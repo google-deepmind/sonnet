@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Batch normalization module for Sonnet.
 
 This contains the module BatchNorm, which performs batch normalization on
@@ -66,8 +67,8 @@ class BatchNorm(base.AbstractModule):
 
       ...
 
-      update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-      with tf.control_dependencies(update_ops):
+      update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+      with tf.control_dependencies([update_ops]):
         train_op = tf.group(train_op)
 
   Then, whenever `train_op` is run so also are the moving average update ops.
@@ -145,7 +146,7 @@ class BatchNorm(base.AbstractModule):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(BatchNorm, self).__init__(name)
+    super(BatchNorm, self).__init__(name=name)
 
     self._axis = axis
     self._offset = offset
@@ -456,6 +457,7 @@ class BatchNorm(base.AbstractModule):
       axis = range(len(input_shape))[:-1]
 
     # See following for important note on accuracy for dtype=tf.float16
+    # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/nn_impl.py#L63
     dtype = input_batch.dtype
     if dtype == tf.float16:
       raise base.NotSupportedError(

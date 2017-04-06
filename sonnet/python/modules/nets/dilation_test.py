@@ -11,26 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from nose_parameterized import parameterized
+
 import numpy as np
+
 import sonnet as snt
 from sonnet.python.modules.nets import dilation
+from sonnet.testing import parameterized
+
 import tensorflow as tf
 
 
-class IdentityKernelInitializerTest(tf.test.TestCase):
+class IdentityKernelInitializerTest(tf.test.TestCase,
+                                    parameterized.ParameterizedTestCase):
 
-  @parameterized.expand([("Rank4", [2, 2]),
-                         ("SquareFilters", [2, 3, 1, 1]),
-                         ("OddHeighAndWidth", [2, 2, 1, 1]),
-                         ("EqualInAndOutChannels", [3, 3, 2, 1])])
-  def testInvalidShapes(self, _, shape):
-
+  @parameterized.NamedParameters(("Rank4", [2, 2]),
+                                 ("SquareFilters", [2, 3, 1, 1]),
+                                 ("OddHeighAndWidth", [2, 2, 1, 1]),
+                                 ("EqualInAndOutChannels", [3, 3, 2, 1]))
+  def testInvalidShapes(self, shape):
     with self.assertRaises(ValueError):
       snt.nets.identity_kernel_initializer(shape)
 
@@ -52,14 +56,14 @@ class IdentityKernelInitializerTest(tf.test.TestCase):
         it.iternext()
 
 
-class NoisyIdentityKernelInitializerTest(tf.test.TestCase):
+class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
+                                         parameterized.ParameterizedTestCase):
 
-  @parameterized.expand([("Rank4", [2, 2]),
-                         ("SquareFilters", [2, 3, 1, 1]),
-                         ("OddHeighAndWidth", [2, 2, 1, 1]),
-                         ("InAndOutChannelsAreMultiples", [3, 3, 2, 7])])
-  def testInvalidShapes(self, _, shape):
-
+  @parameterized.NamedParameters(("Rank4", [2, 2]),
+                                 ("SquareFilters", [2, 3, 1, 1]),
+                                 ("OddHeighAndWidth", [2, 2, 1, 1]),
+                                 ("InAndOutChannelsAreMultiples", [3, 3, 2, 7]))
+  def testInvalidShapes(self, shape):
     with self.assertRaises(ValueError):
       initializer = snt.nets.noisy_identity_kernel_initializer(2)
       initializer(shape)
@@ -85,7 +89,7 @@ class NoisyIdentityKernelInitializerTest(tf.test.TestCase):
         it.iternext()
 
 
-class DilationTest(tf.test.TestCase):
+class DilationTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def setUpWithNumOutputClasses(self, num_output_classes, depth=None):
     """Initialize Dilation module and test images.
@@ -115,17 +119,15 @@ class DilationTest(tf.test.TestCase):
         self._rng.randn(self._batch_size, self._height, self._width,
                         self._depth).astype(np.float32))
 
-  @parameterized.expand([(1,), (3,)])
+  @parameterized.Parameters(1, 3)
   def testShapeInference(self, num_output_classes):
-
     self.setUpWithNumOutputClasses(num_output_classes)
     x = self._module(tf.convert_to_tensor(self._images))
     self.assertTrue(x.get_shape().is_compatible_with(
         [self._batch_size, self._height, self._width, num_output_classes]))
 
-  @parameterized.expand([(1,), (3,)])
+  @parameterized.Parameters(1, 3)
   def testBasicComputation(self, num_output_classes):
-
     self.setUpWithNumOutputClasses(num_output_classes)
     x = self._module(tf.convert_to_tensor(self._images))
 
@@ -136,9 +138,8 @@ class DilationTest(tf.test.TestCase):
       # Default initialization produces an identity operator.
       self.assertAllClose(x_, self._images)
 
-  @parameterized.expand([(1,), (3,)])
+  @parameterized.Parameters(1, 3)
   def testLargeComputation(self, num_output_classes):
-
     self.setUpWithNumOutputClasses(
         num_output_classes, depth=3 * num_output_classes)
     self.setUpWithNumOutputClasses(num_output_classes)

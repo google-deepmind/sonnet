@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for Restore initializer."""
 
 from __future__ import absolute_import
@@ -33,15 +34,15 @@ import tensorflow as tf
 
 def _checkpoint():
   # Delay access to FLAGS.test_srcdir
-  return os.path.join(
-      os.environ['TEST_SRCDIR'],
-      'sonnet/sonnet/python/ops/testdata',
-      'restore_initializer_test_checkpoint')
+  return os.path.join(os.environ['TEST_SRCDIR'],
+                      'sonnet/sonnet/python/ops/testdata',
+                      'restore_initializer_test_checkpoint')
 
 
 _ONE_CONV_LAYER = 75.901642
 _TWO_CONV_LAYERS = 687.9700928
 _TWO_CONV_LAYERS_RELU = 61.4554138
+_TOLERANCE = 0.001
 
 
 class RestoreInitializerTest(tf.test.TestCase):
@@ -51,8 +52,7 @@ class RestoreInitializerTest(tf.test.TestCase):
       bias = tf.get_variable(
           'b',
           shape=[16],
-          initializer=initializers.restore_initializer(
-              _checkpoint(), 'b'))
+          initializer=initializers.restore_initializer(_checkpoint(), 'b'))
     with self.test_session() as session:
       session.run(tf.global_variables_initializer())
       b = session.run(bias)
@@ -60,14 +60,19 @@ class RestoreInitializerTest(tf.test.TestCase):
 
   def testScopeRestore(self):
     c1 = conv.Conv2D(
-        16, 8, 4, name='conv_2d_0', padding=conv.VALID,
+        16,
+        8,
+        4,
+        name='conv_2d_0',
+        padding=conv.VALID,
         initializers={
-            'w': initializers.restore_initializer(
-                _checkpoint(), 'w',
-                scope='agent/conv_net_2d/conv_2d_0'),
-            'b': initializers.restore_initializer(
-                _checkpoint(), 'b',
-                scope='agent/conv_net_2d/conv_2d_0')})
+            'w':
+                initializers.restore_initializer(
+                    _checkpoint(), 'w', scope='agent/conv_net_2d/conv_2d_0'),
+            'b':
+                initializers.restore_initializer(
+                    _checkpoint(), 'b', scope='agent/conv_net_2d/conv_2d_0')
+        })
 
     inputs = tf.constant(1 / 255.0, shape=[1, 86, 86, 3])
     outputs = c1(inputs)
@@ -77,8 +82,7 @@ class RestoreInitializerTest(tf.test.TestCase):
       session.run(init)
       o = session.run(outputs)
 
-    self.assertAllClose(np.linalg.norm(o), _ONE_CONV_LAYER,
-                        rtol=0.001, atol=0.001)
+    self.assertAllClose(np.linalg.norm(o), _ONE_CONV_LAYER, atol=_TOLERANCE)
 
   def testMultipleRestore(self):
     g = tf.Graph()
@@ -91,10 +95,18 @@ class RestoreInitializerTest(tf.test.TestCase):
     with g.as_default():
       with tf.variable_scope('agent/conv_net_2d'):
         c1 = conv.Conv2D(
-            16, 8, 4, name='conv_2d_0', padding=conv.VALID,
+            16,
+            8,
+            4,
+            name='conv_2d_0',
+            padding=conv.VALID,
             initializers=restore_initializers)
         c2 = conv.Conv2D(
-            32, 4, 2, name='conv_2d_1', padding=conv.VALID,
+            32,
+            4,
+            2,
+            name='conv_2d_1',
+            padding=conv.VALID,
             initializers=restore_initializers)
 
       inputs = tf.constant(1 / 255.0, shape=[1, 86, 86, 3])
@@ -108,12 +120,10 @@ class RestoreInitializerTest(tf.test.TestCase):
         session.run(init)
         i1, i2, o = session.run([intermediate_1, intermediate_2, outputs])
 
-      self.assertAllClose(np.linalg.norm(i1), _ONE_CONV_LAYER,
-                          rtol=0.001, atol=0.001)
-      self.assertAllClose(np.linalg.norm(i2), _TWO_CONV_LAYERS,
-                          rtol=0.001, atol=0.001)
-      self.assertAllClose(np.linalg.norm(o), _TWO_CONV_LAYERS_RELU,
-                          rtol=0.001, atol=0.001)
+      self.assertAllClose(np.linalg.norm(i1), _ONE_CONV_LAYER, atol=_TOLERANCE)
+      self.assertAllClose(np.linalg.norm(i2), _TWO_CONV_LAYERS, atol=_TOLERANCE)
+      self.assertAllClose(
+          np.linalg.norm(o), _TWO_CONV_LAYERS_RELU, atol=_TOLERANCE)
 
   def testMoreMultipleRestore(self):
     restore_initializers = {
@@ -139,8 +149,8 @@ class RestoreInitializerTest(tf.test.TestCase):
       session.run(init)
       o = session.run(outputs)
 
-    self.assertAllClose(np.linalg.norm(o), _TWO_CONV_LAYERS_RELU,
-                        rtol=0.001, atol=0.001)
+    self.assertAllClose(
+        np.linalg.norm(o), _TWO_CONV_LAYERS_RELU, atol=_TOLERANCE)
 
   def testFromDifferentScope(self):
     sub = functools.partial(re.sub, r'^[^/]+/', 'agent/')
@@ -167,8 +177,8 @@ class RestoreInitializerTest(tf.test.TestCase):
       session.run(init)
       o = session.run(outputs)
 
-    self.assertAllClose(np.linalg.norm(o), _TWO_CONV_LAYERS_RELU,
-                        rtol=0.001, atol=0.001)
+    self.assertAllClose(
+        np.linalg.norm(o), _TWO_CONV_LAYERS_RELU, atol=_TOLERANCE)
 
   def testPartitionedVariable(self):
     save_path = os.path.join(self.get_temp_dir(), 'partitioned_variable')
@@ -176,9 +186,11 @@ class RestoreInitializerTest(tf.test.TestCase):
 
     g1 = tf.Graph()
     with g1.as_default():
+
       def initializer1(shape, dtype, partition_info):
         _ = partition_info  # Not used for creation.
         return tf.constant(True, dtype, shape)
+
       partitioned_var1 = tf.create_partitioned_variables(
           [1 << 3, 10], [4, 1], initializer1, dtype=tf.bool, name=var_name)
 
@@ -210,8 +222,9 @@ class RestoreInitializerTest(tf.test.TestCase):
           'var1', shape=[], initializer=tf.constant_initializer(42))
     with g2.as_default():
       var2 = tf.get_variable(
-          'var2', shape=[], initializer=initializers.restore_initializer(
-              save_path, 'var1'))
+          'var2',
+          shape=[],
+          initializer=initializers.restore_initializer(save_path, 'var1'))
 
     with self.test_session(graph=g1) as session:
       tf.global_variables_initializer().run()
@@ -223,6 +236,7 @@ class RestoreInitializerTest(tf.test.TestCase):
       v2 = session.run(var2)
 
     self.assertAllEqual(v2, 42)
+
 
 if __name__ == '__main__':
   tf.test.main()

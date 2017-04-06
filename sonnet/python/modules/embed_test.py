@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.modules.embed."""
 
 from __future__ import absolute_import
@@ -96,6 +97,8 @@ class EmbedTest(tf.test.TestCase):
   def testInitializers(self):
     # Since all embeddings are initialized to zero, the extracted embeddings
     # should be as well.
+
+
     initializers = {"embeddings": tf.zeros_initializer()}
     embed_mod = snt.Embed(
         vocab_size=self._vocab_size,

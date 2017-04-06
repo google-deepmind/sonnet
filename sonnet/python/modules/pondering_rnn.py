@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Cores for RNNs with varying number of unrolls.
 
 This file contains implementations for:
@@ -81,7 +82,7 @@ class ACTCore(rnn_core.RNNCore):
       ValueError: if `core` has either nested outputs or outputs that are not
           one dimensional.
     """
-    super(ACTCore, self).__init__(name)
+    super(ACTCore, self).__init__(name=name)
     self._core = core
     self._output_size = output_size
     self._threshold = threshold

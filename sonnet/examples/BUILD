@@ -25,6 +25,7 @@ py_binary(
     ],
     deps = [
         "//sonnet",
+        # Tensorflow dep,
     ],
 )
 
@@ -41,6 +42,7 @@ py_binary(
     ],
     deps = [
         "//sonnet",
+        # Tensorflow dep,
     ],
 )
 
@@ -54,5 +56,6 @@ py_test(
     ],
     deps = [
         "//sonnet",
+        # Tensorflow dep,
     ],
 )

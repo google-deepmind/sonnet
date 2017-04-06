@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """This python module contains Neural Network Modules for TensorFlow.
 
-In brief, each module is a Python object which conceptually "owns" any variables
-required in that part of the Neural Network. The `__call__` function on the
-object is used to connect that Module into the Graph, and this may be called
-repeatedly with sharing automatically taking place.
+ In brief, each module is a Python object
+which conceptually "owns" any variables required in that part of the Neural
+Network. The `__call__` function on the object is used to connect that Module
+into the Graph, and this may be called repeatedly with sharing automatically
+taking place.
 
 Everything public should be imported by this top level `__init__.py` so that the
 library can be used as follows:
@@ -36,6 +38,7 @@ from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead
 from sonnet.python.modules.base import AbstractModule
+from sonnet.python.modules.base import DifferentGraphError
 from sonnet.python.modules.base import Error
 from sonnet.python.modules.base import IncompatibleShapeError
 from sonnet.python.modules.base import Module
@@ -72,6 +75,8 @@ from sonnet.python.modules.conv import SAME
 from sonnet.python.modules.conv import SeparableConv2D
 from sonnet.python.modules.conv import VALID
 from sonnet.python.modules.embed import Embed
+from sonnet.python.modules.gated_rnn import Conv1DLSTM
+from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU
 from sonnet.python.modules.gated_rnn import LSTM
 from sonnet.python.modules.pondering_rnn import ACTCore

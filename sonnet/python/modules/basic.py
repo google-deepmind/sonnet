@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Basic Modules for TensorFlow snt.
 
 Modules defining the simplest building blocks for Neural Networks.
@@ -41,6 +42,7 @@ def merge_leading_dims(tensor, n_dims=2):
   Returns:
     The input tensor, with its first dimensions merged.
   """
+  tensor = tf.convert_to_tensor(tensor)
   tensor_shape_static = tensor.get_shape()
   tensor_shape_list = tensor_shape_static.as_list()
   if tensor_shape_static.is_fully_defined():
@@ -702,6 +704,7 @@ class FlattenTrailingDimensions(BatchReshape):
                   If `inputs` has an statically unknown dimensions other than
                   the first.
     """
+
     input_shape = inputs.get_shape().as_list()
     if any([dim is None for dim in input_shape[1:]]):
       raise ValueError("Input tensor has statically unknown dimension "
@@ -835,11 +838,11 @@ class BatchApply(base.AbstractModule):
     self._n_dims = n_dims
     self._input_example_index = input_example_index
 
-  def _build(self, inputs):
+  def _build(self, *args):
     """Connects the BatchApply module into the graph.
 
     Args:
-      inputs: a Tensor or a nested list of Tensors. The input tensors will
+      *args: a Tensor or a nested list of Tensors. The input tensors will
           have their first dimensions merged, then an op or a module will be
           called on the input. The first dimension of the output will be
           split again based on the leading dimensions of the first input
@@ -850,13 +853,14 @@ class BatchApply(base.AbstractModule):
     """
     # Merge leading dimensions for each input Tensor, then apply inner module.
     merged = nest.map(lambda inp: merge_leading_dims(inp, self._n_dims),
-                      inputs)
-    results = self._module(merged)
+                      args)
+    results = self._module(*merged)
 
     # Unmerging takes the sizes of the leading dimensions from an input example
     # with equal shape for the leading `n_dims` dimensions. Typically this is
     # the first input.
-    example_input = nest.flatten(inputs)[self._input_example_index]
+    example_input = tf.convert_to_tensor(
+        nest.flatten(args)[self._input_example_index])
     def _split_to_original_leading_dims(result):
       return split_leading_dim(result, example_input, self._n_dims)
     return nest.map(_split_to_original_leading_dims, results)
@@ -1153,7 +1157,7 @@ class SelectInput(base.AbstractModule):
     Raises:
       TypeError: If `idx` is not an list, tuple or integer.
     """
-    super(SelectInput, self).__init__(name)
+    super(SelectInput, self).__init__(name=name)
     self._check_type(idx)
     self._idx = idx
 

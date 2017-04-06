@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for Recurrent cores in sonnet."""
 
 from __future__ import absolute_import
@@ -19,10 +20,11 @@ from __future__ import division
 from __future__ import print_function
 
 import mock
-from nose_parameterized import parameterized
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
+
 from tensorflow.python.util import nest
 
 BATCH_SIZE = 5
@@ -34,9 +36,9 @@ _state_size_element = 6
 
 # Use patch to instantiate RNNCore
 @mock.patch.multiple(snt.RNNCore, __abstractmethods__=set())
-class RNNCoreTest(tf.test.TestCase):
+class RNNCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
-  @parameterized.expand([
+  @parameterized.Parameters(
       (False, False, _state_size_tuple),
       (False, True, _state_size_tuple),
       (True, False, _state_size_tuple),
@@ -44,9 +46,8 @@ class RNNCoreTest(tf.test.TestCase):
       (False, False, _state_size_element),
       (False, True, _state_size_element),
       (True, False, _state_size_element),
-      (True, True, _state_size_element)])
+      (True, True, _state_size_element))
   def testInitialStateTuple(self, trainable, use_custom_initial_value,
-
                             state_size):
     batch_size = 6
 
@@ -85,13 +86,12 @@ class RNNCoreTest(tf.test.TestCase):
           expected_initial_state = np.tile(value_row, (batch_size, 1))
         self.assertAllClose(value, expected_initial_state)
 
-  @parameterized.expand([
+  @parameterized.Parameters(
       (False, _state_size_tuple),
       (True, _state_size_tuple),
       (False, _state_size_element),
-      (True, _state_size_element)])
+      (True, _state_size_element))
   def testRegularizers(self, trainable, state_size):
-
     batch_size = 6
 
     # Set the attribute to the class since it we can't set properties of
@@ -116,12 +116,12 @@ class RNNCoreTest(tf.test.TestCase):
             graph_regularizers[i].name, ".*l1_regularizer.*")
 
 
-class TrainableInitialState(tf.test.TestCase):
+class TrainableInitialState(tf.test.TestCase,
+                            parameterized.ParameterizedTestCase):
 
-  @parameterized.expand([(True, MASK_TUPLE), (True, None), (False, False),
-                         (False, None)])
+  @parameterized.Parameters((True, MASK_TUPLE), (True, None), (False, False),
+                            (False, None))
   def testInitialStateComputation(self, tuple_state, mask):
-
     if tuple_state:
       initial_state = (tf.fill([BATCH_SIZE, 6], 2),
                        (tf.fill([BATCH_SIZE, 7], 3),

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // =============================================================================
+
 #ifndef SONNET_CC_KERNELS_RESAMPLER_OP_H_
 #define SONNET_CC_KERNELS_RESAMPLER_OP_H_
 

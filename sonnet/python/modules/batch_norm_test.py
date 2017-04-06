@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for snt.nets.alexnet."""
 
 from __future__ import absolute_import
@@ -20,12 +21,13 @@ from __future__ import print_function
 
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
-from nose_parameterized import parameterized
+
 from tensorflow.python.ops import variables
 
 
-class BatchNormTest( tf.test.TestCase):
+class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
   def testConstruct(self):
     inputs = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
@@ -111,12 +113,11 @@ class BatchNormTest( tf.test.TestCase):
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
       batch_norm(inputs)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
-  ])
-  def testDataType(self, _, dtype):
-
+  )
+  def testDataType(self, dtype):
     inputs = tf.placeholder(dtype, shape=[None, 64, 32, 3])
     batch_norm = snt.BatchNorm(offset=True, scale=True)
     output = batch_norm(inputs)
@@ -156,12 +157,11 @@ class BatchNormTest( tf.test.TestCase):
       out_v = sess.run(out1)
       self.assertAllClose(np.zeros([7, 6]), out_v, rtol=1e-6, atol=1e-6)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
-  ])
-  def testCheckStatsDouble(self, _, dtype):
-
+  )
+  def testCheckStatsDouble(self, dtype):
     """The correct statistics are being computed for double connection.
 
     Connected in parallel, it's ill-defined what order the updates will happen
@@ -263,13 +263,12 @@ class BatchNormTest( tf.test.TestCase):
           (input_v - mm) / np.sqrt(mv + bn._eps),
           out3_)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("UseUpdateCollection", tf.GraphKeys.UPDATE_OPS),
       ("UseDifferentUpdateCollection", "my_update_ops"),
       ("UseControlDependencies", None),
-  ])
-  def testCheckStatsInGraph(self, _, update_ops_collection):
-
+  )
+  def testCheckStatsInGraph(self, update_ops_collection):
     """The correct normalization is being used for different TF flags."""
 
     v, input_v, inputs = self._get_inputs()
@@ -358,7 +357,9 @@ class BatchNormTest( tf.test.TestCase):
     self.assertEqual(len(update_ops), 2)
 
   def testUpdatesInsideCond(self):
-    """Demonstrate that updates inside a cond fail."""
+    """Demonstrate that updates inside a cond fail.
+
+    """
 
     _, input_v, inputs = self._get_inputs()
     bn = snt.BatchNorm(offset=False, scale=False, decay_rate=0.5)
@@ -438,14 +439,13 @@ class BatchNormTest( tf.test.TestCase):
     with self.assertRaisesRegexp(TypeError, err):
       snt.BatchNorm(regularizers={"gamma": tf.zeros([1, 2, 3])})
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
       ("BNOffsetNoScale", True, False),
-  ])
-  def testInitializers(self, _, offset, scale):
-
+  )
+  def testInitializers(self, offset, scale):
     initializers = {
         "moving_mean": tf.constant_initializer(2.0),
         "moving_variance": tf.constant_initializer(3.0),
@@ -475,14 +475,13 @@ class BatchNormTest( tf.test.TestCase):
       if offset:
         self.assertAllClose(bn.beta.eval(), ones_v * 5.0)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
       ("BNOffsetNoScale", True, False),
-  ])
-  def testRegularizersInRegularizationLosses(self, _, offset, scale):
-
+  )
+  def testRegularizersInRegularizationLosses(self, offset, scale):
     regularizers = {}
     if offset:
       regularizers["beta"] = tf.contrib.layers.l1_regularizer(scale=0.5)
@@ -506,14 +505,13 @@ class BatchNormTest( tf.test.TestCase):
       self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
       ("BNOffsetNoScale", True, False),
-  ])
-  def testPartitioners(self, _, offset, scale):
-
+  )
+  def testPartitioners(self, offset, scale):
     partitioners = {}
 
     if scale:
@@ -532,7 +530,7 @@ class BatchNormTest( tf.test.TestCase):
     if offset:
       self.assertEqual(type(bn.beta), variables.PartitionedVariable)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("IsTrainingBoolVal", True, False, False, True),
       ("IsTestingBoolVal", False, True, False, True),
       ("IsTestingBoolValMovingAverage", False, False, False, True),
@@ -544,9 +542,8 @@ class BatchNormTest( tf.test.TestCase):
       ("IsTestingTensorValMovingAverage", False, False, False, False),
       ("IsTrainingScaleTensorVal", True, False, True, False),
       ("IsTestingScaleTensorVal", True, True, True, False),
-      ("IsTestingScaleTensorValMovingAverage", True, False, True, False)])
-  def testFusedBatchNorm(self, _, is_training, test_local_stats, scale,
-
+      ("IsTestingScaleTensorValMovingAverage", True, False, True, False))
+  def testFusedBatchNorm(self, is_training, test_local_stats, scale,
                          is_training_python_bool):
     input_shape = (32, 9, 9, 8)
     iterations = 5

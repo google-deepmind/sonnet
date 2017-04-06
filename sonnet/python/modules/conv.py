@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Implementation of convolutional Sonnet modules.
 
 Classes defining convolutional operations, inheriting from `snt.Module`, with
@@ -367,6 +368,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
   def stride(self):
     """Returns the stride."""
     # Backwards compatability with old stride format.
+
     return (1,) + self._stride + (1,)
 
   @property
@@ -534,7 +536,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv2DTranspose, self).__init__(name)
+    super(Conv2DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
     if callable(output_shape):
@@ -794,6 +796,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
                   data_format=self._data_format)
 
 
+
 class Conv1D(base.AbstractModule, base.Transposable):
   """1D convolution module, including optional bias.
 
@@ -988,6 +991,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
   def stride(self):
     """Returns the stride."""
     # Backwards compatability with old stride format.
+
     return (1,) + self._stride + (1,)
 
   @property
@@ -1119,7 +1123,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv1DTranspose, self).__init__(name)
+    super(Conv1DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
     if callable(output_shape):
@@ -2142,6 +2146,7 @@ class SeparableConv2D(base.AbstractModule):
     return self._regularizers
 
 
+
 class Conv3D(base.AbstractModule):
   """Volumetric convolution module, including optional bias.
 
@@ -2339,6 +2344,7 @@ class Conv3D(base.AbstractModule):
   def stride(self):
     """Returns the stride."""
     # Backwards compatability with old stride format.
+
     return (1,) + self._stride + (1,)
 
   @property
@@ -2471,7 +2477,7 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv3DTranspose, self).__init__(name)
+    super(Conv3DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
     if callable(output_shape):

@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Base class for TensorFlow Sonnet recurrent cores.
 
 This file contains the Abstract Base Class for defining Recurrent Cores in
@@ -25,11 +26,12 @@ from __future__ import print_function
 import abc
 import warnings
 
+
 import six
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
-
 import tensorflow as tf
+
 from tensorflow.python.util import nest
 
 

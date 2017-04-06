@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.experimental."""
 from __future__ import absolute_import
 from __future__ import division
@@ -66,6 +67,20 @@ class ReuseVarsTest(tf.test.TestCase):
     self.assertEqual("scope2/a:0",
                      obj2.method_with_reuse().name)
 
+  def test_multiple_objects_per_variable_scope(self):
+    obj1 = ReuseVarsTest.VariableContainer("scope1")
+    obj2 = ReuseVarsTest.VariableContainer("scope1")
+
+    self.assertEqual("scope1/a:0",
+                     obj1.method_with_reuse().name)
+    self.assertEqual("scope1/a:0",
+                     obj1.method_with_reuse().name)
+
+    self.assertEqual("scope1/a:0",
+                     obj2.method_with_reuse().name)
+    self.assertEqual("scope1/a:0",
+                     obj2.method_with_reuse().name)
+
   def test_reuse_inherited_method(self):
     obj1 = ReuseVarsTest.InheritedVariableContainer("scope1")
     obj2 = ReuseVarsTest.InheritedVariableContainer("scope2")
@@ -93,7 +108,7 @@ class ReuseVarsTest(tf.test.TestCase):
     class ModuleReuse(snt.AbstractModule):
 
       def __init__(self, shape, name="multi_template_test"):
-        super(ModuleReuse, self).__init__(name)
+        super(ModuleReuse, self).__init__(name=name)
         self._shape = shape
 
       @snt.experimental.reuse_vars
@@ -152,7 +167,7 @@ class ReuseVarsTest(tf.test.TestCase):
     class TestModule(snt.AbstractModule):
 
       def __init__(self, name="test_module"):
-        super(TestModule, self).__init__(name)
+        super(TestModule, self).__init__(name=name)
 
       @snt.experimental.reuse_vars
       def a(self):
@@ -172,10 +187,126 @@ class ReuseVarsTest(tf.test.TestCase):
     a1 = m1.a
     a2 = m2.a
 
-    print("VAR SCOPE:", m1.variable_scope)
     self.assertEqual("m1", a1())
     self.assertEqual("m2", a2())
 
+  def test_multiple_graphs(self):
+    g1 = tf.Graph()
+    g2 = tf.Graph()
+
+    with g1.as_default():
+      obj1 = ReuseVarsTest.VariableContainer("scope1")
+      obj2 = ReuseVarsTest.VariableContainer("scope1")
+
+      self.assertEqual("scope1/a:0",
+                       obj1.method_with_reuse().name)
+      self.assertEqual("scope1/a:0",
+                       obj1.method_with_reuse().name)
+
+      self.assertEqual("scope1/a:0",
+                       obj2.method_with_reuse().name)
+      self.assertEqual("scope1/a:0",
+                       obj2.method_with_reuse().name)
+
+    with g2.as_default():
+      obj1 = ReuseVarsTest.VariableContainer("scope1")
+      obj2 = ReuseVarsTest.VariableContainer("scope1")
+
+      self.assertEqual("scope1/a:0",
+                       obj1.method_with_reuse().name)
+      self.assertEqual("scope1/a:0",
+                       obj1.method_with_reuse().name)
+
+      self.assertEqual("scope1/a:0",
+                       obj2.method_with_reuse().name)
+      self.assertEqual("scope1/a:0",
+                       obj2.method_with_reuse().name)
+
+  def test_name_scopes(self):
+
+    class VariableContainerWithOps(ReuseVarsTest.VariableContainer):
+
+      @snt.experimental.reuse_vars
+      def add_b(self, tensor):
+        b = tf.get_variable("b", shape=[1])
+        return tensor + b
+
+      @snt.experimental.reuse_vars
+      def add_a(self, tensor):
+        return tensor + self.method_with_reuse()
+
+      @snt.experimental.reuse_vars
+      def nested_add(self, tensor):
+        return tf.ones(shape=[1]) + self.add_a(tensor)
+
+    def get_tensor_names_from_default_graph():
+      ops = [
+          op for op in tf.get_default_graph().get_operations()
+          if "Initializer" not in op.name and "Assign" not in op.name and
+          "read" not in op.name
+      ]
+      tensor_names = []
+      for op in ops:
+        tensor_names.extend(tensor.name for tensor in op.outputs)
+      return tensor_names
+
+    obj1 = VariableContainerWithOps("scope1")
+    obj2 = VariableContainerWithOps("scope2")
+    zeros = tf.zeros(shape=[1])
+
+    self.assertEqual("scope1/add_b/add:0", obj1.add_b(zeros).name)
+    self.assertEqual("scope1/add_b_1/add:0", obj1.add_b(zeros).name)
+
+    self.assertEqual("scope1/add_a/add:0", obj1.add_a(zeros).name)
+    self.assertEqual("scope1/add_a_1/add:0", obj1.add_a(zeros).name)
+
+    self.assertEqual("scope1/nested_add/add:0",
+                     obj1.nested_add(zeros).name)
+    self.assertEqual("scope1/nested_add_1/add:0",
+                     obj1.nested_add(zeros).name)
+
+    ones = tf.ones(shape=[1])
+    self.assertEqual("scope2/add_b/add:0", obj2.add_b(ones).name)
+    self.assertEqual("scope2/add_b_1/add:0", obj2.add_b(ones).name)
+
+    self.assertEqual("scope2/add_a/add:0", obj2.add_a(ones).name)
+    self.assertEqual("scope2/add_a_1/add:0", obj2.add_a(ones).name)
+
+    self.assertEqual("scope2/nested_add/add:0",
+                     obj2.nested_add(ones).name)
+    self.assertEqual("scope2/nested_add_1/add:0",
+                     obj2.nested_add(ones).name)
+
+    tensor_names = [
+        "zeros:0",
+        "scope1/b:0",
+        "scope1/add_b/add:0",
+        "scope1/add_b_1/add:0",
+        "scope1/a:0",
+        "scope1/add_a/add:0",
+        "scope1/add_a_1/add:0",
+        "scope1/nested_add/ones:0",
+        "scope1/add_a_2/add:0",
+        "scope1/nested_add/add:0",
+        "scope1/nested_add_1/ones:0",
+        "scope1/add_a_3/add:0",
+        "scope1/nested_add_1/add:0",
+        "ones:0",
+        "scope2/b:0",
+        "scope2/add_b/add:0",
+        "scope2/add_b_1/add:0",
+        "scope2/a:0",
+        "scope2/add_a/add:0",
+        "scope2/add_a_1/add:0",
+        "scope2/nested_add/ones:0",
+        "scope2/add_a_2/add:0",
+        "scope2/nested_add/add:0",
+        "scope2/nested_add_1/ones:0",
+        "scope2/add_a_3/add:0",
+        "scope2/nested_add_1/add:0",
+    ]
+
+    self.assertEqual(tensor_names, get_tensor_names_from_default_graph())
 
 if __name__ == "__main__":
   tf.test.main()

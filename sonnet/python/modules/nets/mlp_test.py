@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests sonnet.python.modules.nets.mlp."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from nose_parameterized import parameterized
-
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 
-class MLPTest(tf.test.TestCase):
+class MLPTest(parameterized.ParameterizedTestCase,
+              tf.test.TestCase):
 
   def setUp(self):
     super(MLPTest, self).setUp()
@@ -51,14 +52,13 @@ class MLPTest(tf.test.TestCase):
     self.assertEqual(mlp.scope_name, "scope/" + unique_name)
     self.assertEqual(mlp.module_name, unique_name)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
       ("MLPFinalActNoBias", True, False),
-  ])
-  def testConstructor(self, _, activate_final, use_bias):
-
+  )
+  def testConstructor(self, activate_final, use_bias):
     with self.assertRaisesRegexp(ValueError, "output_sizes must not be empty"):
       mlp = snt.nets.MLP(name=self.module_name,
                          output_sizes=[],
@@ -112,14 +112,13 @@ class MLPTest(tf.test.TestCase):
     for i in range(0, len(mlp.layers)):
       self.assertEqual(mlp.layers[i].output_size, self.output_sizes[i])
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
       ("MLPFinalActNoBias", True, False),
-  ])
-  def testActivateBiasFlags(self, _, activate_final, use_bias):
-
+  )
+  def testActivateBiasFlags(self, activate_final, use_bias):
     mlp = snt.nets.MLP(name=self.module_name,
                        output_sizes=self.output_sizes,
                        activate_final=activate_final,
@@ -153,14 +152,13 @@ class MLPTest(tf.test.TestCase):
     self.assertEqual((self.batch_size, self.input_size), mlp.input_shape)
     self.assertEqual(self.output_sizes, list(mlp.output_sizes))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
       ("MLPFinalActNoBias", True, False),
-  ])
-  def testRegularizersInRegularizationLosses(self, _, active_final, use_bias):
-
+  )
+  def testRegularizersInRegularizationLosses(self, active_final, use_bias):
     if use_bias:
       regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5),
                       "b": tf.contrib.layers.l2_regularizer(scale=0.5)}
@@ -178,14 +176,13 @@ class MLPTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
       ("MLPFinalActNoBias", True, False),
-  ])
-  def testTranspose(self, _, activate_final, use_bias):
-
+  )
+  def testTranspose(self, activate_final, use_bias):
     with tf.variable_scope("scope1"):
       mlp = snt.nets.MLP(name=self.module_name,
                          output_sizes=self.output_sizes,

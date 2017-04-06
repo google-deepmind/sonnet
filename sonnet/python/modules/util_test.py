@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.modules.util."""
 from __future__ import absolute_import
 from __future__ import division
@@ -80,7 +81,7 @@ class UtilTest(tf.test.TestCase):
     with tf.variable_scope("prefix") as s3:
       _ = tf.get_variable("c", shape=[8])
 
-    err = "Scope 'prefix1/prefix2' is not prefixed by 'prefix'."
+    err = r"Scope 'prefix1/prefix2' is not prefixed by 'prefix'."
     with self.assertRaisesRegexp(ValueError, err):
       variable_map = snt.get_normalized_variable_map(s2, context=s3)
 

@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Sequential Module for TensorFlow snt.
 
 A Module that wraps a list of other modules and ops, connecting the output of
@@ -35,8 +36,10 @@ class Sequential(base.AbstractModule):
   method that are passed to the constituents of the module - for example,
   if there is a `BatchNorm` module in `Sequential` and the user wishes to switch
   the `is_training` flag. If this is the desired use case, the recommended
-  solution is to use `snt.Module` to wrap a custom function, as shown in
-  module_with_build_args.py in the example folder.
+  solution is to use `snt.Module` to wrap a custom function, as shown in the
+  following example:
+
+  https://github.com/deepmind/sonnet/examples/module_with_build_args.py
   """
 
   def __init__(self, layers, name="sequential"):

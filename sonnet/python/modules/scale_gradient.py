@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tensorflow op that scales gradient for backwards pass."""
 from __future__ import absolute_import
 from __future__ import division
@@ -26,6 +27,11 @@ def scale_gradient(net, scale, name="scale_gradient"):
 
   This might be used to, for example, allow one part of a model to learn at a
   lower rate than the rest.
+
+  WARNING: Think carefully about how your optimizer works. If, for example, you
+  use rmsprop, the gradient is always rescaled (with some additional epsilon)
+  towards unity. This means `scale_gradient` won't have the effect of
+  lowering the learning rate.
 
   If `scale` is `0.0`, this op reduces to `tf.stop_gradient`. If `scale`
   is `1.0`, this op reduces to `tf.identity`.

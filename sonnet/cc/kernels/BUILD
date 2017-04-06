@@ -7,6 +7,11 @@ exports_files(["LICENSE"])
 
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "//sonnet:tensorflow.bzl",
+    "tf_kernel_library",
+)
+
 cc_library(
     name = "all_kernels",
     deps = [
@@ -14,17 +19,12 @@ cc_library(
     ],
 )
 
-cuda_deps = ["@org_tensorflow//tensorflow/core:gpu_lib"]
-
-cc_library(
+tf_kernel_library(
     name = "resampler_op",
-    srcs = ["resampler_op.cc"],
-    hdrs = ["resampler_op.h"],
-    linkstatic = 1,
+    prefix = "resampler_op",
     deps = [
-        "@org_tensorflow//tensorflow/core:framework_headers_lib",
-        "@org_tensorflow//third_party/eigen3",
-        "@protobuf//:protobuf_headers",
+        "//third_party/tensorflow/core:framework",
+        "//third_party/tensorflow/core:lib",
     ],
     alwayslink = 1,
 )

@@ -11,22 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for Pondering Recurrent cores in sonnet."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from nose_parameterized import parameterized
 import numpy as np
-
 from sonnet.python.modules import basic_rnn
 from sonnet.python.modules import gated_rnn
 from sonnet.python.modules import pondering_rnn
 from sonnet.python.modules import rnn_core
+from sonnet.testing import parameterized
 
 import tensorflow as tf
+
 from tensorflow.python.util import nest
 
 
@@ -71,7 +72,7 @@ class Output2DCore(rnn_core.RNNCore):
     pass
 
 
-class ACTCoreTest(tf.test.TestCase):
+class ACTCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def _test_nested(self, tensor, values_expected):
     with self.test_session() as sess:
@@ -131,9 +132,9 @@ class ACTCoreTest(tf.test.TestCase):
     self.assertTrue(np.all(r_t >= 0))
     self.assertTrue(np.all(r_t <= threshold))
 
-  @parameterized.expand([(13, 11, 7, 3, 5),
-                         (3, 3, 3, 1, 5),
-                         (1, 1, 1, 1, 1)])
+  @parameterized.Parameters((13, 11, 7, 3, 5),
+                            (3, 3, 3, 1, 5),
+                            (1, 1, 1, 1, 1))
   def testACTLSTM(
       self, input_size, hidden_size, output_size, seq_len, batch_size):
     """Tests ACT using an LSTM for the core."""
@@ -144,9 +145,9 @@ class ACTCoreTest(tf.test.TestCase):
     self._testACT(input_size, hidden_size, output_size, seq_len, batch_size,
                   lstm, get_hidden_state)
 
-  @parameterized.expand([(13, 11, 7, 3, 5),
-                         (3, 3, 3, 1, 5),
-                         (1, 1, 1, 1, 1)])
+  @parameterized.Parameters((13, 11, 7, 3, 5),
+                            (3, 3, 3, 1, 5),
+                            (1, 1, 1, 1, 1))
   def testACTVanilla(
       self, input_size, hidden_size, output_size, seq_len, batch_size):
     """Tests ACT using an LSTM for the core."""
@@ -157,7 +158,6 @@ class ACTCoreTest(tf.test.TestCase):
                   vanilla, get_state)
 
   def testOutputTuple(self):
-
     core = OutputTupleCore(name="output_tuple_core")
     err = "Output of core should be single Tensor."
     with self.assertRaisesRegexp(ValueError, err):

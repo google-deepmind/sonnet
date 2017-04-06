@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """LSTM based modules for TensorFlow snt.
 
 This python module contains LSTM-like cores that fall under the broader group
@@ -21,6 +22,7 @@ model parameters may be passed to the constructor.
 Typical usage example of the standard LSTM without peephole connections:
 
   ```
+  import sonnet as snt
 
   hidden_size = 10
   batch_size = 2
@@ -35,11 +37,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
+
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import batch_norm
+from sonnet.python.modules import conv
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
@@ -309,6 +314,7 @@ class LSTM(rnn_core.RNNCore):
     self._create_gate_variables(inputs.get_shape(), inputs.dtype)
     self._create_batch_norm_variables(inputs.dtype)
 
+    # pylint false positive: calling module of same file
     # pylint: disable=not-callable
 
     if self._use_batch_norm_h or self._use_batch_norm_x:
@@ -636,6 +642,170 @@ class LSTM(rnn_core.RNNCore):
     def output_size(self):
       """`tf.TensorShape` indicating the size of the core output."""
       return self._cell.output_size
+
+
+class ConvLSTM(rnn_core.RNNCore):
+  """Convolutional LSTM."""
+
+  @classmethod
+  def get_possible_initializer_keys(cls, conv_ndims, use_bias=True):
+    conv_class = cls._get_conv_class(conv_ndims)
+    return conv_class.get_possible_initializer_keys(use_bias)
+
+  @classmethod
+  def _get_conv_class(cls, conv_ndims):
+    if conv_ndims == 1:
+      return conv.Conv1D
+    elif conv_ndims == 2:
+      return conv.Conv2D
+    elif conv_ndims == 3:
+      return conv.Conv3D
+    else:
+      raise ValueError("Invalid convolution dimensionality.")
+
+  def __init__(self,
+               conv_ndims,
+               input_shape,
+               output_channels,
+               kernel_shape,
+               stride=1,
+               padding=conv.SAME,
+               use_bias=True,
+               skip_connection=False,
+               forget_bias=1.0,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               name="conv_lstm"):
+    """Construct ConvLSTM.
+
+    Args:
+      conv_ndims: Convolution dimensionality (1, 2 or 3).
+      input_shape: Shape of the input as tuple, excluding the batch size.
+      output_channels: Number of output channels of the conv LSTM.
+      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
+          used to define kernel size in all dimensions.
+      stride: Sequence of kernel strides (of size 2), or integer that is used to
+          define stride in all dimensions.
+      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      use_bias: Use bias in convolutions.
+      skip_connection: If set to `True`, concatenate the input to the output
+          of the conv LSTM. Default: `False`.
+      forget_bias: Forget bias.
+      initializers: Dict containing ops to initialize the convolutional weights.
+      partitioners: Optional dict containing partitioners to partition
+        the convolutional weights and biases. As a default, no partitioners are
+        used.
+      regularizers: Optional dict containing regularizers for the convolutional
+        weights and biases. As a default, no regularizers are used.
+      name: Name of the module.
+
+    Raises:
+      ValueError: If `skip_connection` is `True` and stride is different from 1
+        or if `input_shape` is incompatible with `conv_ndims`.
+    """
+    super(ConvLSTM, self).__init__(name=name)
+
+    self._conv_class = self._get_conv_class(conv_ndims)
+
+    if skip_connection and stride != 1:
+      raise ValueError("`stride` needs to be 1 when using skip connection")
+
+    if conv_ndims != len(input_shape)-1:
+      raise ValueError("Invalid input_shape {} for conv_ndims={}.".format(
+          input_shape, conv_ndims))
+
+    self._conv_ndims = conv_ndims
+    self._input_shape = input_shape
+    self._output_channels = output_channels
+    self._kernel_shape = kernel_shape
+    self._stride = stride
+    self._padding = padding
+    self._use_bias = use_bias
+    self._forget_bias = forget_bias
+    self._skip_connection = skip_connection
+    self._initializers = initializers
+    self._partitioners = partitioners
+    self._regularizers = regularizers
+
+    self._total_output_channels = output_channels
+    if self._stride != 1:
+      self._total_output_channels //= self._stride * self._stride
+    if self._skip_connection:
+      self._total_output_channels += self._input_shape[-1]
+
+    self._convolutions = collections.defaultdict(self._new_convolution)
+
+  def _new_convolution(self):
+    return self._conv_class(
+        output_channels=4*self._output_channels,
+        kernel_shape=self._kernel_shape,
+        stride=self._stride,
+        padding=self._padding,
+        use_bias=self._use_bias,
+        initializers=self._initializers,
+        partitioners=self._partitioners,
+        regularizers=self._regularizers,
+        name="conv")
+
+  @property
+  def convolutions(self):
+    return self._convolutions
+
+  @property
+  def state_size(self):
+    """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
+    hidden_size = tf.TensorShape(self._input_shape[:-1] +
+                                 (self._output_channels,))
+    return (hidden_size, hidden_size)
+
+  @property
+  def output_size(self):
+    """`tf.TensorShape` indicating the size of the core output."""
+    return tf.TensorShape(self._input_shape[:-1] +
+                          (self._total_output_channels,))
+
+  def _build(self, inputs, state):
+    hidden, cell = state
+    input_conv = self._convolutions["input"]
+    hidden_conv = self._convolutions["hidden"]
+    new_hidden = input_conv(inputs) + hidden_conv(hidden)
+    gates = tf.split(value=new_hidden, num_or_size_splits=4,
+                     axis=self._conv_ndims+1)
+
+    input_gate, new_input, forget_gate, output_gate = gates
+    new_cell = tf.sigmoid(forget_gate + self._forget_bias) * cell
+    new_cell += tf.sigmoid(input_gate) * tf.tanh(new_input)
+    output = tf.tanh(new_cell) * tf.sigmoid(output_gate)
+
+    if self._skip_connection:
+      output = tf.concat([output, inputs], axis=-1)
+    return output, (output, new_cell)
+
+
+class Conv1DLSTM(ConvLSTM):
+  """1D convolutional LSTM."""
+
+  @classmethod
+  def get_possible_initializer_keys(cls, use_bias=True):
+    return super(Conv1DLSTM, cls).get_possible_initializer_keys(1, use_bias)
+
+  def __init__(self, name="conv_1d_lstm", **kwargs):
+    """Construct Conv1DLSTM. See `snt.ConvLSTM` for more details."""
+    super(Conv1DLSTM, self).__init__(conv_ndims=1, name=name, **kwargs)
+
+
+class Conv2DLSTM(ConvLSTM):
+  """2D convolutional LSTM."""
+
+
+  @classmethod
+  def get_possible_initializer_keys(cls, use_bias=True):
+    return super(Conv2DLSTM, cls).get_possible_initializer_keys(2, use_bias)
+
+  def __init__(self, name="conv_2d_lstm", **kwargs):
+    """Construct Conv2DLSTM. See `snt.ConvLSTM` for more details."""
+    super(Conv2DLSTM, self).__init__(conv_ndims=2, name=name, **kwargs)
 
 
 class GRU(rnn_core.RNNCore):

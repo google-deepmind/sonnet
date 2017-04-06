@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.ops.nest.
 """
 from __future__ import absolute_import
@@ -19,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+
 
 import numpy as np
 from sonnet.python.ops import nest
@@ -248,6 +250,83 @@ class NestTest(tf.test.TestCase):
     # This is checking actual equality of types, empty list != empty tuple
     self.assertNotEqual((), nest.map(f, []))
 
+  def testFlattenAndPackIterable(self):
+    # A nice messy mix of tuples, lists, dicts, and `OrderedDict`s.
+    named_tuple = collections.namedtuple("A", ("b", "c"))
+    mess = [
+        "z",
+        named_tuple(3, 4),
+        {
+            "c": [
+                1,
+                collections.OrderedDict([
+                    ("b", 3),
+                    ("a", 2),
+                ]),
+            ],
+            "b": 5
+        },
+        17
+    ]
+
+    flattened = nest.flatten_iterable(mess)
+    self.assertEqual(flattened, ["z", 3, 4, 5, 1, 3, 2, 17])
+
+    structure_of_mess = [
+        14,
+        named_tuple("a", True),
+        {
+            "c": [
+                0,
+                collections.OrderedDict([
+                    ("b", 9),
+                    ("a", 8),
+                ]),
+            ],
+            "b": 3
+        },
+        "hi everybody",
+    ]
+
+    unflattened = nest.pack_iterable_as(structure_of_mess, flattened)
+    self.assertEqual(unflattened, mess)
+
+  def testFlattenIterable_numpyIsNotFlattened(self):
+    structure = np.array([1, 2, 3])
+    flattened = nest.flatten_iterable(structure)
+    self.assertEqual(len(flattened), 1)
+
+  def testFlattenIterable_stringIsNotFlattened(self):
+    structure = "lots of letters"
+    flattened = nest.flatten_iterable(structure)
+    self.assertEqual(len(flattened), 1)
+
+  def testFlatternIterable_scalarStructure(self):
+    # Tests can call flatten_iterable with single "scalar" object.
+    structure = "hello"
+    flattened = nest.flatten_iterable(structure)
+    unflattened = nest.pack_iterable_as("goodbye", flattened)
+    self.assertEqual(structure, unflattened)
+
+  def testPackIterableAs_notIterableError(self):
+    with self.assertRaisesRegexp(TypeError,
+                                 "flat_iterable must be an iterable"):
+      nest.pack_iterable_as("hi", "bye")
+
+  def testPackIterableAs_scalarStructureError(self):
+    with self.assertRaisesRegexp(
+        ValueError, r"Structure is a scalar but len\(flat_iterable\) == 2 > 1"):
+      nest.pack_iterable_as("hi", ["bye", "twice"])
+
+  def testPackIterableAs_wrongLengthsError(self):
+    with self.assertRaisesRegexp(
+        ValueError,
+        "Structure had 2 elements, but flat_iterable had 3 elements."):
+      nest.pack_iterable_as(["hello", "world"],
+                            ["and", "goodbye", "again"])
+
 
 if __name__ == "__main__":
   tf.test.main()
+
+

@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Basic RNN Cores for TensorFlow snt.
 
 This file contains the definitions of the simplest building blocks for Recurrent
@@ -22,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+
 
 from sonnet.python.modules import basic
 from sonnet.python.modules import rnn_core
@@ -269,8 +271,8 @@ class DeepRNN(rnn_core.RNNCore):
       self._check_cores_output_sizes()
       if not all(self._is_recurrent_list):
         raise ValueError("skip_connections are enabled but not all cores are "
-                         "recurrent, which is not supported. The following "
-                         "cores were specified: {}.".format(self._cores))
+                         "`snt.RNNCore`s, which is not supported. The following"
+                         " cores were specified: {}.".format(self._cores))
 
     self._num_recurrent = sum(self._is_recurrent_list)
 
@@ -427,7 +429,15 @@ class DeepRNN(rnn_core.RNNCore):
       return nest.pack_sequence_as(structure=self._cores[0].output_size,
                                    flat_sequence=output_size)
     else:
-      return self._cores[-1].output_size
+      # Assumes that an element of cores which is not a snt.AbstractModule
+      # does not affect the output shape. Then the 'last' core in the sequence
+      # with output_shape information should be the output_shape of the
+      # DeepRNN.
+      try:
+        return next(core.output_size for core in reversed(self._cores)
+                    if hasattr(core, "output_size"))
+      except StopIteration:
+        raise ValueError("None of the 'cores' have output_size information.")
 
 
 class ModelRNN(rnn_core.RNNCore):

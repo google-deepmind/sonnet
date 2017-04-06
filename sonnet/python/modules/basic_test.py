@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.modules.basic."""
 from __future__ import absolute_import
 from __future__ import division
@@ -19,9 +20,10 @@ from __future__ import print_function
 
 import collections
 
-from nose_parameterized import parameterized
+
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.client import device_lib
@@ -40,7 +42,7 @@ def _test_initializer(mu=0.0, sigma=1.0, dtype=tf.float32):
   return _initializer
 
 
-class LinearTest(tf.test.TestCase):
+class LinearTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def setUp(self):
     super(LinearTest, self).setUp()
@@ -50,11 +52,10 @@ class LinearTest(tf.test.TestCase):
     self.out_size = 17
     self.seed = 42
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShape(self, use_bias):
     inputs = tf.placeholder(tf.float32, shape=[self.batch_size, self.in_size])
     lin = snt.Linear(output_size=self.out_size, use_bias=use_bias)
     output = lin(inputs)
@@ -71,11 +72,10 @@ class LinearTest(tf.test.TestCase):
     # Test deprecated name.
     self.assertEqual(lin.name, "scope/" + mod_name)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testVariables(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testVariables(self, use_bias):
     inputs = tf.placeholder(tf.float32, shape=[self.batch_size, self.in_size])
     lin = snt.Linear(output_size=self.out_size, use_bias=use_bias)
 
@@ -114,11 +114,10 @@ class LinearTest(tf.test.TestCase):
         shape = np.ndarray(self.out_size)
       self.assertShapeEqual(shape, v.initial_value)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputation(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputation(self, use_bias):
     np.random.seed(self.seed)
     types = (tf.float16, tf.float32, tf.float64)
     tol = (1e-2, 1e-6, 1e-9)
@@ -160,10 +159,10 @@ class LinearTest(tf.test.TestCase):
           atol=tolerance_map[dtype],
           rtol=tolerance_map[dtype])
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
 
     np.random.seed(self.seed)
     inp_1 = tf.placeholder(tf.float32, shape=[self.batch_size, self.in_size])
@@ -294,11 +293,10 @@ class LinearTest(tf.test.TestCase):
     self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
     self.assertRegexpMatches(regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testTranspose(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testTranspose(self, use_bias):
     with tf.variable_scope("scope1"):
       linear1 = snt.Linear(output_size=self.out_size,
                            use_bias=use_bias,
@@ -350,7 +348,7 @@ class LinearTest(tf.test.TestCase):
 
     The test exists because while one may expect tf.matmul(X, w) + b to be
     equivalent to tf.nn.xw_plus_b(X, w, b), with the latter this placement
-    results in an InvalidArgumentError.
+    results in an InvalidArgumentError. 
 
     Warning: if there is no gpu available to tensorflow this test will be
     skipped with just a warning! This is because the test requires that
@@ -398,7 +396,7 @@ class LinearTest(tf.test.TestCase):
     self.assertEqual(type(linear.b), variables.PartitionedVariable)
 
 
-class AddBiasTest(tf.test.TestCase):
+class AddBiasTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   BATCH_SIZE = 11
   IN_SHAPE = (13, 7, 5)
@@ -420,27 +418,24 @@ class AddBiasTest(tf.test.TestCase):
     self.mb_out_shape = (self.BATCH_SIZE,) + self.OUT_SHAPE
     self.seed = 42
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testShape(self, _, bias_dims, unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testShape(self, bias_dims, unused_bias_shape):
     inputs = tf.placeholder(tf.float32, shape=self.mb_in_shape)
     add = snt.AddBias(bias_dims=bias_dims)
     output = add(inputs)
     self.assertTrue(
         output.get_shape().is_compatible_with(self.mb_out_shape))
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testName(self, _, bias_dims, unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testName(self, bias_dims, unused_bias_shape):
     mod_name = "unique_name"
     with tf.variable_scope("scope"):
       add = snt.AddBias(name=mod_name, bias_dims=bias_dims)
     self.assertEqual(add.scope_name, "scope/" + mod_name)
     self.assertEqual(add.module_name, mod_name)
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testVariables(self, _, bias_dims, bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testVariables(self, bias_dims, bias_shape):
     inputs = tf.placeholder(tf.float32, shape=self.mb_in_shape)
     add = snt.AddBias(bias_dims=bias_dims)
 
@@ -464,9 +459,8 @@ class AddBiasTest(tf.test.TestCase):
       shape = np.ndarray(bias_shape)
       self.assertShapeEqual(shape, v.initial_value)
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testComputation(self, _, bias_dims, bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testComputation(self, bias_dims, bias_shape):
     np.random.seed(self.seed)
     types = (tf.float16, tf.float32, tf.float64)
     tol = (1e-2, 1e-6, 1e-9)
@@ -497,8 +491,8 @@ class AddBiasTest(tf.test.TestCase):
           atol=tolerance_map[dtype],
           rtol=tolerance_map[dtype])
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testSharing(self, _, bias_dims, unused_bias_shape):
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testSharing(self, bias_dims, unused_bias_shape):
 
     np.random.seed(self.seed)
     inp_1 = tf.placeholder(tf.float32, shape=self.mb_in_shape)
@@ -515,9 +509,8 @@ class AddBiasTest(tf.test.TestCase):
                                         {inp_1: input_data, inp_2: input_data})
     self.assertAllEqual(out_data_1, out_data_2)
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testUniquifying(self, _, bias_dims, unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testUniquifying(self, bias_dims, unused_bias_shape):
     # Create three modules in same scope with same name - make_template will
     # uniquify them.
     inp = tf.placeholder(tf.float32, shape=self.mb_in_shape)
@@ -548,10 +541,8 @@ class AddBiasTest(tf.test.TestCase):
     for v in vars3:
       self.assertRegexpMatches(v.name, r"{}/[b]:0".format(add3.scope_name))
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testInvalidInitializationParameters(self, _, bias_dims,
-                                          unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testInvalidInitializationParameters(self, bias_dims, unused_bias_shape):
     err = "Invalid initializer keys.*"
     with self.assertRaisesRegexp(KeyError, err):
       snt.AddBias(
@@ -564,10 +555,8 @@ class AddBiasTest(tf.test.TestCase):
           bias_dims=bias_dims,
           initializers={"b": tf.zeros([1, 2, 3])})
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testInvalidPartitionerParameters(self, _, bias_dims,
-                                       unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testInvalidPartitionerParameters(self, bias_dims, unused_bias_shape):
     with self.assertRaisesRegexp(KeyError, "Invalid partitioner keys.*"):
       snt.AddBias(
           bias_dims=bias_dims,
@@ -579,10 +568,8 @@ class AddBiasTest(tf.test.TestCase):
           bias_dims=bias_dims,
           partitioners={"b": tf.zeros([1, 2, 3])})
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testInvalidRegularizationParameters(self, _, bias_dims,
-                                          unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testInvalidRegularizationParameters(self, bias_dims, unused_bias_shape):
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
       snt.AddBias(
           bias_dims=bias_dims,
@@ -593,9 +580,8 @@ class AddBiasTest(tf.test.TestCase):
       snt.AddBias(bias_dims=bias_dims,
                   regularizers={"b": tf.zeros([1, 2, 3])})
 
-  @parameterized.expand(BIAS_DIMS_PARAMETERS)
-  def testTranspose(self, _, bias_dims, unused_bias_shape):
-
+  @parameterized.NamedParameters(*BIAS_DIMS_PARAMETERS)
+  def testTranspose(self, bias_dims, unused_bias_shape):
     add = snt.AddBias(bias_dims=bias_dims)
     input_to_add = tf.placeholder(tf.float32, shape=self.mb_in_shape)
 
@@ -879,7 +865,8 @@ class BatchFlattenTest(tf.test.TestCase):
     self.assertEqual(output.get_shape(), [1, 0])
 
 
-class FlattenTrailingDimensionsTest(tf.test.TestCase):
+class FlattenTrailingDimensionsTest(tf.test.TestCase,
+                                    parameterized.ParameterizedTestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -904,12 +891,11 @@ class FlattenTrailingDimensionsTest(tf.test.TestCase):
     with self.assertRaisesRegexp(ValueError, "statically unknown"):
       mod(input_tensor)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("BatchSize1", 1),
       ("BatchSize5", 5),
-      ("BatchSize?", None)])
-  def testFlatten(self, _, batch_size):
-
+      ("BatchSize?", None))
+  def testFlatten(self, batch_size):
     shape = [batch_size, 5, 84, 84, 3, 2]
     inputs = tf.placeholder(tf.float32, shape)
     for dim_from in xrange(1, len(shape)):
@@ -919,12 +905,11 @@ class FlattenTrailingDimensionsTest(tf.test.TestCase):
       self.assertEqual(output.get_shape().as_list(),
                        shape[:dim_from] + [trailing])
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("BatchSize1", 1),
       ("BatchSize5", 5),
-      ("BatchSize?", None)])
-  def testTranspose(self, _, batch_size):
-
+      ("BatchSize?", None))
+  def testTranspose(self, batch_size):
     mod = snt.FlattenTrailingDimensions(dim_from=4)
     mod_trans = mod.transpose()
     initial_shape = [batch_size, 5, 84, 84, 3, 2]
@@ -935,7 +920,7 @@ class FlattenTrailingDimensionsTest(tf.test.TestCase):
     self.assertEqual(final.get_shape().as_list(), initial_shape)
 
 
-class BatchApplyTest(tf.test.TestCase):
+class BatchApplyTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -944,9 +929,8 @@ class BatchApplyTest(tf.test.TestCase):
     self.assertEqual(mod.scope_name, "scope/" + mod_name)
     self.assertEqual(mod.module_name, mod_name)
 
-  @parameterized.expand([(False,), (True,)])
+  @parameterized.Parameters(False, True)
   def testInferShape(self, test_with_none):
-
     if test_with_none:
       in_shape = [2, None, 4]
     else:
@@ -1046,7 +1030,7 @@ class BatchApplyTest(tf.test.TestCase):
       """Dummy module checking input is correct structure & size."""
 
       def __init__(self, tester, name="size_checker"):
-        super(SizeChecker, self).__init__(name)
+        super(SizeChecker, self).__init__(name=name)
         self._tester = tester
 
       def _build(self, inputs):
@@ -1090,6 +1074,19 @@ class BatchApplyTest(tf.test.TestCase):
     with self.test_session() as sess:
       in2_np, out_np = sess.run([in2, output])
       self.assertAllEqual(in2_np, out_np)
+
+  def testMultipleArgs(self):
+    in1 = np.random.randn(2, 3, 4, 5)
+    in2 = np.random.randn(2, 3, 5, 8)
+
+    module = snt.BatchApply(tf.matmul)
+    output = module(in1, in2)
+    output.get_shape().assert_is_compatible_with([2, 3, 4, 8])
+
+    expected_output = tf.matmul(in1, in2)
+    with self.test_session() as sess:
+      out_expected, out_result = sess.run([expected_output, output])
+      self.assertAllClose(out_expected, out_result)
 
 
 class SliceByDimTest(tf.test.TestCase):

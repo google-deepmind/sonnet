@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Example script using `snt.Module` to make a module with build method args.
 
 `snt.Sequential` has been deliberately designed for simple use cases. In
@@ -24,7 +25,7 @@ shown in this script.
 
 To run this script (on CPU), use the following command:
 ```
-blaze run -c opt module_with_build_args
+bazel run -c opt module_with_build_args
 ```
 """
 

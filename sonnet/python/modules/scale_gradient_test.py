@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for snt.scale_gradient.
 """
 from __future__ import absolute_import
@@ -19,18 +20,19 @@ from __future__ import division
 from __future__ import print_function
 
 import itertools
-from nose_parameterized import parameterized
+
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 
-class ScaleGradientTest(tf.test.TestCase):
+class ScaleGradientTest(parameterized.ParameterizedTestCase,
+                        tf.test.TestCase):
 
-  @parameterized.expand(
-      itertools.product(range(6), [0.0, 0.1, 0.9, 1.0])
+  @parameterized.Parameters(
+      *itertools.product(range(6), [0.0, 0.1, 0.9, 1.0])
   )
   def testOpScale(self, x_, scale):
-
     x = tf.placeholder(tf.float32, [1])
     y = x * x
     y = snt.scale_gradient(y, scale)

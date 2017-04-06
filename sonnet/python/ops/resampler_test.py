@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.ops.resampler.
 """
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from nose_parameterized import parameterized
 
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
+
 import tensorflow as tf
 
 
@@ -90,21 +92,21 @@ def _make_warp(batch_size, warp_height, warp_width, dtype):
   return warp.astype(dtype)
 
 
-class ResamplerTest(tf.test.TestCase):
+class ResamplerTest(parameterized.ParameterizedTestCase,
+                    tf.test.TestCase):
 
   def setUp(self):
     super(ResamplerTest, self).setUp()
     if not snt.resampler_is_available():
       self.skipTest(
-           "Resampler is not available, so no tests will be made with it.")
+          "Resampler is not available, so no tests will be made with it.")
 
-  @parameterized.expand([("GPU_float32", True, tf.float32, 1e-4),
-                         ("GPU_float64", True, tf.float64, 1e-5),
-                         ("CPU_float16", False, tf.float16, 1e-2),
-                         ("CPU_float32", False, tf.float32, 1e-4),
-                         ("CPU_float64", False, tf.float64, 1e-5)])
-  def test_op_forward_pass(self, _, on_gpu, dtype, tol):
-
+  @parameterized.NamedParameters(("GPU_float32", True, tf.float32, 1e-4),
+                                 ("GPU_float64", True, tf.float64, 1e-5),
+                                 ("CPU_float16", False, tf.float16, 1e-2),
+                                 ("CPU_float32", False, tf.float32, 1e-4),
+                                 ("CPU_float64", False, tf.float64, 1e-5))
+  def test_op_forward_pass(self, on_gpu, dtype, tol):
     np.random.seed(0)
     data_width = 7
     data_height = 9
@@ -136,12 +138,11 @@ class ResamplerTest(tf.test.TestCase):
 
     self.assertAllClose(out, reference_output, rtol=tol, atol=tol)
 
-  @parameterized.expand([("GPU_float32", True, tf.float32, 1e-3),
-                         ("CPU_float16", False, tf.float16, 1e-3),
-                         ("CPU_float32", False, tf.float32, 1e-4),
-                         ("CPU_float64", False, tf.float64, 1e-6)])
-  def test_op_backward_pass(self, _, on_gpu, dtype, tol):
-
+  @parameterized.NamedParameters(("GPU_float32", True, tf.float32, 1e-3),
+                                 ("CPU_float16", False, tf.float16, 1e-3),
+                                 ("CPU_float32", False, tf.float32, 1e-4),
+                                 ("CPU_float64", False, tf.float64, 1e-6))
+  def test_op_backward_pass(self, on_gpu, dtype, tol):
     np.random.seed(13)
     data_width = 5
     data_height = 4
@@ -168,7 +169,7 @@ class ResamplerTest(tf.test.TestCase):
 
       if not on_gpu:
         # On CPU we perform numerical differentiation at the best available
-        # precision, and compare againt that. This is necessary for test to
+        # precision, and compare against that. This is necessary for test to
         # pass for float16.
         data_tensor_64 = tf.constant(data, dtype=tf.float64)
         warp_tensor_64 = tf.constant(warp, dtype=tf.float64)
@@ -253,3 +254,5 @@ class ResamplerTest(tf.test.TestCase):
 
 if __name__ == "__main__":
   tf.test.main()
+
+

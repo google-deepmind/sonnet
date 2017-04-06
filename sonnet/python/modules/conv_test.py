@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for `sonnet.python.modules.conv`."""
 
 from __future__ import absolute_import
@@ -20,11 +21,11 @@ from __future__ import print_function
 
 import itertools
 import random
-from nose_parameterized import parameterized
 
 import numpy as np
 import sonnet as snt
 from sonnet.python.modules import conv
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
@@ -91,7 +92,7 @@ class FillListTest(tf.test.TestCase):
       conv._fill_shape(["b"], 4)
 
 
-class SharedConvTest(tf.test.TestCase):
+class SharedConvTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
   CONV_1D_KWARGS = {
       "output_channels": 1,
@@ -139,9 +140,8 @@ class SharedConvTest(tf.test.TestCase):
       (snt.SeparableConv2D, 2, SEPARABLE_CONV_2D_KWARGS),
   ]
 
-  @parameterized.expand(modules)
+  @parameterized.Parameters(*modules)
   def testPartitioners(self, module, num_input_dims, module_kwargs):
-
     inputs = tf.zeros((10,) * (num_input_dims + 2))
 
     keys = module.get_possible_initializer_keys(use_bias=True)
@@ -159,9 +159,8 @@ class SharedConvTest(tf.test.TestCase):
       convolution_t = convolution.transpose()
       self.assertEqual(convolution_t.partitioners, convolution.partitioners)
 
-  @parameterized.expand(itertools.product(modules, (True, False)))
+  @parameterized.Parameters(*itertools.product(modules, (True, False)))
   def testVariables(self, module_info, use_bias):
-
     """The correct number of variables are created."""
     module, num_input_dims, module_kwargs = module_info
 
@@ -202,9 +201,8 @@ class SharedConvTest(tf.test.TestCase):
       inputs_data = np.random.rand(*input_shape)
       sess.run(output, feed_dict={inputs: inputs_data})
 
-  @parameterized.expand(itertools.product(modules, (True, False)))
+  @parameterized.Parameters(*itertools.product(modules, (True, False)))
   def testMissingChannelsError(self, module_info, use_bias):
-
     """Error is thrown if the input is missing a channel dimension."""
     module, num_input_dims, module_kwargs = module_info
     conv_mod = module(use_bias=use_bias, **module_kwargs)
@@ -215,9 +213,8 @@ class SharedConvTest(tf.test.TestCase):
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       conv_mod(inputs)
 
-  @parameterized.expand(itertools.product(modules, (True, False)))
+  @parameterized.Parameters(*itertools.product(modules, (True, False)))
   def testFlattenedError(self, module_info, use_bias):
-
     """Error is thrown if the input has been incorrectly flattened."""
     module, num_input_dims, module_kwargs = module_info
     conv_mod = module(use_bias=use_bias, **module_kwargs)
@@ -230,13 +227,12 @@ class SharedConvTest(tf.test.TestCase):
       conv_mod(inputs)
 
 
-class Conv2DTest(tf.test.TestCase):
+class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesSame(self, use_bias):
     """The generated shapes are correct with SAME padding."""
 
     batch_size = random.randint(1, 100)
@@ -274,11 +270,10 @@ class Conv2DTest(tf.test.TestCase):
           conv1.b.get_shape().is_compatible_with(
               [out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesNotKnown(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesNotKnown(self, use_bias):
     """The generated shapes are correct when input shape not known."""
 
     batch_size = 5
@@ -312,11 +307,10 @@ class Conv2DTest(tf.test.TestCase):
           output_eval.shape,
           (batch_size, in_height, in_width, out_channels))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesNotKnownAtrous(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesNotKnownAtrous(self, use_bias):
     """No error is thrown if image shape isn't known for atrous convolution."""
 
     inputs = tf.placeholder(
@@ -335,11 +329,10 @@ class Conv2DTest(tf.test.TestCase):
 
     conv1(inputs)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testKernelShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testKernelShape(self, use_bias):
     """Errors are thrown for invalid kernel shapes."""
 
     snt.Conv2D(output_channels=10, kernel_shape=[3, 4], name="conv1",
@@ -353,11 +346,10 @@ class Conv2DTest(tf.test.TestCase):
                  kernel_shape=[3, 3, 3],
                  name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testStrideError(self, use_bias):
     """Errors are thrown for invalid strides."""
 
     snt.Conv2D(
@@ -376,11 +368,10 @@ class Conv2DTest(tf.test.TestCase):
                  stride=[1, 1, 1],
                  name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateError(self, use_bias):
     """Errors are thrown for invalid dilation rates."""
 
     snt.Conv2D(
@@ -398,11 +389,10 @@ class Conv2DTest(tf.test.TestCase):
                    rate=rate,
                    name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateAndStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateAndStrideError(self, use_bias):
     """Errors are thrown for stride > 1 when using atrous convolution."""
     err = "Cannot have stride > 1 with rate > 1"
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
@@ -412,11 +402,10 @@ class Conv2DTest(tf.test.TestCase):
       snt.Conv2D(output_channels=10, kernel_shape=3,
                  stride=[2, 1], rate=2, name="conv1", use_bias=use_bias)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInputTypeError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInputTypeError(self, use_bias):
     """Errors are thrown for invalid input types."""
     conv1 = snt.Conv2D(output_channels=1,
                        kernel_shape=3,
@@ -433,11 +422,10 @@ class Conv2DTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInitializers(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInitializers(self, use_bias):
     """Test initializers work as expected."""
     w = random.random()
     b = random.random()
@@ -487,11 +475,10 @@ class Conv2DTest(tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRegularizersInRegularizationLosses(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_regularizers(
         use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
 
@@ -509,11 +496,10 @@ class Conv2DTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationSame(self, use_bias):
     """Run through for something with a known answer using SAME padding."""
     conv1 = snt.Conv2D(
         output_channels=1,
@@ -539,11 +525,10 @@ class Conv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
     conv1 = snt.Conv2D(
         output_channels=1,
@@ -567,11 +552,10 @@ class Conv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [3, 3]), expected_output)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
 
     conv1 = snt.Conv2D(
@@ -605,11 +589,10 @@ class Conv2DTest(tf.test.TestCase):
           out1.eval(),
           out2.eval())
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testAtrousConvValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testAtrousConvValid(self, use_bias):
     """The atrous conv is constructed and applied correctly with snt.VALID."""
     conv1 = snt.Conv2D(
         output_channels=1,
@@ -629,11 +612,10 @@ class Conv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [1, 1]), [[9]])
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testAtrousConvSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testAtrousConvSame(self, use_bias):
     """The atrous conv 2D is constructed and applied correctly with SAME."""
     conv1 = snt.Conv2D(
         output_channels=1,
@@ -660,11 +642,10 @@ class Conv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testTransposition(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testTransposition(self, use_bias):
     """Tests if the correct output shapes are setup in transposed module."""
     net = snt.Conv2D(name="conv2d",
                      output_channels=4,
@@ -769,7 +750,8 @@ class Conv2DTest(tf.test.TestCase):
         cm.exception.message, "Invalid mask shape: {}".format(mask.shape))
 
 
-class Conv2DTransposeTest(tf.test.TestCase):
+class Conv2DTransposeTest(parameterized.ParameterizedTestCase,
+                          tf.test.TestCase):
 
   def setUp(self):
     """Set up some variables to re-use in multiple tests."""
@@ -796,11 +778,10 @@ class Conv2DTransposeTest(tf.test.TestCase):
     self.kernel_shape2 = (self.kernel_shape_h, self.kernel_shape_w,
                           self.out_channels, self.in_channels)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testOutputShapeConsistency(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testOutputShapeConsistency(self, use_bias):
     """Tests if output shapes are valid."""
 
     # When padding is SAME, then the actual number of padding pixels can be
@@ -834,11 +815,10 @@ class Conv2DTransposeTest(tf.test.TestCase):
       self.assertTrue(conv1.b.get_shape().is_compatible_with(
           [self.out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testTransposition(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testTransposition(self, use_bias):
     """Tests if the correct output shapes are setup in transposed module."""
     net = snt.Conv2DTranspose(name="conv2d",
                               output_channels=self.out_channels,
@@ -879,13 +859,12 @@ class Conv2DTransposeTest(tf.test.TestCase):
     self.assertAllEqual(initializers, initializers_copy)
 
 
-class Conv1DTest(tf.test.TestCase):
+class Conv1DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapes(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapes(self, use_bias):
     """The generated shapes are correct with SAME and VALID padding."""
 
     batch_size = random.randint(1, 100)
@@ -945,11 +924,10 @@ class Conv1DTest(tf.test.TestCase):
           conv2.b.get_shape().is_compatible_with(
               [out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesNotKnown(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesNotKnown(self, use_bias):
     """The generated shapes are correct when input shape not known."""
 
     batch_size = 5
@@ -983,11 +961,10 @@ class Conv1DTest(tf.test.TestCase):
           output_eval.shape,
           (batch_size, in_length, out_channels))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testKernelShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testKernelShape(self, use_bias):
     """Errors are thrown for invalid kernel shapes."""
 
     snt.Conv1D(output_channels=10, kernel_shape=[3], name="conv1",
@@ -999,11 +976,10 @@ class Conv1DTest(tf.test.TestCase):
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       snt.Conv1D(output_channels=10, kernel_shape=[3, 3], name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testStrideError(self, use_bias):
     """Errors are thrown for invalid strides."""
 
     snt.Conv1D(
@@ -1019,11 +995,10 @@ class Conv1DTest(tf.test.TestCase):
       snt.Conv1D(output_channels=10, kernel_shape=3,
                  stride=[1, 1, 1, 1], name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateError(self, use_bias):
     """Errors are thrown for invalid dilation rates."""
 
     snt.Conv1D(
@@ -1041,22 +1016,20 @@ class Conv1DTest(tf.test.TestCase):
                    rate=rate,
                    name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateAndStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateAndStrideError(self, use_bias):
     """Errors are thrown for stride > 1 when using atrous convolution."""
     err = "Cannot have stride > 1 with rate > 1"
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
       snt.Conv1D(output_channels=10, kernel_shape=3,
                  stride=2, rate=2, name="conv1", use_bias=use_bias)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInputTypeError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInputTypeError(self, use_bias):
     """Errors are thrown for invalid input types."""
     conv1 = snt.Conv1D(output_channels=1,
                        kernel_shape=3,
@@ -1073,11 +1046,10 @@ class Conv1DTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInitializers(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInitializers(self, use_bias):
     """Test initializers work as expected."""
     w = random.random()
     b = random.random()
@@ -1133,11 +1105,10 @@ class Conv1DTest(tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRegularizersInRegularizationLosses(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_regularizers(
         use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
 
@@ -1154,11 +1125,10 @@ class Conv1DTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationSame(self, use_bias):
     """Run through for something with a known answer using SAME padding."""
     conv1 = snt.Conv1D(
         output_channels=1,
@@ -1180,11 +1150,10 @@ class Conv1DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
     conv1 = snt.Conv1D(
         output_channels=1,
@@ -1206,11 +1175,10 @@ class Conv1DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
 
     conv1 = snt.Conv1D(
@@ -1245,7 +1213,8 @@ class Conv1DTest(tf.test.TestCase):
           out2.eval())
 
 
-class Conv1DTransposeTest(tf.test.TestCase):
+class Conv1DTransposeTest(parameterized.ParameterizedTestCase,
+                          tf.test.TestCase):
 
   # Constants for use in all tests.
   batch_size = [10, 2, 8, 18, 23]
@@ -1270,11 +1239,10 @@ class Conv1DTransposeTest(tf.test.TestCase):
   kernel_shape2 = tuple(zip(kernel_shape, out_channels, in_channels))
   stride_shape = tuple(stride)
 
-  @parameterized.expand(
-      zip(out_channels, kernel_shape, padding, use_bias, in_shape, out_shape,
-          stride_shape))
+  @parameterized.Parameters(
+      *zip(out_channels, kernel_shape, padding, use_bias, in_shape, out_shape,
+           stride_shape))
   def testMissingBatchSizeError(self, out_channels, kernel_shape, padding,
-
                                 use_bias, in_shape, out_shape, stride_shape):
     """Error is thrown if the batch size is unknown at build time."""
 
@@ -1292,11 +1260,10 @@ class Conv1DTransposeTest(tf.test.TestCase):
     with self.assertRaisesRegexp(snt.UnderspecifiedError, error_msg):
       conv1(image)
 
-  @parameterized.expand(
-      zip(batch_size, in_length, in_channels, out_length, out_channels,
-          kernel_shape, padding, use_bias, in_shape, out_shape, stride_shape))
+  @parameterized.Parameters(
+      *zip(batch_size, in_length, in_channels, out_length, out_channels,
+           kernel_shape, padding, use_bias, in_shape, out_shape, stride_shape))
   def testShapesSame(self, batch_size, in_length, in_channels, out_length,
-
                      out_channels, kernel_shape, padding, use_bias, in_shape,
                      out_shape, stride_shape):
     """The generated shapes are correct."""
@@ -1328,10 +1295,9 @@ class Conv1DTransposeTest(tf.test.TestCase):
           conv1.b.get_shape().is_compatible_with(
               [out_channels]))
 
-  @parameterized.expand(
-      zip(out_channels, padding, use_bias, in_shape, out_shape, stride_shape))
+  @parameterized.Parameters(
+      *zip(out_channels, padding, use_bias, in_shape, out_shape, stride_shape))
   def testKernelShape(self, out_channels, padding, use_bias, in_shape,
-
                       out_shape, stride_shape):
     """Errors are thrown for invalid kernel shapes."""
 
@@ -1367,10 +1333,9 @@ class Conv1DTransposeTest(tf.test.TestCase):
                           name="conv1",
                           use_bias=use_bias)
 
-  @parameterized.expand(
-      zip(out_channels, padding, use_bias, in_shape, out_shape))
+  @parameterized.Parameters(
+      *zip(out_channels, padding, use_bias, in_shape, out_shape))
   def testStrideError(self, out_channels, padding, use_bias, in_shape,
-
                       out_shape):
     """Errors are thrown for invalid strides."""
 
@@ -1403,11 +1368,10 @@ class Conv1DTransposeTest(tf.test.TestCase):
                           name="conv1",
                           use_bias=use_bias)
 
-  @parameterized.expand(
-      zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-          padding, use_bias, out_shape, stride_shape))
+  @parameterized.Parameters(
+      *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
+           padding, use_bias, out_shape, stride_shape))
   def testInputTypeError(self, batch_size, in_length, in_channels, out_channels,
-
                          kernel_shape, padding, use_bias, out_shape,
                          stride_shape):
     """Errors are thrown for invalid input types."""
@@ -1427,11 +1391,10 @@ class Conv1DTransposeTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
-  @parameterized.expand(
-      zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-          padding, use_bias, out_shape, stride_shape))
+  @parameterized.Parameters(
+      *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
+           padding, use_bias, out_shape, stride_shape))
   def testSharing(self, batch_size, in_length, in_channels, out_channels,
-
                   kernel_shape, padding, use_bias, out_shape, stride_shape):
     """Sharing is working."""
 
@@ -1467,11 +1430,10 @@ class Conv1DTransposeTest(tf.test.TestCase):
           out1.eval(),
           out2.eval())
 
-  @parameterized.expand(
-      zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-          padding, use_bias, out_shape, stride_shape))
+  @parameterized.Parameters(
+      *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
+           padding, use_bias, out_shape, stride_shape))
   def testTranspose(self, batch_size, in_length, in_channels, out_channels,
-
                     kernel_shape, padding, use_bias, out_shape, stride_shape):
     """Test transpose."""
 
@@ -1529,13 +1491,12 @@ class Conv1DTransposeTest(tf.test.TestCase):
     self.assertAllEqual(initializers, initializers_copy)
 
 
-class InPlaneConv2DTest(tf.test.TestCase):
+class InPlaneConv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSameNumberOfOutputAndInputChannels(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSameNumberOfOutputAndInputChannels(self, use_bias):
     """Test that the number of output and input channels are equal."""
 
     input_channels = random.randint(1, 32)
@@ -1552,11 +1513,10 @@ class InPlaneConv2DTest(tf.test.TestCase):
     conv1(inputs)
     self.assertEqual(conv1.output_channels, input_channels)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
 
     conv1 = snt.InPlaneConv2D(kernel_shape=3, use_bias=use_bias)
@@ -1588,7 +1548,8 @@ class InPlaneConv2DTest(tf.test.TestCase):
     self.assertAllEqual(initializers, initializers_copy)
 
 
-class DepthwiseConv2DTest(tf.test.TestCase):
+class DepthwiseConv2DTest(parameterized.ParameterizedTestCase,
+                          tf.test.TestCase):
 
   def setUp(self):
     """Set up some variables to re-use in multiple tests."""
@@ -1610,11 +1571,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
     self.weight_shape = [kernel_shape_h, kernel_shape_w, in_channels,
                          channel_multiplier]
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesSame(self, use_bias):
     """Test that the generated shapes are correct with SAME padding."""
 
     out_channels = self.out_channels
@@ -1640,11 +1600,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
     if use_bias:
       self.assertEqual(conv1.b.get_shape(), out_channels)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesNotKnown(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesNotKnown(self, use_bias):
     """Test that the generated shapes are correct when input shape not known."""
 
     inputs = tf.placeholder(
@@ -1664,11 +1623,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
       output_eval = output.eval({inputs: np.zeros(self.input_shape)})
       self.assertEqual(output_eval.shape, tuple(self.output_shape))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testKernelShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testKernelShape(self, use_bias):
     """Test that errors are thrown for invalid kernel shapes."""
 
     snt.DepthwiseConv2D(channel_multiplier=1, kernel_shape=[3, 4])
@@ -1679,11 +1637,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
       snt.DepthwiseConv2D(channel_multiplier=1, kernel_shape=[3],
                           use_bias=use_bias, name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testStrideError(self, use_bias):
     """Test that errors are thrown for invalid strides."""
 
     snt.DepthwiseConv2D(channel_multiplier=1, kernel_shape=3, stride=1,
@@ -1702,11 +1659,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
                           use_bias=use_bias,
                           name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInputTypeError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInputTypeError(self, use_bias):
     """Test that errors are thrown for invalid input types."""
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=3,
@@ -1722,11 +1678,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInitializers(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInitializers(self, use_bias):
     """Test that initializers work as expected."""
     w = random.random()
     b = np.random.randn(6)  # Kernel shape is 3, input channels are 2, 2*3 = 6
@@ -1760,11 +1715,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
           use_bias=use_bias,
           initializers={"w": tf.ones([])})
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRegularizersInRegularizationLosses(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_regularizers(
         use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
 
@@ -1798,11 +1752,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationSame(self, use_bias):
     """Run through for something with a known answer using SAME padding."""
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=1,
@@ -1827,11 +1780,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=1,
@@ -1854,11 +1806,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [3, 3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValidMultiChannel(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValidMultiChannel(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=1,
@@ -1880,11 +1831,10 @@ class DepthwiseConv2DTest(tf.test.TestCase):
       self.assertAllClose(
           np.reshape(out.eval(), [3, 3, 3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=3, kernel_shape=3, stride=1, padding=snt.SAME,
@@ -1911,7 +1861,8 @@ class DepthwiseConv2DTest(tf.test.TestCase):
       self.assertAllClose(out1.eval(), out2.eval())
 
 
-class SeparableConv2DTest(tf.test.TestCase):
+class SeparableConv2DTest(parameterized.ParameterizedTestCase,
+                          tf.test.TestCase):
 
   def setUp(self):
     """Set up some variables to re-use in multiple tests."""
@@ -1936,11 +1887,10 @@ class SeparableConv2DTest(tf.test.TestCase):
     ]
     self.pointwise_filter_shape = [1, 1, out_channels_dw, out_channels_dw]
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesSame(self, use_bias):
     """Test that the generated shapes are correct with SAME padding."""
 
     out_channels = self.out_channels_dw
@@ -1970,11 +1920,10 @@ class SeparableConv2DTest(tf.test.TestCase):
     if use_bias:
       self.assertTrue(conv1.b.get_shape().is_compatible_with([out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesNotKnown(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesNotKnown(self, use_bias):
     """Test that the generated shapes are correct when input shape not known."""
 
     inputs = tf.placeholder(
@@ -1995,11 +1944,10 @@ class SeparableConv2DTest(tf.test.TestCase):
       output_eval = output.eval({inputs: np.zeros(self.input_shape)})
       self.assertEqual(output_eval.shape, tuple(self.output_shape))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testKernelShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testKernelShape(self, use_bias):
     """Test that errors are thrown for invalid kernel shapes."""
 
     # No check against output_channels is done yet (needs input size).
@@ -2020,11 +1968,10 @@ class SeparableConv2DTest(tf.test.TestCase):
                           kernel_shape=[3],
                           use_bias=use_bias)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testStrideError(self, use_bias):
     """Test that errors are thrown for invalid strides."""
 
     snt.SeparableConv2D(
@@ -2050,11 +1997,10 @@ class SeparableConv2DTest(tf.test.TestCase):
                           name="conv1",
                           use_bias=use_bias)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInputTypeError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInputTypeError(self, use_bias):
     """Test that errors are thrown for invalid input types."""
     conv1 = snt.SeparableConv2D(
         output_channels=3,
@@ -2071,11 +2017,10 @@ class SeparableConv2DTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInitializers(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInitializers(self, use_bias):
     """Test that initializers work as expected."""
 
     w_dw = random.random()
@@ -2133,11 +2078,10 @@ class SeparableConv2DTest(tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRegularizersInRegularizationLosses(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_separable_regularizers(
         use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
 
@@ -2157,11 +2101,10 @@ class SeparableConv2DTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[2].name, ".*l1_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationSame(self, use_bias):
     """Run through for something with a known answer using SAME padding."""
 
     conv1 = snt.SeparableConv2D(
@@ -2190,11 +2133,10 @@ class SeparableConv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
 
     conv1 = snt.SeparableConv2D(
@@ -2220,11 +2162,10 @@ class SeparableConv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [3, 3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValidMultiChannel(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValidMultiChannel(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
 
     conv1 = snt.SeparableConv2D(
@@ -2248,11 +2189,10 @@ class SeparableConv2DTest(tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [3, 3, 3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValidChannelMultiplier(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValidChannelMultiplier(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
 
     input_channels = 3
@@ -2287,11 +2227,10 @@ class SeparableConv2DTest(tf.test.TestCase):
       # Pointwise filter is [1, 1, input_channels * channel_multiplier = 15, x].
       # Results in 9 * 15 = 135 + 1 bias = 136 as outputs.
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
     conv1 = snt.SeparableConv2D(
         output_channels=3, channel_multiplier=3, kernel_shape=3,
@@ -2321,13 +2260,12 @@ class SeparableConv2DTest(tf.test.TestCase):
       self.assertAllClose(out1.eval(), out2.eval())
 
 
-class Conv3DTest(tf.test.TestCase):
+class Conv3DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesSame(self, use_bias):
     """The generated shapes are correct with SAME padding."""
 
     batch_size = random.randint(1, 100)
@@ -2367,11 +2305,10 @@ class Conv3DTest(tf.test.TestCase):
           conv1.b.get_shape().is_compatible_with(
               [out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testShapesWithUnknownInputShape(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testShapesWithUnknownInputShape(self, use_bias):
     """The generated shapes are correct when input shape not known."""
 
     batch_size = 5
@@ -2433,11 +2370,10 @@ class Conv3DTest(tf.test.TestCase):
       snt.Conv3D(output_channels=10, kernel_shape=3, stride=[1, 1, 1, 1],
                  name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateError(self, use_bias):
     """Errors are thrown for invalid dilation rates."""
 
     snt.Conv3D(
@@ -2455,11 +2391,10 @@ class Conv3DTest(tf.test.TestCase):
                    rate=rate,
                    name="conv1")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRateAndStrideError(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRateAndStrideError(self, use_bias):
     """Errors are thrown for stride > 1 when using atrous convolution."""
     err = "Cannot have stride > 1 with rate > 1"
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
@@ -2486,11 +2421,10 @@ class Conv3DTest(tf.test.TestCase):
       self.assertRaisesRegexp(TypeError, "Input must have dtype tf.float32.*",
                               conv1, x)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testInitializers(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testInitializers(self, use_bias):
     """Test initializers work as expected."""
 
     w = random.random()
@@ -2539,11 +2473,10 @@ class Conv3DTest(tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testRegularizersInRegularizationLosses(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_regularizers(
         use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
 
@@ -2561,11 +2494,10 @@ class Conv3DTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationSame(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationSame(self, use_bias):
     """Run through for something with a known answer using SAME padding."""
 
     conv1 = snt.Conv3D(
@@ -2600,11 +2532,10 @@ class Conv3DTest(tf.test.TestCase):
       self.assertAllClose(
           np.reshape(out.eval(), [5, 5, 5]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testComputationValid(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
 
     conv1 = snt.Conv3D(
@@ -2629,11 +2560,10 @@ class Conv3DTest(tf.test.TestCase):
       self.assertAllClose(
           np.reshape(out.eval(), [3, 3, 3]), expected_out)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testSharing(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
     """Sharing is working."""
 
     conv1 = snt.Conv3D(
@@ -2668,7 +2598,8 @@ class Conv3DTest(tf.test.TestCase):
           out2.eval())
 
 
-class Conv3DTransposeTest(tf.test.TestCase):
+class Conv3DTransposeTest(parameterized.ParameterizedTestCase,
+                          tf.test.TestCase):
 
   def setUp(self):
     """Set up some variables to re-use in multiple tests."""
@@ -2703,11 +2634,10 @@ class Conv3DTransposeTest(tf.test.TestCase):
 
     self.strides = (self.stride_d, self.stride_h, self.stride_w)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testOutputShapeConsistency(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testOutputShapeConsistency(self, use_bias):
     """Tests if output shapes are valid."""
 
     # When padding is SAME, then the actual number of padding pixels can be
@@ -2741,11 +2671,10 @@ class Conv3DTransposeTest(tf.test.TestCase):
       self.assertTrue(conv1.b.get_shape().is_compatible_with(
           [self.out_channels]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("WithBias", True),
-      ("WithoutBias", False)])
-  def testTransposition(self, _, use_bias):
-
+      ("WithoutBias", False))
+  def testTransposition(self, use_bias):
     """Tests if the correct ouput shapes are setup in transposed module."""
     net = snt.Conv3DTranspose(name="conv3d_3",
                               output_channels=self.out_channels,
@@ -2770,3 +2699,4 @@ class Conv3DTransposeTest(tf.test.TestCase):
 
 if __name__ == "__main__":
   tf.test.main()
+

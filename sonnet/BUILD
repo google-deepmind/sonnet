@@ -16,5 +16,6 @@ py_library(
     deps = [
         "//sonnet/python:modules",
         "//sonnet/python:ops",
+        # Tensorflow dep,
     ],
 )

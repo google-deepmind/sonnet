@@ -11,16 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
-"""Tests for sonnet.python.modules.spatial_transformer."""  # pylint: disable=line-too-long
+# ============================================================================
+
+"""Tests for sonnet.python.modules.spatial_transformer."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import itertools
-from nose_parameterized import parameterized
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 
@@ -36,7 +37,8 @@ no_shear_2d = snt.AffineWarpConstraints.no_shear_2d
 no_shear_3d = snt.AffineWarpConstraints.no_shear_3d
 
 
-class AffineGridWarperTest(tf.test.TestCase):
+class AffineGridWarperTest(parameterized.ParameterizedTestCase,
+                           tf.test.TestCase):
 
   def testShapeInferenceAndChecks(self):
     output_shape2d = (2, 3)
@@ -89,7 +91,7 @@ class AffineGridWarperTest(tf.test.TestCase):
                            output_shape=output_shape3d,
                            constraints=no_constraints(2))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("2d_a", [13, 17], [7, 11], no_constraints(2)),
       ("2d_b", [11, 5], [2, 8], scale_2d(x=.7)),
       ("2d_c", [9, 23], [3, 11], scale_2d(y=1.2)),
@@ -103,9 +105,8 @@ class AffineGridWarperTest(tf.test.TestCase):
       ("2d_3d_b", [11, 5], [2, 8, 9], scale_3d(y=.7, z=2)),
       ("2d_3d_c", [9, 23], [3, 11, 2], scale_3d(x=1.2)),
       ("2d_3d_d", [2, 23], [9, 13, 33],
-       snt.AffineWarpConstraints([[None] * 4, [1] * 4, [1, None, None, 1]]))])
-  def testSameAsNumPyReference(self, _, output_shape, source_shape, constraints):
-
+       snt.AffineWarpConstraints([[None] * 4, [1] * 4, [1, None, None, 1]])))
+  def testSameAsNumPyReference(self, output_shape, source_shape, constraints):
     def chain(x):
       return itertools.chain(*x)
 
@@ -167,13 +168,12 @@ class AffineGridWarperTest(tf.test.TestCase):
                                    [[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]],
                                    [[0.0, 2.0], [1.0, 2.0], [2.0, 2.0]]]]))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("2d_a", [13, 17], [7, 11], no_constraints(2)),
       ("2d_b", [11, 5], [2, 8], scale_2d(x=.7)),
       ("2d_c", [9, 23], [3, 11], scale_2d(y=1.2)),
-      ("2d_d", [2, 23], [9, 13], snt.AffineWarpConstraints([[1]*3, [None]*3]))])
-  def testInvSameAsNumPyRef(self, _, output_shape, source_shape, constraints):
-
+      ("2d_d", [2, 23], [9, 13], snt.AffineWarpConstraints([[1]*3, [None]*3])))
+  def testInvSameAsNumPyRef(self, output_shape, source_shape, constraints):
     def chain(x):
       return itertools.chain(*x)
 

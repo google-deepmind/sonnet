@@ -11,21 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for snt.nets.alexnet."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
-import sonnet as snt
-import tensorflow as tf
 
+import numpy as np
+
+import sonnet as snt
+from sonnet.testing import parameterized
+
+import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-class AlexNetTest(tf.test.TestCase):
+class AlexNetTest(parameterized.ParameterizedTestCase,
+                  tf.test.TestCase):
 
   def testCalcMinSize(self):
     """Test the minimum input size calculator."""
@@ -210,7 +215,7 @@ class AlexNetTest(tf.test.TestCase):
       self.assertEqual(type(linear_module.b), variables.PartitionedVariable)
 
   def testErrorHandling(self):
-    err = "`batch_norm_config` must be a mapping, e.g. `dict`."
+    err = r"`batch_norm_config` must be a mapping, e\.g\. `dict`."
     with self.assertRaisesRegexp(TypeError, err):
       snt.nets.AlexNet(batch_norm_config="not a valid config")
 

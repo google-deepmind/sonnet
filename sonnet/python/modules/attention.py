@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Modules for attending over memory."""
 
 from __future__ import absolute_import
@@ -20,6 +21,7 @@ from __future__ import print_function
 
 import collections
 
+
 import numpy as np
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
@@ -27,7 +29,8 @@ import tensorflow as tf
 
 
 # Result of AttentiveRead._build(). See docstring therein for details.
-AttentionOutput = collections.namedtuple("AttentionOutput", ["read", "weights"])
+AttentionOutput = collections.namedtuple(
+    "AttentionOutput", ["read", "weights", "weight_logits"])
 
 
 class AttentiveRead(base.AbstractModule):
@@ -50,6 +53,7 @@ class AttentiveRead(base.AbstractModule):
       name: string. Name for module.
     """
     super(AttentiveRead, self).__init__(name=name)
+
     self._attention_logit_mod = attention_logit_mod
 
   def _build(self, memory, query, memory_mask=None):
@@ -73,6 +77,10 @@ class AttentiveRead(base.AbstractModule):
         weights: [batch_size, memory_size]-shaped Tensor of dtype float32. This
           represents, for each example and memory slot, the attention weights
           used to compute the read.
+        weight_logits: [batch_size, memory_size]-shaped Tensor of dtype float32.
+          This represents, for each example and memory slot, the logits of the
+          attention weights, that is, `weights` is calculated by taking the
+          softmax of the weight logits.
 
     Raises:
       UnderspecifiedError: if memory_word_size or query_word_size can not be
@@ -159,6 +167,8 @@ class AttentiveRead(base.AbstractModule):
     attention_weight = tf.reshape(
         tf.nn.softmax(attention_weight_logits),
         shape=[batch_size, memory_size, 1])
+    # The multiplication is elementwise and relies on broadcasting the weights
+    # across memory_word_size. Then we sum across the memory slots.
     attended_memory = tf.reduce_sum(memory * attention_weight, axis=[1])
 
     # Infer shape of result as much as possible.
@@ -167,4 +177,7 @@ class AttentiveRead(base.AbstractModule):
     attended_memory.set_shape([inferred_batch_size, inferred_memory_word_size])
 
     return AttentionOutput(
-        read=attended_memory, weights=tf.squeeze(attention_weight, [2]))
+        read=attended_memory,
+        weights=tf.squeeze(attention_weight, [2]),
+        weight_logits=attention_weight_logits)
+

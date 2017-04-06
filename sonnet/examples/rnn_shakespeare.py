@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Example script to train a stacked LSTM on the Tiny Shakespeare dataset."""
 
 from __future__ import absolute_import
@@ -296,7 +297,7 @@ def train(num_training_iterations, report_interval,
 
 
 def main(unused_argv):
-  tf.logging.set_verbosity(tf.logging.INFO)
+
   train(
       num_training_iterations=FLAGS.num_training_iterations,
       report_interval=FLAGS.report_interval,
@@ -305,3 +306,4 @@ def main(unused_argv):
 
 if __name__ == "__main__":
   tf.app.run()
+

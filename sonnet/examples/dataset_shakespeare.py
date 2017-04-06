@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Classes to load textual data from Shakespeare's plays."""
 
 from __future__ import absolute_import
@@ -83,8 +84,7 @@ class TinyShakespeareDataset(snt.AbstractModule):
   TRAIN = "train"
   VALID = "valid"
   TEST = "test"
-  _RESOURCE_ROOT = os.path.join(
-      os.path.dirname(os.path.realpath(__file__)), "data")
+  _RESOURCE_ROOT = "/cns/wj-d/home/deepmind/sequence_data/ts/"
 
   def __init__(self, num_steps=1, batch_size=1,
                subset="train", random=False, dtype=tf.float32,
@@ -111,6 +111,7 @@ class TinyShakespeareDataset(snt.AbstractModule):
     super(TinyShakespeareDataset, self).__init__(name=name)
 
     # Generate vocab from train set.
+
     self._vocab_file = gfile.Open(
         os.path.join(self._RESOURCE_ROOT, "ts.train.txt"))
     self._data_file = gfile.Open(
@@ -231,3 +232,4 @@ class TinyShakespeareDataset(snt.AbstractModule):
       prefix = "b_{}: ".format(b) if label_batch_entries else ""
       result.append(prefix + self._data_source.decode(index_seq))
     return sep.join(result)
+

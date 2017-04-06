@@ -11,14 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from nose_parameterized import parameterized
+
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 
@@ -54,7 +56,7 @@ class ConstantZero(snt.AbstractModule):
     return tf.zeros(result_shape, dtype=inputs.dtype)
 
 
-class AttentiveReadTest(tf.test.TestCase):
+class AttentiveReadTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def setUp(self):
     super(AttentiveReadTest, self).setUp()
@@ -124,11 +126,16 @@ class AttentiveReadTest(tf.test.TestCase):
         query=tf.constant(np.zeros([2, 5]), dtype=tf.float32),
         memory_mask=tf.constant(mask))
     with self.test_session() as sess:
-      actual_output, actual_weights = sess.run(attention_output)
+      actual = sess.run(attention_output)
 
     # Check output.
-    self.assertAllClose(actual_weights, expected_weights)
-    self.assertAllClose(actual_output, expected_output)
+    self.assertAllClose(actual.read, expected_output)
+    self.assertAllClose(actual.weights, expected_weights)
+    # The actual logit for the masked value should be tiny. First check without.
+    masked_actual_weight_logits = np.array(actual.weight_logits, copy=True)
+    masked_actual_weight_logits[1, 2] = logits[1, 2]
+    self.assertAllClose(masked_actual_weight_logits, logits)
+    self.assertLess(actual.weight_logits[1, 2], -1e35)
 
   def testUndefinedWordSizes(self):
     # memory_word_size must be defined.
@@ -163,9 +170,8 @@ class AttentiveReadTest(tf.test.TestCase):
     with self.assertRaises(snt.IncompatibleShapeError):
       self._attention_mod(self._memory, self._query, memory_mask=memory_mask)
 
-  @parameterized.expand([(1,), (3,)])
+  @parameterized.Parameters(1, 3)
   def testAttentionLogitsModuleShape(self, output_rank):
-
     # attention_logit_mod must produce a rank 2 Tensor.
     attention_mod = snt.AttentiveRead(ConstantZero(output_rank=output_rank))
     with self.assertRaises(snt.IncompatibleShapeError):
@@ -202,17 +208,41 @@ class AttentiveReadTest(tf.test.TestCase):
         }
         sess.run(x, feed_dict=feed_dict)
 
-  @parameterized.expand([(snt.Linear(1),), (snt.nets.MLP([1]),)])
-  def testWorksWithCommonModules(self, attention_logit_mod):
-
+  @parameterized.Parameters({
+      "module_cstr": snt.Linear,
+      "module_kwargs": {
+          "output_size": 1
+      }
+  }, {"module_cstr": snt.nets.MLP,
+      "module_kwargs": {
+          "output_sizes": [1]
+      }})
+  def testWorksWithCommonModules(self, module_cstr, module_kwargs):
     # In the academic literature, attentive reads are most commonly implemented
     # with Linear or MLP modules. This integration test ensures that
     # AttentiveRead works safely with these.
+
+    attention_logit_mod = module_cstr(**module_kwargs)
     attention_mod = snt.AttentiveRead(attention_logit_mod)
     x = attention_mod(self._memory, self._query)
     with self.test_session() as sess:
       sess.run(tf.global_variables_initializer())
       sess.run(x)
+
+  def testAttentionWeightLogitsShape(self):
+    # Expected to be [batch_size, memory_size].
+    x = self._attention_mod(self._memory, self._query).weight_logits
+    self.assertTrue(x.get_shape().is_compatible_with(
+        [self._batch_size, self._memory_size]))
+    self.assertEqual(x.dtype, tf.float32)
+
+  def testWeightsIsSoftmaxOfLogits(self):
+    attention_output = self._attention_mod(self._memory, self._query)
+    softmax_of_weight_logits = tf.nn.softmax(attention_output.weight_logits)
+    with self.test_session() as sess:
+      expected, obtained = sess.run([attention_output.weights,
+                                     softmax_of_weight_logits])
+    self.assertAllClose(expected, obtained)
 
 
 if __name__ == "__main__":

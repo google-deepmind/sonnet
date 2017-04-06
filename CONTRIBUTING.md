@@ -28,7 +28,7 @@ the CLA can be accepted into the main repository.
 
 If you have improvements to Sonnet, send us your pull requests! For those just
 getting started, Github has a
-howto.
+[howto](https://help.github.com/articles/using-pull-requests/).
 
 If you want to contribute but you're not sure where to start, take a look at the
 [issues with the "contributions welcome"

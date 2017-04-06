@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Test sonnet.python.modules.nets.convnet."""
 
 from __future__ import absolute_import
@@ -20,16 +21,18 @@ from __future__ import print_function
 
 from functools import partial
 
-from nose_parameterized import parameterized
+
 import numpy as np
 import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
+from sonnet.testing import parameterized
 
 import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-class SharedConvNets2DTest(tf.test.TestCase):
+class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
+                           tf.test.TestCase):
 
   def setUp(self):
     super(SharedConvNets2DTest, self).setUp()
@@ -38,12 +41,11 @@ class SharedConvNets2DTest(tf.test.TestCase):
     self.strides = [1]
     self.paddings = [snt.SAME]
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
-                                     output_shapes=[[100, 100]]))])
-  def testName(self, _, module):
-
+                                     output_shapes=[[100, 100]])))
+  def testName(self, module):
     unique_name = "unique_name"
     with tf.variable_scope("scope"):
       net = module(name=unique_name,
@@ -54,12 +56,11 @@ class SharedConvNets2DTest(tf.test.TestCase):
     self.assertEqual(net.scope_name, "scope/" + unique_name)
     self.assertEqual(net.module_name, unique_name)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
-                                     output_shapes=[[100, 100]]))])
-  def testConstructor(self, _, module):
-
+                                     output_shapes=[[100, 100]])))
+  def testConstructor(self, module):
     with self.assertRaisesRegexp(ValueError,
                                  "output_channels must not be empty"):
       module(output_channels=[],
@@ -197,13 +198,12 @@ class SharedConvNets2DTest(tf.test.TestCase):
              paddings=self.paddings,
              use_bias=2)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose",
        partial(snt.nets.ConvNet2DTranspose,
-               output_shapes=[[100, 100]]))])
-  def testBatchNorm(self, _, module):
-
+               output_shapes=[[100, 100]])))
+  def testBatchNorm(self, module):
     model = module(output_channels=self.output_channels,
                    kernel_shapes=self.kernel_shapes,
                    strides=self.strides,
@@ -240,12 +240,11 @@ class SharedConvNets2DTest(tf.test.TestCase):
         any("moving_mean" in var.name
             for var in tf.global_variables()))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
-                                     output_shapes=[[100, 100]]))])
-  def testBatchNormConfig(self, _, module):
-
+                                     output_shapes=[[100, 100]])))
+  def testBatchNormConfig(self, module):
     batch_norm_config = {
         "scale": True,
     }
@@ -266,12 +265,11 @@ class SharedConvNets2DTest(tf.test.TestCase):
         len(model_variables),
         len(self.output_channels) * 4 - 2)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
-                                     output_shapes=[[100, 100]]))])
-  def testNoBias(self, _, module):
-
+                                     output_shapes=[[100, 100]])))
+  def testNoBias(self, module):
     model = module(output_channels=self.output_channels,
                    kernel_shapes=self.kernel_shapes,
                    strides=self.strides,
@@ -287,12 +285,11 @@ class SharedConvNets2DTest(tf.test.TestCase):
         len(model_variables),
         len(self.output_channels))
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
-                                     output_shapes=[[100, 100]]))])
-  def testNoBiasIterable(self, _, module):
-
+                                     output_shapes=[[100, 100]])))
+  def testNoBiasIterable(self, module):
     use_bias = (True,) * (len(self.output_channels) - 1) + (False,)
     model = module(output_channels=self.output_channels,
                    kernel_shapes=self.kernel_shapes,
@@ -310,15 +307,14 @@ class SharedConvNets2DTest(tf.test.TestCase):
     self.assertEqual(model_transpose.use_bias, actual_use_biases)
     self.assertEqual(tuple(reversed(use_bias)), actual_use_biases)
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2DNoBias", snt.nets.ConvNet2D, False),
       ("ConvNet2DBias", snt.nets.ConvNet2D, True),
       ("ConvNet2DTransposeNoBias", partial(snt.nets.ConvNet2DTranspose,
                                            output_shapes=[[100, 100]]), False),
       ("ConvNet2DTransposeBias", partial(snt.nets.ConvNet2DTranspose,
-                                         output_shapes=[[100, 100]]), True)])
-  def testRegularizersInRegularizationLosses(self, _, module, use_bias):
-
+                                         output_shapes=[[100, 100]]), True))
+  def testRegularizersInRegularizationLosses(self, module, use_bias):
     if use_bias:
       regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5),
                       "b": tf.contrib.layers.l2_regularizer(scale=0.5)}
@@ -340,7 +336,7 @@ class SharedConvNets2DTest(tf.test.TestCase):
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.expand([
+  @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D, False),
       ("ConvNet2DFinal", snt.nets.ConvNet2D, True),
       ("ConvNet2DTranspose",
@@ -348,9 +344,8 @@ class SharedConvNets2DTest(tf.test.TestCase):
        False),
       ("ConvNet2DTransposeFinal",
        partial(snt.nets.ConvNet2DTranspose, output_shapes=[[100, 100]]),
-       True)])
-  def testActivateFinal(self, _, module, activate_final):
-
+       True))
+  def testActivateFinal(self, module, activate_final):
     model = module(output_channels=self.output_channels,
                    kernel_shapes=self.kernel_shapes,
                    strides=self.strides,
@@ -380,7 +375,8 @@ class SharedConvNets2DTest(tf.test.TestCase):
                      transposed_model_inherit_activate_final.activate_final)
 
 
-class ConvNet2DTest(tf.test.TestCase):
+class ConvNet2DTest(parameterized.ParameterizedTestCase,
+                    tf.test.TestCase):
 
   def setUp(self):
     super(ConvNet2DTest, self).setUp()

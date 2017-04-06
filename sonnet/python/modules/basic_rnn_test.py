@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for Recurrent cores in snt."""
 from __future__ import absolute_import
 from __future__ import division
@@ -19,9 +20,9 @@ from __future__ import print_function
 
 import itertools
 
-from nose_parameterized import parameterized
 import numpy as np
 import sonnet as snt
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
@@ -225,7 +226,7 @@ class VanillaRNNTest(tf.test.TestCase):
     self.assertEqual(len(regularizers), 2)
 
 
-class DeepRNNTest(tf.test.TestCase):
+class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
   def testShape(self):
     batch_size = 3
@@ -290,8 +291,42 @@ class DeepRNNTest(tf.test.TestCase):
              snt.VanillaRNN(name="rnn2", hidden_size=hidden2_size)]
     with self.assertRaisesRegexp(
         ValueError, "skip_connections are enabled but not all cores are "
-                    "recurrent, which is not supported"):
+                    "`snt.RNNCore`s, which is not supported"):
       snt.DeepRNN(cores, name="deep_rnn", skip_connections=True)
+
+    cells = [tf.contrib.rnn.BasicLSTMCell(5), tf.contrib.rnn.BasicLSTMCell(5)]
+    with self.assertRaisesRegexp(
+        ValueError, "skip_connections are enabled but not all cores are "
+        "`snt.RNNCore`s, which is not supported"):
+      snt.DeepRNN(cells, skip_connections=True)
+
+  def test_non_recurrent_mappings(self):
+    insize = 2
+    hidden1_size = 4
+    hidden2_size = 5
+    seq_length = 7
+    batch_size = 3
+
+    # As mentioned above, non-recurrent cores are not supported with
+    # skip connections. But test that some number of non-recurrent cores
+    # is okay (particularly as the last core) without skip connections.
+    cores1 = [snt.LSTM(hidden1_size), tf.tanh, snt.Linear(hidden2_size)]
+    core1 = snt.DeepRNN(cores1, skip_connections=False)
+    core1_h0 = core1.initial_state(batch_size=batch_size)
+
+    cores2 = [snt.LSTM(hidden1_size), snt.Linear(hidden2_size), tf.tanh]
+    core2 = snt.DeepRNN(cores2, skip_connections=False)
+    core2_h0 = core2.initial_state(batch_size=batch_size)
+
+    xseq = tf.random_normal(shape=[seq_length, batch_size, insize])
+    y1, _ = tf.nn.dynamic_rnn(
+        core1, xseq, initial_state=core1_h0, time_major=True)
+    y2, _ = tf.nn.dynamic_rnn(
+        core2, xseq, initial_state=core2_h0, time_major=True)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      sess.run([y1, y2])
 
   def testVariables(self):
     batch_size = 3
@@ -324,10 +359,9 @@ class DeepRNNTest(tf.test.TestCase):
       self.assertRegexpMatches(
           v.name, "rnn(1|2)/(in_to_hidden|hidden_to_hidden)/(w|b):0")
 
-  @parameterized.expand([(True, True), (True, False),
-                         (False, True), (False, False)])
+  @parameterized.Parameters((True, True), (True, False), (False, True),
+                            (False, False))
   def testComputation(self, skip_connections, create_initial_state):
-
     batch_size = 3
     in_size = 2
     hidden1_size = 4
@@ -413,10 +447,9 @@ class DeepRNNTest(tf.test.TestCase):
 
     self.assertAllClose(output_value, manual_out_value)
 
-  @parameterized.expand([(False, False), (False, True),
-                         (True, False), (True, True)])
+  @parameterized.Parameters((False, False), (False, True), (True, False),
+                            (True, True))
   def testInitialState(self, trainable, use_custom_initial_value):
-
     batch_size = 3
     hidden1_size = 4
     hidden2_size = 5

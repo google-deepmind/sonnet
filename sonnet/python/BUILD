@@ -1,5 +1,8 @@
 # Description:
 #   Sonnet: DeepMind abstractions for Neural Networks in TensorFlow.
+load("//sonnet:tensorflow.bzl", "tf_custom_op_library")
+load("//sonnet:tensorflow.bzl", "tf_gen_op_wrapper_py")
+load("//sonnet:tensorflow.bzl", "tf_custom_op_py_library")
 
 licenses(["notice"])  # Apache 2.0 License
 
@@ -14,6 +17,7 @@ py_library(
     ],
     deps = [
         ":util",
+        # Tensorflow dep,
     ],
 )
 
@@ -24,6 +28,7 @@ py_library(
         ":base",
         ":nest",
         ":util",
+        # Tensorflow dep,
     ],
 )
 
@@ -56,6 +61,7 @@ py_library(
         ":base",
         ":basic",
         ":util",
+        # Tensorflow dep,
     ],
 )
 
@@ -63,6 +69,7 @@ py_library(
     name = "util",
     srcs = ["modules/util.py"],
     deps = [
+        # Tensorflow dep,
     ],
 )
 
@@ -70,6 +77,7 @@ py_library(
     name = "nest",
     srcs = ["ops/nest.py"],
     deps = [
+        # Tensorflow dep,
     ],
 )
 
@@ -77,15 +85,8 @@ py_library(
     name = "initializers",
     srcs = ["ops/initializers.py"],
     deps = [
+        # Tensorflow dep,
     ],
-)
-
-py_library(
-    name = "resampler",
-    srcs = [
-        "ops/resampler.py",
-    ],
-    data = [":ops/_resampler.so"],
 )
 
 py_library(
@@ -98,17 +99,42 @@ py_library(
         ":initializers",
         ":nest",
         ":resampler",
+        # Tensorflow dep,
     ],
 )
 
-cc_binary(
+tf_custom_op_py_library(
+    name = "resampler",
+    srcs = ["ops/resampler.py"],
+    dso = [":ops/_resampler.so"],
+    kernels = [
+        "//sonnet/cc/kernels:resampler_op",
+        "//sonnet/cc:resampler_op_lib",
+    ],
+    deps = [
+        ":resampler_py_wrapper",
+    ],
+)
+
+tf_custom_op_library(
     name = "ops/_resampler.so",
-    linkopts = ["-lm"],
-    linkshared = 1,
-    linkstatic = 1,
+    srcs = [
+        "//sonnet/cc:ops/resampler.cc",
+        "//sonnet/cc/kernels:resampler_op.cc",
+        "//sonnet/cc/kernels:resampler_op.h",
+    ],
+    gpu_srcs = [
+        "//sonnet/cc/kernels:resampler_op_gpu.cu.cc",
+    ],
+)
+
+tf_gen_op_wrapper_py(
+    name = "resampler_py_wrapper",
+    out = "ops/gen_resampler.py",
+    hidden = [],
+    require_shape_functions = True,
     deps = [
         "//sonnet/cc:resampler_op_lib",
-        "//sonnet/cc/kernels:resampler_op",
     ],
 )
 
@@ -142,8 +168,8 @@ module_tests = [
     srcs = ["modules/%s%s.py" % (test_subdir, test_name)],
     deps = [
         "//sonnet",
-        # nose_parameterized dep
-        # mock dep
+        "//sonnet/testing/parameterized",
+        # Tensorflow dep,
     ],
 ) for test_name, test_subdir, test_size in module_tests]
 
@@ -157,8 +183,8 @@ py_test(
         "requires-gpu-sm35",
     ],
     deps = [
-        # nose_parameterized dep
         "//sonnet",
+        "//sonnet/testing/parameterized",
     ],
 )
 
@@ -168,7 +194,7 @@ py_test(
     srcs = ["ops/nest_test.py"],
     deps = [
         ":nest",
-        # nose_parameterized dep
+        "//sonnet/testing/parameterized",
     ],
 )
 
@@ -179,8 +205,8 @@ py_test(
     data = ["//sonnet/python/ops/testdata:restore_initializer_test_checkpoint"],
     deps = [
         ":initializers",
-        ":modules",
-        # numpy dep
+        "//sonnet",
+        # Tensorflow dep,
     ],
 )
 
@@ -193,8 +219,7 @@ py_test(
         "requires-gpu-sm35",
     ],
     deps = [
-        # nose_parameterized dep
-        ":resampler",
         "//sonnet",
+        "//sonnet/testing/parameterized",
     ],
 )

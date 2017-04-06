@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
 
 """Tensorflow op performing differentiable resampling."""
 
@@ -24,10 +24,13 @@ import tensorflow as tf
 from tensorflow.python.framework import ops
 
 try:
-  _gen_resampler = tf.load_op_library(
-      tf.resource_loader.get_path_to_datafile("_resampler.so"))
-except tf.errors.NotFoundError:
+  from sonnet.python.ops import gen_resampler as _gen_resampler  # pylint: disable=g-import-not-at-top
+except ImportError:
   _gen_resampler = None
+else:
+  # Link the shared object.
+  _resampler_so = tf.load_op_library(
+      tf.resource_loader.get_path_to_datafile("_resampler.so"))
 
 
 def resampler_is_available():

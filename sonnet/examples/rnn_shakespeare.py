@@ -87,7 +87,7 @@ class TextModel(snt.AbstractModule):
           for i in range(self._lstm_depth)
       ]
       self._core = snt.DeepRNN(self._lstms,
-                               skip_connections=True,
+                               skip_connections=self._use_skip_connections,
                                name="deep_lstm")
 
   def _build(self, one_hot_input_sequence):

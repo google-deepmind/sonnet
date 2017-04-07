@@ -216,7 +216,7 @@ total_regularization_loss = tf.reduce_sum(graph_regularizers)
 # ...
 
 # When minimizing the loss, minimize also the regularization loss.
-train_op = optimizer.minimize(loss + total_regularizer_loss)
+train_op = optimizer.minimize(loss + total_regularization_loss)
 ```
 
 ## Defining your own modules

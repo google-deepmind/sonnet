@@ -1,10 +1,17 @@
 FROM tensorflow/tensorflow
 
-RUN apt-get update && apt-get install -y git curl
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && curl https://bazel.build/bazel-release.pub.gpg | apt-key add - 
+RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
+    curl https://bazel.build/bazel-release.pub.gpg | apt-key add - 
 
-RUN apt-get update && apt-get install -y bazel
+RUN apt-get update && \
+    apt-get install -y bazel && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local
 # https://github.com/deepmind/sonnet/pull/6

@@ -1,4 +1,5 @@
 FROM tensorflow/tensorflow
+
 RUN apt-get update && apt-get install -y git curl
 
 RUN echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && curl https://bazel.build/bazel-release.pub.gpg | apt-key add - 
@@ -19,3 +20,12 @@ RUN ./configure
 WORKDIR /usr/local/sonnet
 
 RUN mkdir /tmp/sonnet && bazel build --config=opt :install && ./bazel-bin/install /tmp/sonnet && pip install /tmp/sonnet/*.whl
+
+# TensorBoard
+EXPOSE 6006
+# IPython
+EXPOSE 8888
+
+WORKDIR "/notebooks"
+
+CMD ["/run_jupyter.sh", "--no-browser"]

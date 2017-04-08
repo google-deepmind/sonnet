@@ -108,7 +108,7 @@ class TextModel(snt.AbstractModule):
 
     batch_embed_module = snt.BatchApply(self._embed_module)
     input_sequence = batch_embed_module(one_hot_input_sequence)
-    input_sequence = tf.nn.relu(input_sequence)
+    input_sequence = tf.nn.relu(input_sequence, name= None)
 
     initial_state = self._core.initial_state(batch_size)
 

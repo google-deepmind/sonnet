@@ -94,6 +94,8 @@ Ensure that you are not importing the cloned source code (i.e. call python
 outside of the cloned repository) and that you have uninstalled Sonnet prior to
 installing the wheel file.
 
+If you'd like to contribute to Sonnet, be sure to review the [contribution guidelines.](https://github.com/deepmind/sonnet/blob/master/CONTRIBUTING.md)
+
 ## Usage Example
 
 The following code constructs a Linear module and connects it to multiple

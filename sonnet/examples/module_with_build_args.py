@@ -72,7 +72,7 @@ def main(unused_argv):
 
   with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for _ in xrange(100):
+    for _ in range(100):
       sess.run(train_step)
     # Check that evaluating train_model_outputs twice returns the same value.
     train_outputs, train_outputs_2 = sess.run([train_model_outputs,

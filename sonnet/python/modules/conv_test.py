@@ -718,7 +718,7 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaises(snt.Error) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=3, mask=mask)
     self.assertEqual(
-        cm.exception.message,
+        str(cm.exception),
         "Invalid mask rank: {}".format(mask.ndim))
 
   def testMaskErrorInvalidType(self):
@@ -728,7 +728,7 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=3, mask=mask)
     self.assertEqual(
-        cm.exception.message, "Invalid type for mask: {}".format(type(mask)))
+        str(cm.exception), "Invalid type for mask: {}".format(type(mask)))
 
   def testMaskErrorIncompatibleRank2(self):
     """Errors are thrown for incompatible rank 2 mask."""
@@ -737,8 +737,8 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     x = tf.constant(0.0, shape=(2, 8, 8, 6))
     with self.assertRaises(snt.Error) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=5, mask=mask)(x)
-    self.assertEqual(
-        cm.exception.message, "Invalid mask shape: {}".format(mask.shape))
+    self.assertTrue(str(cm.exception).startswith(
+        "Invalid mask shape: {}".format(mask.shape)))
 
   def testMaskErrorIncompatibleRank4(self):
     """Errors are thrown for incompatible rank 4 mask."""
@@ -747,8 +747,8 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     x = tf.constant(0.0, shape=(2, 8, 8, 6))
     with self.assertRaises(snt.Error) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=5, mask=mask)(x)
-    self.assertEqual(
-        cm.exception.message, "Invalid mask shape: {}".format(mask.shape))
+    self.assertTrue(str(cm.exception).startswith(
+        "Invalid mask shape: {}".format(mask.shape)))
 
 
 class Conv2DTransposeTest(parameterized.ParameterizedTestCase,

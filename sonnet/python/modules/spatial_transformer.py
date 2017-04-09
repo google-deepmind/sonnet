@@ -23,6 +23,7 @@ from itertools import chain
 
 # Dependency imports
 import numpy as np
+from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 import tensorflow as tf
@@ -419,7 +420,7 @@ class AffineGridWarper(GridWarper):
       index = iter(range(6))
       def get_variable(constraint):
         if constraint is None:
-          i = index.next()
+          i = next(index)
           return inputs[:, i:i+1]
         else:
           return tf.fill(constant_shape, tf.constant(constraint,

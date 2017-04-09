@@ -19,6 +19,8 @@ import collections
 import unittest
 
 # Dependency imports
+import six
+from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.testing import parameterized
 
 from tensorflow.python.platform import googletest
@@ -392,7 +394,9 @@ class ParameterizedTestsTest(googletest.TestCase):
 
     expected_testcases = [1, 2, 3, 4, 5, 6]
     self.assertTrue(hasattr(testSomething, 'testcases'))
-    self.assertItemsEqual(expected_testcases, testSomething.testcases)
+    assertItemsEqual = (self.assertCountEqual if six.PY3
+                        else self.assertItemsEqual)
+    assertItemsEqual(expected_testcases, testSomething.testcases)
 
   def testChainedDecorator(self):
     ts = unittest.makeSuite(self.ChainedTests)

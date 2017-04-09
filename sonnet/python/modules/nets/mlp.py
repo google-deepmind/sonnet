@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import collections
 
+from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import util

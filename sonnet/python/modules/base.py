@@ -39,7 +39,7 @@ class Error(Exception):
   module arity, module is not connected to the graph when it should be,
   tried to wire together incompatible modules, etc.
   """
-
+  print(Exception)
 
 class NotConnectedError(Error):
   """Error raised when operating on a module that has not yet been connected.
@@ -48,7 +48,7 @@ class NotConnectedError(Error):
   been connected into the graph, but some are not. This Error is raised when
   the user attempts to do anything not valid before connection.
   """
-
+  print(Error)
 
 class ParentNotBuiltError(Error):
   """Error raised when the parent of a module has not been built yet.
@@ -57,11 +57,11 @@ class ParentNotBuiltError(Error):
   `module.Transposable`, the parent has to be connected to the graph before the
   child transpose to ensure that shape inference has already occurred.
   """
-
+  print(Error)
 
 class IncompatibleShapeError(Error):
   """Error raised when the shape of the input at build time is incompatible."""
-
+  print(Error)
 
 class UnderspecifiedError(Error):
   """Error raised when too little information is available.
@@ -70,14 +70,14 @@ class UnderspecifiedError(Error):
   work (in which case `IncompatibleShapeError` should be used), just that
   some more information needs to be provided in order to build the Graph.
   """
-
+  print(Error)
 
 class NotSupportedError(Error):
   """Error raised when something that cannot be supported is requested.
 
   For example a Dilated Convolution module cannot be transposed.
   """
-
+  print(Error)
 
 @six.add_metaclass(abc.ABCMeta)
 class AbstractModule(object):

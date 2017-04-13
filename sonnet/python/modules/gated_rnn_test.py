@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import itertools
 
+# Dependency imports
 import numpy as np
 import sonnet as snt
 from sonnet.testing import parameterized
@@ -495,6 +496,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       init.run()
       train_op.run()
 
+  # Regression test.
   def testSideBySide(self):
     hidden_size = 3
     batch_size = 4

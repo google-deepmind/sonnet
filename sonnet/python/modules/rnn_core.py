@@ -26,6 +26,7 @@ from __future__ import print_function
 import abc
 import warnings
 
+# Dependency imports
 
 import six
 from sonnet.python.modules import base

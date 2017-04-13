@@ -21,6 +21,7 @@ from __future__ import print_function
 import abc
 from itertools import chain
 
+# Dependency imports
 import numpy as np
 from sonnet.python.modules import base
 from sonnet.python.modules import basic

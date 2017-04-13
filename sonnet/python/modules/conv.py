@@ -27,6 +27,7 @@ import collections
 import math
 import numbers
 
+# Dependency imports
 
 import numpy as np
 from sonnet.python.modules import base

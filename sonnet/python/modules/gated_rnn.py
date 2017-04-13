@@ -39,6 +39,7 @@ from __future__ import print_function
 
 import collections
 
+# Dependency imports
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
@@ -314,7 +315,7 @@ class LSTM(rnn_core.RNNCore):
     self._create_gate_variables(inputs.get_shape(), inputs.dtype)
     self._create_batch_norm_variables(inputs.dtype)
 
-    # pylint false positive: calling module of same file
+    # pylint false positive: calling module of same file;
     # pylint: disable=not-callable
 
     if self._use_batch_norm_h or self._use_batch_norm_x:

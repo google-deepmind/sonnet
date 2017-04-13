@@ -31,6 +31,7 @@ from __future__ import print_function
 
 import collections
 
+# Dependency imports
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import batch_norm

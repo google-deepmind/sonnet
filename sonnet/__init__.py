@@ -15,7 +15,7 @@
 
 """This python module contains Neural Network Modules for TensorFlow.
 
- In brief, each module is a Python object
+In brief, each module is a Python object
 which conceptually "owns" any variables required in that part of the Neural
 Network. The `__call__` function on the object is used to connect that Module
 into the Graph, and this may be called repeatedly with sharing automatically

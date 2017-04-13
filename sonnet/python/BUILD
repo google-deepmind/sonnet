@@ -17,7 +17,7 @@ py_library(
     ],
     deps = [
         ":util",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -28,7 +28,7 @@ py_library(
         ":base",
         ":nest",
         ":util",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -61,7 +61,7 @@ py_library(
         ":base",
         ":basic",
         ":util",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -69,7 +69,7 @@ py_library(
     name = "util",
     srcs = ["modules/util.py"],
     deps = [
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -77,7 +77,7 @@ py_library(
     name = "nest",
     srcs = ["ops/nest.py"],
     deps = [
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -85,7 +85,7 @@ py_library(
     name = "initializers",
     srcs = ["ops/initializers.py"],
     deps = [
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -99,7 +99,7 @@ py_library(
         ":initializers",
         ":nest",
         ":resampler",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -167,9 +167,10 @@ module_tests = [
     size = test_size,
     srcs = ["modules/%s%s.py" % (test_subdir, test_name)],
     deps = [
+        # mox dep,
         "//sonnet",
         "//sonnet/testing/parameterized",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 ) for test_name, test_subdir, test_size in module_tests]
 
@@ -205,8 +206,9 @@ py_test(
     data = ["//sonnet/python/ops/testdata:restore_initializer_test_checkpoint"],
     deps = [
         ":initializers",
+        # numpy dep,
         "//sonnet",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 

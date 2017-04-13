@@ -221,7 +221,7 @@ train_op = optimizer.minimize(loss + total_regularizer_loss)
 
 ## Defining your own modules
 
-### Inherit from `snt.AbstractModules`
+### Inherit from `snt.AbstractModule`
 
 To define a module, create a new class which inherits from `snt.AbstractModule`.
 The constructor of your class should accept any configuration which defines the
@@ -829,7 +829,7 @@ likely to work correctly.
 
 ### Q: Shouldn't I be overriding \_\_call\_\_ in modules?
 
-A: No. `AbstractModules.__init__` provides an implementation of `__call__`,
+A: No. `AbstractModule.__init__` provides an implementation of `__call__`,
 which calls an internal function wrapped in a Template, which in turn wraps the
 `_build` method. Overriding `__call__` yourself will likely break variable
 sharing.

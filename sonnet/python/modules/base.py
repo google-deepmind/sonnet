@@ -27,6 +27,7 @@ from __future__ import print_function
 import abc
 import collections
 import types
+# Dependency imports
 import six
 from sonnet.python.modules import util
 import tensorflow as tf

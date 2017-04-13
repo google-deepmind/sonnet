@@ -9,7 +9,7 @@ py_library(
         "parameterized.py",
     ],
     deps = [
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 

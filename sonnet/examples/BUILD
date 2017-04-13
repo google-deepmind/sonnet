@@ -25,7 +25,7 @@ py_binary(
     ],
     deps = [
         "//sonnet",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -41,8 +41,9 @@ py_binary(
         "data/ts.valid.txt",
     ],
     deps = [
+        # Tensorflow IO dep,
         "//sonnet",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )
 
@@ -55,7 +56,8 @@ py_test(
         "rnn_shakespeare_test.py",
     ],
     deps = [
+        # Tensorflow IO dep,
         "//sonnet",
-        # Tensorflow dep,
+        # tensorflow dep,
     ],
 )

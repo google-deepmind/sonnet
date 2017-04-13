@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import itertools
 
+# Dependency imports
 import sonnet as snt
 from sonnet.testing import parameterized
 import tensorflow as tf

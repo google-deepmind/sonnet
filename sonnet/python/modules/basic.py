@@ -24,6 +24,7 @@ from __future__ import print_function
 import math
 import numbers
 
+# Dependency imports
 
 import numpy as np
 from sonnet.python.modules import base

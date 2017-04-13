@@ -19,6 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+# Dependency imports
 import numpy as np
 from sonnet.python.modules import basic_rnn
 from sonnet.python.modules import gated_rnn

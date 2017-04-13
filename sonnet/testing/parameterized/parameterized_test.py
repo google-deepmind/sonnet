@@ -18,6 +18,7 @@
 import collections
 import unittest
 
+# Dependency imports
 from sonnet.testing import parameterized
 
 from tensorflow.python.platform import googletest

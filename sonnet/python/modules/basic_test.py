@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import collections
 
+# Dependency imports
 
 import numpy as np
 import sonnet as snt
@@ -348,7 +349,7 @@ class LinearTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     The test exists because while one may expect tf.matmul(X, w) + b to be
     equivalent to tf.nn.xw_plus_b(X, w, b), with the latter this placement
-    results in an InvalidArgumentError. 
+    results in an InvalidArgumentError.
 
     Warning: if there is no gpu available to tensorflow this test will be
     skipped with just a warning! This is because the test requires that

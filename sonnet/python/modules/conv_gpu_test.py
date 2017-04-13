@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import functools
 
+# Dependency imports
 import numpy as np
 import sonnet as snt
 from sonnet.testing import parameterized

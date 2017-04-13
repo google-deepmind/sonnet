@@ -22,6 +22,7 @@ from __future__ import print_function
 import itertools
 import random
 
+# Dependency imports
 import numpy as np
 import sonnet as snt
 from sonnet.python.modules import conv

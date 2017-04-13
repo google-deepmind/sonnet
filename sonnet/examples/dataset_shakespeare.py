@@ -22,6 +22,7 @@ from __future__ import print_function
 import collections
 import os
 
+# Dependency imports
 import numpy as np
 import sonnet as snt
 import tensorflow as tf

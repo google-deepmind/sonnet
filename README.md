@@ -558,8 +558,8 @@ class NaiveAutoEncoder(snt.AbstractModule):
   @snt.experimental.reuse_vars
   def decode(self, latents):
     """Builds the back half of AutoEncoder, latents -> reconstruction."""
-    w_rec = tf.get_variable("w_rec", shape=[self._n_latent, self._n_out])
-    b_rec = tf.get_variable("b_rec", shape=[self._n_out])
+    w_rec = tf.get_variable("w_dec", shape=[self._n_latent, self._n_out])
+    b_rec = tf.get_variable("b_dec", shape=[self._n_out])
     return tf.sigmoid(tf.matmul(latents, w_rec) + b_rec)
 
   def _build(self, input):
@@ -584,8 +584,8 @@ reconstructed_from_input = nae(inputs)
 reconstructed_from_latent = nae.decode(latents)
 ```
 
-In the above example, any variables created by `obj.a()`, `obj.add_with_ab()` or
-`obj.build()` exist in the same `tf.VariableScope`. In addition, since each
+In the above example, any variables created by `nae.encode()`, `nae.decode()`
+or `nae()` exist in the same `tf.VariableScope`. In addition, since each
 decorated method has its own `reuse` flag we don't need to worry about having to
 create all variables on the first method call, or about the calling order at
 all. We can even nest (decorated) methods within other (decorated) methods - the
@@ -593,9 +593,10 @@ all. We can even nest (decorated) methods within other (decorated) methods - the
 every method call.
 
 However every decorated method must be the *sole* owner of its variables. For
-example, if we use `tf.get_variable("a", ...)` inside `obj.build()`, this will
-*not* do variable sharing. Instead, TensorFlow will treat
-`tf.get_variable("a", ...)` in `obj.a()` and `obj.build()` as separate variables
+example, if we use `tf.get_variable("w_dec", ...)` inside
+`NaiveAutoEncoder.encode`, this will *not* do variable sharing. Instead,
+TensorFlow will treat `tf.get_variable("w_dec", ...)` in
+`NaiveAutoEncoder.enodec` and `NaiveAutoEncoder.decode()` as separate variables
 and an error will occur in either`obj.a()` or `obj.build()` (whichever is
 called second).
 

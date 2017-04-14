@@ -249,8 +249,8 @@ struct ResamplerGrad2DFunctor<CPUDevice, T>{
     memset(grad_data, 0, sizeof(T) * grad_data_size);
     memset(grad_warp, 0, sizeof(T) * grad_warp_size);
 
-    const int data_batch_stride = data_height * data_width * data_channels;
-    const int warp_batch_stride = num_sampling_points * 2;
+    int data_batch_stride = data_height * data_width * data_channels;
+    int warp_batch_stride = num_sampling_points * 2;
     const int output_batch_stride = num_sampling_points * data_channels;
     const T zero = static_cast<T>(0.0);
     const T one = static_cast<T>(1.0);

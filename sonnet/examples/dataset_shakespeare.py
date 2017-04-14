@@ -85,7 +85,8 @@ class TinyShakespeareDataset(snt.AbstractModule):
   TRAIN = "train"
   VALID = "valid"
   TEST = "test"
-  _RESOURCE_ROOT = "/cns/wj-d/home/deepmind/sequence_data/ts/"
+  _RESOURCE_ROOT = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "data")
 
   def __init__(self, num_steps=1, batch_size=1,
                subset="train", random=False, dtype=tf.float32,

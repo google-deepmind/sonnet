@@ -13,7 +13,7 @@
 # limitations under the License.
 # ============================================================================
 
-"""Tests for snt.nets.alexnet."""
+"""Tests for sonnet.python.modules.batch_norm."""
 
 from __future__ import absolute_import
 from __future__ import division

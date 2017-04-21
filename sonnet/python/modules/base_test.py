@@ -22,6 +22,7 @@ from __future__ import print_function
 from functools import partial
 
 import numpy as np
+import six
 from sonnet.python.modules import base
 import tensorflow as tf
 
@@ -62,8 +63,10 @@ class AbstractModuleTest(tf.test.TestCase):
     self.assertEqual(keys, {"foo", "bar"})
     keys = ModuleWithNoInitializerKeys.get_possible_initializer_keys()
     self.assertEqual(keys, set())
+    msg = ("missing 1 required positional argument" if six.PY3
+           else "takes exactly 2 arguments")
     self.assertRaisesRegexp(
-        TypeError, "takes exactly 2 arguments",
+        TypeError, msg,
         ModuleWithCustomInitializerKeys.get_possible_initializer_keys)
     keys = ModuleWithCustomInitializerKeys.get_possible_initializer_keys(True)
     self.assertEqual(keys, {"foo"})
@@ -146,7 +149,7 @@ class ModuleTest(tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       base.Module(build="not_a_function")
 
-    self.assertEqual(cm.exception.message, "Input 'build' must be callable.")
+    self.assertEqual(str(cm.exception), "Input 'build' must be callable.")
 
   def testSharing(self):
     batch_size = 3

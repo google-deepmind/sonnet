@@ -290,7 +290,7 @@ def map(fn_or_op, *inputs):  # pylint: disable=redefined-builtin
 def _sorted(dict_):
   """Returns a sorted list from the dict, with error if keys not sortable."""
   try:
-    return sorted(dict_.iterkeys())
+    return sorted(six.iterkeys(dict_))
   except TypeError:
     raise TypeError("nest only supports dicts with sortable keys.")
 
@@ -307,7 +307,7 @@ def _iterable_like(instance, args):
     `args` with the type of `instance`.
   """
   if isinstance(instance, collections.OrderedDict):
-    return collections.OrderedDict(zip(instance.iterkeys(), args))
+    return collections.OrderedDict(zip(six.iterkeys(instance), args))
   elif isinstance(instance, dict):
     return dict(zip(_sorted(instance), args))
   elif (isinstance(instance, tuple) and

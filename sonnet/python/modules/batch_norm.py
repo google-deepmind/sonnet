@@ -306,7 +306,7 @@ class BatchNorm(base.AbstractModule):
       # Reduce over the second dimension.
       return "NCHW"
     else:
-      raise ValueError("Invalid axis option {:s}. This does not correspond to"
+      raise ValueError("Invalid axis option {}. This does not correspond to"
                        " either the NHWC format (0, 1, 2) or the NCHW "
                        "(0, 2, 3).".format(axis))
 
@@ -439,23 +439,23 @@ class BatchNorm(base.AbstractModule):
     if self._axis is not None:
       if len(self._axis) > len(input_shape):
         raise base.IncompatibleShapeError(
-            "Too many indices specified in axis: len({:s}) > len({:s}).".format(
+            "Too many indices specified in axis: len({}) > len({}).".format(
                 self._axis, input_shape))
 
       if max(self._axis) >= len(input_shape):
         raise base.IncompatibleShapeError(
             "One or more index in axis is too large for "
-            "input shape: {:s} >= {:d}.".format(self._axis, len(input_shape)))
+            "input shape: {} >= {:d}.".format(self._axis, len(input_shape)))
 
       if min(self._axis) < 0:
         raise base.IncompatibleShapeError(
-            "Indices in axis must be non-negative: {:s} < 0.".format(
+            "Indices in axis must be non-negative: {} < 0.".format(
                 self._axis))
 
       axis = self._axis
     else:
       # Reduce over all dimensions except the last.
-      axis = range(len(input_shape))[:-1]
+      axis = tuple(range(len(input_shape))[:-1])
 
     # See following for important note on accuracy for dtype=tf.float16
     # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/nn_impl.py#L63

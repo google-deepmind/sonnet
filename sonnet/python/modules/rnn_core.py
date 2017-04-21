@@ -29,6 +29,7 @@ import warnings
 # Dependency imports
 
 import six
+from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 import tensorflow as tf

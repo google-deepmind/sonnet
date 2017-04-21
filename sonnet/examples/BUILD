@@ -51,13 +51,9 @@ py_test(
     name = "rnn_shakespeare_test",
     size = "large",
     srcs = [
-        "dataset_shakespeare.py",
-        "rnn_shakespeare.py",
         "rnn_shakespeare_test.py",
     ],
     deps = [
-        # Tensorflow IO dep,
-        "//sonnet",
-        # tensorflow dep,
+        ":rnn_shakespeare",
     ],
 )

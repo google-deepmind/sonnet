@@ -23,8 +23,9 @@ tf_kernel_library(
     name = "resampler_op",
     prefix = "resampler_op",
     deps = [
-        "//third_party/tensorflow/core:framework",
-        "//third_party/tensorflow/core:lib",
+        "@org_tensorflow//tensorflow/core:framework_headers_lib",
+        "@org_tensorflow//third_party/eigen3",
+        "@protobuf//:protobuf_headers",
     ],
     alwayslink = 1,
 )

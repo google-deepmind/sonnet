@@ -26,9 +26,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local
-# https://github.com/deepmind/sonnet/pull/6
-# RUN git clone --recursive https://github.com/deepmind/sonnet
-RUN git clone --recursive https://github.com/roman3017/sonnet.git
+RUN git clone --recursive https://github.com/deepmind/sonnet
 
 WORKDIR /usr/local/sonnet/tensorflow
 

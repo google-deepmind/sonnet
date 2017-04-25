@@ -12,6 +12,7 @@ py_library(
     srcs = [
         "__init__.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         ":module_with_build_args",
         ":rnn_shakespeare",
@@ -23,6 +24,7 @@ py_binary(
     srcs = [
         "module_with_build_args.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         "//sonnet",
         # tensorflow dep,
@@ -40,6 +42,7 @@ py_binary(
         "data/ts.train.txt",
         "data/ts.valid.txt",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         # Tensorflow IO dep,
         "//sonnet",

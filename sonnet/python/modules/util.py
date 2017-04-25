@@ -28,7 +28,7 @@ def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   """Returns a tuple `tf.Variable`s in a scope for a given collection.
 
   Args:
-    scope: `tf.VariableScope` instance to retrieve variables from.
+    scope: `tf.VariableScope` or string to retrieve variables from.
     collection: Collection to restrict query to. By default this is
         `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
         variables such as moving averages.
@@ -36,9 +36,12 @@ def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   Returns:
     A tuple of `tf.Variable` objects.
   """
+  if isinstance(scope, tf.VariableScope):
+    scope = scope.name
+
   # Escape the name in case it contains any "." characters. Add a closing slash
   # so we will not search any scopes that have this scope name as a prefix.
-  scope_name = re.escape(scope.name) + "/"
+  scope_name = re.escape(scope) + "/"
 
   return tuple(tf.get_collection(collection, scope_name))
 

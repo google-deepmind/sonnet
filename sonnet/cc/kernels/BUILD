@@ -25,7 +25,7 @@ tf_kernel_library(
     deps = [
         "@org_tensorflow//tensorflow/core:framework_headers_lib",
         "@org_tensorflow//third_party/eigen3",
-        "@protobuf//:protobuf_headers",
+        "@protobuf//:protobuf",
     ],
     alwayslink = 1,
 )

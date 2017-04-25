@@ -15,6 +15,7 @@ py_library(
     srcs = [
         "modules/base.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         ":util",
         # tensorflow dep,
@@ -24,6 +25,7 @@ py_library(
 py_library(
     name = "basic",
     srcs = ["modules/basic.py"],
+    srcs_version = "PY2AND3",
     deps = [
         ":base",
         ":nest",
@@ -57,6 +59,7 @@ py_library(
         "modules/sequential.py",
         "modules/spatial_transformer.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         ":base",
         ":basic",
@@ -68,6 +71,7 @@ py_library(
 py_library(
     name = "util",
     srcs = ["modules/util.py"],
+    srcs_version = "PY2AND3",
     deps = [
         # tensorflow dep,
     ],
@@ -76,6 +80,7 @@ py_library(
 py_library(
     name = "nest",
     srcs = ["ops/nest.py"],
+    srcs_version = "PY2AND3",
     deps = [
         # tensorflow dep,
     ],
@@ -84,6 +89,7 @@ py_library(
 py_library(
     name = "initializers",
     srcs = ["ops/initializers.py"],
+    srcs_version = "PY2AND3",
     deps = [
         # tensorflow dep,
     ],
@@ -95,6 +101,7 @@ py_library(
         "__init__.py",
         "ops/__init__.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         ":initializers",
         ":nest",
@@ -178,6 +185,7 @@ py_test(
     name = "conv_gpu_test",
     size = "small",
     srcs = ["modules/conv_gpu_test.py"],
+    srcs_version = "PY2AND3",
     tags = [
         "nomsan",  # Relies on the precompiled library libcuda, which is incompatible with MSan.
         "notap",
@@ -193,6 +201,7 @@ py_test(
     name = "nest_test",
     size = "small",
     srcs = ["ops/nest_test.py"],
+    srcs_version = "PY2AND3",
     deps = [
         ":nest",
         "//sonnet/testing/parameterized",
@@ -204,6 +213,7 @@ py_test(
     size = "small",
     srcs = ["ops/initializers_test.py"],
     data = ["//sonnet/python/ops/testdata:restore_initializer_test_checkpoint"],
+    srcs_version = "PY2AND3",
     deps = [
         ":initializers",
         # numpy dep,
@@ -216,6 +226,7 @@ py_test(
     name = "resampler_test",
     size = "small",
     srcs = ["ops/resampler_test.py"],
+    srcs_version = "PY2AND3",
     tags = [
         "nomsan",  # Relies on the precompiled library libcuda, which is incompatible with MSan.
         "requires-gpu-sm35",

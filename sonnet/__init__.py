@@ -79,6 +79,7 @@ from sonnet.python.modules.gated_rnn import Conv1DLSTM
 from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU
 from sonnet.python.modules.gated_rnn import LSTM
+from sonnet.python.modules.layer_norm import LayerNorm
 from sonnet.python.modules.pondering_rnn import ACTCore
 from sonnet.python.modules.rnn_core import RNNCore
 from sonnet.python.modules.rnn_core import TrainableInitialState

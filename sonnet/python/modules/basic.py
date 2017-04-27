@@ -279,6 +279,40 @@ class Linear(base.AbstractModule, base.Transposable):
     """Returns `True` if bias Variable is present in the module."""
     return self._use_bias
 
+  @property
+  def initializers(self):
+    """Returns the initializers dictionary."""
+    return self._initializers
+
+  @property
+  def partitioners(self):
+    """Returns the partitioners dictionary."""
+    return self._partitioners
+
+  @property
+  def regularizers(self):
+    """Returns the regularizers dictionary."""
+    return self._regularizers
+
+  def clone(self, name=None):
+    """Returns a cloned `Linear` module.
+
+    Args:
+      name: Optional string assigning name of cloned module. The default name
+          is constructed by appending "_clone" to `self.module_name`.
+
+    Returns:
+      Cloned `Linear` module.
+    """
+    if name is None:
+      name = self.module_name + "_clone"
+    return Linear(output_size=self.output_size,
+                  use_bias=self._use_bias,
+                  initializers=self._initializers,
+                  partitioners=self._partitioners,
+                  regularizers=self._regularizers,
+                  name=name)
+
   # Implements Transposable interface.
   @property
   def input_shape(self):

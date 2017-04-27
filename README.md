@@ -242,7 +242,7 @@ class MyMLP(snt.AbstractModule):
   def __init__(self, hidden_size, output_size,
                nonlinearity=tf.tanh, name="my_mlp"):
     """Docstring explaining __init__ args, including types and defaults."""
-    super(MyMLP, self).__init__(name)
+    super(MyMLP, self).__init__(name=name)
     self._hidden_size = hidden_size
     self._output_size = output_size
     self._nonlinearity = nonlinearity
@@ -301,7 +301,7 @@ different, unshared variables. This is not the case - only 4 variables (2 for
 each `Linear`) will be created, no matter how many times the MLP instance is
 connected into the graph. How this is works is a low level TF detail, and
 subject to change - see
-[tf.variable_op_scope]
+tf.variable_op_scope
 for details.
 
 ### Where should the submodules be declared?
@@ -376,7 +376,7 @@ which is completely disjoint from the `"wrong_module"` namespace.
 
 Sonnet includes recurrent core modules (also called "cells" in TensorFlow
 terminology), which perform one time step of computation. These are ready to
-be unrolled in time using TensorFlow's [unrolling operations]
+be unrolled in time using TensorFlow's unrolling operations.
 
 One example of an LSTM that is unrolled in time is the following:
 
@@ -396,13 +396,13 @@ The `batch_size` parameter passed to the `initial_state()` method can also be an
 `int32` Tensor.
 
 For a more comprehensive demonstration on the usage of recurrent modules, a
-fully-documented [example of a deep LSTM with skip connections trained on PTB]
+fully-documented example of a deep LSTM with skip connections trained on PTB
 is available.
 
 #### Defining your own recurrent modules
 
 A recurrent module is any subclass of
-[`snt.RNNCore`]
+`snt.RNNCore`,
 which is inherits from both `snt.AbstractModule` and `tf.RNNCell`. This
 unorthodox choice of multiple inheritance allows us to use the variable sharing
 model from Sonnet, but also use the cores inside TensorFlow's RNN Containers.
@@ -508,7 +508,7 @@ transposed modules to be instantiated _before_ the original module is connected
 to the graph. An example of this behavior can be found in `snt.Linear`,
 where the `output_size` argument of the transposed module is defined as a
 `lambda` returning the `input_shape` property of the original module;
-upon evaluation`input_shape` will raise an error unless the module has not been
+upon evaluation `input_shape` will raise an error unless the module has not been
 connected to the graph, but this is not an issue since the `lambda` is not
 called until the transposed module is connected to the graph.
 
@@ -544,22 +544,22 @@ a2 = obj.reusable_var()
 
 class NaiveAutoEncoder(snt.AbstractModule):
   def __init__(self, n_latent, n_out, name="naive_auto_encoder"):
-    super(NaiveAutoEncoder, self).__init__(name)
+    super(NaiveAutoEncoder, self).__init__(name=name)
     self._n_latent = n_latent
     self._n_out = n_out
 
-  @experimental.reuse_vars
+  @snt.experimental.reuse_vars
   def encode(self, input):
     """Builds the front half of AutoEncoder, inputs -> latents."""
     w_enc = tf.get_variable("w_enc", shape=[self._n_out, self._n_latent])
     b_enc = tf.get_variable("b_enc", shape=[self._n_latent])
     return tf.sigmoid(tf.matmul(input, w_enc) + b_enc)
 
-  @experimental.reuse_vars
+  @snt.experimental.reuse_vars
   def decode(self, latents):
     """Builds the back half of AutoEncoder, latents -> reconstruction."""
-    w_rec = tf.get_variable("w_rec", shape=[self._n_latent, self._n_out])
-    b_rec = tf.get_variable("b_rec", shape=[self._n_out])
+    w_rec = tf.get_variable("w_dec", shape=[self._n_latent, self._n_out])
+    b_rec = tf.get_variable("b_dec", shape=[self._n_out])
     return tf.sigmoid(tf.matmul(latents, w_rec) + b_rec)
 
   def _build(self, input):
@@ -584,8 +584,8 @@ reconstructed_from_input = nae(inputs)
 reconstructed_from_latent = nae.decode(latents)
 ```
 
-In the above example, any variables created by `obj.a()`, `obj.add_with_ab()` or
-`obj.build()` exist in the same `tf.VariableScope`. In addition, since each
+In the above example, any variables created by `nae.encode()`, `nae.decode()`
+or `nae()` exist in the same `tf.VariableScope`. In addition, since each
 decorated method has its own `reuse` flag we don't need to worry about having to
 create all variables on the first method call, or about the calling order at
 all. We can even nest (decorated) methods within other (decorated) methods - the
@@ -593,9 +593,10 @@ all. We can even nest (decorated) methods within other (decorated) methods - the
 every method call.
 
 However every decorated method must be the *sole* owner of its variables. For
-example, if we use `tf.get_variable("a", ...)` inside `obj.build()`, this will
-*not* do variable sharing. Instead, TensorFlow will treat
-`tf.get_variable("a", ...)` in `obj.a()` and `obj.build()` as separate variables
+example, if we use `tf.get_variable("w_dec", ...)` inside
+`NaiveAutoEncoder.encode`, this will *not* do variable sharing. Instead,
+TensorFlow will treat `tf.get_variable("w_dec", ...)` in
+`NaiveAutoEncoder.enodec` and `NaiveAutoEncoder.decode()` as separate variables
 and an error will occur in either`obj.a()` or `obj.build()` (whichever is
 called second).
 
@@ -731,7 +732,7 @@ desirable to implement it with a Module instead of an Op.
 
 Aside from variable sharing, it may be convenient to use Sonnet Modules in cases
 where we wish to attach configuration parameters to an op. An example of this is
-the [content addressing](
+the content addressing
 modules in the Differentiable Neural Computer.
 These modules receive a number of configuration parameters
 (size of each word in memory, number of read heads) and some function of these

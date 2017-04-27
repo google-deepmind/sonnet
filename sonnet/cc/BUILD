@@ -4,6 +4,11 @@ exports_files(["LICENSE"])
 
 package(default_visibility = ["//visibility:public"])
 
+load(
+    "//sonnet:tensorflow.bzl",
+    "tf_gen_op_libs",
+)
+
 cc_library(
     name = "ops",
     deps = [
@@ -12,15 +17,8 @@ cc_library(
     alwayslink = 1,
 )
 
-cc_library(
-    name = "resampler_op_lib",
-    srcs = ["ops/resampler.cc"],
-    linkstatic = 1,
-    visibility = ["//visibility:public"],
-    deps = [
-        "@org_tensorflow//tensorflow/core:framework_headers_lib",
-        "@org_tensorflow//third_party/eigen3",
-        "@protobuf//:protobuf_headers",
+tf_gen_op_libs(
+    op_lib_names = [
+        "resampler",
     ],
-    alwayslink = 1,
 )

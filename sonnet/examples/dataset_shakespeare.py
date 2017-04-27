@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Classes to load textual data from Shakespeare's plays."""
 
 from __future__ import absolute_import
@@ -21,6 +22,7 @@ from __future__ import print_function
 import collections
 import os
 
+# Dependency imports
 import numpy as np
 import sonnet as snt
 import tensorflow as tf
@@ -111,6 +113,7 @@ class TinyShakespeareDataset(snt.AbstractModule):
     super(TinyShakespeareDataset, self).__init__(name=name)
 
     # Generate vocab from train set.
+
     self._vocab_file = gfile.Open(
         os.path.join(self._RESOURCE_ROOT, "ts.train.txt"))
     self._data_file = gfile.Open(
@@ -231,3 +234,4 @@ class TinyShakespeareDataset(snt.AbstractModule):
       prefix = "b_{}: ".format(b) if label_batch_entries else ""
       result.append(prefix + self._data_source.decode(index_seq))
     return sep.join(result)
+

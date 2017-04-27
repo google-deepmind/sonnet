@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Module for experimental sonnet functions and classes.
 
 This file contains functions and classes that are being tested until they're
@@ -26,33 +27,44 @@ import inspect
 import weakref
 import tensorflow as tf
 
+from tensorflow.python.ops import variable_scope as variable_scope_ops
+
 
 def reuse_vars(method):
   """Wraps an arbitrary method so it does variable sharing.
 
-  The wrapper creates variables the first time it calls `method` for a given
-  `(tf.Graph, tf.VariableScope)` pair and reuses them for subsequent calls
-  (provided they use the same variable scope). These variables are created in
-  the context of a variable scope provided to the wrapper as an instance
-  attribute.
+  This decorator creates variables the first time it calls `method`, and reuses
+  them for subsequent calls. The object that calls `method` provides a
+  `tf.VariableScope`, either as a `variable_scope` attribute or as the return
+  value of an `_enter_variable_scope()` method.
 
-  The variables defined in two wrapped method calls are shared if
-  and only if all of the following hold:
+  The first time the wrapped method is invoked, it enters the caller's
+  `tf.VariableScope` with `reuse=False`. On all subsequent calls it enters the
+  same variable scope with `reuse=True`.
 
-  1. They refer to the same method.
-  2. The two calls use the same variable scope.
-  3. All the ops in `method` live in the same `tf.Graph`, which is set as the
-     default graph.
+  Variables are created in the context of the `tf.VariableScope` provided by the
+  caller object. Ops are created with an additional `tf.name_scope()`, which
+  adds a scope for the wrapped method name. For example:
 
-  The variable scope can be provided either as a keyword argument
-  `variable_scope` or as an instance attribute. These two options are mutually
-  exclusive.
+  ```python
+  class MyModule(object):
 
-  To use an instance attribute as a variable scope the following must be true:
+    def __init__(self, name):
+      with tf.variable_scope(name) as variable_scope:
+        self.variable_scope = variable_scope
 
-  1. `method` is an instance method.
-  2. The calling instance has an attribute `variable_scope` of type
-     `tf.VariableScope`.
+    @snt.experimental.reuse_vars
+    def add_x(self, tensor):
+      x = tf.get_variable("x", shape=tensor.get_shape())
+      return tensor + x
+
+  module = MyModule("my_module_name")
+  input_tensor = tf.zeros(shape=(5,))
+
+  # This creates the variable "my_module_name/x:0"
+  # and op "my_module_name/add_x/add:0"
+  output = module.add_x(input_tensor)
+  ```
 
   Args:
     method: The method to wrap.
@@ -60,7 +72,7 @@ def reuse_vars(method):
   Returns:
     The wrapped method.
   """
-  initialized = weakref.WeakSet()
+  initialized_variable_scopes = weakref.WeakKeyDictionary()
 
   # Ensure that the argument passed in is really a method by checking that the
   # first positional argument to it is "self".
@@ -76,10 +88,10 @@ def reuse_vars(method):
 
     The first time the wrapper is called it creates a
     `(tf.Graph, tf.VariableScope)` key and checks it for membership in
-    `initialized`. The check is `False` if and only if this is the first time
-    the wrapper has been called with the key, otherwise the check is `True`. The
-    result of this check is used as the `reuse` flag for entering the provided
-    variable scope before calling `method`.
+    `initialized_variable_scopes`. The check is `False` if and only if this is
+    the first time the wrapper has been called with the key, otherwise the
+    check is `True`. The result of this check is used as the `reuse` flag for
+    entering the provided variable scope before calling `method`.
 
     Here are two examples of how to use the reuse_vars decorator.
 
@@ -147,14 +159,29 @@ def reuse_vars(method):
     variable_scope_context_manager = getattr(obj, "_enter_variable_scope",
                                              default_context_manager)
 
-    initialized_key = obj
+    graph = tf.get_default_graph()
+    if graph not in initialized_variable_scopes:
+      initialized_variable_scopes[graph] = set([])
+    initialized_variable_scopes_for_graph = initialized_variable_scopes[graph]
 
-    reuse = initialized_key in initialized
+    # Temporarily enter the variable scope to capture it
+    with variable_scope_context_manager() as tmp_variable_scope:
+      variable_scope = tmp_variable_scope
 
-    with variable_scope_context_manager(reuse=reuse):
-      with tf.name_scope(method.__name__):
-        out_ops = method(*args, **kwargs)
-        initialized.add(initialized_key)
-        return out_ops
+    reuse = variable_scope.name in initialized_variable_scopes_for_graph
+
+    # Enter the pure variable scope with reuse correctly set
+    with variable_scope_ops._pure_variable_scope(  # pylint:disable=protected-access
+        variable_scope, reuse=reuse) as pure_variable_scope:
+      # Force tf.name_scope to treat variable_scope.original_name_scope as
+      # an "absolute" scope name so we can re-enter it.
+      name_scope = variable_scope.original_name_scope
+      if name_scope[-1] != "/":
+        name_scope += "/"
+      with tf.name_scope(name_scope):
+        with tf.name_scope(method.__name__):
+          out_ops = method(*args, **kwargs)
+          initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
+          return out_ops
 
   return wrapper

@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """"Implementation of Spatial Transformer networks core components."""
 from __future__ import absolute_import
 from __future__ import division
@@ -20,6 +21,7 @@ from __future__ import print_function
 import abc
 from itertools import chain
 
+# Dependency imports
 import numpy as np
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
@@ -62,7 +64,7 @@ class GridWarper(base.AbstractModule):
       Error: If `len(output_shape) > len(source_shape)`.
       TypeError: If `output_shape` and `source_shape` are not both iterable.
     """
-    super(GridWarper, self).__init__(name)
+    super(GridWarper, self).__init__(name=name)
 
     self._source_shape = tuple(source_shape)
     self._output_shape = tuple(output_shape)
@@ -446,6 +448,7 @@ class AffineGridWarper(GridWarper):
 
       agw = AffineGridWarper(self.output_shape,
                              self.source_shape)
+
 
       return agw(inverse_gw_inputs)  # pylint: disable=not-callable
 

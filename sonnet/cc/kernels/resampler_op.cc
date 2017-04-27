@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // =============================================================================
+
 #define EIGEN_USE_THREADS
 
 #include "sonnet/cc/kernels/resampler_op.h"
@@ -210,6 +211,18 @@ TF_CALL_float(REGISTER);
 TF_CALL_double(REGISTER);
 #undef REGISTER
 
+#if GOOGLE_CUDA
+#define REGISTER(TYPE)                                           \
+  REGISTER_KERNEL_BUILDER(Name("Resampler")                      \
+                              .Device(::tensorflow::DEVICE_GPU)  \
+                              .TypeConstraint<TYPE>("T"),        \
+                          ResamplerOp<GPUDevice, TYPE>)
+TF_CALL_float(REGISTER);
+TF_CALL_double(REGISTER);
+#undef REGISTER
+#endif  // GOOGLE_CUDA
+
+
 namespace functor {
 
 template <typename T>
@@ -236,8 +249,8 @@ struct ResamplerGrad2DFunctor<CPUDevice, T>{
     memset(grad_data, 0, sizeof(T) * grad_data_size);
     memset(grad_warp, 0, sizeof(T) * grad_warp_size);
 
-    const int data_batch_stride = data_height * data_width * data_channels;
-    const int warp_batch_stride = num_sampling_points * 2;
+    const auto&& data_batch_stride = data_height * data_width * data_channels;
+    const auto&& warp_batch_stride = num_sampling_points * 2;
     const int output_batch_stride = num_sampling_points * data_channels;
     const T zero = static_cast<T>(0.0);
     const T one = static_cast<T>(1.0);
@@ -341,6 +354,7 @@ struct ResamplerGrad2DFunctor<CPUDevice, T>{
     // estimate of the cost of each work unit is needed to correctly shard the
     // workload. Shard assumes each cost unit is 1ns, minimum cost per shard
     // being 10us.
+
     auto worker_threads = *(ctx->device()->tensorflow_cpu_worker_threads());
     const long long cost =  static_cast<long long>(num_sampling_points) *
         data_channels * 1000;
@@ -436,7 +450,19 @@ TF_CALL_float(REGISTER);
 TF_CALL_double(REGISTER);
 #undef REGISTER
 
+#if GOOGLE_CUDA
+#define REGISTER(TYPE)                                           \
+  REGISTER_KERNEL_BUILDER(Name("ResamplerGrad")                  \
+                              .Device(::tensorflow::DEVICE_GPU)  \
+                              .TypeConstraint<TYPE>("T"),        \
+                          ResamplerGradOp<GPUDevice, TYPE>)
+// Disable half and double precision since atomicAdds are not supported
+// TF_CALL_half(REGISTER);
+// TF_CALL_double(REGISTER);
+TF_CALL_float(REGISTER);
 
+#undef REGISTER
+#endif  // GOOGLE_CUDA
 
 }  // namespace sonnet
 }  // namespace tensorflow

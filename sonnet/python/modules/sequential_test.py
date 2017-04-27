@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
+# ============================================================================
+
 """Tests for sonnet.python.modules.nn."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+# Dependency imports
 import sonnet as snt
 import tensorflow as tf
 
@@ -77,6 +79,15 @@ class SequentialTest(tf.test.TestCase):
     with self.assertRaisesRegexp(TypeError,
                                  "'NoneType' object is not iterable"):
       snt.Sequential(None)
+
+  def testNameScopeRecording(self):
+    lin = snt.Linear(output_size=256)
+    sequential = snt.Sequential([lin])
+
+    with tf.name_scope("blah"):
+      sequential(tf.placeholder(dtype=tf.float32, shape=[2, 3]))
+    self.assertEqual(sequential.name_scopes, ("blah/sequential",))
+    self.assertEqual(lin.name_scopes, ("blah/sequential/linear",))
 
 
 if __name__ == "__main__":

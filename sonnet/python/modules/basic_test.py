@@ -305,9 +305,15 @@ class LinearTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     clone2(inputs)
 
     all_vars = tf.trainable_variables()
-    linear_vars = linear.variable_scope.trainable_variables()
-    clone1_vars = clone1.variable_scope.trainable_variables()
-    clone2_vars = clone2.variable_scope.trainable_variables()
+    linear_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=linear.variable_scope.name + "/")
+    clone1_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone1.variable_scope.name + "/")
+    clone2_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(linear.output_size, clone1.output_size)
     self.assertEqual(linear.module_name + "_clone", clone1.module_name)

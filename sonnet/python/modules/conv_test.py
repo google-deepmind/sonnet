@@ -657,9 +657,15 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     clone2_out = clone2(input_to_net)
 
     all_vars = tf.trainable_variables()
-    net_vars = net.variable_scope.trainable_variables()
-    clone1_vars = clone1.variable_scope.trainable_variables()
-    clone2_vars = clone2.variable_scope.trainable_variables()
+    net_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=net.variable_scope.name + "/")
+    clone1_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone1.variable_scope.name + "/")
+    clone2_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(net.output_channels, clone1.output_channels)
     self.assertEqual(net.module_name + "_clone", clone1.module_name)
@@ -2729,4 +2735,3 @@ class Conv3DTransposeTest(parameterized.ParameterizedTestCase,
 
 if __name__ == "__main__":
   tf.test.main()
-

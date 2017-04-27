@@ -643,6 +643,35 @@ class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
       self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
 
+  def testClone(self):
+    net = snt.Conv2D(name="conv2d",
+                     output_channels=4,
+                     kernel_shape=3,
+                     stride=5)
+    clone1 = net.clone()
+    clone2 = net.clone(name="clone2")
+
+    input_to_net = tf.placeholder(tf.float32, shape=[None, 100, 100, 3])
+    net_out = net(input_to_net)
+    clone1_out = clone1(input_to_net)
+    clone2_out = clone2(input_to_net)
+
+    all_vars = tf.trainable_variables()
+    net_vars = net.variable_scope.trainable_variables()
+    clone1_vars = clone1.variable_scope.trainable_variables()
+    clone2_vars = clone2.variable_scope.trainable_variables()
+
+    self.assertEqual(net.output_channels, clone1.output_channels)
+    self.assertEqual(net.module_name + "_clone", clone1.module_name)
+    self.assertEqual("clone2", clone2.module_name)
+    self.assertEqual(len(all_vars), 3*len(net_vars))
+    self.assertEqual(len(net_vars), len(clone1_vars))
+    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone1_out.get_shape().as_list())
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone2_out.get_shape().as_list())
+
   @parameterized.NamedParameters(
       ("WithBias", True),
       ("WithoutBias", False))

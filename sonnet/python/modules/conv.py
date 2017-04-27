@@ -426,6 +426,42 @@ class Conv2D(base.AbstractModule, base.Transposable):
     """Returns the regularizers dictionary."""
     return self._regularizers
 
+  @property
+  def mask(self):
+    """Returns the mask."""
+    return self._mask
+
+  @property
+  def data_format(self):
+    """Returns the data format."""
+    return self._data_format
+
+  def clone(self, name=None):
+    """Returns a cloned `Conv2D` module.
+
+    Args:
+      name: Optional string assigning name of cloned module. The default name
+        is constructed by appending "_clone" to `self.module_name`.
+
+    Returns:
+      `Conv2D` module.
+    """
+    if name is None:
+      name = self.module_name + "_clone"
+
+    return Conv2D(output_channels=self.output_channels,
+                  kernel_shape=self.kernel_shape,
+                  stride=self.stride,
+                  rate=self.rate,
+                  padding=self.padding,
+                  use_bias=self.has_bias,
+                  initializers=self.initializers,
+                  partitioners=self.partitioners,
+                  regularizers=self.regularizers,
+                  mask=self.mask,
+                  data_format=self.data_format,
+                  name=name)
+
   # Implements Transposable interface.
   @property
   def input_shape(self):

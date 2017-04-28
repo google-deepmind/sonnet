@@ -22,6 +22,7 @@ from __future__ import print_function
 # Dependency imports
 
 import numpy as np
+from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 from sonnet.testing import parameterized
 

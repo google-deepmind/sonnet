@@ -26,7 +26,6 @@ from __future__ import print_function
 
 import abc
 import collections
-import types
 # Dependency imports
 import six
 from sonnet.python.modules import util
@@ -130,7 +129,7 @@ class AbstractModule(object):
       ValueError: If name is not specified.
     """
 
-    if name is None or not isinstance(name, types.StringTypes):
+    if name is None or not isinstance(name, six.string_types):
       raise ValueError("Name must be a string.")
 
     self._connected_subgraphs = []

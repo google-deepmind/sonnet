@@ -151,7 +151,7 @@ class TextModel(snt.AbstractModule):
     current_state = initial_state
 
     generated_letters = []
-    for _ in xrange(sequence_length):
+    for _ in range(sequence_length):
       # Sample a character index from distribution.
       char_index = tf.squeeze(tf.multinomial(current_logits, 1))
       char_one_hot = tf.one_hot(char_index, self._output_size, 1.0, 0.0)
@@ -270,7 +270,7 @@ def train(num_training_iterations, report_interval,
 
     start_iteration = sess.run(global_step)
 
-    for train_iteration in xrange(start_iteration, num_training_iterations):
+    for train_iteration in range(start_iteration, num_training_iterations):
       if (train_iteration + 1) % report_interval == 0:
         train_loss_v, valid_loss_v, _ = sess.run(
             (train_loss, valid_loss, train_step))

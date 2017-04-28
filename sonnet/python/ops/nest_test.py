@@ -24,8 +24,11 @@ import collections
 # Dependency imports
 
 import numpy as np
+import six
 from sonnet.python.ops import nest
 import tensorflow as tf
+
+typekw = "class" if six.PY3 else "type"
 
 
 class NestTest(tf.test.TestCase):
@@ -35,7 +38,7 @@ class NestTest(tf.test.TestCase):
     inp_abc = ["a", "b", "c"]
     with self.assertRaises(ValueError) as cm:
       nest.assert_shallow_structure(inp_abc, inp_ab)
-    self.assertEqual(cm.exception.message,
+    self.assertEqual(str(cm.exception),
                      "The two structures don't have the same sequence length. "
                      "Input structure has length 2, while shallow structure "
                      "has length 3.")
@@ -44,10 +47,10 @@ class NestTest(tf.test.TestCase):
     inp_ab2 = [[1, 1], [2, 2]]
     with self.assertRaises(TypeError) as cm:
       nest.assert_shallow_structure(inp_ab2, inp_ab1)
-    self.assertEqual(cm.exception.message,
+    self.assertEqual(str(cm.exception),
                      "The two structures don't have the same sequence type. "
-                     "Input structure has type <type 'tuple'>, while shallow "
-                     "structure has type <type 'list'>.")
+                     "Input structure has type <{0} 'tuple'>, while shallow "
+                     "structure has type <{0} 'list'>.".format(typekw))
 
   def testFlattenUpTo(self):
     # Normal application (Example 1).
@@ -123,9 +126,9 @@ class NestTest(tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       flattened_input_tree = nest.flatten_up_to(shallow_tree, input_tree)
     flattened_shallow_tree = nest.flatten_up_to(shallow_tree, shallow_tree)
-    self.assertEqual(cm.exception.message,
-                     "If shallow structure is a sequence, input must also "
-                     "be a sequence. Input has type: <type 'str'>.")
+    self.assertEqual(str(cm.exception),
+                     "If shallow structure is a sequence, input must also be "
+                     "a sequence. Input has type: <{} 'str'>.".format(typekw))
     self.assertEqual(flattened_shallow_tree, shallow_tree)
 
     input_tree = "input_tree"
@@ -133,9 +136,9 @@ class NestTest(tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       flattened_input_tree = nest.flatten_up_to(shallow_tree, input_tree)
     flattened_shallow_tree = nest.flatten_up_to(shallow_tree, shallow_tree)
-    self.assertEqual(cm.exception.message,
-                     "If shallow structure is a sequence, input must also "
-                     "be a sequence. Input has type: <type 'str'>.")
+    self.assertEqual(str(cm.exception),
+                     "If shallow structure is a sequence, input must also be "
+                     "a sequence. Input has type: <{} 'str'>.".format(typekw))
     self.assertEqual(flattened_shallow_tree, shallow_tree)
 
     # Using non-iterable elements.
@@ -144,9 +147,9 @@ class NestTest(tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       flattened_input_tree = nest.flatten_up_to(shallow_tree, input_tree)
     flattened_shallow_tree = nest.flatten_up_to(shallow_tree, shallow_tree)
-    self.assertEqual(cm.exception.message,
-                     "If shallow structure is a sequence, input must also "
-                     "be a sequence. Input has type: <type 'int'>.")
+    self.assertEqual(str(cm.exception),
+                     "If shallow structure is a sequence, input must also be "
+                     "a sequence. Input has type: <{} 'int'>.".format(typekw))
     self.assertEqual(flattened_shallow_tree, shallow_tree)
 
     input_tree = 0
@@ -154,9 +157,9 @@ class NestTest(tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       flattened_input_tree = nest.flatten_up_to(shallow_tree, input_tree)
     flattened_shallow_tree = nest.flatten_up_to(shallow_tree, shallow_tree)
-    self.assertEqual(cm.exception.message,
-                     "If shallow structure is a sequence, input must also "
-                     "be a sequence. Input has type: <type 'int'>.")
+    self.assertEqual(str(cm.exception),
+                     "If shallow structure is a sequence, input must also be "
+                     "a sequence. Input has type: <{} 'int'>.".format(typekw))
     self.assertEqual(flattened_shallow_tree, shallow_tree)
 
   def testMapUpTo(self):

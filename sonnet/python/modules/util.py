@@ -21,6 +21,7 @@ from __future__ import print_function
 import re
 
 # Dependency imports
+import six
 import tensorflow as tf
 
 
@@ -82,7 +83,7 @@ def _check_nested_callables(dictionary, object_name):
     TypeError: If the dictionary contains something that is not either a
       dictionary or a callable.
   """
-  for key, entry in dictionary.iteritems():
+  for key, entry in six.iteritems(dictionary):
     if isinstance(entry, dict):
       _check_nested_callables(entry, object_name)
     elif not callable(entry):
@@ -311,7 +312,7 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),
 
 def has_variable_scope(obj):
   """Determines whether the given object has a variable scope."""
-  return hasattr(obj, "variable_scope") or "variable_scope" in dir(obj)
+  return "variable_scope" in dir(obj)
 
 
 def _format_table(rows):

@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+import six
 import sonnet as snt
 import tensorflow as tf
 
@@ -60,7 +61,10 @@ class SequentialTest(tf.test.TestCase):
     def module2(a, b, c):
       return a, b, c
 
-    err_str = r"module2\(\) takes exactly 3 arguments \(2 given\)"
+    if six.PY3:
+      err_str = r"module2\(\) missing 1 required positional argument: 'c'"
+    else:
+      err_str = r"module2\(\) takes exactly 3 arguments \(2 given\)"
     with self.assertRaisesRegexp(TypeError, err_str):
       _, _ = snt.Sequential([module1, module2], name="seq2")(1, 2)
 

@@ -27,6 +27,7 @@ import numbers
 # Dependency imports
 
 import numpy as np
+from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import util
 from sonnet.python.ops import nest

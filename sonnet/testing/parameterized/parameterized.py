@@ -147,6 +147,7 @@ import types
 import unittest
 import uuid
 
+import six
 from tensorflow.python.platform import googletest
 
 ADDR_RE = re.compile(r'\<([a-zA-Z0-9_\-\.]+) object at 0x[a-fA-F0-9]+\>')
@@ -167,13 +168,13 @@ def _StrClass(cls):
 
 def _NonStringIterable(obj):
   return (isinstance(obj, collections.Iterable) and not
-          isinstance(obj, basestring))
+          isinstance(obj, six.string_types))
 
 
 def _FormatParameterList(testcase_params):
   if isinstance(testcase_params, collections.Mapping):
     return ', '.join('%s=%s' % (argname, _CleanRepr(value))
-                     for argname, value in testcase_params.iteritems())
+                     for argname, value in six.iteritems(testcase_params))
   elif _NonStringIterable(testcase_params):
     return ', '.join(map(_CleanRepr, testcase_params))
   else:
@@ -265,7 +266,7 @@ def _ModifyClass(class_object, testcases, naming_type):
       'Cannot add parameters to %s,'
       ' which already has parameterized methods.' % (class_object,))
   class_object._id_suffix = id_suffix = {}
-  for name, obj in class_object.__dict__.items():
+  for name, obj in list(six.iteritems(class_object.__dict__)):
     if (name.startswith(unittest.TestLoader.testMethodPrefix)
         and isinstance(obj, types.FunctionType)):
       delattr(class_object, name)
@@ -273,7 +274,7 @@ def _ModifyClass(class_object, testcases, naming_type):
       _UpdateClassDictForParamTestCase(
           methods, id_suffix, name,
           _ParameterizedTestIter(obj, testcases, naming_type))
-      for name, meth in methods.iteritems():
+      for name, meth in six.iteritems(methods):
         setattr(class_object, name, meth)
 
 
@@ -353,7 +354,7 @@ class TestGeneratorMetaclass(type):
 
   def __new__(mcs, class_name, bases, dct):
     dct['_id_suffix'] = id_suffix = {}
-    for name, obj in dct.items():
+    for name, obj in list(six.iteritems(dct)):
       if (name.startswith(unittest.TestLoader.testMethodPrefix) and
           _NonStringIterable(obj)):
         iterator = iter(obj)
@@ -385,9 +386,9 @@ def _UpdateClassDictForParamTestCase(dct, id_suffix, name, iterator):
     id_suffix[new_name] = getattr(func, '__x_extra_id__', '')
 
 
-class ParameterizedTestCase(googletest.TestCase):
+class ParameterizedTestCase(
+    six.with_metaclass(TestGeneratorMetaclass, googletest.TestCase)):
   """Base class for test cases using the Parameters decorator."""
-  __metaclass__ = TestGeneratorMetaclass
 
   def _OriginalName(self):
     return self._testMethodName.split(_SEPARATOR)[0]

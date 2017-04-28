@@ -175,6 +175,7 @@ module_tests = [
     name = test_name,
     size = test_size,
     srcs = ["modules/%s%s.py" % (test_subdir, test_name)],
+    srcs_version = "PY2AND3",
     deps = [
         # mox dep,
         "//sonnet",

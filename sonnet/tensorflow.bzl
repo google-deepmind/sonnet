@@ -81,7 +81,7 @@ def tf_custom_op_library_additional_deps():
   return [
       "@org_tensorflow//third_party/eigen3",
       "@org_tensorflow//tensorflow/core:framework_headers_lib",
-      "@protobuf//:protobuf_headers",
+      "@protobuf//:protobuf",
   ]
 
 def tf_custom_op_library(name, srcs=[], gpu_srcs=[], deps=[]):

@@ -612,18 +612,18 @@ class LSTM(rnn_core.RNNCore):
       else:
         return create_batch_norm()
 
-  class CellWithExtraInput(tf.contrib.rnn.RNNCell):
-    """Wraps an RNNCell to create a new RNNCell with extra input appended.
+  class CellWithExtraInput(rnn_core.RNNCore):
+    """Wraps an RNNCore to create a new RNNCore with extra input appended.
 
     This will pass the additional input `args` and `kwargs` to the __call__
-    function of the RNNCell after the input and prev_state inputs.
+    function of the RNNCore after the input and prev_state inputs.
     """
 
     def __init__(self, cell, *args, **kwargs):
       """Construct the CellWithExtraInput.
 
       Args:
-        cell: The RNNCell to wrap (typically a snt.RNNCore).
+        cell: The snt.RNNCore to wrap.
         *args: Extra arguments to pass to __call__.
         **kwargs: Extra keyword arguments to pass to __call__.
       """
@@ -633,6 +633,9 @@ class LSTM(rnn_core.RNNCore):
 
     def __call__(self, inputs, state):
       return self._cell(inputs, state, *self._args, **self._kwargs)
+
+    def _build(self, inputs, prev_state, is_training=True, test_local_stats=True):
+      return self._cell._build(inputs, prev_state, is_training, test_local_stats)
 
     @property
     def state_size(self):

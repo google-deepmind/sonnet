@@ -411,6 +411,33 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       # And check that same when using test statistics.
       check_static_and_dynamic(False)
 
+  def testLayerNormVariables(self):
+    core = snt.LSTM(hidden_size=3, use_layer_norm=True)
+
+    batch_size = 3
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, 3, 3])
+    tf.nn.dynamic_rnn(core,
+                      inputs,
+                      initial_state=core.initial_state(batch_size, tf.float32))
+
+    self.assertTrue(core.use_layer_norm)
+
+    expected = 4  # gate bias and one weight, plus LayerNorm's gamma, beta.
+    self.assertEqual(len(core.get_variables()), expected)
+
+  def testConflictingNormalization(self):
+    with self.assertRaisesRegexp(
+        ValueError, "Only one of use_batch_norm_h and layer_norm is allowed."):
+      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_h=True)
+
+    with self.assertRaisesRegexp(
+        ValueError, "Only one of use_batch_norm_x and layer_norm is allowed."):
+      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_x=True)
+
+    with self.assertRaisesRegexp(
+        ValueError, "Only one of use_batch_norm_c and layer_norm is allowed."):
+      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_c=True)
+
   @parameterized.Parameters(
       (False, False, False, False),
       (False, True, False, False),

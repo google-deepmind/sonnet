@@ -46,6 +46,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import batch_norm
 from sonnet.python.modules import conv
+from sonnet.python.modules import layer_norm
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
@@ -150,6 +151,7 @@ class LSTM(rnn_core.RNNCore):
                use_batch_norm_h=False,
                use_batch_norm_x=False,
                use_batch_norm_c=False,
+               use_layer_norm=False,
                max_unique_stats=1,
                name="lstm"):
     """Construct LSTM.
@@ -178,6 +180,8 @@ class LSTM(rnn_core.RNNCore):
         normalization at the input -> gates contribution.
       use_batch_norm_c: Boolean that indicates whether to apply batch
         normalization at the cell -> output contribution.
+      use_layer_norm: Boolean that indicates whether to apply layer
+        normalization.
       max_unique_stats: The maximum number of steps to use unique batch norm
         statistics for. (See module description above for more details.)
       name: name of the module.
@@ -203,6 +207,7 @@ class LSTM(rnn_core.RNNCore):
     self._use_batch_norm_h = use_batch_norm_h
     self._use_batch_norm_x = use_batch_norm_x
     self._use_batch_norm_c = use_batch_norm_c
+    self._use_layer_norm = use_layer_norm
     self.possible_keys = self.get_possible_initializer_keys(
         use_peepholes=use_peepholes, use_batch_norm_h=use_batch_norm_h,
         use_batch_norm_x=use_batch_norm_x, use_batch_norm_c=use_batch_norm_c)
@@ -217,6 +222,15 @@ class LSTM(rnn_core.RNNCore):
     if max_unique_stats != 1 and not (
         use_batch_norm_h or use_batch_norm_x or use_batch_norm_c):
       raise ValueError("max_unique_stats specified but batch norm disabled")
+    if use_batch_norm_h and use_layer_norm:
+      raise ValueError(
+          "Only one of use_batch_norm_h and layer_norm is allowed.")
+    if use_batch_norm_x and use_layer_norm:
+      raise ValueError(
+          "Only one of use_batch_norm_x and layer_norm is allowed.")
+    if use_batch_norm_c and use_layer_norm:
+      raise ValueError(
+          "Only one of use_batch_norm_c and layer_norm is allowed.")
 
     if use_batch_norm_h:
       self._batch_norm_h = LSTM.IndexedStatsBatchNorm(max_unique_stats,
@@ -331,11 +345,16 @@ class LSTM(rnn_core.RNNCore):
                                                      time_step,
                                                      is_training,
                                                      test_local_stats)
-      gates = gates_h + gates_x + self._b
+      gates = gates_h + gates_x
     else:
       # Parameters of gates are concatenated into one multiply for efficiency.
       inputs_and_hidden = tf.concat([inputs, prev_hidden], 1)
-      gates = tf.matmul(inputs_and_hidden, self._w_xh) + self._b
+      gates = tf.matmul(inputs_and_hidden, self._w_xh)
+
+      if self._use_layer_norm:
+        gates = layer_norm.LayerNorm()(gates)
+
+    gates += self._b
 
     # i = input_gate, j = new_input, f = forget_gate, o = output_gate
     i, j, f, o = array_ops.split(value=gates, num_or_size_splits=4, axis=1)
@@ -552,6 +571,11 @@ class LSTM(rnn_core.RNNCore):
   def use_batch_norm_c(self):
     """Boolean indicating whether batch norm for cell -> output is enabled."""
     return self._use_batch_norm_c
+
+  @property
+  def use_layer_norm(self):
+    """Boolean indicating whether layer norm is enabled."""
+    return self._use_layer_norm
 
   class IndexedStatsBatchNorm(base.AbstractModule):
     """BatchNorm module where batch statistics are selected by an input index.

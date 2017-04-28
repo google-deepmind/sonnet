@@ -9,7 +9,7 @@ To install Sonnet, you will need to compile the library using bazel against
 the TensorFlow header files. You should have installed TensorFlow by
 following the [TensorFlow installation instructions](https://www.tensorflow.org/install/).
 
-This installation is compatible with Linux/Mac OS X and Python 2.7. The version
+This installation is compatible with Linux/Mac OS X and Python 2.7 and 3.4. The version
 of TensorFlow installed must be at least 1.0.1. Installing Sonnet supports the
 [virtualenv installation mode](https://www.tensorflow.org/install/install_linux#installing_with_virtualenv)
 of TensorFlow, as well as the [native pip install](https://www.tensorflow.org/install/install_linux#installing_with_native_pip).

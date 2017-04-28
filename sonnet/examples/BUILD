@@ -56,6 +56,7 @@ py_test(
     srcs = [
         "rnn_shakespeare_test.py",
     ],
+    srcs_version = "PY2AND3",
     deps = [
         ":rnn_shakespeare",
     ],

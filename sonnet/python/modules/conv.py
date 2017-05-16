@@ -35,6 +35,9 @@ from sonnet.python.modules import util
 import tensorflow as tf
 
 
+# Strings for TensorFlow convolution padding modes. See the following
+# documentation for an explanation of VALID versus SAME:
+# https://www.tensorflow.org/api_guides/python/nn#Convolution
 SAME = "SAME"
 VALID = "VALID"
 ALLOWED_PADDINGS = {SAME, VALID}
@@ -136,7 +139,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -524,7 +527,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels.
@@ -848,7 +851,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -1118,7 +1121,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. Can be either a number or a
@@ -1414,7 +1417,7 @@ class InPlaneConv2D(base.AbstractModule):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       kernel_shape: Iterable with 2 elements in the layout [filter_height,
@@ -1650,7 +1653,7 @@ class DepthwiseConv2D(base.AbstractModule):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       channel_multiplier: Number of channels to expand convolution to. Must be
@@ -1919,7 +1922,7 @@ class SeparableConv2D(base.AbstractModule):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. Must be an integer.
@@ -2198,7 +2201,7 @@ class Conv3D(base.AbstractModule):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -2470,7 +2473,7 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be

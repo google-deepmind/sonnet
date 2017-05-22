@@ -118,9 +118,9 @@ class AbstractModule(object):
     Every subclass of AbstractModule must begin their constructor with a call to
     this constructor, i.e. `super(MySubModule, self).__init__(name=name)`.
 
-    Avoid instantiating sub-modules in __init__ where possible, as they will not
-    be defined under the module's scope. Instead, instantiate sub-modules in
-    `build`.
+    If you instantiate sub-modules in __init__ you must create them within the
+    `_enter_variable_scope` context manager to ensure they are in the module's
+    variable scope. Alternatively, instantiate sub-modules in `_build`.
 
     Args:
       name: Name of this module. Used to construct the Templated build function.

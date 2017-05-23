@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
 import re
 
 # Dependency imports
@@ -282,7 +283,7 @@ def get_normalized_variable_map(scope_or_module,
   return {variable.name[prefix_length:]: variable for variable in variables}
 
 
-def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),
+def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
               context=None):
   """Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
@@ -315,33 +316,71 @@ def has_variable_scope(obj):
   return "variable_scope" in dir(obj)
 
 
-def _format_table(rows):
+def _format_table(rows, join_lines=True):
   format_str = ""
   for col in range(len(rows[0])):
     column_width = max(len(row[col]) for row in rows)
     format_str += "{:<" + str(column_width) + "}  "
 
-  return "\n".join(format_str.format(*row).strip() for row in rows)
+  output_rows = (format_str.format(*row).strip() for row in rows)
+  return "\n".join(output_rows) if join_lines else output_rows
 
 
-def format_variables(variables):
+def _get_vars_to_collections(variables):
+  """Returns a dict mapping variables to the collections they appear in."""
+  var_to_collections = collections.defaultdict(lambda: [])
+  for graph in set(v.graph for v in variables):
+
+    for collection_name in list(graph._collections):  # pylint: disable=protected-access
+      entries = set(entry for entry in graph.get_collection(collection_name)
+                    if isinstance(entry, tf.Variable))
+      # For legacy reasons, tf.GraphKeys.GLOBAL_VARIABLES == "variables".
+      # Correcting for this here, to avoid confusion.
+      if collection_name == tf.GraphKeys.GLOBAL_VARIABLES:
+        collection_name = "global_variables"
+      for var in entries.intersection(variables):
+        var_to_collections[var].append(collection_name)
+  return var_to_collections
+
+
+def format_variables(variables, join_lines=True):
   """Takes a collection of variables and formats it as a table."""
   rows = []
-  rows.append(("Variable", "Shape", "Type"))
+  rows.append(("Variable", "Shape", "Type", "Collections", "Device"))
+  var_to_collections = _get_vars_to_collections(variables)
   for var in sorted(variables, key=lambda var: var.name):
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
-    dtype = repr(var.dtype.base_dtype)
-    rows.append((var.name, shape, dtype))
-  return _format_table(rows)
+    dtype = repr(var.dtype.base_dtype).replace("tf.", "")
+    coll = ", ".join(sorted(var_to_collections[var]))
+    rows.append((var.name, shape, dtype, coll, var.device))
+  return _format_table(rows, join_lines)
 
 
-def format_variable_map(variable_map):
+def format_variable_map(variable_map, join_lines=True):
   """Takes a key-to-variable map and formats it as a table."""
   rows = []
-  rows.append(("Key", "Variable", "Shape", "Type"))
+  rows.append(("Key", "Variable", "Shape", "Type", "Collections", "Device"))
+  var_to_collections = _get_vars_to_collections(variable_map.values())
   for key in sorted(variable_map.keys()):
     var = variable_map[key]
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
-    dtype = repr(var.dtype.base_dtype)
-    rows.append((key, var.name, shape, dtype))
-  return _format_table(rows)
+    dtype = repr(var.dtype.base_dtype).replace("tf.", "")
+    coll = ", ".join(sorted(var_to_collections[var]))
+    rows.append((key, var.name, shape, dtype, coll, var.device))
+  return _format_table(rows, join_lines)
+
+
+def log_variables(variables=None):
+  """Logs variable information.
+
+  This function logs the name, shape, type, collections, and device for either
+  all variables or a given iterable of variables.
+
+  Args:
+    variables: iterable of variables; if not provided, then all variables
+        (in the default graph) are logged.
+  """
+  if variables is None:
+    variables = tf.global_variables() + tf.local_variables()
+  for row in format_variables(variables, join_lines=False):
+    tf.logging.info(row)

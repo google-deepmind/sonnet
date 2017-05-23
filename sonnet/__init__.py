@@ -98,6 +98,7 @@ from sonnet.python.modules.util import get_saver
 from sonnet.python.modules.util import get_variables_in_module
 from sonnet.python.modules.util import get_variables_in_scope
 from sonnet.python.modules.util import has_variable_scope
+from sonnet.python.modules.util import log_variables
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
 from sonnet.python.ops.resampler import resampler

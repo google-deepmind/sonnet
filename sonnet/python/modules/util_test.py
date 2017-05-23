@@ -23,6 +23,21 @@ import sonnet as snt
 import sonnet.python.modules.util as util
 import tensorflow as tf
 
+_EXPECTED_FORMATTED_VARIABLE_LIST = (
+    "Variable  Shape  Type     Collections                            Device\n"
+    "m1/v1:0   3x4    float32  global_variables, trainable_variables\n"
+    "m2/v2:0   5x6    float32  local_variables                        "
+    "/device:GPU:*"
+)
+
+_EXPECTED_FORMATTED_VARIABLE_MAP = (
+    "Key  Variable  Shape  Type     Collections                            "
+    "Device\n"
+    "vv1  m1/v1:0   3x4    float32  global_variables, trainable_variables\n"
+    "vv2  m2/v2:0   5x6    float32  local_variables                        "
+    "/device:GPU:*"
+)
+
 
 class UtilTest(tf.test.TestCase):
 
@@ -264,23 +279,30 @@ class UtilTest(tf.test.TestCase):
   def testFormatVariables(self):
     with tf.variable_scope("m1"):
       v1 = tf.get_variable("v1", shape=[3, 4])
-    with tf.variable_scope("m2"):
-      v2 = tf.get_variable("v2", shape=[5, 6])
+    with tf.device("/gpu"):
+      with tf.variable_scope("m2"):
+        v2 = tf.get_local_variable("v2", shape=[5, 6])
     self.assertEquals(snt.format_variables([v2, v1]),
-                      ("Variable  Shape  Type\n"
-                       "m1/v1:0   3x4    tf.float32\n"
-                       "m2/v2:0   5x6    tf.float32"))
+                      _EXPECTED_FORMATTED_VARIABLE_LIST)
 
   def testFormatVariableMap(self):
     with tf.variable_scope("m1"):
       v1 = tf.get_variable("v1", shape=[3, 4])
-    with tf.variable_scope("m2"):
-      v2 = tf.get_variable("v2", shape=[5, 6])
+    with tf.device("/gpu"):
+      with tf.variable_scope("m2"):
+        v2 = tf.get_local_variable("v2", shape=[5, 6])
     var_map = {"vv1": v1, "vv2": v2}
     self.assertEquals(snt.format_variable_map(var_map),
-                      ("Key  Variable  Shape  Type\n"
-                       "vv1  m1/v1:0   3x4    tf.float32\n"
-                       "vv2  m2/v2:0   5x6    tf.float32"))
+                      _EXPECTED_FORMATTED_VARIABLE_MAP)
+
+  def testLogVariables(self):
+    tf.get_default_graph().add_to_collection("config", {"version": 1})
+    with tf.variable_scope("m1"):
+      v1 = tf.get_variable("v1", shape=[3, 4])
+    with tf.device("/gpu"):
+      with tf.variable_scope("m2"):
+        v2 = tf.get_local_variable("v2", shape=[5, 6])
+    snt.log_variables([v2, v1])
 
 if __name__ == "__main__":
   tf.test.main()

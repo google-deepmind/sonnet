@@ -337,6 +337,7 @@ class Linear(base.AbstractModule, base.Transposable):
     return Linear(output_size=lambda: self.input_shape[1],
                   use_bias=self._use_bias,
                   initializers=self._initializers,
+                  partitioners=self._partitioners,
                   regularizers=self._regularizers,
                   name=name)
 

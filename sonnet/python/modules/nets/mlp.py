@@ -195,7 +195,7 @@ class MLP(base.AbstractModule, base.Transposable):
     """Returns transposed `MLP`.
 
     Args:
-      name: Optional string specifiying the name of the transposed module. The
+      name: Optional string specifying the name of the transposed module. The
         default name is constructed by appending "_transpose"
         to `self.module_name`.
       activate_final: Optional boolean determining if the activation and batch

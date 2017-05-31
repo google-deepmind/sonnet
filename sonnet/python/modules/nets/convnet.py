@@ -293,7 +293,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     """Returns transposed conv net.
 
     Args:
-      name: Optional string specifiying the name of the transposed module. The
+      name: Optional string specifying the name of the transposed module. The
         default name is constructed by appending "_transpose"
         to `self.module_name`.
       output_channels: Optional iterable of numbers of output channels.
@@ -477,7 +477,7 @@ class ConvNet2DTranspose(ConvNet2D):
     """Returns transposed conv net.
 
     Args:
-      name: Optional string specifiying the name of the transposed module. The
+      name: Optional string specifying the name of the transposed module. The
         default name is constructed by appending "_transpose"
         to `self.module_name`.
       output_channels: Optional iterable of numbers of output channels.

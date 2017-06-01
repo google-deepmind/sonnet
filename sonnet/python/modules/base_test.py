@@ -20,7 +20,6 @@ from __future__ import division
 from __future__ import print_function
 
 from functools import partial
-
 import numpy as np
 import six
 from sonnet.python.modules import base
@@ -51,6 +50,13 @@ class IdentityModule(base.AbstractModule):
 
   def __init__(self, name="identity_module"):
     super(IdentityModule, self).__init__(name=name)
+
+  def _build(self, inputs):
+    return tf.identity(inputs)
+
+
+class NoInitIdentityModule(base.AbstractModule):
+  """Sonnet module that doesn't call `base.AbstractModule.__init__`."""
 
   def _build(self, inputs):
     return tf.identity(inputs)
@@ -135,6 +141,11 @@ class AbstractModuleTest(tf.test.TestCase):
     self.assertIs(subgraphs[0].outputs, outputs)
     self.assertIs(subgraphs[1].outputs, blah_outputs)
     self.assertIs(subgraphs[2].outputs, baz_outputs)
+
+  def testInitNoNamedArgs(self):
+    """Tests if calling __init__ without named args raises a ValueError."""
+    with self.assertRaises(ValueError):
+      NoInitIdentityModule("foobar")
 
 
 def _make_model_with_params(inputs, output_size):

@@ -112,7 +112,7 @@ class AbstractModule(object):
   sharing will not work.
   """
 
-  def __init__(self, name=None):
+  def __init__(self, _sentinel=None, name=None):  # pylint: disable=invalid-name
     """Performs the initialisation necessary for all AbstractModule instances.
 
     Every subclass of AbstractModule must begin their constructor with a call to
@@ -123,11 +123,18 @@ class AbstractModule(object):
     variable scope. Alternatively, instantiate sub-modules in `_build`.
 
     Args:
+      _sentinel: Variable that only carries a non-None value if `__init__` was
+          called without named parameters. If this is the case, a deprecation
+          warning is issued in form of a `ValueError`.
       name: Name of this module. Used to construct the Templated build function.
 
     Raises:
       ValueError: If name is not specified.
+      ValueError: If `__init__` was called without named arguments.
     """
+    if _sentinel is not None:
+      raise ValueError("Calling AbstractModule.__init__ without named "
+                       "arguments is deprecated.")
 
     if name is None or not isinstance(name, six.string_types):
       raise ValueError("Name must be a string.")

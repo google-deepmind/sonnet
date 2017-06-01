@@ -133,6 +133,7 @@ tf_custom_op_library(
     ],
     gpu_srcs = [
         "//sonnet/cc/kernels:resampler_op_gpu.cu.cc",
+        "//sonnet/cc/kernels:resampler_op.h",
     ],
 )
 

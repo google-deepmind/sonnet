@@ -1118,6 +1118,26 @@ class BatchApplyTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       out_expected, out_result = sess.run([expected_output, output])
       self.assertAllClose(out_expected, out_result)
 
+  def testKWArgs(self):
+    in1 = np.random.randn(2, 3, 4, 5)
+    in2 = np.random.randn(2, 3, 5, 8)
+
+    module = snt.BatchApply(tf.matmul)
+    output = module(a=in1, b=in2)
+    output.get_shape().assert_is_compatible_with([2, 3, 4, 8])
+
+    expected_output = tf.matmul(in1, in2)
+    with self.test_session() as sess:
+      out_expected, out_result = sess.run([expected_output, output])
+      self.assertAllClose(out_expected, out_result)
+
+  def testHandlesReturnedNone(self):
+    def fn(input_):
+      del input_
+      return None
+    result = snt.BatchApply(fn)(tf.zeros([1, 1]))
+    self.assertEqual(result, None)
+
 
 class SliceByDimTest(tf.test.TestCase):
 

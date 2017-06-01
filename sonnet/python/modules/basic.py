@@ -875,32 +875,43 @@ class BatchApply(base.AbstractModule):
     self._n_dims = n_dims
     self._input_example_index = input_example_index
 
-  def _build(self, *args):
+  def _build(self, *args, **kwargs):
     """Connects the BatchApply module into the graph.
 
     Args:
-      *args: a Tensor or a nested list of Tensors. The input tensors will
-          have their first dimensions merged, then an op or a module will be
-          called on the input. The first dimension of the output will be
-          split again based on the leading dimensions of the first input
-          tensor.
+      *args: a Tensor or a nested list or dictionary of Tensors. The input
+          tensors will have their first dimensions merged, then an op or a
+          module will be called on the input. The first dimension of the output
+          tensor(s) will be split again based on the leading dimensions of the
+          first input tensor.
+      **kwargs: Dictionary of named arguments; used in the same way as `*args`.
 
     Returns:
-      A Tensor resulting of applying the process above.
+      A Tensor or nested list or dictionary of Tensors as a result of applying
+      the process above. ("None" return values are also supported.)
     """
-    # Merge leading dimensions for each input Tensor, then apply inner module.
-    merged = nest.map(lambda inp: merge_leading_dims(inp, self._n_dims),
-                      args)
-    results = self._module(*merged)
+    flattened = nest.flatten_iterable([args, kwargs])
+    merged_flattened = [merge_leading_dims(inp, self._n_dims)
+                        for inp in flattened]
+    merged_args, merged_kwargs = nest.pack_iterable_as([args, kwargs],
+                                                       merged_flattened)
+
+    results = self._module(*merged_args, **merged_kwargs)
 
     # Unmerging takes the sizes of the leading dimensions from an input example
     # with equal shape for the leading `n_dims` dimensions. Typically this is
     # the first input.
-    example_input = tf.convert_to_tensor(
-        nest.flatten(args)[self._input_example_index])
+    example_input = tf.convert_to_tensor(flattened[self._input_example_index])
     def _split_to_original_leading_dims(result):
-      return split_leading_dim(result, example_input, self._n_dims)
-    return nest.map(_split_to_original_leading_dims, results)
+      if result is None:
+        return None
+      else:
+        return split_leading_dim(result, example_input, self._n_dims)
+
+    flat_results = nest.flatten_iterable(results)
+    flat_unmerged_results = [_split_to_original_leading_dims(result)
+                             for result in flat_results]
+    return nest.pack_iterable_as(results, flat_unmerged_results)
 
 
 class SliceByDim(base.AbstractModule):

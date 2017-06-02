@@ -124,6 +124,44 @@ class UtilTest(tf.test.TestCase):
     self.assertIs(variable_map["w:0"], conv.w)
     self.assertIs(variable_map["b:0"], conv.b)
 
+  def testGetNormalizedVariableMapWithPartionedVariable(self):
+    hidden = tf.ones(shape=(1, 16, 16, 3))
+    partitioner = tf.variable_axis_size_partitioner(4)
+    conv = snt.Conv2D(output_channels=3,
+                      kernel_shape=3,
+                      stride=1,
+                      partitioners={"w": partitioner})
+    conv(hidden)
+    variable_map = snt.get_normalized_variable_map(conv,
+                                                   group_sliced_variables=True)
+    self.assertEqual(len(variable_map), 2)
+    self.assertEqual(variable_map["b:0"], conv.b)
+    self.assertEqual(len(variable_map["w"]), 3)
+
+    variable_map = snt.get_normalized_variable_map(conv,
+                                                   group_sliced_variables=False)
+    self.assertEqual(variable_map["b:0"], conv.b)
+    self.assertEqual(set(variable_map), set(["b:0", "w/part_0:0", "w/part_1:0",
+                                             "w/part_2:0"]))
+
+  def testVariableMapItems(self):
+    hidden = tf.ones(shape=(1, 16, 16, 3))
+    partitioner = tf.variable_axis_size_partitioner(4)
+    conv = snt.Conv2D(output_channels=3,
+                      kernel_shape=3,
+                      stride=1,
+                      partitioners={"w": partitioner})
+    conv(hidden)
+    variable_map = snt.get_normalized_variable_map(conv,
+                                                   group_sliced_variables=True)
+    items = snt.variable_map_items(variable_map)
+
+    items_str = sorted((key, var.name) for key, var in items)
+    self.assertEqual(
+        items_str,
+        [(u"b:0", u"conv_2d/b:0"), ("w", u"conv_2d/w/part_0:0"),
+         ("w", u"conv_2d/w/part_1:0"), ("w", u"conv_2d/w/part_2:0")])
+
   def testGetSaverScope(self):
     with tf.variable_scope("prefix") as s1:
       tf.get_variable("a", shape=[5, 6])
@@ -282,8 +320,8 @@ class UtilTest(tf.test.TestCase):
     with tf.device("/gpu"):
       with tf.variable_scope("m2"):
         v2 = tf.get_local_variable("v2", shape=[5, 6])
-    self.assertEquals(snt.format_variables([v2, v1]),
-                      _EXPECTED_FORMATTED_VARIABLE_LIST)
+    self.assertEqual(snt.format_variables([v2, v1]),
+                     _EXPECTED_FORMATTED_VARIABLE_LIST)
 
   def testFormatVariableMap(self):
     with tf.variable_scope("m1"):
@@ -292,10 +330,19 @@ class UtilTest(tf.test.TestCase):
       with tf.variable_scope("m2"):
         v2 = tf.get_local_variable("v2", shape=[5, 6])
     var_map = {"vv1": v1, "vv2": v2}
-    self.assertEquals(snt.format_variable_map(var_map),
-                      _EXPECTED_FORMATTED_VARIABLE_MAP)
+    self.assertEqual(snt.format_variable_map(var_map),
+                     _EXPECTED_FORMATTED_VARIABLE_MAP)
 
   def testLogVariables(self):
+    tf.get_default_graph().add_to_collection("config", {"version": 1})
+    with tf.variable_scope("m1"):
+      tf.get_variable("v1", shape=[3, 4])
+    with tf.device("/gpu"):
+      with tf.variable_scope("m2"):
+        tf.get_local_variable("v2", shape=[5, 6])
+    snt.log_variables()
+
+  def testLogVariables_with_arg(self):
     tf.get_default_graph().add_to_collection("config", {"version": 1})
     with tf.variable_scope("m1"):
       v1 = tf.get_variable("v1", shape=[3, 4])
@@ -303,6 +350,7 @@ class UtilTest(tf.test.TestCase):
       with tf.variable_scope("m2"):
         v2 = tf.get_local_variable("v2", shape=[5, 6])
     snt.log_variables([v2, v1])
+
 
 if __name__ == "__main__":
   tf.test.main()

@@ -242,8 +242,31 @@ def _is_scope_prefix(scope_name, prefix_name):
   return scope_name.startswith(prefix_name)
 
 
+# pylint: disable=protected-access
+def _get_sliced_variables(var_list):
+  """Separates the sliced (partitioned) and unsliced variables in var_list.
+
+  Args:
+    var_list: a list of variables.
+
+  Returns:
+    A list of unsliced variables in var_list, and a dict mapping names to parts
+    for the sliced variables in var_list.
+  """
+  unsliced_variables = []
+  sliced_variables = collections.defaultdict(lambda: [])
+  for var in var_list:
+    if var._save_slice_info:
+      sliced_variables[var._save_slice_info.full_name].append(var)
+    else:
+      unsliced_variables.append(var)
+  return unsliced_variables, sliced_variables
+# pylint: enable=protected-access
+
+
 def get_normalized_variable_map(scope_or_module,
                                 collection=tf.GraphKeys.GLOBAL_VARIABLES,
+                                group_sliced_variables=False,
                                 context=None):
   """Builds map of `tf.Variable`s in scope or module with normalized names.
 
@@ -254,12 +277,16 @@ def get_normalized_variable_map(scope_or_module,
     collection: Collection to restrict query to. By default this is
         `tf.Graphkeys.VARIABLES`, which includes non-trainable variables such
         as moving averages.
+    group_sliced_variables: Boolean, if set to True, sliced variables are
+       grouped together in the returned map; if set to False, each partition of
+       a sliced variable is a separate (key, value) pair.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix. By default `None`, which means
         `context=scope`.
 
   Returns:
-    Dictionary mapping normalized variable name to `tf.Variable`.
+    Dictionary mapping normalized variable name to `tf.Variable`, or a list
+        of `tf.Variables` if the variable is a sliced (partitioned) variable.
 
   Raises:
     ValueError: If `context` is given but is not a proper prefix of `scope`.
@@ -280,7 +307,20 @@ def get_normalized_variable_map(scope_or_module,
 
   variables = get_variables_in_scope(scope, collection)
 
-  return {variable.name[prefix_length:]: variable for variable in variables}
+  if not group_sliced_variables:
+    single_vars = variables
+    grouped_vars = dict()
+  else:
+    single_vars, grouped_vars = _get_sliced_variables(variables)
+
+  var_map = {var.name[prefix_length:]: var for var in single_vars}
+  for full_name, var_group in grouped_vars.items():
+    name = full_name[prefix_length:]
+    if name in var_map:
+      raise ValueError("Mixing slices and non-slices with the same name: " +
+                       str(name))
+    var_map[name] = var_group
+  return var_map
 
 
 def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
@@ -326,9 +366,31 @@ def _format_table(rows, join_lines=True):
   return "\n".join(output_rows) if join_lines else output_rows
 
 
+def variable_map_items(variable_map):
+  """Returns an iterator over (string, variable) pairs in the variable map.
+
+  In general, variable maps map variable names to either a `tf.Variable`, or
+  list of `tf.Variable`s (in case of sliced variables).
+
+  Args:
+    variable_map: dict, variable map over which to iterate.
+
+  Yields:
+    (string, tf.Variable) pairs.
+  """
+  for key, var_or_vars in six.iteritems(variable_map):
+    if isinstance(var_or_vars, (list, tuple)):
+      for variable in var_or_vars:
+        yield key, variable
+    else:
+      yield key, var_or_vars
+
+
 def _get_vars_to_collections(variables):
   """Returns a dict mapping variables to the collections they appear in."""
   var_to_collections = collections.defaultdict(lambda: [])
+  if isinstance(variables, dict):
+    variables = list(v for _, v in variable_map_items(variables))
   for graph in set(v.graph for v in variables):
 
     for collection_name in list(graph._collections):  # pylint: disable=protected-access
@@ -360,9 +422,10 @@ def format_variable_map(variable_map, join_lines=True):
   """Takes a key-to-variable map and formats it as a table."""
   rows = []
   rows.append(("Key", "Variable", "Shape", "Type", "Collections", "Device"))
-  var_to_collections = _get_vars_to_collections(variable_map.values())
-  for key in sorted(variable_map.keys()):
-    var = variable_map[key]
+  var_to_collections = _get_vars_to_collections(variable_map)
+
+  sort_key = lambda item: (item[0], item[1].name)
+  for key, var in sorted(variable_map_items(variable_map), key=sort_key):
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))

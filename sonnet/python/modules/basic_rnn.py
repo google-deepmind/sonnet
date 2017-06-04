@@ -269,6 +269,10 @@ class DeepRNN(rnn_core.RNNCore):
                                for core in self._cores]
 
     if self._skip_connections:
+      tf.logging.warning(
+          "The `skip_connections` argument will be deprecated. Please use "
+          "snt.SkipConnectionCore instead."
+      )
       self._check_cores_output_sizes()
       if not all(self._is_recurrent_list):
         raise ValueError("skip_connections are enabled but not all cores are "

@@ -81,6 +81,9 @@ from sonnet.python.modules.gated_rnn import GRU
 from sonnet.python.modules.gated_rnn import LSTM
 from sonnet.python.modules.layer_norm import LayerNorm
 from sonnet.python.modules.pondering_rnn import ACTCore
+from sonnet.python.modules.residual import Residual
+from sonnet.python.modules.residual import ResidualCore
+from sonnet.python.modules.residual import SkipConnectionCore
 from sonnet.python.modules.rnn_core import RNNCore
 from sonnet.python.modules.rnn_core import TrainableInitialState
 from sonnet.python.modules.scale_gradient import scale_gradient

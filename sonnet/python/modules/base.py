@@ -83,6 +83,14 @@ class NotSupportedError(Error):
   """
 
 
+class NotInitializedError(Error):
+  """Error raised when connecting an uninitialized Sonnet module.
+
+  Before they can be connected, all Sonnet modules must call
+  `AbstractModule.__init__` (e.g. via a `super` call).
+  """
+
+
 class DifferentGraphError(Error):
   """Error raised when trying to connect a Sonnet module to multiple Graphs."""
 
@@ -194,6 +202,18 @@ class AbstractModule(object):
       this_scope_name = scope_name[:-len("/dummy/")]
     return output, this_scope_name
 
+  def _check_init_called(self):
+    """Checks that the base class's __init__ method has been called.
+
+    Raises:
+      NotInitializedError: `AbstractModule.__init__` has not been called.
+    """
+    try:
+      self._template
+    except AttributeError:
+      raise NotInitializedError(
+          "You may have forgotten to call super in your __init__ method.")
+
   def _check_same_graph(self):
     """Checks that the module is not being connect to multiple Graphs.
 
@@ -245,6 +265,7 @@ class AbstractModule(object):
     Returns:
       The result of the underlying _build method.
     """
+    self._check_init_called()
     self._check_same_graph()
     outputs, this_name_scope = self._template(*args, **kwargs)
     # Connect the module only if self._template returns with no errors.

@@ -43,6 +43,7 @@ from sonnet.python.modules.base import Error
 from sonnet.python.modules.base import IncompatibleShapeError
 from sonnet.python.modules.base import Module
 from sonnet.python.modules.base import NotConnectedError
+from sonnet.python.modules.base import NotInitializedError
 from sonnet.python.modules.base import NotSupportedError
 from sonnet.python.modules.base import ParentNotBuiltError
 from sonnet.python.modules.base import Transposable

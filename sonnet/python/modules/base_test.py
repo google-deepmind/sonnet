@@ -56,7 +56,17 @@ class IdentityModule(base.AbstractModule):
 
 
 class NoInitIdentityModule(base.AbstractModule):
+  """Sonnet module that inherits `base.AbstractModule.__init__`."""
+
+  def _build(self, inputs):
+    return tf.identity(inputs)
+
+
+class NoSuperInitIdentityModule(base.AbstractModule):
   """Sonnet module that doesn't call `base.AbstractModule.__init__`."""
+
+  def __init__(self):
+    pass
 
   def _build(self, inputs):
     return tf.identity(inputs)

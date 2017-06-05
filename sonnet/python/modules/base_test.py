@@ -147,6 +147,16 @@ class AbstractModuleTest(tf.test.TestCase):
     with self.assertRaises(ValueError):
       NoInitIdentityModule("foobar")
 
+  def testInitInvalidTypeArgs(self):
+    """Tests if calling __init__ without a string name raises a TypeError."""
+    with self.assertRaises(TypeError):
+      NoInitIdentityModule(name=123)
+
+  def testInitNoArgs(self):
+    """Tests if calling __init__ with no args uses correct defaults."""
+    module = NoInitIdentityModule()
+    self.assertEqual(module.module_name, "no_init_identity_module")
+
 
 def _make_model_with_params(inputs, output_size):
   weight_shape = [inputs.get_shape().as_list()[-1], output_size]

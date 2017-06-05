@@ -26,6 +26,8 @@ from __future__ import print_function
 
 import abc
 import collections
+import re
+
 # Dependency imports
 import six
 from sonnet.python.modules import util
@@ -92,6 +94,13 @@ ConnectedSubGraph = collections.namedtuple(
     "ConnectedSubGraph", ("builder", "name_scope", "inputs", "outputs"))
 
 
+def _to_snake_case(camel_case):
+  """Returns a CamelCase string as a snake_case string."""
+  underscored = re.sub(r"([A-Z])", r"_\1", camel_case)
+  public_name = re.sub(r"^_*", r"", underscored)
+  return public_name.lower()
+
+
 @six.add_metaclass(abc.ABCMeta)
 class AbstractModule(object):
   """Superclass for Sonnet Modules.
@@ -127,17 +136,20 @@ class AbstractModule(object):
           called without named parameters. If this is the case, a deprecation
           warning is issued in form of a `ValueError`.
       name: Name of this module. Used to construct the Templated build function.
+          If `None` the module's class name is used (converted to snake case).
 
     Raises:
-      ValueError: If name is not specified.
+      TypeError: If `name` is not a string.
       ValueError: If `__init__` was called without named arguments.
     """
     if _sentinel is not None:
       raise ValueError("Calling AbstractModule.__init__ without named "
                        "arguments is deprecated.")
 
-    if name is None or not isinstance(name, six.string_types):
-      raise ValueError("Name must be a string.")
+    if name is None:
+      name = _to_snake_case(self.__class__.__name__)
+    elif not isinstance(name, six.string_types):
+      raise TypeError("Name must be a string.")
 
     self._connected_subgraphs = []
 

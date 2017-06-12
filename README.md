@@ -856,3 +856,13 @@ the Sequential is connected into the graph, querying it with
 The DeepMind Research Engineering team is considering future additions to the
 `Module` API which remedy this, without requiring extra effort from module
 implementors.
+
+### Q: How do I serialize Sonnet module instances?
+
+A: We do not support serializing module instances, via pickle or any other
+method. Modules contain inherently non-serializable artifacts, such as
+references to `Variable`s and `Graph`s. To save a model, you should instead
+serialize the configuration information which will allow you to regenerate the
+Graph, such as the name and constructor parameters of some top level module.
+This avoids any complications with adding new members to modules, and then
+having to deal with old serialized instances where those members don't exist.

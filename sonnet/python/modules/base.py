@@ -447,6 +447,12 @@ class AbstractModule(object):
     return util.get_variables_in_scope(
         self.variable_scope, collection=collection)
 
+  def __getstate__(self):
+    raise NotSupportedError(
+        "Sonnet AbstractModule instances cannot be serialized. You should "
+        "instead serialize all necessary configuration which will allow "
+        "modules to be rebuilt.")
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Transposable(object):

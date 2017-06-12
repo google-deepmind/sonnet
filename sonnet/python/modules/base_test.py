@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from functools import partial
+import pickle
 import numpy as np
 import six
 from sonnet.python.modules import base
@@ -170,6 +171,13 @@ class AbstractModuleTest(tf.test.TestCase):
     module = NoSuperInitIdentityModule()
     with self.assertRaises(base.NotInitializedError):
       module(tf.constant([1]))  # pylint: disable=not-callable
+
+  def testPicklingNotSupported(self):
+    module = IdentityModule()
+    with self.assertRaisesRegexp(base.NotSupportedError,
+                                 "cannot be serialized"):
+      # Writing the object to a string will fail.
+      pickle.dumps(module)
 
 
 def _make_model_with_params(inputs, output_size):

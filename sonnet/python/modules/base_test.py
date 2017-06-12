@@ -47,9 +47,7 @@ class ModuleWithCustomInitializerKeys(base.AbstractModule):
 
 
 class IdentityModule(base.AbstractModule):
-
-  def __init__(self, name="identity_module"):
-    super(IdentityModule, self).__init__(name=name)
+  """Sonnet module that builds a single `tf.identity` op."""
 
   def _build(self, inputs):
     return tf.identity(inputs)
@@ -66,7 +64,7 @@ class NoSuperInitIdentityModule(base.AbstractModule):
   """Sonnet module that doesn't call `base.AbstractModule.__init__`."""
 
   def __init__(self):
-    pass
+    pass  # Don't call superclass initializer.
 
   def _build(self, inputs):
     return tf.identity(inputs)
@@ -166,6 +164,12 @@ class AbstractModuleTest(tf.test.TestCase):
     """Tests if calling __init__ with no args uses correct defaults."""
     module = NoInitIdentityModule()
     self.assertEqual(module.module_name, "no_init_identity_module")
+
+  def testInitNoSuper(self):
+    """Tests if a __call__ with no __init__ raises an error."""
+    module = NoSuperInitIdentityModule()
+    with self.assertRaises(base.NotInitializedError):
+      module(tf.constant([1]))  # pylint: disable=not-callable
 
 
 def _make_model_with_params(inputs, output_size):

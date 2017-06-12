@@ -211,8 +211,8 @@ class AbstractModule(object):
     try:
       self._template
     except AttributeError:
-      raise NotInitializedError(
-          "You may have forgotten to call super in your __init__ method.")
+      raise NotInitializedError("You may have forgotten to call super at the "
+                                "start of your __init__ method.")
 
   def _check_same_graph(self):
     """Checks that the module is not being connect to multiple Graphs.
@@ -227,13 +227,9 @@ class AbstractModule(object):
         it was previously used in.
     """
     current_graph = tf.get_default_graph()
-    try:
-      graph = self._graph
-    except AttributeError:
-      return  # Module instance predates the _graph attribute, skip the check.
-    if graph is None:
+    if self._graph is None:
       self._graph = current_graph
-    elif graph != current_graph:
+    elif self._graph != current_graph:
       raise DifferentGraphError("Cannot connect module to multiple Graphs.")
 
   @abc.abstractmethod
@@ -249,7 +245,6 @@ class AbstractModule(object):
     Returns:
       output Tensor(s).
     """
-    pass
 
   def __call__(self, *args, **kwargs):
     """Operator overload for calling.
@@ -427,6 +422,7 @@ class AbstractModule(object):
     Returns:
       `contextlib.contextmanager` of the variable_scope inside the template.
     """
+    self._check_init_called()
     self._check_same_graph()
     return tf.variable_scope(self._template.variable_scope, reuse=reuse)
 
@@ -492,12 +488,10 @@ class Transposable(object):
     Returns:
       Transposed version of the module.
     """
-    pass
 
   @abc.abstractmethod
   def input_shape(self):
     """Returns shape of input `Tensor` passed at last call to `build`."""
-    pass
 
 
 class Module(AbstractModule):

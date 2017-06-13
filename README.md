@@ -16,8 +16,8 @@ of TensorFlow, as well as the [native pip install](https://www.tensorflow.org/in
 
 ### Install bazel
 
-Ensure you have a recent version of bazel (>= 0.4.5 ). If not, follow
-[these directions](https://bazel.build/versions/master/docs/install.html).
+Ensure you have a recent version of bazel (>= 0.4.5) and JDK (>= 1.8). If not,
+follow [these directions](https://bazel.build/versions/master/docs/install.html).
 
 ### (virtualenv TensorFlow installation) Activate virtualenv
 

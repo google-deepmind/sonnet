@@ -71,6 +71,29 @@ class NoSuperInitIdentityModule(base.AbstractModule):
     return tf.identity(inputs)
 
 
+class InternalFunctionTest(tf.test.TestCase):
+
+  def testToSnakeCase(self):
+    test_cases = [
+        ("UpperCamelCase", "upper_camel_case"),
+        ("lowerCamelCase", "lower_camel_case"),
+        ("endsWithXYZ", "ends_with_xyz"),
+        ("already_snake_case", "already_snake_case"),
+        ("__private__", "private"),
+        ("LSTMModule", "lstm_module"),
+        ("version123p56vfxObject", "version_123p56vfx_object"),
+        ("version123P56VFXObject", "version_123p56vfx_object"),
+        ("versionVFX123P56Object", "version_vfx123p56_object"),
+        ("versionVfx123P56Object", "version_vfx_123p56_object"),
+        ("lstm1", "lstm_1"),
+        ("LSTM1", "lstm1"),
+    ]
+    for camel_case, snake_case in test_cases:
+      actual = base._to_snake_case(camel_case)
+      self.assertEqual(actual, snake_case, "_to_snake_case(%s) -> %s != %s" %
+                       (camel_case, actual, snake_case))
+
+
 class AbstractModuleTest(tf.test.TestCase):
 
   def testInitializerKeys(self):

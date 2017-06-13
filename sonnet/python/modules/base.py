@@ -33,8 +33,6 @@ import six
 from sonnet.python.modules import util
 import tensorflow as tf
 
-from tensorflow.python.util.deprecation import deprecated
-
 
 class Error(Exception):
   """Base class for all errors from snt.
@@ -302,31 +300,6 @@ class AbstractModule(object):
     """
     self._ensure_is_connected()
     return self._template.variable_scope
-
-  @property
-  @deprecated(
-      "2017-02-21", "The .var_scope property is deprecated. Please change your "
-      "code to use the .variable_scope property")
-  def var_scope(self):
-    """Returns the variable_scope declared by the module.
-
-    Deprecated in favour of `.variable_scope`.
-
-    Returns:
-      variable_scope: `tf.VariableScope` instance of the internal `tf.Template`.
-
-    Raises:
-      NotConnectedError: If the module is not connected to the Graph.
-    """
-    return self.variable_scope
-
-  @property
-  @deprecated(
-      "2017-03-01", "The .name property is deprecated. Please change your "
-      "code to use the .scope_name or .module_name property as appropriate")
-  def name(self):
-    """Returns the full name of the Module's variable scope."""
-    return self.scope_name
 
   @property
   def scope_name(self):

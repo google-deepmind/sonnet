@@ -71,9 +71,6 @@ class LinearTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertEqual(lin.scope_name, "scope/" + mod_name)
     self.assertEqual(lin.module_name, mod_name)
 
-    # Test deprecated name.
-    self.assertEqual(lin.name, "scope/" + mod_name)
-
   @parameterized.NamedParameters(
       ("WithBias", True),
       ("WithoutBias", False))

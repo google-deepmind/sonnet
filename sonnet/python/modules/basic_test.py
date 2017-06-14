@@ -422,6 +422,35 @@ class LinearTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertEqual(type(linear.w), variables.PartitionedVariable)
     self.assertEqual(type(linear.b), variables.PartitionedVariable)
 
+  @parameterized.NamedParameters(
+      ("float16", tf.float16),
+      ("float32", tf.float32),
+      ("float64", tf.float64))
+  def testFloatDataTypeConsistent(self, dtype):
+    inputs = tf.placeholder(dtype, [3, 7])
+    linear = snt.Linear(11)
+    outputs = linear(inputs)
+    self.assertEqual(linear.w.dtype.base_dtype, dtype)
+    self.assertEqual(linear.b.dtype.base_dtype, dtype)
+    self.assertEqual(outputs.dtype.base_dtype, dtype)
+
+  def testIntegerDataTypeFailsWithDefaultInitializers(self):
+    dtype = tf.int32
+    inputs = tf.placeholder(dtype, [3, 7])
+    linear = snt.Linear(11)
+    with self.assertRaisesRegexp(ValueError, "Expected floating point type"):
+      unused_outputs = linear(inputs)
+
+  def testIntegerDataTypeConsistentWithCustomWeightInitializer(self):
+    dtype = tf.int32
+    inputs = tf.placeholder(dtype, [3, 7])
+    linear = snt.Linear(
+        11, initializers={"w": tf.zeros_initializer(dtype=dtype)})
+    outputs = linear(inputs)
+    self.assertEqual(linear.w.dtype.base_dtype, dtype)
+    self.assertEqual(linear.b.dtype.base_dtype, dtype)
+    self.assertEqual(outputs.dtype.base_dtype, dtype)
+
 
 class AddBiasTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 

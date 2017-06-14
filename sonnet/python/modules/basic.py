@@ -97,15 +97,15 @@ def split_leading_dim(tensor, inputs, n_dims=2):
   return result
 
 
-def create_linear_initializer(input_size):
+def create_linear_initializer(input_size, dtype=tf.float32):
   """Returns a default initializer for weights of a linear module."""
   stddev = 1 / math.sqrt(input_size)
-  return tf.truncated_normal_initializer(stddev=stddev)
+  return tf.truncated_normal_initializer(stddev=stddev, dtype=dtype)
 
 
-def create_bias_initializer(unused_bias_shape):
+def create_bias_initializer(unused_bias_shape, dtype=tf.float32):
   """Returns a default initializer for the biases of a linear/AddBias module."""
-  return tf.zeros_initializer()
+  return tf.zeros_initializer(dtype=dtype)
 
 
 class Linear(base.AbstractModule, base.Transposable):
@@ -207,15 +207,17 @@ class Linear(base.AbstractModule, base.Transposable):
           .format(self.scope_name, self._input_shape[1], input_shape[1]))
 
     self._input_shape = input_shape
+    dtype = inputs.dtype
 
     if "w" not in self._initializers:
-      self._initializers["w"] = create_linear_initializer(self._input_shape[1])
+      self._initializers["w"] = create_linear_initializer(self._input_shape[1],
+                                                          dtype)
 
     if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(self._input_shape[1])
+      self._initializers["b"] = create_bias_initializer(self._input_shape[1],
+                                                        dtype)
 
     weight_shape = (self._input_shape[1], self.output_size)
-    dtype = inputs.dtype
     self._w = tf.get_variable("w",
                               shape=weight_shape,
                               dtype=dtype,
@@ -521,11 +523,11 @@ class AddBias(base.AbstractModule, base.Transposable):
                                                    input_shape[1]))
 
     self._input_shape = input_shape
+    dtype = inputs.dtype
 
     if "b" not in self._initializers:
-      self._initializers["b"] = create_bias_initializer(bias_shape)
+      self._initializers["b"] = create_bias_initializer(bias_shape, dtype)
 
-    dtype = inputs.dtype
     self._b = tf.get_variable(
         "b",
         shape=bias_shape,

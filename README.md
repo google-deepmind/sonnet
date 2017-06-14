@@ -114,7 +114,10 @@ train_predictions = linear_regression_module(train_data)
 test_predictions = linear_regression_module(test_data)
 ```
 
-More usage examples can be found [here](sonnet/examples/).
+More usage examples:
+
+ * Generative models
+ * RNNs
 
 ## General Principles
 
@@ -374,9 +377,9 @@ which is completely disjoint from the `"wrong_module"` namespace.
 
 #### Usage
 
-Sonnet includes recurrent core modules (also called "cells" in TensorFlow
-terminology), which perform one time step of computation. These are ready to
-be unrolled in time using TensorFlow's unrolling operations.
+Sonnet includes recurrent core modules (also called "cells"
+in TensorFlow terminology), which perform one time step of computation. These
+are ready to be unrolled in time using TensorFlow's unrolling operations.
 
 One example of an LSTM that is unrolled in time is the following:
 
@@ -396,7 +399,8 @@ The `batch_size` parameter passed to the `initial_state()` method can also be an
 `int32` Tensor.
 
 For a more comprehensive demonstration on the usage of recurrent modules, a
-fully-documented example of a deep LSTM with skip connections trained on PTB
+fully-documented example of a deep LSTM with skip connections trained on the
+Shakespeare dataset
 is available.
 
 #### Defining your own recurrent modules

@@ -21,6 +21,7 @@ from __future__ import print_function
 import itertools
 
 # Dependency imports
+import mock
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
@@ -604,6 +605,35 @@ class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertEqual(
         output.get_shape(),
         tf.TensorShape([sequence_length, batch_size, mlp_last_layer_size]))
+
+  def testFinalCoreHasNoSizeWarning(self):
+    cores = [snt.LSTM(hidden_size=10), snt.Linear(output_size=42), tf.nn.relu]
+    rnn = snt.DeepRNN(cores, skip_connections=False)
+
+    with mock.patch.object(tf.logging, "warning") as mocked_logging_warning:
+      # This will produce a warning.
+      unused_output_size = rnn.output_size
+      self.assertTrue(mocked_logging_warning.called)
+      first_call_args = mocked_logging_warning.call_args[0]
+      self.assertTrue("final core %s does not have the "
+                      ".output_size field" in first_call_args[0])
+      self.assertEqual(first_call_args[2], 42)
+
+  def testNoSizeButAlreadyConnected(self):
+    batch_size = 16
+    cores = [snt.LSTM(hidden_size=10), snt.Linear(output_size=42), tf.nn.relu]
+    rnn = snt.DeepRNN(cores, skip_connections=False)
+    unused_output = rnn(tf.zeros((batch_size, 128)),
+                        rnn.initial_state(batch_size=batch_size))
+
+    with mock.patch.object(tf.logging, "warning") as mocked_logging_warning:
+      output_size = rnn.output_size
+      # Correct size is automatically inferred.
+      self.assertEqual(output_size, tf.TensorShape([42]))
+      self.assertTrue(mocked_logging_warning.called)
+      first_call_args = mocked_logging_warning.call_args[0]
+      self.assertTrue("DeepRNN has been connected into the graph, "
+                      "so inferred output size" in first_call_args[0])
 
 
 class ModelRNNTest(tf.test.TestCase):

@@ -154,7 +154,20 @@ class MLP(base.AbstractModule, base.Transposable):
 
   @property
   def output_sizes(self):
+    """Returns a tuple of all output sizes of all the layers."""
     return tuple([l() if callable(l) else l for l in self._output_sizes])
+
+  @property
+  def output_size(self):
+    """Returns the size of the module output, not including the batch dimension.
+
+    This allows the MLP to be used inside a DeepRNN.
+
+    Returns:
+      The scalar size of the module output.
+    """
+    last_size = self._output_sizes[-1]
+    return last_size() if callable(last_size) else last_size
 
   @property
   def use_bias(self):

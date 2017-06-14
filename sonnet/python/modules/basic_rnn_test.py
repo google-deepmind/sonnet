@@ -583,6 +583,28 @@ class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     expected_shape = (batch_size, final_hidden_size)
     self.assertSequenceEqual(initial_output_res.shape, expected_shape)
 
+  def testMLPFinalCore(self):
+    batch_size = 2
+    sequence_length = 3
+    input_size = 4
+    mlp_last_layer_size = 17
+    cores = [
+        snt.LSTM(hidden_size=10),
+        snt.nets.MLP(output_sizes=[6, 7, mlp_last_layer_size]),
+    ]
+    deep_rnn = snt.DeepRNN(cores, skip_connections=False)
+    input_sequence = tf.constant(
+        np.random.randn(sequence_length, batch_size, input_size),
+        dtype=tf.float32)
+    initial_state = deep_rnn.initial_state(batch_size=batch_size)
+    output, unused_final_state = tf.nn.dynamic_rnn(
+        deep_rnn, input_sequence,
+        initial_state=initial_state,
+        time_major=True)
+    self.assertEqual(
+        output.get_shape(),
+        tf.TensorShape([sequence_length, batch_size, mlp_last_layer_size]))
+
 
 class ModelRNNTest(tf.test.TestCase):
 

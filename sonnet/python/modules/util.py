@@ -24,6 +24,7 @@ import re
 # Dependency imports
 import six
 import tensorflow as tf
+from tensorflow.python.util import deprecation
 
 
 def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
@@ -266,8 +267,8 @@ def _get_sliced_variables(var_list):
 
 def get_normalized_variable_map(scope_or_module,
                                 collection=tf.GraphKeys.GLOBAL_VARIABLES,
-                                group_sliced_variables=False,
-                                context=None):
+                                context=None,
+                                group_sliced_variables=True):
   """Builds map of `tf.Variable`s in scope or module with normalized names.
 
   The names of the variables are normalized to remove the scope prefix.
@@ -277,12 +278,12 @@ def get_normalized_variable_map(scope_or_module,
     collection: Collection to restrict query to. By default this is
         `tf.Graphkeys.VARIABLES`, which includes non-trainable variables such
         as moving averages.
-    group_sliced_variables: Boolean, if set to True, sliced variables are
-       grouped together in the returned map; if set to False, each partition of
-       a sliced variable is a separate (key, value) pair.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix. By default `None`, which means
         `context=scope`.
+    group_sliced_variables: Boolean, if set to True, sliced variables are
+       grouped together in the returned map; if set to False, each partition of
+       a sliced variable is a separate (key, value) pair.
 
   Returns:
     Dictionary mapping normalized variable name to `tf.Variable`, or a list
@@ -323,8 +324,13 @@ def get_normalized_variable_map(scope_or_module,
   return var_map
 
 
+@deprecation.deprecated_arg_values(
+    "2017-08-01",
+    "Start using group_sliced_variables=True. This may break your checkpoints "
+    "if they contain sliced (partitioned) variables",
+    group_sliced_variables=False)
 def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
-              context=None):
+              context=None, group_sliced_variables=True):
   """Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
   The names of the variables are normalized to remove the scope prefix.
@@ -338,15 +344,19 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
         which includes moving averages variables as well as trainable variables.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix.
+    group_sliced_variables: Boolean, if set to True, sliced variables are
+       grouped together in the returned map; if set to False, each partition of
+       a sliced variable is a separate (key, value) pair.
 
   Returns:
     A `tf.train.Saver` object for Variables in the scope or module.
   """
 
   variable_map = {}
-
   for collection in collections:
-    variable_map.update(get_normalized_variable_map(scope, collection, context))
+    variable_map.update(get_normalized_variable_map(
+        scope, collection, context,
+        group_sliced_variables))
 
   return tf.train.Saver(var_list=variable_map)
 

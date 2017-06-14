@@ -53,6 +53,8 @@ class AlexNet(base.AbstractModule):
   HALF = "HALF"
   MINI = "MINI"
 
+  POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
+
   def __init__(self, mode=HALF, use_batch_norm=False, batch_norm_config=None,
                initializers=None, partitioners=None, regularizers=None,
                name="alex_net"):
@@ -141,13 +143,16 @@ class AlexNet(base.AbstractModule):
     self._conv_modules = []
     self._linear_modules = []
 
-    self.possible_keys = {"w", "b"}
+    # Keep old name for backwards compatibility
+
+    self.possible_keys = self.POSSIBLE_INITIALIZER_KEYS
+
     self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
+        initializers, self.POSSIBLE_INITIALIZER_KEYS)
     self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
+        partitioners, self.POSSIBLE_INITIALIZER_KEYS)
     self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
+        regularizers, self.POSSIBLE_INITIALIZER_KEYS)
 
   def _calc_min_size(self, conv_layers):
     """Calculates the minimum size of the input layer.

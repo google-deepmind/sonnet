@@ -39,7 +39,10 @@ def _replicate_elements(input_iterable, num_times):
 class ConvNet2D(base.AbstractModule, base.Transposable):
   """A 2D Convolutional Network module."""
 
-  POSSIBLE_KEYS = {"w", "b"}
+  POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
+  # Keep old name for backwards compatibility
+
+  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self,
                output_channels,
@@ -137,11 +140,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     self._input_shape = None
 
     self._initializers = util.check_initializers(
-        initializers, self.POSSIBLE_KEYS)
+        initializers, self.POSSIBLE_INITIALIZER_KEYS)
     self._partitioners = util.check_partitioners(
-        partitioners, self.POSSIBLE_KEYS)
+        partitioners, self.POSSIBLE_INITIALIZER_KEYS)
     self._regularizers = util.check_regularizers(
-        regularizers, self.POSSIBLE_KEYS)
+        regularizers, self.POSSIBLE_INITIALIZER_KEYS)
 
     if not callable(activation):
       raise TypeError("Input 'activation' must be callable")

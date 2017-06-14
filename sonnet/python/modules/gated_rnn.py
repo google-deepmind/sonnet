@@ -138,8 +138,11 @@ class LSTM(rnn_core.RNNCore):
   GAMMA_X = "gamma_x"  # batch norm scaling for input -> gates
   GAMMA_C = "gamma_c"  # batch norm scaling for cell -> output
   BETA_C = "beta_c"  # (batch norm) bias for cell -> output
-  POSSIBLE_KEYS = {W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG, GAMMA_H,
-                   GAMMA_X, GAMMA_C, BETA_C}
+  POSSIBLE_INITIALIZER_KEYS = {W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG,
+                               GAMMA_H, GAMMA_X, GAMMA_C, BETA_C}
+  # Keep old name for backwards compatibility
+
+  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self,
                hidden_size,
@@ -160,16 +163,19 @@ class LSTM(rnn_core.RNNCore):
       hidden_size: (int) Hidden size dimensionality.
       forget_bias: (float) Bias for the forget activation.
       initializers: Dict containing ops to initialize the weights.
-        This dictionary may contain any of the keys in POSSIBLE_KEYS.
+        This dictionary may contain any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
         The gamma and beta variables control batch normalization values for
         different batch norm transformations inside the cell; see the paper for
         details.
       partitioners: Optional dict containing partitioners to partition
         the weights and biases. As a default, no partitioners are used. This
-        dict may contain any of the keys in POSSIBLE_KEYS.
+        dict may contain any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
       regularizers: Optional dict containing regularizers for the weights and
         biases. As a default, no regularizers are used. This dict may contain
-        any of the keys in POSSIBLE_KEYS.
+        any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
       use_peepholes: Boolean that indicates whether peephole connections are
         used.
       use_batch_norm_h: Boolean that indicates whether to apply batch
@@ -187,9 +193,12 @@ class LSTM(rnn_core.RNNCore):
       name: name of the module.
 
     Raises:
-      KeyError: if `initializers` contains any keys not in POSSIBLE_KEYS.
-      KeyError: if `partitioners` contains any keys not in POSSIBLE_KEYS.
-      KeyError: if `regularizers` contains any keys not in POSSIBLE_KEYS.
+      KeyError: if `initializers` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
+      KeyError: if `partitioners` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
+      KeyError: if `regularizers` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
       ValueError: if a peephole initializer is passed in the initializer list,
         but `use_peepholes` is False.
       ValueError: if a batch norm initializer is passed in the initializer list,
@@ -274,7 +283,38 @@ class LSTM(rnn_core.RNNCore):
   def get_possible_initializer_keys(
       cls, use_peepholes=False, use_batch_norm_h=False, use_batch_norm_x=False,
       use_batch_norm_c=False):
-    possible_keys = cls.POSSIBLE_KEYS.copy()
+    """Returns the keys the dictionary of variable initializers may contain.
+
+    The set of all possible initializer keys are:
+      w_gates:  weight for gates
+      b_gates:  bias of gates
+      w_f_diag: weight for prev_cell -> forget gate peephole
+      w_i_diag: weight for prev_cell -> input gate peephole
+      w_o_diag: weight for prev_cell -> output gate peephole
+      gamma_h:  batch norm scaling for previous_hidden -> gates
+      gamma_x:  batch norm scaling for input -> gates
+      gamma_c:  batch norm scaling for cell -> output
+      beta_c:   batch norm bias for cell -> output
+
+    Args:
+      cls:The class.
+      use_peepholes: Boolean that indicates whether peephole connections are
+        used.
+      use_batch_norm_h: Boolean that indicates whether to apply batch
+        normalization at the previous_hidden -> gates contribution. If you are
+        experimenting with batch norm then this may be the most effective to
+        turn on.
+      use_batch_norm_x: Boolean that indicates whether to apply batch
+        normalization at the input -> gates contribution.
+      use_batch_norm_c: Boolean that indicates whether to apply batch
+        normalization at the cell -> output contribution.
+
+    Returns:
+      Set with strings corresponding to the strings that may be passed to the
+        constructor.
+    """
+
+    possible_keys = cls.POSSIBLE_INITIALIZER_KEYS.copy()
     if not use_peepholes:
       possible_keys.difference_update(
           {cls.W_F_DIAG, cls.W_I_DIAG, cls.W_O_DIAG})
@@ -844,17 +884,18 @@ class GRU(rnn_core.RNNCore):
   """
 
   # Keys that may be provided for parameter initializers.
-  WZ = "wz"
-  UZ = "uz"
-  BZ = "bz"
-  WR = "wr"
-  UR = "ur"
-  BR = "br"
-  WH = "wh"
-  UH = "uh"
-  BH = "bh"
+  WZ = "wz"  # weight for input -> update cell
+  UZ = "uz"  # weight for prev_state -> update cell
+  BZ = "bz"  # bias for update_cell
+  WR = "wr"  # weight for input -> reset cell
+  UR = "ur"  # weight for prev_state -> reset cell
+  BR = "br"  # bias for reset cell
+  WH = "wh"  # weight for input -> candidate activation
+  UH = "uh"  # weight for prev_state -> candidate activation
+  BH = "bh"  # bias for candidate activation
   POSSIBLE_INITIALIZER_KEYS = {WZ, UZ, BZ, WR, UR, BR, WH, UH, BH}
   # Keep old name for backwards compatibility
+
   POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self, hidden_size, initializers=None, partitioners=None,
@@ -864,17 +905,25 @@ class GRU(rnn_core.RNNCore):
     Args:
       hidden_size: (int) Hidden size dimensionality.
       initializers: Dict containing ops to initialize the weights. This
-        dict may contain any of the keys in POSSIBLE_KEYS.
+        dict may contain any of the keys returned by
+        `GRU.get_possible_initializer_keys`.
       partitioners: Optional dict containing partitioners to partition
         the weights and biases. As a default, no partitioners are used. This
-        dict may contain any of the keys in POSSIBLE_KEYS.
+        dict may contain any of the keys returned by
+        `GRU.get_possible_initializer_keys`
       regularizers: Optional dict containing regularizers for the weights and
         biases. As a default, no regularizers are used. This
-        dict may contain any of the keys in POSSIBLE_KEYS.
+        dict may contain any of the keys returned by
+        `GRU.get_possible_initializer_keys`
       name: name of the module.
 
     Raises:
-      KeyError: if initializers contains any keys not in POSSIBLE_KEYS.
+      KeyError: if `initializers` contains any keys not returned by
+        `GRU.get_possible_initializer_keys`.
+      KeyError: if `partitioners` contains any keys not returned by
+        `GRU.get_possible_initializer_keys`.
+      KeyError: if `regularizers` contains any keys not returned by
+        `GRU.get_possible_initializer_keys`.
     """
     super(GRU, self).__init__(name=name)
     self._hidden_size = hidden_size
@@ -884,6 +933,27 @@ class GRU(rnn_core.RNNCore):
         partitioners, self.POSSIBLE_INITIALIZER_KEYS)
     self._regularizers = util.check_regularizers(
         regularizers, self.POSSIBLE_INITIALIZER_KEYS)
+
+  @classmethod
+  def get_possible_initializer_keys(cls):
+    """Returns the keys the dictionary of variable initializers may contain.
+
+    The set of all possible initializer keys are:
+      wz: weight for input -> update cell
+      uz: weight for prev_state -> update cell
+      bz: bias for update_cell
+      wr: weight for input -> reset cell
+      ur: weight for prev_state -> reset cell
+      br: bias for reset cell
+      wh: weight for input -> candidate activation
+      uh: weight for prev_state -> candidate activation
+      bh: bias for candidate activation
+
+    Returns:
+      Set with strings corresponding to the strings that may be passed to the
+        constructor.
+    """
+    return super(GRU, cls).get_possible_initializer_keys(cls)
 
   def _build(self, inputs, prev_state):
     """Connects the GRU module into the graph.

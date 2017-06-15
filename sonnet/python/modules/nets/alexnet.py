@@ -185,10 +185,16 @@ class AlexNet(base.AbstractModule):
              test_local_stats=True):
     """Connects the AlexNet module into the graph.
 
+    The is_training flag only controls the batch norm settings, if `False` it
+    does not force no dropout by overriding any input `keep_prob`. To avoid any
+    confusion this may cause, if `is_training=False` and `keep_prob` would cause
+    dropout to be applied, an error is thrown.
+
     Args:
       inputs: A Tensor of size [batch_size, input_height, input_width,
         input_channels], representing a batch of input images.
       keep_prob: A scalar Tensor representing the dropout keep probability.
+        When `is_training=False` this must be None or 1 to give no dropout.
       is_training: Boolean to indicate to `snt.BatchNorm` if we are
         currently training. By default `True`.
       test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
@@ -202,16 +208,25 @@ class AlexNet(base.AbstractModule):
     Raises:
       base.IncompatibleShapeError: If any of the input image dimensions
         (input_height, input_width) are too small for the given network mode.
+      ValueError: If `keep_prob` is not None or 1 when `is_training=False`.
     """
-
+    # Check input shape
     input_shape = inputs.get_shape().as_list()
-
     if input_shape[1] < self._min_size or input_shape[2] < self._min_size:
       raise base.IncompatibleShapeError(
           "Image shape too small: ({:d}, {:d}) < {:d}".format(
               input_shape[1], input_shape[2], self._min_size))
 
     net = inputs
+
+    # Check keep prob
+    if keep_prob is not None:
+      valid_inputs = tf.logical_or(is_training, tf.equal(keep_prob, 1.))
+      keep_prob_check = tf.assert_equal(
+          valid_inputs, True,
+          message="Input `keep_prob` must be None or 1 if `is_training=False`.")
+      with tf.control_dependencies([keep_prob_check]):
+        net = tf.identity(net)
 
     for i, params in enumerate(self._conv_layers):
       output_channels, conv_params, max_pooling = params

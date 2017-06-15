@@ -105,6 +105,24 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
 
     self.assertEqual(len(model_variables), 7 * 4)
 
+  def testNoDropoutInTesting(self):
+    """An exception should be raised if trying to use dropout when testing."""
+    net = snt.nets.AlexNet(mode=snt.nets.AlexNet.FULL)
+    input_shape = [net._min_size, net._min_size, 3]
+    inputs = tf.placeholder(tf.float32, shape=[None] + input_shape)
+
+    keep_prob = tf.placeholder(tf.float32, name="keep_prob")
+    output = net(inputs, keep_prob, is_training=False)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      with self.assertRaisesRegexp(tf.errors.InvalidArgumentError, "keep_prob"):
+        sess.run(output, feed_dict={inputs: np.random.rand(10, *input_shape),
+                                    keep_prob: 0.7})
+      # No exception if keep_prob=1
+      sess.run(output, feed_dict={inputs: np.random.rand(10, *input_shape),
+                                  keep_prob: 1.0})
+
   def testInputTooSmall(self):
     """Check that an error is raised if the input image is too small."""
 

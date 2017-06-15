@@ -584,25 +584,42 @@ class AddBias(base.AbstractModule, base.Transposable):
 class BatchReshape(base.AbstractModule, base.Transposable):
   """Reshapes input Tensor, preserving the batch dimension."""
 
-  def __init__(self, shape, name="batch_reshape"):
+  def __init__(self, shape, preserve_dims=1, name="batch_reshape"):
     """Constructs a BatchReshape module.
 
     Args:
       shape: Shape to reshape the input Tensor to while preserving its
-          batch size; `shape` can be either a tuple/list, or a callable that
-          returns the actual shape. The callable does not need to be ready to
-          return something meaningful at construction time, but it will be
-          required to be able to do so when the module is connected to the
-          graph. When the special value -1 appears in `shape` the corresponding
-          size is automatically inferred. Note that -1 can only appear once in
-          `shape`. To flatten all non-batch dimensions, the snt.BatchFlatten
-          module can also be used.
+          first `preserve_dims` dimensions; `shape` can be either a tuple/list,
+          or a callable that returns the actual shape. The callable does not
+          need to be ready to return something meaningful at construction time,
+          but it will be required to be able to do so when the module is
+          connected to the graph. When the special value -1 appears in `shape`
+          the corresponding size is automatically inferred. Note that -1 can
+          only appear once in `shape`. To flatten all non-batch dimensions,
+          the snt.BatchFlatten module can also be used.
+      preserve_dims: Number of leading dimensions that will not be reshaped.
+          For example, given an input Tensor with shape `[B, H, W, C, D]`,
+          and argument `shape` equal to `(-1, D)`:
+            * `preserve_dims=1` will return a Tensor with shape `[B, H*W*C, D]`.
+            * `preserve_dims=2` will return a Tensor with
+                shape `[B, H, W*C, D]`.
+            * `preserve_dims=3` will return a Tensor with
+                shape `[B, H, W, C, D]`.
+            * `preserve_dims=4` will return a Tensor with
+                shape `[B, H, W, C, 1, D]`.
+            * `preserve_dims>=5` will throw an error on build unless D=1.
+          The preserved dimensions can be unknown at building time.
       name: Name of the module.
+    Raises:
+      ValueError: If `preserve_dims <= 0`.
     """
     super(BatchReshape, self).__init__(name=name)
 
     self._input_shape = None
     self._shape = shape
+    self._preserve_dims = preserve_dims
+    if preserve_dims <= 0:
+      raise ValueError("Argument preserve_dims should be >= 1.")
 
     if not callable(self._shape):
       self._shape = tuple(self._shape)
@@ -631,29 +648,45 @@ class BatchReshape(base.AbstractModule, base.Transposable):
     """Connects the module into the graph, with input Tensor `inputs`.
 
     Args:
-      inputs: A Tensor of shape [batch_size] + input_shape.
+      inputs: A Tensor of shape [b_1, b_2, ..., b_preserve_dims,
+                                 b_preserve_dims+1, ...].
 
     Returns:
-      A Tensor of shape [batch_size] + output_shape, with output_shape as
-         defined in constructor.
+      A Tensor of shape [b_1, b_2, ..., b_preserve_dims,
+                         b_reshape_1, b_reshape_2, ...],
+        with reshaping defined by the constructor `shape` parameter.
 
     Raises:
       ValueError: If output shape is incompatible with input shape; or if
           shape array contains non numeric entries; or if shape array contains
-          more than 1 wildcard -1.
+          more than 1 wildcard -1; or if the input array contains unknown,
+          non-preserved dimensions (except when the unknown dimension is the
+          only non-preserved dimension and doesn't actually need reshaping).
     """
-    self._input_shape = inputs.get_shape()[1:].as_list()
+    full_input_shape = inputs.get_shape().as_list()
+    if len(full_input_shape) < self._preserve_dims:
+      raise ValueError("Input tensor has {} dimensions, should have at least "
+                       "as many as preserve_dims={}".format(
+                           len(full_input_shape),
+                           self._preserve_dims))
+    self._input_shape = full_input_shape[self._preserve_dims:]
 
     if callable(self._shape):
       self._shape = tuple(self._shape())
 
-    # Special-case 2D inputs, where no reshape is necessary. This is useful if
-    # `inputs` contains empty dimensions.
+    # Special-case of 1 non-preserved dimension, where no reshape is necessary.
+    # This is useful if the non-preserved dimension of `inputs` is unknown
+    # at build time.
     if len(self._input_shape) == 1 and len(self._shape) == 1:
       if self._shape[0] == -1 or self._shape[0] == self._input_shape[0]:
         return inputs
       else:
-        raise ValueError("Output shape is incompatible with input shape")
+        if self._input_shape[0] is None:
+          raise ValueError("Unknown non-preserved dimensions are not allowed "
+                           "in the input to BatchReshape unless it is only one "
+                           "and the desired shape is (-1,).")
+        else:
+          raise ValueError("Output shape is incompatible with input shape")
 
     if not all([isinstance(x, numbers.Integral) and (x > 0 or x == -1)
                 for x in self._shape]):
@@ -663,14 +696,33 @@ class BatchReshape(base.AbstractModule, base.Transposable):
     if self._shape.count(-1) > 1:
       raise ValueError("Wildcard -1 can appear only once in shape")
 
-    if self._shape.count(-1) > 0:
-      shape = (-1,) + self._infer_shape(self._input_shape)
-    else:
-      shape = (-1,) + self._shape
+    preserved_shape = tf.shape(inputs)[:self._preserve_dims]
+    # Slicing the shape tensor loses information, we keep it in a list.
+    preserved_shape_list = inputs.get_shape()[:self._preserve_dims]
 
-    if np.prod(self._input_shape) != np.prod(shape[1:]):
+    # Except in the case above where no reshape is needed, we do not allow
+    # unknown non-preserved dimensions in the input.
+    if None in self._input_shape:
+      raise ValueError("Unknown non-preserved dimensions are not allowed in "
+                       "the input to BatchReshape unless it is only one and the"
+                       " desired shape is (-1,). The offending non-preserved "
+                       "input shape is {}".format(self._input_shape))
+    if self._shape.count(-1) > 0:
+      trailing_shape = self._infer_shape(self._input_shape)
+    else:
+      trailing_shape = self._shape
+
+    if np.prod(self._input_shape) != np.prod(trailing_shape):
       raise ValueError("Output shape is incompatible with input shape")
-    return tf.reshape(inputs, shape)
+
+    shape = tf.concat([preserved_shape, trailing_shape], 0)
+    output = tf.reshape(inputs, shape)
+
+    # Include shape information that was lost when we sliced the shape tensor.
+    shape_list = preserved_shape_list.concatenate(trailing_shape)
+    output.set_shape(shape_list)
+
+    return output
 
   @property
   def input_shape(self):
@@ -682,19 +734,34 @@ class BatchReshape(base.AbstractModule, base.Transposable):
     """Returns transpose batch reshape."""
     if name is None:
       name = self.module_name + "_transpose"
-    return BatchReshape(shape=lambda: self.input_shape, name=name)
+    return BatchReshape(shape=lambda: self.input_shape,
+                        preserve_dims=self._preserve_dims,
+                        name=name)
 
 
 class BatchFlatten(BatchReshape):
-  """Flattens the input Tensor, preserving the batch dimension."""
+  """Flattens the input Tensor, preserving the batch dimension(s)."""
 
-  def __init__(self, name="batch_flatten"):
+  def __init__(self, preserve_dims=1, name="batch_flatten"):
     """Constructs a BatchFlatten module.
 
     Args:
+      preserve_dims: Number of leading dimensions that will not be reshaped.
+          For example, given an input Tensor with shape `[B, H, W, C, D]`,
+          and argument `shape` equal to `(-1, D)`:
+            * `preserve_dims=1` will return a Tensor with shape `[B, H*W*C, D]`.
+            * `preserve_dims=2` will return a Tensor with
+                shape `[B, H, W*C, D]`.
+            * `preserve_dims=3` will return a Tensor with
+                shape `[B, H, W, C, D]`.
+            * `preserve_dims=4` will  return a Tensor with
+                shape `[B, H, W, C, 1, D]`.
+            * `preserve_dims>=5` will throw an error on build unless D=1.
+          The preserved dimensions can be unknown at building time.
       name: Name of the module.
     """
-    super(BatchFlatten, self).__init__(name=name, shape=(-1,))
+    super(BatchFlatten, self).__init__(
+        shape=(-1,), preserve_dims=preserve_dims, name=name)
 
 
 class FlattenTrailingDimensions(BatchReshape):
@@ -703,14 +770,15 @@ class FlattenTrailingDimensions(BatchReshape):
   def __init__(self, dim_from, name="batch_dim_from"):
     """Constructs a FlattenTrailingDimensions module.
 
-    For example, given an input Tensor with shape `[B, H, W, C, D]`, where the
-    batch dimension `B` may not be statically known:
+    For example, given an input Tensor with shape `[B, H, W, C, D]`:
 
-      * `dim_from=1` will return a Tensor with shape `[B, H*W*C*D]`, which
-        is equivalent to `BatchFlatten`.
+      * `dim_from=1` will return a Tensor with shape `[B, H*W*C*D]`.
       * `dim_from=2` will return a Tensor with shape `[B, H, W*C*D]`.
       * `dim_from=3` will return a Tensor with shape `[B, H, W, C*D]`.
       * `dim_from=4` will return a Tensor equivalent to input.
+      The preserved dimensions can be unknown at building time.
+
+    Equivalent to BatchFlatten(preserve_dims=dim_from, name=name).
 
     Args:
       dim_from: All dimensions after and including `dim_from` will
@@ -720,38 +788,10 @@ class FlattenTrailingDimensions(BatchReshape):
     Raises:
       ValueError: If `dim_from <= 0`.
     """
-    super(FlattenTrailingDimensions, self).__init__(name=name, shape=())
     if dim_from <= 0:
       raise ValueError("Argument dim_from should be >= 1.")
-    self._dim_from = dim_from
-
-  def _build(self, inputs):
-    """Connects the module into the graph, with input Tensor `inputs`.
-
-    Args:
-      inputs: A Tensor of dimension at least `dim_from+1`. Only the first
-        dimension may be statically unknown.
-
-    Returns:
-      A Tensor of dimension `dim_from+1`, where the size of all dimensions
-          up to `dim_from` are the same as in `inputs`, and the final
-          dimension has size equal to the product of the size of all dimensions
-          from `dim_from`.
-
-    Raises:
-      ValueError: If `inputs` has fewer dimensions than `dim_from`.
-                  If `inputs` has an statically unknown dimensions other than
-                  the first.
-    """
-
-    input_shape = inputs.get_shape().as_list()
-    if any([dim is None for dim in input_shape[1:]]):
-      raise ValueError("Input tensor has statically unknown dimension "
-                       "other than first dimension.")
-    if len(input_shape) < self._dim_from + 1:
-      raise ValueError("Input tensor has fewer dimensions than dim_from.")
-    self._shape = tuple(input_shape[1:self._dim_from] + [-1])
-    return super(FlattenTrailingDimensions, self)._build(inputs)
+    super(FlattenTrailingDimensions, self).__init__(
+        shape=(-1,), preserve_dims=dim_from, name=name)
 
 
 class TrainableVariable(base.AbstractModule):

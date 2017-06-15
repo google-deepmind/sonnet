@@ -796,7 +796,8 @@ class TrainableVariableTest(tf.test.TestCase):
     self.assertEqual(type(var.w), variables.PartitionedVariable)
 
 
-class BatchReshapeTest(tf.test.TestCase):
+class BatchReshapeTest(tf.test.TestCase,
+                       parameterized.ParameterizedTestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -865,6 +866,54 @@ class BatchReshapeTest(tf.test.TestCase):
     output = mod(inputs)
     self.assertEqual(output.get_shape(), [batch_size] + correct_out_size)
 
+  def testAddDimensions(self):
+    batch_size = 10
+    in_shape = []
+    out_size = [1, 1]
+    correct_out_size = [1, 1]
+    inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
+    mod = snt.BatchReshape(shape=out_size)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape(), [batch_size] + correct_out_size)
+    # Transposition should also work
+    mod_t = mod.transpose()
+    t_output = mod_t(output)
+    self.assertEqual(t_output.get_shape(), [batch_size] + in_shape)
+
+  def testNoReshapeNeeded(self):
+    batch_size = 10
+    in_shape = [None]
+    out_size = [-1]
+    inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
+    mod = snt.BatchReshape(shape=out_size)
+    output = mod(inputs)
+    self.assertIs(output, inputs)
+
+    in_shape = [10]
+    out_size = [10]
+    inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
+    mod = snt.BatchReshape(shape=out_size)
+    output = mod(inputs)
+    self.assertIs(output, inputs)
+
+  @parameterized.NamedParameters(
+      ("BadUnknown1", (None,), (5,)),
+      ("BadUnknown2", (None, None), (5,)),
+      ("BadUnknown3", (None, None), (5, 5)),
+      ("BadUnknown4", (5, None), (5, 5)),
+      ("BadUnknown5", (None, 5), (5, 5)),
+  )
+  def testBadUnknownNonPreservedDimensions(self, input_shape, output_shape):
+    preserved_shape = (10,)
+    shape = preserved_shape + input_shape
+    preserve_dims = len(preserved_shape)
+    inputs = tf.placeholder(tf.float32, shape)
+    mod = snt.BatchReshape(shape=output_shape,
+                           preserve_dims=preserve_dims)
+    err = "Unknown non-preserved dimensions are not allowed"
+    with self.assertRaisesRegexp(ValueError, err):
+      _ = mod(inputs)
+
   def testFlatten(self):
     batch_size = 10
     in_shape = [2, 3, 4, 5]
@@ -874,6 +923,17 @@ class BatchReshapeTest(tf.test.TestCase):
     output = mod(inputs)
     flattened_shape = np.prod(in_shape)
     self.assertEqual(output.get_shape(), [batch_size, flattened_shape])
+
+  def testUnknown(self):
+    batch_size = None
+    in_shape = [2, 3, 4, 5]
+    out_size = [-1]
+    inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
+    mod = snt.BatchReshape(shape=out_size)
+    output = mod(inputs)
+    flattened_shape = np.prod(in_shape)
+    self.assertEqual(output.get_shape().as_list(),
+                     [batch_size, flattened_shape])
 
   def testTranspose(self):
     batch_size = 10
@@ -895,6 +955,69 @@ class BatchReshapeTest(tf.test.TestCase):
     with self.test_session() as sess:
       input_data, out = sess.run([inputs, output])
       self.assertAllClose(out, input_data)
+
+  def testInvalidPreserveDimsError(self):
+    with self.assertRaisesRegexp(ValueError, "preserve_dims"):
+      snt.BatchReshape((-1,), preserve_dims=0)
+
+  def testBuildDimError(self):
+    mod = snt.BatchReshape((-1,), preserve_dims=2)
+    input_tensor = tf.placeholder(tf.float32, (50,))
+    with self.assertRaisesRegexp(ValueError, "preserve_dims"):
+      mod(input_tensor)
+
+  def testBuildUnknown(self):
+    mod = snt.BatchReshape(shape=(2, 9), preserve_dims=2)
+    shape = [50, None, 6, 3]
+    inputs = tf.placeholder(tf.float32, shape)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape().as_list(), [50, None, 2, 9])
+
+  @parameterized.NamedParameters(
+      ("Preserve1", (1,)),
+      ("Preserve24", (2, 4)),
+      ("Preserve?", (None,)),
+      ("Preserve?5", (None, 5)),
+      ("Preserve5?", (5, None)),
+      ("Preserve??", (None, None)))
+  def testPreserve(self, preserve):
+    shape = list(preserve) + [13, 84, 3, 2]
+    output_shape = [13, 21, 3, 8]
+    preserve_dims = len(preserve)
+    inputs = tf.placeholder(tf.float32, shape)
+    mod = snt.BatchReshape(shape=output_shape,
+                           preserve_dims=preserve_dims)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape().as_list(),
+                     list(preserve) + output_shape)
+
+  @parameterized.NamedParameters(
+      ("Session1", (1,), (2, 3), (-1,)),
+      ("Session2", (1, 7), (2, 3), (-1,)),
+      ("Session3", (None,), (2, 3), (-1,)),
+      ("Session4", (None, 5, None), (2, 3, 4), (4, 6)),
+      ("Session5", (None, None, None), (2, 3, 4), (-1,)),
+      ("Session6", (5, None, None), (1, 3, 1), (-1,)),
+      ("Session7", (1,), (4, 3), (2, 2, 1, 3)),
+      ("Session8", (None,), (4, 3), (2, 2, 1, 3)),
+      ("Session9", (1, None, 5, None), (4, 3), (2, 2, -1, 3)))
+  def testRun(self, preserve, trailing_in, trailing_out):
+    rng = np.random.RandomState(0)
+    input_shape = preserve + trailing_in
+    output_shape = preserve + np.zeros(trailing_in).reshape(trailing_out).shape
+    inputs = tf.placeholder(tf.float32, input_shape)
+    mod = snt.BatchReshape(shape=trailing_out,
+                           preserve_dims=len(preserve))
+    output = mod(inputs)
+    self.assertEqual(output.get_shape().as_list(), list(output_shape))
+
+    actual_input_shape = [13 if i is None else i for i in input_shape]
+    expected_output_shape = [13 if i is None else i for i in output_shape]
+    actual_input = rng.rand(*actual_input_shape).astype(np.float32)
+    expected_output = actual_input.reshape(expected_output_shape)
+    with self.test_session() as sess:
+      actual_output = sess.run(output, feed_dict={inputs: actual_input})
+    self.assertAllEqual(actual_output, expected_output)
 
 
 class BatchFlattenTest(tf.test.TestCase):
@@ -937,15 +1060,16 @@ class FlattenTrailingDimensionsTest(tf.test.TestCase,
 
   def testBuildDimError(self):
     mod = snt.FlattenTrailingDimensions(dim_from=2)
-    input_tensor = tf.placeholder(tf.float32, (50, 5))
+    input_tensor = tf.placeholder(tf.float32, (50,))
     with self.assertRaisesRegexp(ValueError, "dim_from"):
       mod(input_tensor)
 
-  def testBuildUnknownError(self):
+  def testBuildUnknown(self):
     mod = snt.FlattenTrailingDimensions(dim_from=2)
-    input_tensor = tf.placeholder(tf.float32, (50, None, 5))
-    with self.assertRaisesRegexp(ValueError, "statically unknown"):
-      mod(input_tensor)
+    shape = [50, None, 5]
+    inputs = tf.placeholder(tf.float32, shape)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape().as_list(), shape)
 
   @parameterized.NamedParameters(
       ("BatchSize1", 1),

@@ -425,6 +425,45 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     expected = 4  # gate bias and one weight, plus LayerNorm's gamma, beta.
     self.assertEqual(len(core.get_variables()), expected)
 
+  def testHiddenClipping(self):
+    core = snt.LSTM(hidden_size=5, hidden_clip_value=1.0)
+    obs = tf.constant(np.random.rand(3, 10), dtype=tf.float32)
+    hidden = tf.placeholder(tf.float32, shape=[3, 5])
+    cell = tf.placeholder(tf.float32, shape=[3, 5])
+    output = core(obs, [hidden, cell])
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      unclipped = np.random.rand(3, 5) - 0.5
+      unclipped *= 2.0 / unclipped.max()
+      clipped = unclipped.clip(-1., 1.)
+      output1, (hidden1, cell1) = sess.run(output, feed_dict={hidden: unclipped,
+                                                              cell: unclipped})
+      output2, (hidden2, cell2) = sess.run(output, feed_dict={hidden: clipped,
+                                                              cell: unclipped})
+      self.assertAllClose(output1, output2)
+      self.assertAllClose(hidden1, hidden2)
+      self.assertAllClose(cell1, cell2)
+
+  def testCellClipping(self):
+    core = snt.LSTM(hidden_size=5, cell_clip_value=1.0)
+    obs = tf.constant(np.random.rand(3, 10), dtype=tf.float32)
+    hidden = tf.placeholder(tf.float32, shape=[3, 5])
+    cell = tf.placeholder(tf.float32, shape=[3, 5])
+    output = core(obs, [hidden, cell])
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      unclipped = np.random.rand(3, 5) - 0.5
+      unclipped *= 2.0 / unclipped.max()
+      clipped = unclipped.clip(-1., 1.)
+
+      output1, (hidden1, cell1) = sess.run(output, feed_dict={hidden: unclipped,
+                                                              cell: unclipped})
+      output2, (hidden2, cell2) = sess.run(output, feed_dict={hidden: unclipped,
+                                                              cell: clipped})
+      self.assertAllClose(output1, output2)
+      self.assertAllClose(hidden1, hidden2)
+      self.assertAllClose(cell1, cell2)
+
   def testConflictingNormalization(self):
     with self.assertRaisesRegexp(
         ValueError, "Only one of use_batch_norm_h and layer_norm is allowed."):

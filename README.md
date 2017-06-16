@@ -516,14 +516,14 @@ upon evaluation `input_shape` will raise an error unless the module has not been
 connected to the graph, but this is not an issue since the `lambda` is not
 called until the transposed module is connected to the graph.
 
-## Variable reuse with `@snt.experimental.reuse_vars` (**experimental**)
+## Variable reuse with `@snt.reuse_variables` (**experimental**)
 
 Some use cases require a `tf.VariableScope` to be shared across multiple
 methods, which isn't possible with `snt.AbstractModule`.
 For example, a generative model may define a `sample()` and `log_pdf()` method
 that share parts of the same `tf.Graph`.
 
-Adding the `@snt.experimental.reuse_vars` decorator to a method will
+Adding the `@snt.reuse_variables` decorator to a method will
 enable variable reuse in much the same manner as `_build()`. The most notable
 difference is that a single `tf.VariableScope` will be used across different
 decorated methods and each decorated method has its own `reuse` flag that is
@@ -536,7 +536,7 @@ class Reusable(object):
     with tf.variable_scope(name) as vs:
       self.variable_scope = vs
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def reusable_var(self):
     return tf.get_variable("a", shape=[1])
 
@@ -552,14 +552,14 @@ class NaiveAutoEncoder(snt.AbstractModule):
     self._n_latent = n_latent
     self._n_out = n_out
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def encode(self, input):
     """Builds the front half of AutoEncoder, inputs -> latents."""
     w_enc = tf.get_variable("w_enc", shape=[self._n_out, self._n_latent])
     b_enc = tf.get_variable("b_enc", shape=[self._n_latent])
     return tf.sigmoid(tf.matmul(input, w_enc) + b_enc)
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def decode(self, latents):
     """Builds the back half of AutoEncoder, latents -> reconstruction."""
     w_rec = tf.get_variable("w_dec", shape=[self._n_latent, self._n_out])
@@ -613,11 +613,11 @@ class BadReusable(object):
     with tf.variable_scope(name) as vs:
       self.variable_scope = vs
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def reusable_var(self):
     return tf.get_variable("a", shape=[1])
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def another_reusable_var(self):
     return tf.get_variable("a", shape=[1])
 

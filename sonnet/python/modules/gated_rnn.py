@@ -417,7 +417,7 @@ class LSTM(rnn_core.RNNCore):
 
     gates += self._b
 
-    # i = input_gate, j = new_input, f = forget_gate, o = output_gate
+    # i = input_gate, j = next_input, f = forget_gate, o = output_gate
     i, j, f, o = array_ops.split(value=gates, num_or_size_splits=4, axis=1)
 
     if self._use_peepholes:  # diagonal connections
@@ -426,8 +426,8 @@ class LSTM(rnn_core.RNNCore):
       i += self._w_i_diag * prev_cell
 
     forget_mask = tf.sigmoid(f + self._forget_bias)
-    new_cell = forget_mask * prev_cell + tf.sigmoid(i) * tf.tanh(j)
-    cell_output = new_cell
+    next_cell = forget_mask * prev_cell + tf.sigmoid(i) * tf.tanh(j)
+    cell_output = next_cell
     if self._use_batch_norm_c:
       cell_output = (self._beta_c
                      + self._gamma_c * self._batch_norm_c(cell_output,
@@ -436,12 +436,12 @@ class LSTM(rnn_core.RNNCore):
                                                           test_local_stats))
     if self._use_peepholes:
       cell_output += self._w_o_diag * cell_output
-    new_hidden = tf.tanh(cell_output) * tf.sigmoid(o)
+    next_hidden = tf.tanh(cell_output) * tf.sigmoid(o)
 
     if self._max_unique_stats == 1:
-      return new_hidden, (new_hidden, new_cell)
+      return next_hidden, (next_hidden, next_cell)
     else:
-      return new_hidden, (new_hidden, new_cell, time_step + 1)
+      return next_hidden, (next_hidden, next_cell, time_step + 1)
 
   def _create_batch_norm_variables(self, dtype):
     """Initialize the variables used for the `BatchNorm`s (if any)."""
@@ -855,18 +855,18 @@ class ConvLSTM(rnn_core.RNNCore):
     hidden, cell = state
     input_conv = self._convolutions["input"]
     hidden_conv = self._convolutions["hidden"]
-    new_hidden = input_conv(inputs) + hidden_conv(hidden)
-    gates = tf.split(value=new_hidden, num_or_size_splits=4,
+    next_hidden = input_conv(inputs) + hidden_conv(hidden)
+    gates = tf.split(value=next_hidden, num_or_size_splits=4,
                      axis=self._conv_ndims+1)
 
-    input_gate, new_input, forget_gate, output_gate = gates
-    new_cell = tf.sigmoid(forget_gate + self._forget_bias) * cell
-    new_cell += tf.sigmoid(input_gate) * tf.tanh(new_input)
-    output = tf.tanh(new_cell) * tf.sigmoid(output_gate)
+    input_gate, next_input, forget_gate, output_gate = gates
+    next_cell = tf.sigmoid(forget_gate + self._forget_bias) * cell
+    next_cell += tf.sigmoid(input_gate) * tf.tanh(next_input)
+    output = tf.tanh(next_cell) * tf.sigmoid(output_gate)
 
     if self._skip_connection:
       output = tf.concat([output, inputs], axis=-1)
-    return output, (output, new_cell)
+    return output, (output, next_cell)
 
 
 class Conv1DLSTM(ConvLSTM):

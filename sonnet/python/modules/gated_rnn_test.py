@@ -92,8 +92,8 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTM(hidden_size)
-    _, new_state = lstm(inputs, (prev_hidden, prev_cell))
-    new_hidden, new_cell = new_state
+    _, next_state = lstm(inputs, (prev_hidden, prev_cell))
+    next_hidden, next_cell = next_state
     lstm_variables = lstm.get_variables()
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
@@ -105,7 +105,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     with self.test_session() as session:
       tf.global_variables_initializer().run()
-      fetches = [(new_hidden, new_cell),
+      fetches = [(next_hidden, next_cell),
                  param_map[snt.LSTM.W_GATES],
                  param_map[snt.LSTM.B_GATES]]
       output = session.run(fetches,
@@ -113,17 +113,17 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                             prev_cell: prev_cell_data,
                             prev_hidden: prev_hidden_data})
 
-    new_state_ex, gate_weights_ex, gate_biases_ex = output
+    next_state_ex, gate_weights_ex, gate_biases_ex = output
     in_and_hid = np.concatenate((input_data, prev_hidden_data), axis=1)
     real_gate = np.dot(in_and_hid, gate_weights_ex) + gate_biases_ex
-    # i = input_gate, j = new_input, f = forget_gate, o = output_gate
+    # i = input_gate, j = next_input, f = forget_gate, o = output_gate
     i, j, f, o = np.hsplit(real_gate, 4)
     real_cell = (prev_cell_data / (1 + np.exp(-(f + lstm._forget_bias))) +
                  1 / (1 + np.exp(-i)) * np.tanh(j))
     real_hidden = np.tanh(real_cell) * 1 / (1 + np.exp(-o))
 
-    self.assertAllClose(real_hidden, new_state_ex[0])
-    self.assertAllClose(real_cell, new_state_ex[1])
+    self.assertAllClose(real_hidden, next_state_ex[0])
+    self.assertAllClose(real_cell, next_state_ex[1])
 
   def testPeephole(self):
     batch_size = 5
@@ -134,8 +134,8 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTM(hidden_size, use_peepholes=True)
-    _, new_state = lstm(inputs, (prev_hidden, prev_cell))
-    new_hidden, new_cell = new_state
+    _, next_state = lstm(inputs, (prev_hidden, prev_cell))
+    next_hidden, next_cell = next_state
     lstm_variables = lstm.get_variables()
     self.assertEqual(len(lstm_variables), 5, "LSTM should have 5 variables")
 
@@ -160,7 +160,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     with self.test_session() as session:
       tf.global_variables_initializer().run()
-      fetches = [(new_hidden, new_cell),
+      fetches = [(next_hidden, next_cell),
                  param_map[snt.LSTM.W_GATES],
                  param_map[snt.LSTM.B_GATES],
                  param_map[snt.LSTM.W_F_DIAG],
@@ -171,10 +171,10 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                             prev_cell: prev_cell_data,
                             prev_hidden: prev_hidden_data})
 
-    new_state_ex, w_ex, b_ex, wfd_ex, wid_ex, wod_ex = output
+    next_state_ex, w_ex, b_ex, wfd_ex, wid_ex, wod_ex = output
     in_and_hid = np.concatenate((input_data, prev_hidden_data), axis=1)
     real_gate = np.dot(in_and_hid, w_ex) + b_ex
-    # i = input_gate, j = new_input, f = forget_gate, o = output_gate
+    # i = input_gate, j = next_input, f = forget_gate, o = output_gate
     i, j, f, o = np.hsplit(real_gate, 4)
     real_cell = (prev_cell_data /
                  (1 + np.exp(-(f + lstm._forget_bias +
@@ -183,8 +183,8 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     real_hidden = (np.tanh(real_cell + wod_ex * real_cell) *
                    1 / (1 + np.exp(-o)))
 
-    self.assertAllClose(real_hidden, new_state_ex[0])
-    self.assertAllClose(real_cell, new_state_ex[1])
+    self.assertAllClose(real_hidden, next_state_ex[0])
+    self.assertAllClose(real_cell, next_state_ex[1])
 
   @parameterized.Parameters(
       *itertools.product(

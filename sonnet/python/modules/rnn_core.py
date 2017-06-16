@@ -177,9 +177,9 @@ class RNNCore(base.AbstractModule, tf.contrib.rnn.RNNCell):
   that constructs the graph that corresponds to a core. Such a `_build` method
   should always have the same interface, which is the following:
 
-      output, new_state = self._build(input, prev_state)
+      output, next_state = self._build(input, prev_state)
 
-  where output, new_state, input, and prev_state are arbitrarily nested
+  where output, next_state, input, and prev_state are arbitrarily nested
   tensors. Such structures can be defined according to the following
   grammar:
 

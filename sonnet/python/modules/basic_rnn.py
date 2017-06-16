@@ -144,7 +144,7 @@ class VanillaRNN(rnn_core.RNNCore):
     hidden_to_hidden = self._hidden_to_hidden_linear(prev_state)
     output = self._activation(in_to_hidden + hidden_to_hidden)
 
-    # For VanillaRNN, the new state of the RNN is the same as the output
+    # For VanillaRNN, the next state of the RNN is the same as the output
     return output, output
 
   @property
@@ -534,7 +534,7 @@ class ModelRNN(rnn_core.RNNCore):
     """
     next_state = self._model(prev_state)
 
-    # For ModelRNN, the new state of the RNN is the same as the output
+    # For ModelRNN, the next state of the RNN is the same as the output
     return next_state, next_state
 
   @property

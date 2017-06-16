@@ -87,7 +87,7 @@ class VanillaRNNTest(tf.test.TestCase):
     prev_state = tf.placeholder(tf.float32,
                                 shape=[self.batch_size, self.hidden_size])
     vanilla_rnn = snt.VanillaRNN(name="rnn", hidden_size=self.hidden_size)
-    output, new_state = vanilla_rnn(inputs, prev_state)
+    output, next_state = vanilla_rnn(inputs, prev_state)
     in_to_hid = vanilla_rnn.in_to_hidden_variables
     hid_to_hid = vanilla_rnn.hidden_to_hidden_variables
     with self.test_session() as sess:
@@ -96,11 +96,11 @@ class VanillaRNNTest(tf.test.TestCase):
       prev_state_data = np.random.randn(self.batch_size, self.hidden_size)
       tf.global_variables_initializer().run()
 
-      fetches = [output, new_state, in_to_hid[0], in_to_hid[1],
+      fetches = [output, next_state, in_to_hid[0], in_to_hid[1],
                  hid_to_hid[0], hid_to_hid[1]]
       output = sess.run(fetches,
                         {inputs: input_data, prev_state: prev_state_data})
-    output_v, new_state_v, in_to_hid_w, in_to_hid_b = output[:4]
+    output_v, next_state_v, in_to_hid_w, in_to_hid_b = output[:4]
     hid_to_hid_w, hid_to_hid_b = output[4:]
 
     real_in_to_hid = np.dot(input_data, in_to_hid_w) + in_to_hid_b
@@ -108,7 +108,7 @@ class VanillaRNNTest(tf.test.TestCase):
     real_output = np.tanh(real_in_to_hid + real_hid_to_hid)
 
     self.assertAllClose(real_output, output_v)
-    self.assertAllClose(real_output, new_state_v)
+    self.assertAllClose(real_output, next_state_v)
 
   def testInitializers(self):
     inputs = tf.placeholder(tf.float32, shape=[self.batch_size, self.in_size])

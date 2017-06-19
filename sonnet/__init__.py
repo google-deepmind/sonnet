@@ -76,6 +76,7 @@ from sonnet.python.modules.conv import SAME
 from sonnet.python.modules.conv import SeparableConv2D
 from sonnet.python.modules.conv import VALID
 from sonnet.python.modules.embed import Embed
+from sonnet.python.modules.gated_rnn import BatchNormLSTM
 from sonnet.python.modules.gated_rnn import Conv1DLSTM
 from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU

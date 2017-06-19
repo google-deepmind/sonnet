@@ -1,5 +1,23 @@
 # Sonnet Changelog
 
+
+## Version 1.2 - 19th Jun 2017
+
+* Cell & Hidden state clipping added to `LSTM`.
+* Added Makefile for generating documentation with Sphinx.
+* Batch Norm options for `LSTM` now deprecated to a separate class
+  `BatchNormLSTM`. A future version of `LSTM` will no longer contain the batch
+  norm flags.
+* `@snt.experimental.reuse_vars` decorator promoted to `@snt.reuse_variables`.
+* `BatchReshape` now takes a `preserve_dims` parameter.
+* `DeepRNN` prints a warning if the heuristic is used to infer output size.
+* Deprecated properties removed from `AbstractModule`.
+* Pass inferred data type to bias and weight initializers.
+* `AlexNet` now checks that dropout is disabled or set to 1.0 when testing.
+* `.get_saver()` now groups partitioned variables by default.
+* Docstring, variable name and comment fixes.
+
+
 ## Version 1.1 - 12th Jun 2017
 
 * **breaking change**: Calling `AbstractModule.__init__` with positional

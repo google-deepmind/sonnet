@@ -747,16 +747,15 @@ class BatchFlatten(BatchReshape):
 
     Args:
       preserve_dims: Number of leading dimensions that will not be reshaped.
-          For example, given an input Tensor with shape `[B, H, W, C, D]`,
-          and argument `shape` equal to `(-1, D)`:
-            * `preserve_dims=1` will return a Tensor with shape `[B, H*W*C, D]`.
+          For example, given an input Tensor with shape `[B, H, W, C]`:
+            * `preserve_dims=1` will return a Tensor with shape `[B, H*W*C]`.
             * `preserve_dims=2` will return a Tensor with
-                shape `[B, H, W*C, D]`.
-            * `preserve_dims=3` will return a Tensor with
-                shape `[B, H, W, C, D]`.
+                shape `[B, H, W*C]`.
+            * `preserve_dims=3` will return the input itself,
+                shape `[B, H, W, C]`.
             * `preserve_dims=4` will  return a Tensor with
-                shape `[B, H, W, C, 1, D]`.
-            * `preserve_dims>=5` will throw an error on build unless D=1.
+                shape `[B, H, W, C, 1]`.
+            * `preserve_dims>=5` will throw an error on build.
           The preserved dimensions can be unknown at building time.
       name: Name of the module.
     """
@@ -770,12 +769,13 @@ class FlattenTrailingDimensions(BatchReshape):
   def __init__(self, dim_from, name="batch_dim_from"):
     """Constructs a FlattenTrailingDimensions module.
 
-    For example, given an input Tensor with shape `[B, H, W, C, D]`:
+    For example, given an input Tensor with shape `[B, H, W, C]`:
 
-      * `dim_from=1` will return a Tensor with shape `[B, H*W*C*D]`.
-      * `dim_from=2` will return a Tensor with shape `[B, H, W*C*D]`.
-      * `dim_from=3` will return a Tensor with shape `[B, H, W, C*D]`.
-      * `dim_from=4` will return a Tensor equivalent to input.
+      * `dim_from=1` will return a Tensor with shape `[B, H*W*C]`.
+      * `dim_from=2` will return a Tensor with shape `[B, H, W*C]`.
+      * `dim_from=3` will return the input itself.
+      * `dim_from=4` will return a Tensor with shape `[B, H, W, C, 1]`.
+      * `dim_from>=5` will generate a ValueError when building the module.
       The preserved dimensions can be unknown at building time.
 
     Equivalent to BatchFlatten(preserve_dims=dim_from, name=name).

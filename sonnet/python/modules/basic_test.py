@@ -1020,7 +1020,8 @@ class BatchReshapeTest(tf.test.TestCase,
     self.assertAllEqual(actual_output, expected_output)
 
 
-class BatchFlattenTest(tf.test.TestCase):
+class BatchFlattenTest(tf.test.TestCase,
+                       parameterized.ParameterizedTestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -1037,6 +1038,25 @@ class BatchFlattenTest(tf.test.TestCase):
     output = mod(inputs)
     flattened_size = np.prod(in_shape)
     self.assertEqual(output.get_shape(), [batch_size, flattened_size])
+
+  @parameterized.Parameters(1, 2, 3, 4)
+  def testPreserveDimsOk(self, preserve_dims):
+    in_shape = [10, 2, 3, 4]
+    inputs = tf.placeholder(tf.float32, shape=in_shape)
+    mod = snt.BatchFlatten(preserve_dims=preserve_dims)
+    output = mod(inputs)
+    flattened_shape = (in_shape[:preserve_dims] +
+                       [np.prod(in_shape[preserve_dims:])])
+    self.assertEqual(output.get_shape(), flattened_shape)
+
+  @parameterized.Parameters(5, 6, 7, 10)
+  def testPreserveDimsError(self, preserve_dims):
+    in_shape = [10, 2, 3, 4]
+    inputs = tf.placeholder(tf.float32, shape=in_shape)
+    err = "Input tensor has 4 dimensions"
+    mod = snt.BatchFlatten(preserve_dims=preserve_dims)
+    with self.assertRaisesRegexp(ValueError, err):
+      _ = mod(inputs)
 
   def testFlattenWithZeroDim(self):
     inputs = tf.placeholder(tf.float32, shape=[1, 0])

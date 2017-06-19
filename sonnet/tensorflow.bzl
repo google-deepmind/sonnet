@@ -88,7 +88,7 @@ def tf_custom_op_library(name, srcs=[], gpu_srcs=[], deps=[]):
   """Helper to build a dynamic library (.so) from the sources."""
   cuda_deps = [
       "@org_tensorflow//tensorflow/core:stream_executor_headers_lib",
-      "@org_tensorflow//third_party/gpus/cuda:cudart_static",
+      "@local_config_cuda//cuda:cudart_static",
   ]
   deps = deps + tf_custom_op_library_additional_deps()
   if gpu_srcs:

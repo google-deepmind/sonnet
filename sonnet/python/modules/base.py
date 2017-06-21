@@ -26,6 +26,7 @@ from __future__ import print_function
 
 import abc
 import collections
+import functools
 import re
 
 # Dependency imports
@@ -481,10 +482,26 @@ class Transposable(object):
     """Returns shape of input `Tensor` passed at last call to `build`."""
 
 
+def _name_for_callable(func):
+  """Returns a module name for a callable or `None` if no name can be found."""
+  if isinstance(func, functools.partial):
+    return _name_for_callable(func.func)
+
+  try:
+    name = func.__name__
+  except AttributeError:
+    return None
+
+  if name == "<lambda>":
+    return None
+  else:
+    return _to_snake_case(name)
+
+
 class Module(AbstractModule):
   """Module wrapping a function provided by the user."""
 
-  def __init__(self, build, name="module"):
+  def __init__(self, build, name=None):
     """Constructs a module with a given build function.
 
     The Module class can be used to wrap a function assembling a network into a
@@ -531,15 +548,18 @@ class Module(AbstractModule):
           The `build` function signature can include the following parameters:
             *args - Input Tensors.
             **kwargs - Additional Python parameters controlling connection.
-      name: Module name.
+      name: Module name. If set to `None` (the default), the name will be set to
+          that of the `build` callable converted to `snake_case`. If `build` has
+          no name, the name will be 'module'.
 
     Raises:
       TypeError: If build is not callable.
     """
-    super(Module, self).__init__(name=name)
-
     if not callable(build):
       raise TypeError("Input 'build' must be callable.")
+    if name is None:
+      name = _name_for_callable(build)
+    super(Module, self).__init__(name=name)
     self._build_function = build
 
   def _build(self, *args, **kwargs):

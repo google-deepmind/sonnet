@@ -19,7 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from functools import partial
+import functools
 import pickle
 import numpy as np
 import six
@@ -92,6 +92,35 @@ class InternalFunctionTest(tf.test.TestCase):
       actual = base._to_snake_case(camel_case)
       self.assertEqual(actual, snake_case, "_to_snake_case(%s) -> %s != %s" %
                        (camel_case, actual, snake_case))
+
+  def testNameForCallable_Function(self):
+    def test():
+      pass
+
+    self.assertName(test, "test")
+
+  def testNameForCallable_Lambda(self):
+    test = lambda x: x
+    self.assertName(test, None)
+
+  def testNameForCallable_Partial(self):
+    def test(*unused_args):
+      pass
+
+    test = functools.partial(functools.partial(test, "a"), "b")
+    self.assertName(test, "test")
+
+  def testNameForCallable_Instance(self):
+    class Test(object):
+
+      def __call__(self):
+        pass
+
+    self.assertName(Test(), None)
+
+  def assertName(self, func, expected):
+    name = base._name_for_callable(func)
+    self.assertEqual(name, expected)
 
 
 class AbstractModuleTest(tf.test.TestCase):
@@ -223,7 +252,9 @@ class ModuleTest(tf.test.TestCase):
     inputs1 = tf.placeholder(tf.float32, shape=[batch_size, in_size])
     inputs2 = tf.placeholder(tf.float32, shape=[batch_size, in_size])
 
-    model = base.Module(build=partial(_make_model_with_params, output_size=10))
+    build = functools.partial(_make_model_with_params, output_size=10)
+    model = base.Module(build)
+    self.assertEqual(model.scope_name, "make_model_with_params")
     outputs1 = model(inputs1)
     outputs2 = model(inputs2)
     input_data = np.random.rand(batch_size, in_size)

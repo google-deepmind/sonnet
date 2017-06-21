@@ -108,6 +108,7 @@ py_library(
         ":initializers",
         ":nest",
         ":resampler",
+        "//sonnet/python:resampler",
         # tensorflow dep,
     ],
 )

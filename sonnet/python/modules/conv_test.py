@@ -93,6 +93,94 @@ class FillListTest(tf.test.TestCase):
       conv._fill_shape(["b"], 4)
 
 
+class DefaultTransposeSizeTest(parameterized.ParameterizedTestCase,
+                               tf.test.TestCase):
+
+  # Constants for use in parameterized test.
+  input_shape = [[20], [23, 11, 13], [1, 3]]
+  stride = [[3], [7, 1, 2], [6, 2]]
+  kernel_shape = [[4], [1, 3, 2], [34, 2]]
+  padding = [snt.SAME, snt.VALID, snt.VALID]
+  output_shape = []
+
+  for i, pad in enumerate(padding):
+    if pad == snt.SAME:
+      output_shape.append([x * y for x, y in zip(input_shape[i], stride[i])])
+    if pad == snt.VALID:
+      output_shape.append([x * y + z - 1 for x, y, z in
+                           zip(input_shape[i], stride[i], kernel_shape[i])])
+
+  @parameterized.Parameters(
+      *zip(input_shape, stride, kernel_shape, padding, output_shape))
+  def testFunction(self, input_shape, stride, kernel_shape, padding,
+                   output_shape):
+    """Test output shapes are correct."""
+    self.assertEqual(conv._default_transpose_size(input_shape, stride,
+                                                  kernel_shape=kernel_shape,
+                                                  padding=padding),
+                     tuple(output_shape))
+
+  @parameterized.Parameters(
+      *zip(input_shape, stride, kernel_shape, padding, output_shape))
+  def testModules(self, input_shape, stride, kernel_shape, padding,
+                  output_shape):
+    """Test ConvTranspose modules return expected default output shapes."""
+    if len(input_shape) == 1:
+      module = snt.Conv1DTranspose
+    elif len(input_shape) == 2:
+      module = snt.Conv2DTranspose
+    elif len(input_shape) == 3:
+      module = snt.Conv3DTranspose
+
+    batch_size = [1]
+    channels = [1]
+
+    inputs = tf.zeros(shape=batch_size + input_shape + channels,
+                      dtype=tf.float32)
+    outputs = module(output_channels=1, kernel_shape=kernel_shape,
+                     stride=stride, padding=padding)(inputs)
+    self.assertEqual(output_shape, outputs.get_shape().as_list()[1:-1])
+
+  @parameterized.Parameters(
+      *zip(input_shape, stride, kernel_shape, padding, output_shape))
+  def testConnectTwice(self, input_shape, stride, kernel_shape, padding,
+                       output_shape):
+    """Test ConvTranspose modules with multiple connections."""
+    if len(input_shape) == 1:
+      module = snt.Conv1DTranspose
+    elif len(input_shape) == 2:
+      module = snt.Conv2DTranspose
+    elif len(input_shape) == 3:
+      module = snt.Conv3DTranspose
+
+    batch_size = [1]
+    channels = [1]
+
+    inputs = tf.zeros(shape=batch_size + input_shape + channels,
+                      dtype=tf.float32)
+    inputs_2 = tf.zeros(shape=batch_size + input_shape + channels,
+                        dtype=tf.float32)
+    conv1 = module(output_channels=1, kernel_shape=kernel_shape,
+                   stride=stride, padding=padding)
+    outputs = conv1(inputs)
+
+    # Connecting for the second time with the same shape should be OK.
+    outputs_2 = conv1(inputs_2)
+
+    # So should connecting with a different shape.
+    new_input_shape = [25] * len(input_shape)
+    new_inputs = tf.zeros(shape=batch_size + new_input_shape + channels,
+                          dtype=tf.float32)
+    new_outputs = conv1(new_inputs)
+
+    with self.test_session() as sess:
+      tf.global_variables_initializer().run()
+      outputs_array, outputs_array_2 = sess.run([outputs, outputs_2])
+      self.assertEqual(outputs_array.shape, outputs_array_2.shape)
+
+      sess.run(new_outputs)
+
+
 class SharedConvTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
   CONV_1D_KWARGS = {
@@ -814,6 +902,11 @@ class Conv2DTransposeTest(parameterized.ParameterizedTestCase,
     self.kernel_shape2 = (self.kernel_shape_h, self.kernel_shape_w,
                           self.out_channels, self.in_channels)
 
+  def testKernelsNotSpecified(self):
+    """Tests error is raised if kernel shape is not specified."""
+    with self.assertRaisesRegexp(ValueError, "`kernel_shape` cannot be None."):
+      snt.Conv2DTranspose(output_channels=1)
+
   @parameterized.NamedParameters(
       ("WithBias", True),
       ("WithoutBias", False))
@@ -1274,6 +1367,11 @@ class Conv1DTransposeTest(parameterized.ParameterizedTestCase,
   kernel_shape = tuple(kernel_shape)
   kernel_shape2 = tuple(zip(kernel_shape, out_channels, in_channels))
   stride_shape = tuple(stride)
+
+  def testKernelsNotSpecified(self):
+    """Tests error is raised if kernel shape is not specified."""
+    with self.assertRaisesRegexp(ValueError, "`kernel_shape` cannot be None."):
+      snt.Conv1DTranspose(output_channels=1)
 
   @parameterized.Parameters(
       *zip(out_channels, kernel_shape, padding, use_bias, in_shape, out_shape,
@@ -2669,6 +2767,10 @@ class Conv3DTransposeTest(parameterized.ParameterizedTestCase,
                           self.in_channels)
 
     self.strides = (self.stride_d, self.stride_h, self.stride_w)
+
+  def testKernelsNotSpecified(self):
+    with self.assertRaisesRegexp(ValueError, "`kernel_shape` cannot be None."):
+      snt.Conv3DTranspose(output_channels=1)
 
   @parameterized.NamedParameters(
       ("WithBias", True),

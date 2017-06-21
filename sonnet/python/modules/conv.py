@@ -47,6 +47,60 @@ DATA_FORMAT_NHWC = "NHWC"
 SUPPORTED_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
 
 
+def _default_transpose_size(input_shape, stride, kernel_shape=None,
+                            padding=SAME):
+  """Returns default (maximal) output shape for a transpose convolution.
+
+  In general, there are multiple possible output shapes that a transpose
+  convolution with a given `input_shape` can map to. This function returns the
+  output shape which evenly divides the stride to produce the input shape in
+  a forward convolution, i.e. the maximal valid output shape with the given
+  configuration:
+
+  if the padding type is SAME then:  output_shape = input_shape * stride
+  if the padding type is VALID then: output_shape = input_shape * stride +
+                                                    kernel_shape - 1
+
+  See the following documentation for an explanation of VALID versus SAME
+  padding modes:
+  https://www.tensorflow.org/versions/r0.8/api_docs/python/nn.html#convolution
+
+  Args:
+    input_shape: Sequence of sizes of each dimension of the input, excluding
+      batch and channel dimensions.
+    stride: Sequence or integer of kernel strides, excluding batch and channel
+      dimension strides.
+    kernel_shape: Sequence or integer of kernel sizes.
+    padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+
+  Returns:
+    output_shape: A tuple of sizes for a transposed convolution that divide
+      evenly with the given strides, kernel shapes, and padding algorithm.
+
+  Raises:
+    TypeError: if `input_shape` is not a Sequence;
+  """
+  if not isinstance(input_shape, collections.Sequence):
+    if input_shape is None:
+      raise TypeError("input_shape is None; if using Sonnet, are you sure you "
+                      "have connected the module to inputs?")
+    raise TypeError("input_shape is of type {}, must be a sequence."
+                    .format(type(input_shape)))
+
+  input_length = len(input_shape)
+  stride = _fill_and_verify_parameter_shape(stride, input_length, "stride")
+  padding = _verify_padding(padding)
+
+  output_shape = tuple(x * y for x, y in zip(input_shape, stride))
+
+  if padding == VALID:
+    kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, input_length,
+                                                    "kernel")
+    output_shape = tuple(x + y - 1 for x, y in zip(output_shape, kernel_shape))
+
+  return output_shape
+
+
 def _fill_shape(x, n):
   """Idempotentally converts an integer to a tuple of integers of a given size.
 
@@ -519,8 +573,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
   abstracting away variable creation and sharing.
   """
 
-  def __init__(self, output_channels, output_shape, kernel_shape, stride=1,
-               padding=SAME, use_bias=True, initializers=None,
+  def __init__(self, output_channels, output_shape=None, kernel_shape=None,
+               stride=1, padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None,
                data_format=DATA_FORMAT_NHWC, name="conv_2d_transpose"):
     """Constructs a `Conv2DTranspose module`.
@@ -541,7 +595,9 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
           time, the user must only ensure that `output_shape` can be called,
           returning an iterable of format `(out_height, out_width)` when `build`
           is called. Note that `output_shape` defines the size of output signal
-          domain, as opposed to the shape of the output `Tensor`.
+          domain, as opposed to the shape of the output `Tensor`. If a None
+          value is given, a default shape is automatically calculated (see
+          docstring of _default_transpose_size function for more details).
       kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
           used to define kernel size in all dimensions.
       stride: Sequence of kernel strides (of size 2), or integer that is used to
@@ -571,6 +627,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
       ValueError: If the given data_format is not a supported format (see
         SUPPORTED_DATA_FORMATS).
+      ValueError: If the given kernel_shape is `None`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -579,10 +636,17 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
     super(Conv2DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
-    if callable(output_shape):
-      self._output_shape = output_shape
+
+    if output_shape is None:
+      self._output_shape = None
+      self._use_default_output_shape = True
     else:
-      self._output_shape = tuple(output_shape)
+      self._use_default_output_shape = False
+      if callable(output_shape):
+        self._output_shape = output_shape
+      else:
+        self._output_shape = tuple(output_shape)
+
     self._input_shape = None
 
     if data_format not in SUPPORTED_DATA_FORMATS:
@@ -591,6 +655,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
 
     self._data_format = data_format
 
+    if kernel_shape is None:
+      raise ValueError("`kernel_shape` cannot be None.")
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
     # We want to support passing native strides akin to [1, m, n, 1].
@@ -662,6 +728,13 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
     if inputs.dtype != tf.float32:
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype)
+
+    if self._use_default_output_shape:
+      self._output_shape = (
+          lambda: _default_transpose_size(self._input_shape[1:-1],  # pylint: disable=g-long-lambda
+                                          self.stride[1:-1],
+                                          kernel_shape=self.kernel_shape,
+                                          padding=self.padding))
 
     if len(self.output_shape) != 2:
       raise base.IncompatibleShapeError("Output shape must be specified as "
@@ -751,6 +824,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
   @property
   def output_shape(self):
     """Returns the output shape."""
+    if self._output_shape is None:
+      self._ensure_is_connected()
     if callable(self._output_shape):
       self._output_shape = tuple(self._output_shape())
     return self._output_shape
@@ -1114,8 +1189,8 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
   image to 1.
   """
 
-  def __init__(self, output_channels, output_shape, kernel_shape, stride=1,
-               padding=SAME, use_bias=True, initializers=None,
+  def __init__(self, output_channels, output_shape=None, kernel_shape=None,
+               stride=1, padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, name="conv_1d_transpose"):
     """Constructs a Conv1DTranspose module.
 
@@ -1133,7 +1208,9 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
           number or a callable. In the latter case, since the function
           invocation is deferred to graph construction time, the user must only
           ensure that `output_shape` can be called, returning an iterable of
-          format `(out_length)` when build is called.
+          format `(out_length)` when build is called. If a None
+          value is given, a default shape is automatically calculated (see
+          docstring of _default_transpose_size function for more details).
       kernel_shape: Sequence of kernel sizes (of size 1), or integer that is
           used to define kernel size in all dimensions.
       stride: Sequence of kernel strides (of size 1), or integer that is used to
@@ -1158,6 +1235,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       base.IncompatibleShapeError: If the given stride is not an integer; or if
           the given stride is not a sequence of two or four integers.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given kernel_shape is `None`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1166,13 +1244,23 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
     super(Conv1DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
-    if callable(output_shape):
-      self._output_shape = output_shape
-    elif isinstance(output_shape, numbers.Integral):
-      self._output_shape = (output_shape,)
-    elif isinstance(output_shape, collections.Iterable):
-      self._output_shape = tuple(output_shape)
+
+    if output_shape is None:
+      self._output_shape = None
+      self._use_default_output_shape = True
+    else:
+      self._use_default_output_shape = False
+      if callable(output_shape):
+        self._output_shape = output_shape
+      elif isinstance(output_shape, numbers.Integral):
+        self._output_shape = (output_shape,)
+      elif isinstance(output_shape, collections.Iterable):
+        self._output_shape = tuple(output_shape)
+
     self._input_shape = None
+
+    if kernel_shape is None:
+      raise ValueError("`kernel_shape` cannot be None.")
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 1,
                                                           "kernel")
     # We want to support passing 'native' strides akin to [1, m, 1].
@@ -1229,10 +1317,6 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
 
-    if len(self._output_shape) != 1:
-      raise base.IncompatibleShapeError(
-          "Output shape must be specified as (output_length)")
-
     if len(self._input_shape) != 3:
       raise base.IncompatibleShapeError(
           "Input Tensor must have shape (batch_size, input_length, "
@@ -1247,6 +1331,17 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       raise base.UnderspecifiedError(
           "Batch size must be known at module build time")
     batch_size = self._input_shape[0]
+
+    if self._use_default_output_shape:
+      self._output_shape = (
+          lambda: _default_transpose_size(self._input_shape[1:-1],  # pylint: disable=g-long-lambda
+                                          self.stride[2],
+                                          kernel_shape=self.kernel_shape,
+                                          padding=self.padding))
+
+    if len(self.output_shape) != 1:
+      raise base.IncompatibleShapeError(
+          "Output shape must be specified as (output_length)")
 
     if inputs.dtype != tf.float32:
       raise TypeError("Input must have dtype tf.float32, but dtype was {}"
@@ -1318,6 +1413,8 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
   @property
   def output_shape(self):
     """Returns the output shape."""
+    if self._output_shape is None:
+      self._ensure_is_connected()
     if callable(self._output_shape):
       self._output_shape = self._output_shape()
     return self._output_shape
@@ -2466,8 +2563,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
   abstracting away variable creation and sharing.
   """
 
-  def __init__(self, output_channels, output_shape, kernel_shape, stride=1,
-               padding=SAME, use_bias=True, initializers=None,
+  def __init__(self, output_channels, output_shape=None, kernel_shape=None,
+               stride=1, padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, name="conv_3d_transpose"):
     """Constructs a `Conv3DTranspose` module.
 
@@ -2488,6 +2585,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
           returning an iterable of format `(out_depth, out_height, out_width)`
           when `build` is called. Note that `output_shape` defines the size of
           output signal domain, as opposed to the shape of the output `Tensor`.
+          If a None value is given, a default shape is automatically calculated
+          (see docstring of _default_transpose_size function for more details).
       kernel_shape: Sequence of kernel sizes (of size 3), or integer that is
           used to define kernel size in all dimensions.
       stride: Sequence of kernel strides (of size 3), or integer that is used to
@@ -2512,6 +2611,7 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
       module.IncompatibleShapeError: If the given stride is neither an integer
           nor a sequence of three or five integers.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given kernel_shape is `None`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2520,12 +2620,21 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
     super(Conv3DTranspose, self).__init__(name=name)
 
     self._output_channels = output_channels
-    if callable(output_shape):
-      self._output_shape = output_shape
+
+    if output_shape is None:
+      self._output_shape = None
+      self._use_default_output_shape = True
     else:
-      self._output_shape = tuple(output_shape)
+      self._use_default_output_shape = False
+      if callable(output_shape):
+        self._output_shape = output_shape
+      else:
+        self._output_shape = tuple(output_shape)
+
     self._input_shape = None
 
+    if kernel_shape is None:
+      raise ValueError("`kernel_shape` cannot be None.")
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 3,
                                                           "kernel")
     # We want to support passing native strides akin to [1, m, n, o, 1].
@@ -2594,6 +2703,13 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
     if inputs.dtype != tf.float32:
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype)
+
+    if self._use_default_output_shape:
+      self._output_shape = (
+          lambda: _default_transpose_size(self._input_shape[1:-1],  # pylint: disable=g-long-lambda
+                                          self.stride[1:-1],
+                                          kernel_shape=self.kernel_shape,
+                                          padding=self.padding))
 
     if len(self.output_shape) != 3:
       raise base.IncompatibleShapeError("Output shape must be specified as "
@@ -2671,6 +2787,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
   @property
   def output_shape(self):
     """Returns the output shape."""
+    if self._output_shape is None:
+      self._ensure_is_connected()
     if callable(self._output_shape):
       self._output_shape = tuple(self._output_shape())
     return self._output_shape

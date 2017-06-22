@@ -23,7 +23,6 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
-
 from sonnet.python.modules import util
 
 from tensorflow.python.util import deprecation

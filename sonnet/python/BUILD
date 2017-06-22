@@ -163,7 +163,6 @@ module_tests = [
     ("conv_test", "", "large"),
     ("dilation_test", "nets/", "small"),
     ("embed_test", "", "small"),
-    ("experimental_test", "", "small"),
     ("gated_rnn_test", "", "medium"),
     ("mlp_test", "nets/", "small"),
     ("pondering_rnn_test", "", "small"),
@@ -182,6 +181,7 @@ module_tests = [
     srcs_version = "PY2AND3",
     deps = [
         # mox dep,
+        # numpy dep,
         "//sonnet",
         "//sonnet/testing/parameterized",
         # tensorflow dep,

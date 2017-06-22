@@ -270,6 +270,77 @@ def _get_sliced_variables(var_list):
 # pylint: enable=protected-access
 
 
+def _custom_getter_router(custom_getter_map, name_fn):
+  """Creates a custom getter than matches requests to dict of custom getters.
+
+  Custom getters are callables which implement the
+  [custom getter API]
+  (https://www.tensorflow.org/versions/r1.0/api_docs/python/tf/get_variable).
+
+  The returned custom getter dispatches calls based on pattern matching the
+  name of the requested variable to the keys of custom_getter_map. For example,
+
+      {
+        ".*/w": snt.custom_getters.stop_gradient,
+      }
+
+  will match all variables named with the suffix "/w". The `name_fn` is
+  provided to allow processing of the name, such as stripping off a scope prefix
+  before matching.
+
+  Args:
+    custom_getter_map: Mapping of regular expressions to custom getter
+      functions.
+    name_fn: Callable to map variable name through before matching to regular
+      expressions. This might, for example, strip off a scope prefix.
+
+  Returns:
+    A custom getter.
+
+  Raises:
+    TypeError: If an entry in `custom_getter_map` is not a callable function.
+  """
+
+  for custom_getter in custom_getter_map.values():
+    if not callable(custom_getter):
+      raise TypeError("Given custom_getter is not callable.")
+
+  def _custom_getter(getter, name, *args, **kwargs):
+    """A custom getter that routes based on pattern matching the variable name.
+
+    Args:
+      getter: The true getter to call.
+      name: The fully qualified variable name, i.e. including all scopes.
+      *args: Arguments, in the same format as tf.get_variable.
+      **kwargs: Keyword arguments, in the same format as tf.get_variable.
+
+    Returns:
+      The return value of the appropriate custom getter. If there are no
+      matches, it returns the return value of `getter`.
+
+    Raises:
+      KeyError: If more than one pattern matches the variable name.
+    """
+    bare_name = name_fn(name)
+    matches = [
+        (custom_getter, pattern)
+        for pattern, custom_getter in custom_getter_map.items()
+        if re.match(pattern, bare_name) is not None]
+
+    num_matches = len(matches)
+
+    if num_matches == 0:
+      return getter(name, *args, **kwargs)
+    elif num_matches == 1:
+      custom_getter, pattern = matches[0]
+      return custom_getter(getter, name, *args, **kwargs)
+    else:
+      raise KeyError("More than one custom_getter matched {} ({}): {}".format(
+          name, bare_name, [pattern for _, pattern in matches]))
+
+  return _custom_getter
+
+
 def get_normalized_variable_map(scope_or_module,
                                 collection=tf.GraphKeys.GLOBAL_VARIABLES,
                                 context=None,

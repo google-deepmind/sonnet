@@ -117,6 +117,7 @@ class Linear(base.AbstractModule, base.Transposable):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               custom_getter=None,
                name="linear"):
     """Constructs a Linear module.
 
@@ -140,17 +141,19 @@ class Linear(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
-      KeyError: If `initializers` contains any keys other than 'w' or 'b'.
-      KeyError: If `partitioners` contains any keys other than 'w' or 'b'.
-      KeyError: If `regularizers` contains any keys other than 'w' or 'b'.
-      TypeError: If any of the given initializers are not callable.
-      TypeError: If any of the given partitioners are not callable.
-      TypeError: If any of the given regularizers are not callable.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contains any
+        keys other than 'w' or 'b'.
+      TypeError: If any of the given initializers, partitioners or regularizers
+        are not callable.
     """
-    super(Linear, self).__init__(name=name)
+    super(Linear, self).__init__(custom_getter=custom_getter, name=name)
     self._output_size = output_size
     self._use_bias = use_bias
     self._input_shape = None

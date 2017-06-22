@@ -71,6 +71,40 @@ class NoSuperInitIdentityModule(base.AbstractModule):
     return tf.identity(inputs)
 
 
+class SimpleModule(base.AbstractModule):
+  """Simple module with variables created in constructor and build."""
+
+  def __init__(self, custom_getter=None, name="simple_module"):
+
+    super(SimpleModule, self).__init__(custom_getter=custom_getter,
+                                       name=name)
+
+    with self._enter_variable_scope():
+      self._b = tf.get_variable("b", dtype=tf.float32, shape=[10, 10])
+
+  def _build(self, inputs):
+    self._w = tf.get_variable("w", dtype=tf.float32, shape=[10, 10])
+
+    return self._w * inputs + self._b
+
+
+class ComplexModule(base.AbstractModule):
+  """Complex module consisting of two sub modules."""
+
+  def __init__(self, custom_getter=None, name="complex_module"):
+
+    super(ComplexModule, self).__init__(custom_getter=custom_getter,
+                                        name=name)
+
+    with self._enter_variable_scope():
+      self._a = SimpleModule(name="linear_1")
+
+  def _build(self, inputs):
+    self._b = SimpleModule(name="linear_2")
+
+    return self._b(self._a(inputs))  # pylint: disable=not-callable
+
+
 class InternalFunctionTest(tf.test.TestCase):
 
   def testToSnakeCase(self):
@@ -230,6 +264,89 @@ class AbstractModuleTest(tf.test.TestCase):
                                  "cannot be serialized"):
       # Writing the object to a string will fail.
       pickle.dumps(module)
+
+  def testCustomGetter(self):
+
+    connection_count = {"x": 0}
+    def custom_getter(getter, name, *args, **kwargs):
+      connection_count["x"] += 1
+      return getter(name, *args, **kwargs)
+
+    inputs = tf.placeholder(tf.float32, [10, 10])
+
+    with tf.variable_scope("scope"):
+      module = SimpleModule(name="mod1")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(0, connection_count["x"])
+
+      module = SimpleModule(custom_getter=custom_getter, name="mod2")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(2, connection_count["x"])  # w & b
+
+      module = SimpleModule(custom_getter={"w": custom_getter}, name="mod3")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(3, connection_count["x"])  # w
+
+      module = SimpleModule(custom_getter={"w.*": custom_getter}, name="mod3")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(4, connection_count["x"])  # w
+
+      module = SimpleModule(custom_getter={".*": custom_getter}, name="mod4")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(6, connection_count["x"])  # w & b
+
+      err = r"More than one custom_getter matched scope/mod5/w \(w\):.*"
+      with self.assertRaisesRegexp(KeyError, err):
+        module = SimpleModule(
+            custom_getter={".*": custom_getter, "w.*": custom_getter},
+            name="mod5")
+        module(inputs)  # pylint: disable=not-callable
+
+      err = "Given custom_getter is not callable."
+      with self.assertRaisesRegexp(TypeError, err):
+        module = SimpleModule(custom_getter=0, name="mod6")
+      with self.assertRaisesRegexp(TypeError, err):
+        module = SimpleModule(custom_getter={"w": 0}, name="mod7")
+
+  def testCustomGetterNested(self):
+
+    def custom_getter(getter, name, *args, **kwargs):
+      kwargs["trainable"] = False
+      return getter(name, *args, **kwargs)
+
+    inputs = tf.placeholder(tf.float32, [10, 10])
+
+    with tf.variable_scope("scope"):
+      module = ComplexModule(name="mod1")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(4, len(tf.trainable_variables()))
+
+      module = ComplexModule(custom_getter=custom_getter, name="mod2")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(4, len(tf.trainable_variables()))  # All variables.
+
+      module = ComplexModule(custom_getter={".*/w": custom_getter},
+                             name="mod3")
+      module(inputs)  # pylint: disable=not-callable
+      trainable_names = [v.op.name for v in tf.trainable_variables()]
+      self.assertEqual(6, len(trainable_names))  # linear_1/w and linear_2/w.
+      self.assertIn("scope/mod3/linear_1/b", trainable_names)
+      self.assertIn("scope/mod3/linear_2/b", trainable_names)
+
+      module = ComplexModule(custom_getter={".*/b": custom_getter}, name="mod4")
+      module(inputs)  # pylint: disable=not-callable
+      trainable_names = [v.op.name for v in tf.trainable_variables()]
+      self.assertEqual(8, len(trainable_names))  # linear_1/b and linear_2/b.
+      self.assertIn("scope/mod4/linear_1/w", trainable_names)
+      self.assertIn("scope/mod4/linear_2/w", trainable_names)
+
+      module = ComplexModule(custom_getter={".*": custom_getter}, name="mod5")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(8, len(tf.trainable_variables()))  # All variables.
+
+      module = ComplexModule(custom_getter={"w": custom_getter}, name="mod6")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(12, len(tf.trainable_variables()))  # No variables.
 
 
 def _make_model_with_params(inputs, output_size):

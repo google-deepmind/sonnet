@@ -136,7 +136,8 @@ class AbstractModule(object):
   sharing will not work.
   """
 
-  def __init__(self, _sentinel=None, name=None):  # pylint: disable=invalid-name
+  def __init__(self, _sentinel=None, custom_getter=None,
+               name=None):  # pylint: disable=invalid-name
     """Performs the initialisation necessary for all AbstractModule instances.
 
     Every subclass of AbstractModule must begin their constructor with a call to
@@ -150,11 +151,16 @@ class AbstractModule(object):
       _sentinel: Variable that only carries a non-None value if `__init__` was
           called without named parameters. If this is the case, a deprecation
           warning is issued in form of a `ValueError`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of this module. Used to construct the Templated build function.
           If `None` the module's class name is used (converted to snake case).
 
     Raises:
       TypeError: If `name` is not a string.
+      TypeError: If a given `custom_getter` is not callable.
       ValueError: If `__init__` was called without named arguments.
     """
     if _sentinel is not None:
@@ -168,8 +174,21 @@ class AbstractModule(object):
 
     self._connected_subgraphs = []
 
-    self._template = tf.make_template(name, self._build_wrapper,
-                                      create_scope_now_=True)
+    # If the given custom getter is a dictionary with a per-variable custom
+    # getter, wrap it into a single custom getter.
+    if isinstance(custom_getter, collections.Mapping):
+      self._custom_getter = util._custom_getter_router(  # pylint: disable=protected-access
+          custom_getter_map=custom_getter,
+          name_fn=lambda name: name[len(self.scope_name) + 1:])
+    else:
+      if not (custom_getter is None or callable(custom_getter)):
+        raise TypeError("Given custom_getter is not callable.")
+      self._custom_getter = custom_getter
+
+    self._template = tf.make_template(name,
+                                      self._build_wrapper,
+                                      create_scope_now_=True,
+                                      custom_getter_=self._custom_getter)
 
     self._original_name = name
     self._unique_name = self._template.variable_scope.name.split("/")[-1]

@@ -1,0 +1,613 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.nets.convnet &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.nets.convnet</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;A minimal interface convolutional networks module.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">xrange</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">batch_norm</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">conv</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<span class="k">def</span> <span class="nf">_replicate_elements</span><span class="p">(</span><span class="n">input_iterable</span><span class="p">,</span> <span class="n">num_times</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Replicates entry in `input_iterable` if `input_iterable` is of length 1.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_iterable</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">input_iterable</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="o">*</span> <span class="n">num_times</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">input_iterable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ConvNet2D"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D">[docs]</a><span class="k">class</span> <span class="nc">ConvNet2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A 2D Convolutional Network module.&quot;&quot;&quot;</span>
+
+  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span>
+  <span class="c1"># Keep old name for backwards compatibility</span>
+
+  <span class="n">POSSIBLE_KEYS</span> <span class="o">=</span> <span class="n">POSSIBLE_INITIALIZER_KEYS</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">output_channels</span><span class="p">,</span>
+               <span class="n">kernel_shapes</span><span class="p">,</span>
+               <span class="n">strides</span><span class="p">,</span>
+               <span class="n">paddings</span><span class="p">,</span>
+               <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+               <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_net_2d&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a `ConvNet2D` module.</span>
+
+<span class="sd">    By default, neither batch normalization nor activation are applied to the</span>
+<span class="sd">    output of the final layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      output_channels: Iterable of output channels, as defined in</span>
+<span class="sd">        `conv.Conv2D`. Output channels can be defined either as number or via a</span>
+<span class="sd">        callable. In the latter case, since the function invocation is deferred</span>
+<span class="sd">        to graph construction time, the user must only ensure that entries can</span>
+<span class="sd">        be called when build is called. Each entry in the iterable defines</span>
+<span class="sd">        properties in the corresponding convolutional layer.</span>
+<span class="sd">      kernel_shapes: Iterable of kernel sizes as defined in `conv.Conv2D`; if</span>
+<span class="sd">        the list contains one element only, the same kernel shape is used in</span>
+<span class="sd">        each layer of the network.</span>
+<span class="sd">      strides: Iterable of kernel strides as defined in `conv.Conv2D`; if the</span>
+<span class="sd">        list contains one element only, the same stride is used in each layer of</span>
+<span class="sd">        the network.</span>
+<span class="sd">      paddings: Iterable of padding options, either `snt.SAME` or</span>
+<span class="sd">        `snt.VALID`; if the Iterable contains one element only, the same padding</span>
+<span class="sd">        is used in each layer of the network.</span>
+<span class="sd">      activation: An activation op.</span>
+<span class="sd">      activate_final: Boolean determining if the activation and batch</span>
+<span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
+<span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">          weights (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">          partitioners are used.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the filters of the</span>
+<span class="sd">        whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes a</span>
+<span class="sd">        single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      use_batch_norm: Boolean determining if batch normalization is applied</span>
+<span class="sd">        after convolution.</span>
+<span class="sd">      use_bias: Boolean or iterable of booleans determining whether to include</span>
+<span class="sd">        bias parameters in the convolutional layers. Default `True`.</span>
+<span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
+<span class="sd">        `snt.BatchNorm` modules.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If `output_channels` is not iterable; or if `kernel_shapes` is</span>
+<span class="sd">        not iterable; or `strides` is not iterable; or `paddings` is not</span>
+<span class="sd">        iterable; or if `activation` is not callable; or `batch_norm_config` is</span>
+<span class="sd">        not a mappable (e.g. `dict`).</span>
+<span class="sd">      ValueError: If `output_channels` is empty; or if `kernel_shapes` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`; or if `strides` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`; or if `paddings` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`.</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
+<span class="sd">        are not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_channels</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;output_channels must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">output_channels</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kernel_shapes</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;kernel_shapes must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">kernel_shapes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kernel_shapes</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strides</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;strides must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">strides</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">strides</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paddings</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;paddings must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">paddings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">paddings</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">ConvNet2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_channels</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_channels must not be empty&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
+        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
+        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
+        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">activation</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input &#39;activation&#39; must be callable&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span> <span class="o">=</span> <span class="n">activation</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span> <span class="o">=</span> <span class="n">activate_final</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">kernel_shapes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;kernel_shapes must be of length 1 or len(output_channels)&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_strides</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">strides</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_strides</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sd">&quot;&quot;&quot;strides must be of length 1 or len(output_channels)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">paddings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sd">&quot;&quot;&quot;paddings must be of length 1 or len(output_channels)&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
+
+    <span class="k">if</span> <span class="n">batch_norm_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_norm_config</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`batch_norm_config` must be a mapping, e.g. `dict`.&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+      <span class="n">use_bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">use_bias</span><span class="p">,)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;use_bias must be either a bool or an iterable&quot;</span><span class="p">)</span>
+      <span class="n">use_bias</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">use_bias</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_layers</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Instantiates all the convolutional modules used in the network.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                       <span class="n">output_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_strides</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
+                                       <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
+                                       <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assembles the `ConvNet2D` and connects it to the graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A 4D Tensor of shape `[batch_size, input_height, input_width,</span>
+<span class="sd">        input_channels]`.</span>
+<span class="sd">      is_training: Boolean to indicate to `snt.BatchNorm` if we are</span>
+<span class="sd">        currently training. By default `True`.</span>
+<span class="sd">      test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch</span>
+<span class="sd">        normalization should  use local batch statistics at test time.</span>
+<span class="sd">        By default `True`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A 4D Tensor of shape `[batch_size, output_height, output_width,</span>
+<span class="sd">        output_channels[-1]]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">inputs</span>
+
+    <span class="n">final_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+      <span class="n">net</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">final_index</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span><span class="p">:</span>
+          <span class="n">bn</span> <span class="o">=</span> <span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span><span class="p">)</span>
+          <span class="n">net</span> <span class="o">=</span> <span class="n">bn</span><span class="p">(</span><span class="n">net</span><span class="p">,</span>
+                   <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                   <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
+
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">net</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the convolutional layers of the network.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">initializers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">partitioners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">strides</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strides</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">paddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">kernel_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">l</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">else</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_batch_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">activation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">activate_final</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span>
+
+  <span class="c1"># Implements Transposable interface.</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns shape of input `Tensor` passed at last call to `build`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span>
+
+  <span class="c1"># Implements Transposable interface.</span>
+<div class="viewcode-block" id="ConvNet2D.transpose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.transpose">[docs]</a>  <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns transposed conv net.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Optional string specifying the name of the transposed module. The</span>
+<span class="sd">        default name is constructed by appending &quot;_transpose&quot;</span>
+<span class="sd">        to `self.module_name`.</span>
+<span class="sd">      output_channels: Optional iterable of numbers of output channels.</span>
+<span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
+<span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Matching `ConvNetTranspose2D` module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If output_channels is specified and its length does not match</span>
+<span class="sd">        the number of layers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_transpose&quot;</span>
+
+    <span class="k">if</span> <span class="n">activate_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">activate_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span>
+
+    <span class="k">if</span> <span class="n">output_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">output_channels</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+        <span class="n">output_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="o">=</span><span class="n">layer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Iterable output_channels length must match the &quot;</span>
+                       <span class="s2">&quot;number of layers (</span><span class="si">{}</span><span class="s2">), but is </span><span class="si">{}</span><span class="s2"> instead.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                           <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)))</span>
+
+    <span class="n">output_shapes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+      <span class="n">output_shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="o">=</span><span class="n">layer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">ConvNet2DTranspose</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                              <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+                              <span class="n">output_shapes</span><span class="o">=</span><span class="n">output_shapes</span><span class="p">,</span>
+                              <span class="n">kernel_shapes</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_shapes</span><span class="p">),</span>
+                              <span class="n">strides</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strides</span><span class="p">),</span>
+                              <span class="n">paddings</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paddings</span><span class="p">),</span>
+                              <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+                              <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+                              <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+                              <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+                              <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                              <span class="n">use_batch_norm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_batch_norm</span><span class="p">,</span>
+                              <span class="n">use_bias</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">),</span>
+                              <span class="n">batch_norm_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ConvNet2DTranspose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2DTranspose">[docs]</a><span class="k">class</span> <span class="nc">ConvNet2DTranspose</span><span class="p">(</span><span class="n">ConvNet2D</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A 2D Transpose-Convolutional Network module.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">output_channels</span><span class="p">,</span>
+               <span class="n">output_shapes</span><span class="p">,</span>
+               <span class="n">kernel_shapes</span><span class="p">,</span>
+               <span class="n">strides</span><span class="p">,</span>
+               <span class="n">paddings</span><span class="p">,</span>
+               <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+               <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_net_2d_transpose&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a `ConvNetTranspose2D` module.</span>
+
+<span class="sd">    `output_{shapes,channels}` can be defined either as iterable of</span>
+<span class="sd">    {iterables,integers} or via a callable. In the latter case, since the</span>
+<span class="sd">    function invocation is deferred to graph construction time, the user</span>
+<span class="sd">    must only ensure that entries can be called returning meaningful values when</span>
+<span class="sd">    build is called. Each entry in the iterable defines properties in the</span>
+<span class="sd">    corresponding convolutional layer.</span>
+
+<span class="sd">    By default, neither batch normalization nor activation are applied to the</span>
+<span class="sd">    output of the final layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      output_channels: Iterable of numbers of output channels.</span>
+<span class="sd">      output_shapes: Iterable of output shapes as defined in</span>
+<span class="sd">        `conv.conv2DTranpose`; if the iterable contains one element only, the</span>
+<span class="sd">        same shape is used in each layer of the network.</span>
+<span class="sd">      kernel_shapes: Iterable of kernel sizes as defined in `conv.Conv2D`; if</span>
+<span class="sd">        the list contains one element only, the same kernel shape is used in</span>
+<span class="sd">        each layer of the network.</span>
+<span class="sd">      strides: Iterable of kernel strides as defined in `conv.Conv2D`; if the</span>
+<span class="sd">        list contains one element only, the same stride is used in each layer of</span>
+<span class="sd">        the network.</span>
+<span class="sd">      paddings: Iterable of padding options, either `snt.SAME` or</span>
+<span class="sd">        `snt.VALID`; if the Iterable contains one element only, the same padding</span>
+<span class="sd">        is used in each layer of the network.</span>
+<span class="sd">      activation: An activation op.</span>
+<span class="sd">      activate_final: Boolean determining if the activation and batch</span>
+<span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
+<span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">          weights (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">          partitioners are used.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the filters of the</span>
+<span class="sd">        whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes a</span>
+<span class="sd">        single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      use_batch_norm: Boolean determining if batch normalization is applied</span>
+<span class="sd">        after convolution.</span>
+<span class="sd">      use_bias: Boolean or iterable of booleans determining whether to include</span>
+<span class="sd">        bias parameters in the convolutional layers. Default `True`.</span>
+<span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
+<span class="sd">        `snt.BatchNorm` modules.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If `output_channels` is not iterable; or if `output_shapes`</span>
+<span class="sd">        is not iterable; or if `kernel_shapes` is not iterable; or if `strides`</span>
+<span class="sd">        is not iterable; or if `paddings` is not iterable; or if `activation` is</span>
+<span class="sd">        not callable.</span>
+<span class="sd">      ValueError: If `output_channels` is empty; or if `kernel_shapes` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`; or if `strides` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`; or if `paddings` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`.</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
+<span class="sd">        are not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_channels</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;output_channels must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">output_channels</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span>
+    <span class="n">num_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_shapes</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;output_shapes must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">output_shapes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_shapes</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_shapes</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">output_shapes</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shapes</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_layers</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;output_shapes must be of length 1 or len(output_channels)&quot;</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">ConvNet2DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">output_channels</span><span class="p">,</span>
+        <span class="n">kernel_shapes</span><span class="p">,</span>
+        <span class="n">strides</span><span class="p">,</span>
+        <span class="n">paddings</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Instantiates all the convolutional modules used in the network.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+          <span class="n">conv</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_transpose_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                               <span class="n">output_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                               <span class="n">output_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shapes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                               <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                               <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_strides</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                               <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                               <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
+                               <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
+                               <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+                               <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">l</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">else</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shapes</span><span class="p">])</span>
+
+  <span class="c1"># Implement Transposable interface.</span>
+<div class="viewcode-block" id="ConvNet2DTranspose.transpose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose">[docs]</a>  <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns transposed conv net.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Optional string specifying the name of the transposed module. The</span>
+<span class="sd">        default name is constructed by appending &quot;_transpose&quot;</span>
+<span class="sd">        to `self.module_name`.</span>
+<span class="sd">      output_channels: Optional iterable of numbers of output channels.</span>
+<span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
+<span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Matching `ConvNetTranspose2D` module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If output_channels is specified and its length does not match</span>
+<span class="sd">        the number of layers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_transpose&quot;</span>
+
+    <span class="k">if</span> <span class="n">activate_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">activate_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span>
+
+    <span class="k">if</span> <span class="n">output_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">output_channels</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+        <span class="n">output_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="o">=</span><span class="n">layer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Iterable output_channels length must match the &quot;</span>
+                       <span class="s2">&quot;number of layers (</span><span class="si">{}</span><span class="s2">), but is </span><span class="si">{}</span><span class="s2"> instead.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                           <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_channels</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">ConvNet2D</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                     <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+                     <span class="n">kernel_shapes</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_shapes</span><span class="p">),</span>
+                     <span class="n">strides</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strides</span><span class="p">),</span>
+                     <span class="n">paddings</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paddings</span><span class="p">),</span>
+                     <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+                     <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+                     <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+                     <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+                     <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                     <span class="n">use_batch_norm</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_batch_norm</span><span class="p">,</span>
+                     <span class="n">use_bias</span><span class="o">=</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">),</span>
+                     <span class="n">batch_norm_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,18 @@
+sonnet\.python package
+======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    sonnet.python.modules
+    sonnet.python.ops
+
+Module contents
+---------------
+
+.. automodule:: sonnet.python
+    :members:
+    :undoc-members:
+    :show-inheritance:

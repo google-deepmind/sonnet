@@ -1,0 +1,709 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.util &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Utility functions for dealing with Sonnet Modules.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">weakref</span>
+
+<span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">variable_scope</span> <span class="k">as</span> <span class="n">variable_scope_ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">deprecation</span>
+
+
+<div class="viewcode-block" id="get_variables_in_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variables_in_scope">[docs]</a><span class="k">def</span> <span class="nf">get_variables_in_scope</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a tuple `tf.Variable`s in a scope for a given collection.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    scope: `tf.VariableScope` or string to retrieve variables from.</span>
+<span class="sd">    collection: Collection to restrict query to. By default this is</span>
+<span class="sd">        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn&#39;t include non-trainable</span>
+<span class="sd">        variables such as moving averages.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple of `tf.Variable` objects.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">VariableScope</span><span class="p">):</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="c1"># Escape the name in case it contains any &quot;.&quot; characters. Add a closing slash</span>
+  <span class="c1"># so we will not search any scopes that have this scope name as a prefix.</span>
+  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">scope_name</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_variables_in_module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variables_in_module">[docs]</a><span class="k">def</span> <span class="nf">get_variables_in_module</span><span class="p">(</span><span class="n">module</span><span class="p">,</span>
+                            <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns tuple of `tf.Variable`s declared inside an `snt.Module`.</span>
+
+<span class="sd">  Note that this operates by searching the variable scope a module contains,</span>
+<span class="sd">  and so does not know about any modules which were constructed elsewhere but</span>
+<span class="sd">  used inside this module.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    module: `snt.Module` instance to query the scope of.</span>
+<span class="sd">    collection: Collection to restrict query to. By default this is</span>
+<span class="sd">      `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn&#39;t include non-trainable</span>
+<span class="sd">      variables such as moving averages.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple of `tf.Variable` objects.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">module</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_check_nested_callables</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">object_name</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Checks if all items in the dictionary and in subdictionaries are callables.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    dictionary: Dictionary of callables or other dictionaries with callables.</span>
+<span class="sd">    object_name: The name of the object that is expected in the dictionary.</span>
+<span class="sd">      E.g. &#39;Initializer&#39;, &#39;Partitioner&#39; or &#39;Regularizer&#39;. The first letter</span>
+<span class="sd">      should be capitalised as this will be the first word in the error message.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    TypeError: If the dictionary contains something that is not either a</span>
+<span class="sd">      dictionary or a callable.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">object_name</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+          <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> for &#39;</span><span class="si">{}</span><span class="s2">&#39; is not a callable function or dictionary&quot;</span>
+          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">object_name</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="check_initializers"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_initializers">[docs]</a><span class="k">def</span> <span class="nf">check_initializers</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Checks the given initializers.</span>
+
+<span class="sd">  This checks that `initializers` is a dictionary that only contains keys in</span>
+<span class="sd">  `keys`, and furthermore the entries in `initializers` are functions or</span>
+<span class="sd">  further dictionaries (the latter used, for example, in passing initializers</span>
+<span class="sd">  to modules inside modules) that must satisfy the same constraints.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    initializers: Dictionary of initializers (allowing nested dictionaries) or</span>
+<span class="sd">      None.</span>
+<span class="sd">    keys: Iterable of valid keys for `initializers`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Copy of checked dictionary of initializers. If `initializers=None`, an empty</span>
+<span class="sd">    dictionary will be returned.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    KeyError: If an initializer is provided for a key not in `keys`.</span>
+<span class="sd">    TypeError: If a provided initializer is not a callable function, or if the</span>
+<span class="sd">      dict of initializers is not in fact a dict.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">initializers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{}</span>
+
+  <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+  <span class="c1"># If the user is creating modules that nests other modules, then it is</span>
+  <span class="c1"># possible that they might not nest the initializer dictionaries correctly. If</span>
+  <span class="c1"># that is the case, then we might find that initializers is not a dict here.</span>
+  <span class="c1"># We raise a helpful exception in this case.</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">initializers</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;A dict of initializers was expected, but not &quot;</span>
+                    <span class="s2">&quot;given. You should double-check that you&#39;ve nested the &quot;</span>
+                    <span class="s2">&quot;initializers for any sub-modules correctly.&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
+    <span class="n">extra_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span> <span class="o">-</span> <span class="n">keys</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+        <span class="s2">&quot;Invalid initializer keys </span><span class="si">{}</span><span class="s2">, initializers can only &quot;</span>
+        <span class="s2">&quot;be provided for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">extra_keys</span><span class="p">),</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
+
+  <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span> <span class="s2">&quot;Initializer&quot;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="check_partitioners"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_partitioners">[docs]</a><span class="k">def</span> <span class="nf">check_partitioners</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Checks the given partitioners.</span>
+
+<span class="sd">  This checks that `partitioners` is a dictionary that only contains keys in</span>
+<span class="sd">  `keys`, and furthermore the entries in `partitioners` are functions or</span>
+<span class="sd">  further dictionaries (the latter used, for example, in passing partitioners</span>
+<span class="sd">  to modules inside modules) that must satisfy the same constraints.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    partitioners: Dictionary of partitioners (allowing nested dictionaries) or</span>
+<span class="sd">        None.</span>
+<span class="sd">    keys: Iterable of valid keys for `partitioners`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Checked dictionary of partitioners. If `partitioners=None`, an empty</span>
+<span class="sd">    dictionary will be returned.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    KeyError: If an partitioner is provided for a key not in `keys`.</span>
+<span class="sd">    TypeError: If a provided partitioner is not a callable function.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">partitioners</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{}</span>
+
+  <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">partitioners</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
+    <span class="n">extra_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">partitioners</span><span class="p">)</span> <span class="o">-</span> <span class="n">keys</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+        <span class="s2">&quot;Invalid partitioner keys </span><span class="si">{}</span><span class="s2">, partitioners can only &quot;</span>
+        <span class="s2">&quot;be provided for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">extra_keys</span><span class="p">),</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
+
+  <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span> <span class="s2">&quot;Partitioner&quot;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">partitioners</span></div>
+
+
+<div class="viewcode-block" id="check_regularizers"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_regularizers">[docs]</a><span class="k">def</span> <span class="nf">check_regularizers</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Checks the given regularizers.</span>
+
+<span class="sd">  This checks that `regularizers` is a dictionary that only contains keys in</span>
+<span class="sd">  `keys`, and furthermore the entries in `regularizers` are functions or</span>
+<span class="sd">  further dictionaries (the latter used, for example, in passing regularizers</span>
+<span class="sd">  to modules inside modules) that must satisfy the same constraints.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    regularizers: Dictionary of regularizers (allowing nested dictionaries) or</span>
+<span class="sd">      None.</span>
+<span class="sd">    keys: Iterable of valid keys for `regularizers`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Copy of checked dictionary of regularizers. If `regularizers=None`, an empty</span>
+<span class="sd">    dictionary will be returned.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    KeyError: If an regularizers is provided for a key not in `keys`.</span>
+<span class="sd">    TypeError: If a provided regularizers is not a callable function, or if the</span>
+<span class="sd">      dict of regularizers is not in fact a dict.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">regularizers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{}</span>
+
+  <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+  <span class="c1"># If the user is creating modules that nests other modules, then it is</span>
+  <span class="c1"># possible that they might not nest the regularizer dictionaries correctly. If</span>
+  <span class="c1"># that is the case, then we might find that regularizers is not a dict here.</span>
+  <span class="c1"># We raise a helpful exception in this case.</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">regularizers</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;A dict of regularizers was expected, but not &quot;</span>
+                    <span class="s2">&quot;given. You should double-check that you&#39;ve nested the &quot;</span>
+                    <span class="s2">&quot;regularizers for any sub-modules correctly.&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
+    <span class="n">extra_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span> <span class="o">-</span> <span class="n">keys</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+        <span class="s2">&quot;Invalid regularizer keys </span><span class="si">{}</span><span class="s2">, regularizers can only &quot;</span>
+        <span class="s2">&quot;be provided for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">extra_keys</span><span class="p">),</span>
+            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
+
+  <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span> <span class="s2">&quot;Regularizer&quot;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_is_scope_prefix</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix_name</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Checks that `prefix_name` is a proper scope prefix of `scope_name`.&quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">scope_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+    <span class="n">scope_name</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">prefix_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+    <span class="n">prefix_name</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
+
+  <span class="k">return</span> <span class="n">scope_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix_name</span><span class="p">)</span>
+
+
+<span class="c1"># pylint: disable=protected-access</span>
+<span class="k">def</span> <span class="nf">_get_sliced_variables</span><span class="p">(</span><span class="n">var_list</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Separates the sliced (partitioned) and unsliced variables in var_list.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    var_list: a list of variables.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A list of unsliced variables in var_list, and a dict mapping names to parts</span>
+<span class="sd">    for the sliced variables in var_list.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">unsliced_variables</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">sliced_variables</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+  <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">_save_slice_info</span><span class="p">:</span>
+      <span class="n">sliced_variables</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">_save_slice_info</span><span class="o">.</span><span class="n">full_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">unsliced_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">unsliced_variables</span><span class="p">,</span> <span class="n">sliced_variables</span>
+<span class="c1"># pylint: enable=protected-access</span>
+
+
+<div class="viewcode-block" id="get_normalized_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_normalized_variable_map">[docs]</a><span class="k">def</span> <span class="nf">get_normalized_variable_map</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span>
+                                <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,</span>
+                                <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Builds map of `tf.Variable`s in scope or module with normalized names.</span>
+
+<span class="sd">  The names of the variables are normalized to remove the scope prefix.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    scope_or_module: Scope or module to build map from.</span>
+<span class="sd">    collection: Collection to restrict query to. By default this is</span>
+<span class="sd">        `tf.Graphkeys.VARIABLES`, which includes non-trainable variables such</span>
+<span class="sd">        as moving averages.</span>
+<span class="sd">    context: Scope or module, identical to or parent of `scope`. If given, this</span>
+<span class="sd">        will be used as the stripped prefix. By default `None`, which means</span>
+<span class="sd">        `context=scope`.</span>
+<span class="sd">    group_sliced_variables: Boolean, if set to True, sliced variables are</span>
+<span class="sd">       grouped together in the returned map; if set to False, each partition of</span>
+<span class="sd">       a sliced variable is a separate (key, value) pair.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Dictionary mapping normalized variable name to `tf.Variable`, or a list</span>
+<span class="sd">        of `tf.Variables` if the variable is a sliced (partitioned) variable.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If `context` is given but is not a proper prefix of `scope`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span> <span class="s2">&quot;variable_scope&quot;</span><span class="p">,</span> <span class="n">scope_or_module</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">scope</span>
+  <span class="n">context_scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;variable_scope&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">prefix</span> <span class="o">=</span> <span class="n">context_scope</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_scope_prefix</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scope &#39;</span><span class="si">{}</span><span class="s2">&#39; is not prefixed by &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">))</span>
+
+  <span class="n">prefix_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+  <span class="n">variables</span> <span class="o">=</span> <span class="n">get_variables_in_scope</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">group_sliced_variables</span><span class="p">:</span>
+    <span class="n">single_vars</span> <span class="o">=</span> <span class="n">variables</span>
+    <span class="n">grouped_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">single_vars</span><span class="p">,</span> <span class="n">grouped_vars</span> <span class="o">=</span> <span class="n">_get_sliced_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+
+  <span class="n">var_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">prefix_length</span><span class="p">:]:</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">single_vars</span><span class="p">}</span>
+  <span class="k">for</span> <span class="n">full_name</span><span class="p">,</span> <span class="n">var_group</span> <span class="ow">in</span> <span class="n">grouped_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">full_name</span><span class="p">[</span><span class="n">prefix_length</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">var_map</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mixing slices and non-slices with the same name: &quot;</span> <span class="o">+</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">var_map</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_group</span>
+  <span class="k">return</span> <span class="n">var_map</span></div>
+
+
+<div class="viewcode-block" id="get_saver"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_saver">[docs]</a><span class="nd">@deprecation</span><span class="o">.</span><span class="n">deprecated_arg_values</span><span class="p">(</span>
+    <span class="s2">&quot;2017-08-01&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Start using group_sliced_variables=True. This may break your checkpoints &quot;</span>
+    <span class="s2">&quot;if they contain sliced (partitioned) variables&quot;</span><span class="p">,</span>
+    <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_saver</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,),</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
+              <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Builds a `tf.train.Saver` for the scope or module, with normalized names.</span>
+
+<span class="sd">  The names of the variables are normalized to remove the scope prefix.</span>
+<span class="sd">  This allows the same variables to be restored into another similar scope or</span>
+<span class="sd">  module using a complementary `tf.train.Saver` object.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    scope: Scope or module. Variables within will be saved or restored.</span>
+<span class="sd">    collections: Sequence of collections of variables to restrict</span>
+<span class="sd">        `tf.train.Saver` to. By default this is `tf.GraphKeys.GLOBAL_VARIABLES`</span>
+<span class="sd">        which includes moving averages variables as well as trainable variables.</span>
+<span class="sd">    context: Scope or module, identical to or parent of `scope`. If given, this</span>
+<span class="sd">        will be used as the stripped prefix.</span>
+<span class="sd">    group_sliced_variables: Boolean, if set to True, sliced variables are</span>
+<span class="sd">       grouped together in the returned map; if set to False, each partition of</span>
+<span class="sd">       a sliced variable is a separate (key, value) pair.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A `tf.train.Saver` object for Variables in the scope or module.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">variable_map</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">collections</span><span class="p">:</span>
+    <span class="n">variable_map</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_normalized_variable_map</span><span class="p">(</span>
+        <span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span>
+        <span class="n">group_sliced_variables</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">var_list</span><span class="o">=</span><span class="n">variable_map</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="has_variable_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.has_variable_scope">[docs]</a><span class="k">def</span> <span class="nf">has_variable_scope</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Determines whether the given object has a variable scope.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="s2">&quot;variable_scope&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="n">format_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+    <span class="n">column_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+    <span class="n">format_str</span> <span class="o">+=</span> <span class="s2">&quot;{:&lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">column_width</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}  &quot;</span>
+
+  <span class="n">output_rows</span> <span class="o">=</span> <span class="p">(</span><span class="n">format_str</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+  <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_rows</span><span class="p">)</span> <span class="k">if</span> <span class="n">join_lines</span> <span class="k">else</span> <span class="n">output_rows</span>
+
+
+<div class="viewcode-block" id="variable_map_items"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.variable_map_items">[docs]</a><span class="k">def</span> <span class="nf">variable_map_items</span><span class="p">(</span><span class="n">variable_map</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns an iterator over (string, variable) pairs in the variable map.</span>
+
+<span class="sd">  In general, variable maps map variable names to either a `tf.Variable`, or</span>
+<span class="sd">  list of `tf.Variable`s (in case of sliced variables).</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    variable_map: dict, variable map over which to iterate.</span>
+
+<span class="sd">  Yields:</span>
+<span class="sd">    (string, tf.Variable) pairs.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_or_vars</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">variable_map</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_or_vars</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+      <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">var_or_vars</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">variable</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_or_vars</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_vars_to_collections</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a dict mapping variables to the collections they appear in.&quot;&quot;&quot;</span>
+  <span class="n">var_to_collections</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variable_map_items</span><span class="p">(</span><span class="n">variables</span><span class="p">))</span>
+  <span class="k">for</span> <span class="n">graph</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">graph</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">collection_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">_collections</span><span class="p">):</span>  <span class="c1"># pylint: disable=protected-access</span>
+      <span class="n">entries</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">entry</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">))</span>
+      <span class="c1"># For legacy reasons, tf.GraphKeys.GLOBAL_VARIABLES == &quot;variables&quot;.</span>
+      <span class="c1"># Correcting for this here, to avoid confusion.</span>
+      <span class="k">if</span> <span class="n">collection_name</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">:</span>
+        <span class="n">collection_name</span> <span class="o">=</span> <span class="s2">&quot;global_variables&quot;</span>
+      <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+        <span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">collection_name</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">var_to_collections</span>
+
+
+<div class="viewcode-block" id="format_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.format_variables">[docs]</a><span class="k">def</span> <span class="nf">format_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Takes a collection of variables and formats it as a table.&quot;&quot;&quot;</span>
+  <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;Variable&quot;</span><span class="p">,</span> <span class="s2">&quot;Shape&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Collections&quot;</span><span class="p">,</span> <span class="s2">&quot;Device&quot;</span><span class="p">))</span>
+  <span class="n">var_to_collections</span> <span class="o">=</span> <span class="n">_get_vars_to_collections</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">var</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.format_variable_map">[docs]</a><span class="k">def</span> <span class="nf">format_variable_map</span><span class="p">(</span><span class="n">variable_map</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Takes a key-to-variable map and formats it as a table.&quot;&quot;&quot;</span>
+  <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;Key&quot;</span><span class="p">,</span> <span class="s2">&quot;Variable&quot;</span><span class="p">,</span> <span class="s2">&quot;Shape&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Collections&quot;</span><span class="p">,</span> <span class="s2">&quot;Device&quot;</span><span class="p">))</span>
+  <span class="n">var_to_collections</span> <span class="o">=</span> <span class="n">_get_vars_to_collections</span><span class="p">(</span><span class="n">variable_map</span><span class="p">)</span>
+
+  <span class="n">sort_key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">variable_map_items</span><span class="p">(</span><span class="n">variable_map</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">sort_key</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.log_variables">[docs]</a><span class="k">def</span> <span class="nf">log_variables</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Logs variable information.</span>
+
+<span class="sd">  This function logs the name, shape, type, collections, and device for either</span>
+<span class="sd">  all variables or a given iterable of variables.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    variables: iterable of variables; if not provided, then all variables</span>
+<span class="sd">        (in the default graph) are logged.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables</span><span class="p">()</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables</span><span class="p">()</span>
+  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">format_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reuse_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.reuse_variables">[docs]</a><span class="k">def</span> <span class="nf">reuse_variables</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Wraps an arbitrary method so it does variable sharing.</span>
+
+<span class="sd">  This decorator creates variables the first time it calls `method`, and reuses</span>
+<span class="sd">  them for subsequent calls. The object that calls `method` provides a</span>
+<span class="sd">  `tf.VariableScope`, either as a `variable_scope` attribute or as the return</span>
+<span class="sd">  value of an `_enter_variable_scope()` method.</span>
+
+<span class="sd">  The first time the wrapped method is invoked, it enters the caller&#39;s</span>
+<span class="sd">  `tf.VariableScope` with `reuse=False`. On all subsequent calls it enters the</span>
+<span class="sd">  same variable scope with `reuse=True`.</span>
+
+<span class="sd">  Variables are created in the context of the `tf.VariableScope` provided by the</span>
+<span class="sd">  caller object. Ops are created with an additional `tf.name_scope()`, which</span>
+<span class="sd">  adds a scope for the wrapped method name. For example:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  class MyModule(object):</span>
+
+<span class="sd">    def __init__(self, name):</span>
+<span class="sd">      with tf.variable_scope(name) as variable_scope:</span>
+<span class="sd">        self.variable_scope = variable_scope</span>
+
+<span class="sd">    @snt.reuse_variables</span>
+<span class="sd">    def add_x(self, tensor):</span>
+<span class="sd">      x = tf.get_variable(&quot;x&quot;, shape=tensor.get_shape())</span>
+<span class="sd">      return tensor + x</span>
+
+<span class="sd">  module = MyModule(&quot;my_module_name&quot;)</span>
+<span class="sd">  input_tensor = tf.zeros(shape=(5,))</span>
+
+<span class="sd">  # This creates the variable &quot;my_module_name/x:0&quot;</span>
+<span class="sd">  # and op &quot;my_module_name/add_x/add:0&quot;</span>
+<span class="sd">  output = module.add_x(input_tensor)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    method: The method to wrap.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The wrapped method.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">initialized_variable_scopes</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+
+  <span class="c1"># Ensure that the argument passed in is really a method by checking that the</span>
+  <span class="c1"># first positional argument to it is &quot;self&quot;.</span>
+  <span class="n">arg_spec</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+  <span class="n">is_method</span> <span class="o">=</span> <span class="n">arg_spec</span><span class="o">.</span><span class="n">args</span> <span class="ow">and</span> <span class="n">arg_spec</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">is_method</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;reuse_variables can only be used with methods.&quot;</span><span class="p">)</span>
+
+  <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calls `method` with a variable scope whose reuse flag is set correctly.</span>
+
+<span class="sd">    The first time the wrapper is called it creates a</span>
+<span class="sd">    `(tf.Graph, tf.VariableScope)` key and checks it for membership in</span>
+<span class="sd">    `initialized_variable_scopes`. The check is `False` if and only if this is</span>
+<span class="sd">    the first time the wrapper has been called with the key, otherwise the</span>
+<span class="sd">    check is `True`. The result of this check is used as the `reuse` flag for</span>
+<span class="sd">    entering the provided variable scope before calling `method`.</span>
+
+<span class="sd">    Here are two examples of how to use the reuse_variables decorator.</span>
+
+<span class="sd">    1. Decorate an arbitrary instance method with a `variable_scope` attribute:</span>
+
+<span class="sd">      ```python</span>
+<span class="sd">      class Reusable(object):</span>
+
+<span class="sd">        def __init__(self, name):</span>
+<span class="sd">          with tf.variable_scope(name) as vs:</span>
+<span class="sd">            self.variable_scope = vs</span>
+
+<span class="sd">        @snt.reuse_variables</span>
+<span class="sd">        def add_a(self, input_tensor):</span>
+<span class="sd">          a = tf.get_variable(&quot;a&quot;, shape=input_tensor.get_shape())</span>
+<span class="sd">          return a + input_tensor</span>
+
+<span class="sd">      obj = Reusable(&quot;reusable&quot;)</span>
+<span class="sd">      x = tf.constant(5.0)</span>
+<span class="sd">      out1 = obj.add_a(x)</span>
+<span class="sd">      out2 = obj.add_a(x)</span>
+<span class="sd">      # out1 == out2</span>
+<span class="sd">      ```</span>
+
+<span class="sd">    2. Decorating a snt.AbstractModule instance method:</span>
+
+<span class="sd">      ```python</span>
+<span class="sd">      class ReusableModule(snt.AbstractModule):</span>
+
+<span class="sd">        @snt.reuse_variables</span>
+<span class="sd">        def add_a(self, input_tensor):</span>
+<span class="sd">          a = tf.get_variable(&quot;a&quot;, shape=input_tensor.get_shape())</span>
+<span class="sd">          return a + input_tensor</span>
+
+<span class="sd">        # We don&#39;t need @snt.reuse_variables here because build is</span>
+<span class="sd">        wrapped by # `tf.make_template` inside `snt.AbstractModule`.</span>
+<span class="sd">        def _build(self, input_tensor):</span>
+<span class="sd">          b = tf.get_variable(&quot;b&quot;, shape=input_tensor.get_shape())</span>
+<span class="sd">          return b + self.add_a(input_tensor)</span>
+
+<span class="sd">      obj = Reusable(&quot;reusable&quot;)</span>
+<span class="sd">      x = tf.constant(5.0)</span>
+<span class="sd">      out1 = obj(x)</span>
+<span class="sd">      out2 = obj(x)</span>
+<span class="sd">      # out1 == out2</span>
+<span class="sd">      ```</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *args: The positional arguments (Tensors) passed to the wrapped method.</span>
+<span class="sd">      **kwargs: The keyword arguments passed to the wrapped method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Output of the wrapped method.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If no variable scope is provided or if `method` is a method</span>
+<span class="sd">                  and a variable_scope keyword argument is also provided.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">default_context_manager</span><span class="p">(</span><span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+      <span class="n">variable_scope</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">variable_scope</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span>
+
+    <span class="n">variable_scope_context_manager</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_enter_variable_scope&quot;</span><span class="p">,</span>
+                                             <span class="n">default_context_manager</span><span class="p">)</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">graph</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes</span><span class="p">:</span>
+      <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+    <span class="n">initialized_variable_scopes_for_graph</span> <span class="o">=</span> <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span>
+
+    <span class="c1"># Temporarily enter the variable scope to capture it</span>
+    <span class="k">with</span> <span class="n">variable_scope_context_manager</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp_variable_scope</span><span class="p">:</span>
+      <span class="n">variable_scope</span> <span class="o">=</span> <span class="n">tmp_variable_scope</span>
+
+    <span class="n">reuse</span> <span class="o">=</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes_for_graph</span>
+
+    <span class="c1"># Enter the pure variable scope with reuse correctly set</span>
+    <span class="k">with</span> <span class="n">variable_scope_ops</span><span class="o">.</span><span class="n">_pure_variable_scope</span><span class="p">(</span>  <span class="c1"># pylint:disable=protected-access</span>
+        <span class="n">variable_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_variable_scope</span><span class="p">:</span>
+      <span class="c1"># Force tf.name_scope to treat variable_scope.original_name_scope as</span>
+      <span class="c1"># an &quot;absolute&quot; scope name so we can re-enter it.</span>
+      <span class="n">name_scope</span> <span class="o">=</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">original_name_scope</span>
+      <span class="k">if</span> <span class="n">name_scope</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
+        <span class="n">name_scope</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name_scope</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
+          <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+          <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+          <span class="k">return</span> <span class="n">out_ops</span>
+
+  <span class="k">return</span> <span class="n">wrapper</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

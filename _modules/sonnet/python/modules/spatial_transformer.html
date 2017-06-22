@@ -1,0 +1,683 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.spatial_transformer &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.spatial_transformer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;&quot;Implementation of Spatial Transformer networks core components.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">chain</span>
+
+<span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">xrange</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="GridWarper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.GridWarper">[docs]</a><span class="k">class</span> <span class="nc">GridWarper</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Grid warper interface class.</span>
+
+<span class="sd">  An object implementing the `GridWarper` interface generates a reference grid</span>
+<span class="sd">  of feature points at construction time, and warps it via a parametric</span>
+<span class="sd">  transformation model, specified at run time by an input parameter Tensor.</span>
+<span class="sd">  Grid warpers must then implement a `create_features` function used to generate</span>
+<span class="sd">  the reference grid to be warped in the forward pass (according to a determined</span>
+<span class="sd">  warping model).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_shape</span><span class="p">,</span> <span class="n">output_shape</span><span class="p">,</span> <span class="n">num_coeff</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a GridWarper module and initializes the source grid params.</span>
+
+<span class="sd">    `source_shape` and `output_shape` are used to define the size of the source</span>
+<span class="sd">    and output signal domains, as opposed to the shape of the respective</span>
+<span class="sd">    Tensors. For example, for an image of size `width=W` and `height=H`,</span>
+<span class="sd">    `{source,output}_shape=[H, W]`; for a volume of size `width=W`, `height=H`</span>
+<span class="sd">    and `depth=D`, `{source,output}_shape=[H, W, D]`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      source_shape: Iterable of integers determining the size of the source</span>
+<span class="sd">        signal domain.</span>
+<span class="sd">      output_shape: Iterable of integers determining the size of the destination</span>
+<span class="sd">        resampled signal domain.</span>
+<span class="sd">      num_coeff: Number of coefficients parametrizing the grid warp.</span>
+<span class="sd">        For example, a 2D affine transformation will be defined by the 6</span>
+<span class="sd">        parameters populating the corresponding 2x3 affine matrix.</span>
+<span class="sd">      name: Name of Module.</span>
+<span class="sd">      **kwargs: Extra kwargs to be forwarded to the `create_features` function,</span>
+<span class="sd">        instantiating the source grid parameters.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      Error: If `len(output_shape) &gt; len(source_shape)`.</span>
+<span class="sd">      TypeError: If `output_shape` and `source_shape` are not both iterable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">GridWarper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">source_shape</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s1">&#39;Output domain dimensionality (</span><span class="si">{}</span><span class="s1">) must be equal or &#39;</span>
+                       <span class="s1">&#39;smaller than source domain dimensionality (</span><span class="si">{}</span><span class="s1">)&#39;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">),</span>
+                               <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span><span class="p">)))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_coeff</span> <span class="o">=</span> <span class="n">num_coeff</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_features</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+  <span class="k">def</span> <span class="nf">_create_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates matrix of features, of size `[num_coeff, num_points]`.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">n_coeff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns number of coefficients of warping function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_coeff</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">psi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a list of features used to compute the grid warp.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">source_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the shape of the source signal.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the shape of the output grid.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span></div>
+
+
+<span class="k">def</span> <span class="nf">_create_affine_features</span><span class="p">(</span><span class="n">output_shape</span><span class="p">,</span> <span class="n">source_shape</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Generates n-dimensional homogenous coordinates for a given grid definition.</span>
+
+<span class="sd">  `source_shape` and `output_shape` are used to define the size of the source</span>
+<span class="sd">  and output signal domains, as opposed to the shape of the respective</span>
+<span class="sd">  Tensors. For example, for an image of size `width=W` and `height=H`,</span>
+<span class="sd">  `{source,output}_shape=[H, W]`; for a volume of size `width=W`, `height=H`</span>
+<span class="sd">  and `depth=D`, `{source,output}_shape=[H, W, D]`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    output_shape: Iterable of integers determining the shape of the grid to be</span>
+<span class="sd">      warped.</span>
+<span class="sd">   source_shape: Iterable of integers determining the domain of the signal to be</span>
+<span class="sd">     resampled.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    List of flattened numpy arrays of coordinates in range `[-1, 1]^N`, for</span>
+<span class="sd">    example:</span>
+<span class="sd">      ```</span>
+<span class="sd">      [[x_0_0, .... , x_0_{n-1}],</span>
+<span class="sd">       ....</span>
+<span class="sd">       [x_{M-1}_0, .... , x_{M-1}_{n-1}],</span>
+<span class="sd">       [x_{M}_0=0, .... , x_{M}_{n-1}=0],</span>
+<span class="sd">       ...</span>
+<span class="sd">       [x_{N-1}_0=0, .... , x_{N-1}_{n-1}=0],</span>
+<span class="sd">       [1, ..., 1]]</span>
+<span class="sd">      ```</span>
+<span class="sd">      where N is the dimensionality of the sampled space, M is the</span>
+<span class="sd">      dimensionality of the output space, i.e. 2 for images</span>
+<span class="sd">      and 3 for volumes, and n is the number of points in the output grid.</span>
+<span class="sd">      When the dimensionality of `output_shape` is smaller that that of</span>
+<span class="sd">      `source_shape` the last rows before [1, ..., 1] will be filled with 0.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">ranges</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)]</span>
+  <span class="n">psi</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">ranges</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">)]</span>
+  <span class="n">dim_gap</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_shape</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">dim_gap</span><span class="p">):</span>
+    <span class="n">psi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">psi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+  <span class="n">psi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">psi</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">psi</span>
+
+
+<div class="viewcode-block" id="AffineGridWarper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineGridWarper">[docs]</a><span class="k">class</span> <span class="nc">AffineGridWarper</span><span class="p">(</span><span class="n">GridWarper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Affine Grid Warper class.</span>
+
+<span class="sd">  The affine grid warper generates a reference grid of n-dimensional points</span>
+<span class="sd">  and warps it via an affine transormation model determined by an input</span>
+<span class="sd">  parameter Tensor. Some of the transformation parameters can be fixed at</span>
+<span class="sd">  construction time via an `AffineWarpConstraints` object.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">source_shape</span><span class="p">,</span>
+               <span class="n">output_shape</span><span class="p">,</span>
+               <span class="n">constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s1">&#39;affine_grid_warper&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs an AffineGridWarper.</span>
+
+<span class="sd">    `source_shape` and `output_shape` are used to define the size of the source</span>
+<span class="sd">    and output signal domains, as opposed to the shape of the respective</span>
+<span class="sd">    Tensors. For example, for an image of size `width=W` and `height=H`,</span>
+<span class="sd">    `{source,output}_shape=[H, W]`; for a volume of size `width=W`, `height=H`</span>
+<span class="sd">    and `depth=D`, `{source,output}_shape=[H, W, D]`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      source_shape: Iterable of integers determining the size of the source</span>
+<span class="sd">        signal domain.</span>
+<span class="sd">      output_shape: Iterable of integers determining the size of the destination</span>
+<span class="sd">        resampled signal domain.</span>
+<span class="sd">      constraints: Either a double list of shape `[N, N+1]` defining constraints</span>
+<span class="sd">        on the entries of a matrix defining an affine transformation in N</span>
+<span class="sd">        dimensions, or an `AffineWarpConstraints` object. If the double list is</span>
+<span class="sd">        passed, a numeric value bakes in a constraint on the corresponding</span>
+<span class="sd">        entry in the tranformation matrix, whereas `None` implies that the</span>
+<span class="sd">        corresponding entry will be specified at run time.</span>
+<span class="sd">      name: Name of module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      Error: If constraints fully define the affine transformation; or if</span>
+<span class="sd">        input grid shape and contraints have different dimensionality.</span>
+<span class="sd">      TypeError: If output_shape and source_shape are not both iterable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">source_shape</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+    <span class="n">num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">constraints</span><span class="p">,</span> <span class="n">AffineWarpConstraints</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span> <span class="o">=</span> <span class="n">constraints</span>
+    <span class="k">elif</span> <span class="n">constraints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span> <span class="o">=</span> <span class="n">AffineWarpConstraints</span><span class="o">.</span><span class="n">no_constraints</span><span class="p">(</span><span class="n">num_dim</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span> <span class="o">=</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">constraints</span><span class="o">=</span><span class="n">constraints</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="o">.</span><span class="n">num_free_params</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s1">&#39;Transformation is fully constrained.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="o">.</span><span class="n">num_dim</span> <span class="o">!=</span> <span class="n">num_dim</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s1">&#39;Incompatible set of constraints provided: &#39;</span>
+                       <span class="s1">&#39;input grid shape and constraints have different &#39;</span>
+                       <span class="s1">&#39;dimensionality.&#39;</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">AffineGridWarper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source_shape</span><span class="o">=</span><span class="n">source_shape</span><span class="p">,</span>
+                                           <span class="n">output_shape</span><span class="o">=</span><span class="n">output_shape</span><span class="p">,</span>
+                                           <span class="n">num_coeff</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                           <span class="n">constraints</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_create_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates all the matrices needed to compute the output warped grids.&quot;&quot;&quot;</span>
+    <span class="n">affine_warp_constraints</span> <span class="o">=</span> <span class="n">constraints</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">affine_warp_constraints</span><span class="p">,</span> <span class="n">AffineWarpConstraints</span><span class="p">):</span>
+      <span class="n">affine_warp_constraints</span> <span class="o">=</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">affine_warp_constraints</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">affine_warp_constraints</span><span class="o">.</span><span class="n">mask</span>
+    <span class="n">psi</span> <span class="o">=</span> <span class="n">_create_affine_features</span><span class="p">(</span><span class="n">output_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">,</span>
+                                  <span class="n">source_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span><span class="p">)</span>
+    <span class="n">scales</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="o">.</span><span class="mi">5</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_shape</span><span class="p">)]</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">scales</span>
+    <span class="c1"># Transforming a point x&#39;s i-th coordinate via an affine transformation</span>
+    <span class="c1"># is performed via the following dot product:</span>
+    <span class="c1">#</span>
+    <span class="c1">#  x_i&#39; = s_i * (T_i * x) + t_i                                          (1)</span>
+    <span class="c1">#</span>
+    <span class="c1"># where Ti is the i-th row of an affine matrix, and the scalars s_i and t_i</span>
+    <span class="c1"># define a decentering and global scaling into the source space.</span>
+    <span class="c1"># In the AffineGridWarper some of the entries of Ti are provided via the</span>
+    <span class="c1"># input, some others are instead fixed, according to the constraints</span>
+    <span class="c1"># assigned in the constructor.</span>
+    <span class="c1"># In create_features the internal dot product (1) is accordingly broken down</span>
+    <span class="c1"># into two parts:</span>
+    <span class="c1">#</span>
+    <span class="c1"># x_i&#39; = Ti[uncon_i] * x[uncon_i, :] + offset(con_var)                   (2)</span>
+    <span class="c1">#</span>
+    <span class="c1"># i.e. the sum of the dot product of the free parameters (coming</span>
+    <span class="c1"># from the input) indexed by uncond_i and an offset obtained by</span>
+    <span class="c1"># precomputing the fixed part of (1) according to the constraints.</span>
+    <span class="c1"># This step is implemented by analyzing row by row the constraints matrix</span>
+    <span class="c1"># and saving into a list the x[uncon_i] and offset(con_var) data matrices</span>
+    <span class="c1"># for each output dimension.</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">scales</span><span class="p">):</span>
+      <span class="n">x_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">is_active</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">psi</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_active</span><span class="p">])</span>
+      <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_i</span> <span class="o">*</span> <span class="n">scale</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row_i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+      <span class="n">x_i</span> <span class="o">=</span> <span class="kc">None</span>
+      <span class="n">s</span> <span class="o">=</span> <span class="n">scales</span><span class="p">[</span><span class="n">row_i</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">is_active</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_active</span><span class="p">:</span>
+          <span class="k">continue</span>
+
+        <span class="c1"># In principle a whole row of the affine matrix can be fully</span>
+        <span class="c1"># constrained. In that case the corresponding dot product between input</span>
+        <span class="c1"># parameters and grid coordinates doesn&#39;t need to be implemented in the</span>
+        <span class="c1"># computation graph since it can be precomputed.</span>
+        <span class="c1"># When a whole row if constrained, x_i - which is initialized to</span>
+        <span class="c1"># None - will still be None at the end do the loop when it is appended</span>
+        <span class="c1"># to the features list; this value is then used to detect this setup</span>
+        <span class="c1"># in the build function where the graph is assembled.</span>
+        <span class="k">if</span> <span class="n">x_i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="n">x_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psi</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">affine_warp_constraints</span><span class="p">[</span><span class="n">row_i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">x_i</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">psi</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">affine_warp_constraints</span><span class="p">[</span><span class="n">row_i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span>
+      <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_i</span><span class="p">)</span>
+
+    <span class="n">features</span> <span class="o">+=</span> <span class="n">offsets</span>
+    <span class="k">return</span> <span class="n">features</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assembles the module network and adds it to the graph.</span>
+
+<span class="sd">    The internal computation graph is assembled according to the set of</span>
+<span class="sd">    constraints provided at construction time.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: Tensor containing a batch of transformation parameters.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A batch of warped grids.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      Error: If the input tensor size is not consistent with the constraints</span>
+<span class="sd">        passed at construction time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">as_numpy_dtype</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">number_of_params</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">number_of_params</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="o">.</span><span class="n">num_free_params</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s1">&#39;Input size is not consistent with constraint &#39;</span>
+                       <span class="s1">&#39;definition: </span><span class="si">{}</span><span class="s1"> parameters expected, </span><span class="si">{}</span><span class="s1"> provided.&#39;</span>
+                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="o">.</span><span class="n">num_free_params</span><span class="p">,</span>
+                               <span class="n">number_of_params</span><span class="p">))</span>
+    <span class="n">num_output_dimensions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span>
+    <span class="k">def</span> <span class="nf">get_input_slice</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Extracts a subset of columns from the input 2D Tensor.&quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="n">basic</span><span class="o">.</span><span class="n">SliceByDim</span><span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">size</span><span class="p">])(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="n">warped_grid</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">var_index_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">number_of_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">num_output_dimensions</span><span class="p">):</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The i-th output dimension is not fully specified by the constraints,</span>
+        <span class="c1"># the graph is setup to perform matrix multiplication in batch mode.</span>
+        <span class="n">grid_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+
+        <span class="n">num_active_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">active_vars</span> <span class="o">=</span> <span class="n">get_input_slice</span><span class="p">(</span><span class="n">var_index_offset</span><span class="p">,</span> <span class="n">num_active_vars</span><span class="p">)</span>
+        <span class="n">warped_coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">active_vars</span><span class="p">,</span> <span class="n">grid_coord</span><span class="p">)</span>
+        <span class="n">warped_coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">warped_coord</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">var_index_offset</span> <span class="o">+=</span> <span class="n">num_active_vars</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">num_output_dimensions</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+          <span class="c1"># Some entries in the i-th row of the affine matrix were constrained</span>
+          <span class="c1"># and the corresponding matrix multiplications have been precomputed.</span>
+          <span class="n">tiling_params</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+              <span class="p">[</span>
+                  <span class="n">batch_size</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span>
+                      <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">offset</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+              <span class="p">],</span>
+              <span class="mi">0</span><span class="p">)</span>
+          <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+          <span class="n">warped_coord</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">tiling_params</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># The i-th output dimension is fully specified by the constraints, and</span>
+        <span class="c1"># the corresponding matrix multiplications have been precomputed.</span>
+        <span class="n">warped_coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">num_output_dimensions</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">input_dtype</span><span class="p">)</span>
+        <span class="n">tiling_params</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">batch_size</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span>
+                    <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">warped_coord</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="p">],</span>
+            <span class="mi">0</span><span class="p">)</span>
+        <span class="n">warped_coord</span> <span class="o">=</span> <span class="n">warped_coord</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">warped_coord</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">warped_coord</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">warped_coord</span><span class="p">,</span> <span class="n">tiling_params</span><span class="p">)</span>
+
+      <span class="n">warped_coord</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_psi</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">num_output_dimensions</span><span class="p">]</span>
+      <span class="c1"># Need to help TF figuring out shape inference since tiling information</span>
+      <span class="c1"># is held in Tensors which are not known until run time.</span>
+      <span class="n">warped_coord</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_points</span><span class="p">])</span>
+      <span class="n">warped_grid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">warped_coord</span><span class="p">)</span>
+
+    <span class="c1"># Reshape all the warped coordinates tensors to match the specified output</span>
+    <span class="c1"># shape and concatenate  into a single matrix.</span>
+    <span class="n">grid_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="n">warped_grid</span> <span class="o">=</span> <span class="p">[</span><span class="n">basic</span><span class="o">.</span><span class="n">BatchReshape</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">)(</span><span class="n">grid</span><span class="p">)</span> <span class="k">for</span> <span class="n">grid</span> <span class="ow">in</span> <span class="n">warped_grid</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">warped_grid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_shape</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span>
+
+<div class="viewcode-block" id="AffineGridWarper.inverse"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineGridWarper.inverse">[docs]</a>  <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a `sonnet` module to compute inverse affine transforms.</span>
+
+<span class="sd">      The function first assembles a network that given the constraints of the</span>
+<span class="sd">      current AffineGridWarper and a set of input parameters, retrieves the</span>
+<span class="sd">      coefficients of the corresponding inverse affine transform, then feeds its</span>
+<span class="sd">      output into a new AffineGridWarper setup to correctly warp the `output`</span>
+<span class="sd">      space into the `source` space.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Name of module implementing the inverse grid transformation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A `sonnet` module performing the inverse affine transform of a reference</span>
+<span class="sd">      grid of points via an AffineGridWarper module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      tf.errors.UnimplementedError: If the function is called on a non 2D</span>
+<span class="sd">        instance of AffineGridWarper.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_coeff</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">tf</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">UnimplementedError</span><span class="p">(</span><span class="s1">&#39;AffineGridWarper currently supports&#39;</span>
+                                         <span class="s1">&#39;inversion only for the 2D case.&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_affine_grid_warper_inverse</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Assembles network to compute inverse affine transformation.</span>
+
+<span class="sd">      Each `inputs` row potentailly contains [a, b, tx, c, d, ty]</span>
+<span class="sd">      corresponding to an affine matrix:</span>
+
+<span class="sd">        A = [a, b, tx],</span>
+<span class="sd">            [c, d, ty]</span>
+
+<span class="sd">      We want to generate a tensor containing the coefficients of the</span>
+<span class="sd">      corresponding inverse affine transformation in a constraints-aware</span>
+<span class="sd">      fashion.</span>
+<span class="sd">      Calling M:</span>
+
+<span class="sd">        M = [a, b]</span>
+<span class="sd">            [c, d]</span>
+
+<span class="sd">      the affine matrix for the inverse transform is:</span>
+
+<span class="sd">         A_in = [M^(-1), M^-1 * [-tx, -tx]^T]</span>
+
+<span class="sd">      where</span>
+
+<span class="sd">        M^(-1) = (ad - bc)^(-1) * [ d, -b]</span>
+<span class="sd">                                  [-c,  a]</span>
+
+<span class="sd">      Args:</span>
+<span class="sd">        inputs: Tensor containing a batch of transformation parameters.</span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">        A tensorflow graph performing the inverse affine transformation</span>
+<span class="sd">        parametrized by the input coefficients.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">constant_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">((</span><span class="mi">1</span><span class="p">,))],</span> <span class="mi">0</span><span class="p">)</span>
+
+      <span class="n">index</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+      <span class="k">def</span> <span class="nf">get_variable</span><span class="p">(</span><span class="n">constraint</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">constraint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="n">i</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+          <span class="k">return</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">constant_shape</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">constraint</span><span class="p">,</span>
+                                                     <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+      <span class="n">constraints</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
+      <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">ty</span> <span class="o">=</span> <span class="p">(</span><span class="n">get_variable</span><span class="p">(</span><span class="n">constr</span><span class="p">)</span> <span class="k">for</span> <span class="n">constr</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">)</span>
+
+      <span class="n">det</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">d</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">c</span>
+      <span class="n">a_inv</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="n">det</span>
+      <span class="n">b_inv</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span> <span class="o">/</span> <span class="n">det</span>
+      <span class="n">c_inv</span> <span class="o">=</span> <span class="o">-</span><span class="n">c</span> <span class="o">/</span> <span class="n">det</span>
+      <span class="n">d_inv</span> <span class="o">=</span> <span class="n">a</span> <span class="o">/</span> <span class="n">det</span>
+
+      <span class="n">m_inv</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">BatchReshape</span><span class="p">(</span>
+          <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">a_inv</span><span class="p">,</span> <span class="n">b_inv</span><span class="p">,</span> <span class="n">c_inv</span><span class="p">,</span> <span class="n">d_inv</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+
+      <span class="n">txy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+      <span class="n">txy_inv</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">BatchFlatten</span><span class="p">()(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">m_inv</span><span class="p">,</span> <span class="n">txy</span><span class="p">))</span>
+      <span class="n">tx_inv</span> <span class="o">=</span> <span class="n">txy_inv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">ty_inv</span> <span class="o">=</span> <span class="n">txy_inv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+      <span class="n">inverse_gw_inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+          <span class="p">[</span><span class="n">a_inv</span><span class="p">,</span> <span class="n">b_inv</span><span class="p">,</span> <span class="o">-</span><span class="n">tx_inv</span><span class="p">,</span> <span class="n">c_inv</span><span class="p">,</span> <span class="n">d_inv</span><span class="p">,</span> <span class="o">-</span><span class="n">ty_inv</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+      <span class="n">agw</span> <span class="o">=</span> <span class="n">AffineGridWarper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">source_shape</span><span class="p">)</span>
+
+
+      <span class="k">return</span> <span class="n">agw</span><span class="p">(</span><span class="n">inverse_gw_inputs</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;_inverse&#39;</span>
+    <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">_affine_grid_warper_inverse</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="AffineWarpConstraints"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints">[docs]</a><span class="k">class</span> <span class="nc">AffineWarpConstraints</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Affine warp contraints class.</span>
+
+<span class="sd">  `AffineWarpConstraints` allow for very succinct definitions of constraints on</span>
+<span class="sd">  the values of entries in affine transform matrices.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a constraint definition for an affine transformation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      constraints: A doubly-nested iterable of shape `[N, N+1]` defining</span>
+<span class="sd">        constraints on the entries of a matrix that represents an affine</span>
+<span class="sd">        transformation in `N` dimensions. A numeric value bakes in a constraint</span>
+<span class="sd">        on the corresponding entry in the tranformation matrix, whereas `None`</span>
+<span class="sd">        implies that the corresponding entry will be specified at run time.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If `constraints` is not a nested iterable.</span>
+<span class="sd">      ValueError: If the double iterable `constraints` has inconsistent</span>
+<span class="sd">        dimensions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;constraints must be a nested iterable.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Number of rows</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">)</span>
+    <span class="n">expected_num_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_dim</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_num_cols</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The input list must define a Nx(N+1) matrix of &#39;</span>
+                       <span class="s1">&#39;contraints.&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_calc_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes a boolean mask from the user defined constraints.&quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">:</span>
+      <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">row</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_calc_num_free_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes number of non constrained parameters.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">num_free_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_num_free_params</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_mask</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">num_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_dim</span>
+
+  <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the list of constraints for the i-th row of the affine matrix.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combines two constraints, raising an error if they are not compatible.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">x</span> <span class="ow">or</span> <span class="n">y</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">y</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incompatible set of constraints provided.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+  <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rhs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combines two sets of constraints into a coherent single set.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_with</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AffineWarpConstraints.combine_with"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.combine_with">[docs]</a>  <span class="k">def</span> <span class="nf">combine_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">additional_constraints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combines two sets of constraints into a coherent single set.&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">additional_constraints</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_constraints</span><span class="p">,</span> <span class="n">AffineWarpConstraints</span><span class="p">):</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">additional_constraints</span><span class="p">)</span>
+    <span class="n">new_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">constraints</span><span class="p">):</span>
+      <span class="n">new_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_combine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">new_constraints</span><span class="p">)</span></div>
+
+  <span class="c1"># Collection of utlities to initialize an AffineGridWarper in 2D and 3D.</span>
+<div class="viewcode-block" id="AffineWarpConstraints.no_constraints"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_constraints">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">no_constraints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">num_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Empty set of constraints for a num_dim-ensional affine transform.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),)</span> <span class="o">*</span> <span class="n">num_dim</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.translation_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_2d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">translation_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign contraints on translation components of affine transform in 2d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.translation_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_3d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">translation_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign contraints on translation components of affine transform in 3d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.scale_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.scale_2d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">scale_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assigns contraints on scaling components of affine transform in 2d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.scale_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.scale_3d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">scale_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assigns contraints on scaling components of affine transform in 3d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.shear_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.shear_2d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">shear_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assigns contraints on shear components of affine transform in 2d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.no_shear_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_shear_2d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">no_shear_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">shear_2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AffineWarpConstraints.no_shear_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_shear_3d">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">no_shear_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assigns contraints on shear components of affine transform in 3d.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,321 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.nets.mlp &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.nets.mlp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;A minimal interface mlp module.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">xrange</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="MLP"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP">[docs]</a><span class="k">class</span> <span class="nc">MLP</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A Multi-Layer perceptron module.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">output_sizes</span><span class="p">,</span>
+               <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+               <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mlp&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs an MLP module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      output_sizes: An iterable of output dimensionalities as defined in</span>
+<span class="sd">        `basic.Linear`. Output size can be defined either as number or via a</span>
+<span class="sd">        callable. In the latter case, since the function invocation is deferred</span>
+<span class="sd">        to graph construction time, the user must only ensure that entries can</span>
+<span class="sd">        be called when build is called. Each entry in the iterable defines</span>
+<span class="sd">        properties in the corresponding linear layer.</span>
+<span class="sd">      activation: An activation op. The activation is applied to intermediate</span>
+<span class="sd">        layers, and optionally to the output of the final layer.</span>
+<span class="sd">      activate_final: Boolean determining if the activation is applied to</span>
+<span class="sd">        the output of the final layer. Default `False`.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the linear</span>
+<span class="sd">        layers&#39; weights (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition the</span>
+<span class="sd">        linear layers&#39; weights (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the linear layers&#39;</span>
+<span class="sd">        weights (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
+<span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      use_bias: Whether to include bias parameters in the linear layers.</span>
+<span class="sd">        Default `True`.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: If initializers contains any keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">      KeyError: If regularizers contains any keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">      ValueError: If output_sizes is empty.</span>
+<span class="sd">      TypeError: If `activation` is not callable; or if `output_sizes` is not</span>
+<span class="sd">        iterable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MLP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_sizes</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;output_sizes must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">output_sizes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_sizes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_sizes</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_sizes must not be empty&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span> <span class="o">=</span> <span class="n">output_sizes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
+        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
+        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
+        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">activation</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input &#39;activation&#39; must be callable&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span> <span class="o">=</span> <span class="n">activation</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span> <span class="o">=</span> <span class="n">activate_final</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_layers</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Instantiates all the linear modules used in the network.</span>
+
+<span class="sd">    Layers are instantiated in the constructor, as opposed to the build</span>
+<span class="sd">    function, because MLP implements the Transposable interface, and the</span>
+<span class="sd">    transpose function can be called before the module is actually connected</span>
+<span class="sd">    to the graph and build is called.</span>
+
+<span class="sd">    Notice that this is safe since layers in the transposed module are</span>
+<span class="sd">    instantiated using a lambda returning input_size of the mlp layers, and</span>
+<span class="sd">    this doesn&#39;t have to return sensible values until the original module is</span>
+<span class="sd">    connected to the graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                   <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
+                                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
+                                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+                                   <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="MLP.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assembles the `MLP` and connects it to the graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A 2D Tensor of size `[batch_size, input_size]`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A 2D Tensor of size `[batch_size, output_sizes[-1]]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">inputs</span>
+
+    <span class="n">final_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">layer_id</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">):</span>
+      <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">[</span><span class="n">layer_id</span><span class="p">](</span><span class="n">net</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">final_index</span> <span class="o">!=</span> <span class="n">layer_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span><span class="p">:</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">net</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the linear layers of the `MLP`.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple of all output sizes of all the layers.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">l</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">else</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the size of the module output, not including the batch dimension.</span>
+
+<span class="sd">    This allows the MLP to be used inside a DeepRNN.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The scalar size of the module output.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">last_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">last_size</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">last_size</span><span class="p">)</span> <span class="k">else</span> <span class="n">last_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">initializers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the intializers dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">partitioners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the partitioners dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">activation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">activate_final</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span>
+
+  <span class="c1"># Implements Transposable interface</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns shape of input `Tensor` passed at last call to `build`.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span>
+
+  <span class="c1"># Implements Transposable interface</span>
+<div class="viewcode-block" id="MLP.transpose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.transpose">[docs]</a>  <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns transposed `MLP`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Optional string specifying the name of the transposed module. The</span>
+<span class="sd">        default name is constructed by appending &quot;_transpose&quot;</span>
+<span class="sd">        to `self.module_name`.</span>
+<span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
+<span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Matching transposed `MLP` module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_transpose&quot;</span>
+    <span class="k">if</span> <span class="n">activate_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">activate_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span>
+    <span class="n">output_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">l</span><span class="o">=</span><span class="n">layer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">]</span>
+    <span class="n">output_sizes</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">MLP</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+               <span class="n">output_sizes</span><span class="o">=</span><span class="n">output_sizes</span><span class="p">,</span>
+               <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+               <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+               <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

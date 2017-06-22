@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.ops package &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sonnet-python-ops-package">
+<h1>sonnet.python.ops package<a class="headerlink" href="#sonnet-python-ops-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sonnet.python.ops.initializers">
+<span id="sonnet-python-ops-initializers-module"></span><h2>sonnet.python.ops.initializers module<a class="headerlink" href="#module-sonnet.python.ops.initializers" title="Permalink to this headline">¶</a></h2>
+<p>A checkpoint-restoring Tensorflow initializer.</p>
+<dl class="attribute">
+<dt id="sonnet.python.ops.initializers.restore_initializer">
+<code class="descclassname">sonnet.python.ops.initializers.</code><code class="descname">restore_initializer</code><a class="headerlink" href="#sonnet.python.ops.initializers.restore_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">_Restore</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sonnet.python.ops.nest">
+<span id="sonnet-python-ops-nest-module"></span><h2>sonnet.python.ops.nest module<a class="headerlink" href="#module-sonnet.python.ops.nest" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for dealing with nested structures of Tensors.</p>
+<p>These complement <code class="docutils literal"><span class="pre">nest.flatten</span></code> and <code class="docutils literal"><span class="pre">nest.pack_sequence_as</span></code> from the
+core TF distribution.</p>
+<dl class="function">
+<dt id="sonnet.python.ops.nest.flatten_iterable">
+<code class="descclassname">sonnet.python.ops.nest.</code><code class="descname">flatten_iterable</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/nest.html#flatten_iterable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.nest.flatten_iterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a flat sequence from a given nested structure.</p>
+<p>Unlike <code class="docutils literal"><span class="pre">flatten</span></code> (which just flattens sequences), this will also
+flatten dictionaries.</p>
+<p>If <code class="docutils literal"><span class="pre">nest</span></code> is not a sequence, this returns a single-element list:
+<code class="docutils literal"><span class="pre">[nest]</span></code>.</p>
+<p>Args: structure: an arbitrarily nested structure or a scalar object.
+Note, numpy arrays are considered scalars.</p>
+<p>Returns: A Python list, the flattened version of the input.</p>
+<p>Raises: TypeError: If <code class="docutils literal"><span class="pre">structure</span></code> is a dict or contains a dict with
+non-sortable keys.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.ops.nest.is_iterable">
+<code class="descclassname">sonnet.python.ops.nest.</code><code class="descname">is_iterable</code><span class="sig-paren">(</span><em>seq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/nest.html#is_iterable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.nest.is_iterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if <code class="docutils literal"><span class="pre">seq</span></code> is iterable (apart from strings).</p>
+<p>Args: seq: an input sequence.</p>
+<p>Returns: True if <code class="docutils literal"><span class="pre">seq</span></code> is iterable, but not a string.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.ops.nest.pack_iterable_as">
+<code class="descclassname">sonnet.python.ops.nest.</code><code class="descname">pack_iterable_as</code><span class="sig-paren">(</span><em>structure</em>, <em>flat_iterable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/nest.html#pack_iterable_as"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.nest.pack_iterable_as" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a given flattened iterable packed into a nest.</p>
+<p>If <code class="docutils literal"><span class="pre">structure</span></code> is a scalar, <code class="docutils literal"><span class="pre">flat_iterable</span></code> must be a single-element
+list; in this case the return value is <code class="docutils literal"><span class="pre">flat_sequence[0]</span></code>.</p>
+<p>Args: structure: non-string iterable (such as a tuple, list, dict, or
+named dict) constructed of scalars and/or other tuples/lists, or a
+scalar. Note: numpy arrays are considered scalars. flat_iterable: flat
+iterable to pack.</p>
+<p>Returns: packed: <code class="docutils literal"><span class="pre">flat_iterable</span></code> converted to have the same recursive
+structure as <code class="docutils literal"><span class="pre">structure</span></code>.</p>
+<p>Raises: ValueError: If nest and structure have different element counts.
+TypeError: If <code class="docutils literal"><span class="pre">structure</span></code> is a dict or contains a dict with
+non-sortable keys.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-sonnet.python.ops.resampler">
+<span id="sonnet-python-ops-resampler-module"></span><h2>sonnet.python.ops.resampler module<a class="headerlink" href="#module-sonnet.python.ops.resampler" title="Permalink to this headline">¶</a></h2>
+<p>Tensorflow op performing differentiable resampling.</p>
+<dl class="function">
+<dt id="sonnet.python.ops.resampler.resampler">
+<code class="descclassname">sonnet.python.ops.resampler.</code><code class="descname">resampler</code><span class="sig-paren">(</span><em>data</em>, <em>warp</em>, <em>name=’resampler’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/resampler.html#resampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.resampler.resampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resamples input data at user defined coordinates.</p>
+<p>The resampler currently only supports bilinear interpolation of 2D data.</p>
+<p>Args: data: Tensor of shape
+<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">data_height,</span> <span class="pre">data_width,</span>&#160;&#160;&#160;&#160; <span class="pre">data_num_channels]</span></code>
+containing 2D data that will be resampled. warp: Tensor of minimum rank
+2 containing the coordinates at which resampling will be performed.
+Since only bilinear interpolation is currently supported, the last
+dimension of the <code class="docutils literal"><span class="pre">warp</span></code> tensor must be 2. name: Optional name of the
+op.</p>
+<p>Returns: Tensor of resampled values from <code class="docutils literal"><span class="pre">data</span></code>. The output tensor
+shape is determined by the shape of the warp tensor. For example, if
+<code class="docutils literal"><span class="pre">data</span></code> is of shape
+<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">data_height,</span> <span class="pre">data_width,</span> <span class="pre">data_num_channels]</span></code> and warp of
+shape <code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">dim_0,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">dim_n,</span> <span class="pre">2]</span></code> the output will be of
+shape <code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">dim_0,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">dim_n,</span> <span class="pre">data_num_channels]</span></code>.</p>
+<p>Raises: ImportError: if the wrapper generated during compilation is not
+present when the function is called.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.ops.resampler.resampler_is_available">
+<code class="descclassname">sonnet.python.ops.resampler.</code><code class="descname">resampler_is_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/resampler.html#resampler_is_available"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.resampler.resampler_is_available" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sonnet.python.ops">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sonnet.python.ops" title="Permalink to this headline">¶</a></h2>
+<p>Custom sonnet ops in TensorFlow.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">sonnet.python.ops package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.ops.initializers">sonnet.python.ops.initializers module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.ops.nest">sonnet.python.ops.nest module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.ops.resampler">sonnet.python.ops.resampler module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.ops">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/sonnet.python.ops.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/api/sonnet.python.ops.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

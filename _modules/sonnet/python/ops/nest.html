@@ -1,0 +1,313 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.ops.nest &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.ops.nest</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Utility functions for dealing with nested structures of Tensors.</span>
+
+<span class="sd">These complement `nest.flatten` and `nest.pack_sequence_as` from the core TF</span>
+<span class="sd">distribution.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
+
+
+<span class="c1"># Alias the nest functions from TF so users can just import this module rather</span>
+<span class="c1"># than needing to import two separate ones.</span>
+<span class="n">assert_same_structure</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span>
+<span class="n">flatten</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span>
+<span class="n">is_sequence</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">is_sequence</span>
+<span class="n">pack_sequence_as</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span>
+<span class="nb">map</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<span class="n">map_up_to</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure_up_to</span>
+<span class="n">assert_shallow_structure</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">assert_shallow_structure</span>
+<span class="n">flatten_up_to</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_up_to</span>
+
+
+<span class="k">def</span> <span class="nf">_yield_flat_up_to</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">,</span> <span class="n">input_tree</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Yields elements `input_tree` partially flattened up to `shallow_tree`.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">shallow_branch</span><span class="p">,</span> <span class="n">input_branch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">,</span> <span class="n">input_tree</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">input_leaf</span> <span class="ow">in</span> <span class="n">_yield_flat_up_to</span><span class="p">(</span><span class="n">shallow_branch</span><span class="p">,</span> <span class="n">input_branch</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">input_leaf</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">input_tree</span>
+
+
+<span class="k">def</span> <span class="nf">_sorted</span><span class="p">(</span><span class="n">dict_</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a sorted list from the dict, with error if keys not sortable.&quot;&quot;&quot;</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">dict_</span><span class="p">))</span>
+  <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;nest only supports dicts with sortable keys.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_iterable_like</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Converts the iterable `args` to the same type as `instance`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    instance: an instance of `tuple`, `list`, `namedtuple`, `dict`, or</span>
+<span class="sd">        `collections.NamedDict`.</span>
+<span class="sd">    args: elements to be converted to a sequence.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    `args` with the type of `instance`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">_sorted</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
+  <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">)):</span>
+    <span class="c1"># This is a namedtuple</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Not a namedtuple</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)(</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_yield_value_from_iterable</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Iterate through dictionaries in a deterministic order.</span>
+      <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_sorted</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+      <span class="k">yield</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_yield_flat_nest_from_iterable</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">_yield_value_from_iterable</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">ni</span> <span class="ow">in</span> <span class="n">_yield_flat_nest_from_iterable</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">ni</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">yield</span> <span class="n">n</span>
+
+
+<div class="viewcode-block" id="is_iterable"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.is_iterable">[docs]</a><span class="k">def</span> <span class="nf">is_iterable</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns true if `seq` is iterable (apart from strings).</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    seq: an input sequence.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    True if `seq` is iterable, but not a string.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">return</span> <span class="kc">False</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="nb">iter</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>
+  <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="flatten_iterable"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.flatten_iterable">[docs]</a><span class="k">def</span> <span class="nf">flatten_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a flat sequence from a given nested structure.</span>
+
+<span class="sd">  Unlike `flatten` (which just flattens sequences), this will also flatten</span>
+<span class="sd">  dictionaries.</span>
+
+<span class="sd">  If `nest` is not a sequence, this returns a single-element list: `[nest]`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    structure: an arbitrarily nested structure or a scalar object. Note, numpy</span>
+<span class="sd">        arrays are considered scalars.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A Python list, the flattened version of the input.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    TypeError: If `structure` is a dict or contains a dict with non-sortable</span>
+<span class="sd">        keys.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_yield_flat_nest_from_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">))</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">structure</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_packed_iterable_nest_with_indices</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Helper function for pack_nest_as.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    structure: Substructure (tuple / dict /etc ) to mimic.</span>
+<span class="sd">    flat: Flattened values to output substructure for.</span>
+<span class="sd">    index: Index at which to start reading from flat.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The tuple (new_index, child), where:</span>
+<span class="sd">      * new_index - the updated index into `flat` having processed `structure`.</span>
+<span class="sd">      * packed - the subset of `flat` corresponding to `structure`,</span>
+<span class="sd">                 having started at `index`, and packed into the same nested</span>
+<span class="sd">                 format.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: if `structure` contains more elements than `flat`</span>
+<span class="sd">      (assuming indexing starts from `index`).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">packed</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">_yield_value_from_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+      <span class="n">new_index</span><span class="p">,</span> <span class="n">child</span> <span class="o">=</span> <span class="n">_packed_iterable_nest_with_indices</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">flat</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+      <span class="n">packed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_iterable_like</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">child</span><span class="p">))</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="n">new_index</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">packed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flat</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="k">return</span> <span class="n">index</span><span class="p">,</span> <span class="n">packed</span>
+
+
+<div class="viewcode-block" id="pack_iterable_as"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.pack_iterable_as">[docs]</a><span class="k">def</span> <span class="nf">pack_iterable_as</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a given flattened iterable packed into a nest.</span>
+
+<span class="sd">  If `structure` is a scalar, `flat_iterable` must be a single-element list;</span>
+<span class="sd">  in this case the return value is `flat_sequence[0]`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    structure: non-string iterable (such as a tuple, list, dict, or named dict)</span>
+<span class="sd">        constructed of scalars and/or other tuples/lists, or a scalar. Note:</span>
+<span class="sd">        numpy arrays are considered scalars.</span>
+<span class="sd">    flat_iterable: flat iterable to pack.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    packed: `flat_iterable` converted to have the same recursive structure as</span>
+<span class="sd">      `structure`.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If nest and structure have different element counts.</span>
+<span class="sd">    TypeError: If `structure` is a dict or contains a dict with non-sortable</span>
+<span class="sd">        keys.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;flat_iterable must be an iterable&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Structure is a scalar but len(flat_iterable) == </span><span class="si">%d</span><span class="s2"> &gt; 1&quot;</span>
+                       <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">flat_iterable</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="n">flat_structure</span> <span class="o">=</span> <span class="n">flatten_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_structure</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Could not pack iterable. Structure had </span><span class="si">%d</span><span class="s2"> elements, but flat_iterable &quot;</span>
+        <span class="s2">&quot;had </span><span class="si">%d</span><span class="s2"> elements.  Structure: </span><span class="si">%s</span><span class="s2">, flat_iterable: </span><span class="si">%s</span><span class="s2">.&quot;</span>
+        <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flat_structure</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">),</span> <span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">))</span>
+
+  <span class="n">_</span><span class="p">,</span> <span class="n">packed</span> <span class="o">=</span> <span class="n">_packed_iterable_nest_with_indices</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">_iterable_like</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">packed</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,438 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.nets.dilation &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.nets.dilation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Implementation of (Yu &amp; Koltun, 2016)&#39;s Dilation module.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="c1"># Dependency imports</span>
+
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">conv</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">sequential</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<span class="k">def</span> <span class="nf">_range_along_dimension</span><span class="p">(</span><span class="n">range_dim</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Construct a Tensor whose values are the index along a dimension.</span>
+
+<span class="sd">  Construct a Tensor that counts the distance along a single dimension. This is</span>
+<span class="sd">  useful, for example, when constructing an identity matrix,</span>
+
+<span class="sd">    &gt;&gt;&gt; x = _range_along_dimension(0, [2, 2]).eval()</span>
+<span class="sd">    &gt;&gt;&gt; x</span>
+<span class="sd">    array([[0, 0],</span>
+<span class="sd">           [1, 1]], dtype=int32)</span>
+
+<span class="sd">    &gt;&gt;&gt; y = _range_along_dimension(1, [2, 2]).eval()</span>
+<span class="sd">    &gt;&gt;&gt; y</span>
+<span class="sd">    array([[0, 1],</span>
+<span class="sd">           [0, 1]], dtype=int32)</span>
+
+<span class="sd">    &gt;&gt;&gt; tf.cast(tf.equal(x, y), dtype=tf.int32).eval()</span>
+<span class="sd">    array([[1, 0],</span>
+<span class="sd">           [0, 1]], dtype=int32)</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    range_dim: int. Dimension to count indices on.</span>
+<span class="sd">    shape: 1D Tensor of ints. Shape of Tensor to construct.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A Tensor whose values are the same as the range along dimension range_dim.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If range_dim isn&#39;t a valid dimension.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">range_dim</span> <span class="o">&gt;=</span> <span class="n">rank</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate range along non-existent index.&quot;</span><span class="p">)</span>
+  <span class="n">indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">shape</span><span class="p">[</span><span class="n">range_dim</span><span class="p">])</span>
+  <span class="n">indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+      <span class="n">indices</span><span class="p">,</span>
+      <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">range_dim</span> <span class="k">else</span> <span class="n">shape</span><span class="p">[</span><span class="n">range_dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">)])</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span>
+                 <span class="p">[</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">range_dim</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rank</span><span class="p">)])</span>
+
+
+<span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="identity_kernel_initializer"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.identity_kernel_initializer">[docs]</a><span class="k">def</span> <span class="nf">identity_kernel_initializer</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">partition_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;An initializer for constructing identity convolution kernels.</span>
+
+<span class="sd">  Constructs a convolution kernel such that applying it is the same as an</span>
+<span class="sd">  identity operation on the input. Formally, the kernel has entry [i, j, in,</span>
+<span class="sd">  out] = 1 if in equals out and i and j are the middle of the kernel and 0</span>
+<span class="sd">  otherwise.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    shape: List of integers. Represents shape of result.</span>
+<span class="sd">    dtype: data type for values in result.</span>
+<span class="sd">    partition_info: Partition information for initializer functions. Ignored.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Tensor of desired shape and dtype such that applying it as a convolution</span>
+<span class="sd">      kernel results in the identity operation.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If shape does not define a valid kernel.</span>
+<span class="sd">                If filter width and height differ.</span>
+<span class="sd">                If filter width and height are not odd numbers.</span>
+<span class="sd">                If number of input and output channels differ.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Convolution kernels must be rank 4.&quot;</span><span class="p">)</span>
+
+  <span class="n">filter_height</span><span class="p">,</span> <span class="n">filter_width</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span> <span class="o">=</span> <span class="n">shape</span>
+
+  <span class="k">if</span> <span class="n">filter_width</span> <span class="o">!=</span> <span class="n">filter_height</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Identity initializer only works for square filters.&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">filter_width</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Identity initializer requires filters have odd height and width.&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">in_channels</span> <span class="o">!=</span> <span class="n">out_channels</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;in_channels must equal out_channels in order to construct per-channel&quot;</span>
+        <span class="s2">&quot; identities.&quot;</span><span class="p">)</span>
+
+  <span class="n">middle_pixel</span> <span class="o">=</span> <span class="n">filter_height</span> <span class="o">//</span> <span class="mi">2</span>
+  <span class="n">is_middle_pixel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">),</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">))</span>
+  <span class="n">is_same_channel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
+      <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="noisy_identity_kernel_initializer"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.noisy_identity_kernel_initializer">[docs]</a><span class="k">def</span> <span class="nf">noisy_identity_kernel_initializer</span><span class="p">(</span><span class="n">base_num_channels</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Build an initializer for constructing near-identity convolution kernels.</span>
+
+<span class="sd">  Construct a convolution kernel where in_channels and out_channels are</span>
+<span class="sd">  multiples of base_num_channels, but need not be equal. This initializer is</span>
+<span class="sd">  essentially the same as identity_kernel_initializer, except that magnitude</span>
+<span class="sd">  is &quot;spread out&quot; across multiple copies of the input.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    base_num_channels: int. Number that divides both in_channels and</span>
+<span class="sd">      out_channels.</span>
+<span class="sd">    stddev: float. Standard deviation of truncated normal noise added to</span>
+<span class="sd">      off-entries to break ties.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Initializer function for building a noisy identity kernel.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># pylint: disable=unused-argument</span>
+  <span class="k">def</span> <span class="nf">_noisy_identity_kernel_initializer</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span>
+                                         <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                                         <span class="n">partition_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a noisy identity kernel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      shape: List of integers. Represents shape of result.</span>
+<span class="sd">      dtype: data type for values in result.</span>
+<span class="sd">      partition_info: Partition information for initializer functions. Ignored.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Tensor of desired shape and dtype such that applying it as a convolution</span>
+<span class="sd">        kernel results in a noisy near-identity operation.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If shape does not define a valid kernel.</span>
+<span class="sd">                  If filter width and height differ.</span>
+<span class="sd">                  If filter width and height are not odd numbers.</span>
+<span class="sd">                  If number of input and output channels are not multiples of</span>
+<span class="sd">                    base_num_channels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Convolution kernels must be rank 4.&quot;</span><span class="p">)</span>
+
+    <span class="n">filter_height</span><span class="p">,</span> <span class="n">filter_width</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">out_channels</span> <span class="o">=</span> <span class="n">shape</span>
+
+    <span class="k">if</span> <span class="n">filter_width</span> <span class="o">!=</span> <span class="n">filter_height</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Noisy identity initializer only works for square filters.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filter_width</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Noisy identity initializer requires filters have odd height and &quot;</span>
+          <span class="s2">&quot;width.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">in_channels</span> <span class="o">%</span> <span class="n">base_num_channels</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span>
+        <span class="n">out_channels</span> <span class="o">%</span> <span class="n">base_num_channels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;in_channels and out_channels must both be multiples of &quot;</span>
+                       <span class="s2">&quot;base_num_channels.&quot;</span><span class="p">)</span>
+
+    <span class="n">middle_pixel</span> <span class="o">=</span> <span class="n">filter_height</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">is_middle_pixel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">),</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">))</span>
+    <span class="n">is_same_channel_multiple</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">floordiv</span><span class="p">(</span>
+            <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">base_num_channels</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">),</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">floordiv</span><span class="p">(</span>
+            <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">base_num_channels</span><span class="p">,</span> <span class="n">out_channels</span><span class="p">))</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel_multiple</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_num_channels</span> <span class="o">/</span> <span class="n">out_channels</span><span class="p">),</span>
+        <span class="n">noise</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">_noisy_identity_kernel_initializer</span></div>
+
+
+<div class="viewcode-block" id="Dilation"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.Dilation">[docs]</a><span class="k">class</span> <span class="nc">Dilation</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A convolutional module for per-pixel classification.</span>
+
+<span class="sd">  Consists of 8 convolutional layers, 4 of which are dilated. When applied to</span>
+<span class="sd">  the output of a model like VGG-16 (before fully connected layers), can be used</span>
+<span class="sd">  to make predictions on a per-pixel basis.</span>
+
+<span class="sd">  Note that the default initializers for the &#39;basic&#39; model size require that</span>
+<span class="sd">  the number of input channels be equal to the number of output classes, and the</span>
+<span class="sd">  initializers for the &#39;large&#39; model require it be a multiple.</span>
+
+<span class="sd">  Based on:</span>
+<span class="sd">    &#39;Multi-Scale Context Aggregation by Dilated Convolutions&#39;</span>
+<span class="sd">    Fisher Yu, Vladlen Koltun, ICLR 2016</span>
+<span class="sd">    https://arxiv.org/abs/1511.07122</span>
+
+<span class="sd">  Properties:</span>
+<span class="sd">    conv_modules: list of sonnet modules. The 8 convolution layers used in the</span>
+<span class="sd">      Dilation module.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Size of model to build.</span>
+  <span class="n">BASIC</span> <span class="o">=</span> <span class="s2">&quot;basic&quot;</span>
+  <span class="n">LARGE</span> <span class="o">=</span> <span class="s2">&quot;large&quot;</span>
+
+  <span class="c1"># Keys for initializers.</span>
+  <span class="n">WEIGHTS</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span>
+  <span class="n">BIASES</span> <span class="o">=</span> <span class="s2">&quot;b&quot;</span>
+  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="n">WEIGHTS</span><span class="p">,</span> <span class="n">BIASES</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">num_output_classes</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">model_size</span><span class="o">=</span><span class="s2">&quot;basic&quot;</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dilation&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a dilation module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      num_output_classes: Int. Number of output classes to predict for</span>
+<span class="sd">        each pixel in an image.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize filters (with key</span>
+<span class="sd">        &#39;w&#39;) or biases (with key &#39;b&#39;). The default initializer makes this module</span>
+<span class="sd">        equivalent to the identity.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the weights</span>
+<span class="sd">        (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no regularizers</span>
+<span class="sd">        are used. A regularizer should be a function that takes a single</span>
+<span class="sd">        `Tensor` as an input and returns a scalar `Tensor` output, e.g. the L1</span>
+<span class="sd">        and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      model_size: string. One of &#39;basic&#39; or &#39;large&#39;.</span>
+<span class="sd">      name: string. Name of module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Dilation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_output_classes</span> <span class="o">=</span> <span class="n">num_output_classes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span> <span class="o">=</span> <span class="n">model_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
+        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
+        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build dilation module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      images: Tensor of shape [batch_size, height, width, depth]</span>
+<span class="sd">        and dtype float32. Represents a set of images with an arbitrary depth.</span>
+<span class="sd">        Note that when using the default initializer, depth must equal</span>
+<span class="sd">        num_output_classes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Tensor of shape [batch_size, height, width, num_output_classes] and dtype</span>
+<span class="sd">        float32. Represents, for each image and pixel, logits for per-class</span>
+<span class="sd">        predictions.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      IncompatibleShapeError: If images is not rank 4.</span>
+<span class="sd">      ValueError: If model_size is not one of &#39;basic&#39; or &#39;large&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_output_classes</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+          <span class="s2">&quot;&#39;images&#39; must have shape [batch_size, height, width, depth].&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">WEIGHTS</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">BASIC</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">WEIGHTS</span><span class="p">]</span> <span class="o">=</span> <span class="n">identity_kernel_initializer</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">WEIGHTS</span><span class="p">]</span> <span class="o">=</span> <span class="n">noisy_identity_kernel_initializer</span><span class="p">(</span>
+            <span class="n">num_classes</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized model_size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">BIASES</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">BIASES</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">BASIC</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv1&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv2&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv3&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv4&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv5&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv6&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv7&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;conv8&quot;</span><span class="p">),</span>
+      <span class="p">]</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">LARGE</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv1&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv2&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv3&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv4&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv5&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv6&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="mi">32</span> <span class="o">*</span> <span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;conv7&quot;</span><span class="p">),</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_dilated_conv_layer</span><span class="p">(</span><span class="n">num_classes</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;conv8&quot;</span><span class="p">),</span>
+      <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized model_size: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_size</span><span class="p">)</span>
+
+    <span class="n">dilation_mod</span> <span class="o">=</span> <span class="n">sequential</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dilation&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dilation_mod</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_dilated_conv_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">dilation_rate</span><span class="p">,</span> <span class="n">apply_relu</span><span class="p">,</span>
+                          <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a dilated convolution layer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      output_channels: int. Number of output channels for each pixel.</span>
+<span class="sd">      dilation_rate: int. Represents how many pixels each stride offset will</span>
+<span class="sd">        move. A value of 1 indicates a standard convolution.</span>
+<span class="sd">      apply_relu: bool. If True, a ReLU non-linearlity is added.</span>
+<span class="sd">      name: string. Name for layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      a sonnet Module for a dilated convolution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layer_components</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">conv</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span>
+            <span class="n">output_channels</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+            <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
+            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+            <span class="n">rate</span><span class="o">=</span><span class="n">dilation_rate</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dilated_conv_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">apply_relu</span><span class="p">:</span>
+      <span class="n">layer_components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">lambda</span> <span class="n">net</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;relu_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sequential</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">layer_components</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">conv_modules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

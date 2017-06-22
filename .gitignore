@@ -1,0 +1,5 @@
+/.bazelrc
+/bazel-*
+*pyc
+.DS_Store
+.#*

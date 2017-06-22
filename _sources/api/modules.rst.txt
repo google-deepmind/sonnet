@@ -1,0 +1,7 @@
+sonnet
+======
+
+.. toctree::
+   :maxdepth: 4
+
+   sonnet

@@ -1,0 +1,634 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.basic_rnn &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.basic_rnn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Basic RNN Cores for TensorFlow snt.</span>
+
+<span class="sd">This file contains the definitions of the simplest building blocks for Recurrent</span>
+<span class="sd">Neural Networks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="c1"># Dependency imports</span>
+
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">rnn_core</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
+
+
+<span class="k">def</span> <span class="nf">_get_flat_core_sizes</span><span class="p">(</span><span class="n">cores</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Obtains the list flattened output sizes of a list of cores.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    cores: list of cores to get the shapes from.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    List of lists that, for each core, contains the list of its output</span>
+<span class="sd">      dimensions.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">core_sizes_lists</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">core</span> <span class="ow">in</span> <span class="n">cores</span><span class="p">:</span>
+    <span class="n">flat_output_size</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">output_size</span><span class="p">)</span>
+    <span class="n">core_sizes_lists</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">tensor_shape</span><span class="o">.</span><span class="n">as_shape</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
+                             <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">flat_output_size</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">core_sizes_lists</span>
+
+
+<span class="k">def</span> <span class="nf">_get_shape_without_batch_dimension</span><span class="p">(</span><span class="n">tensor_nest</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Converts Tensor nest to a TensorShape nest, removing batch dimension.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_strip_batch_and_convert_to_shape</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_strip_batch_and_convert_to_shape</span><span class="p">,</span> <span class="n">tensor_nest</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="VanillaRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.VanillaRNN">[docs]</a><span class="k">class</span> <span class="nc">VanillaRNN</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Basic fully connected vanilla RNN core.&quot;&quot;&quot;</span>
+
+  <span class="n">IN_TO_HIDDEN</span> <span class="o">=</span> <span class="s2">&quot;in_to_hidden&quot;</span>
+  <span class="n">HIDDEN_TO_HIDDEN</span> <span class="o">=</span> <span class="s2">&quot;hidden_to_hidden&quot;</span>
+  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="n">IN_TO_HIDDEN</span><span class="p">,</span> <span class="n">HIDDEN_TO_HIDDEN</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;vanilla_rnn&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a Basic RNN core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      hidden_size: hidden size dimensionality.</span>
+<span class="sd">      activation: activation function to use.</span>
+<span class="sd">      initializers: optional dict containing ops to initialize the weights. This</span>
+<span class="sd">        dictionary may contain the keys &#39;in_to_hidden&#39; and/or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      partitioners: optional dict containing ops to partition the weights. This</span>
+<span class="sd">        dictionary may contain the keys &#39;in_to_hidden&#39; and/or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      regularizers: optional dict containing ops to regularize the weights. This</span>
+<span class="sd">        dictionary may contain the keys &#39;in_to_hidden&#39; and/or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      name: name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: if `initializers` contains any keys other than &#39;in_to_hidden&#39; or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      KeyError: if `partitioners` contains any keys other than &#39;in_to_hidden&#39; or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      KeyError: if `regularizers` contains any keys other than &#39;in_to_hidden&#39; or</span>
+<span class="sd">        &#39;hidden_to_hidden&#39;.</span>
+<span class="sd">      TypeError: If any of the given initializers are not callable.</span>
+<span class="sd">      TypeError: If any of the given partitioners are not callable.</span>
+<span class="sd">      TypeError: If any of the given regularizers are not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">VanillaRNN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span> <span class="o">=</span> <span class="n">activation</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
+        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
+        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
+        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the VanillaRNN module into the graph.</span>
+
+<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
+<span class="sd">    the Tensors provided as input_ and state must have the same final</span>
+<span class="sd">    dimension, in order for the existing variables to be the correct size for</span>
+<span class="sd">    their corresponding multiplications. The batch size may differ for each</span>
+<span class="sd">    connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      input_: a 2D Tensor of size [batch_size, input_size].</span>
+<span class="sd">      prev_state: a 2D Tensor of size [batch_size, hidden_size].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      output: a 2D Tensor of size [batch_size, hidden_size].</span>
+<span class="sd">      next_state: a Tensor of size [batch_size, hidden_size].</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if connecting the module into the graph any time after the</span>
+<span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
+<span class="sd">        invocations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_in_to_hidden_linear</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in_to_hidden&quot;</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;in_to_hidden&quot;</span><span class="p">),</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;in_to_hidden&quot;</span><span class="p">),</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;in_to_hidden&quot;</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_to_hidden_linear</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hidden_to_hidden&quot;</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hidden_to_hidden&quot;</span><span class="p">),</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hidden_to_hidden&quot;</span><span class="p">),</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hidden_to_hidden&quot;</span><span class="p">))</span>
+
+    <span class="n">in_to_hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_to_hidden_linear</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+    <span class="n">hidden_to_hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_to_hidden_linear</span><span class="p">(</span><span class="n">prev_state</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span><span class="p">(</span><span class="n">in_to_hidden</span> <span class="o">+</span> <span class="n">hidden_to_hidden</span><span class="p">)</span>
+
+    <span class="c1"># For VanillaRNN, the next state of the RNN is the same as the output</span>
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">output</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">in_to_hidden_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_to_hidden_linear</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">hidden_to_hidden_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_to_hidden_linear</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">in_to_hidden_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_in_to_hidden_linear</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">hidden_to_hidden_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_to_hidden_linear</span><span class="o">.</span><span class="n">get_variables</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="DeepRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.DeepRNN">[docs]</a><span class="k">class</span> <span class="nc">DeepRNN</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;RNN core that passes data through a number of internal modules or ops.</span>
+
+<span class="sd">  This module is constructed by passing an iterable of externally constructed</span>
+<span class="sd">  modules or ops. The DeepRNN takes `(input, prev_state)` as input and passes</span>
+<span class="sd">  the input through each internal module in the order they were presented,</span>
+<span class="sd">  using elements from `prev_state` as necessary for internal recurrent cores.</span>
+<span class="sd">  The output is `(output, next_state)` in common with other RNN cores.</span>
+<span class="sd">  By default, skip connections from the input to all internal modules and from</span>
+<span class="sd">  each intermediate output to the final output are used.</span>
+
+<span class="sd">  E.g.:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  lstm1 = snt.LSTM(hidden_size=256)</span>
+<span class="sd">  lstm2 = snt.LSTM(hidden_size=256)</span>
+<span class="sd">  deep_rnn = snt.DeepRNN([lstm1, lstm2])</span>
+<span class="sd">  output, next_state = deep_rnn(input, prev_state)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  The computation set up inside the DeepRNN has the same effect as:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  prev_state1, prev_state2 = prev_state</span>
+<span class="sd">  lstm1_output, next_state1 = lstm1(input, prev_state1)</span>
+<span class="sd">  lstm2_output, next_state2 = lstm(</span>
+<span class="sd">      tf.concat([input, lstm1_output], 1), prev_state2)</span>
+
+<span class="sd">  next_state = (next_state1, next_state2)</span>
+<span class="sd">  output = tf.concat([lstm1_output, lstm2_output], 1)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Every internal module receives the preceding module&#39;s output and the entire</span>
+<span class="sd">  core&#39;s input. The output is created by concatenating each internal module&#39;s</span>
+<span class="sd">  output. In the case of internal recurrent elements, corresponding elements</span>
+<span class="sd">  of the state are used such that `state[i]` is passed to the `i`&#39;th internal</span>
+<span class="sd">  recurrent element. Note that the state of a `DeepRNN` is always a tuple, which</span>
+<span class="sd">  will contain the same number of elements as there are internal recurrent</span>
+<span class="sd">  cores. If no internal modules are recurrent, the state of the DeepRNN as a</span>
+<span class="sd">  whole is the empty tuple. Wrapping non-recurrent modules into a DeepRNN can</span>
+<span class="sd">  be useful to produce something API compatible with a &quot;real&quot; recurrent module,</span>
+<span class="sd">  simplifying code that handles the cores.</span>
+
+<span class="sd">  Without skip connections the previous example would become the following</span>
+<span class="sd">  (note the only difference is the addition of `skip_connections=False`):</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  # ... declare other modules as above</span>
+<span class="sd">  deep_rnn = snt.DeepRNN([lin, tanh, lstm], skip_connections=False)</span>
+<span class="sd">  output, next_state = deep_rnn(input, prev_state)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  which is equivalent to:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  lin_output = lin(input)</span>
+<span class="sd">  tanh_output = tanh(lin_output)</span>
+<span class="sd">  lstm_output, lstm_next_state = lstm(tanh_output, prev_state[0])</span>
+
+<span class="sd">  next_state = (lstm_next_state,)</span>
+<span class="sd">  output = lstm_output</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Note: when using skip connections, all the cores should be recurrent.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cores</span><span class="p">,</span> <span class="n">skip_connections</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">concat_final_output_if_skip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;deep_rnn&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a Deep RNN core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      cores: iterable of modules or ops.</span>
+<span class="sd">      skip_connections: a boolean that indicates whether to use skip</span>
+<span class="sd">        connections. This means that the input is fed to all the layers, after</span>
+<span class="sd">        being concatenated with the output of the previous layer. The output</span>
+<span class="sd">        of the module will be the concatenation of all the outputs of the</span>
+<span class="sd">        internal modules.</span>
+<span class="sd">      concat_final_output_if_skip: A boolean that indicates whether the outputs</span>
+<span class="sd">        of intermediate layers should be concatenated into the timestep-wise</span>
+<span class="sd">        output of the core. By default this is True. If this is set to False,</span>
+<span class="sd">        then the core output is that of the final layer, i.e. that of</span>
+<span class="sd">        `cores[-1]`.</span>
+<span class="sd">      name: name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if `cores` is not an iterable, or if `skip_connections` is</span>
+<span class="sd">          True and not all the modules are recurrent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">DeepRNN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cores</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cores should be an iterable object.&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cores</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span> <span class="o">=</span> <span class="n">skip_connections</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_concat_final_output_if_skip</span> <span class="o">=</span> <span class="n">concat_final_output_if_skip</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">core</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;The `skip_connections` argument will be deprecated. Please use &quot;</span>
+          <span class="s2">&quot;snt.SkipConnectionCore instead.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;skip_connections are enabled but not all cores are &quot;</span>
+                         <span class="s2">&quot;`snt.RNNCore`s, which is not supported. The following&quot;</span>
+                         <span class="s2">&quot; cores were specified: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_check_cores_output_sizes</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_check_cores_output_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks the output_sizes of the cores of the DeepRNN module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if the outputs of the cores cannot be concatenated along their</span>
+<span class="sd">        first dimension.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">core_sizes</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_get_flat_core_sizes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">))):</span>
+      <span class="n">first_core_list</span> <span class="o">=</span> <span class="n">core_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+      <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">core_list</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">core_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="k">if</span> <span class="n">core_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">first_core_list</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The outputs of the provided cores are not able &quot;</span>
+                           <span class="s2">&quot;to be concatenated along the first feature &quot;</span>
+                           <span class="s2">&quot;dimension. Core 0 has size </span><span class="si">%s</span><span class="s2">, whereas Core </span><span class="si">%d</span><span class="s2"> &quot;</span>
+                           <span class="s2">&quot;has size </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first_core_list</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">core_list</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the DeepRNN module into the graph.</span>
+
+<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
+<span class="sd">    the Tensors provided as input_ and state must have the same final</span>
+<span class="sd">    dimension, in order for the existing variables to be the correct size for</span>
+<span class="sd">    their corresponding multiplications. The batch size may differ for each</span>
+<span class="sd">    connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: a nested tuple of Tensors of arbitrary dimensionality, with at</span>
+<span class="sd">        least an initial batch dimension.</span>
+<span class="sd">      prev_state: a tuple of `prev_state`s that corresponds to the state</span>
+<span class="sd">        of each one of the cores of the `DeepCore`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      output: a nested tuple of Tensors of arbitrary dimensionality, with at</span>
+<span class="sd">        least an initial batch dimension.</span>
+<span class="sd">      next_state: a tuple of `next_state`s that corresponds to the updated state</span>
+<span class="sd">        of each one of the cores of the `DeepCore`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if connecting the module into the graph any time after the</span>
+<span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
+<span class="sd">        invocations. This may happen if one connects a module any time after the</span>
+<span class="sd">        first time that does not have the configuration of skip connections as</span>
+<span class="sd">        the first time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_input</span> <span class="o">=</span> <span class="n">inputs</span>
+    <span class="n">next_states</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">recurrent_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">core</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">):</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">flat_input</span> <span class="o">=</span> <span class="p">(</span><span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">inputs</span><span class="p">),</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">current_input</span><span class="p">))</span>
+        <span class="n">flat_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">input_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">flat_input</span><span class="p">)]</span>
+        <span class="n">current_input</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+                                              <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_input</span><span class="p">)</span>
+
+      <span class="c1"># Determine if this core in the stack is recurrent or not and call</span>
+      <span class="c1"># accordingly.</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+        <span class="n">current_input</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="n">core</span><span class="p">(</span><span class="n">current_input</span><span class="p">,</span>
+                                         <span class="n">prev_state</span><span class="p">[</span><span class="n">recurrent_idx</span><span class="p">])</span>
+        <span class="n">next_states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_state</span><span class="p">)</span>
+        <span class="n">recurrent_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_input</span> <span class="o">=</span> <span class="n">core</span><span class="p">(</span><span class="n">current_input</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span><span class="p">:</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_input</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concat_final_output_if_skip</span><span class="p">:</span>
+      <span class="n">flat_outputs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">)</span>
+      <span class="n">flat_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">flat_outputs</span><span class="p">)]</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                     <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_outputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">current_input</span>
+
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">next_states</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DeepRNN.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.DeepRNN.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">trainable_initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable_regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the default start state for a DeepRNN.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      batch_size: An int, float or scalar Tensor representing the batch size.</span>
+<span class="sd">      dtype: The data type to use for the state.</span>
+<span class="sd">      trainable: Boolean that indicates whether to learn the initial state.</span>
+<span class="sd">      trainable_initializers: An initializer function or nested structure of</span>
+<span class="sd">          functions with same structure as the `state_size` property of the</span>
+<span class="sd">          core, to be used as initializers of the initial state variable.</span>
+<span class="sd">      trainable_regularizers: Optional regularizer function or nested structure</span>
+<span class="sd">        of functions with the same structure as the `state_size` property of the</span>
+<span class="sd">        core, to be used as regularizers of the initial state variable. A</span>
+<span class="sd">        regularizer should be a function that takes a single `Tensor` as an</span>
+<span class="sd">        input and returns a scalar `Tensor` output, e.g. the L1 and L2</span>
+<span class="sd">        regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      name: Optional string used to prefix the initial state variable names, in</span>
+<span class="sd">          the case of a trainable initial state. If not provided, defaults to</span>
+<span class="sd">          the name of the module.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tensor or nested tuple of tensors with same structure and shape as the</span>
+<span class="sd">      `state_size` property of the core.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if the number of passed initializers is not the same as the</span>
+<span class="sd">          number of recurrent cores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">initial_state</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">trainable_initializers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">trainable_initializers</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span>
+    <span class="k">if</span> <span class="n">trainable_regularizers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">trainable_regularizers</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span>
+
+    <span class="n">num_initializers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainable_initializers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_initializers</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The number of initializers and recurrent cores should &quot;</span>
+                       <span class="s2">&quot;be the same. Received </span><span class="si">%d</span><span class="s2"> initializers for </span><span class="si">%d</span><span class="s2"> specified &quot;</span>
+                       <span class="s2">&quot;recurrent cores.&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">num_initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">)):</span>
+      <span class="n">recurrent_idx</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="k">for</span> <span class="n">is_recurrent</span><span class="p">,</span> <span class="n">core</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_recurrent</span><span class="p">:</span>
+          <span class="n">core_initial_state</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+              <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">,</span>
+              <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">[</span><span class="n">recurrent_idx</span><span class="p">],</span>
+              <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">[</span><span class="n">recurrent_idx</span><span class="p">])</span>
+          <span class="n">initial_state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core_initial_state</span><span class="p">)</span>
+          <span class="n">recurrent_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">initial_state</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">sizes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">is_recurrent</span><span class="p">,</span> <span class="n">core</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">is_recurrent</span><span class="p">:</span>
+        <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connections</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concat_final_output_if_skip</span><span class="p">:</span>
+      <span class="n">output_size</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">core_sizes</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_get_flat_core_sizes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">))):</span>
+        <span class="n">added_core_size</span> <span class="o">=</span> <span class="n">core_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">added_core_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">core_sizes</span><span class="p">])</span>
+        <span class="n">output_size</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">added_core_size</span><span class="p">))</span>
+      <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span>
+                                   <span class="n">flat_sequence</span><span class="o">=</span><span class="n">output_size</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Assumes that an element of cores which does not have the output_size</span>
+      <span class="c1"># property does not affect the output shape. Then the &#39;last&#39; core in the</span>
+      <span class="c1"># sequence with output_size information should be the output_size of the</span>
+      <span class="c1"># DeepRNN. This heuristic is error prone, but we would lose a lot of</span>
+      <span class="c1"># flexibility if we tried to enforce that the final core must have an</span>
+      <span class="c1"># output_size field (e.g. it would be impossible to add a TF nonlinearity</span>
+      <span class="c1"># as the final &quot;core&quot;), but we should at least print a warning if this</span>
+      <span class="c1"># is the case.</span>
+      <span class="n">final_core</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">final_core</span><span class="p">,</span> <span class="s2">&quot;output_size&quot;</span><span class="p">):</span>
+        <span class="c1"># This is definitely the correct value, so no warning needed.</span>
+        <span class="k">return</span> <span class="n">final_core</span><span class="o">.</span><span class="n">output_size</span>
+
+      <span class="c1"># If we have connected the module at least once, we can get the output</span>
+      <span class="c1"># size of whatever was actually produced. The indexing of [-1] gets us</span>
+      <span class="c1"># the most recent connection, and [0] gets us the first element of the</span>
+      <span class="c1"># output tuple as opposed to the recurrent state.</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">:</span>
+        <span class="n">last_connected_output_size</span> <span class="o">=</span> <span class="n">_get_shape_without_batch_dimension</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Final core does not contain .output_size, but the &quot;</span>
+            <span class="s2">&quot;DeepRNN has been connected into the graph, so inferred output &quot;</span>
+            <span class="s2">&quot;size as </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">last_connected_output_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">last_connected_output_size</span>
+
+      <span class="c1"># If all else fails, iterate backwards through cores and return the</span>
+      <span class="c1"># first one which has an output_size field. This can be incorrect in</span>
+      <span class="c1"># various ways, so warn loudly.</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">guessed_output_size</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">output_size</span>
+                                   <span class="k">for</span> <span class="n">core</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cores</span><span class="p">)</span>
+                                   <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="s2">&quot;output_size&quot;</span><span class="p">))</span>
+      <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;None of the &#39;cores&#39; have output_size information.&quot;</span><span class="p">)</span>
+
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;Trying to infer output_size of DeepRNN, but the final core </span><span class="si">%s</span><span class="s2"> does &quot;</span>
+          <span class="s2">&quot;not have the .output_size field. The guessed output_size is </span><span class="si">%s</span><span class="s2"> &quot;</span>
+          <span class="s2">&quot;but this may not be correct. If you see shape errors following this &quot;</span>
+          <span class="s2">&quot;warning, you must change the cores used in the DeepRNN so that &quot;</span>
+          <span class="s2">&quot;the final core used has a correct .output_size property.&quot;</span><span class="p">,</span>
+          <span class="n">final_core</span><span class="p">,</span> <span class="n">guessed_output_size</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">guessed_output_size</span></div>
+
+
+<div class="viewcode-block" id="ModelRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.ModelRNN">[docs]</a><span class="k">class</span> <span class="nc">ModelRNN</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;RNNCore that ignores input and uses a model to compute its next state.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;model_rnn&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a Basic RNN core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      model: callable that computes the next state.</span>
+<span class="sd">      name: name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: if model is not a callable object or if it is an RNNCore.</span>
+<span class="sd">      AttributeError: if model does not have an output_size attribute.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ModelRNN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Model must be callable.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Model should not be an RNNCore.&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">output_size</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Model should have an output_size attribute.&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the ModelRNN module into the graph.</span>
+
+<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
+<span class="sd">    the Tensors provided as input_ and state must have the same final</span>
+<span class="sd">    dimension, in order for the existing variables to be the correct size for</span>
+<span class="sd">    their corresponding multiplications. The batch size may differ for each</span>
+<span class="sd">    connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: Tensor input to the ModelRNN (ignored).</span>
+<span class="sd">      prev_state: Tensor of size `model.output_size`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      output: Tensor of size `model.output_size`.</span>
+<span class="sd">      next_state: Tensor of size `model.output_size`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">prev_state</span><span class="p">)</span>
+
+    <span class="c1"># For ModelRNN, the next state of the RNN is the same as the output</span>
+    <span class="k">return</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">next_state</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,635 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.base &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Base class for TensorFlow snt.</span>
+
+<span class="sd">This file contains the Abstract Base Class for defining Modules in TensorFlow.</span>
+<span class="sd">A Module is an object that can be connected into the Graph multiple times</span>
+<span class="sd">using the __call__ method, sharing variables automatically with no need to</span>
+<span class="sd">explicitly use scopes or specify reuse=True.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="Error"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Base class for all errors from snt.</span>
+
+<span class="sd">  This is thrown to indicate a Neural Network specific problem, e.g. wrong</span>
+<span class="sd">  module arity, module is not connected to the graph when it should be,</span>
+<span class="sd">  tried to wire together incompatible modules, etc.</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NotConnectedError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.NotConnectedError">[docs]</a><span class="k">class</span> <span class="nc">NotConnectedError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when operating on a module that has not yet been connected.</span>
+
+<span class="sd">  Some module properties / methods are valid to access before the module has</span>
+<span class="sd">  been connected into the graph, but some are not. This Error is raised when</span>
+<span class="sd">  the user attempts to do anything not valid before connection.</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ParentNotBuiltError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.ParentNotBuiltError">[docs]</a><span class="k">class</span> <span class="nc">ParentNotBuiltError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when the parent of a module has not been built yet.</span>
+
+<span class="sd">  For example, when making a transpose of modules that inherit from</span>
+<span class="sd">  `module.Transposable`, the parent has to be connected to the graph before the</span>
+<span class="sd">  child transpose to ensure that shape inference has already occurred.</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="IncompatibleShapeError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.IncompatibleShapeError">[docs]</a><span class="k">class</span> <span class="nc">IncompatibleShapeError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when the shape of the input at build time is incompatible.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UnderspecifiedError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.UnderspecifiedError">[docs]</a><span class="k">class</span> <span class="nc">UnderspecifiedError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when too little information is available.</span>
+
+<span class="sd">  This does not typically mean the user is trying to do something that doesn&#39;t</span>
+<span class="sd">  work (in which case `IncompatibleShapeError` should be used), just that</span>
+<span class="sd">  some more information needs to be provided in order to build the Graph.</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NotSupportedError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.NotSupportedError">[docs]</a><span class="k">class</span> <span class="nc">NotSupportedError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when something that cannot be supported is requested.</span>
+
+<span class="sd">  For example a Dilated Convolution module cannot be transposed.</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NotInitializedError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.NotInitializedError">[docs]</a><span class="k">class</span> <span class="nc">NotInitializedError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when connecting an uninitialized Sonnet module.</span>
+
+<span class="sd">  Before they can be connected, all Sonnet modules must call</span>
+<span class="sd">  `AbstractModule.__init__` (e.g. via a `super` call).</span>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="DifferentGraphError"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.DifferentGraphError">[docs]</a><span class="k">class</span> <span class="nc">DifferentGraphError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Error raised when trying to connect a Sonnet module to multiple Graphs.&quot;&quot;&quot;</span></div>
+
+
+<span class="n">SubgraphInputs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;SubgraphInputs&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">))</span>
+
+
+<span class="n">ConnectedSubGraph</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s2">&quot;ConnectedSubGraph&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;builder&quot;</span><span class="p">,</span> <span class="s2">&quot;name_scope&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_to_snake_case</span><span class="p">(</span><span class="n">camel_case</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a CamelCase string as a snake_case string.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[A-Za-z_]\w*$&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Input string </span><span class="si">%s</span><span class="s2"> is not a valid Python identifier.&quot;</span> <span class="o">%</span> <span class="n">camel_case</span><span class="p">)</span>
+
+  <span class="c1"># Add underscore at word start and ends.</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([A-Z][a-z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;_\1&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">)</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
+  <span class="c1"># Add underscore before alphanumeric chunks.</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([0-9][^_]*)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
+  <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span>
+  <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="AbstractModule"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">AbstractModule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Superclass for Sonnet Modules.</span>
+
+<span class="sd">  This class defines the functionality that every module should implement,</span>
+<span class="sd">  principally the `build` method which is wrapped using `tf.make_template`</span>
+<span class="sd">  and called from `__call__`. Every time the module is called it will</span>
+<span class="sd">  be connected into the graph but using the same shared set of variables, thanks</span>
+<span class="sd">  to the template.</span>
+
+<span class="sd">  For this to work correctly, the `build` implementation in the derived class</span>
+<span class="sd">  must access all variables using `tf.get_variable`, not `tf.Variable`. The same</span>
+<span class="sd">  set of variables must be created each time, if this is not the case an Error</span>
+<span class="sd">  will be raised.</span>
+
+<span class="sd">  Every subclass must call this class&#39; `__init__` at the start of their</span>
+<span class="sd">  `__init__`, passing the relevant name. If this step is omitted variable</span>
+<span class="sd">  sharing will not work.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_sentinel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-name</span>
+    <span class="sd">&quot;&quot;&quot;Performs the initialisation necessary for all AbstractModule instances.</span>
+
+<span class="sd">    Every subclass of AbstractModule must begin their constructor with a call to</span>
+<span class="sd">    this constructor, i.e. `super(MySubModule, self).__init__(name=name)`.</span>
+
+<span class="sd">    If you instantiate sub-modules in __init__ you must create them within the</span>
+<span class="sd">    `_enter_variable_scope` context manager to ensure they are in the module&#39;s</span>
+<span class="sd">    variable scope. Alternatively, instantiate sub-modules in `_build`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      _sentinel: Variable that only carries a non-None value if `__init__` was</span>
+<span class="sd">          called without named parameters. If this is the case, a deprecation</span>
+<span class="sd">          warning is issued in form of a `ValueError`.</span>
+<span class="sd">      name: Name of this module. Used to construct the Templated build function.</span>
+<span class="sd">          If `None` the module&#39;s class name is used (converted to snake case).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If `name` is not a string.</span>
+<span class="sd">      ValueError: If `__init__` was called without named arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_sentinel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Calling AbstractModule.__init__ without named &quot;</span>
+                       <span class="s2">&quot;arguments is deprecated.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">_to_snake_case</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name must be a string.&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">make_template</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wrapper</span><span class="p">,</span>
+                                      <span class="n">create_scope_now_</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_original_name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_unique_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Update __call__ and the object docstrings to enable better introspection</span>
+    <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="o">.</span><span class="vm">__doc__</span>
+    <span class="bp">self</span><span class="o">.</span><span class="fm">__call__</span><span class="o">.</span><span class="vm">__func__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="o">.</span><span class="vm">__doc__</span>
+
+    <span class="c1"># Keep track of which graph this module has been connected to. Sonnet</span>
+    <span class="c1"># modules cannot be connected to multiple graphs, as transparent variable</span>
+    <span class="c1"># sharing is impossible in that case.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="kc">None</span>
+
+  <span class="k">def</span> <span class="nf">_build_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function which will be wrapped in a Template to do variable sharing.</span>
+
+<span class="sd">    Passes through all arguments to the _build method, and returns the</span>
+<span class="sd">    corresponding outputs, plus the name_scope generated by this call of the</span>
+<span class="sd">    template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *args: args list for self._build</span>
+<span class="sd">      **kwargs: kwargs dict for self._build</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tuple containing (output from _build, scope_name).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Make a dummy subscope to check the name scope we are in. We could read</span>
+    <span class="c1"># the name scope from one of the outputs produced, except that the outputs</span>
+    <span class="c1"># could have been produced from a subscope instantiated by the build</span>
+    <span class="c1"># function, for example if inner modules are present. Calling name_scope</span>
+    <span class="c1"># here and creating a new subscope guarantees we get the right answer.</span>
+    <span class="c1"># Because we don&#39;t create an ops inside this dummy scope, no extra memory</span>
+    <span class="c1"># will be consumed.</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s2">&quot;dummy&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope_name</span><span class="p">:</span>
+      <span class="n">this_scope_name</span> <span class="o">=</span> <span class="n">scope_name</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;/dummy/&quot;</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">this_scope_name</span>
+
+  <span class="k">def</span> <span class="nf">_check_init_called</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks that the base class&#39;s __init__ method has been called.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotInitializedError: `AbstractModule.__init__` has not been called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_template</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">NotInitializedError</span><span class="p">(</span><span class="s2">&quot;You may have forgotten to call super at the &quot;</span>
+                                <span class="s2">&quot;start of your __init__ method.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_check_same_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks that the module is not being connect to multiple Graphs.</span>
+
+<span class="sd">    An instance of a Sonnet module &#39;owns&#39; the variables it contains, and permits</span>
+<span class="sd">    seamless variable sharing. As such, connecting a single module instance to</span>
+<span class="sd">    multiple Graphs is not possible - this function will raise an error should</span>
+<span class="sd">    that occur.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      DifferentGraphError: if the module is connected to a different Graph than</span>
+<span class="sd">        it was previously used in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">current_graph</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">!=</span> <span class="n">current_graph</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">DifferentGraphError</span><span class="p">(</span><span class="s2">&quot;Cannot connect module to multiple Graphs.&quot;</span><span class="p">)</span>
+
+  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add elements to the Graph, computing output Tensors from input Tensors.</span>
+
+<span class="sd">    Subclasses must implement this method, which will be wrapped in a Template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *args: Input Tensors.</span>
+<span class="sd">      **kwargs: Additional Python flags controlling connection.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      output Tensor(s).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Operator overload for calling.</span>
+
+<span class="sd">    This is the entry point when users connect a Module into the Graph. The</span>
+<span class="sd">    underlying _build method will have been wrapped in a Template by the</span>
+<span class="sd">    constructor, and we call this template with the provided inputs here.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *args: Arguments for underlying _build method.</span>
+<span class="sd">      **kwargs: Keyword arguments for underlying _build method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The result of the underlying _build method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_init_called</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_same_graph</span><span class="p">()</span>
+    <span class="n">outputs</span><span class="p">,</span> <span class="n">this_name_scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Connect the module only if self._template returns with no errors.</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">SubgraphInputs</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ConnectedSubGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">this_name_scope</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">outputs</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name_scopes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple of all name_scopes generated by this module.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subgraph</span><span class="o">.</span><span class="n">name_scope</span> <span class="k">for</span> <span class="n">subgraph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the variable_scope declared by the module.</span>
+
+<span class="sd">    It is valid for library users to access the internal templated</span>
+<span class="sd">    variable_scope, but only makes sense to do so after connection. Therefore we</span>
+<span class="sd">    raise an error here if the variable_scope is requested before connection.</span>
+
+<span class="sd">    The only case where it does make sense to access the variable_scope before</span>
+<span class="sd">    connection is to get the post-uniquification name, which we support using</span>
+<span class="sd">    the separate .name property.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      variable_scope: `tf.VariableScope` instance of the internal `tf.Template`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">scope_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the full name of the Module&#39;s variable scope.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">module_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the name of the Module.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique_name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns true iff the Module been connected to the Graph at least once.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">connected_subgraphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the subgraphs created by this module so far.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">last_connected_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the last subgraph created by this module.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The last connected subgraph.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="AbstractModule.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the keys the dictionary of variable initializers may contain.</span>
+
+<span class="sd">    This provides the user with a way of knowing the initializer keys that are</span>
+<span class="sd">    available without having to instantiate a sonnet module. Subclasses may</span>
+<span class="sd">    override this class method if they need additional arguments to determine</span>
+<span class="sd">    what initializer keys may be provided.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
+<span class="sd">          constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;POSSIBLE_INITIALIZER_KEYS&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span></div>
+
+  <span class="k">def</span> <span class="nf">_ensure_is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raise an Error if the module has not been connected yet.</span>
+
+<span class="sd">    Until the module is connected into the Graph, any variables created do</span>
+<span class="sd">    not exist yet and cannot be created in advance due to not knowing the size</span>
+<span class="sd">    of the input Tensor(s). This assertion ensures that any variables contained</span>
+<span class="sd">    in this module must now exist.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">NotConnectedError</span><span class="p">(</span>
+          <span class="s2">&quot;Variables in </span><span class="si">{}</span><span class="s2"> not instantiated yet, __call__ the module &quot;</span>
+          <span class="s2">&quot;first.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scope_name</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_enter_variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a contextlib.contextmanager to enter the internal variable scope.</span>
+
+<span class="sd">    This is useful for situations where submodules must be declared in the</span>
+<span class="sd">    constructor, or somewhere else that is not called under the `_build` method.</span>
+<span class="sd">    If such a case arises, calling `with self._enter_variable_scope():` will</span>
+<span class="sd">    cause the variables in the submodule to be correctly scoped.</span>
+
+<span class="sd">    An example justification for this is to allow the `Transposable` interface</span>
+<span class="sd">    to be implemented - you might want to construct all the submodules at</span>
+<span class="sd">    construction time so that you can call `.transpose()` and connect the</span>
+<span class="sd">    result of that before connecting the non-transposed module.</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    class SomeModule(snt.AbstractModule):</span>
+<span class="sd">      def __init__(self, name=&quot;some_module&quot;):</span>
+<span class="sd">        super(SomeModule, self).__init__(name=name)</span>
+<span class="sd">        with self._enter_variable_scope():</span>
+<span class="sd">          # We need to construct this submodule before we get to the _build</span>
+<span class="sd">          # method, for some reason.</span>
+<span class="sd">          self._sub_mod = snt.SomeSubmodule(name=&quot;some_submodule&quot;)</span>
+
+<span class="sd">      def _build(self, input):</span>
+<span class="sd">        # Connect to the already constructed submodule.</span>
+<span class="sd">        return self._sub_mod(input)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    If you omit this then the submodule and parent module will appear to</span>
+<span class="sd">    be &quot;side by side&quot; rather than nested when viewed in the Graph viewer, and</span>
+<span class="sd">    functions such as `snt.get_variables_in_module()` or the `get_variables()`</span>
+<span class="sd">    method will not know about variables defined in the submodule.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      reuse: Boolean passed to `tf.variable_scope`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      `contextlib.contextmanager` of the variable_scope inside the template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_init_called</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_same_graph</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractModule.get_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.get_variables">[docs]</a>  <span class="k">def</span> <span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns tuple of `tf.Variable`s declared inside this module.</span>
+
+<span class="sd">    Note that this operates by searching this module&#39;s variable scope,</span>
+<span class="sd">    and so does not know about any modules that were constructed elsewhere but</span>
+<span class="sd">    used inside this module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      collection: Collection to restrict query to. By default this is</span>
+<span class="sd">        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn&#39;t include non-trainable</span>
+<span class="sd">        variables such as moving averages.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tuple of `tf.Variable` objects.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_variables_in_scope</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
+        <span class="s2">&quot;Sonnet AbstractModule instances cannot be serialized. You should &quot;</span>
+        <span class="s2">&quot;instead serialize all necessary configuration which will allow &quot;</span>
+        <span class="s2">&quot;modules to be rebuilt.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transposable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Transposable">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Transposable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Transposable module interface.</span>
+
+<span class="sd">    The Transposable interface requires that transposable modules implement</span>
+<span class="sd">    a method called `transpose`, returning a module that is the transposed</span>
+<span class="sd">    version of the one the method is called on.</span>
+<span class="sd">    Calling the method twice should return a module with the same specifications</span>
+<span class="sd">    as the original module.</span>
+
+<span class="sd">    When implementing a transposable module, special care is required to make</span>
+<span class="sd">    sure that parameters needed to instantiate the module are provided as</span>
+<span class="sd">    functions whose invocation is deferred to graph construction time.</span>
+
+<span class="sd">    For example, in Linear we might want to call:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    linear = snt.Linear(name=&quot;linear&quot;, output_size=output_size)</span>
+<span class="sd">    linear_transpose = linear.transpose()</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    where the output_size for linear_transpose is not known yet, as linear is</span>
+<span class="sd">    not yet connected to the graph: output_size is passed to linear_transpose&#39;s</span>
+<span class="sd">    constructor as a lambda returning linear.input_size. The lambda will return</span>
+<span class="sd">    the correct value once linear is given an input.</span>
+<span class="sd">    Notice that linear_transpose&#39;s output_size value does not need to be defined</span>
+<span class="sd">    until the module is connected to the graph.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Transposable.transpose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Transposable.transpose">[docs]</a>  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+  <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds and returns transposed version of module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Name of the transposed module.</span>
+<span class="sd">      **kwargs: Additional Python flags controlling transposition.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Transposed version of the module.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="Transposable.input_shape"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Transposable.input_shape">[docs]</a>  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns shape of input `Tensor` passed at last call to `build`.&quot;&quot;&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Module wrapping a function provided by the user.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;module&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a module with a given build function.</span>
+
+<span class="sd">    The Module class can be used to wrap a function assembling a network into a</span>
+<span class="sd">    module.</span>
+
+<span class="sd">    For example, the following code implements a simple one-hidden-layer MLP</span>
+<span class="sd">    model by defining a function called make_model and using a Module instance</span>
+<span class="sd">    to wrap it.</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    def make_model(inputs):</span>
+<span class="sd">      lin1 = snt.Linear(name=&quot;lin1&quot;, output_size=10)(inputs)</span>
+<span class="sd">      relu1 = tf.nn.relu(lin1, name=&quot;relu1&quot;)</span>
+<span class="sd">      lin2 = snt.Linear(name=&quot;lin2&quot;, output_size=20)(relu1)</span>
+<span class="sd">      return lin2</span>
+
+<span class="sd">    model = snt.Module(name=&#39;simple_mlp&#39;, build=make_model)</span>
+<span class="sd">    outputs = model(inputs)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    The `partial` package from `functools` can be used to bake configuration</span>
+<span class="sd">    parameters into the function at construction time, as shown in the following</span>
+<span class="sd">    example.</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    from functools import partial</span>
+
+<span class="sd">    def make_model(inputs, output_sizes):</span>
+<span class="sd">      lin1 = snt.Linear(name=&quot;lin1&quot;, output_size=output_sizes[0])(inputs)</span>
+<span class="sd">      relu1 = tf.nn.relu(lin1, name=&quot;relu1&quot;)</span>
+<span class="sd">      lin2 = snt.Linear(name=&quot;lin2&quot;, output_size=output_sizes[1])(relu1)</span>
+<span class="sd">      return lin2</span>
+
+<span class="sd">    model = snt.Module(name=&#39;simple_mlp&#39;,</span>
+<span class="sd">                       build=partial(make_model, output_size=[10, 20])</span>
+<span class="sd">    outputs = model(inputs)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      build: Callable to be invoked when connecting the module to the graph.</span>
+<span class="sd">          The `build` function is invoked when the module is called, and its</span>
+<span class="sd">          role is to specify how to add elements to the Graph, and how to</span>
+<span class="sd">          compute output Tensors from input Tensors.</span>
+<span class="sd">          The `build` function signature can include the following parameters:</span>
+<span class="sd">            *args - Input Tensors.</span>
+<span class="sd">            **kwargs - Additional Python parameters controlling connection.</span>
+<span class="sd">      name: Module name.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If build is not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">build</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input &#39;build&#39; must be callable.&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span> <span class="o">=</span> <span class="n">build</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Forwards call to the passed-in build function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

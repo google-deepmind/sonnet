@@ -1,0 +1,441 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.examples.rnn_shakespeare &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.examples.rnn_shakespeare</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Example script to train a stacked LSTM on the Tiny Shakespeare dataset.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="c1"># Dependency imports</span>
+
+<span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
+<span class="kn">from</span> <span class="nn">sonnet.examples</span> <span class="k">import</span> <span class="n">dataset_shakespeare</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="n">FLAGS</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;num_training_iterations&quot;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span>
+                        <span class="s2">&quot;Number of iterations to train for.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;report_interval&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span>
+                        <span class="s2">&quot;Iterations between reports (samples, valid loss).&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;reduce_learning_rate_interval&quot;</span><span class="p">,</span> <span class="mi">2500</span><span class="p">,</span>
+                        <span class="s2">&quot;Iterations between learning rate reductions.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;lstm_depth&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Number of LSTM layers.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;batch_size&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;Batch size for training.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;num_embedding&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;Size of embedding layer.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;num_hidden&quot;</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;Size of LSTM hidden layer.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;truncation_length&quot;</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;Sequence size for training.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;sample_length&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">&quot;Sequence size for sampling.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_float</span><span class="p">(</span><span class="s2">&quot;max_grad_norm&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;Gradient clipping norm limit.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_float</span><span class="p">(</span><span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;Optimizer learning rate.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_float</span><span class="p">(</span><span class="s2">&quot;reduce_learning_rate_multiplier&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span>
+                      <span class="s2">&quot;Learning rate is multiplied by this when reduced.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_float</span><span class="p">(</span><span class="s2">&quot;optimizer_epsilon&quot;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span>
+                      <span class="s2">&quot;Epsilon used for Adam optimizer.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_string</span><span class="p">(</span><span class="s2">&quot;checkpoint_dir&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/tf/rnn_shakespeare&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;Checkpointing directory.&quot;</span><span class="p">)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;checkpoint_interval&quot;</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span>
+                        <span class="s2">&quot;Checkpointing step interval.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_configure_saver</span><span class="p">(</span><span class="n">checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_interval</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a tf.train.CheckpointSaverHook for autosaving checkpoints.&quot;&quot;&quot;</span>
+  <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">CheckpointSaverHook</span><span class="p">(</span>
+      <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">checkpoint_dir</span><span class="p">,</span>
+      <span class="n">save_steps</span><span class="o">=</span><span class="n">checkpoint_interval</span><span class="p">,</span>
+      <span class="n">saver</span><span class="o">=</span><span class="n">saver</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="build_graph"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.build_graph">[docs]</a><span class="k">def</span> <span class="nf">build_graph</span><span class="p">(</span><span class="n">lstm_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">num_embedding</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">num_hidden</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                <span class="n">truncation_length</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">sample_length</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">max_grad_norm</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">initial_learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">reduce_learning_rate_multiplier</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">optimizer_epsilon</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Constructs the computation graph.&quot;&quot;&quot;</span>
+
+  <span class="c1"># Get datasets.</span>
+  <span class="n">dataset_train</span> <span class="o">=</span> <span class="n">dataset_shakespeare</span><span class="o">.</span><span class="n">TinyShakespeareDataset</span><span class="p">(</span>
+      <span class="n">num_steps</span><span class="o">=</span><span class="n">truncation_length</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">subset</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+      <span class="n">random</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;shake_train&quot;</span><span class="p">)</span>
+
+  <span class="n">dataset_valid</span> <span class="o">=</span> <span class="n">dataset_shakespeare</span><span class="o">.</span><span class="n">TinyShakespeareDataset</span><span class="p">(</span>
+      <span class="n">num_steps</span><span class="o">=</span><span class="n">truncation_length</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">subset</span><span class="o">=</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span>
+      <span class="n">random</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;shake_valid&quot;</span><span class="p">)</span>
+
+  <span class="n">dataset_test</span> <span class="o">=</span> <span class="n">dataset_shakespeare</span><span class="o">.</span><span class="n">TinyShakespeareDataset</span><span class="p">(</span>
+      <span class="n">num_steps</span><span class="o">=</span><span class="n">truncation_length</span><span class="p">,</span>
+      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">subset</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+      <span class="n">random</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;shake_test&quot;</span><span class="p">)</span>
+
+  <span class="c1"># Define model.</span>
+  <span class="n">model</span> <span class="o">=</span> <span class="n">TextModel</span><span class="p">(</span>
+      <span class="n">num_embedding</span><span class="o">=</span><span class="n">num_embedding</span><span class="p">,</span>
+      <span class="n">num_hidden</span><span class="o">=</span><span class="n">num_hidden</span><span class="p">,</span>
+      <span class="n">lstm_depth</span><span class="o">=</span><span class="n">lstm_depth</span><span class="p">,</span>
+      <span class="n">output_size</span><span class="o">=</span><span class="n">dataset_valid</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span>
+      <span class="n">use_dynamic_rnn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">use_skip_connections</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+  <span class="c1"># Get the training loss.</span>
+  <span class="n">train_input_sequence</span><span class="p">,</span> <span class="n">train_target_sequence</span> <span class="o">=</span> <span class="n">dataset_train</span><span class="p">()</span>
+  <span class="n">train_output_sequence_logits</span><span class="p">,</span> <span class="n">train_final_state</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">train_input_sequence</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
+  <span class="n">train_loss</span> <span class="o">=</span> <span class="n">dataset_train</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">train_output_sequence_logits</span><span class="p">,</span>
+                                  <span class="n">train_target_sequence</span><span class="p">)</span>
+
+  <span class="c1"># Get the validation loss.</span>
+  <span class="n">valid_input_sequence</span><span class="p">,</span> <span class="n">valid_target_sequence</span> <span class="o">=</span> <span class="n">dataset_valid</span><span class="p">()</span>
+  <span class="n">valid_output_sequence_logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">valid_input_sequence</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
+  <span class="n">valid_loss</span> <span class="o">=</span> <span class="n">dataset_valid</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">valid_output_sequence_logits</span><span class="p">,</span>
+                                  <span class="n">valid_target_sequence</span><span class="p">)</span>
+
+  <span class="c1"># Get the test loss.</span>
+  <span class="n">test_input_sequence</span><span class="p">,</span> <span class="n">test_target_sequence</span> <span class="o">=</span> <span class="n">dataset_test</span><span class="p">()</span>
+  <span class="n">test_output_sequence_logits</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">test_input_sequence</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
+  <span class="n">test_loss</span> <span class="o">=</span> <span class="n">dataset_test</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">test_output_sequence_logits</span><span class="p">,</span>
+                                <span class="n">test_target_sequence</span><span class="p">)</span>
+
+  <span class="c1"># Build graph to sample some strings during training.</span>
+  <span class="n">initial_logits</span> <span class="o">=</span> <span class="n">train_output_sequence_logits</span><span class="p">[</span><span class="n">truncation_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="n">train_generated_string</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">generate_string</span><span class="p">(</span>
+      <span class="n">initial_logits</span><span class="o">=</span><span class="n">initial_logits</span><span class="p">,</span>
+      <span class="n">initial_state</span><span class="o">=</span><span class="n">train_final_state</span><span class="p">,</span>
+      <span class="n">sequence_length</span><span class="o">=</span><span class="n">sample_length</span><span class="p">)</span>
+
+  <span class="c1"># Set up global norm clipping of gradients.</span>
+  <span class="n">trainable_variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">()</span>
+  <span class="n">grads</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_global_norm</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">trainable_variables</span><span class="p">),</span> <span class="n">max_grad_norm</span><span class="p">)</span>
+
+  <span class="c1"># Get learning rate and define annealing.</span>
+  <span class="n">learning_rate</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+      <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
+      <span class="n">shape</span><span class="o">=</span><span class="p">[],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+      <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="n">initial_learning_rate</span><span class="p">),</span>
+      <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="n">reduce_learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+      <span class="n">learning_rate</span> <span class="o">*</span> <span class="n">reduce_learning_rate_multiplier</span><span class="p">)</span>
+
+  <span class="c1"># Get training step counter.</span>
+  <span class="n">global_step</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;global_step&quot;</span><span class="p">,</span>
+      <span class="n">shape</span><span class="o">=</span><span class="p">[],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+      <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(),</span>
+      <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_STEP</span><span class="p">])</span>
+
+  <span class="c1"># Define optimizer and training step.</span>
+  <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">(</span>
+      <span class="n">learning_rate</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">optimizer_epsilon</span><span class="p">)</span>
+  <span class="n">train_step</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span>
+      <span class="nb">zip</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">trainable_variables</span><span class="p">),</span>
+      <span class="n">global_step</span><span class="o">=</span><span class="n">global_step</span><span class="p">)</span>
+
+  <span class="n">graph_tensors</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">train_loss</span><span class="p">,</span>
+      <span class="s2">&quot;valid_loss&quot;</span><span class="p">:</span> <span class="n">valid_loss</span><span class="p">,</span>
+      <span class="s2">&quot;test_loss&quot;</span><span class="p">:</span> <span class="n">test_loss</span><span class="p">,</span>
+      <span class="s2">&quot;train_generated_string&quot;</span><span class="p">:</span> <span class="n">train_generated_string</span><span class="p">,</span>
+      <span class="s2">&quot;reduce_learning_rate&quot;</span><span class="p">:</span> <span class="n">reduce_learning_rate</span><span class="p">,</span>
+      <span class="s2">&quot;global_step&quot;</span><span class="p">:</span> <span class="n">global_step</span><span class="p">,</span>
+      <span class="s2">&quot;train_step&quot;</span><span class="p">:</span> <span class="n">train_step</span>
+  <span class="p">}</span>
+
+  <span class="c1"># Return dataset_train for translation to human readable text.</span>
+  <span class="k">return</span> <span class="n">graph_tensors</span><span class="p">,</span> <span class="n">dataset_train</span></div>
+
+
+<div class="viewcode-block" id="train"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.train">[docs]</a><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">num_training_iterations</span><span class="p">,</span> <span class="n">report_interval</span><span class="p">,</span>
+          <span class="n">reduce_learning_rate_interval</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Trains a deep LSTM model on the Tiny Shakespeare dataset.&quot;&quot;&quot;</span>
+
+  <span class="c1"># Build the computation graph.</span>
+  <span class="n">graph_tensors</span><span class="p">,</span> <span class="n">dataset_train</span> <span class="o">=</span> <span class="n">build_graph</span><span class="p">(</span>
+      <span class="n">lstm_depth</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">lstm_depth</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+      <span class="n">num_embedding</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">num_embedding</span><span class="p">,</span> <span class="n">num_hidden</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">num_hidden</span><span class="p">,</span>
+      <span class="n">truncation_length</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">truncation_length</span><span class="p">,</span>
+      <span class="n">sample_length</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">sample_length</span><span class="p">,</span> <span class="n">max_grad_norm</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">max_grad_norm</span><span class="p">,</span>
+      <span class="n">initial_learning_rate</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+      <span class="n">reduce_learning_rate_multiplier</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">reduce_learning_rate_multiplier</span><span class="p">,</span>
+      <span class="n">optimizer_epsilon</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">optimizer_epsilon</span><span class="p">)</span>
+
+  <span class="c1"># Configure a checkpoint saver.</span>
+  <span class="n">saver_hook</span> <span class="o">=</span> <span class="n">_configure_saver</span><span class="p">(</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">,</span>
+                                <span class="n">FLAGS</span><span class="o">.</span><span class="n">checkpoint_interval</span><span class="p">)</span>
+
+  <span class="c1"># Train the network.</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">SingularMonitoredSession</span><span class="p">(</span>
+      <span class="n">hooks</span><span class="o">=</span><span class="p">[</span><span class="n">saver_hook</span><span class="p">],</span> <span class="n">checkpoint_dir</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">checkpoint_dir</span><span class="p">)</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+
+    <span class="n">start_iteration</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;global_step&quot;</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">train_iteration</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_iteration</span><span class="p">,</span> <span class="n">num_training_iterations</span><span class="p">):</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">train_iteration</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">report_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">train_loss_v</span><span class="p">,</span> <span class="n">valid_loss_v</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;train_loss&quot;</span><span class="p">],</span>
+             <span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;valid_loss&quot;</span><span class="p">],</span>
+             <span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;train_step&quot;</span><span class="p">]))</span>
+
+        <span class="n">train_generated_string_v</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;train_generated_string&quot;</span><span class="p">])</span>
+
+        <span class="n">train_generated_string_human</span> <span class="o">=</span> <span class="n">dataset_train</span><span class="o">.</span><span class="n">to_human_readable</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">train_generated_string_v</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">: Training loss </span><span class="si">%f</span><span class="s2">. Validation loss </span><span class="si">%f</span><span class="s2">. Sample = </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">train_iteration</span><span class="p">,</span>
+                        <span class="n">train_loss_v</span><span class="p">,</span>
+                        <span class="n">valid_loss_v</span><span class="p">,</span>
+                        <span class="n">train_generated_string_human</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">train_loss_v</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">((</span><span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;train_loss&quot;</span><span class="p">],</span>
+                                    <span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;train_step&quot;</span><span class="p">]))</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">: Training loss </span><span class="si">%f</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">train_iteration</span><span class="p">,</span> <span class="n">train_loss_v</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">train_iteration</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">reduce_learning_rate_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;reduce_learning_rate&quot;</span><span class="p">])</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reducing learning rate.&quot;</span><span class="p">)</span>
+
+    <span class="n">test_loss</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">graph_tensors</span><span class="p">[</span><span class="s2">&quot;test_loss&quot;</span><span class="p">])</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Test loss </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">test_loss</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TextModel"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.TextModel">[docs]</a><span class="k">class</span> <span class="nc">TextModel</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;A deep LSTM model, for use on the Tiny Shakespeare dataset.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_embedding</span><span class="p">,</span> <span class="n">num_hidden</span><span class="p">,</span> <span class="n">lstm_depth</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span>
+               <span class="n">use_dynamic_rnn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_skip_connections</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text_model&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a `TextModel`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      num_embedding: Size of embedding representation, used directly after the</span>
+<span class="sd">        one-hot encoded input.</span>
+<span class="sd">      num_hidden: Number of hidden units in each LSTM layer.</span>
+<span class="sd">      lstm_depth: Number of LSTM layers.</span>
+<span class="sd">      output_size: Size of the output layer on top of the DeepRNN.</span>
+<span class="sd">      use_dynamic_rnn: Whether to use dynamic RNN unrolling. If `False`, it uses</span>
+<span class="sd">        static unrolling. Default is `True`.</span>
+<span class="sd">      use_skip_connections: Whether to use skip connections in the</span>
+<span class="sd">        `snt.DeepRNN`. Default is `True`.</span>
+<span class="sd">      name: Name of the module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">TextModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_embedding</span> <span class="o">=</span> <span class="n">num_embedding</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_hidden</span> <span class="o">=</span> <span class="n">num_hidden</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_lstm_depth</span> <span class="o">=</span> <span class="n">lstm_depth</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span> <span class="o">=</span> <span class="n">output_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_dynamic_rnn</span> <span class="o">=</span> <span class="n">use_dynamic_rnn</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_skip_connections</span> <span class="o">=</span> <span class="n">use_skip_connections</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_embed_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_embedding</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_embed&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_output_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_output&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_lstms</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="n">snt</span><span class="o">.</span><span class="n">LSTM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_hidden</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lstm_depth</span><span class="p">)</span>
+      <span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">DeepRNN</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lstms</span><span class="p">,</span>
+                               <span class="n">skip_connections</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_skip_connections</span><span class="p">,</span>
+                               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;deep_lstm&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">one_hot_input_sequence</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the deep LSTM model sub-graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      one_hot_input_sequence: A Tensor with the input sequence encoded as a</span>
+<span class="sd">        one-hot representation. Its dimensions should be `[truncation_length,</span>
+<span class="sd">        batch_size, output_size]`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Tuple of the Tensor of output logits for the batch, with dimensions</span>
+<span class="sd">      `[truncation_length, batch_size, output_size]`, and the</span>
+<span class="sd">      final state of the unrolled core,.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">input_shape</span> <span class="o">=</span> <span class="n">one_hot_input_sequence</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">batch_embed_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">BatchApply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_embed_module</span><span class="p">)</span>
+    <span class="n">input_sequence</span> <span class="o">=</span> <span class="n">batch_embed_module</span><span class="p">(</span><span class="n">one_hot_input_sequence</span><span class="p">)</span>
+    <span class="n">input_sequence</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">input_sequence</span><span class="p">)</span>
+
+    <span class="n">initial_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_dynamic_rnn</span><span class="p">:</span>
+      <span class="n">output_sequence</span><span class="p">,</span> <span class="n">final_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dynamic_rnn</span><span class="p">(</span>
+          <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">,</span>
+          <span class="n">inputs</span><span class="o">=</span><span class="n">input_sequence</span><span class="p">,</span>
+          <span class="n">time_major</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="n">initial_state</span><span class="o">=</span><span class="n">initial_state</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">rnn_input_sequence</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unstack</span><span class="p">(</span><span class="n">input_sequence</span><span class="p">)</span>
+      <span class="n">output</span><span class="p">,</span> <span class="n">final_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">static_rnn</span><span class="p">(</span>
+          <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">,</span>
+          <span class="n">inputs</span><span class="o">=</span><span class="n">rnn_input_sequence</span><span class="p">,</span>
+          <span class="n">initial_state</span><span class="o">=</span><span class="n">initial_state</span><span class="p">)</span>
+      <span class="n">output_sequence</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">batch_output_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">BatchApply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_module</span><span class="p">)</span>
+    <span class="n">output_sequence_logits</span> <span class="o">=</span> <span class="n">batch_output_module</span><span class="p">(</span><span class="n">output_sequence</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_sequence_logits</span><span class="p">,</span> <span class="n">final_state</span>
+
+<div class="viewcode-block" id="TextModel.generate_string"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.TextModel.generate_string">[docs]</a>  <span class="nd">@snt</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">reuse_vars</span>
+  <span class="k">def</span> <span class="nf">generate_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_logits</span><span class="p">,</span> <span class="n">initial_state</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds sub-graph to generate a string, sampled from the model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      initial_logits: Starting logits to sampling from.</span>
+<span class="sd">      initial_state: Starting state for the RNN core.</span>
+<span class="sd">      sequence_length: Number of characters to sample.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A Tensor of characters, with dimensions `[sequence_length, batch_size,</span>
+<span class="sd">      output_size]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_logits</span> <span class="o">=</span> <span class="n">initial_logits</span>
+    <span class="n">current_state</span> <span class="o">=</span> <span class="n">initial_state</span>
+
+    <span class="n">generated_letters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sequence_length</span><span class="p">):</span>
+      <span class="c1"># Sample a character index from distribution.</span>
+      <span class="n">char_index</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">multinomial</span><span class="p">(</span><span class="n">current_logits</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+      <span class="n">char_one_hot</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">char_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+      <span class="n">generated_letters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char_one_hot</span><span class="p">)</span>
+
+      <span class="c1"># Feed character back into the deep_lstm.</span>
+      <span class="n">gen_out_seq</span><span class="p">,</span> <span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">(</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_embed_module</span><span class="p">(</span><span class="n">char_one_hot</span><span class="p">)),</span>
+          <span class="n">current_state</span><span class="p">)</span>
+      <span class="n">current_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_module</span><span class="p">(</span><span class="n">gen_out_seq</span><span class="p">)</span>
+
+    <span class="n">generated_string</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">generated_letters</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">generated_string</span></div></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">unused_argv</span><span class="p">):</span>
+
+  <span class="n">train</span><span class="p">(</span>
+      <span class="n">num_training_iterations</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">num_training_iterations</span><span class="p">,</span>
+      <span class="n">report_interval</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">report_interval</span><span class="p">,</span>
+      <span class="n">reduce_learning_rate_interval</span><span class="o">=</span><span class="n">FLAGS</span><span class="o">.</span><span class="n">reduce_learning_rate_interval</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

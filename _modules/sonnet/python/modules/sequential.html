@@ -1,0 +1,188 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>sonnet.python.modules.sequential &#8212; sonnet git documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sonnet.python.modules.sequential</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2017 The Sonnet Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#    http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ============================================================================</span>
+
+<span class="sd">&quot;&quot;&quot;Sequential Module for TensorFlow snt.</span>
+
+<span class="sd">A Module that wraps a list of other modules and ops, connecting the output of</span>
+<span class="sd">each to the input of the next.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="c1"># Dependency imports</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+
+
+<div class="viewcode-block" id="Sequential"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.sequential.Sequential">[docs]</a><span class="k">class</span> <span class="nc">Sequential</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Builds a module out of a sequence of callables.</span>
+
+<span class="sd">  Note that `Sequential` is limited in the range of possible architectures</span>
+<span class="sd">  it can handle. This is a deliberate design decision; `Sequential` is only</span>
+<span class="sd">  meant to be used for the simple case of fusing together modules/ops where</span>
+<span class="sd">  the input of a particular module/op is the output of the previous one. Another</span>
+<span class="sd">  restriction is that it is not possible to have extra arguments in the `_build`</span>
+<span class="sd">  method that are passed to the constituents of the module - for example,</span>
+<span class="sd">  if there is a `BatchNorm` module in `Sequential` and the user wishes to switch</span>
+<span class="sd">  the `is_training` flag. If this is the desired use case, the recommended</span>
+<span class="sd">  solution is to use `snt.Module` to wrap a custom function, as shown in the</span>
+<span class="sd">  following example:</span>
+
+<span class="sd">  https://github.com/deepmind/sonnet/examples/module_with_build_args.py</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sequential&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a Sequential module.</span>
+
+<span class="sd">    This feeds the output of each layer into the next and returns the output</span>
+<span class="sd">    of the final layer.</span>
+
+<span class="sd">    If a layer returns a tuple, it is assumed that this must be unpacked into</span>
+<span class="sd">    the argument list of the next layer. If it is not a tuple, it is simply</span>
+<span class="sd">    passed through to the next layer unchanged.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      layers: Iterable of callables to stack together, which can be modules</span>
+<span class="sd">          or ops.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If `layers` is None or contains any non-callable items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Sequential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># Store a copy of the iterable in a tuple to ensure users cannot modify the</span>
+    <span class="c1"># iterable later, and protect against iterables which can only be read once.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+
+    <span class="n">is_not_callable</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">mod</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mod</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">)</span>
+                       <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">mod</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">is_not_callable</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Items </span><span class="si">{}</span><span class="s2"> not callable with types: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+          <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">is_not_callable</span><span class="p">),</span>
+          <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">is_not_callable</span><span class="p">)))</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the Sequential module into the graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      *args: A tuple of inputs, to be unpacked as the arguments to the first</span>
+<span class="sd">          layer.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The output value of the last layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="o">*</span><span class="n">net</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">net</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">net</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Sonnet Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

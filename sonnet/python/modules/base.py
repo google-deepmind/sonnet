@@ -26,8 +26,6 @@ from __future__ import print_function
 
 import abc
 import collections
-import functools
-import re
 
 # Dependency imports
 import six
@@ -101,21 +99,6 @@ ConnectedSubGraph = collections.namedtuple(
     "ConnectedSubGraph", ("builder", "name_scope", "inputs", "outputs"))
 
 
-def _to_snake_case(camel_case):
-  """Returns a CamelCase string as a snake_case string."""
-  if not re.match(r"^[A-Za-z_]\w*$", camel_case):
-    raise ValueError(
-        "Input string %s is not a valid Python identifier." % camel_case)
-
-  # Add underscore at word start and ends.
-  underscored = re.sub(r"([A-Z][a-z])", r"_\1", camel_case)
-  underscored = re.sub(r"([a-z])([A-Z])", r"\1_\2", underscored)
-  # Add underscore before alphanumeric chunks.
-  underscored = re.sub(r"([a-z])([0-9][^_]*)", r"\1_\2", underscored)
-  # Remove any underscores at start or end of name and convert to lowercase.
-  return underscored.strip("_").lower()
-
-
 @six.add_metaclass(abc.ABCMeta)
 class AbstractModule(object):
   """Superclass for Sonnet Modules.
@@ -168,7 +151,7 @@ class AbstractModule(object):
                        "arguments is deprecated.")
 
     if name is None:
-      name = _to_snake_case(self.__class__.__name__)
+      name = util.to_snake_case(self.__class__.__name__)
     elif not isinstance(name, six.string_types):
       raise TypeError("Name must be a string.")
 
@@ -501,22 +484,6 @@ class Transposable(object):
     """Returns shape of input `Tensor` passed at last call to `build`."""
 
 
-def _name_for_callable(func):
-  """Returns a module name for a callable or `None` if no name can be found."""
-  if isinstance(func, functools.partial):
-    return _name_for_callable(func.func)
-
-  try:
-    name = func.__name__
-  except AttributeError:
-    return None
-
-  if name == "<lambda>":
-    return None
-  else:
-    return _to_snake_case(name)
-
-
 class Module(AbstractModule):
   """Module wrapping a function provided by the user."""
 
@@ -577,7 +544,7 @@ class Module(AbstractModule):
     if not callable(build):
       raise TypeError("Input 'build' must be callable.")
     if name is None:
-      name = _name_for_callable(build)
+      name = util.name_for_callable(build)
     super(Module, self).__init__(name=name)
     self._build_function = build
 

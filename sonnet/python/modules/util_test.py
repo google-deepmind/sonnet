@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 # Dependency imports
 import numpy as np
 import sonnet as snt
@@ -636,6 +638,58 @@ class ReuseVarsTest(tf.test.TestCase):
     ]
 
     self.assertEqual(tensor_names, get_tensor_names_from_default_graph())
+
+
+class NameFunctionTest(tf.test.TestCase):
+
+  def testToSnakeCase(self):
+    test_cases = [
+        ("UpperCamelCase", "upper_camel_case"),
+        ("lowerCamelCase", "lower_camel_case"),
+        ("endsWithXYZ", "ends_with_xyz"),
+        ("already_snake_case", "already_snake_case"),
+        ("__private__", "private"),
+        ("LSTMModule", "lstm_module"),
+        ("version123p56vfxObject", "version_123p56vfx_object"),
+        ("version123P56VFXObject", "version_123p56vfx_object"),
+        ("versionVFX123P56Object", "version_vfx123p56_object"),
+        ("versionVfx123P56Object", "version_vfx_123p56_object"),
+        ("lstm1", "lstm_1"),
+        ("LSTM1", "lstm1"),
+    ]
+    for camel_case, snake_case in test_cases:
+      actual = util.to_snake_case(camel_case)
+      self.assertEqual(actual, snake_case, "_to_snake_case(%s) -> %s != %s" %
+                       (camel_case, actual, snake_case))
+
+  def testNameForCallable_Function(self):
+    def test():
+      pass
+
+    self.assertName(test, "test")
+
+  def testNameForCallable_Lambda(self):
+    test = lambda x: x
+    self.assertName(test, None)
+
+  def testNameForCallable_Partial(self):
+    def test(*unused_args):
+      pass
+
+    test = functools.partial(functools.partial(test, "a"), "b")
+    self.assertName(test, "test")
+
+  def testNameForCallable_Instance(self):
+    class Test(object):
+
+      def __call__(self):
+        pass
+
+    self.assertName(Test(), None)
+
+  def assertName(self, func, expected):
+    name = util.name_for_callable(func)
+    self.assertEqual(name, expected)
 
 
 if __name__ == "__main__":

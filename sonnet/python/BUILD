@@ -112,6 +112,14 @@ py_library(
     ],
 )
 
+py_library(
+    name = "resampler",
+    srcs = ["ops/resampler.py"],
+    data = ["//sonnet/python:ops/_resampler.so"],
+    srcs_version = "PY2AND3",
+    deps = ["//sonnet/python:resampler_py_wrapper"],
+)
+
 tf_custom_op_library(
     name = "ops/_resampler.so",
     srcs = [

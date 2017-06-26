@@ -3,8 +3,6 @@
 Sonnet is a library built on top of TensorFlow for building complex neural
 networks.
 
-<!-- placeholder for installation instructions in opensource version -->
-
 ## Usage Example
 
 The following code constructs a Linear module and connects it to multiple

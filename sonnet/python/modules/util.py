@@ -588,7 +588,7 @@ def reuse_variables(method):
     raise TypeError("reuse_variables can only be used with methods.")
 
   @functools.wraps(method)
-  def wrapper(*args, **kwargs):
+  def wrapper(obj, *args, **kwargs):
     """Calls `method` with a variable scope whose reuse flag is set correctly.
 
     The first time the wrapper is called it creates a
@@ -645,6 +645,7 @@ def reuse_variables(method):
       ```
 
     Args:
+      obj: The object instance passed to the wrapped method.
       *args: The positional arguments (Tensors) passed to the wrapped method.
       **kwargs: The keyword arguments passed to the wrapped method.
 
@@ -655,7 +656,6 @@ def reuse_variables(method):
       ValueError: If no variable scope is provided or if `method` is a method
                   and a variable_scope keyword argument is also provided.
     """
-    obj = args[0]
 
     def default_context_manager(reuse=None):
       variable_scope = obj.variable_scope
@@ -666,7 +666,7 @@ def reuse_variables(method):
 
     graph = tf.get_default_graph()
     if graph not in initialized_variable_scopes:
-      initialized_variable_scopes[graph] = set([])
+      initialized_variable_scopes[graph] = set()
     initialized_variable_scopes_for_graph = initialized_variable_scopes[graph]
 
     # Temporarily enter the variable scope to capture it
@@ -684,8 +684,9 @@ def reuse_variables(method):
       if name_scope[-1] != "/":
         name_scope += "/"
       with tf.name_scope(name_scope):
-        with tf.name_scope(method.__name__):
-          out_ops = method(*args, **kwargs)
+        sub_scope = to_snake_case(method.__name__)
+        with tf.name_scope(sub_scope):
+          out_ops = method(obj, *args, **kwargs)
           initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
           return out_ops
 

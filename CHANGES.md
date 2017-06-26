@@ -5,9 +5,16 @@
 This version is only compatible with TensorFlow 1.2.0, not the current GitHub
 HEAD.
 
-* Documentation restructured.
 * Resampler op now tries to import from tf.contrib first and falls back to the
 Sonnet op. This is in preparation for the C++ ops to be moved into tf/contrib.
+* `snt.RNNCore` no longer inherits from `tf.RNNCell`. All recurrent modules
+will continue to be suppoted by `tf.dynamic_rnn`, `tf.static_rnn`, etc.
+* The ability to add a `custom_getter` to a module is now supported by
+`snt.AbstractModule`. This is currently only available in `snt.Linear`, with
+more to follow. See the documentation for `tf.get_variable` for how to use
+custom_getters.
+* Documentation restructured.
+* Some functions and tests reorganised.
 
 ## Version 1.2 - 19th Jun 2017
 

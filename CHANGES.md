@@ -1,5 +1,13 @@
 # Sonnet Changelog
 
+## Version 1.3 - 26th Jun 2017
+
+This version is only compatible with TensorFlow 1.2.0, not the current GitHub
+HEAD.
+
+* Documentation restructured.
+* Resampler op now tries to import from tf.contrib first and falls back to the
+Sonnet op. This is in preparation for the C++ ops to be moved into tf/contrib.
 
 ## Version 1.2 - 19th Jun 2017
 

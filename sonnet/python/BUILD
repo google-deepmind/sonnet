@@ -107,22 +107,8 @@ py_library(
     deps = [
         ":initializers",
         ":nest",
-        ":resampler",
         "//sonnet/python:resampler",
         # tensorflow dep,
-    ],
-)
-
-tf_custom_op_py_library(
-    name = "resampler",
-    srcs = ["ops/resampler.py"],
-    dso = [":ops/_resampler.so"],
-    kernels = [
-        "//sonnet/cc/kernels:resampler_op",
-        "//sonnet/cc:resampler_op_lib",
-    ],
-    deps = [
-        ":resampler_py_wrapper",
     ],
 )
 

@@ -71,7 +71,6 @@
 
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="c1"># Dependency imports</span>
 <span class="kn">import</span> <span class="nn">six</span>
@@ -145,21 +144,6 @@
     <span class="s2">&quot;ConnectedSubGraph&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;builder&quot;</span><span class="p">,</span> <span class="s2">&quot;name_scope&quot;</span><span class="p">,</span> <span class="s2">&quot;inputs&quot;</span><span class="p">,</span> <span class="s2">&quot;outputs&quot;</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">_to_snake_case</span><span class="p">(</span><span class="n">camel_case</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a CamelCase string as a snake_case string.&quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[A-Za-z_]\w*$&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-        <span class="s2">&quot;Input string </span><span class="si">%s</span><span class="s2"> is not a valid Python identifier.&quot;</span> <span class="o">%</span> <span class="n">camel_case</span><span class="p">)</span>
-
-  <span class="c1"># Add underscore at word start and ends.</span>
-  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([A-Z][a-z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;_\1&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">)</span>
-  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
-  <span class="c1"># Add underscore before alphanumeric chunks.</span>
-  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([0-9][^_]*)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
-  <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span>
-  <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-
 <div class="viewcode-block" id="AbstractModule"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">AbstractModule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Superclass for Sonnet Modules.</span>
@@ -180,7 +164,8 @@
 <span class="sd">  sharing will not work.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_sentinel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-name</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_sentinel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-name</span>
     <span class="sd">&quot;&quot;&quot;Performs the initialisation necessary for all AbstractModule instances.</span>
 
 <span class="sd">    Every subclass of AbstractModule must begin their constructor with a call to</span>
@@ -194,11 +179,16 @@
 <span class="sd">      _sentinel: Variable that only carries a non-None value if `__init__` was</span>
 <span class="sd">          called without named parameters. If this is the case, a deprecation</span>
 <span class="sd">          warning is issued in form of a `ValueError`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of this module. Used to construct the Templated build function.</span>
 <span class="sd">          If `None` the module&#39;s class name is used (converted to snake case).</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      TypeError: If `name` is not a string.</span>
+<span class="sd">      TypeError: If a given `custom_getter` is not callable.</span>
 <span class="sd">      ValueError: If `__init__` was called without named arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">_sentinel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -206,14 +196,27 @@
                        <span class="s2">&quot;arguments is deprecated.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="n">_to_snake_case</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">to_snake_case</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name must be a string.&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">make_template</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wrapper</span><span class="p">,</span>
-                                      <span class="n">create_scope_now_</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># If the given custom getter is a dictionary with a per-variable custom</span>
+    <span class="c1"># getter, wrap it into a single custom getter.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">_custom_getter_router</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="n">custom_getter_map</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+          <span class="n">name_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">custom_getter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">callable</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Given custom_getter is not callable.&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">custom_getter</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">make_template</span><span class="p">(</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">_build_wrapper</span><span class="p">,</span>
+                                      <span class="n">create_scope_now_</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      <span class="n">custom_getter_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_original_name</span> <span class="o">=</span> <span class="n">name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_unique_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -529,7 +532,7 @@
 <div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Module wrapping a function provided by the user.&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;module&quot;</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a module with a given build function.</span>
 
 <span class="sd">    The Module class can be used to wrap a function assembling a network into a</span>
@@ -576,15 +579,18 @@
 <span class="sd">          The `build` function signature can include the following parameters:</span>
 <span class="sd">            *args - Input Tensors.</span>
 <span class="sd">            **kwargs - Additional Python parameters controlling connection.</span>
-<span class="sd">      name: Module name.</span>
+<span class="sd">      name: Module name. If set to `None` (the default), the name will be set to</span>
+<span class="sd">          that of the `build` callable converted to `snake_case`. If `build` has</span>
+<span class="sd">          no name, the name will be &#39;module&#39;.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      TypeError: If build is not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">build</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input &#39;build&#39; must be callable.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">name_for_callable</span><span class="p">(</span><span class="n">build</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span> <span class="o">=</span> <span class="n">build</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

@@ -119,7 +119,7 @@ automatically with no need to explicitly use scopes or specify
 reuse=True.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.base.AbstractModule">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">AbstractModule</code><span class="sig-paren">(</span><em>_sentinel=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#AbstractModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">AbstractModule</code><span class="sig-paren">(</span><em>_sentinel=None</em>, <em>custom_getter=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#AbstractModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Superclass for Sonnet Modules.</p>
 <p>This class defines the functionality that every module should implement,
@@ -272,7 +272,7 @@ tried to wire together incompatible modules, etc.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.base.Module">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Module</code><span class="sig-paren">(</span><em>build</em>, <em>name=’module’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Module" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Module</code><span class="sig-paren">(</span><em>build</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Module" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Module wrapping a function provided by the user.</p>
 </dd></dl>
@@ -484,7 +484,7 @@ split to match the leading dimensions of the input.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.basic.Linear">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">Linear</code><span class="sig-paren">(</span><em>output_size</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name=’linear’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#Linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.Linear" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">Linear</code><span class="sig-paren">(</span><em>output_size</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name=’linear’</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#Linear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.Linear" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>Linear module, optionally including bias.</p>
 <dl class="attribute">
@@ -2194,9 +2194,6 @@ location.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="sonnet-python-modules-experimental-test-module">
-<h2>sonnet.python.modules.experimental_test module<a class="headerlink" href="#sonnet-python-modules-experimental-test-module" title="Permalink to this headline">¶</a></h2>
-</div>
 <div class="section" id="module-sonnet.python.modules.gated_rnn">
 <span id="sonnet-python-modules-gated-rnn-module"></span><h2>sonnet.python.modules.gated_rnn module<a class="headerlink" href="#module-sonnet.python.modules.gated_rnn" title="Permalink to this headline">¶</a></h2>
 <p>LSTM based modules for TensorFlow snt.</p>
@@ -2643,8 +2640,8 @@ of other <code class="docutils literal"><span class="pre">snt.Module</span></cod
 RNNCell in tensorflow.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.rnn_core.RNNCore">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">RNNCore</code><span class="sig-paren">(</span><em>_sentinel=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#RNNCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.ops.rnn_cell_impl.RNNCell</span></code></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">RNNCore</code><span class="sig-paren">(</span><em>_sentinel=None</em>, <em>custom_getter=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#RNNCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Superclass for Recurrent Neural Network Cores.</p>
 <p>This class defines the basic functionality that every core should
 implement, mainly the <code class="docutils literal"><span class="pre">initial_state</span></code> method which will return an
@@ -2694,6 +2691,34 @@ shape as the <code class="docutils literal"><span class="pre">state_size</span><
 <p>Raises: ValueError: if the user passes initializers that are not
 functions. ValueError: if the user passes regularizers that are not
 functions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.rnn_core.RNNCore.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer or TensorShape: size of outputs produced by this cell.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.rnn_core.RNNCore.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore.state_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>size(s) of state(s) used by this cell.</p>
+<p>It can be represented by an Integer, a TensorShape or a tuple of
+Integers or TensorShapes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.rnn_core.RNNCore.zero_state">
+<code class="descname">zero_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#RNNCore.zero_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore.zero_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return zero-filled state tensor(s).</p>
+<p>Args: batch_size: int, float, or unit Tensor representing the batch
+size. dtype: the data type to use for the state.</p>
+<p>Returns: If <code class="docutils literal"><span class="pre">state_size</span></code> is an int or TensorShape, then the return
+value is a <code class="docutils literal"><span class="pre">N-D</span></code> tensor of shape <code class="docutils literal"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">state_size]</span></code> filled
+with zeros.</p>
+<p>If <code class="docutils literal"><span class="pre">state_size</span></code> is a nested list or tuple, then the return value is a
+nested list or tuple (of the same structure) of <code class="docutils literal"><span class="pre">2-D</span></code> tensors with the
+shapes <code class="docutils literal"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">s]</span></code> for each s in <code class="docutils literal"><span class="pre">state_size</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3124,6 +3149,13 @@ variables (in the default graph) are logged.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="sonnet.python.modules.util.name_for_callable">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">name_for_callable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#name_for_callable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.name_for_callable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a module name for a callable or <code class="docutils literal"><span class="pre">None</span></code> if no name can be
+found.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="sonnet.python.modules.util.reuse_variables">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">reuse_variables</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#reuse_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.reuse_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wraps an arbitrary method so it does variable sharing.</p>
@@ -3160,6 +3192,12 @@ example:</p>
 </div>
 <p>Args: method: The method to wrap.</p>
 <p>Returns: The wrapped method.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.util.to_snake_case">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">to_snake_case</code><span class="sig-paren">(</span><em>camel_case</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#to_snake_case"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.to_snake_case" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a CamelCase string as a snake_case string.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3214,7 +3252,6 @@ variables).</p>
 <li><a class="reference internal" href="#module-sonnet.python.modules.embed">sonnet.python.modules.embed module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-embed-test-module">sonnet.python.modules.embed_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.experimental">sonnet.python.modules.experimental module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-experimental-test-module">sonnet.python.modules.experimental_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.gated_rnn">sonnet.python.modules.gated_rnn module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-gated-rnn-test-module">sonnet.python.modules.gated_rnn_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.layer_norm">sonnet.python.modules.layer_norm module</a></li>

@@ -315,6 +315,77 @@
 <span class="c1"># pylint: enable=protected-access</span>
 
 
+<span class="k">def</span> <span class="nf">_custom_getter_router</span><span class="p">(</span><span class="n">custom_getter_map</span><span class="p">,</span> <span class="n">name_fn</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Creates a custom getter than matches requests to dict of custom getters.</span>
+
+<span class="sd">  Custom getters are callables which implement the</span>
+<span class="sd">  [custom getter API]</span>
+<span class="sd">  (https://www.tensorflow.org/versions/r1.0/api_docs/python/tf/get_variable).</span>
+
+<span class="sd">  The returned custom getter dispatches calls based on pattern matching the</span>
+<span class="sd">  name of the requested variable to the keys of custom_getter_map. For example,</span>
+
+<span class="sd">      {</span>
+<span class="sd">        &quot;.*/w&quot;: snt.custom_getters.stop_gradient,</span>
+<span class="sd">      }</span>
+
+<span class="sd">  will match all variables named with the suffix &quot;/w&quot;. The `name_fn` is</span>
+<span class="sd">  provided to allow processing of the name, such as stripping off a scope prefix</span>
+<span class="sd">  before matching.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    custom_getter_map: Mapping of regular expressions to custom getter</span>
+<span class="sd">      functions.</span>
+<span class="sd">    name_fn: Callable to map variable name through before matching to regular</span>
+<span class="sd">      expressions. This might, for example, strip off a scope prefix.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A custom getter.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    TypeError: If an entry in `custom_getter_map` is not a callable function.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">for</span> <span class="n">custom_getter</span> <span class="ow">in</span> <span class="n">custom_getter_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Given custom_getter is not callable.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_custom_getter</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A custom getter that routes based on pattern matching the variable name.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      getter: The true getter to call.</span>
+<span class="sd">      name: The fully qualified variable name, i.e. including all scopes.</span>
+<span class="sd">      *args: Arguments, in the same format as tf.get_variable.</span>
+<span class="sd">      **kwargs: Keyword arguments, in the same format as tf.get_variable.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      The return value of the appropriate custom getter. If there are no</span>
+<span class="sd">      matches, it returns the return value of `getter`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: If more than one pattern matches the variable name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bare_name</span> <span class="o">=</span> <span class="n">name_fn</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">custom_getter</span> <span class="ow">in</span> <span class="n">custom_getter_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">bare_name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">num_matches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_matches</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">getter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">num_matches</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">custom_getter</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">return</span> <span class="n">custom_getter</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;More than one custom_getter matched </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">): </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+          <span class="n">name</span><span class="p">,</span> <span class="n">bare_name</span><span class="p">,</span> <span class="p">[</span><span class="n">pattern</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]))</span>
+
+  <span class="k">return</span> <span class="n">_custom_getter</span>
+
+
 <div class="viewcode-block" id="get_normalized_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_normalized_variable_map">[docs]</a><span class="k">def</span> <span class="nf">get_normalized_variable_map</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span>
                                 <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,</span>
                                 <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -562,7 +633,7 @@
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;reuse_variables can only be used with methods.&quot;</span><span class="p">)</span>
 
   <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calls `method` with a variable scope whose reuse flag is set correctly.</span>
 
 <span class="sd">    The first time the wrapper is called it creates a</span>
@@ -619,6 +690,7 @@
 <span class="sd">      ```</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">      obj: The object instance passed to the wrapped method.</span>
 <span class="sd">      *args: The positional arguments (Tensors) passed to the wrapped method.</span>
 <span class="sd">      **kwargs: The keyword arguments passed to the wrapped method.</span>
 
@@ -629,7 +701,6 @@
 <span class="sd">      ValueError: If no variable scope is provided or if `method` is a method</span>
 <span class="sd">                  and a variable_scope keyword argument is also provided.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">default_context_manager</span><span class="p">(</span><span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
       <span class="n">variable_scope</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">variable_scope</span>
@@ -640,7 +711,7 @@
 
     <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">graph</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes</span><span class="p">:</span>
-      <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+      <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">initialized_variable_scopes_for_graph</span> <span class="o">=</span> <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span>
 
     <span class="c1"># Temporarily enter the variable scope to capture it</span>
@@ -658,12 +729,44 @@
       <span class="k">if</span> <span class="n">name_scope</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
         <span class="n">name_scope</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name_scope</span><span class="p">):</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
-          <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">sub_scope</span> <span class="o">=</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">sub_scope</span><span class="p">):</span>
+          <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
           <span class="k">return</span> <span class="n">out_ops</span>
 
   <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="name_for_callable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.name_for_callable">[docs]</a><span class="k">def</span> <span class="nf">name_for_callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a module name for a callable or `None` if no name can be found.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">name_for_callable</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+  <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+  <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&lt;lambda&gt;&quot;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="to_snake_case"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.to_snake_case">[docs]</a><span class="k">def</span> <span class="nf">to_snake_case</span><span class="p">(</span><span class="n">camel_case</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a CamelCase string as a snake_case string.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[A-Za-z_]\w*$&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;Input string </span><span class="si">%s</span><span class="s2"> is not a valid Python identifier.&quot;</span> <span class="o">%</span> <span class="n">camel_case</span><span class="p">)</span>
+
+  <span class="c1"># Add underscore at word start and ends.</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([A-Z][a-z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;_\1&quot;</span><span class="p">,</span> <span class="n">camel_case</span><span class="p">)</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
+  <span class="c1"># Add underscore before alphanumeric chunks.</span>
+  <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([0-9][^_]*)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
+  <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span>
+  <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

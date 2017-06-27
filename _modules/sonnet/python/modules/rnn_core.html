@@ -79,6 +79,7 @@
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">rnn_cell_impl</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
 
 
@@ -209,7 +210,7 @@
 
 
 <div class="viewcode-block" id="RNNCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">RNNCore</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">RNNCell</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RNNCore</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Superclass for Recurrent Neural Network Cores.</span>
 
 <span class="sd">  This class defines the basic functionality that every core should implement,</span>
@@ -282,7 +283,41 @@
             <span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
             <span class="n">initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
             <span class="n">regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div></div>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;size(s) of state(s) used by this cell.</span>
+
+<span class="sd">    It can be represented by an Integer, a TensorShape or a tuple of Integers</span>
+<span class="sd">    or TensorShapes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Abstract method&quot;</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Integer or TensorShape: size of outputs produced by this cell.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Abstract method&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RNNCore.zero_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore.zero_state">[docs]</a>  <span class="k">def</span> <span class="nf">zero_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return zero-filled state tensor(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      batch_size: int, float, or unit Tensor representing the batch size.</span>
+<span class="sd">      dtype: the data type to use for the state.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      If `state_size` is an int or TensorShape, then the return value is a</span>
+<span class="sd">      `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.</span>
+
+<span class="sd">      If `state_size` is a nested list or tuple, then the return value is</span>
+<span class="sd">      a nested list or tuple (of the same structure) of `2-D` tensors with</span>
+<span class="sd">      the shapes `[batch_size x s]` for each s in `state_size`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Keep scope for backwards compatibility.</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;ZeroState&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="n">batch_size</span><span class="p">]):</span>
+      <span class="k">return</span> <span class="n">rnn_cell_impl</span><span class="o">.</span><span class="n">_zero_state_tensors</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TrainableInitialState"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.TrainableInitialState">[docs]</a><span class="k">class</span> <span class="nc">TrainableInitialState</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>

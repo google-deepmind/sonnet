@@ -46,86 +46,6 @@
 <h1><img alt="Sonnet" src="_images/sonnet_logo.png" /><a class="headerlink" href="#sonnet" title="Permalink to this headline">¶</a></h1>
 <p>Sonnet is a library built on top of TensorFlow for building complex
 neural networks.</p>
-<div class="section" id="installation-instructions">
-<h2>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h2>
-<p>To install Sonnet, you will need to compile the library using bazel
-against the TensorFlow header files. You should have installed
-TensorFlow by following the <a class="reference external" href="https://www.tensorflow.org/install/">TensorFlow installation
-instructions</a>.</p>
-<p>This installation is compatible with Linux/Mac OS X and Python 2.7 and
-3.4. The version of TensorFlow installed must be at least 1.0.1.
-Installing Sonnet supports the <a class="reference external" href="https://www.tensorflow.org/install/install_linux#installing_with_virtualenv">virtualenv installation
-mode</a>
-of TensorFlow, as well as the <a class="reference external" href="https://www.tensorflow.org/install/install_linux#installing_with_native_pip">native pip
-install</a>.</p>
-<div class="section" id="install-bazel">
-<h3>Install bazel<a class="headerlink" href="#install-bazel" title="Permalink to this headline">¶</a></h3>
-<p>Ensure you have a recent version of bazel (&gt;= 0.4.5) and JDK (&gt;= 1.8).
-If not, follow <a class="reference external" href="https://bazel.build/versions/master/docs/install.html">these
-directions</a>.</p>
-</div>
-<div class="section" id="virtualenv-tensorflow-installation-activate-virtualenv">
-<h3>(virtualenv TensorFlow installation) Activate virtualenv<a class="headerlink" href="#virtualenv-tensorflow-installation-activate-virtualenv" title="Permalink to this headline">¶</a></h3>
-<p>If using virtualenv, activate your virtualenv for the rest of the
-installation, otherwise skip this step:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
-$ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
-</pre></div>
-</div>
-</div>
-<div class="section" id="configure-tensorflow-headers">
-<h3>Configure TensorFlow Headers<a class="headerlink" href="#configure-tensorflow-headers" title="Permalink to this headline">¶</a></h3>
-<p>First clone the Sonnet source code with TensorFlow as a submodule:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ git clone --recursive https://github.com/deepmind/sonnet
-</pre></div>
-</div>
-<p>and then call <code class="docutils literal"><span class="pre">configure</span></code>:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ cd sonnet/tensorflow
-$ ./configure
-$ cd ../
-</pre></div>
-</div>
-<p>You can choose the suggested defaults during the TensorFlow
-configuration. Note: This will not modify your existing installation of
-TensorFlow. This step is necessary so that Sonnet can build against the
-TensorFlow headers.</p>
-</div>
-<div class="section" id="build-and-run-the-installer">
-<h3>Build and run the installer<a class="headerlink" href="#build-and-run-the-installer" title="Permalink to this headline">¶</a></h3>
-<p>Run the install script to create a wheel file in a temporary directory:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ mkdir /tmp/sonnet
-$ bazel build --config=opt :install
-$ ./bazel-bin/install /tmp/sonnet
-</pre></div>
-</div>
-<p><code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span></code> the generated wheel file:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ pip install /tmp/sonnet/*.whl
-</pre></div>
-</div>
-<p>If Sonnet was already installed, uninstall prior to calling
-<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span></code> on the wheel file:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ pip uninstall sonnet
-</pre></div>
-</div>
-<p>You can verify that Sonnet has been successfully installed by, for
-example, trying out the resampler op:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ cd ~/
-$ python
-&gt;&gt;&gt; import sonnet as snt
-&gt;&gt;&gt; import tensorflow as tf
-&gt;&gt;&gt; snt.resampler(tf.constant([0.]), tf.constant([0.]))
-</pre></div>
-</div>
-<p>The expected output should be:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span> <span class="s1">&#39;resampler/Resampler:0&#39;</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>However, if an <code class="docutils literal"><span class="pre">ImportError</span></code> is raised then the C++ components were
-not found. Ensure that you are not importing the cloned source code
-(i.e. call python outside of the cloned repository) and that you have
-uninstalled Sonnet prior to installing the wheel file.</p>
-</div>
-</div>
 <div class="section" id="usage-example">
 <h2>Usage Example<a class="headerlink" href="#usage-example" title="Permalink to this headline">¶</a></h2>
 <p>The following code constructs a Linear module and connects it to
@@ -889,13 +809,6 @@ serialized instances where those members don’t exist.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#"></a><ul>
-<li><a class="reference internal" href="#installation-instructions">Installation instructions</a><ul>
-<li><a class="reference internal" href="#install-bazel">Install bazel</a></li>
-<li><a class="reference internal" href="#virtualenv-tensorflow-installation-activate-virtualenv">(virtualenv TensorFlow installation) Activate virtualenv</a></li>
-<li><a class="reference internal" href="#configure-tensorflow-headers">Configure TensorFlow Headers</a></li>
-<li><a class="reference internal" href="#build-and-run-the-installer">Build and run the installer</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#usage-example">Usage Example</a></li>
 <li><a class="reference internal" href="#general-principles">General Principles</a></li>
 <li><a class="reference internal" href="#importing-sonnet">Importing Sonnet</a></li>

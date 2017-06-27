@@ -171,14 +171,6 @@ sonnet\.python\.modules\.experimental module
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.experimental\_test module
---------------------------------------------------
-
-.. automodule:: sonnet.python.modules.experimental_test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 sonnet\.python\.modules\.gated\_rnn module
 ------------------------------------------
 

@@ -29,10 +29,6 @@ _VERSION = '1.3'
 
 project_name = 'sonnet'
 
-REQUIRED_PACKAGES = [
-    'nose_parameterized >= 0.6.0',
-]
-
 EXTRA_PACKAGES = {
     'tensorflow': ['tensorflow>=1.0.1'],
     'tensorflow with gpu': ['tensorflow-gpu>=1.0.1']
@@ -50,9 +46,7 @@ setup(
     # Contained modules and scripts.
     packages=find_packages(),
     entry_points={},
-    install_requires=REQUIRED_PACKAGES,
     extra_requires=EXTRA_PACKAGES,
-    tests_require=REQUIRED_PACKAGES,
     # Add in any packaged data.
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst'], 'sonnet': ['*.so']},

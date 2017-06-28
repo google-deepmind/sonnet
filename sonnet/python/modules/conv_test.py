@@ -947,6 +947,33 @@ class Conv2DTransposeTest(parameterized.ParameterizedTestCase,
   @parameterized.NamedParameters(
       ("WithBias", True),
       ("WithoutBias", False))
+  def testOutputShapeInteger(self, use_bias):
+    """Tests if output shapes are valid when specified as an integer."""
+    inputs = tf.zeros(shape=[3, 5, 5, 2], dtype=tf.float32)
+    inputs_2 = tf.zeros(shape=[3, 5, 7, 2], dtype=tf.float32)
+
+    conv1 = snt.Conv2DTranspose(name="conv2d_1",
+                                output_channels=10,
+                                output_shape=10,
+                                kernel_shape=5,
+                                padding=snt.SAME,
+                                stride=2,
+                                use_bias=use_bias)
+
+    outputs = conv1(inputs)
+    outputs_2 = conv1(inputs_2)
+
+    self.assertTrue(outputs.get_shape().is_compatible_with((3, 10, 10, 10)))
+
+    with self.test_session() as sess:
+      tf.global_variables_initializer().run()
+      sess.run(outputs)
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        sess.run(outputs_2)
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
   def testTransposition(self, use_bias):
     """Tests if the correct output shapes are setup in transposed module."""
     net = snt.Conv2DTranspose(name="conv2d",
@@ -2808,6 +2835,33 @@ class Conv3DTransposeTest(parameterized.ParameterizedTestCase,
     if use_bias:
       self.assertTrue(conv1.b.get_shape().is_compatible_with(
           [self.out_channels]))
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testOutputShapeInteger(self, use_bias):
+    """Tests if output shapes are valid when specified as an integer."""
+    inputs = tf.zeros(shape=[3, 5, 5, 5, 2], dtype=tf.float32)
+    inputs_2 = tf.zeros(shape=[3, 5, 7, 5, 2], dtype=tf.float32)
+
+    conv1 = snt.Conv3DTranspose(name="conv3d_1",
+                                output_channels=10,
+                                output_shape=10,
+                                kernel_shape=5,
+                                padding=snt.SAME,
+                                stride=2,
+                                use_bias=use_bias)
+
+    outputs = conv1(inputs)
+    outputs_2 = conv1(inputs_2)
+
+    self.assertTrue(outputs.get_shape().is_compatible_with((3, 10, 10, 10, 10)))
+
+    with self.test_session() as sess:
+      tf.global_variables_initializer().run()
+      sess.run(outputs)
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        sess.run(outputs_2)
 
   @parameterized.NamedParameters(
       ("WithBias", True),

@@ -645,7 +645,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       if callable(output_shape):
         self._output_shape = output_shape
       else:
-        self._output_shape = tuple(output_shape)
+        self._output_shape = _fill_and_verify_parameter_shape(output_shape, 2,
+                                                              "output_shape")
 
     self._input_shape = None
 
@@ -2629,7 +2630,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
       if callable(output_shape):
         self._output_shape = output_shape
       else:
-        self._output_shape = tuple(output_shape)
+        self._output_shape = _fill_and_verify_parameter_shape(output_shape, 3,
+                                                              "output_shape")
 
     self._input_shape = None
 

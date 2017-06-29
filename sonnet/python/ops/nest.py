@@ -28,6 +28,7 @@ import collections
 import numpy as np
 import six
 
+
 from tensorflow.python.util import nest
 
 
@@ -41,6 +42,7 @@ map = nest.map_structure  # pylint: disable=redefined-builtin
 map_up_to = nest.map_structure_up_to
 assert_shallow_structure = nest.assert_shallow_structure
 flatten_up_to = nest.flatten_up_to
+flatten_dict_items = nest.flatten_dict_items
 
 
 def _yield_flat_up_to(shallow_tree, input_tree):

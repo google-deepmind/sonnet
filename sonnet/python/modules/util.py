@@ -376,11 +376,14 @@ def get_normalized_variable_map(scope_or_module,
 
   scope_name = scope.name
   prefix = context_scope.name
-  if not _is_scope_prefix(scope_name, prefix):
-    raise ValueError("Scope '{}' is not prefixed by '{}'.".format(
-        scope_name, prefix))
+  if prefix:
+    if not _is_scope_prefix(scope_name, prefix):
+      raise ValueError("Scope '{}' is not prefixed by '{}'.".format(
+          scope_name, prefix))
 
-  prefix_length = len(prefix) + 1
+    prefix_length = len(prefix) + 1
+  else:
+    prefix_length = 0
 
   variables = get_variables_in_scope(scope, collection)
 

@@ -114,6 +114,16 @@ class UtilTest(tf.test.TestCase):
     self.assertIs(variable_map["prefix2/a:0"], v1)
     self.assertIs(variable_map["prefix2/b:0"], v2)
 
+    with tf.variable_scope("") as s4:
+      self.assertEqual(s4.name, "")
+      variable_map = snt.get_normalized_variable_map(s2, context=s4)
+
+    self.assertEqual(len(variable_map), 2)
+    self.assertIn("prefix1/prefix2/a:0", variable_map)
+    self.assertIn("prefix1/prefix2/b:0", variable_map)
+    self.assertIs(variable_map["prefix1/prefix2/a:0"], v1)
+    self.assertIs(variable_map["prefix1/prefix2/b:0"], v2)
+
   def testGetNormalizedVariableMapModule(self):
     input_ = tf.placeholder(tf.float32, shape=[1, 10, 10, 3])
     conv = snt.Conv2D(output_channels=3, kernel_shape=3)

@@ -1310,7 +1310,6 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
           of dimensions.
       base.IncompatibleShapeError: If the input tensor has an unknown
           `input_channels`.
-      base.UnderspecifiedError: If the input tensor has unknown `batch_size`.
       base.IncompatibleShapeError: If `output_shape` is not an integer or
           iterable of length 1.
       TypeError: If input Tensor dtype is not tf.float32.
@@ -1327,11 +1326,6 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
     input_channels = self._input_shape[2]
-
-    if self._input_shape[0] is None:
-      raise base.UnderspecifiedError(
-          "Batch size must be known at module build time")
-    batch_size = self._input_shape[0]
 
     if self._use_default_output_shape:
       self._output_shape = (
@@ -1369,8 +1363,12 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
                               partitioner=self._partitioners.get("w", None),
                               regularizer=self._regularizers.get("w", None))
 
-    tf_out_shape = ((batch_size, 1,) + self._output_shape +
-                    (self.output_channels,))
+    batch_size = tf.expand_dims(tf.shape(inputs)[0], 0)
+    out_shape = (1, self.output_shape[0])
+    out_channels = (self.output_channels,)
+    out_shape_tuple = out_shape + out_channels
+    conv_output_shape = tf.convert_to_tensor(out_shape_tuple)
+    tf_out_shape = tf.concat([batch_size, conv_output_shape], 0)
 
     # Add an extra dimension to the input - a height of 1.
     inputs = tf.expand_dims(inputs, 1)
@@ -1392,6 +1390,11 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
     # Remove the superfluous height dimension to return a 3D tensor.
     outputs = tf.squeeze(outputs, [1])
 
+    # Set the tensor sizes in order for shape inference.
+    batch_size_value = inputs.get_shape()[0]
+    output_shape_value = ((batch_size_value,) + self.output_shape +
+                          (self.output_channels,))
+    outputs.set_shape(output_shape_value)
     return outputs
 
   @property

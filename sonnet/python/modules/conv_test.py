@@ -1403,9 +1403,9 @@ class Conv1DTransposeTest(parameterized.ParameterizedTestCase,
   @parameterized.Parameters(
       *zip(out_channels, kernel_shape, padding, use_bias, in_shape, out_shape,
            stride_shape))
-  def testMissingBatchSizeError(self, out_channels, kernel_shape, padding,
-                                use_bias, in_shape, out_shape, stride_shape):
-    """Error is thrown if the batch size is unknown at build time."""
+  def testMissingBatchSize(self, out_channels, kernel_shape, padding,
+                           use_bias, in_shape, out_shape, stride_shape):
+    """Check functionality with unknown batch size at build time."""
 
     conv1 = snt.Conv1DTranspose(output_channels=out_channels,
                                 output_shape=out_shape,
@@ -1417,9 +1417,13 @@ class Conv1DTransposeTest(parameterized.ParameterizedTestCase,
 
     # Pass in an image with its batch size set to `None`:
     image = tf.placeholder(tf.float32, shape=(None,) + in_shape[1:])
-    error_msg = "Batch size must be known at module build time"
-    with self.assertRaisesRegexp(snt.UnderspecifiedError, error_msg):
-      conv1(image)
+    output = conv1(image)
+    self.assertTrue(output.get_shape().is_compatible_with(
+        [None, out_shape, out_channels]))
+
+    with self.test_session() as sess:
+      tf.global_variables_initializer().run()
+      sess.run(output, feed_dict={image: np.zeros((10,) + in_shape[1:])})
 
   @parameterized.Parameters(
       *zip(batch_size, in_length, in_channels, out_length, out_channels,

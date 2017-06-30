@@ -21,6 +21,7 @@ from __future__ import print_function
 from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.install import install as InstallCommandBase
+from setuptools.dist import Distribution
 
 # This version string is semver compatible, but incompatible with pip.
 # For pip, we will remove all '-' characters from this string, and use the
@@ -33,6 +34,13 @@ EXTRA_PACKAGES = {
     'tensorflow': ['tensorflow>=1.0.1'],
     'tensorflow with gpu': ['tensorflow-gpu>=1.0.1']
 }
+
+
+class BinaryDistribution(Distribution):
+  """This class is needed in order to create OS specific wheels."""
+
+  def has_ext_modules(self):
+    return True
 
 setup(
     name=project_name,
@@ -51,6 +59,7 @@ setup(
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst'], 'sonnet': ['*.so']},
     zip_safe=False,
+    distclass=BinaryDistribution,
     cmdclass={
         'install': InstallCommandBase,
     },

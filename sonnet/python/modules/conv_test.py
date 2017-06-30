@@ -1656,6 +1656,128 @@ class Conv1DTransposeTest(parameterized.ParameterizedTestCase,
     self.assertAllEqual(initializers, initializers_copy)
 
 
+class CausalConv1DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testComputation(self, use_bias):
+    """Run through for something with a known answer."""
+    conv1 = snt.CausalConv1D(
+        output_channels=1,
+        kernel_shape=3,
+        stride=1,
+        use_bias=use_bias,
+        name="conv1",
+        initializers=create_constant_initializers(1.0, 1.0, use_bias))
+
+    out = conv1(tf.constant(np.ones([1, 5, 1], dtype=np.float32)))
+    expected_out = np.reshape(np.array([1, 2, 3, 3, 3]), [1, 5, 1])
+    if use_bias:
+      expected_out += 1
+
+    init_op = tf.variables_initializer(
+        [conv1.w, conv1.b] if use_bias else [conv1.w])
+    with self.test_session() as sess:
+      sess.run(init_op)
+      actual_out = sess.run(out)
+
+    self.assertAllClose(actual_out, expected_out)
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testComputationStrided(self, use_bias):
+    """Run through for something with a known answer."""
+    conv1 = snt.CausalConv1D(
+        output_channels=1,
+        kernel_shape=3,
+        stride=2,
+        use_bias=use_bias,
+        name="conv1",
+        initializers=create_constant_initializers(1.0, 1.0, use_bias))
+
+    out = conv1(tf.constant(np.ones([1, 5, 1], dtype=np.float32)))
+    expected_out = np.reshape(np.array([1, 3, 3]), [1, 3, 1])
+    if use_bias:
+      expected_out += 1
+
+    init_op = tf.variables_initializer(
+        [conv1.w, conv1.b] if use_bias else [conv1.w])
+    with self.test_session() as sess:
+      sess.run(init_op)
+      actual_out = sess.run(out)
+
+    self.assertAllClose(actual_out, expected_out)
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testComputationDilated(self, use_bias):
+    """Run through for something with a known answer."""
+    conv1 = snt.CausalConv1D(
+        output_channels=1,
+        kernel_shape=3,
+        stride=1,
+        rate=2,
+        use_bias=use_bias,
+        name="conv1",
+        initializers=create_constant_initializers(1.0, 1.0, use_bias))
+
+    out = conv1(tf.constant(np.ones([1, 5, 1], dtype=np.float32)))
+    expected_out = np.reshape(np.array([1, 1, 2, 2, 3]), [1, 5, 1])
+    if use_bias:
+      expected_out += 1
+
+    init_op = tf.variables_initializer(
+        [conv1.w, conv1.b] if use_bias else [conv1.w])
+    with self.test_session() as sess:
+      sess.run(init_op)
+      actual_out = sess.run(out)
+
+    self.assertAllClose(actual_out, expected_out)
+
+  @parameterized.NamedParameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testSharing(self, use_bias):
+    """Sharing is working."""
+
+    conv1 = snt.CausalConv1D(
+        output_channels=1,
+        kernel_shape=3,
+        stride=1,
+        use_bias=use_bias,
+        name="conv1")
+
+    x = np.random.randn(1, 5, 1)
+    x1 = tf.constant(x, dtype=np.float32)
+    x2 = tf.constant(x, dtype=np.float32)
+
+    out1 = conv1(x1)
+    out2 = conv1(x2)
+
+    w = np.random.randn(3, 1, 1)
+    weight_change_op = conv1.w.assign(w)
+
+    init_op = tf.variables_initializer(
+        [conv1.w, conv1.b] if use_bias else [conv1.w])
+
+    with self.test_session() as sess:
+      sess.run(init_op)
+      first_replica_out = sess.run(out1)
+      second_replica_out = sess.run(out2)
+
+      # Now change the weights
+      sess.run(weight_change_op)
+
+      first_replica_out_changed = sess.run(out1)
+      second_replica_out_changed = sess.run(out2)
+
+    self.assertAllClose(first_replica_out, second_replica_out)
+    self.assertAllClose(first_replica_out_changed, second_replica_out_changed)
+
+
 class InPlaneConv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
   @parameterized.NamedParameters(

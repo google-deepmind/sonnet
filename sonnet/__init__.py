@@ -66,6 +66,7 @@ from sonnet.python.modules.basic_rnn import ModelRNN
 from sonnet.python.modules.basic_rnn import VanillaRNN
 from sonnet.python.modules.batch_norm import BatchNorm
 from sonnet.python.modules.clip_gradient import clip_gradient
+from sonnet.python.modules.conv import CausalConv1D
 from sonnet.python.modules.conv import Conv1D
 from sonnet.python.modules.conv import Conv1DTranspose
 from sonnet.python.modules.conv import Conv2D

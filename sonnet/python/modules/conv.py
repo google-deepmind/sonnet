@@ -1503,6 +1503,169 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
                   name=name)
 
 
+class CausalConv1D(Conv1D):
+  """1D convolution module, including optional bias.
+
+  This acts as a light wrapper around Conv1D ensuring that the outputs at index
+  `i` only depend on indices smaller than `i` (also known as a causal
+  convolution). For further details on the theoretical background, refer to:
+
+  https://arxiv.org/abs/1610.10099
+  """
+
+  def __init__(self,
+               output_channels,
+               kernel_shape,
+               stride=1,
+               rate=1,
+               use_bias=True,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               name="conv_1d"):
+    """Constructs a CausalConv1D module.
+
+    Args:
+      output_channels: Number of output channels. `output_channels` can be
+          either a number or a callable. In the latter case, since the function
+          invocation is deferred to graph construction time, the user must only
+          ensure that output_channels can be called, returning an integer,
+          when `build` is called.
+      kernel_shape: Sequence of kernel sizes (of size 1), or integer that is
+          used to define kernel size in all dimensions.
+      stride: Sequence of kernel strides (of size 1), or integer that is used to
+          define stride in all dimensions.
+      rate: Sequence of dilation rates (of size 1), or integer that is used to
+          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          convolution, `rate > 1` corresponds to dilated convolution. Cannot be
+          > 1 if any of `stride` is also > 1.
+      use_bias: Whether to include bias parameters. Default `True`.
+      initializers: Optional dict containing ops to initialize the filters (with
+          key 'w') or biases (with key 'b'). The default initializer for the
+          weights is a truncated normal initializer, which is commonly used
+          when the inputs are zero centered (see
+          https://arxiv.org/pdf/1502.03167v3.pdf). The default initializer for
+          the bias is a zero initializer.
+      partitioners: Optional dict containing partitioners to partition
+          weights (with key 'w') or biases (with key 'b'). As a default, no
+          partitioners are used.
+      regularizers: Optional dict containing regularizers for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        regularizers are used. A regularizer should be a function that takes
+        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
+        the L1 and L2 regularizers in `tf.contrib.layers`.
+      name: Name of the module.
+
+    Raises:
+      base.IncompatibleShapeError: If the given kernel shape is not an integer;
+          or if the given kernel shape is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given stride is not an integer; or if
+          the given stride is not a sequence of two or four integers.
+      base.IncompatibleShapeError: If the given rate is not an integer; or if
+          the given rate is not a sequence of two integers.
+      base.NotSupportedError: If rate in any dimension and the stride in any
+          dimension are simultaneously > 1.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contain any
+        keys other than 'w' or 'b'.
+      TypeError: If any of the given initializers, partitioners or regularizers
+        are not callable.
+    """
+    super(CausalConv1D, self).__init__(
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride,
+        rate=rate,
+        padding=VALID,  # Can't be configured by the user.
+        use_bias=use_bias,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        name=name)
+
+  def _build(self, inputs):
+    """Connects the CausalConv1D module into the graph, with `inputs` as input.
+
+    If this is not the first time the module has been connected to the graph,
+    the input Tensor provided here must have the same final 2 dimensions, in
+    order for the existing variables to be the correct size for the
+    multiplication. The batch size may differ for each connection.
+
+    Args:
+      inputs: A 3D Tensor of shape [batch_size, input_length, input_channels].
+
+    Returns:
+      A 3D Tensor of shape [batch_size, output_length, output_channels].
+
+    Raises:
+      ValueError: If connecting the module into the graph any time after the
+          first time and the inferred size of the input does not match previous
+          invocations.
+      base.IncompatibleShapeError: If the input tensor has the wrong number
+          of dimensions.
+      base.IncompatibleShapeError: If a mask is present and its shape is
+          incompatible with the shape of the weights.
+      base.UnderspecifiedError: If the input tensor has an unknown
+          `input_channels`.
+      TypeError: If input Tensor dtype is not `tf.float32`.
+    """
+    # Handle input whose shape is unknown during graph creation.
+    self._input_shape = tuple(inputs.get_shape().as_list())
+
+    if len(self._input_shape) != 3:
+      raise base.IncompatibleShapeError(
+          "Input Tensor must have shape (batch_size, input_length, input_"
+          "channels)")
+
+
+    if self._input_shape[2] is None:
+      raise base.UnderspecifiedError(
+          "Number of input channels must be known at module build time")
+    else:
+      input_channels = self._input_shape[2]
+
+    if inputs.dtype != tf.float32:
+      raise TypeError("Input must have dtype tf.float32, but dtype was {}".
+                      format(inputs.dtype))
+
+    weight_shape = (self._kernel_shape[0], input_channels, self.output_channels)
+
+    bias_shape = (self.output_channels,)
+
+    if "w" not in self._initializers:
+      self._initializers["w"] = create_weight_initializer(weight_shape[:2])
+
+    if "b" not in self._initializers and self._use_bias:
+      self._initializers["b"] = create_bias_initializer(bias_shape)
+
+    self._w = tf.get_variable(
+        "w",
+        shape=weight_shape,
+        initializer=self._initializers["w"],
+        partitioner=self._partitioners.get("w", None),
+        regularizer=self._regularizers.get("w", None))
+
+    pad_amount = int((self._kernel_shape[0] - 1) * self._rate[0])
+    padded_inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
+
+    outputs = tf.nn.convolution(
+        padded_inputs,
+        self._w,
+        strides=self._stride,
+        padding=VALID,
+        dilation_rate=self._rate)
+
+    if self._use_bias:
+      self._b = tf.get_variable(
+          "b",
+          shape=bias_shape,
+          initializer=self._initializers["b"],
+          partitioner=self._partitioners.get("b", None),
+          regularizer=self._regularizers.get("b", None))
+      outputs += self._b
+
+    return outputs
+
+
 class InPlaneConv2D(base.AbstractModule):
   """Applies an in-plane convolution to each channel with tied filter weights.
 

@@ -452,15 +452,14 @@ class BatchNorm(base.AbstractModule):
           regularizer=self._regularizers.get(self.GAMMA, None),
           trainable=self._scale)
 
-  def _build(self, input_batch, is_training=True, test_local_stats=True):
+  def _build(self, input_batch, is_training, test_local_stats=True):
     """Connects the BatchNorm module into the graph.
 
     Args:
       input_batch: A Tensor of arbitrary dimension. By default, the final
         dimension is not reduced over when computing the minibatch statistics.
       is_training: A boolean to indicate if the module should be connected in
-        training mode, meaning the moving averages are updated. By default
-        `True`. Can be a Tensor.
+        training mode, meaning the moving averages are updated. Can be a Tensor.
       test_local_stats: A boolean to indicate if local batch statistics should
         be used when `is_training=False`. If not, moving averages are used.
         By default `True`. Can be a Tensor.

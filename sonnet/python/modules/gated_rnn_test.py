@@ -236,7 +236,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell))
+    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
     init = tf.global_variables_initializer()
 
     # Test that the initializers have been correctly applied.
@@ -258,6 +258,29 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       with self.assertRaisesRegexp(KeyError, "Invalid initializer"):
         snt.LSTM(hidden_size, use_peepholes=False,
                  initializers={key: tf.constant_initializer(0)})
+
+  @parameterized.Parameters(
+      (True, False, False),
+      (False, True, False),
+      (False, False, True)
+  )
+  def testBatchNormBuildFlag(self, use_batch_norm_h, use_batch_norm_x,
+                             use_batch_norm_c):
+    """Check if an error is raised if we don't specify the is_training flag."""
+    batch_size = 2
+    hidden_size = 4
+
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+
+    err = "is_training flag must be explicitly specified"
+    with self.assertRaisesRegexp(ValueError, err):
+      lstm = snt.LSTM(hidden_size,
+                      use_batch_norm_h=use_batch_norm_h,
+                      use_batch_norm_x=use_batch_norm_x,
+                      use_batch_norm_c=use_batch_norm_c)
+      lstm(inputs, (prev_cell, prev_hidden))
 
   def testBatchNormInitializersCheck(self):
     hidden_size = 4
@@ -304,7 +327,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell))
+    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
 
     # Test that the variables are partitioned.
     var_names = _get_lstm_variable_names(lstm)
@@ -339,7 +362,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell))
+    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
 
     # Test that we have regularization losses.
     num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
@@ -529,7 +552,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     # Need to connect the cell before it has variables
     batch_size = 3
     inputs = tf.placeholder(tf.float32, shape=[batch_size, 3, 3])
-    tf.nn.dynamic_rnn(cell,
+    tf.nn.dynamic_rnn(cell.with_batch_norm_control(is_training=True),
                       inputs,
                       initial_state=cell.initial_state(batch_size, tf.float32))
 
@@ -576,10 +599,11 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                          dtype=tf.float32)
     initial_state = cell.initial_state(
         batch_size, tf.float32, trainable_initial_state)
-    output, _ = tf.nn.dynamic_rnn(cell,
-                                  inputs,
-                                  initial_state=initial_state,
-                                  dtype=tf.float32)
+    output, _ = tf.nn.dynamic_rnn(
+        cell.with_batch_norm_control(is_training=True),
+        inputs,
+        initial_state=initial_state,
+        dtype=tf.float32)
 
     loss = tf.reduce_mean(tf.square(
         output - np.random.rand(batch_size, time_steps, hidden_size)))

@@ -206,7 +206,7 @@ class UtilTest(tf.test.TestCase):
     with tf.variable_scope("prefix") as s1:
       input_ = tf.placeholder(tf.float32, shape=[3, 4])
       net = snt.Linear(10)(input_)
-      net = snt.BatchNorm()(net)
+      net = snt.BatchNorm()(net, is_training=True)
 
     saver1 = snt.get_saver(s1)
     saver2 = snt.get_saver(s1, collections=(tf.GraphKeys.TRAINABLE_VARIABLES,))

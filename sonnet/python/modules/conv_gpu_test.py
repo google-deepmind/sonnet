@@ -111,7 +111,7 @@ class ConvTestDataFormats(parameterized.ParameterizedTestCase,
       else:
         bn = snt.BatchNorm(scale=True, update_ops_collection=None, fused=True,
                            axis=(0, 2, 3))
-      return snt.Sequential([conv, bn])
+      return snt.Sequential([conv, functools.partial(bn, is_training=True)])
     x = tf.constant(np.random.random(self.INPUT_SHAPE).astype(np.float32))
     self.helperDataFormats(func, x, use_bias)
 

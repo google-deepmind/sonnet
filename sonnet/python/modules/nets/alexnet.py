@@ -181,7 +181,7 @@ class AlexNet(base.AbstractModule):
 
     return input_size
 
-  def _build(self, inputs, keep_prob=None, is_training=True,
+  def _build(self, inputs, keep_prob=None, is_training=None,
              test_local_stats=True):
     """Connects the AlexNet module into the graph.
 
@@ -195,8 +195,8 @@ class AlexNet(base.AbstractModule):
         input_channels], representing a batch of input images.
       keep_prob: A scalar Tensor representing the dropout keep probability.
         When `is_training=False` this must be None or 1 to give no dropout.
-      is_training: Boolean to indicate to `snt.BatchNorm` if we are
-        currently training. By default `True`.
+      is_training: Boolean to indicate if we are currently training. Must be
+          specified if batch normalization or dropout is used.
       test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
         normalization should  use local batch statistics at test time.
         By default `True`.
@@ -209,8 +209,14 @@ class AlexNet(base.AbstractModule):
       base.IncompatibleShapeError: If any of the input image dimensions
         (input_height, input_width) are too small for the given network mode.
       ValueError: If `keep_prob` is not None or 1 when `is_training=False`.
+      ValueError: If `is_training` is not explicitly specified when using
+        batch normalization.
     """
     # Check input shape
+    if (self._use_batch_norm or keep_prob is not None) and is_training is None:
+      raise ValueError("Boolean is_training flag must be explicitly specified "
+                       "when using batch normalization or dropout.")
+
     input_shape = inputs.get_shape().as_list()
     if input_shape[1] < self._min_size or input_shape[2] < self._min_size:
       raise base.IncompatibleShapeError(

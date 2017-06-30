@@ -144,7 +144,7 @@ class _BaseLSTM(rnn_core.RNNCore):
       self._batch_norm_c = _BaseLSTM.IndexedStatsBatchNorm(max_unique_stats,
                                                            "batch_norm_c")
 
-  def with_batch_norm_control(self, is_training=True, test_local_stats=True):
+  def with_batch_norm_control(self, is_training, test_local_stats=True):
     """Wraps this RNNCore with the additional control input to the `BatchNorm`s.
 
     Example usage:
@@ -219,7 +219,7 @@ class _BaseLSTM(rnn_core.RNNCore):
       possible_keys.difference_update({cls.GAMMA_C, cls.BETA_C})
     return possible_keys
 
-  def _build(self, inputs, prev_state, is_training=True, test_local_stats=True):
+  def _build(self, inputs, prev_state, is_training=None, test_local_stats=True):
     """Connects the LSTM module into the graph.
 
     If this is not the first time the module has been connected to the graph,
@@ -253,6 +253,12 @@ class _BaseLSTM(rnn_core.RNNCore):
         first time, and the inferred size of the inputs does not match previous
         invocations.
     """
+    use_batch_norm = self._use_batch_norm_c or self._use_batch_norm_h
+    use_batch_norm = use_batch_norm or self._use_batch_norm_x
+    if use_batch_norm and is_training is None:
+      raise ValueError("Boolean is_training flag must be explicitly specified "
+                       "when using batch normalization.")
+
     if self._max_unique_stats == 1:
       prev_hidden, prev_cell = prev_state
       time_step = None

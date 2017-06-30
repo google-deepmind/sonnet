@@ -200,14 +200,15 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                                        regularizers=self._regularizers)
                            for i in xrange(self._num_layers))
 
-  def _build(self, inputs, is_training=True, test_local_stats=True):
+  def _build(self, inputs, is_training=None, test_local_stats=True):
     """Assembles the `ConvNet2D` and connects it to the graph.
 
     Args:
       inputs: A 4D Tensor of shape `[batch_size, input_height, input_width,
         input_channels]`.
       is_training: Boolean to indicate to `snt.BatchNorm` if we are
-        currently training. By default `True`.
+        currently training. Must be specified explicitly if `use_batchnorm` is
+        `True`.
       test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
         normalization should  use local batch statistics at test time.
         By default `True`.
@@ -215,7 +216,15 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     Returns:
       A 4D Tensor of shape `[batch_size, output_height, output_width,
         output_channels[-1]]`.
+
+    Raises:
+      ValueError: If `is_training` is not explicitly specified when using
+        batch normalization.
     """
+    if self._use_batch_norm and is_training is None:
+      raise ValueError("Boolean is_training flag must be explicitly specified "
+                       "when using batch normalization.")
+
     self._input_shape = tuple(inputs.get_shape().as_list())
     net = inputs
 

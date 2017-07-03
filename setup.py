@@ -26,7 +26,7 @@ from setuptools.dist import Distribution
 # This version string is semver compatible, but incompatible with pip.
 # For pip, we will remove all '-' characters from this string, and use the
 # result for pip.
-_VERSION = '1.3'
+_VERSION = '1.4'
 
 project_name = 'sonnet'
 

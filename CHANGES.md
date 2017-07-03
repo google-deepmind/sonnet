@@ -1,5 +1,18 @@
 # Sonnet Changelog
 
+## Version 1.4 - 3rd Jul 2017
+
+* Added all constructor arguments to `ConvNet2D.transpose` and
+  `ConvNet2DTranspose.transpose`.
+* *Backwards incompatible change* is_training flags of `_build` functions no
+  longer default to True. They must be specified explicitly at every connection
+  point.
+* Added causal 1D Convolution.
+* Fixed to scope name utilities.
+* Added `flatten_dict_items` to `snt.nest`.
+* `Conv1DTranspose` modules can accept input with undefined batch sizes.
+* Apply verification to output_shape in `ConvTranspose` modules.
+
 ## Version 1.3 - 26th Jun 2017
 
 This version is only compatible with TensorFlow 1.2.0, not the current GitHub

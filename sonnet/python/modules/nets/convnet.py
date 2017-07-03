@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import functools
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
@@ -286,6 +287,10 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     return self._use_batch_norm
 
   @property
+  def batch_norm_config(self):
+    return self._batch_norm_config
+
+  @property
   def activation(self):
     return self._activation
 
@@ -300,59 +305,203 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     self._ensure_is_connected()
     return self._input_shape
 
-  # Implements Transposable interface.
-  def transpose(self, name=None, output_channels=None, activate_final=None):
-    """Returns transposed conv net.
+  def _transpose(self,
+                 transpose_constructor,
+                 name=None,
+                 output_channels=None,
+                 kernel_shapes=None,
+                 strides=None,
+                 paddings=None,
+                 activation=None,
+                 activate_final=None,
+                 initializers=None,
+                 partitioners=None,
+                 regularizers=None,
+                 use_batch_norm=None,
+                 use_bias=None,
+                 batch_norm_config=None):
+    """Returns transposed version of this network.
 
     Args:
+      transpose_constructor: A method that creates an instance of the transposed
+        network type. The method must accept the same kwargs as this methods
+        with the exception of the `transpose_constructor` argument.
       name: Optional string specifying the name of the transposed module. The
         default name is constructed by appending "_transpose"
         to `self.module_name`.
       output_channels: Optional iterable of numbers of output channels.
+      kernel_shapes: Optional iterable of kernel sizes. The default value is
+        constructed by reversing `self.kernel_shapes`.
+      strides: Optional iterable of kernel strides. The default value is
+        constructed by reversing `self.strides`.
+      paddings: Optional iterable of padding options, either `snt.SAME` or
+        `snt.VALID`; The default value is constructed by reversing
+        `self.paddings`.
+      activation: Optional activation op. Default value is `self.activation`.
       activate_final: Optional boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      initializers: Optional dict containing ops to initialize the filters of
+        the whole network (with key 'w') or biases (with key 'b'). The default
+        value is `self.initializers`.
+      partitioners: Optional dict containing partitioners to partition
+        weights (with key 'w') or biases (with key 'b'). The default value is
+        `self.partitioners`.
+      regularizers: Optional dict containing regularizers for the filters of the
+        whole network (with key 'w') or biases (with key 'b'). The default is
+        `self.regularizers`.
+      use_batch_norm: Optional boolean determining if batch normalization is
+        applied after convolution. The default value is `self.use_batch_norm`.
+      use_bias: Optional boolean or iterable of booleans determining whether to
+        include bias parameters in the convolutional layers. Default
+        is constructed by reversing `self.use_bias`.
+      batch_norm_config: Optional mapping of additional configuration for the
+        `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
 
     Returns:
-      Matching `ConvNetTranspose2D` module.
+      Matching transposed module.
 
     Raises:
       ValueError: If output_channels is specified and its length does not match
         the number of layers.
     """
-    if name is None:
-      name = self.module_name + "_transpose"
-
-    if activate_final is None:
-      activate_final = self.activate_final
-
     if output_channels is None:
       output_channels = []
       for layer in reversed(self._layers):
         output_channels.append(lambda l=layer: l.input_shape[-1])
 
     elif len(output_channels) != len(self._layers):
+      # Note that we only have to do this check for the output channels. Any
+      # other inconsistencies will be picked up by ConvNet2D.__init__.
       raise ValueError("Iterable output_channels length must match the "
                        "number of layers ({}), but is {} instead.".format(
                            len(self._layers), len(output_channels)))
 
+    if kernel_shapes is None:
+      kernel_shapes = reversed(self.kernel_shapes)
+
+    if strides is None:
+      strides = reversed(self.strides)
+
+    if paddings is None:
+      paddings = reversed(self.paddings)
+
+    if activation is None:
+      activation = self.activation
+
+    if activate_final is None:
+      activate_final = self.activate_final
+
+    if initializers is None:
+      initializers = self.initializers
+
+    if partitioners is None:
+      partitioners = self.partitioners
+
+    if regularizers is None:
+      regularizers = self.regularizers
+
+    if use_batch_norm is None:
+      use_batch_norm = self.use_batch_norm
+
+    if use_bias is None:
+      use_bias = reversed(self.use_bias)
+
+    if batch_norm_config is None:
+      batch_norm_config = self.batch_norm_config
+
+    if name is None:
+      name = self.module_name + "_transpose"
+
+    return transpose_constructor(output_channels=output_channels,
+                                 kernel_shapes=kernel_shapes,
+                                 strides=strides,
+                                 paddings=paddings,
+                                 activation=activation,
+                                 activate_final=activate_final,
+                                 initializers=initializers,
+                                 partitioners=partitioners,
+                                 regularizers=regularizers,
+                                 use_batch_norm=use_batch_norm,
+                                 use_bias=use_bias,
+                                 batch_norm_config=batch_norm_config,
+                                 name=name)
+
+  # Implements Transposable interface.
+  def transpose(self,
+                name=None,
+                output_channels=None,
+                kernel_shapes=None,
+                strides=None,
+                paddings=None,
+                activation=None,
+                activate_final=None,
+                initializers=None,
+                partitioners=None,
+                regularizers=None,
+                use_batch_norm=None,
+                use_bias=None,
+                batch_norm_config=None):
+    """Returns transposed version of this network.
+
+    Args:
+      name: Optional string specifying the name of the transposed module. The
+        default name is constructed by appending "_transpose"
+        to `self.module_name`.
+      output_channels: Optional iterable of numbers of output channels.
+      kernel_shapes: Optional iterable of kernel sizes. The default value is
+        constructed by reversing `self.kernel_shapes`.
+      strides: Optional iterable of kernel strides. The default value is
+        constructed by reversing `self.strides`.
+      paddings: Optional iterable of padding options, either `snt.SAME` or
+        `snt.VALID`; The default value is constructed by reversing
+        `self.paddings`.
+      activation: Optional activation op. Default value is `self.activation`.
+      activate_final: Optional boolean determining if the activation and batch
+        normalization, if turned on, are applied to the final layer.
+      initializers: Optional dict containing ops to initialize the filters of
+        the whole network (with key 'w') or biases (with key 'b'). The default
+        value is `self.initializers`.
+      partitioners: Optional dict containing partitioners to partition
+        weights (with key 'w') or biases (with key 'b'). The default value is
+        `self.partitioners`.
+      regularizers: Optional dict containing regularizers for the filters of the
+        whole network (with key 'w') or biases (with key 'b'). The default is
+        `self.regularizers`.
+      use_batch_norm: Optional boolean determining if batch normalization is
+        applied after convolution. The default value is `self.use_batch_norm`.
+      use_bias: Optional boolean or iterable of booleans determining whether to
+        include bias parameters in the convolutional layers. Default
+        is constructed by reversing `self.use_bias`.
+      batch_norm_config: Optional mapping of additional configuration for the
+        `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
+
+    Returns:
+      Matching `ConvNet2DTranspose` module.
+
+    Raises:
+      ValueError: If output_channels is specified and its length does not match
+        the number of layers.
+    """
     output_shapes = []
     for layer in reversed(self._layers):
       output_shapes.append(lambda l=layer: l.input_shape[1:-1])
+    transpose_constructor = functools.partial(ConvNet2DTranspose,
+                                              output_shapes=output_shapes)
 
-    return ConvNet2DTranspose(name=name,
-                              output_channels=output_channels,
-                              output_shapes=output_shapes,
-                              kernel_shapes=reversed(self.kernel_shapes),
-                              strides=reversed(self.strides),
-                              paddings=reversed(self.paddings),
-                              activation=self.activation,
-                              activate_final=activate_final,
-                              initializers=self.initializers,
-                              partitioners=self.partitioners,
-                              regularizers=self.regularizers,
-                              use_batch_norm=self.use_batch_norm,
-                              use_bias=reversed(self.use_bias),
-                              batch_norm_config=self._batch_norm_config)
+    return self._transpose(transpose_constructor=transpose_constructor,
+                           name=name,
+                           output_channels=output_channels,
+                           kernel_shapes=kernel_shapes,
+                           strides=strides,
+                           paddings=paddings,
+                           activation=activation,
+                           activate_final=activate_final,
+                           initializers=initializers,
+                           partitioners=partitioners,
+                           regularizers=regularizers,
+                           use_batch_norm=use_batch_norm,
+                           use_bias=use_bias,
+                           batch_norm_config=batch_norm_config)
 
 
 class ConvNet2DTranspose(ConvNet2D):
@@ -484,51 +633,73 @@ class ConvNet2DTranspose(ConvNet2D):
   def output_shapes(self):
     return tuple([l() if callable(l) else l for l in self._output_shapes])
 
-  # Implement Transposable interface.
-  def transpose(self, name=None, output_channels=None, activate_final=None):
-    """Returns transposed conv net.
+  # Implements Transposable interface.
+  def transpose(self,
+                name=None,
+                output_channels=None,
+                kernel_shapes=None,
+                strides=None,
+                paddings=None,
+                activation=None,
+                activate_final=None,
+                initializers=None,
+                partitioners=None,
+                regularizers=None,
+                use_batch_norm=None,
+                use_bias=None,
+                batch_norm_config=None):
+    """Returns transposed version of this network.
 
     Args:
       name: Optional string specifying the name of the transposed module. The
         default name is constructed by appending "_transpose"
         to `self.module_name`.
       output_channels: Optional iterable of numbers of output channels.
+      kernel_shapes: Optional iterable of kernel sizes. The default value is
+        constructed by reversing `self.kernel_shapes`.
+      strides: Optional iterable of kernel strides. The default value is
+        constructed by reversing `self.strides`.
+      paddings: Optional iterable of padding options, either `snt.SAME` or
+        `snt.VALID`; The default value is constructed by reversing
+        `self.paddings`.
+      activation: Optional activation op. Default value is `self.activation`.
       activate_final: Optional boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      initializers: Optional dict containing ops to initialize the filters of
+        the whole network (with key 'w') or biases (with key 'b'). The default
+        value is `self.initializers`.
+      partitioners: Optional dict containing partitioners to partition
+        weights (with key 'w') or biases (with key 'b'). The default value is
+        `self.partitioners`.
+      regularizers: Optional dict containing regularizers for the filters of the
+        whole network (with key 'w') or biases (with key 'b'). The default is
+        `self.regularizers`.
+      use_batch_norm: Optional boolean determining if batch normalization is
+        applied after convolution. The default value is `self.use_batch_norm`.
+      use_bias: Optional boolean or iterable of booleans determining whether to
+        include bias parameters in the convolutional layers. Default
+        is constructed by reversing `self.use_bias`.
+      batch_norm_config: Optional mapping of additional configuration for the
+        `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
 
     Returns:
-      Matching `ConvNetTranspose2D` module.
+      Matching `ConvNet2D` module.
 
     Raises:
       ValueError: If output_channels is specified and its length does not match
         the number of layers.
     """
-    if name is None:
-      name = self.module_name + "_transpose"
-
-    if activate_final is None:
-      activate_final = self.activate_final
-
-    if output_channels is None:
-      output_channels = []
-      for layer in reversed(self._layers):
-        output_channels.append(lambda l=layer: l.input_shape[-1])
-
-    elif len(output_channels) != len(self._layers):
-      raise ValueError("Iterable output_channels length must match the "
-                       "number of layers ({}), but is {} instead.".format(
-                           len(self._layers), len(output_channels)))
-
-    return ConvNet2D(name=name,
-                     output_channels=output_channels,
-                     kernel_shapes=reversed(self.kernel_shapes),
-                     strides=reversed(self.strides),
-                     paddings=reversed(self.paddings),
-                     activation=self.activation,
-                     activate_final=activate_final,
-                     initializers=self.initializers,
-                     partitioners=self.partitioners,
-                     regularizers=self.regularizers,
-                     use_batch_norm=self.use_batch_norm,
-                     use_bias=reversed(self.use_bias),
-                     batch_norm_config=self._batch_norm_config)
+    return self._transpose(transpose_constructor=ConvNet2D,
+                           name=name,
+                           output_channels=output_channels,
+                           kernel_shapes=kernel_shapes,
+                           strides=strides,
+                           paddings=paddings,
+                           activation=activation,
+                           activate_final=activate_final,
+                           initializers=initializers,
+                           partitioners=partitioners,
+                           regularizers=regularizers,
+                           use_batch_norm=use_batch_norm,
+                           use_bias=use_bias,
+                           batch_norm_config=batch_norm_config)

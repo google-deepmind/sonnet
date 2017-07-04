@@ -24,7 +24,9 @@ function main() {
     exit 1
   fi
 
-  DEST=$1
+  DEST="$(readlink -f $1)"
+  echo "=== destination directory: ${DEST}"
+
   TMPDIR=$(mktemp -d -t tmp.XXXXXXXXXX)
 
   echo $(date) : "=== Using tmpdir: ${TMPDIR}"

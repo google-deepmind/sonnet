@@ -1522,7 +1522,7 @@ class CausalConv1D(Conv1D):
                initializers=None,
                partitioners=None,
                regularizers=None,
-               name="conv_1d"):
+               name="causal_conv_1d"):
     """Constructs a CausalConv1D module.
 
     Args:

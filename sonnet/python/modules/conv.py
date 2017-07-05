@@ -2225,7 +2225,7 @@ class SeparableConv2D(base.AbstractModule):
           list of 3 integers.
       base.IncompatibleShapeError: If `stride` is neither an integer nor a
           list of 2 or 4 integers.
-      ValueError: If `padding` is not `nnd.VALID` or `nnd.SAME`;
+      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers

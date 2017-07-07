@@ -56,7 +56,7 @@ class RestoreInitializerTest(tf.test.TestCase):
     with self.test_session() as session:
       session.run(tf.global_variables_initializer())
       b = session.run(bias)
-      self.assertAlmostEqual(np.linalg.norm(b), 3.9685926)
+      self.assertAllClose(np.linalg.norm(b), 3.9685926, atol=_TOLERANCE)
 
   def testScopeRestore(self):
     c1 = conv.Conv2D(

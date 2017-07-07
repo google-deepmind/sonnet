@@ -21,18 +21,26 @@ from __future__ import print_function
 from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.install import install as InstallCommandBase
+from setuptools.dist import Distribution
 
 # This version string is semver compatible, but incompatible with pip.
 # For pip, we will remove all '-' characters from this string, and use the
 # result for pip.
-_VERSION = '1.0'
+_VERSION = '1.4'
 
 project_name = 'sonnet'
 
-REQUIRED_PACKAGES = [
-    'tensorflow >= 1.0.1',
-    'nose_parameterized >= 0.6.0',
-]
+EXTRA_PACKAGES = {
+    'tensorflow': ['tensorflow>=1.0.1'],
+    'tensorflow with gpu': ['tensorflow-gpu>=1.0.1']
+}
+
+
+class BinaryDistribution(Distribution):
+  """This class is needed in order to create OS specific wheels."""
+
+  def has_ext_modules(self):
+    return True
 
 setup(
     name=project_name,
@@ -46,12 +54,12 @@ setup(
     # Contained modules and scripts.
     packages=find_packages(),
     entry_points={},
-    install_requires=REQUIRED_PACKAGES,
-    tests_require=REQUIRED_PACKAGES,
+    extra_requires=EXTRA_PACKAGES,
     # Add in any packaged data.
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst'], 'sonnet': ['*.so']},
     zip_safe=False,
+    distclass=BinaryDistribution,
     cmdclass={
         'install': InstallCommandBase,
     },

@@ -55,6 +55,7 @@ py_library(
         "modules/nets/dilation.py",
         "modules/nets/mlp.py",
         "modules/pondering_rnn.py",
+        "modules/residual.py",
         "modules/rnn_core.py",
         "modules/scale_gradient.py",
         "modules/sequential.py",
@@ -106,22 +107,17 @@ py_library(
     deps = [
         ":initializers",
         ":nest",
-        ":resampler",
+        "//sonnet/python:resampler",
         # tensorflow dep,
     ],
 )
 
-tf_custom_op_py_library(
+py_library(
     name = "resampler",
     srcs = ["ops/resampler.py"],
-    dso = [":ops/_resampler.so"],
-    kernels = [
-        "//sonnet/cc/kernels:resampler_op",
-        "//sonnet/cc:resampler_op_lib",
-    ],
-    deps = [
-        ":resampler_py_wrapper",
-    ],
+    data = ["//sonnet/python:ops/_resampler.so"],
+    srcs_version = "PY2AND3",
+    deps = ["//sonnet/python:resampler_py_wrapper"],
 )
 
 tf_custom_op_library(
@@ -133,6 +129,7 @@ tf_custom_op_library(
     ],
     gpu_srcs = [
         "//sonnet/cc/kernels:resampler_op_gpu.cu.cc",
+        "//sonnet/cc/kernels:resampler_op.h",
     ],
 )
 
@@ -160,11 +157,11 @@ module_tests = [
     ("conv_test", "", "large"),
     ("dilation_test", "nets/", "small"),
     ("embed_test", "", "small"),
-    ("experimental_test", "", "small"),
     ("gated_rnn_test", "", "medium"),
     ("mlp_test", "nets/", "small"),
     ("pondering_rnn_test", "", "small"),
     ("rnn_core_test", "", "small"),
+    ("residual_test", "", "small"),
     ("scale_gradient_test", "", "small"),
     ("sequential_test", "", "small"),
     ("spatial_transformer_test", "", "small"),
@@ -178,6 +175,7 @@ module_tests = [
     srcs_version = "PY2AND3",
     deps = [
         # mox dep,
+        # numpy dep,
         "//sonnet",
         "//sonnet/testing/parameterized",
         # tensorflow dep,

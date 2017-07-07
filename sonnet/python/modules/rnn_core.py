@@ -34,6 +34,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import basic
 import tensorflow as tf
 
+from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.util import nest
 
 
@@ -164,7 +165,7 @@ def trainable_initial_state(batch_size, state_size, dtype, initializers=None,
 
 
 @six.add_metaclass(abc.ABCMeta)
-class RNNCore(base.AbstractModule, tf.contrib.rnn.RNNCell):
+class RNNCore(base.AbstractModule):
   """Superclass for Recurrent Neural Network Cores.
 
   This class defines the basic functionality that every core should implement,
@@ -177,9 +178,9 @@ class RNNCore(base.AbstractModule, tf.contrib.rnn.RNNCell):
   that constructs the graph that corresponds to a core. Such a `_build` method
   should always have the same interface, which is the following:
 
-      output, new_state = self._build(input, prev_state)
+      output, next_state = self._build(input, prev_state)
 
-  where output, new_state, input, and prev_state are arbitrarily nested
+  where output, next_state, input, and prev_state are arbitrarily nested
   tensors. Such structures can be defined according to the following
   grammar:
 
@@ -238,6 +239,40 @@ class RNNCore(base.AbstractModule, tf.contrib.rnn.RNNCell):
             initializers=trainable_initializers,
             regularizers=trainable_regularizers,
             name=self._initial_state_scope(name))
+
+  @property
+  def state_size(self):
+    """size(s) of state(s) used by this cell.
+
+    It can be represented by an Integer, a TensorShape or a tuple of Integers
+    or TensorShapes.
+    """
+    raise NotImplementedError("Abstract method")
+
+  @property
+  def output_size(self):
+    """Integer or TensorShape: size of outputs produced by this cell."""
+    raise NotImplementedError("Abstract method")
+
+  def zero_state(self, batch_size, dtype):
+    """Return zero-filled state tensor(s).
+
+    Args:
+      batch_size: int, float, or unit Tensor representing the batch size.
+      dtype: the data type to use for the state.
+
+    Returns:
+      If `state_size` is an int or TensorShape, then the return value is a
+      `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
+
+      If `state_size` is a nested list or tuple, then the return value is
+      a nested list or tuple (of the same structure) of `2-D` tensors with
+      the shapes `[batch_size x s]` for each s in `state_size`.
+    """
+    # Keep scope for backwards compatibility.
+    with tf.name_scope(type(self).__name__ + "ZeroState", values=[batch_size]):
+      return rnn_cell_impl._zero_state_tensors(  # pylint: disable=protected-access
+          self.state_size, batch_size, dtype)
 
 
 class TrainableInitialState(base.AbstractModule):

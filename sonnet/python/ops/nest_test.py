@@ -240,7 +240,8 @@ class NestTest(tf.test.TestCase):
     self.assertEqual((45, (46, 49)), output)
 
   def testNoSequences(self):
-    with self.assertRaisesRegexp(ValueError, "Cannot map over no sequences"):
+    with self.assertRaisesRegexp(ValueError,
+                                 "Must provide at least one structure"):
       nest.map(lambda x: x)
 
   def testEmptySequences(self):

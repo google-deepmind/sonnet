@@ -51,7 +51,10 @@ class LayerNorm(base.AbstractModule):
   GAMMA = "gamma"  # Layer norm scaling.
   BETA = "beta"  # Layer norm bias.
 
-  POSSIBLE_KEYS = {GAMMA, BETA}
+  POSSIBLE_INITIALIZER_KEYS = {GAMMA, BETA}
+  # Keep old name for backwards compatibility
+
+  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self,
                eps=1e-5,
@@ -64,19 +67,19 @@ class LayerNorm(base.AbstractModule):
     Args:
       eps: small epsilon to avoid division by zero variance. Defaults to
         1e-5 as used in the paper.
-      initializers: Dict containing ops to initialize the scale and bias.
-        This dictionary may contain any of the keys in POSSIBLE_KEYS.
+      initializers: Dict containing ops to initialize the scale
+        (with key 'gamma') and bias (with key 'beta').
       partitioners: Optional dict containing partitioners to partition
-        the scale and bias. As a default, no partitioners are used. This
-        dict may contain any of the keys in POSSIBLE_KEYS.
-      regularizers: Optional dict containing regularizers for the scale and
-        bias. As a default, no regularizers are used. This dict may contain
-        any of the keys in POSSIBLE_KEYS.
+        the scale (with key 'gamma') and bias (with key 'beta'). As a default,
+        no partitioners are used.
+      regularizers: Optional dict containing regularizers for the scale (with
+        key 'gamma') and bias (with key 'beta').. As a default, no regularizers
+        are used.
       name: name of the module.
 
     Raises:
       KeyError: If `initializers`, `partitioners` or `regularizers` contain
-        any keys other than `gamma`, `beta`.
+        any keys other than `gamma` or `beta`.
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
@@ -85,11 +88,11 @@ class LayerNorm(base.AbstractModule):
     self._eps = eps
 
     self._initializers = util.check_initializers(initializers,
-                                                 self.POSSIBLE_KEYS)
+                                                 self.POSSIBLE_INITIALIZER_KEYS)
     self._partitioners = util.check_partitioners(partitioners,
-                                                 self.POSSIBLE_KEYS)
+                                                 self.POSSIBLE_INITIALIZER_KEYS)
     self._regularizers = util.check_regularizers(regularizers,
-                                                 self.POSSIBLE_KEYS)
+                                                 self.POSSIBLE_INITIALIZER_KEYS)
 
   def _build(self, inputs):
     """Connects the LayerNorm module into the graph.

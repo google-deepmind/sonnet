@@ -21,6 +21,7 @@ from __future__ import print_function
 import itertools
 
 # Dependency imports
+import mock
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
@@ -86,7 +87,7 @@ class VanillaRNNTest(tf.test.TestCase):
     prev_state = tf.placeholder(tf.float32,
                                 shape=[self.batch_size, self.hidden_size])
     vanilla_rnn = snt.VanillaRNN(name="rnn", hidden_size=self.hidden_size)
-    output, new_state = vanilla_rnn(inputs, prev_state)
+    output, next_state = vanilla_rnn(inputs, prev_state)
     in_to_hid = vanilla_rnn.in_to_hidden_variables
     hid_to_hid = vanilla_rnn.hidden_to_hidden_variables
     with self.test_session() as sess:
@@ -95,11 +96,11 @@ class VanillaRNNTest(tf.test.TestCase):
       prev_state_data = np.random.randn(self.batch_size, self.hidden_size)
       tf.global_variables_initializer().run()
 
-      fetches = [output, new_state, in_to_hid[0], in_to_hid[1],
+      fetches = [output, next_state, in_to_hid[0], in_to_hid[1],
                  hid_to_hid[0], hid_to_hid[1]]
       output = sess.run(fetches,
                         {inputs: input_data, prev_state: prev_state_data})
-    output_v, new_state_v, in_to_hid_w, in_to_hid_b = output[:4]
+    output_v, next_state_v, in_to_hid_w, in_to_hid_b = output[:4]
     hid_to_hid_w, hid_to_hid_b = output[4:]
 
     real_in_to_hid = np.dot(input_data, in_to_hid_w) + in_to_hid_b
@@ -107,7 +108,7 @@ class VanillaRNNTest(tf.test.TestCase):
     real_output = np.tanh(real_in_to_hid + real_hid_to_hid)
 
     self.assertAllClose(real_output, output_v)
-    self.assertAllClose(real_output, new_state_v)
+    self.assertAllClose(real_output, next_state_v)
 
   def testInitializers(self):
     inputs = tf.placeholder(tf.float32, shape=[self.batch_size, self.in_size])
@@ -582,6 +583,57 @@ class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       initial_output_res = sess.run(initial_output, feed_dict=feed_dict)
     expected_shape = (batch_size, final_hidden_size)
     self.assertSequenceEqual(initial_output_res.shape, expected_shape)
+
+  def testMLPFinalCore(self):
+    batch_size = 2
+    sequence_length = 3
+    input_size = 4
+    mlp_last_layer_size = 17
+    cores = [
+        snt.LSTM(hidden_size=10),
+        snt.nets.MLP(output_sizes=[6, 7, mlp_last_layer_size]),
+    ]
+    deep_rnn = snt.DeepRNN(cores, skip_connections=False)
+    input_sequence = tf.constant(
+        np.random.randn(sequence_length, batch_size, input_size),
+        dtype=tf.float32)
+    initial_state = deep_rnn.initial_state(batch_size=batch_size)
+    output, unused_final_state = tf.nn.dynamic_rnn(
+        deep_rnn, input_sequence,
+        initial_state=initial_state,
+        time_major=True)
+    self.assertEqual(
+        output.get_shape(),
+        tf.TensorShape([sequence_length, batch_size, mlp_last_layer_size]))
+
+  def testFinalCoreHasNoSizeWarning(self):
+    cores = [snt.LSTM(hidden_size=10), snt.Linear(output_size=42), tf.nn.relu]
+    rnn = snt.DeepRNN(cores, skip_connections=False)
+
+    with mock.patch.object(tf.logging, "warning") as mocked_logging_warning:
+      # This will produce a warning.
+      unused_output_size = rnn.output_size
+      self.assertTrue(mocked_logging_warning.called)
+      first_call_args = mocked_logging_warning.call_args[0]
+      self.assertTrue("final core %s does not have the "
+                      ".output_size field" in first_call_args[0])
+      self.assertEqual(first_call_args[2], 42)
+
+  def testNoSizeButAlreadyConnected(self):
+    batch_size = 16
+    cores = [snt.LSTM(hidden_size=10), snt.Linear(output_size=42), tf.nn.relu]
+    rnn = snt.DeepRNN(cores, skip_connections=False)
+    unused_output = rnn(tf.zeros((batch_size, 128)),
+                        rnn.initial_state(batch_size=batch_size))
+
+    with mock.patch.object(tf.logging, "warning") as mocked_logging_warning:
+      output_size = rnn.output_size
+      # Correct size is automatically inferred.
+      self.assertEqual(output_size, tf.TensorShape([42]))
+      self.assertTrue(mocked_logging_warning.called)
+      first_call_args = mocked_logging_warning.call_args[0]
+      self.assertTrue("DeepRNN has been connected into the graph, "
+                      "so inferred output size" in first_call_args[0])
 
 
 class ModelRNNTest(tf.test.TestCase):

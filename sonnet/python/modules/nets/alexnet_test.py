@@ -57,7 +57,7 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
       net = snt.nets.AlexNet(name="net_{}".format(mode), mode=mode)
       input_shape = [None, net._min_size, net._min_size, 3]
       inputs = tf.placeholder(tf.float32, shape=input_shape)
-      net(inputs, keep_prob)
+      net(inputs, keep_prob, is_training=True)
 
   def testBatchNorm(self):
     """Test that batch norm can be instantiated."""
@@ -66,11 +66,16 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
                            use_batch_norm=True)
     input_shape = [net._min_size, net._min_size, 3]
     inputs = tf.placeholder(tf.float32, shape=[None] + input_shape)
-    output = net(inputs)
+    output = net(inputs, is_training=True)
 
     with self.test_session() as sess:
       sess.run(tf.global_variables_initializer())
       sess.run(output, feed_dict={inputs: np.random.rand(10, *input_shape)})
+
+    # Check that an error is raised if we don't specify the is_training flag
+    err = "is_training flag must be explicitly specified"
+    with self.assertRaisesRegexp(ValueError, err):
+      net(inputs)
 
     # Check Tensorflow flags work
     is_training = tf.placeholder(tf.bool)
@@ -100,10 +105,28 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
 
     input_to_net = tf.placeholder(tf.float32, shape=(1, 224, 224, 3))
 
-    model(input_to_net)
+    model(input_to_net, is_training=True)
     model_variables = model.get_variables()
 
     self.assertEqual(len(model_variables), 7 * 4)
+
+  def testNoDropoutInTesting(self):
+    """An exception should be raised if trying to use dropout when testing."""
+    net = snt.nets.AlexNet(mode=snt.nets.AlexNet.FULL)
+    input_shape = [net._min_size, net._min_size, 3]
+    inputs = tf.placeholder(tf.float32, shape=[None] + input_shape)
+
+    keep_prob = tf.placeholder(tf.float32, name="keep_prob")
+    output = net(inputs, keep_prob, is_training=False)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      with self.assertRaisesRegexp(tf.errors.InvalidArgumentError, "keep_prob"):
+        sess.run(output, feed_dict={inputs: np.random.rand(10, *input_shape),
+                                    keep_prob: 0.7})
+      # No exception if keep_prob=1
+      sess.run(output, feed_dict={inputs: np.random.rand(10, *input_shape),
+                                  keep_prob: 1.0})
 
   def testInputTooSmall(self):
     """Check that an error is raised if the input image is too small."""
@@ -113,13 +136,13 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
 
     input_shape = [None, net._min_size, net._min_size, 1]
     inputs = tf.placeholder(tf.float32, shape=input_shape)
-    net(inputs, keep_prob)
+    net(inputs, keep_prob, is_training=True)
 
     with self.assertRaisesRegexp(snt.IncompatibleShapeError,
                                  "Image shape too small: (.*?, .*?) < .*?"):
       input_shape = [None, net._min_size - 1, net._min_size - 1, 1]
       inputs = tf.placeholder(tf.float32, shape=input_shape)
-      net(inputs, keep_prob)
+      net(inputs, keep_prob, is_training=True)
 
   def testSharing(self):
     """Check that the correct number of variables are made when sharing."""
@@ -130,8 +153,8 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
     keep_prob1 = tf.placeholder(tf.float32)
     keep_prob2 = tf.placeholder(tf.float32)
 
-    net(inputs1, keep_prob1)
-    net(inputs2, keep_prob2)
+    net(inputs1, keep_prob1, is_training=True)
+    net(inputs2, keep_prob2, is_training=True)
 
     self.assertEqual(len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)),
                      7 * 2)

@@ -53,6 +53,13 @@ def _get_flat_core_sizes(cores):
   return core_sizes_lists
 
 
+def _get_shape_without_batch_dimension(tensor_nest):
+  """Converts Tensor nest to a TensorShape nest, removing batch dimension."""
+  def _strip_batch_and_convert_to_shape(tensor):
+    return tensor[0].get_shape()
+  return nest.map_structure(_strip_batch_and_convert_to_shape, tensor_nest)
+
+
 class VanillaRNN(rnn_core.RNNCore):
   """Basic fully connected vanilla RNN core."""
 
@@ -137,7 +144,7 @@ class VanillaRNN(rnn_core.RNNCore):
     hidden_to_hidden = self._hidden_to_hidden_linear(prev_state)
     output = self._activation(in_to_hidden + hidden_to_hidden)
 
-    # For VanillaRNN, the new state of the RNN is the same as the output
+    # For VanillaRNN, the next state of the RNN is the same as the output
     return output, output
 
   @property
@@ -269,11 +276,15 @@ class DeepRNN(rnn_core.RNNCore):
                                for core in self._cores]
 
     if self._skip_connections:
-      self._check_cores_output_sizes()
+      tf.logging.warning(
+          "The `skip_connections` argument will be deprecated. Please use "
+          "snt.SkipConnectionCore instead."
+      )
       if not all(self._is_recurrent_list):
         raise ValueError("skip_connections are enabled but not all cores are "
                          "`snt.RNNCore`s, which is not supported. The following"
                          " cores were specified: {}.".format(self._cores))
+      self._check_cores_output_sizes()
 
     self._num_recurrent = sum(self._is_recurrent_list)
 
@@ -430,15 +441,50 @@ class DeepRNN(rnn_core.RNNCore):
       return nest.pack_sequence_as(structure=self._cores[0].output_size,
                                    flat_sequence=output_size)
     else:
-      # Assumes that an element of cores which is not a snt.AbstractModule
-      # does not affect the output shape. Then the 'last' core in the sequence
-      # with output_shape information should be the output_shape of the
-      # DeepRNN.
+      # Assumes that an element of cores which does not have the output_size
+      # property does not affect the output shape. Then the 'last' core in the
+      # sequence with output_size information should be the output_size of the
+      # DeepRNN. This heuristic is error prone, but we would lose a lot of
+      # flexibility if we tried to enforce that the final core must have an
+      # output_size field (e.g. it would be impossible to add a TF nonlinearity
+      # as the final "core"), but we should at least print a warning if this
+      # is the case.
+      final_core = self._cores[-1]
+      if hasattr(final_core, "output_size"):
+        # This is definitely the correct value, so no warning needed.
+        return final_core.output_size
+
+      # If we have connected the module at least once, we can get the output
+      # size of whatever was actually produced. The indexing of [-1] gets us
+      # the most recent connection, and [0] gets us the first element of the
+      # output tuple as opposed to the recurrent state.
+      if self._connected_subgraphs:
+        last_connected_output_size = _get_shape_without_batch_dimension(
+            self._connected_subgraphs[-1].outputs[0])
+        tf.logging.warning(
+            "Final core does not contain .output_size, but the "
+            "DeepRNN has been connected into the graph, so inferred output "
+            "size as %s", last_connected_output_size)
+        return last_connected_output_size
+
+      # If all else fails, iterate backwards through cores and return the
+      # first one which has an output_size field. This can be incorrect in
+      # various ways, so warn loudly.
       try:
-        return next(core.output_size for core in reversed(self._cores)
-                    if hasattr(core, "output_size"))
+        guessed_output_size = next(core.output_size
+                                   for core in reversed(self._cores)
+                                   if hasattr(core, "output_size"))
       except StopIteration:
         raise ValueError("None of the 'cores' have output_size information.")
+
+      tf.logging.warning(
+          "Trying to infer output_size of DeepRNN, but the final core %s does "
+          "not have the .output_size field. The guessed output_size is %s "
+          "but this may not be correct. If you see shape errors following this "
+          "warning, you must change the cores used in the DeepRNN so that "
+          "the final core used has a correct .output_size property.",
+          final_core, guessed_output_size)
+      return guessed_output_size
 
 
 class ModelRNN(rnn_core.RNNCore):
@@ -488,7 +534,7 @@ class ModelRNN(rnn_core.RNNCore):
     """
     next_state = self._model(prev_state)
 
-    # For ModelRNN, the new state of the RNN is the same as the output
+    # For ModelRNN, the next state of the RNN is the same as the output
     return next_state, next_state
 
   @property

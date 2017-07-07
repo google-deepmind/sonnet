@@ -34,6 +34,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import sys
+
 from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead
@@ -43,6 +45,7 @@ from sonnet.python.modules.base import Error
 from sonnet.python.modules.base import IncompatibleShapeError
 from sonnet.python.modules.base import Module
 from sonnet.python.modules.base import NotConnectedError
+from sonnet.python.modules.base import NotInitializedError
 from sonnet.python.modules.base import NotSupportedError
 from sonnet.python.modules.base import ParentNotBuiltError
 from sonnet.python.modules.base import Transposable
@@ -63,6 +66,7 @@ from sonnet.python.modules.basic_rnn import ModelRNN
 from sonnet.python.modules.basic_rnn import VanillaRNN
 from sonnet.python.modules.batch_norm import BatchNorm
 from sonnet.python.modules.clip_gradient import clip_gradient
+from sonnet.python.modules.conv import CausalConv1D
 from sonnet.python.modules.conv import Conv1D
 from sonnet.python.modules.conv import Conv1DTranspose
 from sonnet.python.modules.conv import Conv2D
@@ -75,12 +79,16 @@ from sonnet.python.modules.conv import SAME
 from sonnet.python.modules.conv import SeparableConv2D
 from sonnet.python.modules.conv import VALID
 from sonnet.python.modules.embed import Embed
+from sonnet.python.modules.gated_rnn import BatchNormLSTM
 from sonnet.python.modules.gated_rnn import Conv1DLSTM
 from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU
 from sonnet.python.modules.gated_rnn import LSTM
 from sonnet.python.modules.layer_norm import LayerNorm
 from sonnet.python.modules.pondering_rnn import ACTCore
+from sonnet.python.modules.residual import Residual
+from sonnet.python.modules.residual import ResidualCore
+from sonnet.python.modules.residual import SkipConnectionCore
 from sonnet.python.modules.rnn_core import RNNCore
 from sonnet.python.modules.rnn_core import TrainableInitialState
 from sonnet.python.modules.scale_gradient import scale_gradient
@@ -98,7 +106,23 @@ from sonnet.python.modules.util import get_saver
 from sonnet.python.modules.util import get_variables_in_module
 from sonnet.python.modules.util import get_variables_in_scope
 from sonnet.python.modules.util import has_variable_scope
+from sonnet.python.modules.util import log_variables
+from sonnet.python.modules.util import reuse_variables
+from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
-from sonnet.python.ops.resampler import resampler
-from sonnet.python.ops.resampler import resampler_is_available
+
+# Check if resampler module is already present in tf.contrib. If so, redirect
+# `snt.resampler` to `tf.contrib.resampler`; if not, import sonnet resampler.
+resampler = None
+for k, v in sys.modules.items():
+  if 'contrib.resampler' in k:
+    import tensorflow as tf  # pylint: disable=g-import-not-at-top
+    resampler = tf.contrib.resampler.resampler
+    resampler_is_available = lambda: True
+
+if not resampler:
+  # pylint: disable=g-import-not-at-top
+  from sonnet.python.ops.resampler import resampler
+  from sonnet.python.ops.resampler import resampler_is_available
+

@@ -53,6 +53,8 @@ class AlexNet(base.AbstractModule):
   HALF = "HALF"
   MINI = "MINI"
 
+  POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
+
   def __init__(self, mode=HALF, use_batch_norm=False, batch_norm_config=None,
                initializers=None, partitioners=None, regularizers=None,
                name="alex_net"):
@@ -141,13 +143,16 @@ class AlexNet(base.AbstractModule):
     self._conv_modules = []
     self._linear_modules = []
 
-    self.possible_keys = {"w", "b"}
+    # Keep old name for backwards compatibility
+
+    self.possible_keys = self.POSSIBLE_INITIALIZER_KEYS
+
     self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
+        initializers, self.POSSIBLE_INITIALIZER_KEYS)
     self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
+        partitioners, self.POSSIBLE_INITIALIZER_KEYS)
     self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
+        regularizers, self.POSSIBLE_INITIALIZER_KEYS)
 
   def _calc_min_size(self, conv_layers):
     """Calculates the minimum size of the input layer.
@@ -176,16 +181,22 @@ class AlexNet(base.AbstractModule):
 
     return input_size
 
-  def _build(self, inputs, keep_prob=None, is_training=True,
+  def _build(self, inputs, keep_prob=None, is_training=None,
              test_local_stats=True):
     """Connects the AlexNet module into the graph.
+
+    The is_training flag only controls the batch norm settings, if `False` it
+    does not force no dropout by overriding any input `keep_prob`. To avoid any
+    confusion this may cause, if `is_training=False` and `keep_prob` would cause
+    dropout to be applied, an error is thrown.
 
     Args:
       inputs: A Tensor of size [batch_size, input_height, input_width,
         input_channels], representing a batch of input images.
       keep_prob: A scalar Tensor representing the dropout keep probability.
-      is_training: Boolean to indicate to `snt.BatchNorm` if we are
-        currently training. By default `True`.
+        When `is_training=False` this must be None or 1 to give no dropout.
+      is_training: Boolean to indicate if we are currently training. Must be
+          specified if batch normalization or dropout is used.
       test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
         normalization should  use local batch statistics at test time.
         By default `True`.
@@ -197,16 +208,31 @@ class AlexNet(base.AbstractModule):
     Raises:
       base.IncompatibleShapeError: If any of the input image dimensions
         (input_height, input_width) are too small for the given network mode.
+      ValueError: If `keep_prob` is not None or 1 when `is_training=False`.
+      ValueError: If `is_training` is not explicitly specified when using
+        batch normalization.
     """
+    # Check input shape
+    if (self._use_batch_norm or keep_prob is not None) and is_training is None:
+      raise ValueError("Boolean is_training flag must be explicitly specified "
+                       "when using batch normalization or dropout.")
 
     input_shape = inputs.get_shape().as_list()
-
     if input_shape[1] < self._min_size or input_shape[2] < self._min_size:
       raise base.IncompatibleShapeError(
           "Image shape too small: ({:d}, {:d}) < {:d}".format(
               input_shape[1], input_shape[2], self._min_size))
 
     net = inputs
+
+    # Check keep prob
+    if keep_prob is not None:
+      valid_inputs = tf.logical_or(is_training, tf.equal(keep_prob, 1.))
+      keep_prob_check = tf.assert_equal(
+          valid_inputs, True,
+          message="Input `keep_prob` must be None or 1 if `is_training=False`.")
+      with tf.control_dependencies([keep_prob_check]):
+        net = tf.identity(net)
 
     for i, params in enumerate(self._conv_layers):
       output_channels, conv_params, max_pooling = params

@@ -73,6 +73,7 @@ class UtilTest(tf.test.TestCase):
     self.assertEqual(set(snt.get_variables_in_scope(s2.name)), {v2, v3})
 
   def testIsScopePrefix(self):
+    self.assertTrue(util._is_scope_prefix("a/b/c", ""))
     self.assertTrue(util._is_scope_prefix("a/b/c", "a/b/c"))
     self.assertTrue(util._is_scope_prefix("a/b/c", "a/b"))
     self.assertTrue(util._is_scope_prefix("a/b/c", "a"))
@@ -107,6 +108,10 @@ class UtilTest(tf.test.TestCase):
       variable_map = snt.get_normalized_variable_map(s2, context=s3)
 
     variable_map = snt.get_normalized_variable_map(s2, context=s1)
+    self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s1),
+                     variable_map)
+    self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s1.name),
+                     variable_map)
 
     self.assertEqual(len(variable_map), 2)
     self.assertIn("prefix2/a:0", variable_map)
@@ -116,7 +121,12 @@ class UtilTest(tf.test.TestCase):
 
     with tf.variable_scope("") as s4:
       self.assertEqual(s4.name, "")
-      variable_map = snt.get_normalized_variable_map(s2, context=s4)
+
+    variable_map = snt.get_normalized_variable_map(s2, context=s4)
+    self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s4),
+                     variable_map)
+    self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s4.name),
+                     variable_map)
 
     self.assertEqual(len(variable_map), 2)
     self.assertIn("prefix1/prefix2/a:0", variable_map)
@@ -137,7 +147,7 @@ class UtilTest(tf.test.TestCase):
     self.assertIs(variable_map["w:0"], conv.w)
     self.assertIs(variable_map["b:0"], conv.b)
 
-  def testGetNormalizedVariableMapWithPartionedVariable(self):
+  def testGetNormalizedVariableMapWithPartitionedVariable(self):
     hidden = tf.ones(shape=(1, 16, 16, 3))
     partitioner = tf.variable_axis_size_partitioner(4)
     conv = snt.Conv2D(output_channels=3,

@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.python.modules.nets package &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -47,32 +44,448 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="sonnet-python-modules-nets-alexnet-module">
-<h2>sonnet.python.modules.nets.alexnet module<a class="headerlink" href="#sonnet-python-modules-nets-alexnet-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.python.modules.nets.alexnet">
+<span id="sonnet-python-modules-nets-alexnet-module"></span><h2>sonnet.python.modules.nets.alexnet module<a class="headerlink" href="#module-sonnet.python.modules.nets.alexnet" title="Permalink to this headline">¶</a></h2>
+<p>Implementation of AlexNet as a Sonnet module.</p>
+<p><code class="docutils literal"><span class="pre">AlexNet</span></code> is a Sonnet module that implements three variants of
+‘ImageNet Classification with Deep Convolutional Neural Networks’ Alex
+Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
+<a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-w">http://papers.nips.cc/paper/4824-imagenet-classification-w</a></p>
+<p>The three modes are FULL, HALF and MINI, corresponding to the full
+dual-gpu version, the single-gpu version and a cut-down version that is
+able to run on Cifar10.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.alexnet.</code><code class="descname">AlexNet</code><span class="sig-paren">(</span><em>mode='HALF'</em>, <em>use_batch_norm=False</em>, <em>batch_norm_config=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='alex_net'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/alexnet.html#AlexNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Implementation of AlexNet with full, half and mini versions.</p>
+<p>Based on: ‘ImageNet Classification with Deep Convolutional Neural
+Networks’ Alex Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
+<a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-w">http://papers.nips.cc/paper/4824-imagenet-classification-w</a></p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.FULL">
+<code class="descname">FULL</code><em class="property"> = 'FULL'</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.FULL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.HALF">
+<code class="descname">HALF</code><em class="property"> = 'HALF'</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.HALF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.MINI">
+<code class="descname">MINI</code><em class="property"> = 'MINI'</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.MINI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b', 'w'])</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.conv_modules">
+<code class="descname">conv_modules</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.conv_modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list containing convolutional modules of network.</p>
+<p>Returns: A list containing the Conv2D modules.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.initializers">
+<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.initializers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.linear_modules">
+<code class="descname">linear_modules</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.linear_modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list containing linear modules of network.</p>
+<p>Returns: A list containing the Linear modules.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.min_input_size">
+<code class="descname">min_input_size</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.min_input_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns integer specifying the minimum width and height for the input.</p>
+<p>Note that the input can be non-square, but both the width and height
+must be &gt;= this number in size.</p>
+<p>Returns: The minimum size as an integer.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.partitioners">
+<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.partitioners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNet.regularizers">
+<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.regularizers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="sonnet-python-modules-nets-alexnet-test-module">
 <h2>sonnet.python.modules.nets.alexnet_test module<a class="headerlink" href="#sonnet-python-modules-nets-alexnet-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="sonnet-python-modules-nets-convnet-module">
-<h2>sonnet.python.modules.nets.convnet module<a class="headerlink" href="#sonnet-python-modules-nets-convnet-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.python.modules.nets.convnet">
+<span id="sonnet-python-modules-nets-convnet-module"></span><h2>sonnet.python.modules.nets.convnet module<a class="headerlink" href="#module-sonnet.python.modules.nets.convnet" title="Permalink to this headline">¶</a></h2>
+<p>A minimal interface convolutional networks module.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<p>A 2D Convolutional Network module.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b', 'w'])</em><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.POSSIBLE_KEYS">
+<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['b', 'w'])</em><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.activate_final">
+<code class="descname">activate_final</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.activate_final" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.activation">
+<code class="descname">activation</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.activation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.batch_norm_config">
+<code class="descname">batch_norm_config</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.batch_norm_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.initializers">
+<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.initializers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.input_shape">
+<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns shape of input <code class="docutils literal"><span class="pre">Tensor</span></code> passed at last call to <code class="docutils literal"><span class="pre">build</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.kernel_shapes">
+<code class="descname">kernel_shapes</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.kernel_shapes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.layers">
+<code class="descname">layers</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple containing the convolutional layers of the network.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.output_channels">
+<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.output_channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.paddings">
+<code class="descname">paddings</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.paddings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.partitioners">
+<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.partitioners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.regularizers">
+<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.regularizers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.strides">
+<code class="descname">strides</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.strides" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.transpose">
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns transposed version of this network.</p>
+<p>Args: name: Optional string specifying the name of the transposed
+module. The default name is constructed by appending “<em>transpose” to
+``self.module_name``. output</em>channels: Optional iterable of numbers of
+output channels. kernel_shapes: Optional iterable of kernel sizes. The
+default value is constructed by reversing <code class="docutils literal"><span class="pre">self.kernel_shapes</span></code>.
+strides: Optional iterable of kernel strides. The default value is
+constructed by reversing <code class="docutils literal"><span class="pre">self.strides</span></code>. paddings: Optional iterable
+of padding options, either <code class="docutils literal"><span class="pre">snt.SAME</span></code> or <code class="docutils literal"><span class="pre">snt.VALID</span></code>; The default
+value is constructed by reversing <code class="docutils literal"><span class="pre">self.paddings</span></code>. activation:
+Optional activation op. Default value is <code class="docutils literal"><span class="pre">self.activation</span></code>.
+activate_final: Optional boolean determining if the activation and
+batch normalization, if turned on, are applied to the final layer.
+initializers: Optional dict containing ops to initialize the filters of
+the whole network (with key ‘w’) or biases (with key ‘b’). The default
+value is <code class="docutils literal"><span class="pre">self.initializers</span></code>. partitioners: Optional dict containing
+partitioners to partition weights (with key ‘w’) or biases (with key
+‘b’). The default value is <code class="docutils literal"><span class="pre">self.partitioners</span></code>. regularizers: Optional
+dict containing regularizers for the filters of the whole network (with
+key ‘w’) or biases (with key ‘b’). The default is <code class="docutils literal"><span class="pre">self.regularizers</span></code>.
+use_batch_norm: Optional boolean determining if batch normalization is
+applied after convolution. The default value is <code class="docutils literal"><span class="pre">self.use_batch_norm</span></code>.
+use_bias: Optional boolean or iterable of booleans determining whether
+to include bias parameters in the convolutional layers. Default is
+constructed by reversing <code class="docutils literal"><span class="pre">self.use_bias</span></code>. batch_norm_config:
+Optional mapping of additional configuration for the <code class="docutils literal"><span class="pre">snt.BatchNorm</span></code>
+modules. Default is <code class="docutils literal"><span class="pre">self.batch_norm_config</span></code>.</p>
+<p>Returns: Matching <code class="docutils literal"><span class="pre">ConvNet2DTranspose</span></code> module.</p>
+<p>Raises: ValueError: If output_channels is specified and its length does
+not match the number of layers.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.use_batch_norm">
+<code class="descname">use_batch_norm</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.use_batch_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.use_bias">
+<code class="descname">use_bias</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.use_bias" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2DTranspose">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shapes</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>name='conv_net_2d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="sonnet.python.modules.nets.convnet.ConvNet2D"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.nets.convnet.ConvNet2D</span></code></a></p>
+<p>A 2D Transpose-Convolutional Network module.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2DTranspose.output_shapes">
+<code class="descname">output_shapes</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.output_shapes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose">
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns transposed version of this network.</p>
+<p>Args: name: Optional string specifying the name of the transposed
+module. The default name is constructed by appending “<em>transpose” to
+``self.module_name``. output</em>channels: Optional iterable of numbers of
+output channels. kernel_shapes: Optional iterable of kernel sizes. The
+default value is constructed by reversing <code class="docutils literal"><span class="pre">self.kernel_shapes</span></code>.
+strides: Optional iterable of kernel strides. The default value is
+constructed by reversing <code class="docutils literal"><span class="pre">self.strides</span></code>. paddings: Optional iterable
+of padding options, either <code class="docutils literal"><span class="pre">snt.SAME</span></code> or <code class="docutils literal"><span class="pre">snt.VALID</span></code>; The default
+value is constructed by reversing <code class="docutils literal"><span class="pre">self.paddings</span></code>. activation:
+Optional activation op. Default value is <code class="docutils literal"><span class="pre">self.activation</span></code>.
+activate_final: Optional boolean determining if the activation and
+batch normalization, if turned on, are applied to the final layer.
+initializers: Optional dict containing ops to initialize the filters of
+the whole network (with key ‘w’) or biases (with key ‘b’). The default
+value is <code class="docutils literal"><span class="pre">self.initializers</span></code>. partitioners: Optional dict containing
+partitioners to partition weights (with key ‘w’) or biases (with key
+‘b’). The default value is <code class="docutils literal"><span class="pre">self.partitioners</span></code>. regularizers: Optional
+dict containing regularizers for the filters of the whole network (with
+key ‘w’) or biases (with key ‘b’). The default is <code class="docutils literal"><span class="pre">self.regularizers</span></code>.
+use_batch_norm: Optional boolean determining if batch normalization is
+applied after convolution. The default value is <code class="docutils literal"><span class="pre">self.use_batch_norm</span></code>.
+use_bias: Optional boolean or iterable of booleans determining whether
+to include bias parameters in the convolutional layers. Default is
+constructed by reversing <code class="docutils literal"><span class="pre">self.use_bias</span></code>. batch_norm_config:
+Optional mapping of additional configuration for the <code class="docutils literal"><span class="pre">snt.BatchNorm</span></code>
+modules. Default is <code class="docutils literal"><span class="pre">self.batch_norm_config</span></code>.</p>
+<p>Returns: Matching <code class="docutils literal"><span class="pre">ConvNet2D</span></code> module.</p>
+<p>Raises: ValueError: If output_channels is specified and its length does
+not match the number of layers.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="sonnet-python-modules-nets-convnet-test-module">
 <h2>sonnet.python.modules.nets.convnet_test module<a class="headerlink" href="#sonnet-python-modules-nets-convnet-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="sonnet-python-modules-nets-dilation-module">
-<h2>sonnet.python.modules.nets.dilation module<a class="headerlink" href="#sonnet-python-modules-nets-dilation-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.python.modules.nets.dilation">
+<span id="sonnet-python-modules-nets-dilation-module"></span><h2>sonnet.python.modules.nets.dilation module<a class="headerlink" href="#module-sonnet.python.modules.nets.dilation" title="Permalink to this headline">¶</a></h2>
+<p>Implementation of (Yu &amp; Koltun, 2016)’s Dilation module.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.nets.dilation.Dilation">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.dilation.</code><code class="descname">Dilation</code><span class="sig-paren">(</span><em>num_output_classes</em>, <em>initializers=None</em>, <em>regularizers=None</em>, <em>model_size='basic'</em>, <em>name='dilation'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/dilation.html#Dilation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>A convolutional module for per-pixel classification.</p>
+<p>Consists of 8 convolutional layers, 4 of which are dilated. When applied
+to the output of a model like VGG-16 (before fully connected layers),
+can be used to make predictions on a per-pixel basis.</p>
+<p>Note that the default initializers for the ‘basic’ model size require
+that the number of input channels be equal to the number of output
+classes, and the initializers for the ‘large’ model require it be a
+multiple.</p>
+<p>Based on: ‘Multi-Scale Context Aggregation by Dilated Convolutions’
+Fisher Yu, Vladlen Koltun, ICLR 2016 <a class="reference external" href="https://arxiv.org/abs/1511.07122">https://arxiv.org/abs/1511.07122</a></p>
+<p>Properties: conv_modules: list of sonnet modules. The 8 convolution
+layers used in the Dilation module.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.BASIC">
+<code class="descname">BASIC</code><em class="property"> = 'basic'</em><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.BASIC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.BIASES">
+<code class="descname">BIASES</code><em class="property"> = 'b'</em><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.BIASES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.LARGE">
+<code class="descname">LARGE</code><em class="property"> = 'large'</em><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.LARGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b', 'w'])</em><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.WEIGHTS">
+<code class="descname">WEIGHTS</code><em class="property"> = 'w'</em><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.WEIGHTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.dilation.Dilation.conv_modules">
+<code class="descname">conv_modules</code><a class="headerlink" href="#sonnet.python.modules.nets.dilation.Dilation.conv_modules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.nets.dilation.identity_kernel_initializer">
+<code class="descclassname">sonnet.python.modules.nets.dilation.</code><code class="descname">identity_kernel_initializer</code><span class="sig-paren">(</span><em>shape</em>, <em>dtype=tf.float32</em>, <em>partition_info=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/dilation.html#identity_kernel_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.dilation.identity_kernel_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>An initializer for constructing identity convolution kernels.</p>
+<p>Constructs a convolution kernel such that applying it is the same as an
+identity operation on the input. Formally, the kernel has entry [i, j,
+in, out] = 1 if in equals out and i and j are the middle of the kernel
+and 0 otherwise.</p>
+<p>Args: shape: List of integers. Represents shape of result. dtype: data
+type for values in result. partition_info: Partition information for
+initializer functions. Ignored.</p>
+<p>Returns: Tensor of desired shape and dtype such that applying it as a
+convolution kernel results in the identity operation.</p>
+<p>Raises: ValueError: If shape does not define a valid kernel. If filter
+width and height differ. If filter width and height are not odd numbers.
+If number of input and output channels differ.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.nets.dilation.noisy_identity_kernel_initializer">
+<code class="descclassname">sonnet.python.modules.nets.dilation.</code><code class="descname">noisy_identity_kernel_initializer</code><span class="sig-paren">(</span><em>base_num_channels</em>, <em>stddev=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/dilation.html#noisy_identity_kernel_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.dilation.noisy_identity_kernel_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build an initializer for constructing near-identity convolution kernels.</p>
+<p>Construct a convolution kernel where in_channels and out_channels are
+multiples of base_num_channels, but need not be equal. This
+initializer is essentially the same as identity_kernel_initializer,
+except that magnitude is “spread out” across multiple copies of the
+input.</p>
+<p>Args: base_num_channels: int. Number that divides both in_channels
+and out_channels. stddev: float. Standard deviation of truncated normal
+noise added to off-entries to break ties.</p>
+<p>Returns: Initializer function for building a noisy identity kernel.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="sonnet-python-modules-nets-dilation-test-module">
 <h2>sonnet.python.modules.nets.dilation_test module<a class="headerlink" href="#sonnet-python-modules-nets-dilation-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="sonnet-python-modules-nets-mlp-module">
-<h2>sonnet.python.modules.nets.mlp module<a class="headerlink" href="#sonnet-python-modules-nets-mlp-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.python.modules.nets.mlp">
+<span id="sonnet-python-modules-nets-mlp-module"></span><h2>sonnet.python.modules.nets.mlp module<a class="headerlink" href="#module-sonnet.python.modules.nets.mlp" title="Permalink to this headline">¶</a></h2>
+<p>A minimal interface mlp module.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.nets.mlp.MLP">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.mlp.</code><code class="descname">MLP</code><span class="sig-paren">(</span><em>output_sizes</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_bias=True</em>, <em>name='mlp'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<p>A Multi-Layer perceptron module.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.activate_final">
+<code class="descname">activate_final</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.activate_final" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.activation">
+<code class="descname">activation</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.activation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sonnet.python.modules.nets.mlp.MLP.get_possible_initializer_keys">
+<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.initializers">
+<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.initializers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the intializers dictionary.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.input_shape">
+<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.input_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns shape of input <code class="docutils literal"><span class="pre">Tensor</span></code> passed at last call to <code class="docutils literal"><span class="pre">build</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.layers">
+<code class="descname">layers</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple containing the linear layers of the <code class="docutils literal"><span class="pre">MLP</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the module output, not including the batch
+dimension.</p>
+<p>This allows the MLP to be used inside a DeepRNN.</p>
+<p>Returns: The scalar size of the module output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.output_sizes">
+<code class="descname">output_sizes</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.output_sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple of all output sizes of all the layers.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.partitioners">
+<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.partitioners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the partitioners dictionary.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.regularizers">
+<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.regularizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the regularizers dictionary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.nets.mlp.MLP.transpose">
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>activate_final=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns transposed <code class="docutils literal"><span class="pre">MLP</span></code>.</p>
+<p>Args: name: Optional string specifying the name of the transposed
+module. The default name is constructed by appending “<em>transpose” to
+``self.module_name``. activate</em>final: Optional boolean determining if
+the activation and batch normalization, if turned on, are applied to the
+final layer.</p>
+<p>Returns: Matching transposed <code class="docutils literal"><span class="pre">MLP</span></code> module.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.use_bias">
+<code class="descname">use_bias</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.use_bias" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="sonnet-python-modules-nets-mlp-test-module">
 <h2>sonnet.python.modules.nets.mlp_test module<a class="headerlink" href="#sonnet-python-modules-nets-mlp-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.python.modules.nets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sonnet.python.modules.nets" title="Permalink to this headline">¶</a></h2>
+<p>Common network architectures implemented as Sonnet modules.</p>
 </div>
 </div>
 
@@ -86,15 +499,15 @@
   <ul>
 <li><a class="reference internal" href="#">sonnet.python.modules.nets package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-nets-alexnet-module">sonnet.python.modules.nets.alexnet module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets.alexnet">sonnet.python.modules.nets.alexnet module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-alexnet-test-module">sonnet.python.modules.nets.alexnet_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-nets-convnet-module">sonnet.python.modules.nets.convnet module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets.convnet">sonnet.python.modules.nets.convnet module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-convnet-test-module">sonnet.python.modules.nets.convnet_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-nets-dilation-module">sonnet.python.modules.nets.dilation module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets.dilation">sonnet.python.modules.nets.dilation module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-dilation-test-module">sonnet.python.modules.nets.dilation_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-nets-mlp-module">sonnet.python.modules.nets.mlp module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets.mlp">sonnet.python.modules.nets.mlp module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-mlp-test-module">sonnet.python.modules.nets.mlp_test module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -130,7 +543,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

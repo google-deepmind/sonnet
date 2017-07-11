@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.examples package &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -47,20 +44,195 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="sonnet-examples-dataset-shakespeare-module">
-<h2>sonnet.examples.dataset_shakespeare module<a class="headerlink" href="#sonnet-examples-dataset-shakespeare-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.examples.dataset_shakespeare">
+<span id="sonnet-examples-dataset-shakespeare-module"></span><h2>sonnet.examples.dataset_shakespeare module<a class="headerlink" href="#module-sonnet.examples.dataset_shakespeare" title="Permalink to this headline">¶</a></h2>
+<p>Classes to load textual data from Shakespeare’s plays.</p>
+<dl class="class">
+<dt id="sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask">
+<em class="property">class </em><code class="descclassname">sonnet.examples.dataset_shakespeare.</code><code class="descname">SequenceDataOpsNoMask</code><span class="sig-paren">(</span><em>obs</em>, <em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask.obs">
+<code class="descname">obs</code><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask.obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask.target">
+<code class="descname">target</code><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset">
+<em class="property">class </em><code class="descclassname">sonnet.examples.dataset_shakespeare.</code><code class="descname">TinyShakespeareDataset</code><span class="sig-paren">(</span><em>num_steps=1</em>, <em>batch_size=1</em>, <em>subset='train'</em>, <em>random=False</em>, <em>dtype=tf.float32</em>, <em>name='tiny_shakespeare_dataset'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TinyShakespeareDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Tiny Shakespeare sequence data.</p>
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.TEST">
+<code class="descname">TEST</code><em class="property"> = 'test'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.TEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.TRAIN">
+<code class="descname">TRAIN</code><em class="property"> = 'train'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.TRAIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.VALID">
+<code class="descname">VALID</code><em class="property"> = 'valid'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.VALID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.cost">
+<code class="descname">cost</code><span class="sig-paren">(</span><em>logits</em>, <em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TinyShakespeareDataset.cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cost.</p>
+<p>Args: logits: model output. target: target.</p>
+<p>Returns: Cross-entropy loss for a sequence of logits. The loss will be
+averaged across time steps if time_average_cost was enabled at
+construction time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.to_human_readable">
+<code class="descname">to_human_readable</code><span class="sig-paren">(</span><em>data</em>, <em>label_batch_entries=True</em>, <em>indices=None</em>, <em>sep='\n'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TinyShakespeareDataset.to_human_readable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.to_human_readable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a human-readable version of a one-hot encoding of words.</p>
+<p>Args: data: A tuple with (obs, target). <code class="docutils literal"><span class="pre">obs</span></code> is a numpy array with
+one-hot encoding of words. label_batch_entries: bool. Whether to add
+numerical label before each batch element in the output string. indices:
+List of int or None. Used to select a subset of minibatch indices to
+print. None will print the whole minibatch. sep: A char separator which
+separates the output for each batch. Defaults to the newline character.</p>
+<p>Returns: String with the words from <code class="docutils literal"><span class="pre">data[0]</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.vocab_size">
+<code class="descname">vocab_size</code><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.vocab_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource">
+<em class="property">class </em><code class="descclassname">sonnet.examples.dataset_shakespeare.</code><code class="descname">TokenDataSource</code><span class="sig-paren">(</span><em>data_file</em>, <em>vocab_data_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TokenDataSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Encapsulates loading/tokenization logic for disk-based data.</p>
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.CHAR_EOS">
+<code class="descname">CHAR_EOS</code><em class="property"> = '|'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.CHAR_EOS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.DEFAULT_START_TOKENS">
+<code class="descname">DEFAULT_START_TOKENS</code><em class="property"> = ['_unk_', '_null_', '_eos_', '|']</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.DEFAULT_START_TOKENS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.NULL">
+<code class="descname">NULL</code><em class="property"> = '_null_'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.NULL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.UNK">
+<code class="descname">UNK</code><em class="property"> = '_unk_'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.UNK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.WORD_EOS">
+<code class="descname">WORD_EOS</code><em class="property"> = '_eos_'</em><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.WORD_EOS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>token_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TokenDataSource.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces a human-readable representation of the token list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.dataset_shakespeare.TokenDataSource.tokenize">
+<code class="descname">tokenize</code><span class="sig-paren">(</span><em>token_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_shakespeare.html#TokenDataSource.tokenize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_shakespeare.TokenDataSource.tokenize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces the list of integer indices corresponding to a token list.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="sonnet-examples-module-with-build-args-module">
-<h2>sonnet.examples.module_with_build_args module<a class="headerlink" href="#sonnet-examples-module-with-build-args-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.examples.module_with_build_args">
+<span id="sonnet-examples-module-with-build-args-module"></span><h2>sonnet.examples.module_with_build_args module<a class="headerlink" href="#module-sonnet.examples.module_with_build_args" title="Permalink to this headline">¶</a></h2>
+<p>Example script using <code class="docutils literal"><span class="pre">snt.Module</span></code> to make a module with build method
+args.</p>
+<p><code class="docutils literal"><span class="pre">snt.Sequential</span></code> has been deliberately designed for simple use cases.
+In particular, it assumes that the only arguments passed when called are
+inputs to the first layer. As such, one cannot easily control behaviour
+of submodules that do accept different arguments in their call method,
+such as <code class="docutils literal"><span class="pre">snt.BatchNorm</span></code> and the <code class="docutils literal"><span class="pre">is_training</span></code> flag. One may,
+however, quite easily replicate the same functionality using
+<code class="docutils literal"><span class="pre">snt.Module</span></code> to construct a module from a custom method, as shown in
+this script.</p>
+<p>To run this script (on CPU), use the following command:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">bazel</span> <span class="n">run</span> <span class="o">-</span><span class="n">c</span> <span class="n">opt</span> <span class="n">module_with_build_args</span>
+</pre></div>
 </div>
-<div class="section" id="sonnet-examples-rnn-shakespeare-module">
-<h2>sonnet.examples.rnn_shakespeare module<a class="headerlink" href="#sonnet-examples-rnn-shakespeare-module" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="sonnet.examples.module_with_build_args.custom_build">
+<code class="descclassname">sonnet.examples.module_with_build_args.</code><code class="descname">custom_build</code><span class="sig-paren">(</span><em>inputs</em>, <em>is_training</em>, <em>keep_prob</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/module_with_build_args.html#custom_build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.module_with_build_args.custom_build" title="Permalink to this definition">¶</a></dt>
+<dd><p>A custom build method to wrap into a sonnet Module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.module_with_build_args.main">
+<code class="descclassname">sonnet.examples.module_with_build_args.</code><code class="descname">main</code><span class="sig-paren">(</span><em>unused_argv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/module_with_build_args.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.module_with_build_args.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sonnet.examples.rnn_shakespeare">
+<span id="sonnet-examples-rnn-shakespeare-module"></span><h2>sonnet.examples.rnn_shakespeare module<a class="headerlink" href="#module-sonnet.examples.rnn_shakespeare" title="Permalink to this headline">¶</a></h2>
+<p>Example script to train a stacked LSTM on the Tiny Shakespeare dataset.</p>
+<dl class="class">
+<dt id="sonnet.examples.rnn_shakespeare.TextModel">
+<em class="property">class </em><code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">TextModel</code><span class="sig-paren">(</span><em>num_embedding</em>, <em>num_hidden</em>, <em>lstm_depth</em>, <em>output_size</em>, <em>use_dynamic_rnn=True</em>, <em>use_skip_connections=True</em>, <em>name='text_model'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#TextModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.TextModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>A deep LSTM model, for use on the Tiny Shakespeare dataset.</p>
+<dl class="method">
+<dt id="sonnet.examples.rnn_shakespeare.TextModel.generate_string">
+<code class="descname">generate_string</code><span class="sig-paren">(</span><em>obj</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#TextModel.generate_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.TextModel.generate_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds sub-graph to generate a string, sampled from the model.</p>
+<p>Args: initial_logits: Starting logits to sampling from. initial_state:
+Starting state for the RNN core. sequence_length: Number of characters
+to sample.</p>
+<p>Returns: A Tensor of characters, with dimensions
+<code class="docutils literal"><span class="pre">[sequence_length,</span> <span class="pre">batch_size,</span>&#160;&#160; <span class="pre">output_size]</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.rnn_shakespeare.build_graph">
+<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">build_graph</code><span class="sig-paren">(</span><em>lstm_depth=3</em>, <em>batch_size=32</em>, <em>num_embedding=32</em>, <em>num_hidden=128</em>, <em>truncation_length=64</em>, <em>sample_length=1000</em>, <em>max_grad_norm=5</em>, <em>initial_learning_rate=0.1</em>, <em>reduce_learning_rate_multiplier=0.1</em>, <em>optimizer_epsilon=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#build_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.build_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the computation graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.rnn_shakespeare.main">
+<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">main</code><span class="sig-paren">(</span><em>unused_argv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.rnn_shakespeare.train">
+<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">train</code><span class="sig-paren">(</span><em>num_training_iterations</em>, <em>report_interval</em>, <em>reduce_learning_rate_interval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains a deep LSTM model on the Tiny Shakespeare dataset.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="sonnet-examples-rnn-shakespeare-test-module">
 <h2>sonnet.examples.rnn_shakespeare_test module<a class="headerlink" href="#sonnet-examples-rnn-shakespeare-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sonnet.examples">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sonnet.examples" title="Permalink to this headline">¶</a></h2>
+<p>Examples.</p>
 </div>
 </div>
 
@@ -74,11 +246,11 @@
   <ul>
 <li><a class="reference internal" href="#">sonnet.examples package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#sonnet-examples-dataset-shakespeare-module">sonnet.examples.dataset_shakespeare module</a></li>
-<li><a class="reference internal" href="#sonnet-examples-module-with-build-args-module">sonnet.examples.module_with_build_args module</a></li>
-<li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-module">sonnet.examples.rnn_shakespeare module</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples.dataset_shakespeare">sonnet.examples.dataset_shakespeare module</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples.module_with_build_args">sonnet.examples.module_with_build_args module</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples.rnn_shakespeare">sonnet.examples.rnn_shakespeare module</a></li>
 <li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-test-module">sonnet.examples.rnn_shakespeare_test module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -114,7 +286,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.python.ops.nest &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -73,6 +70,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">six</span>
 
+
 <span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
 
 
@@ -86,6 +84,7 @@
 <span class="n">map_up_to</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure_up_to</span>
 <span class="n">assert_shallow_structure</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">assert_shallow_structure</span>
 <span class="n">flatten_up_to</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_up_to</span>
+<span class="n">flatten_dict_items</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_dict_items</span>
 
 
 <span class="k">def</span> <span class="nf">_yield_flat_up_to</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">,</span> <span class="n">input_tree</span><span class="p">):</span>
@@ -301,7 +300,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.python.modules.conv &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -690,7 +687,8 @@
       <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">output_shape</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="n">output_shape</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">output_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                                                              <span class="s2">&quot;output_shape&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1354,7 +1352,6 @@
 <span class="sd">          of dimensions.</span>
 <span class="sd">      base.IncompatibleShapeError: If the input tensor has an unknown</span>
 <span class="sd">          `input_channels`.</span>
-<span class="sd">      base.UnderspecifiedError: If the input tensor has unknown `batch_size`.</span>
 <span class="sd">      base.IncompatibleShapeError: If `output_shape` is not an integer or</span>
 <span class="sd">          iterable of length 1.</span>
 <span class="sd">      TypeError: If input Tensor dtype is not tf.float32.</span>
@@ -1371,11 +1368,6 @@
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">UnderspecifiedError</span><span class="p">(</span>
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
     <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">UnderspecifiedError</span><span class="p">(</span>
-          <span class="s2">&quot;Batch size must be known at module build time&quot;</span><span class="p">)</span>
-    <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_default_output_shape</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="p">(</span>
@@ -1413,8 +1405,12 @@
                               <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                               <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-    <span class="n">tf_out_shape</span> <span class="o">=</span> <span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">+</span>
-                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">,))</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">out_channels</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">,)</span>
+    <span class="n">out_shape_tuple</span> <span class="o">=</span> <span class="n">out_shape</span> <span class="o">+</span> <span class="n">out_channels</span>
+    <span class="n">conv_output_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">out_shape_tuple</span><span class="p">)</span>
+    <span class="n">tf_out_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">conv_output_shape</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Add an extra dimension to the input - a height of 1.</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -1436,6 +1432,11 @@
     <span class="c1"># Remove the superfluous height dimension to return a 3D tensor.</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+    <span class="c1"># Set the tensor sizes in order for shape inference.</span>
+    <span class="n">batch_size_value</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">output_shape_value</span> <span class="o">=</span> <span class="p">((</span><span class="n">batch_size_value</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_shape</span> <span class="o">+</span>
+                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">,))</span>
+    <span class="n">outputs</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">output_shape_value</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">outputs</span>
 
   <span class="nd">@property</span>
@@ -1542,6 +1543,169 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="CausalConv1D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.CausalConv1D">[docs]</a><span class="k">class</span> <span class="nc">CausalConv1D</span><span class="p">(</span><span class="n">Conv1D</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;1D convolution module, including optional bias.</span>
+
+<span class="sd">  This acts as a light wrapper around Conv1D ensuring that the outputs at index</span>
+<span class="sd">  `i` only depend on indices smaller than `i` (also known as a causal</span>
+<span class="sd">  convolution). For further details on the theoretical background, refer to:</span>
+
+<span class="sd">  https://arxiv.org/abs/1610.10099</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">output_channels</span><span class="p">,</span>
+               <span class="n">kernel_shape</span><span class="p">,</span>
+               <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;causal_conv_1d&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a CausalConv1D module.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      output_channels: Number of output channels. `output_channels` can be</span>
+<span class="sd">          either a number or a callable. In the latter case, since the function</span>
+<span class="sd">          invocation is deferred to graph construction time, the user must only</span>
+<span class="sd">          ensure that output_channels can be called, returning an integer,</span>
+<span class="sd">          when `build` is called.</span>
+<span class="sd">      kernel_shape: Sequence of kernel sizes (of size 1), or integer that is</span>
+<span class="sd">          used to define kernel size in all dimensions.</span>
+<span class="sd">      stride: Sequence of kernel strides (of size 1), or integer that is used to</span>
+<span class="sd">          define stride in all dimensions.</span>
+<span class="sd">      rate: Sequence of dilation rates (of size 1), or integer that is used to</span>
+<span class="sd">          define dilation rate in all dimensions. 1 corresponds to standard 2D</span>
+<span class="sd">          convolution, `rate &gt; 1` corresponds to dilated convolution. Cannot be</span>
+<span class="sd">          &gt; 1 if any of `stride` is also &gt; 1.</span>
+<span class="sd">      use_bias: Whether to include bias parameters. Default `True`.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the filters (with</span>
+<span class="sd">          key &#39;w&#39;) or biases (with key &#39;b&#39;). The default initializer for the</span>
+<span class="sd">          weights is a truncated normal initializer, which is commonly used</span>
+<span class="sd">          when the inputs are zero centered (see</span>
+<span class="sd">          https://arxiv.org/pdf/1502.03167v3.pdf). The default initializer for</span>
+<span class="sd">          the bias is a zero initializer.</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">          weights (with key &#39;w&#39;) or biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">          partitioners are used.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the filters</span>
+<span class="sd">        (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
+<span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      base.IncompatibleShapeError: If the given kernel shape is not an integer;</span>
+<span class="sd">          or if the given kernel shape is not a sequence of two integers.</span>
+<span class="sd">      base.IncompatibleShapeError: If the given stride is not an integer; or if</span>
+<span class="sd">          the given stride is not a sequence of two or four integers.</span>
+<span class="sd">      base.IncompatibleShapeError: If the given rate is not an integer; or if</span>
+<span class="sd">          the given rate is not a sequence of two integers.</span>
+<span class="sd">      base.NotSupportedError: If rate in any dimension and the stride in any</span>
+<span class="sd">          dimension are simultaneously &gt; 1.</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
+<span class="sd">        are not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">CausalConv1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+        <span class="n">kernel_shape</span><span class="o">=</span><span class="n">kernel_shape</span><span class="p">,</span>
+        <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="n">VALID</span><span class="p">,</span>  <span class="c1"># Can&#39;t be configured by the user.</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the CausalConv1D module into the graph, with `inputs` as input.</span>
+
+<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
+<span class="sd">    the input Tensor provided here must have the same final 2 dimensions, in</span>
+<span class="sd">    order for the existing variables to be the correct size for the</span>
+<span class="sd">    multiplication. The batch size may differ for each connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A 3D Tensor of shape [batch_size, input_length, input_channels].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A 3D Tensor of shape [batch_size, output_length, output_channels].</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
+<span class="sd">          first time and the inferred size of the input does not match previous</span>
+<span class="sd">          invocations.</span>
+<span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
+<span class="sd">          of dimensions.</span>
+<span class="sd">      base.IncompatibleShapeError: If a mask is present and its shape is</span>
+<span class="sd">          incompatible with the shape of the weights.</span>
+<span class="sd">      base.UnderspecifiedError: If the input tensor has an unknown</span>
+<span class="sd">          `input_channels`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+          <span class="s2">&quot;Input Tensor must have shape (batch_size, input_length, input_&quot;</span>
+          <span class="s2">&quot;channels)&quot;</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">UnderspecifiedError</span><span class="p">(</span>
+          <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span>
+                      <span class="nb">format</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+    <span class="n">weight_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">input_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">)</span>
+
+    <span class="n">bias_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">,)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_bias_initializer</span><span class="p">(</span><span class="n">bias_shape</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="n">pad_amount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">padded_inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">paddings</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pad_amount</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span>
+        <span class="n">padded_inputs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="n">VALID</span><span class="p">,</span>
+        <span class="n">dilation_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+          <span class="s2">&quot;b&quot;</span><span class="p">,</span>
+          <span class="n">shape</span><span class="o">=</span><span class="n">bias_shape</span><span class="p">,</span>
+          <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
+          <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+          <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+      <span class="n">outputs</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+
+    <span class="k">return</span> <span class="n">outputs</span></div>
 
 
 <div class="viewcode-block" id="InPlaneConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D">[docs]</a><span class="k">class</span> <span class="nc">InPlaneConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2103,7 +2267,7 @@
 <span class="sd">          list of 3 integers.</span>
 <span class="sd">      base.IncompatibleShapeError: If `stride` is neither an integer nor a</span>
 <span class="sd">          list of 2 or 4 integers.</span>
-<span class="sd">      ValueError: If `padding` is not `nnd.VALID` or `nnd.SAME`;</span>
+<span class="sd">      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">        keys other than &#39;w_dw&#39;, &#39;w_pw&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
@@ -2674,7 +2838,8 @@
       <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">output_shape</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="n">output_shape</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">output_shape</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+                                                              <span class="s2">&quot;output_shape&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -2941,7 +3106,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

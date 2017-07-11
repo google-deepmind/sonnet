@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.python.modules.util &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -77,6 +74,29 @@
 <span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">deprecation</span>
 
 
+<div class="viewcode-block" id="get_variable_scope_name"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variable_scope_name">[docs]</a><span class="k">def</span> <span class="nf">get_variable_scope_name</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns the name of the variable scope indicated by the given value.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    value: String, variable scope, or object with `variable_scope` attribute</span>
+<span class="sd">    (e.g., Sonnet module).</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The name (a string) of the corresponding variable scope.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If `value` does not identify a variable scope.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># If the object has a &quot;variable_scope&quot; property, use it.</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;variable_scope&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">VariableScope</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not a variable scope: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="get_variables_in_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variables_in_scope">[docs]</a><span class="k">def</span> <span class="nf">get_variables_in_scope</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a tuple `tf.Variable`s in a scope for a given collection.</span>
 
@@ -89,12 +109,11 @@
 <span class="sd">  Returns:</span>
 <span class="sd">    A tuple of `tf.Variable` objects.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">VariableScope</span><span class="p">):</span>
-    <span class="n">scope</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">get_variable_scope_name</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
 
   <span class="c1"># Escape the name in case it contains any &quot;.&quot; characters. Add a closing slash</span>
   <span class="c1"># so we will not search any scopes that have this scope name as a prefix.</span>
-  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
 
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">scope_name</span><span class="p">))</span></div>
 
@@ -284,6 +303,9 @@
 <span class="k">def</span> <span class="nf">_is_scope_prefix</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix_name</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Checks that `prefix_name` is a proper scope prefix of `scope_name`.&quot;&quot;&quot;</span>
 
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">prefix_name</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
   <span class="k">if</span> <span class="ow">not</span> <span class="n">scope_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
     <span class="n">scope_name</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
 
@@ -413,21 +435,19 @@
 <span class="sd">  Raises:</span>
 <span class="sd">    ValueError: If `context` is given but is not a proper prefix of `scope`.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span> <span class="s2">&quot;variable_scope&quot;</span><span class="p">,</span> <span class="n">scope_or_module</span><span class="p">)</span>
+  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">get_variable_scope_name</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="n">scope</span>
-  <span class="n">context_scope</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;variable_scope&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">scope_or_module</span>
 
-  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">scope</span><span class="o">.</span><span class="n">name</span>
-  <span class="n">prefix</span> <span class="o">=</span> <span class="n">context_scope</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">prefix</span> <span class="o">=</span> <span class="n">get_variable_scope_name</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+  <span class="n">prefix_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="mi">0</span>
+
   <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_scope_prefix</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scope &#39;</span><span class="si">{}</span><span class="s2">&#39; is not prefixed by &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
         <span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix</span><span class="p">))</span>
 
-  <span class="n">prefix_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-
-  <span class="n">variables</span> <span class="o">=</span> <span class="n">get_variables_in_scope</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+  <span class="n">variables</span> <span class="o">=</span> <span class="n">get_variables_in_scope</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="ow">not</span> <span class="n">group_sliced_variables</span><span class="p">:</span>
     <span class="n">single_vars</span> <span class="o">=</span> <span class="n">variables</span>
@@ -800,7 +820,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

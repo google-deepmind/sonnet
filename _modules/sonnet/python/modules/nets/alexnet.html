@@ -5,12 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>sonnet.python.modules.nets.alexnet &#8212; sonnet git documentation</title>
-    
     <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../../',
@@ -24,7 +21,7 @@
     <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -226,7 +223,7 @@
 
     <span class="k">return</span> <span class="n">input_size</span>
 
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the AlexNet module into the graph.</span>
 
@@ -240,8 +237,8 @@
 <span class="sd">        input_channels], representing a batch of input images.</span>
 <span class="sd">      keep_prob: A scalar Tensor representing the dropout keep probability.</span>
 <span class="sd">        When `is_training=False` this must be None or 1 to give no dropout.</span>
-<span class="sd">      is_training: Boolean to indicate to `snt.BatchNorm` if we are</span>
-<span class="sd">        currently training. By default `True`.</span>
+<span class="sd">      is_training: Boolean to indicate if we are currently training. Must be</span>
+<span class="sd">          specified if batch normalization or dropout is used.</span>
 <span class="sd">      test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch</span>
 <span class="sd">        normalization should  use local batch statistics at test time.</span>
 <span class="sd">        By default `True`.</span>
@@ -254,8 +251,14 @@
 <span class="sd">      base.IncompatibleShapeError: If any of the input image dimensions</span>
 <span class="sd">        (input_height, input_width) are too small for the given network mode.</span>
 <span class="sd">      ValueError: If `keep_prob` is not None or 1 when `is_training=False`.</span>
+<span class="sd">      ValueError: If `is_training` is not explicitly specified when using</span>
+<span class="sd">        batch normalization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check input shape</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="ow">or</span> <span class="n">keep_prob</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Boolean is_training flag must be explicitly specified &quot;</span>
+                       <span class="s2">&quot;when using batch normalization or dropout.&quot;</span><span class="p">)</span>
+
     <span class="n">input_shape</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_size</span> <span class="ow">or</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_size</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
@@ -409,7 +412,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

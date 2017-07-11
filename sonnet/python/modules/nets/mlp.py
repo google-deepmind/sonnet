@@ -39,6 +39,7 @@ class MLP(base.AbstractModule, base.Transposable):
                partitioners=None,
                regularizers=None,
                use_bias=True,
+               custom_getter=None,
                name="mlp"):
     """Constructs an MLP module.
 
@@ -64,6 +65,10 @@ class MLP(base.AbstractModule, base.Transposable):
         the L1 and L2 regularizers in `tf.contrib.layers`.
       use_bias: Whether to include bias parameters in the linear layers.
         Default `True`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -73,7 +78,7 @@ class MLP(base.AbstractModule, base.Transposable):
       TypeError: If `activation` is not callable; or if `output_sizes` is not
         iterable.
     """
-    super(MLP, self).__init__(name=name)
+    super(MLP, self).__init__(custom_getter=custom_getter, name=name)
 
     if not isinstance(output_sizes, collections.Iterable):
       raise TypeError("output_sizes must be iterable")

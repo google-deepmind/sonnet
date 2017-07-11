@@ -280,6 +280,23 @@ class MLPTest(parameterized.ParameterizedTestCase,
 
     self.assertEqual(set(variable_names), set(correct_variable_names))
 
+  def testCustomGettersUsed(self):
+    pi = 3.1415
+
+    def get_pi(getter, *args, **kwargs):
+      """A custom getter which sets all variables to pi."""
+      variable = getter(*args, **kwargs)
+      return variable * 0.0 + pi
+
+    mlpi = snt.nets.MLP(output_sizes=[10], custom_getter=get_pi)
+    mlpi(tf.zeros(shape=(2, 1)))
+    mlp_variables = [mlpi.layers[0].w, mlpi.layers[0].b]
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      for var_value in sess.run(mlp_variables):
+        self.assertAllClose(var_value, np.zeros_like(var_value)+pi)
+
 
 if __name__ == "__main__":
   tf.test.main()

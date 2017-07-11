@@ -1,5 +1,13 @@
 # Sonnet Changelog
 
+## Version 1.5 - Monday, 10. July 2017
+
+* `install.sh` now supports relative paths as well as absolute.
+* Accept string values as variable scope in `snt.get_variables_in_scope` and 
+  `snt.get_normalized_variable_map`.
+* Add IPython notebook that explains how Sonnet's `BatchNorm` module can be
+  configured.
+
 ## Version 1.4 - 3rd Jul 2017
 
 * Added all constructor arguments to `ConvNet2D.transpose` and
@@ -75,4 +83,3 @@ as a unit when saving checkpoints / model snapshots with tf.Saver. The option is
 set to False by default, for backwards compatibility reasons.
 * `snt.Linear.transpose` creates a new module which now uses the same
 partitioners as the parent module.
-

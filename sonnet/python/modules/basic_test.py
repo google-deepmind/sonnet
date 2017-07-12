@@ -844,20 +844,20 @@ class BatchReshapeTest(tf.test.TestCase,
     in_shape = [2, 3, 4, 5]
     inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
     # Shape array has invalid format
-    err = "Wildcard -1 can appear only once in shape"
+    err = "Wildcard -1 can appear only once in desired output shape. "
     with self.assertRaisesRegexp(ValueError, err):
       output_invalid_shape_format = [-1, -1]
       snt.BatchReshape(shape=output_invalid_shape_format)(inputs)
 
-    err = ("Input array shape can contain positive integral numbers only,"
-           " and the wildcard -1 used once")
+    err = ("Desired shape can only contain positive integral numbers "
+           "and the wildcard -1. ")
     with self.assertRaisesRegexp(ValueError, err):
       output_invalid_shape_format = [2, 3, -2]
       snt.BatchReshape(shape=output_invalid_shape_format)(inputs)
 
     # Shape array contains invalid entries
-    err = ("Input array shape can contain positive integral numbers only,"
-           " and the wildcard -1 used once")
+    err = ("Desired shape can only contain positive integral numbers "
+           "and the wildcard -1. ")
     with self.assertRaisesRegexp(ValueError, err):
       invalid_shape_type = [7, "string"]
       snt.BatchReshape(shape=invalid_shape_type)(inputs)

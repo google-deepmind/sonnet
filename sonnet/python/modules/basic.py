@@ -693,11 +693,14 @@ class BatchReshape(base.AbstractModule, base.Transposable):
 
     if not all([isinstance(x, numbers.Integral) and (x > 0 or x == -1)
                 for x in self._shape]):
-      raise ValueError("Input array shape can contain positive integral "
-                       "numbers only, and the wildcard -1 used once")
+      raise ValueError(
+          "Desired shape can only contain positive integral numbers "
+          "and the wildcard -1. Given shape {}".format(self._shape))
 
     if self._shape.count(-1) > 1:
-      raise ValueError("Wildcard -1 can appear only once in shape")
+      raise ValueError(
+          "Wildcard -1 can appear only once in desired output shape. "
+          "Given shape {}".format(self._shape))
 
     preserved_shape = tf.shape(inputs)[:self._preserve_dims]
     # Slicing the shape tensor loses information, we keep it in a list.

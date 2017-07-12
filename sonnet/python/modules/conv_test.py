@@ -315,6 +315,37 @@ class SharedConvTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       conv_mod(inputs)
 
+  @parameterized.Parameters(*modules)
+  def testCustomGetter(self, module, num_input_dims, module_kwargs):
+    """Check that custom_getter option works."""
+
+    def stop_gradient(getter, *args, **kwargs):
+      return tf.stop_gradient(getter(*args, **kwargs))
+
+    inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 2))
+
+    conv_mod1 = module(**module_kwargs)
+    out1 = conv_mod1(inputs)
+
+    conv_mod2 = module(custom_getter=stop_gradient, **module_kwargs)
+    out2 = conv_mod2(inputs)
+
+    num_variables = len(conv_mod1.get_variables())
+
+    grads1 = tf.gradients(out1, list(conv_mod1.get_variables()))
+    grads2 = tf.gradients(out2, list(conv_mod2.get_variables()))
+
+    self.assertEqual([tf.Tensor] * num_variables, [type(g) for g in grads1])
+    self.assertEqual([None] * num_variables, grads2)
+
+    # Check that the transpose, if present, also adopts the custom getter.
+    if hasattr(conv_mod2, "transpose"):
+      conv_mod2_transpose = conv_mod2.transpose()
+      inputs_transpose = tf.placeholder(tf.float32, out2.get_shape())
+      out3 = conv_mod2_transpose(inputs_transpose)
+      grads3 = tf.gradients(out3, list(conv_mod2_transpose.get_variables()))
+      self.assertEqual([None] * num_variables, grads3)
+
 
 class Conv2DTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 

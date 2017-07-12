@@ -936,8 +936,9 @@ class BatchApply(base.AbstractModule):
       the process above. ("None" return values are also supported.)
     """
     flattened = nest.flatten_iterable([args, kwargs])
-    merged_flattened = [merge_leading_dims(inp, self._n_dims)
-                        for inp in flattened]
+    merged_flattened = [
+        merge_leading_dims(inp, self._n_dims) if inp is not None else None
+        for inp in flattened]
     merged_args, merged_kwargs = nest.pack_iterable_as([args, kwargs],
                                                        merged_flattened)
 

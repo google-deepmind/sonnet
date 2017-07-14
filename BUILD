@@ -12,12 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # =============================================================================
+load("@local_config_cuda//cuda:build_defs.bzl", "if_cuda")
+
+genrule(
+    name = "setup_py",
+    srcs = ["setup.py.tmpl"],
+    outs = ["setup.py"],
+    cmd = if_cuda("cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet-gpu/g' > $@",
+                  "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet/g' > $@")
+)
+
 sh_binary(
     name = "install",
     srcs = ["install.sh"],
     data = [
         "MANIFEST.in",
-        "setup.py",
+        ":setup_py",
         "//sonnet",
         "//sonnet/examples",
     ],

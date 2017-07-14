@@ -1,3 +1,4 @@
+# pylint: disable=g-bad-file-header
 # Copyright 2017 The Sonnet Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,12 +29,30 @@ from setuptools.dist import Distribution
 # result for pip.
 _VERSION = '1.5'
 
-project_name = 'sonnet'
+# The possible sonnet project names.
+_PROJECT_NAME_CPU = 'dm-sonnet'
+_PROJECT_NAME_GPU = 'dm-sonnet-gpu'
+
+# This placeholder is substituted by the build script. Because we distribute
+# sonnet under two different names (dm-sonnet and dm-sonnet-gpu), we have to
+# create two "different" setup.py files.
+project_name = '%%%PROJECT_NAME%%%'
+
+# Check if the project name is valid.
+if project_name not in (_PROJECT_NAME_CPU, _PROJECT_NAME_GPU):
+  raise ValueError('Invalid project name {}.'.format(project_name))
 
 EXTRA_PACKAGES = {
     'tensorflow': ['tensorflow>=1.0.1'],
     'tensorflow with gpu': ['tensorflow-gpu>=1.0.1']
 }
+
+REQUIRED_PACKAGES = []
+
+# If this is the GPU build of sonnet, tensorflow-gpu is a hard requirement.
+# The CPU only version works well with both versions of tensorflow.
+if project_name == _PROJECT_NAME_GPU:
+  REQUIRED_PACKAGES.append('tensorflow-gpu >= 1.0.1')
 
 
 class BinaryDistribution(Distribution):
@@ -54,6 +73,7 @@ setup(
     # Contained modules and scripts.
     packages=find_packages(),
     entry_points={},
+    install_requires=REQUIRED_PACKAGES,
     extra_requires=EXTRA_PACKAGES,
     # Add in any packaged data.
     include_package_data=True,

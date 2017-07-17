@@ -81,6 +81,7 @@
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mlp&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs an MLP module.</span>
 
@@ -106,6 +107,10 @@
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
 <span class="sd">      use_bias: Whether to include bias parameters in the linear layers.</span>
 <span class="sd">        Default `True`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -115,7 +120,7 @@
 <span class="sd">      TypeError: If `activation` is not callable; or if `output_sizes` is not</span>
 <span class="sd">        iterable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">MLP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MLP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_sizes</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;output_sizes must be iterable&quot;</span><span class="p">)</span>

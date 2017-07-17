@@ -230,7 +230,8 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d&quot;</span><span class="p">):</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a Conv2D module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -272,6 +273,10 @@
 <span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
 <span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
 <span class="sd">          second dimension (&quot;NCHW&quot;).</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -294,7 +299,7 @@
 <span class="sd">        are not callable.</span>
 <span class="sd">      TypeError: If mask is given and is not an array, tuple or a numpy array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
@@ -434,8 +439,6 @@
           <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
               <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">))</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
-      <span class="n">mask_tensor</span><span class="p">,</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">py_func</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span> <span class="n">stateful</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-      <span class="n">mask_tensor</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">)</span>
       <span class="n">w</span> <span class="o">*=</span> <span class="n">mask</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
@@ -559,6 +562,7 @@
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
   <span class="c1"># Implements Transposable interface.</span>
@@ -605,6 +609,7 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
@@ -618,7 +623,8 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">output_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_transpose&quot;</span><span class="p">):</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_transpose&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a `Conv2DTranspose module`.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -659,6 +665,10 @@
 <span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
 <span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
 <span class="sd">          second dimension (&quot;NCHW&quot;).</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -675,7 +685,8 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
 
@@ -950,8 +961,9 @@
                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                  <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span></div></div>
+                  <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 
@@ -964,7 +976,8 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_1d&quot;</span><span class="p">):</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_1d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a Conv1D module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -1001,6 +1014,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -1018,7 +1035,7 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1221,6 +1238,7 @@
                            <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
@@ -1234,7 +1252,8 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">output_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_1d_transpose&quot;</span><span class="p">):</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_1d_transpose&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a Conv1DTranspose module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -1270,6 +1289,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -1284,7 +1307,8 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
 
@@ -1542,6 +1566,7 @@
                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
@@ -1564,6 +1589,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;causal_conv_1d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a CausalConv1D module.</span>
 
@@ -1596,6 +1622,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -1622,6 +1652,7 @@
         <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
         <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
@@ -1718,7 +1749,7 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in_plane_conv2d&quot;</span><span class="p">):</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in_plane_conv2d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs an InPlaneConv2D module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -1743,6 +1774,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -1758,7 +1793,7 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">InPlaneConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">InPlaneConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                                           <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
@@ -1954,6 +1989,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_depthwise&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a DepthwiseConv2D module.</span>
 
@@ -1988,6 +2024,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -2004,7 +2044,8 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">DepthwiseConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">DepthwiseConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel_multiplier</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">or</span>
         <span class="n">channel_multiplier</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
@@ -2223,6 +2264,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Separable_conv2d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a SeparableConv2D module.</span>
 
@@ -2258,6 +2300,10 @@
 <span class="sd">        A regularizer should be a function that takes a single `Tensor` as an</span>
 <span class="sd">        input and returns a scalar `Tensor` output, e.g. the L1 and L2</span>
 <span class="sd">        regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -2273,7 +2319,8 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">SeparableConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SeparableConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_channels</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">or</span> <span class="n">output_channels</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_channels (=</span><span class="si">{}</span><span class="s2">), must be integer &gt;= 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -2502,7 +2549,8 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_3d&quot;</span><span class="p">):</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_3d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a Conv3D module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -2539,6 +2587,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -2556,7 +2608,7 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2762,6 +2814,7 @@
                            <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
@@ -2774,7 +2827,8 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">output_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_3d_transpose&quot;</span><span class="p">):</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_3d_transpose&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a `Conv3DTranspose` module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -2812,6 +2866,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -2826,7 +2884,8 @@
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
 
@@ -3072,6 +3131,7 @@
                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 </pre></div>
 

@@ -735,11 +735,14 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">]):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input array shape can contain positive integral &quot;</span>
-                       <span class="s2">&quot;numbers only, and the wildcard -1 used once&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Desired shape can only contain positive integral numbers &quot;</span>
+          <span class="s2">&quot;and the wildcard -1. Given shape </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wildcard -1 can appear only once in shape&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Wildcard -1 can appear only once in desired output shape. &quot;</span>
+          <span class="s2">&quot;Given shape </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">))</span>
 
     <span class="n">preserved_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_preserve_dims</span><span class="p">]</span>
     <span class="c1"># Slicing the shape tensor loses information, we keep it in a list.</span>
@@ -978,8 +981,9 @@
 <span class="sd">      the process above. (&quot;None&quot; return values are also supported.)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">flattened</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_iterable</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">])</span>
-    <span class="n">merged_flattened</span> <span class="o">=</span> <span class="p">[</span><span class="n">merge_leading_dims</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_dims</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">flattened</span><span class="p">]</span>
+    <span class="n">merged_flattened</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">merge_leading_dims</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_dims</span><span class="p">)</span> <span class="k">if</span> <span class="n">inp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">flattened</span><span class="p">]</span>
     <span class="n">merged_args</span><span class="p">,</span> <span class="n">merged_kwargs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_iterable_as</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">],</span>
                                                        <span class="n">merged_flattened</span><span class="p">)</span>
 

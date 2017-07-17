@@ -1,9 +1,15 @@
 # Sonnet Changelog
 
+## Version 1.6 - Monday, 17. July 2017
+
+* Support "None" entries in BatchApply's inputs.
+* Add `custom_getter` option to convolution modules and MLP.
+* Better error messages for BatchReshape.
+
 ## Version 1.5 - Monday, 10. July 2017
 
 * `install.sh` now supports relative paths as well as absolute.
-* Accept string values as variable scope in `snt.get_variables_in_scope` and 
+* Accept string values as variable scope in `snt.get_variables_in_scope` and
   `snt.get_normalized_variable_map`.
 * Add IPython notebook that explains how Sonnet's `BatchNorm` module can be
   configured.

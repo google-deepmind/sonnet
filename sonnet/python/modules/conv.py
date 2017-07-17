@@ -397,8 +397,6 @@ class Conv2D(base.AbstractModule, base.Transposable):
           raise base.IncompatibleShapeError(
               "Invalid mask shape: {}".format(mask_shape))
         mask = self._mask
-      mask_tensor, = tf.py_func(lambda: mask, [], [w.dtype], stateful=False)
-      mask_tensor.set_shape(weight_shape)
       w *= mask
 
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,

@@ -458,7 +458,7 @@ class _BaseLSTM(rnn_core.RNNCore):
           the name of the module.
 
     Returns:
-      A tensor tuple `([batch_size x state_size], [batch_size x state_size], ?)`
+      A tensor tuple `([batch_size, state_size], [batch_size, state_size], ?)`
       filled with zeros, with the third entry present when batch norm is enabled
       with `max_unique_stats > 1', with value `0` (representing the time step).
     """
@@ -1158,13 +1158,13 @@ class GRU(rnn_core.RNNCore):
     connection.
 
     Args:
-      inputs: Tensor of size [batch_size, input_size].
-      prev_state: Tensor of size [batch_size, hidden_size].
+      inputs: Tensor of size `[batch_size, input_size]`.
+      prev_state: Tensor of size `[batch_size, hidden_size]`.
 
     Returns:
       A tuple (output, next_state) where `output` is a Tensor of size
-      [batch_size, hidden_size] and `next_state` is a Tensor of size
-      [batch_size, hidden_size].
+      `[batch_size, hidden_size]` and `next_state` is a Tensor of size
+      `[batch_size, hidden_size]`.
 
     Raises:
       ValueError: If connecting the module into the graph any time after the

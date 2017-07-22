@@ -188,7 +188,8 @@ class Conv2D(base.AbstractModule, base.Transposable):
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, mask=None,
-               data_format=DATA_FORMAT_NHWC, name="conv_2d"):
+               data_format=DATA_FORMAT_NHWC, custom_getter=None,
+               name="conv_2d"):
     """Constructs a Conv2D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -230,6 +231,10 @@ class Conv2D(base.AbstractModule, base.Transposable):
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension ("NCHW").
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -252,7 +257,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
         are not callable.
       TypeError: If mask is given and is not an array, tuple or a numpy array.
     """
-    super(Conv2D, self).__init__(name=name)
+    super(Conv2D, self).__init__(custom_getter=custom_getter, name=name)
 
     self._output_channels = output_channels
     self._input_shape = None
@@ -392,8 +397,6 @@ class Conv2D(base.AbstractModule, base.Transposable):
           raise base.IncompatibleShapeError(
               "Invalid mask shape: {}".format(mask_shape))
         mask = self._mask
-      mask_tensor, = tf.py_func(lambda: mask, [], [w.dtype], stateful=False)
-      mask_tensor.set_shape(weight_shape)
       w *= mask
 
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,
@@ -517,6 +520,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
                   regularizers=self.regularizers,
                   mask=self.mask,
                   data_format=self.data_format,
+                  custom_getter=self._custom_getter,
                   name=name)
 
   # Implements Transposable interface.
@@ -563,6 +567,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
                            partitioners=self.partitioners,
                            regularizers=self.regularizers,
                            data_format=self._data_format,
+                           custom_getter=self._custom_getter,
                            name=name)
 
 
@@ -576,7 +581,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
   def __init__(self, output_channels, output_shape=None, kernel_shape=None,
                stride=1, padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None,
-               data_format=DATA_FORMAT_NHWC, name="conv_2d_transpose"):
+               data_format=DATA_FORMAT_NHWC, custom_getter=None,
+               name="conv_2d_transpose"):
     """Constructs a `Conv2DTranspose module`.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -617,6 +623,10 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension ("NCHW").
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -633,7 +643,8 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv2DTranspose, self).__init__(name=name)
+    super(Conv2DTranspose, self).__init__(custom_getter=custom_getter,
+                                          name=name)
 
     self._output_channels = output_channels
 
@@ -908,8 +919,9 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
                   initializers=self.initializers,
                   partitioners=self.partitioners,
                   regularizers=self.regularizers,
-                  name=name,
-                  data_format=self._data_format)
+                  data_format=self._data_format,
+                  custom_getter=self._custom_getter,
+                  name=name)
 
 
 
@@ -922,7 +934,8 @@ class Conv1D(base.AbstractModule, base.Transposable):
 
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, name="conv_1d"):
+               partitioners=None, regularizers=None, custom_getter=None,
+               name="conv_1d"):
     """Constructs a Conv1D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -959,6 +972,10 @@ class Conv1D(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -976,7 +993,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv1D, self).__init__(name=name)
+    super(Conv1D, self).__init__(custom_getter=custom_getter, name=name)
 
     self._output_channels = output_channels
     self._input_shape = None
@@ -1179,6 +1196,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
                            initializers=self.initializers,
                            partitioners=self.partitioners,
                            regularizers=self.regularizers,
+                           custom_getter=self._custom_getter,
                            name=name)
 
 
@@ -1192,7 +1210,8 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
 
   def __init__(self, output_channels, output_shape=None, kernel_shape=None,
                stride=1, padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, name="conv_1d_transpose"):
+               partitioners=None, regularizers=None, custom_getter=None,
+               name="conv_1d_transpose"):
     """Constructs a Conv1DTranspose module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -1228,6 +1247,10 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1242,7 +1265,8 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv1DTranspose, self).__init__(name=name)
+    super(Conv1DTranspose, self).__init__(custom_getter=custom_getter,
+                                          name=name)
 
     self._output_channels = output_channels
 
@@ -1500,6 +1524,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
                   initializers=self.initializers,
                   partitioners=self.partitioners,
                   regularizers=self.regularizers,
+                  custom_getter=self._custom_getter,
                   name=name)
 
 
@@ -1522,7 +1547,8 @@ class CausalConv1D(Conv1D):
                initializers=None,
                partitioners=None,
                regularizers=None,
-               name="conv_1d"):
+               custom_getter=None,
+               name="causal_conv_1d"):
     """Constructs a CausalConv1D module.
 
     Args:
@@ -1554,6 +1580,10 @@ class CausalConv1D(Conv1D):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1580,6 +1610,7 @@ class CausalConv1D(Conv1D):
         initializers=initializers,
         partitioners=partitioners,
         regularizers=regularizers,
+        custom_getter=custom_getter,
         name=name)
 
   def _build(self, inputs):
@@ -1676,7 +1707,7 @@ class InPlaneConv2D(base.AbstractModule):
 
   def __init__(self, kernel_shape, stride=1, padding=SAME, use_bias=True,
                initializers=None, partitioners=None, regularizers=None,
-               name="in_plane_conv2d"):
+               custom_getter=None, name="in_plane_conv2d"):
     """Constructs an InPlaneConv2D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -1701,6 +1732,10 @@ class InPlaneConv2D(base.AbstractModule):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1716,7 +1751,7 @@ class InPlaneConv2D(base.AbstractModule):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(InPlaneConv2D, self).__init__(name=name)
+    super(InPlaneConv2D, self).__init__(custom_getter=custom_getter, name=name)
 
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
@@ -1912,6 +1947,7 @@ class DepthwiseConv2D(base.AbstractModule):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               custom_getter=None,
                name="conv_2d_depthwise"):
     """Constructs a DepthwiseConv2D module.
 
@@ -1946,6 +1982,10 @@ class DepthwiseConv2D(base.AbstractModule):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1962,7 +2002,8 @@ class DepthwiseConv2D(base.AbstractModule):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(DepthwiseConv2D, self).__init__(name=name)
+    super(DepthwiseConv2D, self).__init__(custom_getter=custom_getter,
+                                          name=name)
 
     if (not isinstance(channel_multiplier, numbers.Integral) or
         channel_multiplier < 1):
@@ -2181,6 +2222,7 @@ class SeparableConv2D(base.AbstractModule):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               custom_getter=None,
                name="Separable_conv2d"):
     """Constructs a SeparableConv2D module.
 
@@ -2216,6 +2258,10 @@ class SeparableConv2D(base.AbstractModule):
         A regularizer should be a function that takes a single `Tensor` as an
         input and returns a scalar `Tensor` output, e.g. the L1 and L2
         regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2225,13 +2271,14 @@ class SeparableConv2D(base.AbstractModule):
           list of 3 integers.
       base.IncompatibleShapeError: If `stride` is neither an integer nor a
           list of 2 or 4 integers.
-      ValueError: If `padding` is not `nnd.VALID` or `nnd.SAME`;
+      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(SeparableConv2D, self).__init__(name=name)
+    super(SeparableConv2D, self).__init__(custom_getter=custom_getter,
+                                          name=name)
 
     if not isinstance(output_channels, numbers.Integral) or output_channels < 1:
       raise ValueError("output_channels (={}), must be integer >= 1".format(
@@ -2460,7 +2507,8 @@ class Conv3D(base.AbstractModule):
 
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, name="conv_3d"):
+               partitioners=None, regularizers=None, custom_getter=None,
+               name="conv_3d"):
     """Constructs a Conv3D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -2497,6 +2545,10 @@ class Conv3D(base.AbstractModule):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2514,7 +2566,7 @@ class Conv3D(base.AbstractModule):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv3D, self).__init__(name=name)
+    super(Conv3D, self).__init__(custom_getter=custom_getter, name=name)
 
     self._output_channels = output_channels
     self._input_shape = None
@@ -2720,6 +2772,7 @@ class Conv3D(base.AbstractModule):
                            initializers=self.initializers,
                            partitioners=self.partitioners,
                            regularizers=self.regularizers,
+                           custom_getter=self._custom_getter,
                            name=name)
 
 
@@ -2732,7 +2785,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
 
   def __init__(self, output_channels, output_shape=None, kernel_shape=None,
                stride=1, padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, name="conv_3d_transpose"):
+               partitioners=None, regularizers=None, custom_getter=None,
+               name="conv_3d_transpose"):
     """Constructs a `Conv3DTranspose` module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -2770,6 +2824,10 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2784,7 +2842,8 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv3DTranspose, self).__init__(name=name)
+    super(Conv3DTranspose, self).__init__(custom_getter=custom_getter,
+                                          name=name)
 
     self._output_channels = output_channels
 
@@ -3030,4 +3089,5 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
                   initializers=self.initializers,
                   partitioners=self.partitioners,
                   regularizers=self.regularizers,
+                  custom_getter=self._custom_getter,
                   name=name)

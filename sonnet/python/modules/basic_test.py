@@ -844,20 +844,20 @@ class BatchReshapeTest(tf.test.TestCase,
     in_shape = [2, 3, 4, 5]
     inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
     # Shape array has invalid format
-    err = "Wildcard -1 can appear only once in shape"
+    err = "Wildcard -1 can appear only once in desired output shape. "
     with self.assertRaisesRegexp(ValueError, err):
       output_invalid_shape_format = [-1, -1]
       snt.BatchReshape(shape=output_invalid_shape_format)(inputs)
 
-    err = ("Input array shape can contain positive integral numbers only,"
-           " and the wildcard -1 used once")
+    err = ("Desired shape can only contain positive integral numbers "
+           "and the wildcard -1. ")
     with self.assertRaisesRegexp(ValueError, err):
       output_invalid_shape_format = [2, 3, -2]
       snt.BatchReshape(shape=output_invalid_shape_format)(inputs)
 
     # Shape array contains invalid entries
-    err = ("Input array shape can contain positive integral numbers only,"
-           " and the wildcard -1 used once")
+    err = ("Desired shape can only contain positive integral numbers "
+           "and the wildcard -1. ")
     with self.assertRaisesRegexp(ValueError, err):
       invalid_shape_type = [7, "string"]
       snt.BatchReshape(shape=invalid_shape_type)(inputs)
@@ -1330,6 +1330,26 @@ class BatchApplyTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       return None
     result = snt.BatchApply(fn)(tf.zeros([1, 1]))
     self.assertEqual(result, None)
+
+  def testSomeInputsAreNone(self):
+    in1 = np.random.randn(2, 3, 4, 5)
+    in2 = np.random.randn(2, 3, 5, 8)
+    in3 = None
+
+    def build(input1, input2, input3):
+      output = tf.matmul(input1, input2)
+      if input3 is not None:
+        output = tf.matmul(input3)
+      return output
+
+    module = snt.BatchApply(build)
+    output = module(in1, in2, in3)
+    output.get_shape().assert_is_compatible_with([2, 3, 4, 8])
+
+    expected_output = tf.matmul(in1, in2)
+    with self.test_session() as sess:
+      out_expected, out_result = sess.run([expected_output, output])
+    self.assertAllClose(out_expected, out_result)
 
 
 class SliceByDimTest(tf.test.TestCase):

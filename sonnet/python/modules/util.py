@@ -32,6 +32,29 @@ from tensorflow.python.ops import variable_scope as variable_scope_ops
 from tensorflow.python.util import deprecation
 
 
+def get_variable_scope_name(value):
+  """Returns the name of the variable scope indicated by the given value.
+
+  Args:
+    value: String, variable scope, or object with `variable_scope` attribute
+    (e.g., Sonnet module).
+
+  Returns:
+    The name (a string) of the corresponding variable scope.
+
+  Raises:
+    ValueError: If `value` does not identify a variable scope.
+  """
+  # If the object has a "variable_scope" property, use it.
+  value = getattr(value, "variable_scope", value)
+  if isinstance(value, tf.VariableScope):
+    return value.name
+  elif isinstance(value, six.string_types):
+    return value
+  else:
+    raise ValueError("Not a variable scope: {}".format(value))
+
+
 def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   """Returns a tuple `tf.Variable`s in a scope for a given collection.
 
@@ -44,12 +67,11 @@ def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   Returns:
     A tuple of `tf.Variable` objects.
   """
-  if isinstance(scope, tf.VariableScope):
-    scope = scope.name
+  scope_name = get_variable_scope_name(scope)
 
   # Escape the name in case it contains any "." characters. Add a closing slash
   # so we will not search any scopes that have this scope name as a prefix.
-  scope_name = re.escape(scope) + "/"
+  scope_name = re.escape(scope_name) + "/"
 
   return tuple(tf.get_collection(collection, scope_name))
 
@@ -239,6 +261,9 @@ def check_regularizers(regularizers, keys):
 def _is_scope_prefix(scope_name, prefix_name):
   """Checks that `prefix_name` is a proper scope prefix of `scope_name`."""
 
+  if not prefix_name:
+    return True
+
   if not scope_name.endswith("/"):
     scope_name += "/"
 
@@ -368,24 +393,19 @@ def get_normalized_variable_map(scope_or_module,
   Raises:
     ValueError: If `context` is given but is not a proper prefix of `scope`.
   """
-  scope = getattr(scope_or_module, "variable_scope", scope_or_module)
+  scope_name = get_variable_scope_name(scope_or_module)
 
   if context is None:
-    context = scope
-  context_scope = getattr(context, "variable_scope", context)
+    context = scope_or_module
 
-  scope_name = scope.name
-  prefix = context_scope.name
-  if prefix:
-    if not _is_scope_prefix(scope_name, prefix):
-      raise ValueError("Scope '{}' is not prefixed by '{}'.".format(
-          scope_name, prefix))
+  prefix = get_variable_scope_name(context)
+  prefix_length = len(prefix) + 1 if prefix else 0
 
-    prefix_length = len(prefix) + 1
-  else:
-    prefix_length = 0
+  if not _is_scope_prefix(scope_name, prefix):
+    raise ValueError("Scope '{}' is not prefixed by '{}'.".format(
+        scope_name, prefix))
 
-  variables = get_variables_in_scope(scope, collection)
+  variables = get_variables_in_scope(scope_name, collection)
 
   if not group_sliced_variables:
     single_vars = variables

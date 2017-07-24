@@ -40,7 +40,14 @@ function main() {
 
   pushd ${TMPDIR}
   echo $(date) : "=== Building wheel"
-  python setup.py bdist_wheel >/dev/null
+
+  if [[ "$2" == "" ]] ; then
+    python setup.py bdist_wheel >/dev/null
+  else
+    # Use custom location of python specified in argument:
+    "$2" setup.py bdist_wheel >/dev/null
+  fi
+
   cp dist/* ${DEST}
   popd
   rm -rf ${TMPDIR}

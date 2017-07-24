@@ -338,10 +338,10 @@ trained on the Shakespeare dataset is available.
 Defining your own recurrent modules
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A recurrent module is any subclass of ``snt.RNNCore``, which is inherits
-from both ``snt.AbstractModule`` and ``tf.RNNCell``. This unorthodox
-choice of multiple inheritance allows us to use the variable sharing
-model from Sonnet, but also use the cores inside TensorFlow's RNN
+A recurrent module is any subclass of ``snt.RNNCore``, which inherits
+from ``snt.AbstractModule`` and has an interface compatible with
+``tf.nn.rnn_cell.RNNCell``. This allows us to use the variable sharing
+model from Sonnet whilst also using the cores inside TensorFlow's RNN
 Containers.
 
 .. code:: python
@@ -407,12 +407,12 @@ recurrent state, and an example of it, respectively. ``snt.RNNCore``
 defines a ``initial_state`` method that can be used to generate a zero
 initial state or a trainable initial state (based on the aforementioned
 properties). Optionally, any recurrent module can define its own
-``initial_state`` method. Note that the ``zero_state`` method is also
-available, inherited from ``tf.RNNCell``, to produce a correctly sized
-state value filled with zeros. In some situations (LSTM, etc) it may be
-acceptable to begin with a state containing all zeros, but in other
-situations this is too limiting, and we may want to (eg) fill some part
-of the state with random noise.
+``initial_state`` method. Note that a ``zero_state`` method is also
+available (as in ``tf.nn.rnn_cell.RNNCell``) to produce a correctly
+sized state value filled with zeros. In some situations (LSTM, etc) it
+may be acceptable to begin with a state containing all zeros, but in
+other situations this is too limiting, and we may want to (eg) fill some
+part of the state with random noise.
 
 A common option is to make the initial state of an RNN trainable,
 meaning the state is produced from some ``tf.Variable``\ s which are

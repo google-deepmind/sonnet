@@ -337,10 +337,10 @@ trained on the Shakespeare dataset is available.</p>
 </div>
 <div class="section" id="defining-your-own-recurrent-modules">
 <h4>Defining your own recurrent modules<a class="headerlink" href="#defining-your-own-recurrent-modules" title="Permalink to this headline">¶</a></h4>
-<p>A recurrent module is any subclass of <code class="docutils literal"><span class="pre">snt.RNNCore</span></code>, which is inherits
-from both <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code> and <code class="docutils literal"><span class="pre">tf.RNNCell</span></code>. This unorthodox
-choice of multiple inheritance allows us to use the variable sharing
-model from Sonnet, but also use the cores inside TensorFlow’s RNN
+<p>A recurrent module is any subclass of <code class="docutils literal"><span class="pre">snt.RNNCore</span></code>, which inherits
+from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code> and has an interface compatible with
+<code class="docutils literal"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>. This allows us to use the variable sharing
+model from Sonnet whilst also using the cores inside TensorFlow’s RNN
 Containers.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Add1RNN</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Simple core that adds 1 to its state and produces zero outputs.</span>
@@ -404,12 +404,12 @@ recurrent state, and an example of it, respectively. <code class="docutils liter
 defines a <code class="docutils literal"><span class="pre">initial_state</span></code> method that can be used to generate a zero
 initial state or a trainable initial state (based on the aforementioned
 properties). Optionally, any recurrent module can define its own
-<code class="docutils literal"><span class="pre">initial_state</span></code> method. Note that the <code class="docutils literal"><span class="pre">zero_state</span></code> method is also
-available, inherited from <code class="docutils literal"><span class="pre">tf.RNNCell</span></code>, to produce a correctly sized
-state value filled with zeros. In some situations (LSTM, etc) it may be
-acceptable to begin with a state containing all zeros, but in other
-situations this is too limiting, and we may want to (eg) fill some part
-of the state with random noise.</p>
+<code class="docutils literal"><span class="pre">initial_state</span></code> method. Note that a <code class="docutils literal"><span class="pre">zero_state</span></code> method is also
+available (as in <code class="docutils literal"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>) to produce a correctly
+sized state value filled with zeros. In some situations (LSTM, etc) it
+may be acceptable to begin with a state containing all zeros, but in
+other situations this is too limiting, and we may want to (eg) fill some
+part of the state with random noise.</p>
 <p>A common option is to make the initial state of an RNN trainable,
 meaning the state is produced from some <code class="docutils literal"><span class="pre">tf.Variable</span></code>s which are
 trained via backpropagation. If a core supports this, it should provide

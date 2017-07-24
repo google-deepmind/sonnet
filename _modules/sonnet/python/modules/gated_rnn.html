@@ -500,7 +500,7 @@
 <span class="sd">          the name of the module.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      A tensor tuple `([batch_size x state_size], [batch_size x state_size], ?)`</span>
+<span class="sd">      A tensor tuple `([batch_size, state_size], [batch_size, state_size], ?)`</span>
 <span class="sd">      filled with zeros, with the third entry present when batch norm is enabled</span>
 <span class="sd">      with `max_unique_stats &gt; 1&#39;, with value `0` (representing the time step).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1200,13 +1200,13 @@
 <span class="sd">    connection.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: Tensor of size [batch_size, input_size].</span>
-<span class="sd">      prev_state: Tensor of size [batch_size, hidden_size].</span>
+<span class="sd">      inputs: Tensor of size `[batch_size, input_size]`.</span>
+<span class="sd">      prev_state: Tensor of size `[batch_size, hidden_size]`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A tuple (output, next_state) where `output` is a Tensor of size</span>
-<span class="sd">      [batch_size, hidden_size] and `next_state` is a Tensor of size</span>
-<span class="sd">      [batch_size, hidden_size].</span>
+<span class="sd">      `[batch_size, hidden_size]` and `next_state` is a Tensor of size</span>
+<span class="sd">      `[batch_size, hidden_size]`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      ValueError: If connecting the module into the graph any time after the</span>

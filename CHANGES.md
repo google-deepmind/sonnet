@@ -1,5 +1,14 @@
 # Sonnet Changelog
 
+## Version 1.7 - Monday 24. July 2017
+
+* Fix install script for Python 3.
+* Better error message in AbstractModule.
+* Fix out of date docs about RNNCore.
+* Use tf.layers.utils instead of tf.contrib.layers.utils, allowing to remove
+  the use of contrib in the future, which will save on import time.
+* Fixes to docstrings.
+
 ## Version 1.6 - Monday, 17. July 2017
 
 * Support "None" entries in BatchApply's inputs.

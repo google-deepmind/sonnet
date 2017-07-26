@@ -59,6 +59,14 @@ $ bazel build --config=opt :install
 $ ./bazel-bin/install /tmp/sonnet
 ```
 
+By default, the wheel file is built using `python`. You can optionally specify
+another python binary in the previous command to build the wheel file, such as
+`python3`:
+
+```
+$ ./bazel-bin/install /tmp/sonnet python3
+```
+
 `pip install` the generated wheel file:
 
 ```shell

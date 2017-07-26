@@ -28,7 +28,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import util
 import tensorflow as tf
 
-from tensorflow.contrib.layers.python.layers import utils
+from tensorflow.python.layers import utils
 from tensorflow.python.training import moving_averages
 
 

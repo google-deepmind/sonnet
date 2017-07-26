@@ -221,7 +221,8 @@ class AbstractModule(object):
       self._template
     except AttributeError:
       raise NotInitializedError("You may have forgotten to call super at the "
-                                "start of your __init__ method.")
+                                "start of %s.__init__."
+                                % self.__class__.__name__)
 
   def _check_same_graph(self):
     """Checks that the module is not being connect to multiple Graphs.

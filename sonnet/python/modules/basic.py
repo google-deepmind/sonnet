@@ -457,6 +457,13 @@ class AddBias(base.AbstractModule, base.Transposable):
     first_bias = snt.AddBias(bias_dims=[1])
     first_bias_output = first_bias(input)
     first_bias.b.get_shape()  # (dim1_size, 1, 1)
+
+    # Subtract and later add the same learned bias:
+    bias = snt.AddBias()
+    hidden1 = bias(input, multiplier=-1)
+    # ...
+    reconstructed_input = bias(hidden4)
+
     ```
 
     Raises:
@@ -479,11 +486,16 @@ class AddBias(base.AbstractModule, base.Transposable):
     self._regularizers = util.check_regularizers(
         regularizers, self.POSSIBLE_INITIALIZER_KEYS)
 
-  def _build(self, inputs):
+  def _build(self, inputs, multiplier=1):
     """Connects the Add module into the graph, with input Tensor `inputs`.
 
     Args:
       inputs: A Tensor of size `[batch_size, input_size1, ...]`.
+      multiplier: A scalar or Tensor which the bias term is multiplied by
+        before adding it to `inputs`. Anything which works in the expression
+        `bias * multiplier` is acceptable here. This may be useful if you want
+        to add a bias in one place and subtract the same bias in another place
+        via `multiplier=-1`.
 
     Returns:
       A Tensor of size `[batch_size, input_size1, ...]`.
@@ -539,7 +551,10 @@ class AddBias(base.AbstractModule, base.Transposable):
         partitioner=self._partitioners.get("b", None),
         regularizer=self._regularizers.get("b", None))
 
-    outputs = inputs + self._b
+    bias = self._b
+    if multiplier != 1:
+      bias *= multiplier
+    outputs = inputs + bias
     return outputs
 
   @property

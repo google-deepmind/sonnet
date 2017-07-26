@@ -551,22 +551,30 @@ class AddBiasTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                         initializers={"b": _test_initializer()},
                         regularizers={"b": b_regularizer})
       output = add(inputs)
+      output_subtract = add(inputs, multiplier=-1)
       with self.test_session() as sess:
         # With random data, check the TF calculation matches the Numpy version.
         input_data = np.random.randn(*self.mb_in_shape).astype(
             dtype.as_numpy_dtype)
         sess.run(tf.global_variables_initializer())
-        output_data, b = sess.run([output, add.b],
-                                  {inputs: input_data})
+        output_data, output_subtract_data, b = sess.run(
+            [output, output_subtract, add.b], {inputs: input_data})
         regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         self.assertRegexpMatches(regularizers[0].name, ".*l2_regularizer.*")
       if not bias_shape:  # Scalar bias.
-        result = input_data + np.array([b]).astype(dtype.as_numpy_dtype(b))
+        b_array = np.array([b]).astype(dtype.as_numpy_dtype(b))
       else:
-        result = input_data + b.astype(dtype.as_numpy_dtype)
+        b_array = b.astype(dtype.as_numpy_dtype)
+      result = input_data + b_array
+      result_subtract = input_data - b_array
       self.assertAllClose(
           result,
           output_data,
+          atol=tolerance_map[dtype],
+          rtol=tolerance_map[dtype])
+      self.assertAllClose(
+          result_subtract,
+          output_subtract_data,
           atol=tolerance_map[dtype],
           rtol=tolerance_map[dtype])
 

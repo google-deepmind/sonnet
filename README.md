@@ -55,7 +55,7 @@ Run the install script to create a wheel file in a temporary directory:
 
 ```shell
 $ mkdir /tmp/sonnet
-$ bazel build --config=opt :install
+$ bazel build :install
 $ ./bazel-bin/install /tmp/sonnet
 ```
 

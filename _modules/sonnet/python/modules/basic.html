@@ -499,6 +499,13 @@
 <span class="sd">    first_bias = snt.AddBias(bias_dims=[1])</span>
 <span class="sd">    first_bias_output = first_bias(input)</span>
 <span class="sd">    first_bias.b.get_shape()  # (dim1_size, 1, 1)</span>
+
+<span class="sd">    # Subtract and later add the same learned bias:</span>
+<span class="sd">    bias = snt.AddBias()</span>
+<span class="sd">    hidden1 = bias(input, multiplier=-1)</span>
+<span class="sd">    # ...</span>
+<span class="sd">    reconstructed_input = bias(hidden4)</span>
+
 <span class="sd">    ```</span>
 
 <span class="sd">    Raises:</span>
@@ -521,11 +528,16 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
         <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the Add module into the graph, with input Tensor `inputs`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A Tensor of size `[batch_size, input_size1, ...]`.</span>
+<span class="sd">      multiplier: A scalar or Tensor which the bias term is multiplied by</span>
+<span class="sd">        before adding it to `inputs`. Anything which works in the expression</span>
+<span class="sd">        `bias * multiplier` is acceptable here. This may be useful if you want</span>
+<span class="sd">        to add a bias in one place and subtract the same bias in another place</span>
+<span class="sd">        via `multiplier=-1`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A Tensor of size `[batch_size, input_size1, ...]`.</span>
@@ -581,7 +593,10 @@
         <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
         <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">inputs</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+    <span class="k">if</span> <span class="n">multiplier</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">bias</span> <span class="o">*=</span> <span class="n">multiplier</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">inputs</span> <span class="o">+</span> <span class="n">bias</span>
     <span class="k">return</span> <span class="n">outputs</span>
 
   <span class="nd">@property</span>

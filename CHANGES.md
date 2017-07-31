@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.8 - Monday 31. July 2017
+
+* Add optional bias for the multipler in AddBias.
+* Push first version of wheel files to PyPI.
+
 ## Version 1.7 - Monday 24. July 2017
 
 * Fix install script for Python 3.

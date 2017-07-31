@@ -78,6 +78,8 @@ the wheel file:
 
 ```shell
 $ pip uninstall sonnet
+or
+$ pip uninstall dm-sonnet #if you installed v1.6 already
 ```
 
 You can verify that Sonnet has been successfully installed by, for example,

@@ -127,7 +127,7 @@ class NestTest(tf.test.TestCase):
     ]
 
     flattened = nest.flatten_iterable(mess)
-    self.assertEqual(flattened, ["z", 3, 4, 5, 1, 3, 2, 17])
+    self.assertEqual(flattened, ["z", 3, 4, 5, 1, 2, 3, 17])
 
     structure_of_mess = [
         14,

@@ -45,16 +45,6 @@ flatten_up_to = nest.flatten_up_to
 flatten_dict_items = nest.flatten_dict_items
 
 
-def _yield_flat_up_to(shallow_tree, input_tree):
-  """Yields elements `input_tree` partially flattened up to `shallow_tree`."""
-  if is_sequence(shallow_tree):
-    for shallow_branch, input_branch in zip(shallow_tree, input_tree):
-      for input_leaf in _yield_flat_up_to(shallow_branch, input_branch):
-        yield input_leaf
-  else:
-    yield input_tree
-
-
 def _sorted(dict_):
   """Returns a sorted list from the dict, with error if keys not sortable."""
   try:

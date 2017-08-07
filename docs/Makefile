@@ -3,8 +3,9 @@
 docs:
 	# Copy Sonnet logo into the right location.
 	mkdir -p docs/images && cp images/sonnet_logo.png docs/images/sonnet_logo.png
-	# Convert our README.md into an rst file.
+	# Convert our .md files into rst files.
 	pandoc -f markdown -o docs/README.rst docs/README.md
+	pandoc -f markdown -o docs/INSTALL.rst docs/INSTALL.md
 	# Create automated API docs.
 	sphinx-apidoc -o docs/api sonnet/ 'sonnet/python/ops/*_test*'
 	# Build Sphinx documentation.

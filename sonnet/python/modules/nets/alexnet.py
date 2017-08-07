@@ -13,17 +13,21 @@
 # limitations under the License.
 # ============================================================================
 
+# pylint: disable=line-too-long
 """Implementation of AlexNet as a Sonnet module.
 
-`AlexNet` is a Sonnet module that implements three variants of
+`AlexNet` is a Sonnet module that implements two variants of
    'ImageNet Classification with Deep Convolutional Neural Networks'
     Alex Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
     http://papers.nips.cc/paper/4824-imagenet-classification-w
 
-The three modes are FULL, HALF and MINI, corresponding to the full
-dual-gpu version, the single-gpu version and a cut-down version that
-is able to run on Cifar10.
+The two modes are FULL and MINI, corresponding to the full dual-gpu version and
+a cut-down version that is able to run on Cifar10.
+
+AlexNet is no longer state of the art and isn't considered a good starting point
+for a vision network.
 """
+# pylint: enable=line-too-long
 
 from __future__ import absolute_import
 from __future__ import division
@@ -41,7 +45,7 @@ import tensorflow as tf
 
 
 class AlexNet(base.AbstractModule):
-  """Implementation of AlexNet with full, half and mini versions.
+  """Implementation of AlexNet with full and mini versions.
 
   Based on:
     'ImageNet Classification with Deep Convolutional Neural Networks'
@@ -50,19 +54,17 @@ class AlexNet(base.AbstractModule):
   """
 
   FULL = "FULL"
-  HALF = "HALF"
   MINI = "MINI"
 
   POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
 
-  def __init__(self, mode=HALF, use_batch_norm=False, batch_norm_config=None,
+  def __init__(self, mode, use_batch_norm=False, batch_norm_config=None,
                initializers=None, partitioners=None, regularizers=None,
-               name="alex_net"):
+               bn_on_fc_layers=True, name="alex_net"):
     """Constructs AlexNet.
 
     Args:
-      mode: Construction mode of network: `AlexNet.FULL`, `AlexNet.HALF` or
-          `AlexNet.MINI`.
+      mode: Construction mode of network: `AlexNet.FULL` or `AlexNet.MINI`.
       use_batch_norm: Whether to use batch normalization between the output of
           a layer and the activation function.
       batch_norm_config: Optional mapping of additional configuration for the
@@ -79,20 +81,27 @@ class AlexNet(base.AbstractModule):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      bn_on_fc_layers: If `use_batch_norm` is True, add batch normalization to
+        the fully-connected layers. This is deprecated.
       name: Name of the module.
 
     Raises:
       base.Error: If the given `mode` is not one of `AlexNet.FULL`,
-          `AlexNet.HALF` or `AlexNet.MINI`.
+        or `AlexNet.MINI`.
       TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
-      KeyError: If `initializers` contains any keys other than 'w' or 'b'.
-      KeyError: If `partitioners` contains any keys other than 'w' or 'b'.
-      KeyError: If `regularizers` contains any keys other than 'w' or 'b'.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contains any
+        keys other than 'w' or 'b'.
     """
     super(AlexNet, self).__init__(name=name)
 
     self._mode = mode
     self._use_batch_norm = use_batch_norm
+    self._bn_on_fc_layers = bn_on_fc_layers
+
+    if self._bn_on_fc_layers:
+      tf.logging.warn("Using BatchNorm on the fully connected layers in "
+                      "AlexNet is not recommended. 'bn_on_fc_layers' is a "
+                      "deprecated option and will likely be removed.")
 
     if batch_norm_config is not None:
       if not isinstance(batch_norm_config, collections.Mapping):
@@ -101,18 +110,7 @@ class AlexNet(base.AbstractModule):
     else:
       self._batch_norm_config = {}
 
-    if self._mode == self.HALF:
-      # Half of AlexNet, i.e. originally ran on one GPU
-      self._conv_layers = [
-          (48, (11, 4), (3, 2)),
-          (128, (5, 1), (3, 2)),
-          (192, (3, 1), None),
-          (192, (3, 1), None),
-          (128, (3, 1), (3, 2)),
-      ]
-
-      self._fc_layers = [2048, 2048]
-    elif self._mode == self.FULL:
+    if self._mode == self.FULL:
       # The full AlexNet, i.e. originally ran on two GPUs
       self._conv_layers = [
           (96, (11, 4), (3, 2)),
@@ -136,8 +134,8 @@ class AlexNet(base.AbstractModule):
       self._fc_layers = [1024, 1024]
     else:
       raise base.Error("AlexNet construction mode '{}' not recognised, "
-                       "must be one of: '{}', '{}', '{}'".format(
-                           mode, self.HALF, self.FULL, self.MINI))
+                       "must be one of: '{}', '{}'".format(
+                           mode, self.FULL, self.MINI))
 
     self._min_size = self._calc_min_size(self._conv_layers)
     self._conv_modules = []
@@ -281,7 +279,7 @@ class AlexNet(base.AbstractModule):
 
       net = linear_mod(net)
 
-      if self._use_batch_norm:
+      if self._use_batch_norm and self._bn_on_fc_layers:
         bn = batch_norm.BatchNorm(**self._batch_norm_config)
         net = bn(net, is_training, test_local_stats)
 
@@ -337,3 +335,89 @@ class AlexNet(base.AbstractModule):
     self._ensure_is_connected()
 
     return self._linear_modules
+
+
+class AlexNetFull(AlexNet):
+  """AlexNet constructed in the 'FULL' mode."""
+
+  def __init__(self, use_batch_norm=False, batch_norm_config=None,
+               initializers=None, partitioners=None, regularizers=None,
+               name="alex_net_full"):
+    """Constructs AlexNet.
+
+    Args:
+      use_batch_norm: Whether to use batch normalization between the output of
+          a layer and the activation function.
+      batch_norm_config: Optional mapping of additional configuration for the
+          `snt.BatchNorm` modules.
+      initializers: Optional dict containing ops to initialize the filters (with
+          key 'w') or biases (with key 'b'). The default initializers are
+          truncated normal initializers, which are commonly used when the inputs
+          are zero centered (see https://arxiv.org/pdf/1502.03167v3.pdf).
+      partitioners: Optional dict containing partitioners for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        partitioners are used.
+      regularizers: Optional dict containing regularizers for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        regularizers are used. A regularizer should be a function that takes
+        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
+        the L1 and L2 regularizers in `tf.contrib.layers`.
+      name: Name of the module.
+
+    Raises:
+      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contains any
+        keys other than 'w' or 'b'.
+    """
+    super(AlexNetFull, self).__init__(
+        mode=self.FULL,
+        use_batch_norm=use_batch_norm,
+        batch_norm_config=batch_norm_config,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        bn_on_fc_layers=False,
+        name=name)
+
+
+class AlexNetMini(AlexNet):
+  """AlexNet constructed in the 'MINI' mode."""
+
+  def __init__(self, use_batch_norm=False, batch_norm_config=None,
+               initializers=None, partitioners=None, regularizers=None,
+               name="alex_net_mini"):
+    """Constructs AlexNet.
+
+    Args:
+      use_batch_norm: Whether to use batch normalization between the output of
+          a layer and the activation function.
+      batch_norm_config: Optional mapping of additional configuration for the
+          `snt.BatchNorm` modules.
+      initializers: Optional dict containing ops to initialize the filters (with
+          key 'w') or biases (with key 'b'). The default initializers are
+          truncated normal initializers, which are commonly used when the inputs
+          are zero centered (see https://arxiv.org/pdf/1502.03167v3.pdf).
+      partitioners: Optional dict containing partitioners for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        partitioners are used.
+      regularizers: Optional dict containing regularizers for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        regularizers are used. A regularizer should be a function that takes
+        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
+        the L1 and L2 regularizers in `tf.contrib.layers`.
+      name: Name of the module.
+
+    Raises:
+      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contains any
+        keys other than 'w' or 'b'.
+    """
+    super(AlexNetMini, self).__init__(
+        mode=self.MINI,
+        use_batch_norm=use_batch_norm,
+        batch_norm_config=batch_norm_config,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        bn_on_fc_layers=False,
+        name=name)

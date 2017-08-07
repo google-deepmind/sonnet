@@ -20,6 +20,8 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.python.modules.nets.alexnet import AlexNet
+from sonnet.python.modules.nets.alexnet import AlexNetFull
+from sonnet.python.modules.nets.alexnet import AlexNetMini
 from sonnet.python.modules.nets.convnet import ConvNet2D
 from sonnet.python.modules.nets.convnet import ConvNet2DTranspose
 from sonnet.python.modules.nets.dilation import Dilation

@@ -429,7 +429,7 @@ def get_normalized_variable_map(scope_or_module,
     "if they contain sliced (partitioned) variables",
     group_sliced_variables=False)
 def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
-              context=None, group_sliced_variables=True):
+              context=None, group_sliced_variables=True, **kwargs):
   """Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
   The names of the variables are normalized to remove the scope prefix.
@@ -446,6 +446,7 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
     group_sliced_variables: Boolean, if set to True, sliced variables are
        grouped together in the returned map; if set to False, each partition of
        a sliced variable is a separate (key, value) pair.
+    **kwargs: Extra keyword arguments to pass to tf.train.Saver.
 
   Returns:
     A `tf.train.Saver` object for Variables in the scope or module.
@@ -457,7 +458,7 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
         scope, collection, context,
         group_sliced_variables))
 
-  return tf.train.Saver(var_list=variable_map)
+  return tf.train.Saver(var_list=variable_map, **kwargs)
 
 
 def has_variable_scope(obj):

@@ -1,6 +1,8 @@
 
 .. include:: README.rst
 
+.. include:: INSTALL.rst
+
 Indices and tables
 ==================
 

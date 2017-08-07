@@ -471,7 +471,7 @@
     <span class="s2">&quot;if they contain sliced (partitioned) variables&quot;</span><span class="p">,</span>
     <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_saver</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,),</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
-              <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+              <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group_sliced_variables</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Builds a `tf.train.Saver` for the scope or module, with normalized names.</span>
 
 <span class="sd">  The names of the variables are normalized to remove the scope prefix.</span>
@@ -488,6 +488,7 @@
 <span class="sd">    group_sliced_variables: Boolean, if set to True, sliced variables are</span>
 <span class="sd">       grouped together in the returned map; if set to False, each partition of</span>
 <span class="sd">       a sliced variable is a separate (key, value) pair.</span>
+<span class="sd">    **kwargs: Extra keyword arguments to pass to tf.train.Saver.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    A `tf.train.Saver` object for Variables in the scope or module.</span>
@@ -499,7 +500,7 @@
         <span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span>
         <span class="n">group_sliced_variables</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">var_list</span><span class="o">=</span><span class="n">variable_map</span><span class="p">)</span></div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">var_list</span><span class="o">=</span><span class="n">variable_map</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="has_variable_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.has_variable_scope">[docs]</a><span class="k">def</span> <span class="nf">has_variable_scope</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>

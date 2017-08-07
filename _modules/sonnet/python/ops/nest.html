@@ -64,11 +64,11 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">collections</span> <span class="k">as</span> <span class="nn">_collections</span>
 
 <span class="c1"># Dependency imports</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">six</span> <span class="k">as</span> <span class="nn">_six</span>
 
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
@@ -87,43 +87,37 @@
 <span class="n">flatten_dict_items</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_dict_items</span>
 
 
-<span class="k">def</span> <span class="nf">_yield_flat_up_to</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">,</span> <span class="n">input_tree</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Yields elements `input_tree` partially flattened up to `shallow_tree`.&quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">shallow_branch</span><span class="p">,</span> <span class="n">input_branch</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">shallow_tree</span><span class="p">,</span> <span class="n">input_tree</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">input_leaf</span> <span class="ow">in</span> <span class="n">_yield_flat_up_to</span><span class="p">(</span><span class="n">shallow_branch</span><span class="p">,</span> <span class="n">input_branch</span><span class="p">):</span>
-        <span class="k">yield</span> <span class="n">input_leaf</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">yield</span> <span class="n">input_tree</span>
-
-
 <span class="k">def</span> <span class="nf">_sorted</span><span class="p">(</span><span class="n">dict_</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a sorted list from the dict, with error if keys not sortable.&quot;&quot;&quot;</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">dict_</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">dict_</span><span class="p">))</span>
   <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;nest only supports dicts with sortable keys.&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_iterable_like</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Converts the iterable `args` to the same type as `instance`.</span>
+  <span class="sd">&quot;&quot;&quot;Converts the sequence `args` to the same type as `instance`.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    instance: an instance of `tuple`, `list`, `namedtuple`, `dict`, or</span>
-<span class="sd">        `collections.NamedDict`.</span>
-<span class="sd">    args: elements to be converted to a sequence.</span>
+<span class="sd">        `collections.OrderedDict`.</span>
+<span class="sd">    args: elements to be converted to the `instance` type.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    `args` with the type of `instance`.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
-  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">_sorted</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="c1"># Pack dictionaries in a deterministic order by sorting the keys.</span>
+    <span class="c1"># Notice this means that we ignore the original order of `OrderedDict`</span>
+    <span class="c1"># instances. This is intentional, to avoid potential bugs caused by mixing</span>
+    <span class="c1"># ordered and plain dicts (e.g., flattening a dict but using a</span>
+    <span class="c1"># corresponding `OrderedDict` to pack it back).</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">_sorted</span><span class="p">(</span><span class="n">instance</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)((</span><span class="n">key</span><span class="p">,</span> <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_six</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span>
   <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span>
         <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span> <span class="ow">and</span>
-        <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span>
-        <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">)):</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="n">_collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">instance</span><span class="o">.</span><span class="n">_fields</span><span class="p">)):</span>
     <span class="c1"># This is a namedtuple</span>
     <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
@@ -133,13 +127,13 @@
 
 <span class="k">def</span> <span class="nf">_yield_value_from_iterable</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
-        <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Iterate through dictionaries in a deterministic order.</span>
-      <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_sorted</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
-        <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="c1"># Iterate through dictionaries in a deterministic order by sorting the</span>
+    <span class="c1"># keys. Notice this means that we ignore the original order of `OrderedDict`</span>
+    <span class="c1"># instances. This is intentional, to avoid potential bugs caused by mixing</span>
+    <span class="c1"># ordered and plain dicts (e.g., flattening a dict but using a</span>
+    <span class="c1"># corresponding `OrderedDict` to pack it back).</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_sorted</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+      <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
       <span class="k">yield</span> <span class="n">value</span>
@@ -163,7 +157,7 @@
 <span class="sd">  Returns:</span>
 <span class="sd">    True if `seq` is iterable, but not a string.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">_six</span><span class="o">.</span><span class="n">string_types</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="k">return</span> <span class="kc">False</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="nb">iter</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
@@ -173,12 +167,19 @@
 
 
 <div class="viewcode-block" id="flatten_iterable"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.flatten_iterable">[docs]</a><span class="k">def</span> <span class="nf">flatten_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a flat sequence from a given nested structure.</span>
+  <span class="sd">&quot;&quot;&quot;Returns a flat list from a given nested structure.</span>
 
-<span class="sd">  Unlike `flatten` (which just flattens sequences), this will also flatten</span>
-<span class="sd">  dictionaries.</span>
+<span class="sd">  If `structure` is not a sequence, tuple, or dict, then returns a</span>
+<span class="sd">  single-element list: `[structure]`.</span>
 
-<span class="sd">  If `nest` is not a sequence, this returns a single-element list: `[nest]`.</span>
+<span class="sd">  In the case of dict instances, the sequence consists of the values, sorted by</span>
+<span class="sd">  key to ensure deterministic behavior. This is true also for `OrderedDict`</span>
+<span class="sd">  instances: their sequence order is ignored, the sorting order of keys is</span>
+<span class="sd">  used instead. The same convention is followed in `pack_sequence_as`. This</span>
+<span class="sd">  correctly repacks dicts and `OrderedDict`s after they have been flattened,</span>
+<span class="sd">  and also allows flattening an `OrderedDict` and then repacking it back using</span>
+<span class="sd">  a correponding plain dict, or vice-versa.</span>
+<span class="sd">  Dictionaries with non-sortable keys cannot be flattened.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    structure: an arbitrarily nested structure or a scalar object. Note, numpy</span>
@@ -188,8 +189,7 @@
 <span class="sd">    A Python list, the flattened version of the input.</span>
 
 <span class="sd">  Raises:</span>
-<span class="sd">    TypeError: If `structure` is a dict or contains a dict with non-sortable</span>
-<span class="sd">        keys.</span>
+<span class="sd">    TypeError: The structure is or contains a dict with non-sortable keys.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_yield_flat_nest_from_iterable</span><span class="p">(</span><span class="n">structure</span><span class="p">))</span>
@@ -229,25 +229,34 @@
 
 
 <div class="viewcode-block" id="pack_iterable_as"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.pack_iterable_as">[docs]</a><span class="k">def</span> <span class="nf">pack_iterable_as</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a given flattened iterable packed into a nest.</span>
+  <span class="sd">&quot;&quot;&quot;Returns a given flattened sequence packed into a given structure.</span>
 
 <span class="sd">  If `structure` is a scalar, `flat_iterable` must be a single-element list;</span>
-<span class="sd">  in this case the return value is `flat_sequence[0]`.</span>
+<span class="sd">  in this case the return value is `flat_iterable[0]`.</span>
+
+<span class="sd">  If `structure` is or contains a dict instance, the keys will be sorted to</span>
+<span class="sd">  pack the flat sequence in deterministic order. This is true also for</span>
+<span class="sd">  `OrderedDict` instances: their sequence order is ignored, the sorting order of</span>
+<span class="sd">  keys is used instead. The same convention is followed in `pack_sequence_as`.</span>
+<span class="sd">  This correctly repacks dicts and `OrderedDict`s after they have been</span>
+<span class="sd">  flattened, and also allows flattening an `OrderedDict` and then repacking it</span>
+<span class="sd">  back using a correponding plain dict, or vice-versa.</span>
+<span class="sd">  Dictionaries with non-sortable keys cannot be flattened.</span>
 
 <span class="sd">  Args:</span>
-<span class="sd">    structure: non-string iterable (such as a tuple, list, dict, or named dict)</span>
-<span class="sd">        constructed of scalars and/or other tuples/lists, or a scalar. Note:</span>
-<span class="sd">        numpy arrays are considered scalars.</span>
-<span class="sd">    flat_iterable: flat iterable to pack.</span>
+<span class="sd">    structure: Nested structure, whose structure is given by nested lists,</span>
+<span class="sd">        tuples, and dicts. Note: numpy arrays and strings are considered</span>
+<span class="sd">        scalars.</span>
+<span class="sd">    flat_iterable: flat sequence to pack.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    packed: `flat_iterable` converted to have the same recursive structure as</span>
 <span class="sd">      `structure`.</span>
 
 <span class="sd">  Raises:</span>
-<span class="sd">    ValueError: If nest and structure have different element counts.</span>
-<span class="sd">    TypeError: If `structure` is a dict or contains a dict with non-sortable</span>
-<span class="sd">        keys.</span>
+<span class="sd">    ValueError: If `flat_iterable` and `structure` have different</span>
+<span class="sd">      element counts.</span>
+<span class="sd">    TypeError: `structure` is or contains a dict with non-sortable keys.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">is_iterable</span><span class="p">(</span><span class="n">flat_iterable</span><span class="p">):</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;flat_iterable must be an iterable&quot;</span><span class="p">)</span>

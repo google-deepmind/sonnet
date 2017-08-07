@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.9 - Monday 7. August 2017
+
+* Clean up and clarify documentation on nest's dict ordering behavior.
+* Change installation instructions to use pip.
+
 ## Version 1.8 - Monday 31. July 2017
 
 * Add optional bias for the multipler in AddBias.

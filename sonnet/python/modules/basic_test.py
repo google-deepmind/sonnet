@@ -25,13 +25,14 @@ import collections
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
+from sonnet.python.modules import basic
+from sonnet.python.ops import nest
 from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.client import device_lib
 from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import variables
-from tensorflow.python.util import nest
 
 
 def _test_initializer(mu=0.0, sigma=1.0, dtype=tf.float32):
@@ -1051,6 +1052,34 @@ class BatchReshapeTest(tf.test.TestCase,
     self.assertAllEqual(actual_output, expected_output)
 
 
+class MergeLeadingDimsTest(tf.test.TestCase,
+                           parameterized.ParameterizedTestCase):
+  """Tests the merge_leading_dims function."""
+
+  @parameterized.NamedParameters(
+      ("Float", 1.0),
+      ("Integer", 1),
+      ("Boolean", False))
+  def testScalarInput(self, scalar):
+    """Tests if a statically shaped scalar stays a scalar."""
+    # Act.
+    tensor = basic.merge_leading_dims(scalar)
+
+    # Assert.
+    # This should be a scalar (i.e. a tensor of rank 0).
+    self.assertEqual(0, len(tensor.get_shape().as_list()))
+
+  def testExceptionUnknownRank(self):
+    """Checks if an exception is thrown if the rank of the tensor is unknown."""
+    # Arrange.
+    tensor_scalar = tf.placeholder(dtype=tf.float32)
+
+    # Act / assert.
+    err = "unknown rank"
+    with self.assertRaisesRegexp(ValueError, err):
+      basic.merge_leading_dims(tensor_scalar)
+
+
 class BatchFlattenTest(tf.test.TestCase,
                        parameterized.ParameterizedTestCase):
 
@@ -1358,6 +1387,42 @@ class BatchApplyTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     with self.test_session() as sess:
       out_expected, out_result = sess.run([expected_output, output])
     self.assertAllClose(out_expected, out_result)
+
+  @parameterized.NamedParameters(
+      ("flagArgTrue", [True], {}),
+      ("flagArgFalse", [False], {}),
+      ("flagKwargTrue", [], {"is_training": True}),
+      ("flagKwargFalse", [], {"is_training": False}))
+  def testNonTensor(self, flag_args, flag_kawargs):
+    """Tests if non-tensor inputs are simply forwarded to the module."""
+    # Arrange.
+    # We work around the Python closure issue by writing to a list instead of
+    # a primitive variable.
+    received_flag_value = [None]
+    x = tf.placeholder(shape=(5, 3, 10), dtype=tf.float32)
+
+    def _build(inputs, is_training):
+      """Builds a network that requires a flag at construction time."""
+      net = snt.Linear(output_size=10)(inputs)
+      net = snt.BatchNorm()(net, is_training=is_training)
+      # We record the value of the flag here to make sure that the value
+      # is correctly passed on to this module.
+      received_flag_value[0] = is_training
+      return net
+
+    # Act.
+    snt.BatchApply(snt.Module(build=_build))(x, *flag_args, **flag_kawargs)
+
+    # Assert.
+    self.assertIsNotNone(received_flag_value[0])
+
+    # Recover the original value of the flag from the tensorflow graph.
+    with self.test_session() as sess:
+      session_value = sess.run(received_flag_value[0])
+
+    # Recover the flag value from the test inputs.
+    flag_value = nest.flatten_iterable([flag_args, flag_kawargs])[0]
+    self.assertEqual(session_value, flag_value)
 
 
 class SliceByDimTest(tf.test.TestCase):

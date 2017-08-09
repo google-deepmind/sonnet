@@ -104,8 +104,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     Raises:
       TypeError: If `output_channels` is not iterable; or if `kernel_shapes` is
         not iterable; or `strides` is not iterable; or `paddings` is not
-        iterable; or if `activation` is not callable; or `batch_norm_config` is
-        not a mappable (e.g. `dict`).
+        iterable; or if `activation` is not callable.
       ValueError: If `output_channels` is empty; or if `kernel_shapes` has not
         length 1 or `len(output_channels)`; or if `strides` has not
         length 1 or `len(output_channels)`; or if `paddings` has not
@@ -169,12 +168,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
 
     self._use_batch_norm = use_batch_norm
 
-    if batch_norm_config is not None:
-      if not isinstance(batch_norm_config, collections.Mapping):
-        raise TypeError("`batch_norm_config` must be a mapping, e.g. `dict`.")
-      self._batch_norm_config = batch_norm_config
-    else:
-      self._batch_norm_config = {}
+    self._batch_norm_config = batch_norm_config or {}
 
     if isinstance(use_bias, bool):
       use_bias = (use_bias,)

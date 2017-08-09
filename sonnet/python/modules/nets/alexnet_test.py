@@ -248,10 +248,6 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
       self.assertEqual(type(linear_module.b), variables.PartitionedVariable)
 
   def testErrorHandling(self):
-    err = r"`batch_norm_config` must be a mapping, e\.g\. `dict`."
-    with self.assertRaisesRegexp(TypeError, err):
-      snt.nets.AlexNetMini(
-          batch_norm_config="not a valid config")
 
     err = "AlexNet construction mode 'BLAH' not recognised"
     with self.assertRaisesRegexp(snt.Error, err):

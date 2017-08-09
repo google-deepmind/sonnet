@@ -156,14 +156,6 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
              paddings=self.paddings,
              activation="not_a_function")
 
-    err = "`batch_norm_config` must be a mapping, e.g. `dict`"
-    with self.assertRaisesRegexp(TypeError, err):
-      module(output_channels=self.output_channels,
-             kernel_shapes=self.kernel_shapes,
-             strides=self.strides,
-             paddings=self.paddings,
-             batch_norm_config="not a valid config")
-
     err = "output_channels must be iterable"
     with self.assertRaisesRegexp(TypeError, err):
       module(output_channels=42,

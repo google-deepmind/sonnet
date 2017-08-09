@@ -113,7 +113,7 @@ def _check_nested_callables(dictionary, object_name):
       dictionary or a callable.
   """
   for key, entry in six.iteritems(dictionary):
-    if isinstance(entry, dict):
+    if hasattr(entry, "items"):
       _check_nested_callables(entry, object_name)
     elif not callable(entry):
       raise TypeError(
@@ -140,22 +140,12 @@ def check_initializers(initializers, keys):
 
   Raises:
     KeyError: If an initializer is provided for a key not in `keys`.
-    TypeError: If a provided initializer is not a callable function, or if the
-      dict of initializers is not in fact a dict.
+    TypeError: If a provided initializer is not a callable function.
   """
   if initializers is None:
     return {}
 
   keys = set(keys)
-
-  # If the user is creating modules that nests other modules, then it is
-  # possible that they might not nest the initializer dictionaries correctly. If
-  # that is the case, then we might find that initializers is not a dict here.
-  # We raise a helpful exception in this case.
-  if not issubclass(type(initializers), dict):
-    raise TypeError("A dict of initializers was expected, but not "
-                    "given. You should double-check that you've nested the "
-                    "initializers for any sub-modules correctly.")
 
   if not set(initializers) <= keys:
     extra_keys = set(initializers) - keys
@@ -235,15 +225,6 @@ def check_regularizers(regularizers, keys):
     return {}
 
   keys = set(keys)
-
-  # If the user is creating modules that nests other modules, then it is
-  # possible that they might not nest the regularizer dictionaries correctly. If
-  # that is the case, then we might find that regularizers is not a dict here.
-  # We raise a helpful exception in this case.
-  if not issubclass(type(regularizers), dict):
-    raise TypeError("A dict of regularizers was expected, but not "
-                    "given. You should double-check that you've nested the "
-                    "regularizers for any sub-modules correctly.")
 
   if not set(regularizers) <= keys:
     extra_keys = set(regularizers) - keys
@@ -477,7 +458,7 @@ def _format_table(rows, join_lines=True):
 
 
 def variable_map_items(variable_map):
-  """Returns an iterator over (string, variable) pairs in the variable map.
+  """Yields an iterator over (string, variable) pairs in the variable map.
 
   In general, variable maps map variable names to either a `tf.Variable`, or
   list of `tf.Variable`s (in case of sliced variables).

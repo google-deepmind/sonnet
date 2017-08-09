@@ -33,8 +33,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import collections
-
 # Dependency imports
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
@@ -88,7 +86,6 @@ class AlexNet(base.AbstractModule):
     Raises:
       base.Error: If the given `mode` is not one of `AlexNet.FULL`,
         or `AlexNet.MINI`.
-      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contains any
         keys other than 'w' or 'b'.
     """
@@ -103,12 +100,7 @@ class AlexNet(base.AbstractModule):
                       "AlexNet is not recommended. 'bn_on_fc_layers' is a "
                       "deprecated option and will likely be removed.")
 
-    if batch_norm_config is not None:
-      if not isinstance(batch_norm_config, collections.Mapping):
-        raise TypeError("`batch_norm_config` must be a mapping, e.g. `dict`.")
-      self._batch_norm_config = batch_norm_config
-    else:
-      self._batch_norm_config = {}
+    self._batch_norm_config = batch_norm_config or {}
 
     if self._mode == self.FULL:
       # The full AlexNet, i.e. originally ran on two GPUs
@@ -365,7 +357,6 @@ class AlexNetFull(AlexNet):
       name: Name of the module.
 
     Raises:
-      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contains any
         keys other than 'w' or 'b'.
     """
@@ -408,7 +399,6 @@ class AlexNetMini(AlexNet):
       name: Name of the module.
 
     Raises:
-      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contains any
         keys other than 'w' or 'b'.
     """

@@ -1,5 +1,15 @@
 # Sonnet Changelog
 
+## Version 1.10 - Monday, 14. August 2017
+
+* First steps of AlexNet cleanup.
+  * Add option to disable batch normalization on fully-connected layers.
+  * Remove HALF mode.
+  * Add AlexNetMini and AlexNetFull.
+* Fixed bias compatibility between NHWC and NCHW data formats in Conv2D.
+  Uses tf.nn.bias_add for bias addition in all convolutional layers.
+* snt.BatchApply now also accepts scalar-valued inputs such as Boolean flags.
+
 ## Version 1.9 - Monday 7. August 2017
 
 * Clean up and clarify documentation on nest's dict ordering behavior.

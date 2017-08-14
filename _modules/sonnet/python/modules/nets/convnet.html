@@ -146,8 +146,7 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      TypeError: If `output_channels` is not iterable; or if `kernel_shapes` is</span>
 <span class="sd">        not iterable; or `strides` is not iterable; or `paddings` is not</span>
-<span class="sd">        iterable; or if `activation` is not callable; or `batch_norm_config` is</span>
-<span class="sd">        not a mappable (e.g. `dict`).</span>
+<span class="sd">        iterable; or if `activation` is not callable.</span>
 <span class="sd">      ValueError: If `output_channels` is empty; or if `kernel_shapes` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if `strides` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if `paddings` has not</span>
@@ -211,12 +210,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
 
-    <span class="k">if</span> <span class="n">batch_norm_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_norm_config</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`batch_norm_config` must be a mapping, e.g. `dict`.&quot;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
       <span class="n">use_bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">use_bias</span><span class="p">,)</span>

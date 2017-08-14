@@ -47,29 +47,25 @@
 <div class="section" id="module-sonnet.python.modules.nets.alexnet">
 <span id="sonnet-python-modules-nets-alexnet-module"></span><h2>sonnet.python.modules.nets.alexnet module<a class="headerlink" href="#module-sonnet.python.modules.nets.alexnet" title="Permalink to this headline">¶</a></h2>
 <p>Implementation of AlexNet as a Sonnet module.</p>
-<p><code class="docutils literal"><span class="pre">AlexNet</span></code> is a Sonnet module that implements three variants of
-‘ImageNet Classification with Deep Convolutional Neural Networks’ Alex
-Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
+<p><code class="docutils literal"><span class="pre">AlexNet</span></code> is a Sonnet module that implements two variants of ‘ImageNet
+Classification with Deep Convolutional Neural Networks’ Alex Krizhevsky,
+Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
 <a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-w">http://papers.nips.cc/paper/4824-imagenet-classification-w</a></p>
-<p>The three modes are FULL, HALF and MINI, corresponding to the full
-dual-gpu version, the single-gpu version and a cut-down version that is
-able to run on Cifar10.</p>
+<p>The two modes are FULL and MINI, corresponding to the full dual-gpu
+version and a cut-down version that is able to run on Cifar10.</p>
+<p>AlexNet is no longer state of the art and isn’t considered a good
+starting point for a vision network.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.nets.alexnet.AlexNet">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.alexnet.</code><code class="descname">AlexNet</code><span class="sig-paren">(</span><em>mode='HALF'</em>, <em>use_batch_norm=False</em>, <em>batch_norm_config=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='alex_net'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/alexnet.html#AlexNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.alexnet.</code><code class="descname">AlexNet</code><span class="sig-paren">(</span><em>mode</em>, <em>use_batch_norm=False</em>, <em>batch_norm_config=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>bn_on_fc_layers=True</em>, <em>name='alex_net'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/alexnet.html#AlexNet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
-<p>Implementation of AlexNet with full, half and mini versions.</p>
+<p>Implementation of AlexNet with full and mini versions.</p>
 <p>Based on: ‘ImageNet Classification with Deep Convolutional Neural
 Networks’ Alex Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012
 <a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-w">http://papers.nips.cc/paper/4824-imagenet-classification-w</a></p>
 <dl class="attribute">
 <dt id="sonnet.python.modules.nets.alexnet.AlexNet.FULL">
 <code class="descname">FULL</code><em class="property"> = 'FULL'</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.FULL" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.nets.alexnet.AlexNet.HALF">
-<code class="descname">HALF</code><em class="property"> = 'HALF'</em><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.HALF" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -120,6 +116,20 @@ must be &gt;= this number in size.</p>
 <code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNet.regularizers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNetFull">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.alexnet.</code><code class="descname">AlexNetFull</code><span class="sig-paren">(</span><em>use_batch_norm=False</em>, <em>batch_norm_config=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='alex_net_full'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/alexnet.html#AlexNetFull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNetFull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.nets.alexnet.AlexNet" title="sonnet.python.modules.nets.alexnet.AlexNet"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.nets.alexnet.AlexNet</span></code></a></p>
+<p>AlexNet constructed in the ‘FULL’ mode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.nets.alexnet.AlexNetMini">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.alexnet.</code><code class="descname">AlexNetMini</code><span class="sig-paren">(</span><em>use_batch_norm=False</em>, <em>batch_norm_config=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='alex_net_mini'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/alexnet.html#AlexNetMini"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.alexnet.AlexNetMini" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.nets.alexnet.AlexNet" title="sonnet.python.modules.nets.alexnet.AlexNet"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.nets.alexnet.AlexNet</span></code></a></p>
+<p>AlexNet constructed in the ‘MINI’ mode.</p>
 </dd></dl>
 
 </div>

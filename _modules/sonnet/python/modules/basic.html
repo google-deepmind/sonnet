@@ -85,10 +85,24 @@
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The input tensor, with its first dimensions merged.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If the rank of `tensor` is not well-defined.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
   <span class="n">tensor_shape_static</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+
+  <span class="c1"># Check if the rank of the input tensor is well-defined.</span>
+  <span class="k">if</span> <span class="n">tensor_shape_static</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can&#39;t merge leading dimensions of tensor of unknown &quot;</span>
+                     <span class="s2">&quot;rank.&quot;</span><span class="p">)</span>
   <span class="n">tensor_shape_list</span> <span class="o">=</span> <span class="n">tensor_shape_static</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
+
+  <span class="c1"># We can only merge the n_dims leading dimensions if the rank of the given</span>
+  <span class="c1"># tensor is sufficiently large.</span>
+  <span class="k">if</span> <span class="n">n_dims</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor_shape_list</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tensor</span>
+
   <span class="k">if</span> <span class="n">tensor_shape_static</span><span class="o">.</span><span class="n">is_fully_defined</span><span class="p">():</span>
     <span class="n">new_shape</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">tensor_shape_list</span><span class="p">[:</span><span class="n">n_dims</span><span class="p">])]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span>
@@ -103,7 +117,7 @@
   <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">new_size</span><span class="p">)</span>
 
   <span class="c1"># We need to set the result size of this, as otherwise we won&#39;t be able to</span>
-  <span class="c1"># pass to e.g. a Linear.</span>
+  <span class="c1"># pass to e.g. a Linear. Here we need to know at least the rank of the tensor.</span>
   <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
@@ -943,6 +957,10 @@
 <span class="sd">  Merges a number of leading dimensions of a tensor into a single dimension,</span>
 <span class="sd">  connects the provided module, then splits the leading dimension of the</span>
 <span class="sd">  result to match the input.</span>
+
+<span class="sd">  Input tensors whose rank is smaller than the number of dimensions to collapse</span>
+<span class="sd">  (e.g. all scalar values, which are tensors of rank 0), are passed unaltered to</span>
+<span class="sd">  the provided module.</span>
 
 <span class="sd">  This is useful for applying some module to each timestep of a Time x Batch x N</span>
 <span class="sd">  tensor. If a module is hard coded to only support 2D (Batch x N) then the</span>

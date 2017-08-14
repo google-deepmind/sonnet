@@ -155,7 +155,7 @@
 <span class="sd">      dictionary or a callable.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">dictionary</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">):</span>
       <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">object_name</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">entry</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -182,22 +182,12 @@
 
 <span class="sd">  Raises:</span>
 <span class="sd">    KeyError: If an initializer is provided for a key not in `keys`.</span>
-<span class="sd">    TypeError: If a provided initializer is not a callable function, or if the</span>
-<span class="sd">      dict of initializers is not in fact a dict.</span>
+<span class="sd">    TypeError: If a provided initializer is not a callable function.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">initializers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{}</span>
 
   <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-
-  <span class="c1"># If the user is creating modules that nests other modules, then it is</span>
-  <span class="c1"># possible that they might not nest the initializer dictionaries correctly. If</span>
-  <span class="c1"># that is the case, then we might find that initializers is not a dict here.</span>
-  <span class="c1"># We raise a helpful exception in this case.</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">initializers</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;A dict of initializers was expected, but not &quot;</span>
-                    <span class="s2">&quot;given. You should double-check that you&#39;ve nested the &quot;</span>
-                    <span class="s2">&quot;initializers for any sub-modules correctly.&quot;</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
     <span class="n">extra_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span> <span class="o">-</span> <span class="n">keys</span>
@@ -277,15 +267,6 @@
     <span class="k">return</span> <span class="p">{}</span>
 
   <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-
-  <span class="c1"># If the user is creating modules that nests other modules, then it is</span>
-  <span class="c1"># possible that they might not nest the regularizer dictionaries correctly. If</span>
-  <span class="c1"># that is the case, then we might find that regularizers is not a dict here.</span>
-  <span class="c1"># We raise a helpful exception in this case.</span>
-  <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">regularizers</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;A dict of regularizers was expected, but not &quot;</span>
-                    <span class="s2">&quot;given. You should double-check that you&#39;ve nested the &quot;</span>
-                    <span class="s2">&quot;regularizers for any sub-modules correctly.&quot;</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">keys</span><span class="p">:</span>
     <span class="n">extra_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span> <span class="o">-</span> <span class="n">keys</span>
@@ -519,7 +500,7 @@
 
 
 <div class="viewcode-block" id="variable_map_items"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.variable_map_items">[docs]</a><span class="k">def</span> <span class="nf">variable_map_items</span><span class="p">(</span><span class="n">variable_map</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns an iterator over (string, variable) pairs in the variable map.</span>
+  <span class="sd">&quot;&quot;&quot;Yields an iterator over (string, variable) pairs in the variable map.</span>
 
 <span class="sd">  In general, variable maps map variable names to either a `tf.Variable`, or</span>
 <span class="sd">  list of `tf.Variable`s (in case of sliced variables).</span>

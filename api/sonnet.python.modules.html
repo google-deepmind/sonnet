@@ -438,6 +438,9 @@ it.</p>
 <p>Merges a number of leading dimensions of a tensor into a single
 dimension, connects the provided module, then splits the leading
 dimension of the result to match the input.</p>
+<p>Input tensors whose rank is smaller than the number of dimensions to
+collapse (e.g. all scalar values, which are tensors of rank 0), are
+passed unaltered to the provided module.</p>
 <p>This is useful for applying some module to each timestep of a Time x
 Batch x N tensor. If a module is hard coded to only support 2D (Batch x
 N) then the full 3D Tensor cannot be provided. BatchApply will ‘merge’
@@ -728,6 +731,7 @@ dimension, e.g. <code class="docutils literal"><span class="pre">bias_dims=[0]</
 <p>Args: tensor: Tensor to have its first dimensions merged. n_dims:
 Number of dimensions to merge.</p>
 <p>Returns: The input tensor, with its first dimensions merged.</p>
+<p>Raises: ValueError: If the rank of <code class="docutils literal"><span class="pre">tensor</span></code> is not well-defined.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3014,7 +3018,7 @@ dictionaries) or None. keys: Iterable of valid keys for
 <code class="docutils literal"><span class="pre">initializers=None</span></code>, an empty dictionary will be returned.</p>
 <p>Raises: KeyError: If an initializer is provided for a key not in
 <code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided initializer is not a callable
-function, or if the dict of initializers is not in fact a dict.</p>
+function.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3222,7 +3226,7 @@ example:</p>
 <dl class="function">
 <dt id="sonnet.python.modules.util.variable_map_items">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">variable_map_items</code><span class="sig-paren">(</span><em>variable_map</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#variable_map_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.variable_map_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns an iterator over (string, variable) pairs in the variable map.</p>
+<dd><p>Yields an iterator over (string, variable) pairs in the variable map.</p>
 <p>In general, variable maps map variable names to either a
 <code class="docutils literal"><span class="pre">tf.Variable</span></code>, or list of <code class="docutils literal"><span class="pre">tf.Variable</span></code>s (in case of sliced
 variables).</p>

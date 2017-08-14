@@ -55,23 +55,25 @@
 <span class="c1"># limitations under the License.</span>
 <span class="c1"># ============================================================================</span>
 
+<span class="c1"># pylint: disable=line-too-long</span>
 <span class="sd">&quot;&quot;&quot;Implementation of AlexNet as a Sonnet module.</span>
 
-<span class="sd">`AlexNet` is a Sonnet module that implements three variants of</span>
+<span class="sd">`AlexNet` is a Sonnet module that implements two variants of</span>
 <span class="sd">   &#39;ImageNet Classification with Deep Convolutional Neural Networks&#39;</span>
 <span class="sd">    Alex Krizhevsky, Ilya Sutskever, Geoffrey E. Hinton, NIPS 2012</span>
 <span class="sd">    http://papers.nips.cc/paper/4824-imagenet-classification-w</span>
 
-<span class="sd">The three modes are FULL, HALF and MINI, corresponding to the full</span>
-<span class="sd">dual-gpu version, the single-gpu version and a cut-down version that</span>
-<span class="sd">is able to run on Cifar10.</span>
+<span class="sd">The two modes are FULL and MINI, corresponding to the full dual-gpu version and</span>
+<span class="sd">a cut-down version that is able to run on Cifar10.</span>
+
+<span class="sd">AlexNet is no longer state of the art and isn&#39;t considered a good starting point</span>
+<span class="sd">for a vision network.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: enable=line-too-long</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
-
-<span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="c1"># Dependency imports</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
@@ -83,7 +85,7 @@
 
 
 <div class="viewcode-block" id="AlexNet"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNet">[docs]</a><span class="k">class</span> <span class="nc">AlexNet</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Implementation of AlexNet with full, half and mini versions.</span>
+  <span class="sd">&quot;&quot;&quot;Implementation of AlexNet with full and mini versions.</span>
 
 <span class="sd">  Based on:</span>
 <span class="sd">    &#39;ImageNet Classification with Deep Convolutional Neural Networks&#39;</span>
@@ -92,19 +94,17 @@
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">FULL</span> <span class="o">=</span> <span class="s2">&quot;FULL&quot;</span>
-  <span class="n">HALF</span> <span class="o">=</span> <span class="s2">&quot;HALF&quot;</span>
   <span class="n">MINI</span> <span class="o">=</span> <span class="s2">&quot;MINI&quot;</span>
 
   <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">HALF</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net&quot;</span><span class="p">):</span>
+               <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      mode: Construction mode of network: `AlexNet.FULL`, `AlexNet.HALF` or</span>
-<span class="sd">          `AlexNet.MINI`.</span>
+<span class="sd">      mode: Construction mode of network: `AlexNet.FULL` or `AlexNet.MINI`.</span>
 <span class="sd">      use_batch_norm: Whether to use batch normalization between the output of</span>
 <span class="sd">          a layer and the activation function.</span>
 <span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
@@ -121,40 +121,30 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      bn_on_fc_layers: If `use_batch_norm` is True, add batch normalization to</span>
+<span class="sd">        the fully-connected layers. This is deprecated.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      base.Error: If the given `mode` is not one of `AlexNet.FULL`,</span>
-<span class="sd">          `AlexNet.HALF` or `AlexNet.MINI`.</span>
-<span class="sd">      TypeError: If `batch_norm_config` is not a mapping, e.g. `dict`.</span>
-<span class="sd">      KeyError: If `initializers` contains any keys other than &#39;w&#39; or &#39;b&#39;.</span>
-<span class="sd">      KeyError: If `partitioners` contains any keys other than &#39;w&#39; or &#39;b&#39;.</span>
-<span class="sd">      KeyError: If `regularizers` contains any keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">        or `AlexNet.MINI`.</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contains any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bn_on_fc_layers</span> <span class="o">=</span> <span class="n">bn_on_fc_layers</span>
 
-    <span class="k">if</span> <span class="n">batch_norm_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_norm_config</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`batch_norm_config` must be a mapping, e.g. `dict`.&quot;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bn_on_fc_layers</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Using BatchNorm on the fully connected layers in &quot;</span>
+                      <span class="s2">&quot;AlexNet is not recommended. &#39;bn_on_fc_layers&#39; is a &quot;</span>
+                      <span class="s2">&quot;deprecated option and will likely be removed.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">HALF</span><span class="p">:</span>
-      <span class="c1"># Half of AlexNet, i.e. originally ran on one GPU</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_conv_layers</span> <span class="o">=</span> <span class="p">[</span>
-          <span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
-          <span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
-          <span class="p">(</span><span class="mi">192</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-          <span class="p">(</span><span class="mi">192</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-          <span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
-      <span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span> <span class="ow">or</span> <span class="p">{}</span>
 
-      <span class="bp">self</span><span class="o">.</span><span class="n">_fc_layers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULL</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULL</span><span class="p">:</span>
       <span class="c1"># The full AlexNet, i.e. originally ran on two GPUs</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_conv_layers</span> <span class="o">=</span> <span class="p">[</span>
           <span class="p">(</span><span class="mi">96</span><span class="p">,</span> <span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
@@ -178,8 +168,8 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_fc_layers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">1024</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s2">&quot;AlexNet construction mode &#39;</span><span class="si">{}</span><span class="s2">&#39; not recognised, &quot;</span>
-                       <span class="s2">&quot;must be one of: &#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                           <span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">HALF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MINI</span><span class="p">))</span>
+                       <span class="s2">&quot;must be one of: &#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                           <span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MINI</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_min_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_min_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_conv_layers</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span> <span class="o">=</span> <span class="p">[]</span>
@@ -323,7 +313,7 @@
 
       <span class="n">net</span> <span class="o">=</span> <span class="n">linear_mod</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
 
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bn_on_fc_layers</span><span class="p">:</span>
         <span class="n">bn</span> <span class="o">=</span> <span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span><span class="p">)</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">bn</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="p">)</span>
 
@@ -379,6 +369,90 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_linear_modules</span></div>
+
+
+<div class="viewcode-block" id="AlexNetFull"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNetFull">[docs]</a><span class="k">class</span> <span class="nc">AlexNetFull</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;AlexNet constructed in the &#39;FULL&#39; mode.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net_full&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      use_batch_norm: Whether to use batch normalization between the output of</span>
+<span class="sd">          a layer and the activation function.</span>
+<span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
+<span class="sd">          `snt.BatchNorm` modules.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the filters (with</span>
+<span class="sd">          key &#39;w&#39;) or biases (with key &#39;b&#39;). The default initializers are</span>
+<span class="sd">          truncated normal initializers, which are commonly used when the inputs</span>
+<span class="sd">          are zero centered (see https://arxiv.org/pdf/1502.03167v3.pdf).</span>
+<span class="sd">      partitioners: Optional dict containing partitioners for the filters</span>
+<span class="sd">        (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        partitioners are used.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the filters</span>
+<span class="sd">        (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
+<span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contains any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AlexNetFull</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FULL</span><span class="p">,</span>
+        <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
+        <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AlexNetMini"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNetMini">[docs]</a><span class="k">class</span> <span class="nc">AlexNetMini</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;AlexNet constructed in the &#39;MINI&#39; mode.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net_mini&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      use_batch_norm: Whether to use batch normalization between the output of</span>
+<span class="sd">          a layer and the activation function.</span>
+<span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
+<span class="sd">          `snt.BatchNorm` modules.</span>
+<span class="sd">      initializers: Optional dict containing ops to initialize the filters (with</span>
+<span class="sd">          key &#39;w&#39;) or biases (with key &#39;b&#39;). The default initializers are</span>
+<span class="sd">          truncated normal initializers, which are commonly used when the inputs</span>
+<span class="sd">          are zero centered (see https://arxiv.org/pdf/1502.03167v3.pdf).</span>
+<span class="sd">      partitioners: Optional dict containing partitioners for the filters</span>
+<span class="sd">        (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        partitioners are used.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the filters</span>
+<span class="sd">        (with key &#39;w&#39;) and the biases (with key &#39;b&#39;). As a default, no</span>
+<span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
+<span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
+<span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contains any</span>
+<span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AlexNetMini</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MINI</span><span class="p">,</span>
+        <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
+        <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

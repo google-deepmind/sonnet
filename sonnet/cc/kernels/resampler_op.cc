@@ -126,7 +126,7 @@ struct Resampler2DFunctor<CPUDevice, T>{
     // estimate of the cost of each work unit is needed to correclty shard the
     // workload. Shard assumes each cost unit is 1ns, minimum cost per shard
     // being 10us.
-    const long long cost =  static_cast<long long>(num_sampling_points) *
+    const int64 cost =  static_cast<int64>(num_sampling_points) *
         data_channels * 1000;
     auto worker_threads = *(ctx->device()->tensorflow_cpu_worker_threads());
     ::tensorflow::Shard(worker_threads.num_threads, worker_threads.workers,
@@ -356,7 +356,7 @@ struct ResamplerGrad2DFunctor<CPUDevice, T>{
     // being 10us.
 
     auto worker_threads = *(ctx->device()->tensorflow_cpu_worker_threads());
-    const long long cost =  static_cast<long long>(num_sampling_points) *
+    const int64 cost =  static_cast<int64>(num_sampling_points) *
         data_channels * 1000;
     ::tensorflow::Shard(worker_threads.num_threads, worker_threads.workers,
                         batch_size, cost, update_grads_for_batches);

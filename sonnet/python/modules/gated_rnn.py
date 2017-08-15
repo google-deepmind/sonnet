@@ -92,9 +92,10 @@ class _BaseLSTM(rnn_core.RNNCore):
                max_unique_stats=1,
                hidden_clip_value=None,
                cell_clip_value=None,
+               custom_getter=None,
                name="lstm"):
     """See `__init__` of `LSTM` and `BatchNormLSTM` for docs."""
-    super(_BaseLSTM, self).__init__(name=name)
+    super(_BaseLSTM, self).__init__(custom_getter=custom_getter, name=name)
 
     self._hidden_size = hidden_size
     self._forget_bias = forget_bias
@@ -662,6 +663,7 @@ class LSTM(_BaseLSTM):
                max_unique_stats=1,
                hidden_clip_value=None,
                cell_clip_value=None,
+               custom_getter=None,
                name="lstm"):
     """Construct LSTM.
 
@@ -706,7 +708,10 @@ class LSTM(_BaseLSTM):
         vector is clipped by this value.
       cell_clip_value: Optional number; if set, then the LSTM cell vector is
         clipped by this value.
-      name: name of the module.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
 
     Raises:
       KeyError: if `initializers` contains any keys not returned by
@@ -732,6 +737,7 @@ class LSTM(_BaseLSTM):
         max_unique_stats=max_unique_stats,
         hidden_clip_value=hidden_clip_value,
         cell_clip_value=cell_clip_value,
+        custom_getter=custom_getter,
         name=name)
 
 
@@ -822,6 +828,7 @@ class BatchNormLSTM(_BaseLSTM):
                max_unique_stats=1,
                hidden_clip_value=None,
                cell_clip_value=None,
+               custom_getter=None,
                name="batch_norm_lstm"):
     """Construct `BatchNormLSTM`.
 
@@ -858,7 +865,10 @@ class BatchNormLSTM(_BaseLSTM):
         vector is clipped by this value.
       cell_clip_value: Optional number; if set, then the LSTM cell vector is
         clipped by this value.
-      name: name of the module.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
 
     Raises:
       KeyError: if `initializers` contains any keys not returned by
@@ -890,6 +900,7 @@ class BatchNormLSTM(_BaseLSTM):
         max_unique_stats=max_unique_stats,
         hidden_clip_value=hidden_clip_value,
         cell_clip_value=cell_clip_value,
+        custom_getter=custom_getter,
         name=name)
 
   # Overriding because the default for use_batch_norm_h is True here.
@@ -934,6 +945,7 @@ class ConvLSTM(rnn_core.RNNCore):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               custom_getter=None,
                name="conv_lstm"):
     """Construct ConvLSTM.
 
@@ -956,13 +968,16 @@ class ConvLSTM(rnn_core.RNNCore):
         used.
       regularizers: Optional dict containing regularizers for the convolutional
         weights and biases. As a default, no regularizers are used.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
       name: Name of the module.
 
     Raises:
       ValueError: If `skip_connection` is `True` and stride is different from 1
         or if `input_shape` is incompatible with `conv_ndims`.
     """
-    super(ConvLSTM, self).__init__(name=name)
+    super(ConvLSTM, self).__init__(custom_getter=custom_getter, name=name)
 
     self._conv_class = self._get_conv_class(conv_ndims)
 
@@ -1092,7 +1107,7 @@ class GRU(rnn_core.RNNCore):
   POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self, hidden_size, initializers=None, partitioners=None,
-               regularizers=None, name="gru"):
+               regularizers=None, custom_getter=None, name="gru"):
     """Construct GRU.
 
     Args:
@@ -1108,7 +1123,10 @@ class GRU(rnn_core.RNNCore):
         biases. As a default, no regularizers are used. This
         dict may contain any of the keys returned by
         `GRU.get_possible_initializer_keys`
-      name: name of the module.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
 
     Raises:
       KeyError: if `initializers` contains any keys not returned by
@@ -1118,7 +1136,7 @@ class GRU(rnn_core.RNNCore):
       KeyError: if `regularizers` contains any keys not returned by
         `GRU.get_possible_initializer_keys`.
     """
-    super(GRU, self).__init__(name=name)
+    super(GRU, self).__init__(custom_getter=custom_getter, name=name)
     self._hidden_size = hidden_size
     self._initializers = util.check_initializers(
         initializers, self.POSSIBLE_INITIALIZER_KEYS)

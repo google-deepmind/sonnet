@@ -56,9 +56,16 @@ class AlexNet(base.AbstractModule):
 
   POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
 
-  def __init__(self, mode, use_batch_norm=False, batch_norm_config=None,
-               initializers=None, partitioners=None, regularizers=None,
-               bn_on_fc_layers=True, name="alex_net"):
+  def __init__(self,
+               mode,
+               use_batch_norm=False,
+               batch_norm_config=None,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               bn_on_fc_layers=True,
+               custom_getter=None,
+               name="alex_net"):
     """Constructs AlexNet.
 
     Args:
@@ -81,6 +88,10 @@ class AlexNet(base.AbstractModule):
         the L1 and L2 regularizers in `tf.contrib.layers`.
       bn_on_fc_layers: If `use_batch_norm` is True, add batch normalization to
         the fully-connected layers. This is deprecated.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -89,7 +100,7 @@ class AlexNet(base.AbstractModule):
       KeyError: If `initializers`, `partitioners` or `regularizers` contains any
         keys other than 'w' or 'b'.
     """
-    super(AlexNet, self).__init__(name=name)
+    super(AlexNet, self).__init__(custom_getter=custom_getter, name=name)
 
     self._mode = mode
     self._use_batch_norm = use_batch_norm
@@ -264,6 +275,7 @@ class AlexNet(base.AbstractModule):
       linear_mod = basic.Linear(
           name="fc_{}".format(i),
           output_size=output_size,
+          initializers=self._initializers,
           partitioners=self._partitioners)
 
       if not self.is_connected:
@@ -332,8 +344,13 @@ class AlexNet(base.AbstractModule):
 class AlexNetFull(AlexNet):
   """AlexNet constructed in the 'FULL' mode."""
 
-  def __init__(self, use_batch_norm=False, batch_norm_config=None,
-               initializers=None, partitioners=None, regularizers=None,
+  def __init__(self,
+               use_batch_norm=False,
+               batch_norm_config=None,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               custom_getter=None,
                name="alex_net_full"):
     """Constructs AlexNet.
 
@@ -354,6 +371,10 @@ class AlexNetFull(AlexNet):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -368,14 +389,20 @@ class AlexNetFull(AlexNet):
         partitioners=partitioners,
         regularizers=regularizers,
         bn_on_fc_layers=False,
+        custom_getter=custom_getter,
         name=name)
 
 
 class AlexNetMini(AlexNet):
   """AlexNet constructed in the 'MINI' mode."""
 
-  def __init__(self, use_batch_norm=False, batch_norm_config=None,
-               initializers=None, partitioners=None, regularizers=None,
+  def __init__(self,
+               use_batch_norm=False,
+               batch_norm_config=None,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               custom_getter=None,
                name="alex_net_mini"):
     """Constructs AlexNet.
 
@@ -396,6 +423,10 @@ class AlexNetMini(AlexNet):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -410,4 +441,5 @@ class AlexNetMini(AlexNet):
         partitioners=partitioners,
         regularizers=regularizers,
         bn_on_fc_layers=False,
+        custom_getter=custom_getter,
         name=name)

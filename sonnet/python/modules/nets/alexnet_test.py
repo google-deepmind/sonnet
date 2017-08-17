@@ -221,8 +221,8 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
 
     with self.test_session() as sess:
       sess.run(init)
-      for conv_module in alex_net.conv_modules:
-        w_v, b_v = sess.run([conv_module.w, conv_module.b])
+      for module in alex_net.conv_modules + alex_net.linear_modules:
+        w_v, b_v = sess.run([module.w, module.b])
         self.assertAllClose(w_v, 1.5 * np.ones(w_v.shape))
         self.assertAllClose(b_v, 2.5 * np.ones(b_v.shape))
 
@@ -260,6 +260,27 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
     alex_net(inputs)
     for mod in alex_net.linear_modules:
       self.assertEqual(mod.output_size, 4096)
+
+  def testCustomGetterUsed(self):
+
+    const = 42.
+
+    def set_to_const(getter, *args, **kwargs):
+      variable = getter(*args, **kwargs)
+      return 0.0 * variable + const
+
+    alex_net = snt.nets.AlexNetFull(custom_getter=set_to_const)
+    input_shape = [None, alex_net.min_input_size, alex_net.min_input_size, 3]
+    inputs = tf.placeholder(dtype=tf.float32, shape=input_shape)
+    alex_net(inputs)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      for module in alex_net.conv_modules + alex_net.linear_modules:
+        var_w, var_b = sess.run([module.w, module.b])
+        self.assertAllClose(var_w, np.zeros_like(var_w) + const)
+        self.assertAllClose(var_b, np.zeros_like(var_b) + const)
+
 
 if __name__ == "__main__":
   tf.test.main()

@@ -1,8 +1,5 @@
 # Description:
 #   Sonnet: DeepMind abstractions for Neural Networks in TensorFlow.
-load("//sonnet:tensorflow.bzl", "tf_custom_op_library")
-load("//sonnet:tensorflow.bzl", "tf_gen_op_wrapper_py")
-load("//sonnet:tensorflow.bzl", "tf_custom_op_py_library")
 
 licenses(["notice"])  # Apache 2.0 License
 
@@ -111,29 +108,6 @@ py_library(
     ],
 )
 
-tf_custom_op_library(
-    name = "ops/_resampler.so",
-    srcs = [
-        "//sonnet/cc:ops/resampler.cc",
-        "//sonnet/cc/kernels:resampler_op.cc",
-        "//sonnet/cc/kernels:resampler_op.h",
-    ],
-    gpu_srcs = [
-        "//sonnet/cc/kernels:resampler_op_gpu.cu.cc",
-        "//sonnet/cc/kernels:resampler_op.h",
-    ],
-)
-
-tf_gen_op_wrapper_py(
-    name = "resampler_py_wrapper",
-    out = "ops/gen_resampler.py",
-    hidden = [],
-    require_shape_functions = True,
-    deps = [
-        "//sonnet/cc:resampler_op_lib",
-    ],
-)
-
 module_tests = [
     ("alexnet_test", "nets/", "large"),
     ("attention_test", "", "small"),
@@ -211,20 +185,5 @@ py_test(
         # numpy dep,
         "//sonnet",
         # tensorflow dep,
-    ],
-)
-
-py_test(
-    name = "resampler_test",
-    size = "small",
-    srcs = ["ops/resampler_test.py"],
-    srcs_version = "PY2AND3",
-    tags = [
-        "nomsan",  # Relies on the precompiled library libcuda, which is incompatible with MSan.
-        "requires-gpu-sm35",
-    ],
-    deps = [
-        "//sonnet",
-        "//sonnet/testing/parameterized",
     ],
 )

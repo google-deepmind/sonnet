@@ -71,24 +71,12 @@ $ pip uninstall dm-sonnet  # or dm-sonnet-gpu
 ```
 
 You can verify that Sonnet has been successfully installed by, for example,
-trying out the resampler op:
+trying to instantiate and connect a Linear module:
 
 ```shell
 $ cd ~/
 $ python
 >>> import sonnet as snt
->>> import tensorflow as tf
->>> snt.resampler(tf.constant([0.]), tf.constant([0.]))
+>>> input_ = tf.zeros(3, 5)
+>>> output = snt.Linear(10)(input_)
 ```
-
-The expected output should be:
-
-```shell
-<tf.Tensor 'resampler/Resampler:0' shape=(1,) dtype=float32>
-```
-
-However, if an `ImportError` is raised then the C++ components were not found.
-Ensure that you are not importing the cloned source code (i.e. call python
-outside of the cloned repository) and that you have uninstalled Sonnet prior to
-installing the wheel file.
-

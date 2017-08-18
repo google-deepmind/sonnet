@@ -111,18 +111,3 @@ from sonnet.python.modules.util import reuse_variables
 from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
-
-# Check if resampler module is already present in tf.contrib. If so, redirect
-# `snt.resampler` to `tf.contrib.resampler`; if not, import sonnet resampler.
-resampler = None
-for k, v in sys.modules.items():
-  if 'contrib.resampler' in k:
-    import tensorflow as tf  # pylint: disable=g-import-not-at-top
-    resampler = tf.contrib.resampler.resampler
-    resampler_is_available = lambda: True
-
-if not resampler:
-  # pylint: disable=g-import-not-at-top
-  from sonnet.python.ops.resampler import resampler
-  from sonnet.python.ops.resampler import resampler_is_available
-

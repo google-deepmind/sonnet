@@ -167,11 +167,11 @@ class _BaseLSTM(rnn_core.RNNCore):
         batch statistics in test mode.
 
     Returns:
-      RNNCell wrapping this class with the extra input(s) added.
+      snt.RNNCore wrapping this class with the extra input(s) added.
     """
-    return _BaseLSTM.CellWithExtraInput(self,
-                                        is_training=is_training,
-                                        test_local_stats=test_local_stats)
+    return _BaseLSTM.CoreWithExtraBuildArgs(self,
+                                            is_training=is_training,
+                                            test_local_stats=test_local_stats)
 
   @classmethod
   def get_possible_initializer_keys(
@@ -585,37 +585,39 @@ class _BaseLSTM(rnn_core.RNNCore):
       else:
         return create_batch_norm()
 
-  class CellWithExtraInput(tf.contrib.rnn.RNNCell):
-    """Wraps an RNNCell to create a new RNNCell with extra input appended.
+  class CoreWithExtraBuildArgs(rnn_core.RNNCore):
+    """Wraps an RNNCore so that the build method receives extra args and kwargs.
 
-    This will pass the additional input `args` and `kwargs` to the __call__
-    function of the RNNCell after the input and prev_state inputs.
+    This will pass the additional input `args` and `kwargs` to the _build
+    function of the snt.RNNCore after the input and prev_state inputs.
     """
 
-    def __init__(self, cell, *args, **kwargs):
-      """Construct the CellWithExtraInput.
+    def __init__(self, core, *args, **kwargs):
+      """Construct the CoreWithExtraBuildArgs.
 
       Args:
-        cell: The RNNCell to wrap (typically a snt.RNNCore).
-        *args: Extra arguments to pass to __call__.
-        **kwargs: Extra keyword arguments to pass to __call__.
+        core: The snt.RNNCore to wrap.
+        *args: Extra arguments to pass to _build.
+        **kwargs: Extra keyword arguments to pass to _build.
       """
-      self._cell = cell
+      super(_BaseLSTM.CoreWithExtraBuildArgs, self).__init__(
+          name=core.module_name + "_extra_args")
+      self._core = core
       self._args = args
       self._kwargs = kwargs
 
-    def __call__(self, inputs, state):
-      return self._cell(inputs, state, *self._args, **self._kwargs)
+    def _build(self, inputs, state):
+      return self._core(inputs, state, *self._args, **self._kwargs)
 
     @property
     def state_size(self):
       """Tuple indicating the size of nested state tensors."""
-      return self._cell.state_size
+      return self._core.state_size
 
     @property
     def output_size(self):
       """`tf.TensorShape` indicating the size of the core output."""
-      return self._cell.output_size
+      return self._core.output_size
 
 
 class LSTM(_BaseLSTM):

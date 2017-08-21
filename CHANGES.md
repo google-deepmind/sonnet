@@ -1,5 +1,14 @@
 # Sonnet Changelog
 
+## Version 1.11 - Monday 21. August 2017
+
+This version requires TensorFlow 1.3.0.
+
+* *Backwards incompatible change*: Resampler ops removed, they are now available
+  in `tf.contrib.resampler`.
+* Custom getters supported in RNNs and AlexNet.
+* Replace last references to `contrib.RNNCell` with `snt.RNNCore`.
+
 ## Version 1.10 - Monday, 14. August 2017
 
 * First steps of AlexNet cleanup.

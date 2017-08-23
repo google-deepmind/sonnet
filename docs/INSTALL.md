@@ -1,8 +1,8 @@
 # Installing from source
 
-To install Sonnet from source, you will need to compile the library using bazel 
-against the TensorFlow header files. You should have installed TensorFlow by
-following the [TensorFlow installation instructions](https://www.tensorflow.org/install/).
+To install Sonnet from source, you will need to compile the library using bazel.
+You should have installed TensorFlow by following the [TensorFlow installation
+instructions](https://www.tensorflow.org/install/).
 
 ## Install bazel
 
@@ -19,35 +19,24 @@ $ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
 $ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
 ```
 
-## Configure TensorFlow Headers
-
-First clone the Sonnet source code with TensorFlow as a submodule:
-
-```shell
-$ git clone --recursive https://github.com/deepmind/sonnet
-```
-
-and then call `configure`:
-
-```shell
-$ cd sonnet/tensorflow
-$ ./configure
-$ cd ../
-```
-
-You can choose the suggested defaults during the TensorFlow configuration.
-Note: This will not modify your existing installation of TensorFlow. This step
-is necessary so that Sonnet can build against the TensorFlow headers.
-
 ### Build and run the installer
 
-Run the install script to create a wheel file in a temporary directory:
+First clone the Sonnet source code:
+
+```shell
+$ git clone https://github.com/deepmind/sonnet
+```
+
+Then run the install script to create a wheel file in a temporary directory:
 
 ```shell
 $ mkdir /tmp/sonnet
 $ bazel build :install
 $ ./bazel-bin/install /tmp/sonnet
 ```
+
+To build the GPU version instead, add a flag to the `bazel build :install`
+command above: `bazel build :install --define gpu=true`.
 
 By default, the wheel file is built using `python`. You can optionally specify
 another python binary in the previous command to build the wheel file, such as

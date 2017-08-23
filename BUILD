@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # =============================================================================
-load("@local_config_cuda//cuda:build_defs.bzl", "if_cuda")
+
+config_setting(
+    name = "gpu_build",
+    values = { "define": "gpu=true" }
+)
 
 genrule(
     name = "setup_py",
     srcs = ["setup.py.tmpl"],
     outs = ["setup.py"],
-    cmd = if_cuda("cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet-gpu/g' > $@",
-                  "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet/g' > $@")
+    cmd = select({
+        ":gpu_build": "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet-gpu/g' > $@",
+        "//conditions:default": "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet/g' > $@"
+        })
 )
 
 sh_binary(

@@ -19,30 +19,33 @@ from __future__ import division
 from __future__ import print_function
 
 import functools
+import os
+import tempfile
 
 # Dependency imports
 import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
+from sonnet.testing import parameterized
 import tensorflow as tf
 
 _EXPECTED_FORMATTED_VARIABLE_LIST = (
     "Variable  Shape  Type     Collections                            Device\n"
-    "m1/v1:0   3x4    float32  global_variables, trainable_variables\n"
-    "m2/v2:0   5x6    float32  local_variables                        "
+    "m1/v1     3x4    float32  global_variables, trainable_variables\n"
+    "m2/v2     5x6    float32  local_variables                        "
     "/device:GPU:*"
 )
 
 _EXPECTED_FORMATTED_VARIABLE_MAP = (
     "Key  Variable  Shape  Type     Collections                            "
     "Device\n"
-    "vv1  m1/v1:0   3x4    float32  global_variables, trainable_variables\n"
-    "vv2  m2/v2:0   5x6    float32  local_variables                        "
+    "vv1  m1/v1     3x4    float32  global_variables, trainable_variables\n"
+    "vv2  m2/v2     5x6    float32  local_variables                        "
     "/device:GPU:*"
 )
 
 
-class UtilTest(tf.test.TestCase):
+class UtilTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
   def testQueryInModule(self):
     module = snt.Linear(output_size=42, name="linear")
@@ -89,10 +92,10 @@ class UtilTest(tf.test.TestCase):
     variable_map = snt.get_normalized_variable_map(s1)
 
     self.assertEqual(len(variable_map), 2)
-    self.assertIn("a:0", variable_map)
-    self.assertIn("b:0", variable_map)
-    self.assertIs(variable_map["a:0"], v1)
-    self.assertIs(variable_map["b:0"], v2)
+    self.assertIn("a", variable_map)
+    self.assertIn("b", variable_map)
+    self.assertIs(variable_map["a"], v1)
+    self.assertIs(variable_map["b"], v2)
 
   def testGetNormalizedVariableMapScopeContext(self):
     with tf.variable_scope("prefix1") as s1:
@@ -114,10 +117,10 @@ class UtilTest(tf.test.TestCase):
                      variable_map)
 
     self.assertEqual(len(variable_map), 2)
-    self.assertIn("prefix2/a:0", variable_map)
-    self.assertIn("prefix2/b:0", variable_map)
-    self.assertIs(variable_map["prefix2/a:0"], v1)
-    self.assertIs(variable_map["prefix2/b:0"], v2)
+    self.assertIn("prefix2/a", variable_map)
+    self.assertIn("prefix2/b", variable_map)
+    self.assertIs(variable_map["prefix2/a"], v1)
+    self.assertIs(variable_map["prefix2/b"], v2)
 
     with tf.variable_scope("") as s4:
       self.assertEqual(s4.name, "")
@@ -129,10 +132,10 @@ class UtilTest(tf.test.TestCase):
                      variable_map)
 
     self.assertEqual(len(variable_map), 2)
-    self.assertIn("prefix1/prefix2/a:0", variable_map)
-    self.assertIn("prefix1/prefix2/b:0", variable_map)
-    self.assertIs(variable_map["prefix1/prefix2/a:0"], v1)
-    self.assertIs(variable_map["prefix1/prefix2/b:0"], v2)
+    self.assertIn("prefix1/prefix2/a", variable_map)
+    self.assertIn("prefix1/prefix2/b", variable_map)
+    self.assertIs(variable_map["prefix1/prefix2/a"], v1)
+    self.assertIs(variable_map["prefix1/prefix2/b"], v2)
 
   def testGetNormalizedVariableMapModule(self):
     input_ = tf.placeholder(tf.float32, shape=[1, 10, 10, 3])
@@ -142,10 +145,10 @@ class UtilTest(tf.test.TestCase):
     variable_map = snt.get_normalized_variable_map(conv)
 
     self.assertEqual(len(variable_map), 2)
-    self.assertIn("w:0", variable_map)
-    self.assertIn("b:0", variable_map)
-    self.assertIs(variable_map["w:0"], conv.w)
-    self.assertIs(variable_map["b:0"], conv.b)
+    self.assertIn("w", variable_map)
+    self.assertIn("b", variable_map)
+    self.assertIs(variable_map["w"], conv.w)
+    self.assertIs(variable_map["b"], conv.b)
 
   def testGetNormalizedVariableMapWithPartitionedVariable(self):
     hidden = tf.ones(shape=(1, 16, 16, 3))
@@ -158,14 +161,14 @@ class UtilTest(tf.test.TestCase):
     variable_map = snt.get_normalized_variable_map(conv,
                                                    group_sliced_variables=True)
     self.assertEqual(len(variable_map), 2)
-    self.assertEqual(variable_map["b:0"], conv.b)
+    self.assertEqual(variable_map["b"], conv.b)
     self.assertEqual(len(variable_map["w"]), 3)
 
     variable_map = snt.get_normalized_variable_map(conv,
                                                    group_sliced_variables=False)
-    self.assertEqual(variable_map["b:0"], conv.b)
-    self.assertEqual(set(variable_map), set(["b:0", "w/part_0:0", "w/part_1:0",
-                                             "w/part_2:0"]))
+    self.assertEqual(variable_map["b"], conv.b)
+    self.assertEqual(set(variable_map), set(["b", "w/part_0", "w/part_1",
+                                             "w/part_2"]))
 
   def testVariableMapItems(self):
     hidden = tf.ones(shape=(1, 16, 16, 3))
@@ -175,15 +178,14 @@ class UtilTest(tf.test.TestCase):
                       stride=1,
                       partitioners={"w": partitioner})
     conv(hidden)
-    variable_map = snt.get_normalized_variable_map(conv,
-                                                   group_sliced_variables=True)
+    variable_map = snt.get_normalized_variable_map(conv)
     items = snt.variable_map_items(variable_map)
 
-    items_str = sorted((key, var.name) for key, var in items)
+    items_str = sorted((key, var.op.name) for key, var in items)
     self.assertEqual(
         items_str,
-        [(u"b:0", u"conv_2d/b:0"), ("w", u"conv_2d/w/part_0:0"),
-         ("w", u"conv_2d/w/part_1:0"), ("w", u"conv_2d/w/part_2:0")])
+        [(u"b", u"conv_2d/b"), ("w", u"conv_2d/w/part_0"),
+         ("w", u"conv_2d/w/part_1"), ("w", u"conv_2d/w/part_2")])
 
   def testGetSaverScope(self):
     with tf.variable_scope("prefix") as s1:
@@ -192,8 +194,7 @@ class UtilTest(tf.test.TestCase):
 
     saver = snt.get_saver(s1)
     self.assertIsInstance(saver, tf.train.Saver)
-    self.assertIn("a:0", saver._var_list)
-    self.assertIn("b:0", saver._var_list)
+    self.assertEqual(set(saver._var_list), set(["a", "b"]))
 
   def testGetSaverModule(self):
     input_ = tf.placeholder(tf.float32, shape=[1, 10, 10, 3])
@@ -201,8 +202,44 @@ class UtilTest(tf.test.TestCase):
     conv(input_)
     saver = snt.get_saver(conv)
     self.assertIsInstance(saver, tf.train.Saver)
-    self.assertIn("w:0", saver._var_list)
-    self.assertIn("b:0", saver._var_list)
+    self.assertIn("w", saver._var_list)
+    self.assertIn("b", saver._var_list)
+
+  def _create_conv(self, partitioned, name):
+    hidden = tf.ones(shape=(1, 16, 16, 3))
+    if partitioned:
+      partitioners = {"w": tf.variable_axis_size_partitioner(4)}
+    else:
+      partitioners = None
+    conv = snt.Conv2D(output_channels=3, kernel_shape=3, stride=1,
+                      partitioners=partitioners, name=name)
+    conv(hidden)
+    return conv
+
+  @parameterized.Parameters(
+      {"save_partitioned": True, "load_partitioned": True},
+      {"save_partitioned": True, "load_partitioned": False},
+      {"save_partitioned": False, "load_partitioned": True},
+      {"save_partitioned": False, "load_partitioned": False})
+  def testGetSaverPartitioned(self, save_partitioned, load_partitioned):
+    path = os.path.join(tempfile.mkdtemp(), "ckpt")
+
+    # Save checkpoint.
+    with self.test_session() as sess:
+      conv = self._create_conv(partitioned=save_partitioned, name="a")
+      saver = snt.get_saver(conv)
+      sess.run(tf.global_variables_initializer())
+      saver.save(sess, path)
+      w = tf.identity(conv.w)
+      w_value = sess.run(w)
+
+    # Restore checkpoint.
+    with self.test_session() as sess:
+      conv = self._create_conv(partitioned=load_partitioned, name="b")
+      saver = snt.get_saver(conv)
+      saver.restore(sess, path)
+      w = tf.identity(conv.w)
+      self.assertAllEqual(sess.run(w), w_value)
 
   def testCollectionGetVariableInScope(self):
     with tf.variable_scope("prefix") as s1:
@@ -225,18 +262,18 @@ class UtilTest(tf.test.TestCase):
     self.assertIsInstance(saver2, tf.train.Saver)
 
     self.assertEqual(len(saver1._var_list), 5)
-    self.assertIn("linear/w:0", saver1._var_list)
-    self.assertIn("linear/b:0", saver1._var_list)
-    self.assertIn("batch_norm/beta:0", saver1._var_list)
-    self.assertIn("batch_norm/moving_mean:0", saver1._var_list)
-    self.assertIn("batch_norm/moving_variance:0", saver1._var_list)
+    self.assertIn("linear/w", saver1._var_list)
+    self.assertIn("linear/b", saver1._var_list)
+    self.assertIn("batch_norm/beta", saver1._var_list)
+    self.assertIn("batch_norm/moving_mean", saver1._var_list)
+    self.assertIn("batch_norm/moving_variance", saver1._var_list)
 
     self.assertEqual(len(saver2._var_list), 3)
-    self.assertIn("linear/w:0", saver2._var_list)
-    self.assertIn("linear/b:0", saver2._var_list)
-    self.assertIn("batch_norm/beta:0", saver2._var_list)
-    self.assertNotIn("batch_norm/moving_mean:0", saver2._var_list)
-    self.assertNotIn("batch_norm/moving_variance:0", saver2._var_list)
+    self.assertIn("linear/w", saver2._var_list)
+    self.assertIn("linear/b", saver2._var_list)
+    self.assertIn("batch_norm/beta", saver2._var_list)
+    self.assertNotIn("batch_norm/moving_mean", saver2._var_list)
+    self.assertNotIn("batch_norm/moving_variance", saver2._var_list)
 
   def testCheckInitializers(self):
     initializers = {"key_a": tf.truncated_normal_initializer(mean=0,
@@ -400,7 +437,7 @@ class ReuseVarsTest(tf.test.TestCase):
     obj1 = ReuseVarsTest.VariableContainer("scope1")
     obj2 = ReuseVarsTest.VariableContainer("scope2")
 
-    self.assertEqual("b:0", obj1.method_without_reuse().name)
+    self.assertEqual("b", obj1.method_without_reuse().op.name)
     self.assertRaisesRegexp(ValueError,
                             r"Variable b already exists, disallowed.*",
                             obj1.method_without_reuse)
@@ -408,35 +445,27 @@ class ReuseVarsTest(tf.test.TestCase):
                             r"Variable b already exists, disallowed.*",
                             obj2.method_without_reuse)
 
-    self.assertEqual("scope1/a:0",
-                     obj1.method_with_reuse().name)
-    self.assertEqual("scope1/a:0",
-                     obj1.method_with_reuse().name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
 
-    self.assertEqual("scope2/a:0",
-                     obj2.method_with_reuse().name)
-    self.assertEqual("scope2/a:0",
-                     obj2.method_with_reuse().name)
+    self.assertEqual("scope2/a", obj2.method_with_reuse().op.name)
+    self.assertEqual("scope2/a", obj2.method_with_reuse().op.name)
 
   def test_multiple_objects_per_variable_scope(self):
     obj1 = ReuseVarsTest.VariableContainer("scope1")
     obj2 = ReuseVarsTest.VariableContainer("scope1")
 
-    self.assertEqual("scope1/a:0",
-                     obj1.method_with_reuse().name)
-    self.assertEqual("scope1/a:0",
-                     obj1.method_with_reuse().name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
 
-    self.assertEqual("scope1/a:0",
-                     obj2.method_with_reuse().name)
-    self.assertEqual("scope1/a:0",
-                     obj2.method_with_reuse().name)
+    self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
+    self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
 
   def test_reuse_inherited_method(self):
     obj1 = ReuseVarsTest.InheritedVariableContainer("scope1")
     obj2 = ReuseVarsTest.InheritedVariableContainer("scope2")
 
-    self.assertEqual("b:0", obj1.method_without_reuse().name)
+    self.assertEqual("b", obj1.method_without_reuse().op.name)
     self.assertRaisesRegexp(ValueError,
                             r"Variable b already exists, disallowed.*",
                             obj1.method_without_reuse)
@@ -444,15 +473,15 @@ class ReuseVarsTest(tf.test.TestCase):
                             r"Variable b already exists, disallowed.*",
                             obj2.method_without_reuse)
 
-    self.assertEqual("scope1/a:0", obj1.method_with_reuse().name)
-    self.assertEqual("scope1/a:0", obj1.method_with_reuse().name)
-    self.assertEqual("scope1/c:0", obj1.not_inherited_method_with_reuse().name)
-    self.assertEqual("scope1/c:0", obj1.not_inherited_method_with_reuse().name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+    self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+    self.assertEqual("scope1/c", obj1.not_inherited_method_with_reuse().op.name)
+    self.assertEqual("scope1/c", obj1.not_inherited_method_with_reuse().op.name)
 
-    self.assertEqual("scope2/a:0", obj2.method_with_reuse().name)
-    self.assertEqual("scope2/a:0", obj2.method_with_reuse().name)
-    self.assertEqual("scope2/c:0", obj2.not_inherited_method_with_reuse().name)
-    self.assertEqual("scope2/c:0", obj2.not_inherited_method_with_reuse().name)
+    self.assertEqual("scope2/a", obj2.method_with_reuse().op.name)
+    self.assertEqual("scope2/a", obj2.method_with_reuse().op.name)
+    self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
+    self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
 
   def test_reuse_abstract_module(self):
 
@@ -549,29 +578,21 @@ class ReuseVarsTest(tf.test.TestCase):
       obj1 = ReuseVarsTest.VariableContainer("scope1")
       obj2 = ReuseVarsTest.VariableContainer("scope1")
 
-      self.assertEqual("scope1/a:0",
-                       obj1.method_with_reuse().name)
-      self.assertEqual("scope1/a:0",
-                       obj1.method_with_reuse().name)
+      self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+      self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
 
-      self.assertEqual("scope1/a:0",
-                       obj2.method_with_reuse().name)
-      self.assertEqual("scope1/a:0",
-                       obj2.method_with_reuse().name)
+      self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
+      self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
 
     with g2.as_default():
       obj1 = ReuseVarsTest.VariableContainer("scope1")
       obj2 = ReuseVarsTest.VariableContainer("scope1")
 
-      self.assertEqual("scope1/a:0",
-                       obj1.method_with_reuse().name)
-      self.assertEqual("scope1/a:0",
-                       obj1.method_with_reuse().name)
+      self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
+      self.assertEqual("scope1/a", obj1.method_with_reuse().op.name)
 
-      self.assertEqual("scope1/a:0",
-                       obj2.method_with_reuse().name)
-      self.assertEqual("scope1/a:0",
-                       obj2.method_with_reuse().name)
+      self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
+      self.assertEqual("scope1/a", obj2.method_with_reuse().op.name)
 
   def test_name_scopes(self):
 
@@ -605,28 +626,24 @@ class ReuseVarsTest(tf.test.TestCase):
     obj2 = VariableContainerWithOps("scope2")
     zeros = tf.zeros(shape=[1])
 
-    self.assertEqual("scope1/add_b/add:0", obj1.add_b(zeros).name)
-    self.assertEqual("scope1/add_b_1/add:0", obj1.add_b(zeros).name)
+    self.assertEqual("scope1/add_b/add", obj1.add_b(zeros).op.name)
+    self.assertEqual("scope1/add_b_1/add", obj1.add_b(zeros).op.name)
 
-    self.assertEqual("scope1/add_a/add:0", obj1.add_a(zeros).name)
-    self.assertEqual("scope1/add_a_1/add:0", obj1.add_a(zeros).name)
+    self.assertEqual("scope1/add_a/add", obj1.add_a(zeros).op.name)
+    self.assertEqual("scope1/add_a_1/add", obj1.add_a(zeros).op.name)
 
-    self.assertEqual("scope1/nested_add/add:0",
-                     obj1.nested_add(zeros).name)
-    self.assertEqual("scope1/nested_add_1/add:0",
-                     obj1.nested_add(zeros).name)
+    self.assertEqual("scope1/nested_add/add", obj1.nested_add(zeros).op.name)
+    self.assertEqual("scope1/nested_add_1/add", obj1.nested_add(zeros).op.name)
 
     ones = tf.ones(shape=[1])
-    self.assertEqual("scope2/add_b/add:0", obj2.add_b(ones).name)
-    self.assertEqual("scope2/add_b_1/add:0", obj2.add_b(ones).name)
+    self.assertEqual("scope2/add_b/add", obj2.add_b(ones).op.name)
+    self.assertEqual("scope2/add_b_1/add", obj2.add_b(ones).op.name)
 
-    self.assertEqual("scope2/add_a/add:0", obj2.add_a(ones).name)
-    self.assertEqual("scope2/add_a_1/add:0", obj2.add_a(ones).name)
+    self.assertEqual("scope2/add_a/add", obj2.add_a(ones).op.name)
+    self.assertEqual("scope2/add_a_1/add", obj2.add_a(ones).op.name)
 
-    self.assertEqual("scope2/nested_add/add:0",
-                     obj2.nested_add(ones).name)
-    self.assertEqual("scope2/nested_add_1/add:0",
-                     obj2.nested_add(ones).name)
+    self.assertEqual("scope2/nested_add/add", obj2.nested_add(ones).op.name)
+    self.assertEqual("scope2/nested_add_1/add", obj2.nested_add(ones).op.name)
 
     tensor_names = [
         "zeros:0",

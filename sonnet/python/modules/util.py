@@ -29,7 +29,6 @@ import six
 import tensorflow as tf
 
 from tensorflow.python.ops import variable_scope as variable_scope_ops
-from tensorflow.python.util import deprecation
 
 
 def get_variable_scope_name(value):
@@ -394,7 +393,7 @@ def get_normalized_variable_map(scope_or_module,
   else:
     single_vars, grouped_vars = _get_sliced_variables(variables)
 
-  var_map = {var.name[prefix_length:]: var for var in single_vars}
+  var_map = {var.op.name[prefix_length:]: var for var in single_vars}
   for full_name, var_group in grouped_vars.items():
     name = full_name[prefix_length:]
     if name in var_map:
@@ -404,13 +403,8 @@ def get_normalized_variable_map(scope_or_module,
   return var_map
 
 
-@deprecation.deprecated_arg_values(
-    "2017-08-01",
-    "Start using group_sliced_variables=True. This may break your checkpoints "
-    "if they contain sliced (partitioned) variables",
-    group_sliced_variables=False)
 def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
-              context=None, group_sliced_variables=True, **kwargs):
+              context=None, **kwargs):
   """Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
   The names of the variables are normalized to remove the scope prefix.
@@ -424,9 +418,6 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
         which includes moving averages variables as well as trainable variables.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix.
-    group_sliced_variables: Boolean, if set to True, sliced variables are
-       grouped together in the returned map; if set to False, each partition of
-       a sliced variable is a separate (key, value) pair.
     **kwargs: Extra keyword arguments to pass to tf.train.Saver.
 
   Returns:
@@ -435,9 +426,7 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
 
   variable_map = {}
   for collection in collections:
-    variable_map.update(get_normalized_variable_map(
-        scope, collection, context,
-        group_sliced_variables))
+    variable_map.update(get_normalized_variable_map(scope, collection, context))
 
   return tf.train.Saver(var_list=variable_map, **kwargs)
 
@@ -501,11 +490,11 @@ def format_variables(variables, join_lines=True):
   rows = []
   rows.append(("Variable", "Shape", "Type", "Collections", "Device"))
   var_to_collections = _get_vars_to_collections(variables)
-  for var in sorted(variables, key=lambda var: var.name):
+  for var in sorted(variables, key=lambda var: var.op.name):
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))
-    rows.append((var.name, shape, dtype, coll, var.device))
+    rows.append((var.op.name, shape, dtype, coll, var.device))
   return _format_table(rows, join_lines)
 
 
@@ -520,7 +509,7 @@ def format_variable_map(variable_map, join_lines=True):
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))
-    rows.append((key, var.name, shape, dtype, coll, var.device))
+    rows.append((key, var.op.name, shape, dtype, coll, var.device))
   return _format_table(rows, join_lines)
 
 
@@ -571,8 +560,8 @@ def reuse_variables(method):
   module = MyModule("my_module_name")
   input_tensor = tf.zeros(shape=(5,))
 
-  # This creates the variable "my_module_name/x:0"
-  # and op "my_module_name/add_x/add:0"
+  # This creates the variable "my_module_name/x"
+  # and op "my_module_name/add_x/add"
   output = module.add_x(input_tensor)
   ```
 

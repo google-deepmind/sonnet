@@ -488,7 +488,7 @@ class Transposable(object):
 class Module(AbstractModule):
   """Module wrapping a function provided by the user."""
 
-  def __init__(self, build, name=None):
+  def __init__(self, build, custom_getter=None, name=None):
     """Constructs a module with a given build function.
 
     The Module class can be used to wrap a function assembling a network into a
@@ -535,18 +535,24 @@ class Module(AbstractModule):
           The `build` function signature can include the following parameters:
             *args - Input Tensors.
             **kwargs - Additional Python parameters controlling connection.
+      custom_getter: Callable or dictionary of callables to use as
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Module name. If set to `None` (the default), the name will be set to
           that of the `build` callable converted to `snake_case`. If `build` has
           no name, the name will be 'module'.
 
     Raises:
       TypeError: If build is not callable.
+      TypeError: If a given `custom_getter` is not callable.
     """
     if not callable(build):
       raise TypeError("Input 'build' must be callable.")
     if name is None:
       name = util.name_for_callable(build)
-    super(Module, self).__init__(name=name)
+    super(Module, self).__init__(custom_getter=custom_getter, name=name)
     self._build_function = build
 
   def _build(self, *args, **kwargs):

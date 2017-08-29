@@ -332,6 +332,56 @@ class ModuleTest(tf.test.TestCase):
                      inputs2: input_data})
       self.assertAllClose(outputs1, outputs2)
 
+  def testCustomGetter(self):
+    def simple_module_build(inputs):
+      w = tf.get_variable("w", dtype=tf.float32, shape=[10, 10])
+      b = tf.get_variable("b", dtype=tf.float32, shape=[10, 10])
+      return w * inputs + b
+
+    connection_count = {"x": 0}
+
+    def custom_getter(getter, name, *args, **kwargs):
+      connection_count["x"] += 1
+      return getter(name, *args, **kwargs)
+
+    create_module = functools.partial(base.Module, build=simple_module_build)
+
+    inputs = tf.placeholder(tf.float32, [10, 10])
+
+    with tf.variable_scope("scope"):
+      module = create_module(name="mod1")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(0, connection_count["x"])
+
+      module = create_module(custom_getter=custom_getter, name="mod2")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(2, connection_count["x"])  # w & b
+
+      module = create_module(custom_getter={"w": custom_getter}, name="mod3")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(3, connection_count["x"])  # w
+
+      module = create_module(custom_getter={"w.*": custom_getter}, name="mod3")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(4, connection_count["x"])  # w
+
+      module = create_module(custom_getter={".*": custom_getter}, name="mod4")
+      module(inputs)  # pylint: disable=not-callable
+      self.assertEqual(6, connection_count["x"])  # w & b
+
+      err = r"More than one custom_getter matched scope/mod5/w \(w\):.*"
+      with self.assertRaisesRegexp(KeyError, err):
+        module = create_module(
+            custom_getter={".*": custom_getter, "w.*": custom_getter},
+            name="mod5")
+        module(inputs)  # pylint: disable=not-callable
+
+      err = "Given custom_getter is not callable."
+      with self.assertRaisesRegexp(TypeError, err):
+        module = create_module(custom_getter=0, name="mod6")
+      with self.assertRaisesRegexp(TypeError, err):
+        module = create_module(custom_getter={"w": 0}, name="mod7")
+
 
 if __name__ == "__main__":
   tf.test.main()

@@ -8,6 +8,8 @@ This version requires TensorFlow 1.3.0.
   in `tf.contrib.resampler`.
 * Custom getters supported in RNNs and AlexNet.
 * Replace last references to `contrib.RNNCell` with `snt.RNNCore`.
+* Removed Tensorflow dependencies in Bazel config files, which makes it
+  unnecessary to have Tensorflow as a submodule of Sonnet.
 
 ## Version 1.10 - Monday, 14. August 2017
 

@@ -56,12 +56,6 @@ if project_name == _PROJECT_NAME_GPU:
   REQUIRED_PACKAGES.append('tensorflow-gpu >= 1.0.1')
 
 
-class BinaryDistribution(Distribution):
-  """This class is needed in order to create OS specific wheels."""
-
-  def has_ext_modules(self):
-    return True
-
 setup(
     name=project_name,
     version=_VERSION,
@@ -80,7 +74,6 @@ setup(
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst'], 'sonnet': ['*.so']},
     zip_safe=False,
-    distclass=BinaryDistribution,
     cmdclass={
         'install': InstallCommandBase,
     },

@@ -472,8 +472,7 @@ def _get_vars_to_collections(variables):
   if isinstance(variables, dict):
     variables = list(v for _, v in variable_map_items(variables))
   for graph in set(v.graph for v in variables):
-
-    for collection_name in list(graph._collections):  # pylint: disable=protected-access
+    for collection_name in list(graph.collections):
       entries = set(entry for entry in graph.get_collection(collection_name)
                     if isinstance(entry, tf.Variable))
       # For legacy reasons, tf.GraphKeys.GLOBAL_VARIABLES == "variables".

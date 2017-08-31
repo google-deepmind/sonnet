@@ -20,14 +20,6 @@ sonnet\.python\.ops\.nest module
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.ops\.resampler module
--------------------------------------
-
-.. automodule:: sonnet.python.ops.resampler
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

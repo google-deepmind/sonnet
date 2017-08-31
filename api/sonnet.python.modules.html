@@ -269,7 +269,7 @@ tried to wire together incompatible modules, etc.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.base.Module">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Module</code><span class="sig-paren">(</span><em>build</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Module" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Module</code><span class="sig-paren">(</span><em>build</em>, <em>custom_getter=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Module" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Module wrapping a function provided by the user.</p>
 </dd></dl>
@@ -2221,7 +2221,7 @@ tf.placeholder(tf.float32, shape=[batch_size, hidden_size]) out,
 next_state = rnn(input, rnn.initial_state()) ```</p>
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">BatchNormLSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_batch_norm_h=True</em>, <em>use_batch_norm_x=False</em>, <em>use_batch_norm_c=False</em>, <em>max_unique_stats=1</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>name='batch_norm_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">BatchNormLSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_batch_norm_h=True</em>, <em>use_batch_norm_x=False</em>, <em>use_batch_norm_c=False</em>, <em>max_unique_stats=1</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='batch_norm_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.gated_rnn._BaseLSTM</span></code></p>
 <p>LSTM recurrent network cell with optional peepholes, batch
 normalization.</p>
@@ -2315,7 +2315,7 @@ Boolean indicating whether batch norm (c) is enabled.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.ConvLSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>skip_connection=False</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>skip_connection=False</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>Convolutional LSTM.</p>
 <dl class="attribute">
@@ -2344,7 +2344,7 @@ Boolean indicating whether batch norm (c) is enabled.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.GRU">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">GRU</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='gru'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#GRU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">GRU</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='gru'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#GRU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>GRU recurrent network cell.</p>
 <p>The implementation is based on: <a class="reference external" href="https://arxiv.org/pdf/1412.3555v1.pdf">https://arxiv.org/pdf/1412.3555v1.pdf</a>.</p>
@@ -3095,13 +3095,9 @@ of <code class="docutils literal"><span class="pre">scope</span></code>.</p>
 
 <dl class="function">
 <dt id="sonnet.python.modules.util.get_saver">
-<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">get_saver</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#get_saver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.get_saver" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">get_saver</code><span class="sig-paren">(</span><em>scope</em>, <em>collections=('variables'</em>, <em>)</em>, <em>context=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#get_saver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.get_saver" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds a <code class="docutils literal"><span class="pre">tf.train.Saver</span></code> for the scope or module, with normalized
-names. (deprecated arguments)</p>
-<p>SOME ARGUMENTS ARE DEPRECATED. They will be removed after 2017-08-01.
-Instructions for updating: Start using group_sliced_variables=True.
-This may break your checkpoints if they contain sliced (partitioned)
-variables</p>
+names.</p>
 <p>The names of the variables are normalized to remove the scope prefix.
 This allows the same variables to be restored into another similar scope
 or module using a complementary <code class="docutils literal"><span class="pre">tf.train.Saver</span></code> object.</p>
@@ -3111,10 +3107,8 @@ restored. collections: Sequence of collections of variables to restrict
 <code class="docutils literal"><span class="pre">tf.GraphKeys.GLOBAL_VARIABLES</span></code> which includes moving averages
 variables as well as trainable variables. context: Scope or module,
 identical to or parent of <code class="docutils literal"><span class="pre">scope</span></code>. If given, this will be used as the
-stripped prefix. group_sliced_variables: Boolean, if set to True,
-sliced variables are grouped together in the returned map; if set to
-False, each partition of a sliced variable is a separate (key, value)
-pair. **kwargs: Extra keyword arguments to pass to tf.train.Saver.</p>
+stripped prefix. **kwargs: Extra keyword arguments to pass to
+tf.train.Saver.</p>
 <p>Returns: A <code class="docutils literal"><span class="pre">tf.train.Saver</span></code> object for Variables in the scope or
 module.</p>
 </dd></dl>
@@ -3208,8 +3202,8 @@ example:</p>
 <span class="n">module</span> <span class="o">=</span> <span class="n">MyModule</span><span class="p">(</span><span class="s2">&quot;my_module_name&quot;</span><span class="p">)</span>
 <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,))</span>
 
-<span class="c1"># This creates the variable &quot;my_module_name/x:0&quot;</span>
-<span class="c1"># and op &quot;my_module_name/add_x/add:0&quot;</span>
+<span class="c1"># This creates the variable &quot;my_module_name/x&quot;</span>
+<span class="c1"># and op &quot;my_module_name/add_x/add&quot;</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">add_x</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
 </pre></div>
 </div>

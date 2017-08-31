@@ -98,9 +98,16 @@
 
   <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net&quot;</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">mode</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
 
 <span class="sd">    Args:</span>
@@ -123,6 +130,10 @@
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
 <span class="sd">      bn_on_fc_layers: If `use_batch_norm` is True, add batch normalization to</span>
 <span class="sd">        the fully-connected layers. This is deprecated.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -131,7 +142,7 @@
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contains any</span>
 <span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_mode</span> <span class="o">=</span> <span class="n">mode</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
@@ -306,6 +317,7 @@
       <span class="n">linear_mod</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fc_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
           <span class="n">output_size</span><span class="o">=</span><span class="n">output_size</span><span class="p">,</span>
+          <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
           <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">:</span>
@@ -374,8 +386,13 @@
 <div class="viewcode-block" id="AlexNetFull"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNetFull">[docs]</a><span class="k">class</span> <span class="nc">AlexNetFull</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;AlexNet constructed in the &#39;FULL&#39; mode.&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net_full&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
 
@@ -396,6 +413,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -410,14 +431,20 @@
         <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
         <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AlexNetMini"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNetMini">[docs]</a><span class="k">class</span> <span class="nc">AlexNetMini</span><span class="p">(</span><span class="n">AlexNet</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;AlexNet constructed in the &#39;MINI&#39; mode.&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;alex_net_mini&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs AlexNet.</span>
 
@@ -438,6 +465,10 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -452,6 +483,7 @@
         <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
         <span class="n">bn_on_fc_layers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 </pre></div>
 

@@ -115,37 +115,6 @@ with non-sortable keys.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-sonnet.python.ops.resampler">
-<span id="sonnet-python-ops-resampler-module"></span><h2>sonnet.python.ops.resampler module<a class="headerlink" href="#module-sonnet.python.ops.resampler" title="Permalink to this headline">¶</a></h2>
-<p>Tensorflow op performing differentiable resampling.</p>
-<dl class="function">
-<dt id="sonnet.python.ops.resampler.resampler">
-<code class="descclassname">sonnet.python.ops.resampler.</code><code class="descname">resampler</code><span class="sig-paren">(</span><em>data</em>, <em>warp</em>, <em>name='resampler'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/resampler.html#resampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.resampler.resampler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Resamples input data at user defined coordinates.</p>
-<p>The resampler currently only supports bilinear interpolation of 2D data.</p>
-<p>Args: data: Tensor of shape
-<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">data_height,</span> <span class="pre">data_width,</span>&#160;&#160;&#160;&#160; <span class="pre">data_num_channels]</span></code>
-containing 2D data that will be resampled. warp: Tensor of minimum rank
-2 containing the coordinates at which resampling will be performed.
-Since only bilinear interpolation is currently supported, the last
-dimension of the <code class="docutils literal"><span class="pre">warp</span></code> tensor must be 2. name: Optional name of the
-op.</p>
-<p>Returns: Tensor of resampled values from <code class="docutils literal"><span class="pre">data</span></code>. The output tensor
-shape is determined by the shape of the warp tensor. For example, if
-<code class="docutils literal"><span class="pre">data</span></code> is of shape
-<code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">data_height,</span> <span class="pre">data_width,</span> <span class="pre">data_num_channels]</span></code> and warp of
-shape <code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">dim_0,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">dim_n,</span> <span class="pre">2]</span></code> the output will be of
-shape <code class="docutils literal"><span class="pre">[batch_size,</span> <span class="pre">dim_0,</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">dim_n,</span> <span class="pre">data_num_channels]</span></code>.</p>
-<p>Raises: ImportError: if the wrapper generated during compilation is not
-present when the function is called.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="sonnet.python.ops.resampler.resampler_is_available">
-<code class="descclassname">sonnet.python.ops.resampler.</code><code class="descname">resampler_is_available</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/ops/resampler.html#resampler_is_available"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.ops.resampler.resampler_is_available" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</div>
 <div class="section" id="module-sonnet.python.ops">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sonnet.python.ops" title="Permalink to this headline">¶</a></h2>
 <p>Custom sonnet ops in TensorFlow.</p>
@@ -164,7 +133,6 @@ present when the function is called.</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.ops.initializers">sonnet.python.ops.initializers module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.ops.nest">sonnet.python.ops.nest module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.ops.resampler">sonnet.python.ops.resampler module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.ops">Module contents</a></li>
 </ul>
 </li>

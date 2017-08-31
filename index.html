@@ -799,15 +799,9 @@ serialized instances where those members don’t exist.</p>
 <div class="section" id="installing-from-source">
 <h1>Installing from source<a class="headerlink" href="#installing-from-source" title="Permalink to this headline">¶</a></h1>
 <p>To install Sonnet from source, you will need to compile the library
-using bazel against the TensorFlow header files. You should have
-installed TensorFlow by following the <a class="reference external" href="https://www.tensorflow.org/install/">TensorFlow installation
+using bazel. You should have installed TensorFlow by following the
+<a class="reference external" href="https://www.tensorflow.org/install/">TensorFlow installation
 instructions</a>.</p>
-<p>This installation is compatible with Linux/Mac OS X and Python 2.7 and
-3.4. The version of TensorFlow installed must be at least 1.2.
-Installing Sonnet supports the <a class="reference external" href="https://www.tensorflow.org/install/install_linux#installing_with_virtualenv">virtualenv installation
-mode</a>
-of TensorFlow, as well as the <a class="reference external" href="https://www.tensorflow.org/install/install_linux#installing_with_native_pip">native pip
-install</a>.</p>
 <div class="section" id="install-bazel">
 <h2>Install bazel<a class="headerlink" href="#install-bazel" title="Permalink to this headline">¶</a></h2>
 <p>Ensure you have a recent version of bazel (&gt;= 0.4.5) and JDK (&gt;= 1.8).
@@ -822,31 +816,22 @@ $ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="configure-tensorflow-headers">
-<h2>Configure TensorFlow Headers<a class="headerlink" href="#configure-tensorflow-headers" title="Permalink to this headline">¶</a></h2>
-<p>First clone the Sonnet source code with TensorFlow as a submodule:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ git clone --recursive https://github.com/deepmind/sonnet
-</pre></div>
-</div>
-<p>and then call <code class="docutils literal"><span class="pre">configure</span></code>:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ cd sonnet/tensorflow
-$ ./configure
-$ cd ../
-</pre></div>
-</div>
-<p>You can choose the suggested defaults during the TensorFlow
-configuration. Note: This will not modify your existing installation of
-TensorFlow. This step is necessary so that Sonnet can build against the
-TensorFlow headers.</p>
 <div class="section" id="build-and-run-the-installer">
 <h3>Build and run the installer<a class="headerlink" href="#build-and-run-the-installer" title="Permalink to this headline">¶</a></h3>
-<p>Run the install script to create a wheel file in a temporary directory:</p>
+<p>First clone the Sonnet source code:</p>
+<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/deepmind/sonnet
+</pre></div>
+</div>
+<p>Then run the install script to create a wheel file in a temporary
+directory:</p>
 <div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ mkdir /tmp/sonnet
 $ bazel build :install
 $ ./bazel-bin/install /tmp/sonnet
 </pre></div>
 </div>
+<p>To build the GPU version instead, add a flag to the
+<code class="docutils literal"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span></code> command above:
+<code class="docutils literal"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span> <span class="pre">--define</span> <span class="pre">gpu=true</span></code>.</p>
 <p>By default, the wheel file is built using <code class="docutils literal"><span class="pre">python</span></code>. You can optionally
 specify another python binary in the previous command to build the wheel
 file, such as <code class="docutils literal"><span class="pre">python3</span></code>:</p>
@@ -863,22 +848,14 @@ file, such as <code class="docutils literal"><span class="pre">python3</span></c
 </pre></div>
 </div>
 <p>You can verify that Sonnet has been successfully installed by, for
-example, trying out the resampler op:</p>
+example, trying to instantiate and connect a Linear module:</p>
 <div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ cd ~/
 $ python
 &gt;&gt;&gt; import sonnet as snt
-&gt;&gt;&gt; import tensorflow as tf
-&gt;&gt;&gt; snt.resampler(tf.constant([0.]), tf.constant([0.]))
+&gt;&gt;&gt; input_ = tf.zeros(3, 5)
+&gt;&gt;&gt; output = snt.Linear(10)(input_)
 </pre></div>
 </div>
-<p>The expected output should be:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span> <span class="s1">&#39;resampler/Resampler:0&#39;</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>However, if an <code class="docutils literal"><span class="pre">ImportError</span></code> is raised then the C++ components were
-not found. Ensure that you are not importing the cloned source code
-(i.e. call python outside of the cloned repository) and that you have
-uninstalled Sonnet prior to installing the wheel file.</p>
 </div>
 </div>
 </div>
@@ -939,9 +916,6 @@ uninstalled Sonnet prior to installing the wheel file.</p>
 <li><a class="reference internal" href="#installing-from-source">Installing from source</a><ul>
 <li><a class="reference internal" href="#install-bazel">Install bazel</a><ul>
 <li><a class="reference internal" href="#virtualenv-tensorflow-installation-activate-virtualenv">(virtualenv TensorFlow installation) Activate virtualenv</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#configure-tensorflow-headers">Configure TensorFlow Headers</a><ul>
 <li><a class="reference internal" href="#build-and-run-the-installer">Build and run the installer</a></li>
 </ul>
 </li>

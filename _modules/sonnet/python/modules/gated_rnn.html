@@ -134,9 +134,10 @@
                <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;See `__init__` of `LSTM` and `BatchNormLSTM` for docs.&quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
@@ -208,11 +209,11 @@
 <span class="sd">        batch statistics in test mode.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      RNNCell wrapping this class with the extra input(s) added.</span>
+<span class="sd">      snt.RNNCore wrapping this class with the extra input(s) added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">CellWithExtraInput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                        <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
-                                        <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                            <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
+                                            <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span>
@@ -626,37 +627,39 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">create_batch_norm</span><span class="p">()</span>
 
-  <span class="k">class</span> <span class="nc">CellWithExtraInput</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">RNNCell</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Wraps an RNNCell to create a new RNNCell with extra input appended.</span>
+  <span class="k">class</span> <span class="nc">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps an RNNCore so that the build method receives extra args and kwargs.</span>
 
-<span class="sd">    This will pass the additional input `args` and `kwargs` to the __call__</span>
-<span class="sd">    function of the RNNCell after the input and prev_state inputs.</span>
+<span class="sd">    This will pass the additional input `args` and `kwargs` to the _build</span>
+<span class="sd">    function of the snt.RNNCore after the input and prev_state inputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-      <span class="sd">&quot;&quot;&quot;Construct the CellWithExtraInput.</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Construct the CoreWithExtraBuildArgs.</span>
 
 <span class="sd">      Args:</span>
-<span class="sd">        cell: The RNNCell to wrap (typically a snt.RNNCore).</span>
-<span class="sd">        *args: Extra arguments to pass to __call__.</span>
-<span class="sd">        **kwargs: Extra keyword arguments to pass to __call__.</span>
+<span class="sd">        core: The snt.RNNCore to wrap.</span>
+<span class="sd">        *args: Extra arguments to pass to _build.</span>
+<span class="sd">        **kwargs: Extra keyword arguments to pass to _build.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="n">cell</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+          <span class="n">name</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_extra_args&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">core</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;Tuple indicating the size of nested state tensors.&quot;&quot;&quot;</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="o">.</span><span class="n">state_size</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">state_size</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="o">.</span><span class="n">output_size</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span>
 
 
 <div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">):</span>
@@ -704,6 +707,7 @@
                <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Construct LSTM.</span>
 
@@ -748,7 +752,10 @@
 <span class="sd">        vector is clipped by this value.</span>
 <span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
 <span class="sd">        clipped by this value.</span>
-<span class="sd">      name: name of the module.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
@@ -774,6 +781,7 @@
         <span class="n">max_unique_stats</span><span class="o">=</span><span class="n">max_unique_stats</span><span class="p">,</span>
         <span class="n">hidden_clip_value</span><span class="o">=</span><span class="n">hidden_clip_value</span><span class="p">,</span>
         <span class="n">cell_clip_value</span><span class="o">=</span><span class="n">cell_clip_value</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -864,6 +872,7 @@
                <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_lstm&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Construct `BatchNormLSTM`.</span>
 
@@ -900,7 +909,10 @@
 <span class="sd">        vector is clipped by this value.</span>
 <span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
 <span class="sd">        clipped by this value.</span>
-<span class="sd">      name: name of the module.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
@@ -932,6 +944,7 @@
         <span class="n">max_unique_stats</span><span class="o">=</span><span class="n">max_unique_stats</span><span class="p">,</span>
         <span class="n">hidden_clip_value</span><span class="o">=</span><span class="n">hidden_clip_value</span><span class="p">,</span>
         <span class="n">cell_clip_value</span><span class="o">=</span><span class="n">cell_clip_value</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
   <span class="c1"># Overriding because the default for use_batch_norm_h is True here.</span>
@@ -976,6 +989,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lstm&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Construct ConvLSTM.</span>
 
@@ -998,13 +1012,16 @@
 <span class="sd">        used.</span>
 <span class="sd">      regularizers: Optional dict containing regularizers for the convolutional</span>
 <span class="sd">        weights and biases. As a default, no regularizers are used.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      ValueError: If `skip_connection` is `True` and stride is different from 1</span>
 <span class="sd">        or if `input_shape` is incompatible with `conv_ndims`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">ConvLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ConvLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_conv_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_conv_class</span><span class="p">(</span><span class="n">conv_ndims</span><span class="p">)</span>
 
@@ -1134,7 +1151,7 @@
   <span class="n">POSSIBLE_KEYS</span> <span class="o">=</span> <span class="n">POSSIBLE_INITIALIZER_KEYS</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gru&quot;</span><span class="p">):</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;gru&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Construct GRU.</span>
 
 <span class="sd">    Args:</span>
@@ -1150,7 +1167,10 @@
 <span class="sd">        biases. As a default, no regularizers are used. This</span>
 <span class="sd">        dict may contain any of the keys returned by</span>
 <span class="sd">        `GRU.get_possible_initializer_keys`</span>
-<span class="sd">      name: name of the module.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
@@ -1160,7 +1180,7 @@
 <span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
 <span class="sd">        `GRU.get_possible_initializer_keys`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">GRU</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">GRU</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
         <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>

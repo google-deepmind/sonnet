@@ -530,7 +530,7 @@
 <div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Module wrapping a function provided by the user.&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a module with a given build function.</span>
 
 <span class="sd">    The Module class can be used to wrap a function assembling a network into a</span>
@@ -577,18 +577,24 @@
 <span class="sd">          The `build` function signature can include the following parameters:</span>
 <span class="sd">            *args - Input Tensors.</span>
 <span class="sd">            **kwargs - Additional Python parameters controlling connection.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">          custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">          correspond to regexes to match variable names. See the</span>
+<span class="sd">          `tf.get_variable` documentation for information about the</span>
+<span class="sd">          custom_getter API.</span>
 <span class="sd">      name: Module name. If set to `None` (the default), the name will be set to</span>
 <span class="sd">          that of the `build` callable converted to `snake_case`. If `build` has</span>
 <span class="sd">          no name, the name will be &#39;module&#39;.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      TypeError: If build is not callable.</span>
+<span class="sd">      TypeError: If a given `custom_getter` is not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">build</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input &#39;build&#39; must be callable.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">name_for_callable</span><span class="p">(</span><span class="n">build</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Module</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span> <span class="o">=</span> <span class="n">build</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

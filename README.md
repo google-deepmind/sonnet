@@ -13,21 +13,15 @@ This installation is compatible with Linux/Mac OS X and Python 2.7 and
 Sonnet supports the [virtualenv installation mode](https://www.tensorflow.org/install/install_linux#installing_with_virtualenv)
 of TensorFlow, as well as the [native pip install](https://www.tensorflow.org/install/install_linux#installing_with_native_pip).
 
-The version with GPU depends on `tensorflow-gpu` and will install it if you have
-not done so. The version without GPU support will use the version of tensorflow
-you have installed, and will not work if you don't have any version installed.
-
-To install sonnet without gpu support, run
+To install sonnet, run:
 
 ```shell
 $ pip install dm-sonnet
 ```
 
-To install it with gpu support:
-
-```shell
-$ pip install dm-sonnet-gpu
-```
+Sonnet will work with both the CPU and GPU version of tensorflow, but to allow
+for that it does not list Tensorflow as a requirement, so you need to install
+Tensorflow separately if you haven't already done so.
 
 ## Usage Example
 

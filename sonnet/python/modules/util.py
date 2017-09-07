@@ -490,7 +490,10 @@ def format_variables(variables, join_lines=True):
   rows.append(("Variable", "Shape", "Type", "Collections", "Device"))
   var_to_collections = _get_vars_to_collections(variables)
   for var in sorted(variables, key=lambda var: var.op.name):
-    shape = "x".join(str(dim) for dim in var.get_shape().as_list())
+    if var.get_shape().is_fully_defined():
+      shape = "x".join(str(dim) for dim in var.get_shape().as_list())
+    else:
+      shape = "undefined"
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))
     rows.append((var.op.name, shape, dtype, coll, var.device))

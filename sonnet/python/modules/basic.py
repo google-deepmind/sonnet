@@ -1177,12 +1177,16 @@ class MergeDims(base.AbstractModule):
   For example, merging dimensions 1, 2 and 3 together can be performed by
   calling:
 
+  ```python
   output = MergeDims(start=1, size=3)(x)
+  ```
 
   A nested list of tensors can be merged:
 
+  ```python
   x = [tf.random_uniform(shape=[5, 5]), [tf.random_uniform(shape=[3, 3, 3])]]
   output = MergeDims(start=0, size=2)(x)
+  ```
   """
 
   def __init__(self, start, size, name="merge_dims"):

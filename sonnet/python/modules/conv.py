@@ -332,7 +332,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
           incompatible with the shape of the weights.
       base.UnderspecifiedError: If the input tensor has an unknown
           `input_channels`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -354,7 +354,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
 
     self._input_channels = input_channels
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError(
           "Input must have dtype tf.float32, but dtype was {}".format(
               inputs.dtype))
@@ -715,7 +715,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
           dimensions; or if the input tensor has an unknown `input_channels`; or
           or if `output_shape` is an iterable and is not in the format
           `(out_height, out_width)`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -734,7 +734,7 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
       raise base.IncompatibleShapeError(
           "Number of input channels must be known at module build time")
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype)
 
@@ -1043,7 +1043,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
           incompatible with the shape of the weights.
       base.UnderspecifiedError: If the input tensor has an unknown
           `input_channels`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -1059,7 +1059,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
     else:
       input_channels = self._input_shape[2]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError(
           "Input must have dtype tf.float32, but dtype was {}".format(
               inputs.dtype))
@@ -1330,7 +1330,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
           `input_channels`.
       base.IncompatibleShapeError: If `output_shape` is not an integer or
           iterable of length 1.
-      TypeError: If input Tensor dtype is not tf.float32.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -1356,7 +1356,7 @@ class Conv1DTranspose(base.AbstractModule, base.Transposable):
       raise base.IncompatibleShapeError(
           "Output shape must be specified as (output_length)")
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was {}"
                       .format(inputs.dtype))
 
@@ -1631,7 +1631,7 @@ class CausalConv1D(Conv1D):
           incompatible with the shape of the weights.
       base.UnderspecifiedError: If the input tensor has an unknown
           `input_channels`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -1648,7 +1648,7 @@ class CausalConv1D(Conv1D):
     else:
       input_channels = self._input_shape[2]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was {}".
                       format(inputs.dtype))
 
@@ -1791,7 +1791,7 @@ class InPlaneConv2D(base.AbstractModule):
           invocations.
       base.IncompatibleShapeError: If the input tensor has the wrong number
           of dimensions; or if the input tensor has an unknown `input_channels`.
-      TypeError: If input Tensor dtype is not tf.float32.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
 
     # Handle input whose shape is unknown during graph creation.
@@ -1808,7 +1808,7 @@ class InPlaneConv2D(base.AbstractModule):
 
     self._input_channels = self._input_shape[3]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype.name)
 
@@ -2057,7 +2057,7 @@ class DepthwiseConv2D(base.AbstractModule):
           invocations.
       base.IncompatibleShapeError: If the input tensor has the wrong number
           of dimensions; or if the input tensor has an unknown `input_channels`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
 
     # Handle input whose shape is unknown during graph creation.
@@ -2073,7 +2073,7 @@ class DepthwiseConv2D(base.AbstractModule):
           "Number of input channels must be known at module build time")
     self._input_channels = self._input_shape[3]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype.name)
 
@@ -2336,7 +2336,7 @@ class SeparableConv2D(base.AbstractModule):
           overparameterized.
       base.IncompatibleShapeError: If the input tensor has the wrong number
           of dimensions; or if the input tensor has an unknown `input_channels`.
-      TypeError: If input Tensor dtype is not tf.float32.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
 
     # Handle input whose shape is unknown during graph creation.
@@ -2353,7 +2353,7 @@ class SeparableConv2D(base.AbstractModule):
 
     self._input_channels = self._input_shape[3]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype.name)
 
@@ -2617,7 +2617,7 @@ class Conv3D(base.AbstractModule):
           of dimensions.
       base.UnderspecifiedError: If the input tensor has an unknown
           `input_channels`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -2633,7 +2633,7 @@ class Conv3D(base.AbstractModule):
     else:
       input_channels = self._input_shape[4]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError(
           "Input must have dtype tf.float32, but dtype was {}".format(
               inputs.dtype))
@@ -2906,7 +2906,7 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
           dimensions; or if the input tensor has an unknown `input_channels`; or
           or if `output_shape` is an iterable and is not in the format
           `(out_height, out_width)`.
-      TypeError: If input Tensor dtype is not `tf.float32`.
+      TypeError: If input Tensor dtype is not compatible with `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -2921,7 +2921,7 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
           "Number of input channels must be known at module build time")
     input_channels = self._input_shape[4]
 
-    if inputs.dtype != tf.float32:
+    if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
                       inputs.dtype)
 

@@ -940,6 +940,7 @@ class ConvLSTM(rnn_core.RNNCore):
                output_channels,
                kernel_shape,
                stride=1,
+               rate=1,
                padding=conv.SAME,
                use_bias=True,
                skip_connection=False,
@@ -959,6 +960,10 @@ class ConvLSTM(rnn_core.RNNCore):
           used to define kernel size in all dimensions.
       stride: Sequence of kernel strides (of size 2), or integer that is used to
           define stride in all dimensions.
+      rate: Sequence of dilation rates (of size conv_ndims), or integer that is
+          used to define dilation rate in all dimensions. 1 corresponds to a
+          standard convolution, while rate > 1 corresponds to a dilated
+          convolution. Cannot be > 1 if any of stride is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
       use_bias: Use bias in convolutions.
       skip_connection: If set to `True`, concatenate the input to the output
@@ -995,6 +1000,7 @@ class ConvLSTM(rnn_core.RNNCore):
     self._output_channels = output_channels
     self._kernel_shape = kernel_shape
     self._stride = stride
+    self._rate = rate
     self._padding = padding
     self._use_bias = use_bias
     self._forget_bias = forget_bias
@@ -1016,6 +1022,7 @@ class ConvLSTM(rnn_core.RNNCore):
         output_channels=4*self._output_channels,
         kernel_shape=self._kernel_shape,
         stride=self._stride,
+        rate=self._rate,
         padding=self._padding,
         use_bias=self._use_bias,
         initializers=self._initializers,

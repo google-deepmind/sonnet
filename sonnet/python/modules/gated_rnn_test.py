@@ -824,6 +824,57 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       sess.run(init)
       sess.run(train_op)
 
+  @parameterized.Parameters(
+      (snt.Conv1DLSTM, 1, False, 1, 1),
+      (snt.Conv1DLSTM, 1, False, 1, 5),
+      (snt.Conv1DLSTM, 1, False, 6, 1),
+      (snt.Conv1DLSTM, 1, False, 6, 5),
+      (snt.Conv1DLSTM, 1, True, 1, 1),
+      (snt.Conv1DLSTM, 1, True, 1, 5),
+      (snt.Conv1DLSTM, 1, True, 6, 1),
+      (snt.Conv1DLSTM, 1, True, 6, 5),
+      (snt.Conv2DLSTM, 2, False, 1, 1),
+      (snt.Conv2DLSTM, 2, False, 1, 5),
+      (snt.Conv2DLSTM, 2, False, 6, 1),
+      (snt.Conv2DLSTM, 2, False, 6, 5),
+      (snt.Conv2DLSTM, 2, True, 1, 1),
+      (snt.Conv2DLSTM, 2, True, 1, 5),
+      (snt.Conv2DLSTM, 2, True, 6, 1),
+      (snt.Conv2DLSTM, 2, True, 6, 5),
+  )
+  def testDilatedConv(self, lstm_class, dim, trainable_initial_state, rate,
+                      kernel_shape):
+    """Test that training works, with or without dilated convolutions."""
+    time_steps = 1
+    batch_size = 2
+    input_shape = (8,) * dim
+    input_channels = 3
+    output_channels = 5
+
+    input_shape = (batch_size,) + input_shape + (input_channels,)
+
+    lstm = lstm_class(
+        input_shape=input_shape[1:],
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        rate=rate)
+    inputs = tf.random_normal((time_steps,) + input_shape, dtype=tf.float32)
+    initial_state = lstm.initial_state(
+        batch_size, tf.float32, trainable_initial_state)
+
+    output, _ = tf.nn.dynamic_rnn(lstm,
+                                  inputs,
+                                  time_major=True,
+                                  initial_state=initial_state,
+                                  dtype=tf.float32)
+
+    loss = tf.reduce_mean(tf.square(output))
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+    init = tf.global_variables_initializer()
+    with self.test_session() as sess:
+      sess.run(init)
+      sess.run(train_op)
+
 
 class GRUTest(tf.test.TestCase):
 

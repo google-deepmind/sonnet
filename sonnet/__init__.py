@@ -36,6 +36,7 @@ from __future__ import print_function
 
 import sys
 
+from sonnet.python import custom_getters
 from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead

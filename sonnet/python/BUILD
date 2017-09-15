@@ -32,6 +32,21 @@ py_library(
 )
 
 py_library(
+    name = "custom_getters",
+    srcs = [
+        "custom_getters/__init__.py",
+        "custom_getters/context.py",
+        "custom_getters/non_trainable.py",
+        "custom_getters/restore_initializer.py",
+        "custom_getters/stop_gradient.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        # tensorflow dep,
+    ],
+)
+
+py_library(
     name = "modules",
     srcs = [
         "__init__.py",
@@ -187,3 +202,40 @@ py_test(
         # tensorflow dep,
     ],
 )
+
+custom_getters_tests = [
+    (
+        "context_test",
+        "small",
+        [],
+    ),
+    (
+        "non_trainable_test",
+        "small",
+        [],
+    ),
+    (
+        "restore_initializer_test",
+        "small",
+        [],
+    ),
+    (
+        "stop_gradient_test",
+        "small",
+        [],
+    ),
+]
+
+[py_test(
+    name = test_name,
+    size = test_size,
+    srcs = ["custom_getters/%s.py" % test_name],
+    tags = test_tags,
+    deps = [
+        # Test dep,
+        # numpy dep,
+        "//sonnet",
+        "//sonnet/testing/parameterized",
+        # tensorflow dep,
+    ],
+) for test_name, test_size, test_tags in custom_getters_tests]

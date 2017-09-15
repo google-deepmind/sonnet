@@ -15,6 +15,7 @@ py_library(
     srcs_version = "PY2AND3",
     visibility = ["//visibility:public"],
     deps = [
+        "//sonnet/python:custom_getters",
         "//sonnet/python:modules",
         "//sonnet/python:ops",
         # tensorflow dep,

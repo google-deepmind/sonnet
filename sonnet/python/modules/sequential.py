@@ -24,6 +24,7 @@ from __future__ import print_function
 
 # Dependency imports
 from sonnet.python.modules import base
+import tensorflow as tf
 
 
 class Sequential(base.AbstractModule):
@@ -98,3 +99,16 @@ class Sequential(base.AbstractModule):
   @property
   def layers(self):
     return self._layers
+
+  def get_variables(self, *args, **kwargs):
+    """Provide a warning that get_variables on Sequential always returns ()."""
+    tf.logging.warning(
+        "Calling Sequential.get_variables, which will always return an empty "
+        "tuple. get_variables() can only return variables created directly by "
+        "a Module, or created by submodules directly created inside the "
+        "Module. Sequential is constructed from already constructed submodules "
+        "and so this will always be empty. See the documentation for more "
+        "details, but tl;dr if you need to connect some modules sequentially "
+        "and call get_variables on the result, writing a simple custom module "
+        "is the simplest way.")
+    return super(Sequential, self).get_variables(*args, **kwargs)

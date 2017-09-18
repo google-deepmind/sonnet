@@ -232,7 +232,6 @@ custom_getters_tests = [
     srcs = ["custom_getters/%s.py" % test_name],
     tags = test_tags,
     deps = [
-        # Test dep,
         # numpy dep,
         "//sonnet",
         "//sonnet/testing/parameterized",

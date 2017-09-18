@@ -30,37 +30,45 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
+# Some helpers used for generic tests which cover both LSTM and BatchNormLSTM:
+
+
 def _get_lstm_variable_names(lstm):
-  keys = lstm.get_possible_initializer_keys(
-      lstm.use_peepholes,
-      lstm.use_batch_norm_h,
-      lstm.use_batch_norm_x,
-      lstm.use_batch_norm_c)
-  var_names = keys - {"w_gates", "b_gates"}
-  var_names |= {"b"}
-  if lstm.use_batch_norm_h or lstm.use_batch_norm_x:
-    var_names |= {"w_x", "w_h"}
+  if isinstance(lstm, snt.BatchNormLSTM):
+    var_names = lstm.get_possible_initializer_keys(
+        lstm.use_peepholes,
+        lstm.use_batch_norm_h,
+        lstm.use_batch_norm_x,
+        lstm.use_batch_norm_c)
+    if lstm.use_batch_norm_h or lstm.use_batch_norm_x:
+      var_names |= {"w_x", "w_h"}
+    else:
+      var_names |= {"w_xh"}
   else:
+    var_names = lstm.get_possible_initializer_keys(lstm.use_peepholes)
     var_names |= {"w_xh"}
+  var_names -= {"w_gates", "b_gates"}
+  var_names |= {"b"}
   return var_names
 
 
 def _construct_lstm(use_batch_norm_h=False, use_batch_norm_x=False,
-                    use_batch_norm_c=False, **kwargs):
-  # Preparing for deprecation, this uses plain LSTM if no batch norm required.
+                    use_batch_norm_c=False, max_unique_stats=1, **kwargs):
   if any([use_batch_norm_h, use_batch_norm_x, use_batch_norm_c]):
-    return snt.BatchNormLSTM(
+    cell = snt.BatchNormLSTM(
         use_batch_norm_h=use_batch_norm_h,
         use_batch_norm_x=use_batch_norm_x,
         use_batch_norm_c=use_batch_norm_c,
+        max_unique_stats=max_unique_stats,
         **kwargs)
+    return cell, cell.with_batch_norm_control(is_training=True)
   else:
-    return snt.LSTM(**kwargs)
+    cell = snt.LSTM(**kwargs)
+    return cell, cell
 
 
 def _get_possible_initializer_keys(use_peepholes, use_batch_norm_h,
                                    use_batch_norm_x, use_batch_norm_c):
-  # Preparing for deprecation, this uses plain LSTM if no batch norm required.
   if any([use_batch_norm_h, use_batch_norm_x, use_batch_norm_c]):
     return snt.BatchNormLSTM.get_possible_initializer_keys(
         use_peepholes, use_batch_norm_h, use_batch_norm_x, use_batch_norm_c)
@@ -225,18 +233,18 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     }
 
     # Test we can successfully create the LSTM with initializers.
-    lstm = _construct_lstm(hidden_size=hidden_size,
-                           use_peepholes=use_peepholes,
-                           use_batch_norm_h=use_batch_norm_h,
-                           use_batch_norm_x=use_batch_norm_x,
-                           use_batch_norm_c=use_batch_norm_c,
-                           initializers=initializers)
+    lstm, wrapped_lstm = _construct_lstm(hidden_size=hidden_size,
+                                         use_peepholes=use_peepholes,
+                                         use_batch_norm_h=use_batch_norm_h,
+                                         use_batch_norm_x=use_batch_norm_x,
+                                         use_batch_norm_c=use_batch_norm_c,
+                                         initializers=initializers)
 
     # Test we can build the LSTM.
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
+    wrapped_lstm(inputs, (prev_hidden, prev_cell))
     init = tf.global_variables_initializer()
 
     # Test that the initializers have been correctly applied.
@@ -276,29 +284,31 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     err = "is_training flag must be explicitly specified"
     with self.assertRaisesRegexp(ValueError, err):
-      lstm = snt.LSTM(hidden_size,
-                      use_batch_norm_h=use_batch_norm_h,
-                      use_batch_norm_x=use_batch_norm_x,
-                      use_batch_norm_c=use_batch_norm_c)
+      lstm = snt.BatchNormLSTM(
+          hidden_size,
+          use_batch_norm_h=use_batch_norm_h,
+          use_batch_norm_x=use_batch_norm_x,
+          use_batch_norm_c=use_batch_norm_c)
       lstm(inputs, (prev_cell, prev_hidden))
 
   def testBatchNormInitializersCheck(self):
     hidden_size = 4
 
-    # N.B. batch norm options to LSTM are deprecated now, so this is just
-    # checking that bad uses of deprecated options are complained about.
-
     # Test that passing in a batchnorm initializer when we don't request
-    # batchnorm raises an error.
-    for key in [snt.LSTM.GAMMA_H, snt.LSTM.GAMMA_X, snt.LSTM.GAMMA_C,
-                snt.LSTM.BETA_C]:
+    # that form of batchnorm raises an error.
+    for key, options in [
+        (snt.BatchNormLSTM.GAMMA_H, {"use_batch_norm_h": False,
+                                     "use_batch_norm_x": True}),
+        (snt.BatchNormLSTM.GAMMA_X, {"use_batch_norm_x": False,
+                                     "use_batch_norm_h": True}),
+        (snt.BatchNormLSTM.GAMMA_C, {"use_batch_norm_c": False,
+                                     "use_batch_norm_h": True}),
+        (snt.BatchNormLSTM.BETA_C, {"use_batch_norm_c": False,
+                                    "use_batch_norm_h": True})]:
       with self.assertRaisesRegexp(KeyError, "Invalid initializer"):
-        snt.LSTM(hidden_size,
-                 initializers={key: tf.constant_initializer(0)})
-
-    # Test that setting max_unique_stats=2 without batchnorm raises an error.
-    with self.assertRaisesRegexp(ValueError, "max_unique_stats specified.*"):
-      snt.LSTM(hidden_size, max_unique_stats=2)
+        snt.BatchNormLSTM(
+            hidden_size, initializers={key: tf.constant_initializer(0)},
+            **options)
 
   @parameterized.Parameters(
       *itertools.product(
@@ -316,18 +326,18 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     }
 
     # Test we can successfully create the LSTM with partitioners.
-    lstm = _construct_lstm(hidden_size=hidden_size,
-                           use_peepholes=use_peepholes,
-                           use_batch_norm_h=use_batch_norm_h,
-                           use_batch_norm_x=use_batch_norm_x,
-                           use_batch_norm_c=use_batch_norm_c,
-                           partitioners=partitioners)
+    lstm, wrapped_lstm = _construct_lstm(hidden_size=hidden_size,
+                                         use_peepholes=use_peepholes,
+                                         use_batch_norm_h=use_batch_norm_h,
+                                         use_batch_norm_x=use_batch_norm_x,
+                                         use_batch_norm_c=use_batch_norm_c,
+                                         partitioners=partitioners)
 
     # Test we can build the LSTM
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
+    wrapped_lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that the variables are partitioned.
     var_names = _get_lstm_variable_names(lstm)
@@ -351,18 +361,18 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     }
 
     # Test we can successfully create the LSTM with regularizers.
-    lstm = _construct_lstm(hidden_size=hidden_size,
-                           use_peepholes=use_peepholes,
-                           use_batch_norm_h=use_batch_norm_h,
-                           use_batch_norm_x=use_batch_norm_x,
-                           use_batch_norm_c=use_batch_norm_c,
-                           regularizers=regularizers)
+    _, wrapped_lstm = _construct_lstm(hidden_size=hidden_size,
+                                      use_peepholes=use_peepholes,
+                                      use_batch_norm_h=use_batch_norm_h,
+                                      use_batch_norm_x=use_batch_norm_x,
+                                      use_batch_norm_c=use_batch_norm_c,
+                                      regularizers=regularizers)
 
     # Test we can build the LSTM
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm(inputs, (prev_hidden, prev_cell), is_training=True)
+    wrapped_lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that we have regularization losses.
     num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
@@ -372,18 +382,16 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       self.assertEqual(num_reg_losses, len(keys))
 
   # Pick some hopefully representative combination of parameter values
-  # (want to test with and without BatchNorm, and with
-  # seq_len < max_unique_stats and seq_len > max_unique_stats, and some other
-  # combinations for good measure).
+  # (want to test with seq_len < max_unique_stats and seq_len >
+  # max_unique_stats, and some other combinations for good measure).
   @parameterized.Parameters(
-      (False, False, 3, 1, 2),
-      (False, True, 1, 1, 2),
-      (True, True, 3, 1, 2),
-      (False, True, 1, 2, 1),
-      (True, True, 3, 2, 1),
-      (False, True, 3, 3, 5))
-  def testSameInStaticAndDynamic(self, use_peepholes, use_batch_norm,
-                                 batch_size, max_unique_stats, seq_len):
+      (False, 1, 1, 2),
+      (True, 3, 1, 2),
+      (False, 1, 2, 1),
+      (True, 3, 2, 1),
+      (False, 3, 3, 5))
+  def testSameInStaticAndDynamicWithBatchNorm(self, use_peepholes, batch_size,
+                                              max_unique_stats, seq_len):
     # Tests that when the cell is used in either a normal tensorflow rnn, or in
     # tensorflow's dynamic_rnn, that the output is the same. This is to test
     # test that the cores aren't doing anything funny they shouldn't be (like
@@ -399,12 +407,13 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     test_local_stats = False
 
-    cell = _construct_lstm(hidden_size=hidden_size,
-                           max_unique_stats=max_unique_stats,
-                           use_peepholes=use_peepholes,
-                           use_batch_norm_h=use_batch_norm,
-                           use_batch_norm_x=use_batch_norm,
-                           use_batch_norm_c=use_batch_norm)
+    cell = snt.BatchNormLSTM(
+        hidden_size=hidden_size,
+        max_unique_stats=max_unique_stats,
+        use_peepholes=use_peepholes,
+        use_batch_norm_h=True,
+        use_batch_norm_x=True,
+        use_batch_norm_c=True)
 
     # Connect static in training and test modes
     train_static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
@@ -460,6 +469,39 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       # And check that same when using test statistics.
       check_static_and_dynamic(False)
 
+  def testSameInStaticAndDynamic(self):
+    batch_size = 3
+    seq_len = 2
+    hidden_size = 3
+    input_size = 3
+
+    inputs = tf.placeholder(tf.float32,
+                            shape=[batch_size, seq_len, input_size],
+                            name="inputs")
+    static_inputs = tf.unstack(inputs, axis=1)
+
+    cell = snt.LSTM(hidden_size=hidden_size)
+
+    static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
+        cell, static_inputs,
+        initial_state=cell.initial_state(batch_size, tf.float32))
+
+    dynamic_output, _ = tf.nn.dynamic_rnn(
+        cell, inputs,
+        initial_state=cell.initial_state(batch_size, tf.float32),
+        dtype=tf.float32)
+
+    static_output = tf.stack(static_output_unpacked, axis=1)
+
+    with self.test_session() as session:
+      tf.global_variables_initializer().run()
+
+      # Check that static and dynamic give the same output
+      input_data = np.random.rand(batch_size, seq_len, input_size)
+      static_out, dynamic_out = session.run([static_output, dynamic_output],
+                                            feed_dict={inputs: input_data})
+      self.assertAllClose(static_out, dynamic_out)
+
   def testLayerNormVariables(self):
     core = snt.LSTM(hidden_size=3, use_layer_norm=True)
 
@@ -513,22 +555,6 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       self.assertAllClose(hidden1, hidden2)
       self.assertAllClose(cell1, cell2)
 
-  def testConflictingNormalization(self):
-    # N.B. batch norm options to LSTM are deprecated now, so this is just
-    # checking that bad uses of deprecated options are complained about.
-
-    with self.assertRaisesRegexp(
-        ValueError, "Only one of use_batch_norm_h and layer_norm is allowed."):
-      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_h=True)
-
-    with self.assertRaisesRegexp(
-        ValueError, "Only one of use_batch_norm_x and layer_norm is allowed."):
-      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_x=True)
-
-    with self.assertRaisesRegexp(
-        ValueError, "Only one of use_batch_norm_c and layer_norm is allowed."):
-      snt.LSTM(hidden_size=3, use_layer_norm=True, use_batch_norm_c=True)
-
   @parameterized.Parameters(
       (False, False, False, False),
       (False, True, False, False),
@@ -543,23 +569,23 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                              use_batch_norm_h,
                              use_batch_norm_x,
                              use_batch_norm_c):
-    cell = _construct_lstm(hidden_size=3,
-                           use_peepholes=use_peepholes,
-                           use_batch_norm_h=use_batch_norm_h,
-                           use_batch_norm_x=use_batch_norm_x,
-                           use_batch_norm_c=use_batch_norm_c)
+    cell, wrapped_cell = _construct_lstm(hidden_size=3,
+                                         use_peepholes=use_peepholes,
+                                         use_batch_norm_h=use_batch_norm_h,
+                                         use_batch_norm_x=use_batch_norm_x,
+                                         use_batch_norm_c=use_batch_norm_c)
 
     # Need to connect the cell before it has variables
     batch_size = 3
     inputs = tf.placeholder(tf.float32, shape=[batch_size, 3, 3])
-    tf.nn.dynamic_rnn(cell.with_batch_norm_control(is_training=True),
-                      inputs,
+    tf.nn.dynamic_rnn(wrapped_cell, inputs,
                       initial_state=cell.initial_state(batch_size, tf.float32))
 
     self.assertEqual(use_peepholes, cell.use_peepholes)
-    self.assertEqual(use_batch_norm_h, cell.use_batch_norm_h)
-    self.assertEqual(use_batch_norm_x, cell.use_batch_norm_x)
-    self.assertEqual(use_batch_norm_c, cell.use_batch_norm_c)
+    if use_batch_norm_h or use_batch_norm_x or use_batch_norm_c:
+      self.assertEqual(use_batch_norm_h, cell.use_batch_norm_h)
+      self.assertEqual(use_batch_norm_x, cell.use_batch_norm_x)
+      self.assertEqual(use_batch_norm_c, cell.use_batch_norm_c)
 
     if use_batch_norm_h or use_batch_norm_x:
       expected = 3  # gate bias and two weights
@@ -712,7 +738,8 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
         for i, key in enumerate(keys):
           variable = getattr(convolution, key)
           self.assertAllClose(sess.run(variable),
-                              np.full(variable.get_shape(), i))
+                              np.full(variable.get_shape(),
+                                      i, dtype=np.float32))
 
   @parameterized.Parameters(
       (snt.Conv1DLSTM, 1, False),

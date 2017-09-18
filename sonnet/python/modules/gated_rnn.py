@@ -52,16 +52,352 @@ from sonnet.python.modules import util
 import tensorflow as tf
 
 from tensorflow.python.ops import array_ops
-from tensorflow.python.util import deprecation
 
 
-class _BaseLSTM(rnn_core.RNNCore):
-  """Base implementation underlying BatchNormLSTM and LSTM.
+class LSTM(rnn_core.RNNCore):
+  """LSTM recurrent network cell with optional peepholes & layer normalization.
 
-  This exists as a temporary measure during the deprecation process of batch
-  norm options to LSTM. Once deprecation is complete, it will be removed and
-  both BatchNormLSTM and LSTM replaced with simpler direct implementations.
+  The implementation is based on: http://arxiv.org/abs/1409.2329. We add
+  forget_bias (default: 1) to the biases of the forget gate in order to
+  reduce the scale of forgetting in the beginning of the training.
+
+  #### Layer normalization
+
+  This is described in https://arxiv.org/pdf/1607.06450.pdf
+
+  #### Peep-hole connections
+
+  Peep-hole connections may optionally be used by specifying a flag in the
+  constructor. These connections can aid increasing the precision of output
+  timing, for more details see:
+
+    https://research.google.com/pubs/archive/43905.pdf
+
+  Attributes:
+    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.
+    output_size: `tf.TensorShape` indicating the size of the core output.
+    use_peepholes: Boolean indicating whether peephole connections are used.
   """
+  # Keys that may be provided for parameter initializers.
+  W_GATES = "w_gates"  # weight for gates
+  B_GATES = "b_gates"  # bias of gates
+  W_F_DIAG = "w_f_diag"  # weight for prev_cell -> forget gate peephole
+  W_I_DIAG = "w_i_diag"  # weight for prev_cell -> input gate peephole
+  W_O_DIAG = "w_o_diag"  # weight for prev_cell -> output gate peephole
+  POSSIBLE_INITIALIZER_KEYS = {W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG}
+
+  def __init__(self,
+               hidden_size,
+               forget_bias=1.0,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               use_peepholes=False,
+               use_layer_norm=False,
+               hidden_clip_value=None,
+               cell_clip_value=None,
+               custom_getter=None,
+               name="lstm"):
+    """Construct LSTM.
+
+    Args:
+      hidden_size: (int) Hidden size dimensionality.
+      forget_bias: (float) Bias for the forget activation.
+      initializers: Dict containing ops to initialize the weights.
+        This dictionary may contain any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
+      partitioners: Optional dict containing partitioners to partition
+        the weights and biases. As a default, no partitioners are used. This
+        dict may contain any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
+      regularizers: Optional dict containing regularizers for the weights and
+        biases. As a default, no regularizers are used. This dict may contain
+        any of the keys returned by
+        `LSTM.get_possible_initializer_keys`.
+      use_peepholes: Boolean that indicates whether peephole connections are
+        used.
+      use_layer_norm: Boolean that indicates whether to apply layer
+        normalization.
+      hidden_clip_value: Optional number; if set, then the LSTM hidden state
+        vector is clipped by this value.
+      cell_clip_value: Optional number; if set, then the LSTM cell vector is
+        clipped by this value.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
+
+    Raises:
+      KeyError: if `initializers` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
+      KeyError: if `partitioners` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
+      KeyError: if `regularizers` contains any keys not returned by
+        `LSTM.get_possible_initializer_keys`.
+      ValueError: if a peephole initializer is passed in the initializer list,
+        but `use_peepholes` is False.
+    """
+    super(LSTM, self).__init__(custom_getter=custom_getter, name=name)
+
+    self._hidden_size = hidden_size
+    self._forget_bias = forget_bias
+    self._use_peepholes = use_peepholes
+    self._use_layer_norm = use_layer_norm
+    self._hidden_clip_value = hidden_clip_value
+    self._cell_clip_value = cell_clip_value
+    self.possible_keys = self.get_possible_initializer_keys(
+        use_peepholes=use_peepholes)
+    self._initializers = util.check_initializers(initializers,
+                                                 self.possible_keys)
+    self._partitioners = util.check_initializers(partitioners,
+                                                 self.possible_keys)
+    self._regularizers = util.check_initializers(regularizers,
+                                                 self.possible_keys)
+    if hidden_clip_value is not None and hidden_clip_value < 0:
+      raise ValueError("The value of hidden_clip_value should be nonnegative.")
+    if cell_clip_value is not None and cell_clip_value < 0:
+      raise ValueError("The value of cell_clip_value should be nonnegative.")
+
+  @classmethod
+  def get_possible_initializer_keys(cls, use_peepholes=False):
+    """Returns the keys the dictionary of variable initializers may contain.
+
+    The set of all possible initializer keys are:
+      w_gates:  weight for gates
+      b_gates:  bias of gates
+      w_f_diag: weight for prev_cell -> forget gate peephole
+      w_i_diag: weight for prev_cell -> input gate peephole
+      w_o_diag: weight for prev_cell -> output gate peephole
+
+    Args:
+      cls:The class.
+      use_peepholes: Boolean that indicates whether peephole connections are
+        used.
+
+    Returns:
+      Set with strings corresponding to the strings that may be passed to the
+        constructor.
+    """
+
+    possible_keys = cls.POSSIBLE_INITIALIZER_KEYS.copy()
+    if not use_peepholes:
+      possible_keys.difference_update(
+          {cls.W_F_DIAG, cls.W_I_DIAG, cls.W_O_DIAG})
+    return possible_keys
+
+  def _build(self, inputs, prev_state):
+    """Connects the LSTM module into the graph.
+
+    If this is not the first time the module has been connected to the graph,
+    the Tensors provided as inputs and state must have the same final
+    dimension, in order for the existing variables to be the correct size for
+    their corresponding multiplications. The batch size may differ for each
+    connection.
+
+    Args:
+      inputs: Tensor of size `[batch_size, input_size]`.
+      prev_state: Tuple (prev_hidden, prev_cell).
+
+    Returns:
+      A tuple (output, next_state) where 'output' is a Tensor of size
+      `[batch_size, hidden_size]` and 'next_state' is a tuple
+      (next_hidden, next_cell) where next_hidden and next_cell have size
+      `[batch_size, hidden_size]`.
+
+    Raises:
+      ValueError: If connecting the module into the graph any time after the
+        first time, and the inferred size of the inputs does not match previous
+        invocations.
+    """
+    prev_hidden, prev_cell = prev_state
+
+    # pylint: disable=invalid-unary-operand-type
+    if self._hidden_clip_value is not None:
+      prev_hidden = tf.clip_by_value(
+          prev_hidden, -self._hidden_clip_value, self._hidden_clip_value)
+    if self._cell_clip_value is not None:
+      prev_cell = tf.clip_by_value(
+          prev_cell, -self._cell_clip_value, self._cell_clip_value)
+    # pylint: enable=invalid-unary-operand-type
+
+    self._create_gate_variables(inputs.get_shape(), inputs.dtype)
+
+    # pylint false positive: calling module of same file;
+    # pylint: disable=not-callable
+
+    # Parameters of gates are concatenated into one multiply for efficiency.
+    inputs_and_hidden = tf.concat([inputs, prev_hidden], 1)
+    gates = tf.matmul(inputs_and_hidden, self._w_xh)
+
+    if self._use_layer_norm:
+      gates = layer_norm.LayerNorm()(gates)
+
+    gates += self._b
+
+    # i = input_gate, j = next_input, f = forget_gate, o = output_gate
+    i, j, f, o = array_ops.split(value=gates, num_or_size_splits=4, axis=1)
+
+    if self._use_peepholes:  # diagonal connections
+      self._create_peephole_variables(inputs.dtype)
+      f += self._w_f_diag * prev_cell
+      i += self._w_i_diag * prev_cell
+
+    forget_mask = tf.sigmoid(f + self._forget_bias)
+    next_cell = forget_mask * prev_cell + tf.sigmoid(i) * tf.tanh(j)
+    cell_output = next_cell
+    if self._use_peepholes:
+      cell_output += self._w_o_diag * cell_output
+    next_hidden = tf.tanh(cell_output) * tf.sigmoid(o)
+
+    return next_hidden, (next_hidden, next_cell)
+
+  def _create_gate_variables(self, input_shape, dtype):
+    """Initialize the variables used for the gates."""
+    if len(input_shape) != 2:
+      raise ValueError(
+          "Rank of shape must be {} not: {}".format(2, len(input_shape)))
+    input_size = input_shape.dims[1].value
+
+    b_shape = [4 * self._hidden_size]
+
+    equiv_input_size = self._hidden_size + input_size
+    initializer = basic.create_linear_initializer(equiv_input_size)
+
+    self._w_xh = tf.get_variable(
+        self.W_GATES,
+        shape=[self._hidden_size + input_size, 4 * self._hidden_size],
+        dtype=dtype,
+        initializer=self._initializers.get(self.W_GATES, initializer),
+        partitioner=self._partitioners.get(self.W_GATES),
+        regularizer=self._regularizers.get(self.W_GATES))
+    self._b = tf.get_variable(
+        self.B_GATES,
+        shape=b_shape,
+        dtype=dtype,
+        initializer=self._initializers.get(self.B_GATES, initializer),
+        partitioner=self._partitioners.get(self.B_GATES),
+        regularizer=self._regularizers.get(self.B_GATES))
+
+  def _create_peephole_variables(self, dtype):
+    """Initialize the variables used for the peephole connections."""
+    self._w_f_diag = tf.get_variable(
+        self.W_F_DIAG,
+        shape=[self._hidden_size],
+        dtype=dtype,
+        initializer=self._initializers.get(self.W_F_DIAG),
+        partitioner=self._partitioners.get(self.W_F_DIAG),
+        regularizer=self._regularizers.get(self.W_F_DIAG))
+    self._w_i_diag = tf.get_variable(
+        self.W_I_DIAG,
+        shape=[self._hidden_size],
+        dtype=dtype,
+        initializer=self._initializers.get(self.W_I_DIAG),
+        partitioner=self._partitioners.get(self.W_I_DIAG),
+        regularizer=self._regularizers.get(self.W_I_DIAG))
+    self._w_o_diag = tf.get_variable(
+        self.W_O_DIAG,
+        shape=[self._hidden_size],
+        dtype=dtype,
+        initializer=self._initializers.get(self.W_O_DIAG),
+        partitioner=self._partitioners.get(self.W_O_DIAG),
+        regularizer=self._regularizers.get(self.W_O_DIAG))
+
+  @property
+  def state_size(self):
+    """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
+    return (tf.TensorShape([self._hidden_size]),
+            tf.TensorShape([self._hidden_size]))
+
+  @property
+  def output_size(self):
+    """`tf.TensorShape` indicating the size of the core output."""
+    return tf.TensorShape([self._hidden_size])
+
+  @property
+  def use_peepholes(self):
+    """Boolean indicating whether peephole connections are used."""
+    return self._use_peepholes
+
+  @property
+  def use_layer_norm(self):
+    """Boolean indicating whether layer norm is enabled."""
+    return self._use_layer_norm
+
+
+class BatchNormLSTM(rnn_core.RNNCore):
+  """LSTM recurrent network cell with optional peepholes, batch normalization.
+
+  The base implementation is based on: http://arxiv.org/abs/1409.2329. We add
+  forget_bias (default: 1) to the biases of the forget gate in order to
+  reduce the scale of forgetting in the beginning of the training.
+
+  #### Peep-hole connections
+
+  Peep-hole connections may optionally be used by specifying a flag in the
+  constructor. These connections can aid increasing the precision of output
+  timing, for more details see:
+
+    https://research.google.com/pubs/archive/43905.pdf
+
+  #### Batch normalization
+
+  The batch norm transformation (in training mode) is
+    batchnorm(x) = gamma * (x - mean(x)) / stddev(x) + beta,
+  where gamma is a learnt scaling factor and beta is a learnt offset.
+
+  Batch normalization may optionally be used at different places in the LSTM by
+  specifying flag(s) in the constructor. These are applied when calculating
+  the gate activations and cell-to-hidden transformation. The set-up is based on
+
+    https://arxiv.org/pdf/1603.09025.pdf
+
+  ##### Batch normalization: where to apply?
+
+  Batch norm can be applied in three different places in the LSTM:
+
+    (h) To the W_h h_{t-1} contribution to the gates from the previous hiddens.
+    (x) To the W_x x_t contribution to the gates from the current input.
+    (c) To the cell value c_t when calculating the output h_t from the cell.
+
+  (The notation here is consistent with the Recurrent Batch Normalization
+  paper). Each of these can be controlled individually, because batch norm is
+  expensive, and not all are necessary. The paper doesn't mention the relative
+  effects of these different batch norms; however, experimentation with a
+  shallow LSTM for the `permuted_mnist` sequence task suggests that (h) is the
+  most important and the other two can be left off. For other tasks or deeper
+  (stacked) LSTMs, other batch norm combinations may be more effective.
+
+  ##### Batch normalization: collecting stats (training vs test)
+
+  When switching to testing (see `LSTM.with_batch_norm_control`), we can use a
+  mean and stddev learnt from the training data instead of using the statistics
+  from the test data. (This both increases test accuracy because the statistics
+  have less variance, and if the test data does not have the same distribution
+  as the training data then we must use the training statistics to ensure the
+  effective network does not change when switching to testing anyhow.)
+
+  This does however introduces a slight subtlety. The first few time steps of
+  the RNN tend to have varying statistics (mean and variance) before settling
+  down to a steady value. Therefore in general, better performance is obtained
+  by using separate statistics for the first few time steps, and then using the
+  final set of statistics for all subsequent time steps. This is controlled by
+  the parameter `max_unique_stats`. (We can't have an unbounded number of
+  distinct statistics for both technical reasons and also for the case where
+  test sequences are longer than anything seen in training.)
+
+  You may be fine leaving it at its default value of 1. Small values (like 10)
+  may achieve better performance on some tasks when testing with cached
+  statistics.
+
+  Attributes:
+    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.
+    output_size: `tf.TensorShape` indicating the size of the core output.
+    use_peepholes: Boolean indicating whether peephole connections are used.
+    use_batch_norm_h: Boolean indicating whether batch norm (h) is enabled.
+    use_batch_norm_x: Boolean indicating whether batch norm (x) is enabled.
+    use_batch_norm_c: Boolean indicating whether batch norm (c) is enabled.
+  """
+
   # Keys that may be provided for parameter initializers.
   W_GATES = "w_gates"  # weight for gates
   B_GATES = "b_gates"  # bias of gates
@@ -85,17 +421,72 @@ class _BaseLSTM(rnn_core.RNNCore):
                partitioners=None,
                regularizers=None,
                use_peepholes=False,
-               use_batch_norm_h=False,
+               use_batch_norm_h=True,
                use_batch_norm_x=False,
                use_batch_norm_c=False,
-               use_layer_norm=False,
                max_unique_stats=1,
                hidden_clip_value=None,
                cell_clip_value=None,
                custom_getter=None,
-               name="lstm"):
-    """See `__init__` of `LSTM` and `BatchNormLSTM` for docs."""
-    super(_BaseLSTM, self).__init__(custom_getter=custom_getter, name=name)
+               name="batch_norm_lstm"):
+    """Construct `BatchNormLSTM`.
+
+    Args:
+      hidden_size: (int) Hidden size dimensionality.
+      forget_bias: (float) Bias for the forget activation.
+      initializers: Dict containing ops to initialize the weights.
+        This dictionary may contain any of the keys returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+        The gamma and beta variables control batch normalization values for
+        different batch norm transformations inside the cell; see the paper for
+        details.
+      partitioners: Optional dict containing partitioners to partition
+        the weights and biases. As a default, no partitioners are used. This
+        dict may contain any of the keys returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+      regularizers: Optional dict containing regularizers for the weights and
+        biases. As a default, no regularizers are used. This dict may contain
+        any of the keys returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+      use_peepholes: Boolean that indicates whether peephole connections are
+        used.
+      use_batch_norm_h: Boolean that indicates whether to apply batch
+        normalization at the previous_hidden -> gates contribution. If you are
+        experimenting with batch norm then this may be the most effective to
+        use, and is enabled by default.
+      use_batch_norm_x: Boolean that indicates whether to apply batch
+        normalization at the input -> gates contribution.
+      use_batch_norm_c: Boolean that indicates whether to apply batch
+        normalization at the cell -> output contribution.
+      max_unique_stats: The maximum number of steps to use unique batch norm
+        statistics for. (See module description above for more details.)
+      hidden_clip_value: Optional number; if set, then the LSTM hidden state
+        vector is clipped by this value.
+      cell_clip_value: Optional number; if set, then the LSTM cell vector is
+        clipped by this value.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
+
+    Raises:
+      KeyError: if `initializers` contains any keys not returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+      KeyError: if `partitioners` contains any keys not returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+      KeyError: if `regularizers` contains any keys not returned by
+        `BatchNormLSTM.get_possible_initializer_keys`.
+      ValueError: if a peephole initializer is passed in the initializer list,
+        but `use_peepholes` is False.
+      ValueError: if a batch norm initializer is passed in the initializer list,
+        but batch norm is disabled.
+      ValueError: if none of the `use_batch_norm_*` options are True.
+      ValueError: if `max_unique_stats` is < 1.
+    """
+    if not any([use_batch_norm_h, use_batch_norm_x, use_batch_norm_c]):
+      raise ValueError("At least one use_batch_norm_* option is required for "
+                       "BatchNormLSTM")
+    super(BatchNormLSTM, self).__init__(custom_getter=custom_getter, name=name)
 
     self._hidden_size = hidden_size
     self._forget_bias = forget_bias
@@ -104,7 +495,6 @@ class _BaseLSTM(rnn_core.RNNCore):
     self._use_batch_norm_h = use_batch_norm_h
     self._use_batch_norm_x = use_batch_norm_x
     self._use_batch_norm_c = use_batch_norm_c
-    self._use_layer_norm = use_layer_norm
     self._hidden_clip_value = hidden_clip_value
     self._cell_clip_value = cell_clip_value
     self.possible_keys = self.get_possible_initializer_keys(
@@ -121,29 +511,20 @@ class _BaseLSTM(rnn_core.RNNCore):
     if max_unique_stats != 1 and not (
         use_batch_norm_h or use_batch_norm_x or use_batch_norm_c):
       raise ValueError("max_unique_stats specified but batch norm disabled")
-    if use_batch_norm_h and use_layer_norm:
-      raise ValueError(
-          "Only one of use_batch_norm_h and layer_norm is allowed.")
-    if use_batch_norm_x and use_layer_norm:
-      raise ValueError(
-          "Only one of use_batch_norm_x and layer_norm is allowed.")
-    if use_batch_norm_c and use_layer_norm:
-      raise ValueError(
-          "Only one of use_batch_norm_c and layer_norm is allowed.")
     if hidden_clip_value is not None and hidden_clip_value < 0:
       raise ValueError("The value of hidden_clip_value should be nonnegative.")
     if cell_clip_value is not None and cell_clip_value < 0:
       raise ValueError("The value of cell_clip_value should be nonnegative.")
 
     if use_batch_norm_h:
-      self._batch_norm_h = _BaseLSTM.IndexedStatsBatchNorm(max_unique_stats,
-                                                           "batch_norm_h")
+      self._batch_norm_h = BatchNormLSTM.IndexedStatsBatchNorm(max_unique_stats,
+                                                               "batch_norm_h")
     if use_batch_norm_x:
-      self._batch_norm_x = _BaseLSTM.IndexedStatsBatchNorm(max_unique_stats,
-                                                           "batch_norm_x")
+      self._batch_norm_x = BatchNormLSTM.IndexedStatsBatchNorm(max_unique_stats,
+                                                               "batch_norm_x")
     if use_batch_norm_c:
-      self._batch_norm_c = _BaseLSTM.IndexedStatsBatchNorm(max_unique_stats,
-                                                           "batch_norm_c")
+      self._batch_norm_c = BatchNormLSTM.IndexedStatsBatchNorm(max_unique_stats,
+                                                               "batch_norm_c")
 
   def with_batch_norm_control(self, is_training, test_local_stats=True):
     """Wraps this RNNCore with the additional control input to the `BatchNorm`s.
@@ -169,13 +550,12 @@ class _BaseLSTM(rnn_core.RNNCore):
     Returns:
       snt.RNNCore wrapping this class with the extra input(s) added.
     """
-    return _BaseLSTM.CoreWithExtraBuildArgs(self,
-                                            is_training=is_training,
-                                            test_local_stats=test_local_stats)
+    return BatchNormLSTM.CoreWithExtraBuildArgs(
+        self, is_training=is_training, test_local_stats=test_local_stats)
 
   @classmethod
   def get_possible_initializer_keys(
-      cls, use_peepholes=False, use_batch_norm_h=False, use_batch_norm_x=False,
+      cls, use_peepholes=False, use_batch_norm_h=True, use_batch_norm_x=False,
       use_batch_norm_c=False):
     """Returns the keys the dictionary of variable initializers may contain.
 
@@ -254,9 +634,7 @@ class _BaseLSTM(rnn_core.RNNCore):
         first time, and the inferred size of the inputs does not match previous
         invocations.
     """
-    use_batch_norm = self._use_batch_norm_c or self._use_batch_norm_h
-    use_batch_norm = use_batch_norm or self._use_batch_norm_x
-    if use_batch_norm and is_training is None:
+    if is_training is None:
       raise ValueError("Boolean is_training flag must be explicitly specified "
                        "when using batch normalization.")
 
@@ -299,9 +677,6 @@ class _BaseLSTM(rnn_core.RNNCore):
       # Parameters of gates are concatenated into one multiply for efficiency.
       inputs_and_hidden = tf.concat([inputs, prev_hidden], 1)
       gates = tf.matmul(inputs_and_hidden, self._w_xh)
-
-      if self._use_layer_norm:
-        gates = layer_norm.LayerNorm()(gates)
 
     gates += self._b
 
@@ -464,7 +839,7 @@ class _BaseLSTM(rnn_core.RNNCore):
       with `max_unique_stats > 1', with value `0` (representing the time step).
     """
     if self._max_unique_stats == 1:
-      return super(_BaseLSTM, self).initial_state(
+      return super(BatchNormLSTM, self).initial_state(
           batch_size, dtype=dtype, trainable=trainable,
           trainable_initializers=trainable_initializers,
           trainable_regularizers=trainable_regularizers, name=name)
@@ -521,11 +896,6 @@ class _BaseLSTM(rnn_core.RNNCore):
     """Boolean indicating whether batch norm for cell -> output is enabled."""
     return self._use_batch_norm_c
 
-  @property
-  def use_layer_norm(self):
-    """Boolean indicating whether layer norm is enabled."""
-    return self._use_layer_norm
-
   class IndexedStatsBatchNorm(base.AbstractModule):
     """BatchNorm module where batch statistics are selected by an input index.
 
@@ -555,7 +925,7 @@ class _BaseLSTM(rnn_core.RNNCore):
           indices beyond this will use the final statistics.
         name: Name of the module.
       """
-      super(_BaseLSTM.IndexedStatsBatchNorm, self).__init__(name=name)
+      super(BatchNormLSTM.IndexedStatsBatchNorm, self).__init__(name=name)
       self._max_unique_stats = max_unique_stats
 
     def _build(self, inputs, index, is_training, test_local_stats):
@@ -600,7 +970,7 @@ class _BaseLSTM(rnn_core.RNNCore):
         *args: Extra arguments to pass to _build.
         **kwargs: Extra keyword arguments to pass to _build.
       """
-      super(_BaseLSTM.CoreWithExtraBuildArgs, self).__init__(
+      super(BatchNormLSTM.CoreWithExtraBuildArgs, self).__init__(
           name=core.module_name + "_extra_args")
       self._core = core
       self._args = args
@@ -618,301 +988,6 @@ class _BaseLSTM(rnn_core.RNNCore):
     def output_size(self):
       """`tf.TensorShape` indicating the size of the core output."""
       return self._core.output_size
-
-
-class LSTM(_BaseLSTM):
-  """LSTM recurrent network cell with optional peepholes & layer normalization.
-
-  The implementation is based on: http://arxiv.org/abs/1409.2329. We add
-  forget_bias (default: 1) to the biases of the forget gate in order to
-  reduce the scale of forgetting in the beginning of the training.
-
-  #### Layer normalization
-
-  This is described in https://arxiv.org/pdf/1607.06450.pdf
-
-  #### Peep-hole connections
-
-  Peep-hole connections may optionally be used by specifying a flag in the
-  constructor. These connections can aid increasing the precision of output
-  timing, for more details see:
-
-    https://research.google.com/pubs/archive/43905.pdf
-
-  Attributes:
-    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.
-    output_size: `tf.TensorShape` indicating the size of the core output.
-    use_peepholes: Boolean indicating whether peephole connections are used.
-  """
-
-  @deprecation.deprecated_args(
-      "2017-09-18",
-      "Please switch from LSTM to BatchNormLSTM if you need batch norm "
-      "functionality.",
-      "use_batch_norm_h", "use_batch_norm_x", "use_batch_norm_c",
-      "max_unique_stats")
-  def __init__(self,
-               hidden_size,
-               forget_bias=1.0,
-               initializers=None,
-               partitioners=None,
-               regularizers=None,
-               use_peepholes=False,
-               use_batch_norm_h=False,
-               use_batch_norm_x=False,
-               use_batch_norm_c=False,
-               use_layer_norm=False,
-               max_unique_stats=1,
-               hidden_clip_value=None,
-               cell_clip_value=None,
-               custom_getter=None,
-               name="lstm"):
-    """Construct LSTM.
-
-    Args:
-      hidden_size: (int) Hidden size dimensionality.
-      forget_bias: (float) Bias for the forget activation.
-      initializers: Dict containing ops to initialize the weights.
-        This dictionary may contain any of the keys returned by
-        `LSTM.get_possible_initializer_keys`.
-        The gamma and beta variables control batch normalization values for
-        different batch norm transformations inside the cell; see the paper for
-        details.
-      partitioners: Optional dict containing partitioners to partition
-        the weights and biases. As a default, no partitioners are used. This
-        dict may contain any of the keys returned by
-        `LSTM.get_possible_initializer_keys`.
-      regularizers: Optional dict containing regularizers for the weights and
-        biases. As a default, no regularizers are used. This dict may contain
-        any of the keys returned by
-        `LSTM.get_possible_initializer_keys`.
-      use_peepholes: Boolean that indicates whether peephole connections are
-        used.
-      use_batch_norm_h: Boolean that indicates whether to apply batch
-        normalization at the previous_hidden -> gates contribution.
-        This is deprecated and will be removed in a future sonnet version.
-        Please switch to `BatchNormLSTM` if you require it.
-      use_batch_norm_x: Boolean that indicates whether to apply batch
-        normalization at the input -> gates contribution.
-        This is deprecated and will be removed in a future sonnet version.
-        Please switch to `BatchNormLSTM` if you require it.
-      use_batch_norm_c: Boolean that indicates whether to apply batch
-        normalization at the cell -> output contribution.
-        This is deprecated and will be removed in a future sonnet version.
-        Please switch to `BatchNormLSTM` if you require it.
-      use_layer_norm: Boolean that indicates whether to apply layer
-        normalization.
-      max_unique_stats: The maximum number of steps to use unique batch norm
-        statistics for. (See module description above for more details.)
-        This is deprecated and will be removed in a future sonnet version.
-        Please switch to `BatchNormLSTM` if you require it.
-      hidden_clip_value: Optional number; if set, then the LSTM hidden state
-        vector is clipped by this value.
-      cell_clip_value: Optional number; if set, then the LSTM cell vector is
-        clipped by this value.
-      custom_getter: Callable that takes as a first argument the true getter,
-        and allows overwriting the internal get_variable method. See the
-        `tf.get_variable` documentation for more details.
-      name: Name of the module.
-
-    Raises:
-      KeyError: if `initializers` contains any keys not returned by
-        `LSTM.get_possible_initializer_keys`.
-      KeyError: if `partitioners` contains any keys not returned by
-        `LSTM.get_possible_initializer_keys`.
-      KeyError: if `regularizers` contains any keys not returned by
-        `LSTM.get_possible_initializer_keys`.
-      ValueError: if a peephole initializer is passed in the initializer list,
-        but `use_peepholes` is False.
-    """
-    super(LSTM, self).__init__(
-        hidden_size,
-        forget_bias=forget_bias,
-        initializers=initializers,
-        partitioners=partitioners,
-        regularizers=regularizers,
-        use_peepholes=use_peepholes,
-        use_batch_norm_h=use_batch_norm_h,
-        use_batch_norm_x=use_batch_norm_x,
-        use_batch_norm_c=use_batch_norm_c,
-        use_layer_norm=use_layer_norm,
-        max_unique_stats=max_unique_stats,
-        hidden_clip_value=hidden_clip_value,
-        cell_clip_value=cell_clip_value,
-        custom_getter=custom_getter,
-        name=name)
-
-
-class BatchNormLSTM(_BaseLSTM):
-  """LSTM recurrent network cell with optional peepholes, batch normalization.
-
-  The base implementation is based on: http://arxiv.org/abs/1409.2329. We add
-  forget_bias (default: 1) to the biases of the forget gate in order to
-  reduce the scale of forgetting in the beginning of the training.
-
-  #### Peep-hole connections
-
-  Peep-hole connections may optionally be used by specifying a flag in the
-  constructor. These connections can aid increasing the precision of output
-  timing, for more details see:
-
-    https://research.google.com/pubs/archive/43905.pdf
-
-  #### Batch normalization
-
-  The batch norm transformation (in training mode) is
-    batchnorm(x) = gamma * (x - mean(x)) / stddev(x) + beta,
-  where gamma is a learnt scaling factor and beta is a learnt offset.
-
-  Batch normalization may optionally be used at different places in the LSTM by
-  specifying flag(s) in the constructor. These are applied when calculating
-  the gate activations and cell-to-hidden transformation. The set-up is based on
-
-    https://arxiv.org/pdf/1603.09025.pdf
-
-  ##### Batch normalization: where to apply?
-
-  Batch norm can be applied in three different places in the LSTM:
-
-    (h) To the W_h h_{t-1} contribution to the gates from the previous hiddens.
-    (x) To the W_x x_t contribution to the gates from the current input.
-    (c) To the cell value c_t when calculating the output h_t from the cell.
-
-  (The notation here is consistent with the Recurrent Batch Normalization
-  paper). Each of these can be controlled individually, because batch norm is
-  expensive, and not all are necessary. The paper doesn't mention the relative
-  effects of these different batch norms; however, experimentation with a
-  shallow LSTM for the `permuted_mnist` sequence task suggests that (h) is the
-  most important and the other two can be left off. For other tasks or deeper
-  (stacked) LSTMs, other batch norm combinations may be more effective.
-
-  ##### Batch normalization: collecting stats (training vs test)
-
-  When switching to testing (see `LSTM.with_batch_norm_control`), we can use a
-  mean and stddev learnt from the training data instead of using the statistics
-  from the test data. (This both increases test accuracy because the statistics
-  have less variance, and if the test data does not have the same distribution
-  as the training data then we must use the training statistics to ensure the
-  effective network does not change when switching to testing anyhow.)
-
-  This does however introduces a slight subtlety. The first few time steps of
-  the RNN tend to have varying statistics (mean and variance) before settling
-  down to a steady value. Therefore in general, better performance is obtained
-  by using separate statistics for the first few time steps, and then using the
-  final set of statistics for all subsequent time steps. This is controlled by
-  the parameter `max_unique_stats`. (We can't have an unbounded number of
-  distinct statistics for both technical reasons and also for the case where
-  test sequences are longer than anything seen in training.)
-
-  You may be fine leaving it at its default value of 1. Small values (like 10)
-  may achieve better performance on some tasks when testing with cached
-  statistics.
-
-  Attributes:
-    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.
-    output_size: `tf.TensorShape` indicating the size of the core output.
-    use_peepholes: Boolean indicating whether peephole connections are used.
-    use_batch_norm_h: Boolean indicating whether batch norm (h) is enabled.
-    use_batch_norm_x: Boolean indicating whether batch norm (x) is enabled.
-    use_batch_norm_c: Boolean indicating whether batch norm (c) is enabled.
-  """
-
-  def __init__(self,
-               hidden_size,
-               forget_bias=1.0,
-               initializers=None,
-               partitioners=None,
-               regularizers=None,
-               use_peepholes=False,
-               use_batch_norm_h=True,
-               use_batch_norm_x=False,
-               use_batch_norm_c=False,
-               max_unique_stats=1,
-               hidden_clip_value=None,
-               cell_clip_value=None,
-               custom_getter=None,
-               name="batch_norm_lstm"):
-    """Construct `BatchNormLSTM`.
-
-    Args:
-      hidden_size: (int) Hidden size dimensionality.
-      forget_bias: (float) Bias for the forget activation.
-      initializers: Dict containing ops to initialize the weights.
-        This dictionary may contain any of the keys returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-        The gamma and beta variables control batch normalization values for
-        different batch norm transformations inside the cell; see the paper for
-        details.
-      partitioners: Optional dict containing partitioners to partition
-        the weights and biases. As a default, no partitioners are used. This
-        dict may contain any of the keys returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-      regularizers: Optional dict containing regularizers for the weights and
-        biases. As a default, no regularizers are used. This dict may contain
-        any of the keys returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-      use_peepholes: Boolean that indicates whether peephole connections are
-        used.
-      use_batch_norm_h: Boolean that indicates whether to apply batch
-        normalization at the previous_hidden -> gates contribution. If you are
-        experimenting with batch norm then this may be the most effective to
-        use, and is enabled by default.
-      use_batch_norm_x: Boolean that indicates whether to apply batch
-        normalization at the input -> gates contribution.
-      use_batch_norm_c: Boolean that indicates whether to apply batch
-        normalization at the cell -> output contribution.
-      max_unique_stats: The maximum number of steps to use unique batch norm
-        statistics for. (See module description above for more details.)
-      hidden_clip_value: Optional number; if set, then the LSTM hidden state
-        vector is clipped by this value.
-      cell_clip_value: Optional number; if set, then the LSTM cell vector is
-        clipped by this value.
-      custom_getter: Callable that takes as a first argument the true getter,
-        and allows overwriting the internal get_variable method. See the
-        `tf.get_variable` documentation for more details.
-      name: Name of the module.
-
-    Raises:
-      KeyError: if `initializers` contains any keys not returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-      KeyError: if `partitioners` contains any keys not returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-      KeyError: if `regularizers` contains any keys not returned by
-        `BatchNormLSTM.get_possible_initializer_keys`.
-      ValueError: if a peephole initializer is passed in the initializer list,
-        but `use_peepholes` is False.
-      ValueError: if a batch norm initializer is passed in the initializer list,
-        but batch norm is disabled.
-      ValueError: if none of the `use_batch_norm_*` options are True.
-      ValueError: if `max_unique_stats` is < 1.
-    """
-    if not any([use_batch_norm_h, use_batch_norm_x, use_batch_norm_c]):
-      raise ValueError("At least one use_batch_norm_* option is required for "
-                       "BatchNormLSTM")
-    super(BatchNormLSTM, self).__init__(
-        hidden_size,
-        forget_bias=forget_bias,
-        initializers=initializers,
-        partitioners=partitioners,
-        regularizers=regularizers,
-        use_peepholes=use_peepholes,
-        use_batch_norm_h=use_batch_norm_h,
-        use_batch_norm_x=use_batch_norm_x,
-        use_batch_norm_c=use_batch_norm_c,
-        max_unique_stats=max_unique_stats,
-        hidden_clip_value=hidden_clip_value,
-        cell_clip_value=cell_clip_value,
-        custom_getter=custom_getter,
-        name=name)
-
-  # Overriding because the default for use_batch_norm_h is True here.
-  @classmethod
-  def get_possible_initializer_keys(
-      cls, use_peepholes=False, use_batch_norm_h=True, use_batch_norm_x=False,
-      use_batch_norm_c=False):
-    return super(BatchNormLSTM, cls).get_possible_initializer_keys(
-        use_peepholes=use_peepholes, use_batch_norm_h=use_batch_norm_h,
-        use_batch_norm_x=use_batch_norm_x, use_batch_norm_c=use_batch_norm_c)
 
 
 class ConvLSTM(rnn_core.RNNCore):

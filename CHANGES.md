@@ -1,5 +1,17 @@
 # Sonnet Changelog
 
+## Version 1.12 - Monday 18. September 2017
+
+* `custom_getters` subpackage. This allows modules to be made non-trainable, or
+  to completely block gradients. See documentation for `tf.get_variable` for
+  more details.
+* `Sequential.get_variables()` generates a warning to indicate that no
+  variables will ever be returned.
+* `ConvLSTM` now supports dilated convolutions.
+* `utils.format_variables` allows logging Variables with non-static shape.
+* `snt.trainable_initial_state` is now publicly exposed.
+* Stop using private property of `tf.Graph` in `util.py`.
+
 ## Version 1.11 - Monday 21. August 2017
 
 This version requires TensorFlow 1.3.0.

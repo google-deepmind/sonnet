@@ -580,10 +580,14 @@ Hence, the reshape can be performed without knowing in advance the rank
 of the input tensor.</p>
 <p>For example, merging dimensions 1, 2 and 3 together can be performed by
 calling:</p>
-<p>output = MergeDims(start=1, size=3)(x)</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">MergeDims</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>A nested list of tensors can be merged:</p>
-<p>x = [tf.random_uniform(shape=[5, 5]), [tf.random_uniform(shape=[3, 3,
-3])]] output = MergeDims(start=0, size=2)(x)</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])]]</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">MergeDims</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="class">
@@ -2315,7 +2319,7 @@ Boolean indicating whether batch norm (c) is enabled.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.ConvLSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>skip_connection=False</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>skip_connection=False</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>Convolutional LSTM.</p>
 <dl class="attribute">
@@ -2830,6 +2834,12 @@ passed to the constituents of the module - for example, if there is a
 solution is to use <code class="docutils literal"><span class="pre">snt.Module</span></code> to wrap a custom function, as shown in
 the following example:</p>
 <p><a class="reference external" href="https://github.com/deepmind/sonnet/examples/module_with_build_args.py">https://github.com/deepmind/sonnet/examples/module_with_build_args.py</a></p>
+<dl class="method">
+<dt id="sonnet.python.modules.sequential.Sequential.get_variables">
+<code class="descname">get_variables</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/sequential.html#Sequential.get_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.sequential.Sequential.get_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide a warning that get_variables on Sequential always returns ().</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="sonnet.python.modules.sequential.Sequential.layers">
 <code class="descname">layers</code><a class="headerlink" href="#sonnet.python.modules.sequential.Sequential.layers" title="Permalink to this definition">¶</a></dt>

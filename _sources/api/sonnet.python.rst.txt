@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    sonnet.python.custom_getters
     sonnet.python.modules
     sonnet.python.ops
 

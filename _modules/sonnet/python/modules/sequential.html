@@ -66,6 +66,7 @@
 
 <span class="c1"># Dependency imports</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
 <div class="viewcode-block" id="Sequential"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.sequential.Sequential">[docs]</a><span class="k">class</span> <span class="nc">Sequential</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -139,7 +140,20 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span>
+
+<div class="viewcode-block" id="Sequential.get_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.sequential.Sequential.get_variables">[docs]</a>  <span class="k">def</span> <span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provide a warning that get_variables on Sequential always returns ().&quot;&quot;&quot;</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;Calling Sequential.get_variables, which will always return an empty &quot;</span>
+        <span class="s2">&quot;tuple. get_variables() can only return variables created directly by &quot;</span>
+        <span class="s2">&quot;a Module, or created by submodules directly created inside the &quot;</span>
+        <span class="s2">&quot;Module. Sequential is constructed from already constructed submodules &quot;</span>
+        <span class="s2">&quot;and so this will always be empty. See the documentation for more &quot;</span>
+        <span class="s2">&quot;details, but tl;dr if you need to connect some modules sequentially &quot;</span>
+        <span class="s2">&quot;and call get_variables on the result, writing a simple custom module &quot;</span>
+        <span class="s2">&quot;is the simplest way.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Sequential</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

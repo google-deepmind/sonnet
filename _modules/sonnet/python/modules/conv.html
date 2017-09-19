@@ -374,7 +374,7 @@
 <span class="sd">          incompatible with the shape of the weights.</span>
 <span class="sd">      base.UnderspecifiedError: If the input tensor has an unknown</span>
 <span class="sd">          `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -396,7 +396,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="n">input_channels</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
           <span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
               <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
@@ -757,7 +757,7 @@
 <span class="sd">          dimensions; or if the input tensor has an unknown `input_channels`; or</span>
 <span class="sd">          or if `output_shape` is an iterable and is not in the format</span>
 <span class="sd">          `(out_height, out_width)`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -776,7 +776,7 @@
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
                       <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
@@ -1085,7 +1085,7 @@
 <span class="sd">          incompatible with the shape of the weights.</span>
 <span class="sd">      base.UnderspecifiedError: If the input tensor has an unknown</span>
 <span class="sd">          `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -1101,7 +1101,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
           <span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
               <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
@@ -1372,7 +1372,7 @@
 <span class="sd">          `input_channels`.</span>
 <span class="sd">      base.IncompatibleShapeError: If `output_shape` is not an integer or</span>
 <span class="sd">          iterable of length 1.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not tf.float32.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -1398,7 +1398,7 @@
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
           <span class="s2">&quot;Output shape must be specified as (output_length)&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span>
                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
@@ -1673,7 +1673,7 @@
 <span class="sd">          incompatible with the shape of the weights.</span>
 <span class="sd">      base.UnderspecifiedError: If the input tensor has an unknown</span>
 <span class="sd">          `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -1690,7 +1690,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span>
                       <span class="nb">format</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
@@ -1833,7 +1833,7 @@
 <span class="sd">          invocations.</span>
 <span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
 <span class="sd">          of dimensions; or if the input tensor has an unknown `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not tf.float32.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
@@ -1850,7 +1850,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
                       <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -2099,7 +2099,7 @@
 <span class="sd">          invocations.</span>
 <span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
 <span class="sd">          of dimensions; or if the input tensor has an unknown `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
@@ -2115,7 +2115,7 @@
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
                       <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -2378,7 +2378,7 @@
 <span class="sd">          overparameterized.</span>
 <span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
 <span class="sd">          of dimensions; or if the input tensor has an unknown `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not tf.float32.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
@@ -2395,7 +2395,7 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
                       <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
@@ -2659,7 +2659,7 @@
 <span class="sd">          of dimensions.</span>
 <span class="sd">      base.UnderspecifiedError: If the input tensor has an unknown</span>
 <span class="sd">          `input_channels`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -2675,7 +2675,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
           <span class="s2">&quot;Input must have dtype tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
               <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
@@ -2948,7 +2948,7 @@
 <span class="sd">          dimensions; or if the input tensor has an unknown `input_channels`; or</span>
 <span class="sd">          or if `output_shape` is an iterable and is not in the format</span>
 <span class="sd">          `(out_height, out_width)`.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not `tf.float32`.</span>
+<span class="sd">      TypeError: If input Tensor dtype is not compatible with `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Handle input whose shape is unknown during graph creation.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -2963,7 +2963,7 @@
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
     <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
                       <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 

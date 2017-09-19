@@ -1219,12 +1219,16 @@
 <span class="sd">  For example, merging dimensions 1, 2 and 3 together can be performed by</span>
 <span class="sd">  calling:</span>
 
+<span class="sd">  ```python</span>
 <span class="sd">  output = MergeDims(start=1, size=3)(x)</span>
+<span class="sd">  ```</span>
 
 <span class="sd">  A nested list of tensors can be merged:</span>
 
+<span class="sd">  ```python</span>
 <span class="sd">  x = [tf.random_uniform(shape=[5, 5]), [tf.random_uniform(shape=[3, 3, 3])]]</span>
 <span class="sd">  output = MergeDims(start=0, size=2)(x)</span>
+<span class="sd">  ```</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;merge_dims&quot;</span><span class="p">):</span>

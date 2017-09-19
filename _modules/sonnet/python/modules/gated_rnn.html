@@ -982,6 +982,7 @@
                <span class="n">output_channels</span><span class="p">,</span>
                <span class="n">kernel_shape</span><span class="p">,</span>
                <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+               <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">conv</span><span class="o">.</span><span class="n">SAME</span><span class="p">,</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">skip_connection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1001,6 +1002,10 @@
 <span class="sd">          used to define kernel size in all dimensions.</span>
 <span class="sd">      stride: Sequence of kernel strides (of size 2), or integer that is used to</span>
 <span class="sd">          define stride in all dimensions.</span>
+<span class="sd">      rate: Sequence of dilation rates (of size conv_ndims), or integer that is</span>
+<span class="sd">          used to define dilation rate in all dimensions. 1 corresponds to a</span>
+<span class="sd">          standard convolution, while rate &gt; 1 corresponds to a dilated</span>
+<span class="sd">          convolution. Cannot be &gt; 1 if any of stride is also &gt; 1.</span>
 <span class="sd">      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.</span>
 <span class="sd">      use_bias: Use bias in convolutions.</span>
 <span class="sd">      skip_connection: If set to `True`, concatenate the input to the output</span>
@@ -1037,6 +1042,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">kernel_shape</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">stride</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">padding</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
@@ -1058,6 +1064,7 @@
         <span class="n">output_channels</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,</span>
         <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">,</span>
         <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
+        <span class="n">rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">,</span>
         <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span>
         <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">,</span>
         <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>

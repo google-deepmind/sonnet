@@ -25,6 +25,7 @@ import sonnet as snt
 from sonnet.examples import dataset_shakespeare
 import tensorflow as tf
 
+
 FLAGS = tf.flags.FLAGS
 
 tf.flags.DEFINE_integer("num_training_iterations", 10000,
@@ -255,12 +256,25 @@ class TextModel(snt.AbstractModule):
     with self._enter_variable_scope():
       self._embed_module = snt.Linear(self._num_embedding, name="linear_embed")
       self._output_module = snt.Linear(self._output_size, name="linear_output")
-      self._lstms = [
+      self._subcores = [
           snt.LSTM(self._num_hidden, name="lstm_{}".format(i))
           for i in range(self._lstm_depth)
       ]
-      self._core = snt.DeepRNN(self._lstms,
-                               skip_connections=self._use_skip_connections,
+      if self._use_skip_connections:
+        skips = []
+        current_input_shape = self._num_embedding
+        for lstm in self._subcores:
+          input_shape = tf.TensorShape([current_input_shape])
+          skip = snt.SkipConnectionCore(
+              lstm,
+              input_shape=input_shape,
+              name="skip_{}".format(lstm.module_name))
+          skips.append(skip)
+          # SkipConnectionCore concatenates the input with the output, so the
+          # dimensionality increases with depth.
+          current_input_shape += self._num_hidden
+        self._subcores = skips
+      self._core = snt.DeepRNN(self._subcores, skip_connections=False,
                                name="deep_lstm")
 
   def _build(self, one_hot_input_sequence):
@@ -305,7 +319,7 @@ class TextModel(snt.AbstractModule):
 
     return output_sequence_logits, final_state
 
-  @snt.experimental.reuse_vars
+  @snt.reuse_variables
   def generate_string(self, initial_logits, initial_state, sequence_length):
     """Builds sub-graph to generate a string, sampled from the model.
 
@@ -350,4 +364,3 @@ def main(unused_argv):
 
 if __name__ == "__main__":
   tf.app.run()
-

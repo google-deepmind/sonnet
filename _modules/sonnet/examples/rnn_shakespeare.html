@@ -67,6 +67,7 @@
 <span class="kn">from</span> <span class="nn">sonnet.examples</span> <span class="k">import</span> <span class="n">dataset_shakespeare</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
+
 <span class="n">FLAGS</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">FLAGS</span>
 
 <span class="n">tf</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DEFINE_integer</span><span class="p">(</span><span class="s2">&quot;num_training_iterations&quot;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span>
@@ -297,12 +298,25 @@
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_embed_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_embedding</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_embed&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_output_module</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_output&quot;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_lstms</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_subcores</span> <span class="o">=</span> <span class="p">[</span>
           <span class="n">snt</span><span class="o">.</span><span class="n">LSTM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_hidden</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lstm_depth</span><span class="p">)</span>
       <span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">DeepRNN</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lstms</span><span class="p">,</span>
-                               <span class="n">skip_connections</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_skip_connections</span><span class="p">,</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_skip_connections</span><span class="p">:</span>
+        <span class="n">skips</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_input_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_embedding</span>
+        <span class="k">for</span> <span class="n">lstm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcores</span><span class="p">:</span>
+          <span class="n">input_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="n">current_input_shape</span><span class="p">])</span>
+          <span class="n">skip</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">SkipConnectionCore</span><span class="p">(</span>
+              <span class="n">lstm</span><span class="p">,</span>
+              <span class="n">input_shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">,</span>
+              <span class="n">name</span><span class="o">=</span><span class="s2">&quot;skip_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lstm</span><span class="o">.</span><span class="n">module_name</span><span class="p">))</span>
+          <span class="n">skips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">skip</span><span class="p">)</span>
+          <span class="c1"># SkipConnectionCore concatenates the input with the output, so the</span>
+          <span class="c1"># dimensionality increases with depth.</span>
+          <span class="n">current_input_shape</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_hidden</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subcores</span> <span class="o">=</span> <span class="n">skips</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">DeepRNN</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subcores</span><span class="p">,</span> <span class="n">skip_connections</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;deep_lstm&quot;</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">one_hot_input_sequence</span><span class="p">):</span>
@@ -347,7 +361,7 @@
 
     <span class="k">return</span> <span class="n">output_sequence_logits</span><span class="p">,</span> <span class="n">final_state</span>
 
-<div class="viewcode-block" id="TextModel.generate_string"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.TextModel.generate_string">[docs]</a>  <span class="nd">@snt</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">reuse_vars</span>
+<div class="viewcode-block" id="TextModel.generate_string"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.rnn_shakespeare.TextModel.generate_string">[docs]</a>  <span class="nd">@snt</span><span class="o">.</span><span class="n">reuse_variables</span>
   <span class="k">def</span> <span class="nf">generate_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_logits</span><span class="p">,</span> <span class="n">initial_state</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Builds sub-graph to generate a string, sampled from the model.</span>
 
@@ -392,7 +406,6 @@
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
   <span class="n">tf</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
 </pre></div>
 
           </div>

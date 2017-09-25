@@ -94,16 +94,352 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">array_ops</span>
-<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">deprecation</span>
 
 
-<span class="k">class</span> <span class="nc">_BaseLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Base implementation underlying BatchNormLSTM and LSTM.</span>
+<div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;LSTM recurrent network cell with optional peepholes &amp; layer normalization.</span>
 
-<span class="sd">  This exists as a temporary measure during the deprecation process of batch</span>
-<span class="sd">  norm options to LSTM. Once deprecation is complete, it will be removed and</span>
-<span class="sd">  both BatchNormLSTM and LSTM replaced with simpler direct implementations.</span>
+<span class="sd">  The implementation is based on: http://arxiv.org/abs/1409.2329. We add</span>
+<span class="sd">  forget_bias (default: 1) to the biases of the forget gate in order to</span>
+<span class="sd">  reduce the scale of forgetting in the beginning of the training.</span>
+
+<span class="sd">  #### Layer normalization</span>
+
+<span class="sd">  This is described in https://arxiv.org/pdf/1607.06450.pdf</span>
+
+<span class="sd">  #### Peep-hole connections</span>
+
+<span class="sd">  Peep-hole connections may optionally be used by specifying a flag in the</span>
+<span class="sd">  constructor. These connections can aid increasing the precision of output</span>
+<span class="sd">  timing, for more details see:</span>
+
+<span class="sd">    https://research.google.com/pubs/archive/43905.pdf</span>
+
+<span class="sd">  Attributes:</span>
+<span class="sd">    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.</span>
+<span class="sd">    output_size: `tf.TensorShape` indicating the size of the core output.</span>
+<span class="sd">    use_peepholes: Boolean indicating whether peephole connections are used.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># Keys that may be provided for parameter initializers.</span>
+  <span class="n">W_GATES</span> <span class="o">=</span> <span class="s2">&quot;w_gates&quot;</span>  <span class="c1"># weight for gates</span>
+  <span class="n">B_GATES</span> <span class="o">=</span> <span class="s2">&quot;b_gates&quot;</span>  <span class="c1"># bias of gates</span>
+  <span class="n">W_F_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_f_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; forget gate peephole</span>
+  <span class="n">W_I_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_i_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; input gate peephole</span>
+  <span class="n">W_O_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_o_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; output gate peephole</span>
+  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="n">W_GATES</span><span class="p">,</span> <span class="n">B_GATES</span><span class="p">,</span> <span class="n">W_F_DIAG</span><span class="p">,</span> <span class="n">W_I_DIAG</span><span class="p">,</span> <span class="n">W_O_DIAG</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">hidden_size</span><span class="p">,</span>
+               <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct LSTM.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      hidden_size: (int) Hidden size dimensionality.</span>
+<span class="sd">      forget_bias: (float) Bias for the forget activation.</span>
+<span class="sd">      initializers: Dict containing ops to initialize the weights.</span>
+<span class="sd">        This dictionary may contain any of the keys returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">        the weights and biases. As a default, no partitioners are used. This</span>
+<span class="sd">        dict may contain any of the keys returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the weights and</span>
+<span class="sd">        biases. As a default, no regularizers are used. This dict may contain</span>
+<span class="sd">        any of the keys returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
+<span class="sd">        used.</span>
+<span class="sd">      use_layer_norm: Boolean that indicates whether to apply layer</span>
+<span class="sd">        normalization.</span>
+<span class="sd">      hidden_clip_value: Optional number; if set, then the LSTM hidden state</span>
+<span class="sd">        vector is clipped by this value.</span>
+<span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
+<span class="sd">        clipped by this value.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `partitioners` contains any keys not returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
+<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      ValueError: if a peephole initializer is passed in the initializer list,</span>
+<span class="sd">        but `use_peepholes` is False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">LSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_peepholes</span> <span class="o">=</span> <span class="n">use_peepholes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span> <span class="o">=</span> <span class="n">use_layer_norm</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span> <span class="o">=</span> <span class="n">hidden_clip_value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span> <span class="o">=</span> <span class="n">cell_clip_value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span>
+        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hidden_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hidden_clip_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of hidden_clip_value should be nonnegative.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cell_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cell_clip_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of cell_clip_value should be nonnegative.&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the keys the dictionary of variable initializers may contain.</span>
+
+<span class="sd">    The set of all possible initializer keys are:</span>
+<span class="sd">      w_gates:  weight for gates</span>
+<span class="sd">      b_gates:  bias of gates</span>
+<span class="sd">      w_f_diag: weight for prev_cell -&gt; forget gate peephole</span>
+<span class="sd">      w_i_diag: weight for prev_cell -&gt; input gate peephole</span>
+<span class="sd">      w_o_diag: weight for prev_cell -&gt; output gate peephole</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      cls:The class.</span>
+<span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
+<span class="sd">        used.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
+<span class="sd">        constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_peepholes</span><span class="p">:</span>
+      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span>
+          <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">possible_keys</span></div>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the LSTM module into the graph.</span>
+
+<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
+<span class="sd">    the Tensors provided as inputs and state must have the same final</span>
+<span class="sd">    dimension, in order for the existing variables to be the correct size for</span>
+<span class="sd">    their corresponding multiplications. The batch size may differ for each</span>
+<span class="sd">    connection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: Tensor of size `[batch_size, input_size]`.</span>
+<span class="sd">      prev_state: Tuple (prev_hidden, prev_cell).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tuple (output, next_state) where &#39;output&#39; is a Tensor of size</span>
+<span class="sd">      `[batch_size, hidden_size]` and &#39;next_state&#39; is a tuple</span>
+<span class="sd">      (next_hidden, next_cell) where next_hidden and next_cell have size</span>
+<span class="sd">      `[batch_size, hidden_size]`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
+<span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
+<span class="sd">        invocations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prev_hidden</span><span class="p">,</span> <span class="n">prev_cell</span> <span class="o">=</span> <span class="n">prev_state</span>
+
+    <span class="c1"># pylint: disable=invalid-unary-operand-type</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">prev_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span>
+          <span class="n">prev_hidden</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">prev_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span>
+          <span class="n">prev_cell</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span><span class="p">)</span>
+    <span class="c1"># pylint: enable=invalid-unary-operand-type</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_create_gate_variables</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># pylint false positive: calling module of same file;</span>
+    <span class="c1"># pylint: disable=not-callable</span>
+
+    <span class="c1"># Parameters of gates are concatenated into one multiply for efficiency.</span>
+    <span class="n">inputs_and_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">inputs</span><span class="p">,</span> <span class="n">prev_hidden</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">gates</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">inputs_and_hidden</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_xh</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span><span class="p">:</span>
+      <span class="n">gates</span> <span class="o">=</span> <span class="n">layer_norm</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">()(</span><span class="n">gates</span><span class="p">)</span>
+
+    <span class="n">gates</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+
+    <span class="c1"># i = input_gate, j = next_input, f = forget_gate, o = output_gate</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">o</span> <span class="o">=</span> <span class="n">array_ops</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">gates</span><span class="p">,</span> <span class="n">num_or_size_splits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_peepholes</span><span class="p">:</span>  <span class="c1"># diagonal connections</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_create_peephole_variables</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+      <span class="n">f</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_f_diag</span> <span class="o">*</span> <span class="n">prev_cell</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_i_diag</span> <span class="o">*</span> <span class="n">prev_cell</span>
+
+    <span class="n">forget_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">f</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span><span class="p">)</span>
+    <span class="n">next_cell</span> <span class="o">=</span> <span class="n">forget_mask</span> <span class="o">*</span> <span class="n">prev_cell</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+    <span class="n">cell_output</span> <span class="o">=</span> <span class="n">next_cell</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_peepholes</span><span class="p">:</span>
+      <span class="n">cell_output</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_o_diag</span> <span class="o">*</span> <span class="n">cell_output</span>
+    <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">cell_output</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">next_hidden</span><span class="p">,</span> <span class="p">(</span><span class="n">next_hidden</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_create_gate_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the variables used for the gates.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;Rank of shape must be </span><span class="si">{}</span><span class="s2"> not: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)))</span>
+    <span class="n">input_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">b_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]</span>
+
+    <span class="n">equiv_input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">+</span> <span class="n">input_size</span>
+    <span class="n">initializer</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">create_linear_initializer</span><span class="p">(</span><span class="n">equiv_input_size</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_w_xh</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">,</span> <span class="n">initializer</span><span class="p">),</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">b_shape</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">,</span> <span class="n">initializer</span><span class="p">),</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_create_peephole_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the variables used for the peephole connections.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_w_f_diag</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">),</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_w_i_diag</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">),</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_w_o_diag</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">),</span>
+        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">),</span>
+        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tuple of `tf.TensorShape`s indicating the size of state tensors.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_peepholes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean indicating whether peephole connections are used.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_peepholes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_layer_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span></div>
+
+
+<div class="viewcode-block" id="BatchNormLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM">[docs]</a><span class="k">class</span> <span class="nc">BatchNormLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;LSTM recurrent network cell with optional peepholes, batch normalization.</span>
+
+<span class="sd">  The base implementation is based on: http://arxiv.org/abs/1409.2329. We add</span>
+<span class="sd">  forget_bias (default: 1) to the biases of the forget gate in order to</span>
+<span class="sd">  reduce the scale of forgetting in the beginning of the training.</span>
+
+<span class="sd">  #### Peep-hole connections</span>
+
+<span class="sd">  Peep-hole connections may optionally be used by specifying a flag in the</span>
+<span class="sd">  constructor. These connections can aid increasing the precision of output</span>
+<span class="sd">  timing, for more details see:</span>
+
+<span class="sd">    https://research.google.com/pubs/archive/43905.pdf</span>
+
+<span class="sd">  #### Batch normalization</span>
+
+<span class="sd">  The batch norm transformation (in training mode) is</span>
+<span class="sd">    batchnorm(x) = gamma * (x - mean(x)) / stddev(x) + beta,</span>
+<span class="sd">  where gamma is a learnt scaling factor and beta is a learnt offset.</span>
+
+<span class="sd">  Batch normalization may optionally be used at different places in the LSTM by</span>
+<span class="sd">  specifying flag(s) in the constructor. These are applied when calculating</span>
+<span class="sd">  the gate activations and cell-to-hidden transformation. The set-up is based on</span>
+
+<span class="sd">    https://arxiv.org/pdf/1603.09025.pdf</span>
+
+<span class="sd">  ##### Batch normalization: where to apply?</span>
+
+<span class="sd">  Batch norm can be applied in three different places in the LSTM:</span>
+
+<span class="sd">    (h) To the W_h h_{t-1} contribution to the gates from the previous hiddens.</span>
+<span class="sd">    (x) To the W_x x_t contribution to the gates from the current input.</span>
+<span class="sd">    (c) To the cell value c_t when calculating the output h_t from the cell.</span>
+
+<span class="sd">  (The notation here is consistent with the Recurrent Batch Normalization</span>
+<span class="sd">  paper). Each of these can be controlled individually, because batch norm is</span>
+<span class="sd">  expensive, and not all are necessary. The paper doesn&#39;t mention the relative</span>
+<span class="sd">  effects of these different batch norms; however, experimentation with a</span>
+<span class="sd">  shallow LSTM for the `permuted_mnist` sequence task suggests that (h) is the</span>
+<span class="sd">  most important and the other two can be left off. For other tasks or deeper</span>
+<span class="sd">  (stacked) LSTMs, other batch norm combinations may be more effective.</span>
+
+<span class="sd">  ##### Batch normalization: collecting stats (training vs test)</span>
+
+<span class="sd">  When switching to testing (see `LSTM.with_batch_norm_control`), we can use a</span>
+<span class="sd">  mean and stddev learnt from the training data instead of using the statistics</span>
+<span class="sd">  from the test data. (This both increases test accuracy because the statistics</span>
+<span class="sd">  have less variance, and if the test data does not have the same distribution</span>
+<span class="sd">  as the training data then we must use the training statistics to ensure the</span>
+<span class="sd">  effective network does not change when switching to testing anyhow.)</span>
+
+<span class="sd">  This does however introduces a slight subtlety. The first few time steps of</span>
+<span class="sd">  the RNN tend to have varying statistics (mean and variance) before settling</span>
+<span class="sd">  down to a steady value. Therefore in general, better performance is obtained</span>
+<span class="sd">  by using separate statistics for the first few time steps, and then using the</span>
+<span class="sd">  final set of statistics for all subsequent time steps. This is controlled by</span>
+<span class="sd">  the parameter `max_unique_stats`. (We can&#39;t have an unbounded number of</span>
+<span class="sd">  distinct statistics for both technical reasons and also for the case where</span>
+<span class="sd">  test sequences are longer than anything seen in training.)</span>
+
+<span class="sd">  You may be fine leaving it at its default value of 1. Small values (like 10)</span>
+<span class="sd">  may achieve better performance on some tasks when testing with cached</span>
+<span class="sd">  statistics.</span>
+
+<span class="sd">  Attributes:</span>
+<span class="sd">    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.</span>
+<span class="sd">    output_size: `tf.TensorShape` indicating the size of the core output.</span>
+<span class="sd">    use_peepholes: Boolean indicating whether peephole connections are used.</span>
+<span class="sd">    use_batch_norm_h: Boolean indicating whether batch norm (h) is enabled.</span>
+<span class="sd">    use_batch_norm_x: Boolean indicating whether batch norm (x) is enabled.</span>
+<span class="sd">    use_batch_norm_c: Boolean indicating whether batch norm (c) is enabled.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
   <span class="c1"># Keys that may be provided for parameter initializers.</span>
   <span class="n">W_GATES</span> <span class="o">=</span> <span class="s2">&quot;w_gates&quot;</span>  <span class="c1"># weight for gates</span>
   <span class="n">B_GATES</span> <span class="o">=</span> <span class="s2">&quot;b_gates&quot;</span>  <span class="c1"># bias of gates</span>
@@ -127,17 +463,72 @@
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;See `__init__` of `LSTM` and `BatchNormLSTM` for docs.&quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_lstm&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct `BatchNormLSTM`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      hidden_size: (int) Hidden size dimensionality.</span>
+<span class="sd">      forget_bias: (float) Bias for the forget activation.</span>
+<span class="sd">      initializers: Dict containing ops to initialize the weights.</span>
+<span class="sd">        This dictionary may contain any of the keys returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">        The gamma and beta variables control batch normalization values for</span>
+<span class="sd">        different batch norm transformations inside the cell; see the paper for</span>
+<span class="sd">        details.</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">        the weights and biases. As a default, no partitioners are used. This</span>
+<span class="sd">        dict may contain any of the keys returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the weights and</span>
+<span class="sd">        biases. As a default, no regularizers are used. This dict may contain</span>
+<span class="sd">        any of the keys returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
+<span class="sd">        used.</span>
+<span class="sd">      use_batch_norm_h: Boolean that indicates whether to apply batch</span>
+<span class="sd">        normalization at the previous_hidden -&gt; gates contribution. If you are</span>
+<span class="sd">        experimenting with batch norm then this may be the most effective to</span>
+<span class="sd">        use, and is enabled by default.</span>
+<span class="sd">      use_batch_norm_x: Boolean that indicates whether to apply batch</span>
+<span class="sd">        normalization at the input -&gt; gates contribution.</span>
+<span class="sd">      use_batch_norm_c: Boolean that indicates whether to apply batch</span>
+<span class="sd">        normalization at the cell -&gt; output contribution.</span>
+<span class="sd">      max_unique_stats: The maximum number of steps to use unique batch norm</span>
+<span class="sd">        statistics for. (See module description above for more details.)</span>
+<span class="sd">      hidden_clip_value: Optional number; if set, then the LSTM hidden state</span>
+<span class="sd">        vector is clipped by this value.</span>
+<span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
+<span class="sd">        clipped by this value.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `partitioners` contains any keys not returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
+<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
+<span class="sd">      ValueError: if a peephole initializer is passed in the initializer list,</span>
+<span class="sd">        but `use_peepholes` is False.</span>
+<span class="sd">      ValueError: if a batch norm initializer is passed in the initializer list,</span>
+<span class="sd">        but batch norm is disabled.</span>
+<span class="sd">      ValueError: if none of the `use_batch_norm_*` options are True.</span>
+<span class="sd">      ValueError: if `max_unique_stats` is &lt; 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">use_batch_norm_h</span><span class="p">,</span> <span class="n">use_batch_norm_x</span><span class="p">,</span> <span class="n">use_batch_norm_c</span><span class="p">]):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one use_batch_norm_* option is required for &quot;</span>
+                       <span class="s2">&quot;BatchNormLSTM&quot;</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
@@ -146,7 +537,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_h</span> <span class="o">=</span> <span class="n">use_batch_norm_h</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_x</span> <span class="o">=</span> <span class="n">use_batch_norm_x</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_c</span> <span class="o">=</span> <span class="n">use_batch_norm_c</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span> <span class="o">=</span> <span class="n">use_layer_norm</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span> <span class="o">=</span> <span class="n">hidden_clip_value</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span> <span class="o">=</span> <span class="n">cell_clip_value</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span>
@@ -163,31 +553,22 @@
     <span class="k">if</span> <span class="n">max_unique_stats</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
         <span class="n">use_batch_norm_h</span> <span class="ow">or</span> <span class="n">use_batch_norm_x</span> <span class="ow">or</span> <span class="n">use_batch_norm_c</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;max_unique_stats specified but batch norm disabled&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">use_batch_norm_h</span> <span class="ow">and</span> <span class="n">use_layer_norm</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Only one of use_batch_norm_h and layer_norm is allowed.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">use_batch_norm_x</span> <span class="ow">and</span> <span class="n">use_layer_norm</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Only one of use_batch_norm_x and layer_norm is allowed.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">use_batch_norm_c</span> <span class="ow">and</span> <span class="n">use_layer_norm</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Only one of use_batch_norm_c and layer_norm is allowed.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">hidden_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hidden_clip_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of hidden_clip_value should be nonnegative.&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cell_clip_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cell_clip_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of cell_clip_value should be nonnegative.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">use_batch_norm_h</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_h</span> <span class="o">=</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
-                                                           <span class="s2">&quot;batch_norm_h&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_h</span> <span class="o">=</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
+                                                               <span class="s2">&quot;batch_norm_h&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">use_batch_norm_x</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_x</span> <span class="o">=</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
-                                                           <span class="s2">&quot;batch_norm_x&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_x</span> <span class="o">=</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
+                                                               <span class="s2">&quot;batch_norm_x&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">use_batch_norm_c</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_c</span> <span class="o">=</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
-                                                           <span class="s2">&quot;batch_norm_c&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_c</span> <span class="o">=</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">max_unique_stats</span><span class="p">,</span>
+                                                               <span class="s2">&quot;batch_norm_c&quot;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">with_batch_norm_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="BatchNormLSTM.with_batch_norm_control"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.with_batch_norm_control">[docs]</a>  <span class="k">def</span> <span class="nf">with_batch_norm_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Wraps this RNNCore with the additional control input to the `BatchNorm`s.</span>
 
 <span class="sd">    Example usage:</span>
@@ -211,13 +592,12 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      snt.RNNCore wrapping this class with the extra input(s) added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                                            <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
-                                            <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span></div>
 
-  <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="BatchNormLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span>
-      <span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
       <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the keys the dictionary of variable initializers may contain.</span>
 
@@ -260,7 +640,7 @@
       <span class="n">possible_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">GAMMA_X</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_batch_norm_c</span><span class="p">:</span>
       <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">GAMMA_C</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">BETA_C</span><span class="p">})</span>
-    <span class="k">return</span> <span class="n">possible_keys</span>
+    <span class="k">return</span> <span class="n">possible_keys</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the LSTM module into the graph.</span>
@@ -296,9 +676,7 @@
 <span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
 <span class="sd">        invocations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">use_batch_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_c</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_h</span>
-    <span class="n">use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_x</span>
-    <span class="k">if</span> <span class="n">use_batch_norm</span> <span class="ow">and</span> <span class="n">is_training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">is_training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Boolean is_training flag must be explicitly specified &quot;</span>
                        <span class="s2">&quot;when using batch normalization.&quot;</span><span class="p">)</span>
 
@@ -341,9 +719,6 @@
       <span class="c1"># Parameters of gates are concatenated into one multiply for efficiency.</span>
       <span class="n">inputs_and_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">inputs</span><span class="p">,</span> <span class="n">prev_hidden</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
       <span class="n">gates</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">inputs_and_hidden</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_xh</span><span class="p">)</span>
-
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span><span class="p">:</span>
-        <span class="n">gates</span> <span class="o">=</span> <span class="n">layer_norm</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">()(</span><span class="n">gates</span><span class="p">)</span>
 
     <span class="n">gates</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
 
@@ -479,7 +854,7 @@
         <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">),</span>
         <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">))</span>
 
-  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<div class="viewcode-block" id="BatchNormLSTM.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">trainable_initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable_regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Builds the default start state tensor of zeros.</span>
@@ -506,7 +881,7 @@
 <span class="sd">      with `max_unique_stats &gt; 1&#39;, with value `0` (representing the time step).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_unique_stats</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+      <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
           <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">,</span>
           <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
           <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -525,7 +900,7 @@
               <span class="n">initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
               <span class="n">regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span>
               <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -563,12 +938,7 @@
     <span class="sd">&quot;&quot;&quot;Boolean indicating whether batch norm for cell -&gt; output is enabled.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm_c</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">use_layer_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span>
-
-  <span class="k">class</span> <span class="nc">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="viewcode-block" id="BatchNormLSTM.IndexedStatsBatchNorm"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.IndexedStatsBatchNorm">[docs]</a>  <span class="k">class</span> <span class="nc">IndexedStatsBatchNorm</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;BatchNorm module where batch statistics are selected by an input index.</span>
 
 <span class="sd">    This is used by LSTM+batchnorm, where we have distinct batch norm statistics</span>
@@ -597,7 +967,7 @@
 <span class="sd">          indices beyond this will use the final statistics.</span>
 <span class="sd">        name: Name of the module.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
-      <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">IndexedStatsBatchNorm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_max_unique_stats</span> <span class="o">=</span> <span class="n">max_unique_stats</span>
 
     <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="p">):</span>
@@ -625,9 +995,9 @@
         <span class="n">out</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>  <span class="c1"># needed for tf.case shape inference</span>
         <span class="k">return</span> <span class="n">out</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">create_batch_norm</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">create_batch_norm</span><span class="p">()</span></div>
 
-  <span class="k">class</span> <span class="nc">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+<div class="viewcode-block" id="BatchNormLSTM.CoreWithExtraBuildArgs"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs">[docs]</a>  <span class="k">class</span> <span class="nc">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Wraps an RNNCore so that the build method receives extra args and kwargs.</span>
 
 <span class="sd">    This will pass the additional input `args` and `kwargs` to the _build</span>
@@ -642,7 +1012,7 @@
 <span class="sd">        *args: Extra arguments to pass to _build.</span>
 <span class="sd">        **kwargs: Extra keyword arguments to pass to _build.</span>
 <span class="sd">      &quot;&quot;&quot;</span>
-      <span class="nb">super</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
           <span class="n">name</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_extra_args&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">core</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
@@ -659,302 +1029,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span>
-
-
-<div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;LSTM recurrent network cell with optional peepholes &amp; layer normalization.</span>
-
-<span class="sd">  The implementation is based on: http://arxiv.org/abs/1409.2329. We add</span>
-<span class="sd">  forget_bias (default: 1) to the biases of the forget gate in order to</span>
-<span class="sd">  reduce the scale of forgetting in the beginning of the training.</span>
-
-<span class="sd">  #### Layer normalization</span>
-
-<span class="sd">  This is described in https://arxiv.org/pdf/1607.06450.pdf</span>
-
-<span class="sd">  #### Peep-hole connections</span>
-
-<span class="sd">  Peep-hole connections may optionally be used by specifying a flag in the</span>
-<span class="sd">  constructor. These connections can aid increasing the precision of output</span>
-<span class="sd">  timing, for more details see:</span>
-
-<span class="sd">    https://research.google.com/pubs/archive/43905.pdf</span>
-
-<span class="sd">  Attributes:</span>
-<span class="sd">    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.</span>
-<span class="sd">    output_size: `tf.TensorShape` indicating the size of the core output.</span>
-<span class="sd">    use_peepholes: Boolean indicating whether peephole connections are used.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-
-  <span class="nd">@deprecation</span><span class="o">.</span><span class="n">deprecated_args</span><span class="p">(</span>
-      <span class="s2">&quot;2017-09-18&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;Please switch from LSTM to BatchNormLSTM if you need batch norm &quot;</span>
-      <span class="s2">&quot;functionality.&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;use_batch_norm_h&quot;</span><span class="p">,</span> <span class="s2">&quot;use_batch_norm_x&quot;</span><span class="p">,</span> <span class="s2">&quot;use_batch_norm_c&quot;</span><span class="p">,</span>
-      <span class="s2">&quot;max_unique_stats&quot;</span><span class="p">)</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-               <span class="n">hidden_size</span><span class="p">,</span>
-               <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-               <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct LSTM.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">      hidden_size: (int) Hidden size dimensionality.</span>
-<span class="sd">      forget_bias: (float) Bias for the forget activation.</span>
-<span class="sd">      initializers: Dict containing ops to initialize the weights.</span>
-<span class="sd">        This dictionary may contain any of the keys returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">        The gamma and beta variables control batch normalization values for</span>
-<span class="sd">        different batch norm transformations inside the cell; see the paper for</span>
-<span class="sd">        details.</span>
-<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
-<span class="sd">        the weights and biases. As a default, no partitioners are used. This</span>
-<span class="sd">        dict may contain any of the keys returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      regularizers: Optional dict containing regularizers for the weights and</span>
-<span class="sd">        biases. As a default, no regularizers are used. This dict may contain</span>
-<span class="sd">        any of the keys returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
-<span class="sd">        used.</span>
-<span class="sd">      use_batch_norm_h: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the previous_hidden -&gt; gates contribution.</span>
-<span class="sd">        This is deprecated and will be removed in a future sonnet version.</span>
-<span class="sd">        Please switch to `BatchNormLSTM` if you require it.</span>
-<span class="sd">      use_batch_norm_x: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the input -&gt; gates contribution.</span>
-<span class="sd">        This is deprecated and will be removed in a future sonnet version.</span>
-<span class="sd">        Please switch to `BatchNormLSTM` if you require it.</span>
-<span class="sd">      use_batch_norm_c: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the cell -&gt; output contribution.</span>
-<span class="sd">        This is deprecated and will be removed in a future sonnet version.</span>
-<span class="sd">        Please switch to `BatchNormLSTM` if you require it.</span>
-<span class="sd">      use_layer_norm: Boolean that indicates whether to apply layer</span>
-<span class="sd">        normalization.</span>
-<span class="sd">      max_unique_stats: The maximum number of steps to use unique batch norm</span>
-<span class="sd">        statistics for. (See module description above for more details.)</span>
-<span class="sd">        This is deprecated and will be removed in a future sonnet version.</span>
-<span class="sd">        Please switch to `BatchNormLSTM` if you require it.</span>
-<span class="sd">      hidden_clip_value: Optional number; if set, then the LSTM hidden state</span>
-<span class="sd">        vector is clipped by this value.</span>
-<span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
-<span class="sd">        clipped by this value.</span>
-<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
-<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
-<span class="sd">        `tf.get_variable` documentation for more details.</span>
-<span class="sd">      name: Name of the module.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      KeyError: if `partitioners` contains any keys not returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
-<span class="sd">        `LSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      ValueError: if a peephole initializer is passed in the initializer list,</span>
-<span class="sd">        but `use_peepholes` is False.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">LSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="n">hidden_size</span><span class="p">,</span>
-        <span class="n">forget_bias</span><span class="o">=</span><span class="n">forget_bias</span><span class="p">,</span>
-        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
-        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
-        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
-        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">,</span>
-        <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="n">use_batch_norm_h</span><span class="p">,</span>
-        <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="n">use_batch_norm_x</span><span class="p">,</span>
-        <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="n">use_batch_norm_c</span><span class="p">,</span>
-        <span class="n">use_layer_norm</span><span class="o">=</span><span class="n">use_layer_norm</span><span class="p">,</span>
-        <span class="n">max_unique_stats</span><span class="o">=</span><span class="n">max_unique_stats</span><span class="p">,</span>
-        <span class="n">hidden_clip_value</span><span class="o">=</span><span class="n">hidden_clip_value</span><span class="p">,</span>
-        <span class="n">cell_clip_value</span><span class="o">=</span><span class="n">cell_clip_value</span><span class="p">,</span>
-        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="BatchNormLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM">[docs]</a><span class="k">class</span> <span class="nc">BatchNormLSTM</span><span class="p">(</span><span class="n">_BaseLSTM</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;LSTM recurrent network cell with optional peepholes, batch normalization.</span>
-
-<span class="sd">  The base implementation is based on: http://arxiv.org/abs/1409.2329. We add</span>
-<span class="sd">  forget_bias (default: 1) to the biases of the forget gate in order to</span>
-<span class="sd">  reduce the scale of forgetting in the beginning of the training.</span>
-
-<span class="sd">  #### Peep-hole connections</span>
-
-<span class="sd">  Peep-hole connections may optionally be used by specifying a flag in the</span>
-<span class="sd">  constructor. These connections can aid increasing the precision of output</span>
-<span class="sd">  timing, for more details see:</span>
-
-<span class="sd">    https://research.google.com/pubs/archive/43905.pdf</span>
-
-<span class="sd">  #### Batch normalization</span>
-
-<span class="sd">  The batch norm transformation (in training mode) is</span>
-<span class="sd">    batchnorm(x) = gamma * (x - mean(x)) / stddev(x) + beta,</span>
-<span class="sd">  where gamma is a learnt scaling factor and beta is a learnt offset.</span>
-
-<span class="sd">  Batch normalization may optionally be used at different places in the LSTM by</span>
-<span class="sd">  specifying flag(s) in the constructor. These are applied when calculating</span>
-<span class="sd">  the gate activations and cell-to-hidden transformation. The set-up is based on</span>
-
-<span class="sd">    https://arxiv.org/pdf/1603.09025.pdf</span>
-
-<span class="sd">  ##### Batch normalization: where to apply?</span>
-
-<span class="sd">  Batch norm can be applied in three different places in the LSTM:</span>
-
-<span class="sd">    (h) To the W_h h_{t-1} contribution to the gates from the previous hiddens.</span>
-<span class="sd">    (x) To the W_x x_t contribution to the gates from the current input.</span>
-<span class="sd">    (c) To the cell value c_t when calculating the output h_t from the cell.</span>
-
-<span class="sd">  (The notation here is consistent with the Recurrent Batch Normalization</span>
-<span class="sd">  paper). Each of these can be controlled individually, because batch norm is</span>
-<span class="sd">  expensive, and not all are necessary. The paper doesn&#39;t mention the relative</span>
-<span class="sd">  effects of these different batch norms; however, experimentation with a</span>
-<span class="sd">  shallow LSTM for the `permuted_mnist` sequence task suggests that (h) is the</span>
-<span class="sd">  most important and the other two can be left off. For other tasks or deeper</span>
-<span class="sd">  (stacked) LSTMs, other batch norm combinations may be more effective.</span>
-
-<span class="sd">  ##### Batch normalization: collecting stats (training vs test)</span>
-
-<span class="sd">  When switching to testing (see `LSTM.with_batch_norm_control`), we can use a</span>
-<span class="sd">  mean and stddev learnt from the training data instead of using the statistics</span>
-<span class="sd">  from the test data. (This both increases test accuracy because the statistics</span>
-<span class="sd">  have less variance, and if the test data does not have the same distribution</span>
-<span class="sd">  as the training data then we must use the training statistics to ensure the</span>
-<span class="sd">  effective network does not change when switching to testing anyhow.)</span>
-
-<span class="sd">  This does however introduces a slight subtlety. The first few time steps of</span>
-<span class="sd">  the RNN tend to have varying statistics (mean and variance) before settling</span>
-<span class="sd">  down to a steady value. Therefore in general, better performance is obtained</span>
-<span class="sd">  by using separate statistics for the first few time steps, and then using the</span>
-<span class="sd">  final set of statistics for all subsequent time steps. This is controlled by</span>
-<span class="sd">  the parameter `max_unique_stats`. (We can&#39;t have an unbounded number of</span>
-<span class="sd">  distinct statistics for both technical reasons and also for the case where</span>
-<span class="sd">  test sequences are longer than anything seen in training.)</span>
-
-<span class="sd">  You may be fine leaving it at its default value of 1. Small values (like 10)</span>
-<span class="sd">  may achieve better performance on some tasks when testing with cached</span>
-<span class="sd">  statistics.</span>
-
-<span class="sd">  Attributes:</span>
-<span class="sd">    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.</span>
-<span class="sd">    output_size: `tf.TensorShape` indicating the size of the core output.</span>
-<span class="sd">    use_peepholes: Boolean indicating whether peephole connections are used.</span>
-<span class="sd">    use_batch_norm_h: Boolean indicating whether batch norm (h) is enabled.</span>
-<span class="sd">    use_batch_norm_x: Boolean indicating whether batch norm (x) is enabled.</span>
-<span class="sd">    use_batch_norm_c: Boolean indicating whether batch norm (c) is enabled.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-               <span class="n">hidden_size</span><span class="p">,</span>
-               <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-               <span class="n">max_unique_stats</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-               <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_lstm&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct `BatchNormLSTM`.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">      hidden_size: (int) Hidden size dimensionality.</span>
-<span class="sd">      forget_bias: (float) Bias for the forget activation.</span>
-<span class="sd">      initializers: Dict containing ops to initialize the weights.</span>
-<span class="sd">        This dictionary may contain any of the keys returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">        The gamma and beta variables control batch normalization values for</span>
-<span class="sd">        different batch norm transformations inside the cell; see the paper for</span>
-<span class="sd">        details.</span>
-<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
-<span class="sd">        the weights and biases. As a default, no partitioners are used. This</span>
-<span class="sd">        dict may contain any of the keys returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      regularizers: Optional dict containing regularizers for the weights and</span>
-<span class="sd">        biases. As a default, no regularizers are used. This dict may contain</span>
-<span class="sd">        any of the keys returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
-<span class="sd">        used.</span>
-<span class="sd">      use_batch_norm_h: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the previous_hidden -&gt; gates contribution. If you are</span>
-<span class="sd">        experimenting with batch norm then this may be the most effective to</span>
-<span class="sd">        use, and is enabled by default.</span>
-<span class="sd">      use_batch_norm_x: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the input -&gt; gates contribution.</span>
-<span class="sd">      use_batch_norm_c: Boolean that indicates whether to apply batch</span>
-<span class="sd">        normalization at the cell -&gt; output contribution.</span>
-<span class="sd">      max_unique_stats: The maximum number of steps to use unique batch norm</span>
-<span class="sd">        statistics for. (See module description above for more details.)</span>
-<span class="sd">      hidden_clip_value: Optional number; if set, then the LSTM hidden state</span>
-<span class="sd">        vector is clipped by this value.</span>
-<span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
-<span class="sd">        clipped by this value.</span>
-<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
-<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
-<span class="sd">        `tf.get_variable` documentation for more details.</span>
-<span class="sd">      name: Name of the module.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      KeyError: if `partitioners` contains any keys not returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
-<span class="sd">        `BatchNormLSTM.get_possible_initializer_keys`.</span>
-<span class="sd">      ValueError: if a peephole initializer is passed in the initializer list,</span>
-<span class="sd">        but `use_peepholes` is False.</span>
-<span class="sd">      ValueError: if a batch norm initializer is passed in the initializer list,</span>
-<span class="sd">        but batch norm is disabled.</span>
-<span class="sd">      ValueError: if none of the `use_batch_norm_*` options are True.</span>
-<span class="sd">      ValueError: if `max_unique_stats` is &lt; 1.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="n">use_batch_norm_h</span><span class="p">,</span> <span class="n">use_batch_norm_x</span><span class="p">,</span> <span class="n">use_batch_norm_c</span><span class="p">]):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one use_batch_norm_* option is required for &quot;</span>
-                       <span class="s2">&quot;BatchNormLSTM&quot;</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="n">hidden_size</span><span class="p">,</span>
-        <span class="n">forget_bias</span><span class="o">=</span><span class="n">forget_bias</span><span class="p">,</span>
-        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
-        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
-        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
-        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">,</span>
-        <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="n">use_batch_norm_h</span><span class="p">,</span>
-        <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="n">use_batch_norm_x</span><span class="p">,</span>
-        <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="n">use_batch_norm_c</span><span class="p">,</span>
-        <span class="n">max_unique_stats</span><span class="o">=</span><span class="n">max_unique_stats</span><span class="p">,</span>
-        <span class="n">hidden_clip_value</span><span class="o">=</span><span class="n">hidden_clip_value</span><span class="p">,</span>
-        <span class="n">cell_clip_value</span><span class="o">=</span><span class="n">cell_clip_value</span><span class="p">,</span>
-        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
-  <span class="c1"># Overriding because the default for use_batch_norm_h is True here.</span>
-<div class="viewcode-block" id="BatchNormLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span>
-      <span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-      <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormLSTM</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span>
-        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">,</span> <span class="n">use_batch_norm_h</span><span class="o">=</span><span class="n">use_batch_norm_h</span><span class="p">,</span>
-        <span class="n">use_batch_norm_x</span><span class="o">=</span><span class="n">use_batch_norm_x</span><span class="p">,</span> <span class="n">use_batch_norm_c</span><span class="o">=</span><span class="n">use_batch_norm_c</span><span class="p">)</span></div></div>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div></div>
 
 
 <div class="viewcode-block" id="ConvLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ConvLSTM">[docs]</a><span class="k">class</span> <span class="nc">ConvLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>

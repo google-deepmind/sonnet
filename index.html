@@ -50,6 +50,7 @@ multiple inputs. The variables (i.e., the weights and biases of the
 linear transformation) are automatically shared.</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
 
+<span class="c1"># Provide your own functions to generate data Tensors.</span>
 <span class="n">train_data</span> <span class="o">=</span> <span class="n">get_training_data</span><span class="p">()</span>
 <span class="n">test_data</span> <span class="o">=</span> <span class="n">get_test_data</span><span class="p">()</span>
 

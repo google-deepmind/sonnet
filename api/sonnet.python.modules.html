@@ -2226,7 +2226,7 @@ next_state = rnn(input, rnn.initial_state()) ```</p>
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">BatchNormLSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_batch_norm_h=True</em>, <em>use_batch_norm_x=False</em>, <em>use_batch_norm_c=False</em>, <em>max_unique_stats=1</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='batch_norm_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.gated_rnn._BaseLSTM</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>LSTM recurrent network cell with optional peepholes, batch
 normalization.</p>
 <p>The base implementation is based on: <a class="reference external" href="http://arxiv.org/abs/1409.2329">http://arxiv.org/abs/1409.2329</a>. We
@@ -2286,10 +2286,206 @@ peephole connections are used. use_batch_norm_h: Boolean indicating
 whether batch norm (h) is enabled. use_batch_norm_x: Boolean
 indicating whether batch norm (x) is enabled. use_batch_norm_c:
 Boolean indicating whether batch norm (c) is enabled.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.BETA_C">
+<code class="descname">BETA_C</code><em class="property"> = 'beta_c'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.BETA_C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.B_GATES">
+<code class="descname">B_GATES</code><em class="property"> = 'b_gates'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.B_GATES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs">
+<em class="property">class </em><code class="descname">CoreWithExtraBuildArgs</code><span class="sig-paren">(</span><em>core</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM.CoreWithExtraBuildArgs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>Wraps an RNNCore so that the build method receives extra args and
+kwargs.</p>
+<p>This will pass the additional input <code class="docutils literal"><span class="pre">args</span></code> and <code class="docutils literal"><span class="pre">kwargs</span></code> to the
+<em>build function of the snt.RNNCore after the input and prev</em>state
+inputs.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">tf.TensorShape</span></code> indicating the size of the core output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs.state_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple indicating the size of nested state tensors.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_C">
+<code class="descname">GAMMA_C</code><em class="property"> = 'gamma_c'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_C" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_H">
+<code class="descname">GAMMA_H</code><em class="property"> = 'gamma_h'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_H" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_X">
+<code class="descname">GAMMA_X</code><em class="property"> = 'gamma_x'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.GAMMA_X" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.IndexedStatsBatchNorm">
+<em class="property">class </em><code class="descname">IndexedStatsBatchNorm</code><span class="sig-paren">(</span><em>max_unique_stats</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM.IndexedStatsBatchNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.IndexedStatsBatchNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>BatchNorm module where batch statistics are selected by an input index.</p>
+<p>This is used by LSTM+batchnorm, where we have distinct batch norm
+statistics for the first <code class="docutils literal"><span class="pre">max_unique_stats</span></code> time steps, and then use
+the final set of statistics for subsequent time steps.</p>
+<p>The module has as input (x, index, is_training, test_local_stats).
+During training or when test_local_stats=True, the output is simply
+batchnorm(x) (where mean(x) and stddev(x) are used), and during training
+the <code class="docutils literal"><span class="pre">BatchNorm</span></code> module accumulates statistics in mean_i, etc, where i
+= min(index, max_unique_stats - 1).</p>
+<p>During testing with test_local_stats=False, the output is
+batchnorm(x), where mean_i and stddev_i are used instead of mean(x)
+and stddev(x).</p>
+<p>See the <code class="docutils literal"><span class="pre">BatchNorm</span></code> module for more on is_training and
+test_local_stats.</p>
+<p>No offset <code class="docutils literal"><span class="pre">beta</span></code> or scaling <code class="docutils literal"><span class="pre">gamma</span></code> are learnt.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'gamma_x', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS">
+<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'gamma_x', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.W_F_DIAG">
+<code class="descname">W_F_DIAG</code><em class="property"> = 'w_f_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.W_F_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.W_GATES">
+<code class="descname">W_GATES</code><em class="property"> = 'w_gates'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.W_GATES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.W_I_DIAG">
+<code class="descname">W_I_DIAG</code><em class="property"> = 'w_i_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.W_I_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.W_O_DIAG">
+<code class="descname">W_O_DIAG</code><em class="property"> = 'w_o_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.W_O_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="classmethod">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.get_possible_initializer_keys">
 <em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_peepholes=False</em>, <em>use_batch_norm_h=True</em>, <em>use_batch_norm_x=False</em>, <em>use_batch_norm_c=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
+<p>The set of all possible initializer keys are: w_gates: weight for gates
+b_gates: bias of gates w_f_diag: weight for prev_cell -&gt; forget gate
+peephole w_i_diag: weight for prev_cell -&gt; input gate peephole
+w_o_diag: weight for prev_cell -&gt; output gate peephole gamma_h:
+batch norm scaling for previous_hidden -&gt; gates gamma_x: batch norm
+scaling for input -&gt; gates gamma_c: batch norm scaling for cell -&gt;
+output beta_c: batch norm bias for cell -&gt; output</p>
+<p>Args: cls:The class. use_peepholes: Boolean that indicates whether
+peephole connections are used. use_batch_norm_h: Boolean that
+indicates whether to apply batch normalization at the previous_hidden
+-&gt; gates contribution. If you are experimenting with batch norm then
+this may be the most effective to turn on. use_batch_norm_x: Boolean
+that indicates whether to apply batch normalization at the input -&gt;
+gates contribution. use_batch_norm_c: Boolean that indicates whether
+to apply batch normalization at the cell -&gt; output contribution.</p>
+<p>Returns: Set with strings corresponding to the strings that may be
+passed to the constructor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>dtype=tf.float32</em>, <em>trainable=False</em>, <em>trainable_initializers=None</em>, <em>trainable_regularizers=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state tensor of zeros.</p>
+<p>Args: batch_size: An int, float or scalar Tensor representing the batch
+size. dtype: The data type to use for the state. trainable: Boolean that
+indicates whether to learn the initial state. trainable_initializers:
+An optional pair of initializers for the initial hidden state and cell
+state. trainable_regularizers: Optional regularizer function or nested
+structure of functions with the same structure as the <code class="docutils literal"><span class="pre">state_size</span></code>
+property of the core, to be used as regularizers of the initial state
+variable. A regularizer should be a function that takes a single
+<code class="docutils literal"><span class="pre">Tensor</span></code> as an input and returns a scalar <code class="docutils literal"><span class="pre">Tensor</span></code> output, e.g. the
+L1 and L2 regularizers in <code class="docutils literal"><span class="pre">tf.contrib.layers</span></code>. name: Optional string
+used to prefix the initial state variable names, in the case of a
+trainable initial state. If not provided, defaults to the name of the
+module.</p>
+<p>Returns: A tensor tuple
+<code class="docutils literal"><span class="pre">([batch_size,</span> <span class="pre">state_size],</span> <span class="pre">[batch_size,</span> <span class="pre">state_size],</span> <span class="pre">?)</span></code> filled with
+zeros, with the third entry present when batch norm is enabled with
+<code class="docutils literal"><span class="pre">max_unique_stats</span> <span class="pre">&gt;</span> <span class="pre">1',</span> <span class="pre">with</span> <span class="pre">value</span></code>0` (representing the time step).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">tf.TensorShape</span></code> indicating the size of the core output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.state_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of <code class="docutils literal"><span class="pre">tf.TensorShape</span></code>s indicating the size of state tensors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_c">
+<code class="descname">use_batch_norm_c</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_c" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether batch norm for cell -&gt; output is enabled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_h">
+<code class="descname">use_batch_norm_h</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_h" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether batch norm for hidden -&gt; gates is enabled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_x">
+<code class="descname">use_batch_norm_x</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether batch norm for input -&gt; gates is enabled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.use_peepholes">
+<code class="descname">use_peepholes</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_peepholes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether peephole connections are used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.with_batch_norm_control">
+<code class="descname">with_batch_norm_control</code><span class="sig-paren">(</span><em>is_training</em>, <em>test_local_stats=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM.with_batch_norm_control"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.with_batch_norm_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps this RNNCore with the additional control input to the
+<code class="docutils literal"><span class="pre">BatchNorm</span></code>s.</p>
+<p>Example usage:</p>
+<p>lstm = snt.BatchNormLSTM(4) is_training = tf.placeholder(tf.bool)
+rnn_input = … my_rnn =
+rnn.rnn(lstm.with_batch_norm_control(is_training), rnn_input)</p>
+<p>Args: is_training: Boolean that indicates whether we are in training
+mode or testing mode. When in training mode, the batch norm statistics
+are taken from the given batch, and moving statistics are updated. When
+in testing mode, the moving statistics are not updated, and in addition
+if <code class="docutils literal"><span class="pre">test_local_stats</span></code> is False then the moving statistics are used for
+the batch statistics. See the <code class="docutils literal"><span class="pre">BatchNorm</span></code> module for more details.
+test_local_stats: Boolean scalar indicated whether to use local batch
+statistics in test mode.</p>
+<p>Returns: snt.RNNCore wrapping this class with the extra input(s) added.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2437,8 +2633,8 @@ passed to the constructor.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.LSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTM</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.gated_rnn._BaseLSTM</span></code></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_layer_norm=False</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>LSTM recurrent network cell with optional peepholes &amp; layer
 normalization.</p>
 <p>The implementation is based on: <a class="reference external" href="http://arxiv.org/abs/1409.2329">http://arxiv.org/abs/1409.2329</a>. We add
@@ -2453,6 +2649,74 @@ output timing, for more details see:</p>
 size of state tensors. output_size: <code class="docutils literal"><span class="pre">tf.TensorShape</span></code> indicating the
 size of the core output. use_peepholes: Boolean indicating whether
 peephole connections are used.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.B_GATES">
+<code class="descname">B_GATES</code><em class="property"> = 'b_gates'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.B_GATES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b_gates', 'w_o_diag', 'w_f_diag', 'w_i_diag', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.W_F_DIAG">
+<code class="descname">W_F_DIAG</code><em class="property"> = 'w_f_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_F_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.W_GATES">
+<code class="descname">W_GATES</code><em class="property"> = 'w_gates'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_GATES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.W_I_DIAG">
+<code class="descname">W_I_DIAG</code><em class="property"> = 'w_i_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_I_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.W_O_DIAG">
+<code class="descname">W_O_DIAG</code><em class="property"> = 'w_o_diag'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_O_DIAG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys">
+<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_peepholes=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
+<p>The set of all possible initializer keys are: w_gates: weight for gates
+b_gates: bias of gates w_f_diag: weight for prev_cell -&gt; forget gate
+peephole w_i_diag: weight for prev_cell -&gt; input gate peephole
+w_o_diag: weight for prev_cell -&gt; output gate peephole</p>
+<p>Args: cls:The class. use_peepholes: Boolean that indicates whether
+peephole connections are used.</p>
+<p>Returns: Set with strings corresponding to the strings that may be
+passed to the constructor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">tf.TensorShape</span></code> indicating the size of the core output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.state_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of <code class="docutils literal"><span class="pre">tf.TensorShape</span></code>s indicating the size of state tensors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.use_layer_norm">
+<code class="descname">use_layer_norm</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.use_layer_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether layer norm is enabled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.use_peepholes">
+<code class="descname">use_peepholes</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.use_peepholes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether peephole connections are used.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>

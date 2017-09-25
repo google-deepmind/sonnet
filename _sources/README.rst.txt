@@ -15,6 +15,7 @@ linear transformation) are automatically shared.
 
     import sonnet as snt
 
+    # Provide your own functions to generate data Tensors.
     train_data = get_training_data()
     test_data = get_test_data()
 

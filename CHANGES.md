@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.13 - Monday 25. Septebmer 2017
+
+* Separate `BatchNormLSTM` and `LSTM` to two separate modules.
+* Clarify example in Readme.
+
 ## Version 1.12 - Monday 18. September 2017
 
 * `custom_getters` subpackage. This allows modules to be made non-trainable, or

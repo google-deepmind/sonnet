@@ -12,6 +12,7 @@ transformation) are automatically shared.
 ```python
 import sonnet as snt
 
+# Provide your own functions to generate data Tensors.
 train_data = get_training_data()
 test_data = get_test_data()
 

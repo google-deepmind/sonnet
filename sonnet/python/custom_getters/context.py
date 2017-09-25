@@ -18,19 +18,24 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
+
 
 class Context(object):
   """Contextually switching a custom getter on.
 
-  Example usage, once Sonnet modules accept a custom_getter argument:
+  Example usage, using `snt.custom_getters.stop_gradient` with `Context` to
+  selectively disable gradients flowing to variables for particular connections
+  of the module:
 
+  ```python
     custom_getter = snt.custom_getters.Context(snt.custom_getters.stop_gradient)
     lin = snt.Linear(10, custom_getter=custom_getter)
 
     lin(net1)  # custom getter not used, gradients on
     with custom_getter:
       lin(net2)  # custom getter used, gradients off
-
+  ```
 
   Warning: If the custom getter affects the way the variable is created, then
   switching it on or off after the variable has been created will have no
@@ -41,11 +46,13 @@ class Context(object):
   this applies an operation to the variable.
   """
 
-  def __init__(self, getter):
+  def __init__(self, getter, verbose=False):
     """Initializes a contextual switch for a custom getter.
 
     Args:
       getter: The custom getter which we may want to switch on.
+      verbose: Log out every time a variable is fetched, and whether or not
+        `getter` is used.
 
     Returns:
       A custom getter which can also be used as a context manager.
@@ -53,12 +60,19 @@ class Context(object):
     """
     self._count = 0
     self._getter = getter
+    self._verbose = verbose
 
-  def __call__(self, getter, *args, **kwargs):
+  def __call__(self, getter, name, *args, **kwargs):
     if self._count:
-      return self._getter(getter, *args, **kwargs)
+      if self._verbose:
+        tf.logging.info("Context: Fetching variable %s with custom getter.",
+                        name)
+      return self._getter(getter, name, *args, **kwargs)
     else:
-      return getter(*args, **kwargs)
+      if self._verbose:
+        tf.logging.info("Context: Fetching variable %s with normal getter.",
+                        name)
+      return getter(name, *args, **kwargs)
 
   def __enter__(self):
     self._count += 1

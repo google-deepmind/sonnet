@@ -33,7 +33,7 @@ def _suffix_getter(getter, name, *args, **kwargs):
 class ContextTest(tf.test.TestCase):
 
   def testContextCallsCustomGetterOnlyWhenInScope(self):
-    custom_getter = snt.custom_getters.Context(_suffix_getter)
+    custom_getter = snt.custom_getters.Context(_suffix_getter, verbose=True)
     with tf.variable_scope('', custom_getter=custom_getter):
       lin = snt.Linear(10, name='linear')
 

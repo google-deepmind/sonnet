@@ -154,11 +154,18 @@ def _verify_padding(padding):
   return padding
 
 
-def _fill_and_one_pad_stride(stride, n):
+def _fill_and_one_pad_stride(stride, n, data_format=DATA_FORMAT_NHWC):
   """Expands the provided stride to size n and pads it with 1s."""
   if isinstance(stride, numbers.Integral) or (
       isinstance(stride, collections.Iterable) and len(stride) <= n):
-    return (1,) + _fill_shape(stride, n) + (1,)
+    if data_format == DATA_FORMAT_NHWC:
+      return (1,) + _fill_shape(stride, n) + (1,)
+    elif data_format == DATA_FORMAT_NCHW:
+      return (1, 1,) + _fill_shape(stride, n)
+    else:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+
   elif isinstance(stride, collections.Iterable) and len(stride) == n + 2:
     return stride
   else:
@@ -427,7 +434,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
     """Returns the stride."""
     # Backwards compatibility with old stride format.
 
-    return (1,) + self._stride + (1,)
+    return _fill_and_one_pad_stride(self._stride, 2, self._data_format)
 
   @property
   def rate(self):
@@ -670,12 +677,13 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
                                                           "kernel")
     # We want to support passing native strides akin to [1, m, n, 1].
     if isinstance(stride, collections.Iterable) and len(stride) == 4:
-      if not stride[0] == stride[3] == 1:
+      if (self._data_format == DATA_FORMAT_NHWC and
+          (not stride[0] == stride[3] == 1)):
         raise base.IncompatibleShapeError(
             "Invalid stride: First and last element must be 1.")
       self._stride = tuple(stride)
     else:
-      self._stride = _fill_and_one_pad_stride(stride, 2)
+      self._stride = _fill_and_one_pad_stride(stride, 2, self._data_format)
 
     self._padding = _verify_padding(padding)
     self._use_bias = use_bias

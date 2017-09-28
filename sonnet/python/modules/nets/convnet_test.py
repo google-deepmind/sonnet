@@ -192,6 +192,15 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
              paddings=self.paddings,
              use_bias=2)
 
+    err = "Invalid data_format"
+    with self.assertRaisesRegexp(ValueError, err):
+      module(
+          output_channels=self.output_channels,
+          kernel_shapes=self.kernel_shapes,
+          strides=self.strides,
+          paddings=self.paddings,
+          data_format="NHCW")
+
   @parameterized.NamedParameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose",
@@ -454,6 +463,40 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
       self.assertItemsEqual(param_value, getattr(transpose_model, param_name))
     else:
       self.assertEqual(param_value, getattr(transpose_model, param_name))
+
+  @parameterized.NamedParameters(
+      ("ConvNet2DNHWC", snt.nets.ConvNet2D, "NHWC"),
+      ("ConvNet2DNCHW", snt.nets.ConvNet2D, "NCHW"),
+      ("ConvNet2DTransposeNHWC", partial(
+          snt.nets.ConvNet2DTranspose, output_shapes=[[100, 100]]), "NHWC"),
+      ("ConvNet2DTransposeNCHW", partial(
+          snt.nets.ConvNet2DTranspose, output_shapes=[[100, 100]]), "NCHW"),)
+  def testDataFormat(self, module, data_format):
+    net = module(
+        output_channels=self.output_channels,
+        kernel_shapes=self.kernel_shapes,
+        strides=self.strides,
+        paddings=self.paddings,
+        data_format=data_format)
+
+    input_height, input_width, input_channels = 100, 100, 3
+    batch_size = 10
+    final_channel = self.output_channels[-1]
+    if data_format == "NHWC":
+      input_shape = [batch_size, input_height, input_width, input_channels]
+      expected_output_shape = [
+          batch_size, input_height, input_width, final_channel
+      ]
+
+    else:
+      input_shape = [batch_size, input_channels, input_height, input_width]
+      expected_output_shape = [
+          batch_size, final_channel, input_height, input_width
+      ]
+    input_to_net = tf.placeholder(tf.float32, shape=input_shape)
+
+    output = net(input_to_net)
+    self.assertEqual(output.get_shape().as_list(), expected_output_shape)
 
 
 class ConvNet2DTest(parameterized.ParameterizedTestCase,

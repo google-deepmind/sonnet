@@ -29,6 +29,10 @@ from sonnet.python.modules import util
 
 import tensorflow as tf
 
+DATA_FORMAT_NCHW = "NCHW"
+DATA_FORMAT_NHWC = "NHWC"
+SUPPORTED_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
+
 
 def _replicate_elements(input_iterable, num_times):
   """Replicates entry in `input_iterable` if `input_iterable` is of length 1."""
@@ -58,6 +62,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                use_batch_norm=False,
                use_bias=True,
                batch_norm_config=None,
+               data_format=DATA_FORMAT_NHWC,
                name="conv_net_2d"):
     """Constructs a `ConvNet2D` module.
 
@@ -99,6 +104,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         bias parameters in the convolutional layers. Default `True`.
       batch_norm_config: Optional mapping of additional configuration for the
         `snt.BatchNorm` modules.
+      data_format: A string, one of "NCHW" or "NHWC". Specifies whether the
+        channel dimension of the input and output is the last dimension
+        (default, "NHWC"), or the second dimension ("NCHW").
       name: Name of the module.
 
     Raises:
@@ -108,7 +116,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       ValueError: If `output_channels` is empty; or if `kernel_shapes` has not
         length 1 or `len(output_channels)`; or if `strides` has not
         length 1 or `len(output_channels)`; or if `paddings` has not
-        length 1 or `len(output_channels)`.
+        length 1 or `len(output_channels)`; or if the given data_format is not a
+        supported format ("NHWC" or "NCHW").
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -138,6 +147,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     self._num_layers = len(self._output_channels)
 
     self._input_shape = None
+
+    if data_format not in SUPPORTED_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+    self._data_format = data_format
 
     self._initializers = util.check_initializers(
         initializers, self.POSSIBLE_INITIALIZER_KEYS)
@@ -192,7 +206,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                                        use_bias=self._use_bias[i],
                                        initializers=self._initializers,
                                        partitioners=self._partitioners,
-                                       regularizers=self._regularizers)
+                                       regularizers=self._regularizers,
+                                       data_format=self._data_format)
                            for i in xrange(self._num_layers))
 
   def _build(self, inputs, is_training=None, test_local_stats=True):
@@ -313,7 +328,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                  regularizers=None,
                  use_batch_norm=None,
                  use_bias=None,
-                 batch_norm_config=None):
+                 batch_norm_config=None,
+                 data_format=None,):
     """Returns transposed version of this network.
 
     Args:
@@ -350,7 +366,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         is constructed by reversing `self.use_bias`.
       batch_norm_config: Optional mapping of additional configuration for the
         `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
-
+      data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
+        the channel dimension of the input and output is the last dimension.
+        Default is `self._data_format`.
     Returns:
       Matching transposed module.
 
@@ -358,10 +376,15 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       ValueError: If output_channels is specified and its length does not match
         the number of layers.
     """
+
+    if data_format is None:
+      data_format = self._data_format
+
     if output_channels is None:
       output_channels = []
+      channel_dim = -1 if data_format == DATA_FORMAT_NHWC else 1
       for layer in reversed(self._layers):
-        output_channels.append(lambda l=layer: l.input_shape[-1])
+        output_channels.append(lambda l=layer: l.input_shape[channel_dim])
 
     elif len(output_channels) != len(self._layers):
       # Note that we only have to do this check for the output channels. Any
@@ -418,6 +441,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                                  use_batch_norm=use_batch_norm,
                                  use_bias=use_bias,
                                  batch_norm_config=batch_norm_config,
+                                 data_format=data_format,
                                  name=name)
 
   # Implements Transposable interface.
@@ -434,7 +458,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                 regularizers=None,
                 use_batch_norm=None,
                 use_bias=None,
-                batch_norm_config=None):
+                batch_norm_config=None,
+                data_format=None):
     """Returns transposed version of this network.
 
     Args:
@@ -468,6 +493,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         is constructed by reversing `self.use_bias`.
       batch_norm_config: Optional mapping of additional configuration for the
         `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
+      data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
+        the channel dimension of the input and output is the last dimension.
+        Default is `self._data_format`.
 
     Returns:
       Matching `ConvNet2DTranspose` module.
@@ -475,10 +503,22 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     Raises:
       ValueError: If output_channels is specified and its length does not match
         the number of layers.
+      ValueError: If the given data_format is not a supported format ("NHWC" or
+        "NCHW").
     """
     output_shapes = []
+    if data_format is None:
+      data_format = self._data_format
+    if data_format == DATA_FORMAT_NHWC:
+      start_dim, end_dim = 1, -1
+    elif data_format == DATA_FORMAT_NCHW:
+      start_dim, end_dim = 2, 4
+    else:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+
     for layer in reversed(self._layers):
-      output_shapes.append(lambda l=layer: l.input_shape[1:-1])
+      output_shapes.append(lambda l=layer: l.input_shape[start_dim:end_dim])
     transpose_constructor = functools.partial(ConvNet2DTranspose,
                                               output_shapes=output_shapes)
 
@@ -495,7 +535,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                            regularizers=regularizers,
                            use_batch_norm=use_batch_norm,
                            use_bias=use_bias,
-                           batch_norm_config=batch_norm_config)
+                           batch_norm_config=batch_norm_config,
+                           data_format=data_format)
 
 
 class ConvNet2DTranspose(ConvNet2D):
@@ -515,6 +556,7 @@ class ConvNet2DTranspose(ConvNet2D):
                use_batch_norm=False,
                use_bias=True,
                batch_norm_config=None,
+               data_format=DATA_FORMAT_NHWC,
                name="conv_net_2d_transpose"):
     """Constructs a `ConvNetTranspose2D` module.
 
@@ -561,6 +603,9 @@ class ConvNet2DTranspose(ConvNet2D):
         bias parameters in the convolutional layers. Default `True`.
       batch_norm_config: Optional mapping of additional configuration for the
         `snt.BatchNorm` modules.
+      data_format: A string, one of "NCHW" or "NHWC". Specifies whether the
+        channel dimension of the input and output is the last dimension
+        (default, "NHWC"), or the second dimension ("NCHW").
       name: Name of the module.
 
     Raises:
@@ -572,6 +617,8 @@ class ConvNet2DTranspose(ConvNet2D):
         length 1 or `len(output_channels)`; or if `strides` has not
         length 1 or `len(output_channels)`; or if `paddings` has not
         length 1 or `len(output_channels)`.
+      ValueError: If the given data_format is not a supported format ("NHWC" or
+        "NCHW").
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -604,6 +651,7 @@ class ConvNet2DTranspose(ConvNet2D):
         use_batch_norm=use_batch_norm,
         use_bias=use_bias,
         batch_norm_config=batch_norm_config,
+        data_format=data_format,
         name=name)
 
   def _instantiate_layers(self):
@@ -620,6 +668,7 @@ class ConvNet2DTranspose(ConvNet2D):
                                initializers=self._initializers,
                                partitioners=self._partitioners,
                                regularizers=self._regularizers,
+                               data_format=self._data_format,
                                use_bias=self._use_bias[i])
           for i in xrange(self._num_layers))
 
@@ -641,7 +690,8 @@ class ConvNet2DTranspose(ConvNet2D):
                 regularizers=None,
                 use_batch_norm=None,
                 use_bias=None,
-                batch_norm_config=None):
+                batch_norm_config=None,
+                data_format=None):
     """Returns transposed version of this network.
 
     Args:
@@ -675,6 +725,9 @@ class ConvNet2DTranspose(ConvNet2D):
         is constructed by reversing `self.use_bias`.
       batch_norm_config: Optional mapping of additional configuration for the
         `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
+      data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
+        the channel dimension of the input and output is the last dimension.
+        Default is `self._data_format`.
 
     Returns:
       Matching `ConvNet2D` module.
@@ -696,4 +749,5 @@ class ConvNet2DTranspose(ConvNet2D):
                            regularizers=regularizers,
                            use_batch_norm=use_batch_norm,
                            use_bias=use_bias,
-                           batch_norm_config=batch_norm_config)
+                           batch_norm_config=batch_norm_config,
+                           data_format=data_format)

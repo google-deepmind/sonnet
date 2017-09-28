@@ -3024,7 +3024,7 @@ class Conv3DTransposeTest(parameterized.ParameterizedTestCase,
       ("WithBias", True),
       ("WithoutBias", False))
   def testTransposition(self, use_bias):
-    """Tests if the correct ouput shapes are setup in transposed module."""
+    """Tests if the correct output shapes are setup in transposed module."""
     net = snt.Conv3DTranspose(name="conv3d_3",
                               output_channels=self.out_channels,
                               output_shape=self.out_shape,

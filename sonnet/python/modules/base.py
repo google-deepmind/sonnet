@@ -26,77 +26,27 @@ from __future__ import print_function
 
 import abc
 import collections
+import inspect
 
 # Dependency imports
 import six
+from sonnet.python.modules import base_info
 from sonnet.python.modules import util
 import tensorflow as tf
 
+# Import error class from base_errors for backward compability.
 
-class Error(Exception):
-  """Base class for all errors from snt.
-
-  This is thrown to indicate a Neural Network specific problem, e.g. wrong
-  module arity, module is not connected to the graph when it should be,
-  tried to wire together incompatible modules, etc.
-  """
-
-
-class NotConnectedError(Error):
-  """Error raised when operating on a module that has not yet been connected.
-
-  Some module properties / methods are valid to access before the module has
-  been connected into the graph, but some are not. This Error is raised when
-  the user attempts to do anything not valid before connection.
-  """
-
-
-class ParentNotBuiltError(Error):
-  """Error raised when the parent of a module has not been built yet.
-
-  For example, when making a transpose of modules that inherit from
-  `module.Transposable`, the parent has to be connected to the graph before the
-  child transpose to ensure that shape inference has already occurred.
-  """
-
-
-class IncompatibleShapeError(Error):
-  """Error raised when the shape of the input at build time is incompatible."""
-
-
-class UnderspecifiedError(Error):
-  """Error raised when too little information is available.
-
-  This does not typically mean the user is trying to do something that doesn't
-  work (in which case `IncompatibleShapeError` should be used), just that
-  some more information needs to be provided in order to build the Graph.
-  """
-
-
-class NotSupportedError(Error):
-  """Error raised when something that cannot be supported is requested.
-
-  For example a Dilated Convolution module cannot be transposed.
-  """
-
-
-class NotInitializedError(Error):
-  """Error raised when connecting an uninitialized Sonnet module.
-
-  Before they can be connected, all Sonnet modules must call
-  `AbstractModule.__init__` (e.g. via a `super` call).
-  """
-
-
-class DifferentGraphError(Error):
-  """Error raised when trying to connect a Sonnet module to multiple Graphs."""
-
-
-SubgraphInputs = collections.namedtuple("SubgraphInputs", ("args", "kwargs"))
-
-
-ConnectedSubGraph = collections.namedtuple(
-    "ConnectedSubGraph", ("builder", "name_scope", "inputs", "outputs"))
+from sonnet.python.modules.base_errors import Error
+from sonnet.python.modules.base_errors import NotConnectedError
+from sonnet.python.modules.base_errors import ParentNotBuiltError
+from sonnet.python.modules.base_errors import IncompatibleShapeError
+from sonnet.python.modules.base_errors import UnderspecifiedError
+from sonnet.python.modules.base_errors import NotSupportedError
+from sonnet.python.modules.base_errors import NotInitializedError
+from sonnet.python.modules.base_errors import DifferentGraphError
+from sonnet.python.modules.base_errors import ModuleInfoError
+# pylint: enable=g-bad-import-order
+# pylint: enable=unused-import
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -224,6 +174,15 @@ class AbstractModule(object):
                                 "start of %s.__init__."
                                 % self.__class__.__name__)
 
+  def _set_module_info(self):
+    """Creates a `ModuleInfo` and adds it to the graph collections."""
+    self._module_info = base_info.ModuleInfo(
+        module_name=self.module_name,
+        scope_name=self.scope_name,
+        connected_subgraphs=self._connected_subgraphs)
+    self._graph.add_to_collection(base_info.SONNET_COLLECTION_NAME,
+                                  self._module_info)
+
   def _check_same_graph(self):
     """Checks that the module is not being connect to multiple Graphs.
 
@@ -239,6 +198,7 @@ class AbstractModule(object):
     current_graph = tf.get_default_graph()
     if self._graph is None:
       self._graph = current_graph
+      self._set_module_info()
     elif self._graph != current_graph:
       raise DifferentGraphError("Cannot connect module to multiple Graphs.")
 
@@ -256,6 +216,25 @@ class AbstractModule(object):
       output Tensor(s).
     """
 
+  def _add_connected_subgraph(self, outputs, subgraph_name_scope,
+                              *inputs_args, **inputs_kwargs):
+    """Adds a newly connected subgraph.
+
+    Args:
+      outputs: `self._build` outputs.
+      subgraph_name_scope: name scope of the newly connected subgraph.
+      *inputs_args: `self._build` inputs `*args`.
+      **inputs_kwargs: `self._build` inputs `*kwargs`.
+    """
+    build_inputs = inspect.getcallargs(self._build,
+                                       *inputs_args, **inputs_kwargs)
+    del build_inputs["self"]
+    connected_subgraph = base_info.ConnectedSubGraph(
+        module=self, name_scope=subgraph_name_scope,
+        inputs=build_inputs,
+        outputs=outputs)
+    self._connected_subgraphs.append(connected_subgraph)
+
   def __call__(self, *args, **kwargs):
     """Operator overload for calling.
 
@@ -272,11 +251,9 @@ class AbstractModule(object):
     """
     self._check_init_called()
     self._check_same_graph()
-    outputs, this_name_scope = self._template(*args, **kwargs)
-    # Connect the module only if self._template returns with no errors.
-    inputs = SubgraphInputs(args, kwargs)
-    self._connected_subgraphs.append(
-        ConnectedSubGraph(self, this_name_scope, inputs, outputs))
+    outputs, subgraph_name_scope = self._template(*args, **kwargs)
+    self._add_connected_subgraph(outputs, subgraph_name_scope,
+                                 *args, **kwargs)
     return outputs
 
   @property

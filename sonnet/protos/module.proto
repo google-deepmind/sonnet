@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package sonnet;
+
+// Nested data to record Sonnet inputs and outputs.
+message NestedData {
+  // Ordered list of items. In Python, this deserializes as a `tuple`.
+  message Tuple {
+    repeated NestedData list = 1;
+  }
+
+  // Ordered list of items. In Python, this deserializes as a `list`.
+  message List {
+    repeated NestedData list = 1;
+  }
+
+  // Key-value container. In Python, this deserializes as a `dict`.
+  message Dict {
+    map<string, NestedData> map = 1;
+  }
+
+  // Named key-value container. In Python, this deserializes as a `namedtuple`.
+  message NamedTuple {
+    string name = 1;
+    map<string, NestedData> map = 2;
+  }
+
+  // Special type, used to identify types with custom serializer.
+  message SpecialType {
+    string name = 1;
+    NestedData object = 2;
+  }
+
+  oneof one_of {
+    string value = 1;
+    List list = 2;
+    Tuple tuple = 3;
+    Dict dict = 4;
+    NamedTuple named_tuple = 5;
+    SpecialType special_type = 6;
+  }
+}
+
+
+// One Sonnet module, serialized in the meta-graphdef collections.
+// All the fields are required. The "graph" here means an instance of a
+// TensorFlow graph. A "connected subgraph" is a TensorFlow "sub-graph"
+// created by a Sonnet module instance. Here we make the assumption that
+// a connected subgraph correspond to a TensorFlow name scope.
+message SonnetModule {
+  message ConnectedSubgraph {
+    string name_scope = 1;
+    NestedData inputs = 2;
+    NestedData outputs = 3;
+  }
+  string module_name = 1;
+  string scope_name = 2;
+  repeated ConnectedSubgraph connected_subgraphs = 3;
+}

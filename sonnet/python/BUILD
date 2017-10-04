@@ -11,10 +11,13 @@ py_library(
     name = "base",
     srcs = [
         "modules/base.py",
+        "modules/base_errors.py",
+        "modules/base_info.py",
     ],
     srcs_version = "PY2AND3",
     deps = [
         ":util",
+        "//sonnet/protos:module_pb2",
         # tensorflow dep,
     ],
 )

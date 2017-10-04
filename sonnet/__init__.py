@@ -15,11 +15,10 @@
 
 """This python module contains Neural Network Modules for TensorFlow.
 
-In brief, each module is a Python object
-which conceptually "owns" any variables required in that part of the Neural
-Network. The `__call__` function on the object is used to connect that Module
-into the Graph, and this may be called repeatedly with sharing automatically
-taking place.
+Each module is a Python object which conceptually "owns" any
+variables required in that part of the Neural Network. The `__call__` function
+on the object is used to connect that Module into the Graph, and this may be
+called repeatedly with sharing automatically taking place.
 
 Everything public should be imported by this top level `__init__.py` so that the
 library can be used as follows:
@@ -41,16 +40,19 @@ from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead
 from sonnet.python.modules.base import AbstractModule
-from sonnet.python.modules.base import DifferentGraphError
-from sonnet.python.modules.base import Error
-from sonnet.python.modules.base import IncompatibleShapeError
 from sonnet.python.modules.base import Module
-from sonnet.python.modules.base import NotConnectedError
-from sonnet.python.modules.base import NotInitializedError
-from sonnet.python.modules.base import NotSupportedError
-from sonnet.python.modules.base import ParentNotBuiltError
 from sonnet.python.modules.base import Transposable
-from sonnet.python.modules.base import UnderspecifiedError
+from sonnet.python.modules.base_errors import DifferentGraphError
+from sonnet.python.modules.base_errors import Error
+from sonnet.python.modules.base_errors import IncompatibleShapeError
+from sonnet.python.modules.base_errors import ModuleInfoError
+from sonnet.python.modules.base_errors import NotConnectedError
+from sonnet.python.modules.base_errors import NotInitializedError
+from sonnet.python.modules.base_errors import NotSupportedError
+from sonnet.python.modules.base_errors import ParentNotBuiltError
+from sonnet.python.modules.base_errors import UnderspecifiedError
+from sonnet.python.modules.base_errors import UnderspecifiedError
+from sonnet.python.modules.base_info import SONNET_COLLECTION_NAME
 from sonnet.python.modules.basic import AddBias
 from sonnet.python.modules.basic import BatchApply
 from sonnet.python.modules.basic import BatchFlatten

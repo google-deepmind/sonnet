@@ -228,7 +228,14 @@ class AbstractModule(object):
     """
     build_inputs = inspect.getcallargs(self._build,
                                        *inputs_args, **inputs_kwargs)
-    del build_inputs["self"]
+
+    # "self" should normally be in `build_inputs` but some people are decorating
+    # their `_build` function with `memoize`, in which case the function
+    # signature doesn't contain `self` anymore.
+
+    if "self" in build_inputs:
+      del build_inputs["self"]
+
     connected_subgraph = base_info.ConnectedSubGraph(
         module=self, name_scope=subgraph_name_scope,
         inputs=build_inputs,

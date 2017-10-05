@@ -179,6 +179,8 @@ class AbstractModule(object):
     self._module_info = base_info.ModuleInfo(
         module_name=self.module_name,
         scope_name=self.scope_name,
+        class_name="{}.{}".format(
+            self.__class__.__module__, self.__class__.__name__),
         connected_subgraphs=self._connected_subgraphs)
     self._graph.add_to_collection(base_info.SONNET_COLLECTION_NAME,
                                   self._module_info)

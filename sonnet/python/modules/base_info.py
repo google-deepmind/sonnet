@@ -33,7 +33,8 @@ SONNET_COLLECTION_NAME = "sonnet"
 
 
 ModuleInfo = collections.namedtuple(
-    "ModuleInfo", ("module_name", "scope_name", "connected_subgraphs"))
+    "ModuleInfo",
+    ("module_name", "scope_name", "class_name", "connected_subgraphs"))
 
 
 ConnectedSubGraph = collections.namedtuple(
@@ -226,7 +227,8 @@ def _module_info_to_proto(module_info, export_scope=None):
     return strip_name_scope(_graph_element_to_path(value))
   module_info_def = module_pb2.SonnetModule(
       module_name=module_info.module_name,
-      scope_name=strip_name_scope(module_info.scope_name))
+      scope_name=strip_name_scope(module_info.scope_name),
+      class_name=module_info.class_name)
   for connected_subgraph in module_info.connected_subgraphs:
     connected_subgraph_info_def = module_info_def.connected_subgraphs.add()
     connected_subgraph_info_def.name_scope = strip_name_scope(
@@ -316,6 +318,7 @@ def _module_info_from_proto(module_info_def, import_scope=None):
   module_info = ModuleInfo(
       module_name=module_info_def.module_name,
       scope_name=prepend_name_scope(module_info_def.scope_name),
+      class_name=module_info_def.class_name,
       connected_subgraphs=connected_subgraphs)
   for connected_subgraph_def in module_info_def.connected_subgraphs:
     connected_subgraph = ConnectedSubGraph(

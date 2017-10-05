@@ -130,6 +130,7 @@ module_tests = [
     ("alexnet_test", "nets/", "large"),
     ("attention_test", "", "small"),
     ("base_test", "", "small"),
+    ("base_info_test", "", "small"),
     ("basic_test", "", "small"),
     ("basic_rnn_test", "", "medium"),
     ("batch_norm_test", "", "small"),

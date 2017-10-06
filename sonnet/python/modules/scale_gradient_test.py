@@ -46,7 +46,7 @@ class ScaleGradientTest(parameterized.ParameterizedTestCase,
       if scale == 1.0:
         self.assertEqual(y.op.type, "Identity")
       else:
-        self.assertEqual(y.op.type, "ScaleGradient")
+        self.assertEqual(y.op.type, "ScaleGradient_float32")
 
       with self.test_session() as sess:
         dydx_, y_ = sess.run([dydx, y], feed_dict={x: [x_]})
@@ -78,6 +78,14 @@ class ScaleGradientTest(parameterized.ParameterizedTestCase,
     y = snt.scale_gradient(x, 0.1)
     shape = tuple(y.get_shape().as_list())
     self.assertEqual(shape, (None, 10, 13))
+
+  def testOpScaleDifferentDtypes(self):
+    x_1 = tf.placeholder(tf.float16, shape=())
+    snt.scale_gradient(x_1, 0.1)
+
+    # clip_gradient throws here if the Defun func_name does not use the dtype.
+    x_2 = tf.placeholder(tf.float32, shape=())
+    snt.scale_gradient(x_2, 0.1)
 
 
 if __name__ == "__main__":

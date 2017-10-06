@@ -22,6 +22,43 @@ import tensorflow as tf
 from tensorflow.python.framework import function
 
 
+def _clip_gradient_op(dtype):
+  """Create an op that clips gradients using a Defun.
+
+  The tensorflow Defun decorator creates an op and tensorflow caches these op
+  automatically according to `func_name`. Using a Defun decorator twice with the
+  same `func_name` does not create a new op, instead the cached op is used.
+
+  This method produces a new op the first time it is called with a given `dtype`
+  argument, and then uses the cached op each time it is called after that with
+  the same `dtype`. The min and max clip values are given as arguments for the
+  forward pass method so that they can be used in the backwards pass.
+
+  Args:
+    dtype: the dtype of the net whose gradient is being clipped.
+
+  Returns:
+    The op that clips gradients.
+  """
+
+  def clip_gradient_backward(op, grad):
+    clip_value_min = op.inputs[1]
+    clip_value_max = op.inputs[2]
+    clipped_grad = tf.clip_by_value(grad, clip_value_min, clip_value_max)
+    return clipped_grad, None, None
+
+  def clip_gradient_forward(x, clip_value_min, clip_value_max):
+    del clip_value_min  # Unused.
+    del clip_value_max  # Unused.
+    return x
+
+  func_name = "ClipGradient_{}".format(dtype.name)
+  return function.Defun(
+      dtype, dtype, dtype,
+      python_grad_func=clip_gradient_backward,
+      func_name=func_name)(clip_gradient_forward)
+
+
 def clip_gradient(net, clip_value_min, clip_value_max, name=None):
   """Clips respective gradients of a given tensor.
 
@@ -38,20 +75,20 @@ def clip_gradient(net, clip_value_min, clip_value_max, name=None):
 
   Returns:
     A `tf.Tensor` with the same type as the input tensor.
+
+  Raises:
+    ValueError: If `net` dtype is non-float.
   """
-
-  def _clip_gradient_backward(unused_op, grad):
-    return tf.clip_by_value(grad, clip_value_min, clip_value_max)
-
-  @function.Defun(
-      net.dtype,
-      python_grad_func=_clip_gradient_backward,
-      func_name="ClipGradient")
-  def _clip_gradient_forward(x):
-    return x
+  if not net.dtype.is_floating:
+    raise ValueError("clip_gradient does not support non-float `net` inputs.")
 
   with tf.name_scope(name, "clip_gradient", values=[net]):
-    output = _clip_gradient_forward(net)
+    dtype = net.dtype.base_dtype  # Convert ref dtypes to regular dtypes.
+    min_tensor = tf.convert_to_tensor(clip_value_min, dtype=dtype)
+    max_tensor = tf.convert_to_tensor(clip_value_max, dtype=dtype)
+
+    clip_gradient_op = _clip_gradient_op(dtype)
+    output = clip_gradient_op(net, min_tensor, max_tensor)
     output.set_shape(net.get_shape())
 
   return output

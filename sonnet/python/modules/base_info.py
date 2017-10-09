@@ -100,7 +100,8 @@ def _path_to_graph_element(path, graph):
     return _MissingTensor(path)
 
 
-def _to_proto_sparse_tensor(sparse_tensor, nested_proto, process_leafs):
+def _to_proto_sparse_tensor(sparse_tensor, nested_proto,
+                            process_leafs, already_processed):
   """Serializes a `tf.SparseTensor` into `nested_proto`.
 
   Args:
@@ -109,7 +110,10 @@ def _to_proto_sparse_tensor(sparse_tensor, nested_proto, process_leafs):
       `sparse_tensor`.
     process_leafs: A function to be applied to the leaf valued of the nested
       structure.
+    already_processed: Set of already processed objects (used to avoid
+      infinite recursion).
   """
+  already_processed.add(id(sparse_tensor))
   nested_proto.named_tuple.name = _SPARSE_TENSOR_NAME
   for str_key in _SPARSE_TENSOR_FIELD:
     tensor = getattr(sparse_tensor, str_key)
@@ -157,7 +161,8 @@ _TO_PROTO_SPECIAL_TYPES[_SPARSE_TENSOR_NAME] = _SpecialTypeInfo(
     from_proto=_from_proto_sparse_tensor)
 
 
-def _nested_to_proto(nested_value, nested_proto, process_leafs):
+def _nested_to_proto(nested_value, nested_proto, process_leafs,
+                     already_processed):
   """Serializes `nested_value` into `nested_proto`.
 
   Args:
@@ -166,7 +171,8 @@ def _nested_to_proto(nested_value, nested_proto, process_leafs):
       in `nested_value`.
     process_leafs: A function to be applied to the leaf values of the nested
       structure.
-
+    already_processed: Set of already processed objects (used to avoid
+      infinite recursion).
   Raises:
     ModuleInfoError: If `nested_proto` is not an instance of
       `module_pb2.NestedData`.
@@ -174,39 +180,49 @@ def _nested_to_proto(nested_value, nested_proto, process_leafs):
   if not isinstance(nested_proto, module_pb2.NestedData):
     raise base_errors.ModuleInfoError("Expected module_pb2.NestedData.")
 
+  # If this object was already processed, mark as "unserializable"
+  # to avoid infinite recursion.
+  if id(nested_value) in already_processed:
+    nested_proto.value = ""
+    return
+
   # Check special types.
   for type_name, type_info in six.iteritems(_TO_PROTO_SPECIAL_TYPES):
     if type_info.check(nested_value):
       nested_proto.special_type.name = type_name
       type_info.to_proto(
-          nested_value, nested_proto.special_type.object, process_leafs)
+          nested_value, nested_proto.special_type.object,
+          process_leafs, already_processed)
       return
 
   # Check standard types.
   if _is_iterable(nested_value):
+    # Mark this container as "already processed" to avoid infinite recursion.
+    already_processed.add(id(nested_value))
     if isinstance(nested_value, dict):
       nested_proto.dict.SetInParent()
       for key, child in six.iteritems(nested_value):
         str_key = str(key)
-        _nested_to_proto(child, nested_proto.dict.map[str_key], process_leafs)
+        child_proto = nested_proto.dict.map[str_key]
+        _nested_to_proto(child, child_proto, process_leafs, already_processed)
     elif isinstance(nested_value, tuple):
       # NamedTuple?
       if _is_namedtuple(nested_value):
         nested_proto.named_tuple.name = type(nested_value).__name__
         for str_key in nested_value._fields:
           child = getattr(nested_value, str_key)
-          _nested_to_proto(
-              child, nested_proto.named_tuple.map[str_key], process_leafs)
+          child_proto = nested_proto.named_tuple.map[str_key]
+          _nested_to_proto(child, child_proto, process_leafs, already_processed)
       else:
         nested_proto.tuple.SetInParent()
         for child in nested_value:
           child_proto = nested_proto.tuple.list.add()
-          _nested_to_proto(child, child_proto, process_leafs)
+          _nested_to_proto(child, child_proto, process_leafs, already_processed)
     else:
       nested_proto.list.SetInParent()
       for child in nested_value:
         child_proto = nested_proto.list.list.add()
-        _nested_to_proto(child, child_proto, process_leafs)
+        _nested_to_proto(child, child_proto, process_leafs, already_processed)
   else:
     nested_proto.value = process_leafs(nested_value)
 
@@ -236,11 +252,11 @@ def _module_info_to_proto(module_info, export_scope=None):
     _nested_to_proto(
         connected_subgraph.inputs,
         connected_subgraph_info_def.inputs,
-        process_leafs)
+        process_leafs, set())
     _nested_to_proto(
         connected_subgraph.outputs,
         connected_subgraph_info_def.outputs,
-        process_leafs)
+        process_leafs, set())
   return module_info_def
 
 

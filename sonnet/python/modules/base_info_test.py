@@ -41,14 +41,18 @@ class NotATensor(object):
 class DumbModule(base.AbstractModule):
   """Dumb module to test ModuleInfo."""
 
-  def __init__(self, name):
+  def __init__(self, name, no_nest=False):
     base.AbstractModule.__init__(self, name=name)
+    self.no_nest = no_nest
 
   def _build(self, inputs):
     if isinstance(inputs, (NotATensor, tf.SparseTensor)):
       outputs = inputs
     else:
-      outputs = nest.map_structure(tf.identity, inputs)
+      if self.no_nest:
+        outputs = inputs
+      else:
+        outputs = nest.map_structure(tf.identity, inputs)
     return outputs
 
 
@@ -85,10 +89,10 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_multiple_modules(self):
     # pylint: disable=not-callable
+    tf.reset_default_graph()
     dumb = DumbModule(name="dumb")
     dumb_1 = DumbModule(name="dumb")
     linear = basic.Linear(10, name="linear")
-    tf.reset_default_graph()
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb(ph_0)
     with tf.name_scope("foo"):
@@ -130,8 +134,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_multiple_subgraph(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb(ph_0)
     with tf.name_scope("foo"):
@@ -151,8 +155,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_tensor(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb(ph_0)
     def check():
@@ -167,8 +171,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_sparsetensor(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     sparse_tensor = tf.SparseTensor(
         indices=tf.placeholder(dtype=tf.int64, shape=(10, 2,)),
         values=tf.placeholder(dtype=tf.float32, shape=(10,)),
@@ -187,8 +191,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_tuple(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     ph_1 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb((ph_0, ph_1))
@@ -204,8 +208,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_namedtuple(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     ph_1 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb(DumbNamedTuple(ph_0, ph_1))
@@ -222,8 +226,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_dict(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     ph_1 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
     dumb({"ph_0": ph_0, "ph_1": ph_1})
@@ -239,8 +243,8 @@ class ModuleInfoTest(tf.test.TestCase):
 
   def testModuleInfo_not_a_tensor(self):
     # pylint: disable=not-callable
-    dumb = DumbModule(name="dumb_a")
     tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a")
     dumb(NotATensor())
     def check(check_type):
       sonnet_collection = tf.get_default_graph().get_collection(
@@ -249,6 +253,28 @@ class ModuleInfoTest(tf.test.TestCase):
       self.assertIsInstance(connected_subgraph.inputs["inputs"], check_type)
       self.assertIsInstance(connected_subgraph.outputs, check_type)
     check(NotATensor)
+    _copy_default_graph()
+    check(base_info._UnserializableObject)
+
+  def testModuleInfo_recursion(self):
+    # pylint: disable=not-callable
+    tf.reset_default_graph()
+    dumb = DumbModule(name="dumb_a", no_nest=True)
+    ph_0 = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
+    val = {"one": ph_0, "self": None}
+    val["self"] = val
+    dumb(val)
+    def check(check_type):
+      sonnet_collection = tf.get_default_graph().get_collection(
+          base_info.SONNET_COLLECTION_NAME)
+      connected_subgraph = sonnet_collection[0].connected_subgraphs[0]
+      self.assertIsInstance(connected_subgraph.inputs["inputs"]["one"],
+                            tf.Tensor)
+      self.assertIsInstance(
+          connected_subgraph.inputs["inputs"]["self"], check_type)
+      self.assertIsInstance(connected_subgraph.outputs["one"], tf.Tensor)
+      self.assertIsInstance(connected_subgraph.outputs["self"], check_type)
+    check(dict)
     _copy_default_graph()
     check(base_info._UnserializableObject)
 

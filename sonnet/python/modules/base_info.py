@@ -59,12 +59,8 @@ def _is_namedtuple(obj):
 
 
 def _is_iterable(obj):
-  """Returns true if the object is iterable."""
-  try:
-    _ = iter(obj)
-    return True
-  except TypeError:
-    return False
+  """Returns `True` if the object is a supported iterable."""
+  return isinstance(obj, (list, tuple, dict))
 
 
 def _graph_element_to_path(graph_element):

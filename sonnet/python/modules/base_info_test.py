@@ -77,8 +77,11 @@ class ModuleInfoTest(tf.test.TestCase):
     self.assertTrue(base_info._is_iterable((1, 2, 3)))
     self.assertTrue(base_info._is_iterable([1, 2, 3]))
     self.assertTrue(base_info._is_iterable({1: 1, 2: 2, 3: 3}))
+    self.assertTrue(base_info._is_iterable(
+        collections.OrderedDict([(1, 1), (2, 2)])))
     self.assertTrue(base_info._is_iterable(DumbNamedTuple(1, 2)))
     tensor = tf.placeholder(dtype=tf.float32, shape=(1, 10,))
+    self.assertFalse(base_info._is_iterable(set([1, 2, 3])))
     self.assertFalse(base_info._is_iterable(tensor))
     sparse_tensor = tf.SparseTensor(
         indices=tf.placeholder(dtype=tf.int64, shape=(10, 2,)),
@@ -86,6 +89,12 @@ class ModuleInfoTest(tf.test.TestCase):
         dense_shape=tf.placeholder(dtype=tf.int64, shape=(2,)))
     self.assertFalse(base_info._is_iterable(sparse_tensor))
     self.assertFalse(base_info._is_iterable(NotATensor()))
+    self.assertFalse(base_info._is_iterable("foo"))
+    def generator():
+      for count in xrange(3):
+        self.assertFalse(False)
+        yield count
+    self.assertFalse(base_info._is_iterable(generator))
 
   def testModuleInfo_multiple_modules(self):
     # pylint: disable=not-callable

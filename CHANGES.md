@@ -1,5 +1,18 @@
 # Sonnet Changelog
 
+## Version 1.14 - Monday, 09. October 2017
+
+* Added Sonnet `ModuleInfo` to the "sonnet" graph collection. This allows to
+  keep track of which modules generated which connected sub-graphs. This
+  information is serialised and available when loading a meta-graph-def. This
+  can be used, for instance, to visualise the TensorFlow graph from a Sonnet
+  perspective.
+* Scale_gradient now handles all float dtypes.
+* Fixed a bug in clip_gradient that caused clip values to be shared.
+* ConvNet can now use the NCHW data format.
+* Cleaned up and improved example text for `snt.custom_getters.Context`.
+
+
 ## Version 1.13 - Monday 25. Septebmer 2017
 
 * Separate `BatchNormLSTM` and `LSTM` to two separate modules.
@@ -146,3 +159,4 @@ as a unit when saving checkpoints / model snapshots with tf.Saver. The option is
 set to False by default, for backwards compatibility reasons.
 * `snt.Linear.transpose` creates a new module which now uses the same
 partitioners as the parent module.
+

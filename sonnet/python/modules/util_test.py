@@ -483,32 +483,31 @@ class ReuseVarsTest(tf.test.TestCase):
     self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
     self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
 
+  class ModuleReuse(snt.AbstractModule):
+
+    def __init__(self, shape, name="multi_template_test"):
+      super(ReuseVarsTest.ModuleReuse, self).__init__(name=name)
+      self._shape = shape
+
+    @util.reuse_variables
+    def a(self):
+      return tf.get_variable("a", shape=self._shape)
+
+    @util.reuse_variables
+    def add_b(self, inputs):
+      return inputs + tf.get_variable("b", shape=self._shape)
+
+    def _build(self, inputs):
+      return self.add_b(inputs + self.a())
+
   def test_reuse_abstract_module(self):
-
-    class ModuleReuse(snt.AbstractModule):
-
-      def __init__(self, shape, name="multi_template_test"):
-        super(ModuleReuse, self).__init__(name=name)
-        self._shape = shape
-
-      @util.reuse_variables
-      def a(self):
-        return tf.get_variable("a", shape=self._shape)
-
-      @util.reuse_variables
-      def add_b(self, inputs):
-        return inputs + tf.get_variable("b", shape=self._shape)
-
-      def _build(self, inputs):
-        return self.add_b(inputs + self.a())
-
     np.random.seed(100)
     batch_size = 3
     in_size = 4
     inputs = tf.placeholder(tf.float32, shape=[batch_size, in_size])
 
-    module1 = ModuleReuse(inputs.get_shape().as_list())
-    module2 = ModuleReuse(inputs.get_shape().as_list())
+    module1 = ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list())
+    module2 = ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list())
 
     a1 = module1.a()
     inputs_plus_b1 = module1.add_b(inputs)
@@ -675,6 +674,16 @@ class ReuseVarsTest(tf.test.TestCase):
     ]
 
     self.assertEqual(tensor_names, get_tensor_names_from_default_graph())
+
+  def test_reuse_vars_subgraph_recording(self):
+    obj1 = ReuseVarsTest.ModuleReuse(shape=[3, 4], name="scope1")
+    self.assertFalse(obj1.is_connected)
+    obj1_a_outputs = obj1.a()
+    self.assertTrue(obj1.is_connected)
+    self.assertEqual(obj1.last_connected_subgraph.name_scope, "scope1/a/")
+    self.assertIs(obj1.last_connected_subgraph.module, obj1)
+    self.assertEqual(obj1.last_connected_subgraph.inputs, {})
+    self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
 
 
 class NameFunctionTest(tf.test.TestCase):

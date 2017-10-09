@@ -218,17 +218,18 @@ class AbstractModule(object):
       output Tensor(s).
     """
 
-  def _add_connected_subgraph(self, outputs, subgraph_name_scope,
+  def _add_connected_subgraph(self, call_method, outputs, subgraph_name_scope,
                               *inputs_args, **inputs_kwargs):
     """Adds a newly connected subgraph.
 
     Args:
-      outputs: `self._build` outputs.
+      call_method: the function used to connect this Sonnet module to the graph.
+      outputs: `call_method` outputs.
       subgraph_name_scope: name scope of the newly connected subgraph.
       *inputs_args: `self._build` inputs `*args`.
       **inputs_kwargs: `self._build` inputs `*kwargs`.
     """
-    build_inputs = inspect.getcallargs(self._build,
+    build_inputs = inspect.getcallargs(call_method,
                                        *inputs_args, **inputs_kwargs)
 
     # "self" should normally be in `build_inputs` but some people are decorating
@@ -261,7 +262,7 @@ class AbstractModule(object):
     self._check_init_called()
     self._check_same_graph()
     outputs, subgraph_name_scope = self._template(*args, **kwargs)
-    self._add_connected_subgraph(outputs, subgraph_name_scope,
+    self._add_connected_subgraph(self._build, outputs, subgraph_name_scope,
                                  *args, **kwargs)
     return outputs
 

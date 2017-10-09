@@ -681,9 +681,17 @@ def reuse_variables(method):
         name_scope += "/"
       with tf.name_scope(name_scope):
         sub_scope = to_snake_case(method.__name__)
-        with tf.name_scope(sub_scope):
+        with tf.name_scope(sub_scope) as scope:
           out_ops = method(obj, *args, **kwargs)
           initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
+          try:
+            # If `obj` is a Sonnet module, let it know it's been connected
+            # to the TF graph
+            method_positional_args = [obj] + list(args)
+            obj._add_connected_subgraph(  # pylint: disable=protected-access
+                method, out_ops, scope, *method_positional_args, **kwargs)
+          except AttributeError:
+            pass
           return out_ops
 
   return wrapper

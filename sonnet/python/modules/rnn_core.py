@@ -296,7 +296,7 @@ class TrainableInitialState(base.AbstractModule):
   def __init__(self, initial_state, mask=None, name="trainable_initial_state"):
     """Constructs the Module that introduces a trainable state in the graph.
 
-    It receives an initial state that will be used as the intial values for the
+    It receives an initial state that will be used as the initial values for the
     trainable variables that the module contains, and optionally a mask that
     indicates the parts of the initial state that should be learnable.
 

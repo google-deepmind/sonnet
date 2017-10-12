@@ -29,6 +29,12 @@ def stop_gradient(getter, *args, **kwargs):
     with tf.variable_scope("", custom_getter=snt.custom_getters.stop_gradient):
         net = snt.Linear(num_hidden)(net)
 
+  or, using the `custom_getter` constructor argument,
+
+    linear = snt.Linear(num_hidden,
+                        custom_getter=snt.custom_getters.stop_gradient)
+    net = linear(net)
+
   will result in the gradient with respect to the variables in the linear
   module being `None`. By default, the variables will still be in the trainable
   variables collection.

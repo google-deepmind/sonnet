@@ -27,6 +27,12 @@ def non_trainable(getter, *args, **kwargs):
     with tf.variable_scope("", custom_getter=snt.custom_getters.non_trainable):
         net = snt.Linear(num_hidden)(net)
 
+  or, using the `custom_getter` constructor argument,
+
+    linear = snt.Linear(num_hidden,
+                        custom_getter=snt.custom_getters.non_trainable)
+    net = linear(net)
+
   will result in the variables inside the linear having `trainable=False`, i.e.
   won't be added to tf.trainable_variables() and thus won't be optimized.
 

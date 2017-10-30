@@ -21,6 +21,8 @@ from __future__ import print_function
 
 import functools
 import pickle
+
+# Dependency imports
 import numpy as np
 import six
 from sonnet.python.modules import base

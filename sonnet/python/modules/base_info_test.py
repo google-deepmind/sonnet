@@ -20,6 +20,8 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+
+# Dependency imports
 from sonnet.python.modules import base
 from sonnet.python.modules import base_info
 from sonnet.python.modules import basic

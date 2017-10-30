@@ -23,6 +23,7 @@ import functools
 import os
 import re
 
+# Dependency imports
 import numpy as np
 
 from sonnet.python.modules import conv

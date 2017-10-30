@@ -233,8 +233,8 @@ class Conv2D(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
-      mask: Optional 2D or 4D array, tuple or numpy array containing values to
-          multiply the weights by component-wise.
+      mask: A 2D or 4D tensor, or an object convertible to a 2D or 4D tensor
+        which is used to multiplied component-wise with the weights (Optional).
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension ("NCHW").
@@ -252,7 +252,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
       base.IncompatibleShapeError: If the given rate is not an integer; or if
           the given rate is not a sequence of two integers.
       base.IncompatibleShapeError: If a mask is given and its rank is neither 2
-          nor 4.
+          nor 4, or if it is a TensorFlow Tensor with a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
@@ -262,7 +262,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
-      TypeError: If mask is given and is not an array, tuple or a numpy array.
+      TypeError: If mask is given and it is not convertible to a Tensor.
     """
     super(Conv2D, self).__init__(custom_getter=custom_getter, name=name)
 
@@ -298,10 +298,17 @@ class Conv2D(base.AbstractModule, base.Transposable):
         regularizers, self.possible_keys)
 
     if mask is not None:
-      if not isinstance(mask, (list, tuple, np.ndarray)):
+      if isinstance(mask, (tf.Tensor, list, tuple, np.ndarray)):
+        self._mask = tf.convert_to_tensor(mask)
+        if not (tf.float32.is_compatible_with(self._mask.dtype) or
+                tf.float64.is_compatible_with(self._mask.dtype)):
+          raise TypeError("Mask needs to have dtype float32 or float64")
+        if not self._mask.shape.is_fully_defined():
+          base.IncompatibleShapeError(
+              "Mask needs to have a statically defined shape")
+      else:
         raise TypeError("Invalid type for mask: {}".format(type(mask)))
-      self._mask = np.asanyarray(mask)
-      mask_rank = mask.ndim
+      mask_rank = self._mask.shape.ndims
       if mask_rank != 2 and mask_rank != 4:
         raise base.IncompatibleShapeError(
             "Invalid mask rank: {}".format(mask_rank))
@@ -389,18 +396,16 @@ class Conv2D(base.AbstractModule, base.Transposable):
     w = self._w
 
     if self._mask is not None:
-      mask_rank = self._mask.ndim
-      mask_shape = self._mask.shape
-      if mask_rank == 2:
-        if mask_shape != self._kernel_shape:
+      mask = self._mask
+      mask_shape = mask.shape.as_list()
+      if len(mask_shape) == 2:
+        if mask_shape != list(self._kernel_shape):
           raise base.IncompatibleShapeError(
-              "Invalid mask shape: {}".format(mask_shape))
-        mask = np.reshape(self._mask, self._kernel_shape + (1, 1))
-      elif mask_rank == 4:
-        if mask_shape != tuple(weight_shape):
-          raise base.IncompatibleShapeError(
-              "Invalid mask shape: {}".format(mask_shape))
-        mask = self._mask
+              "Invalid mask shape: {}".format(tuple(mask_shape)))
+        mask = tf.expand_dims(tf.expand_dims(mask, -1), -1)
+      elif mask_shape != list(weight_shape):
+        raise base.IncompatibleShapeError(
+            "Invalid mask shape: {}".format(tuple(mask_shape)))
       w *= mask
 
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,

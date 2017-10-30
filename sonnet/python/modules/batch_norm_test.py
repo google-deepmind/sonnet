@@ -20,15 +20,15 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
 
 
-class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
   def testConstruct(self):
     inputs = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
@@ -114,7 +114,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
       batch_norm(inputs, is_training=True)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
   )
@@ -158,7 +158,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
       out_v = sess.run(out1)
       self.assertAllClose(np.zeros([7, 6]), out_v, rtol=1e-6, atol=1e-6)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
   )
@@ -264,7 +264,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
           (input_v - mm) / np.sqrt(mv + bn._eps),
           out3_)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("UseUpdateCollection", tf.GraphKeys.UPDATE_OPS),
       ("UseDifferentUpdateCollection", "my_update_ops"),
       ("UseControlDependencies", None),
@@ -440,7 +440,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(TypeError, err):
       snt.BatchNorm(regularizers={"gamma": tf.zeros([1, 2, 3])})
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
@@ -476,7 +476,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
       if offset:
         self.assertAllClose(bn.beta.eval(), ones_v * 5.0)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
@@ -506,7 +506,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
       self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("BNNoOffsetScale", False, True),
       ("BNNoOffsetNoScale", False, False),
       ("BNOffsetScale", True, True),
@@ -531,7 +531,7 @@ class BatchNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     if offset:
       self.assertEqual(type(bn.beta), variables.PartitionedVariable)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("IsTrainingBoolVal", True, False, False, True),
       ("IsTestingBoolVal", False, True, False, True),
       ("IsTestingBoolValMovingAverage", False, False, False, True),

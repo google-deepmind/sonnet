@@ -19,8 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 _CONV_NET_2D_KWARGS = {
@@ -38,7 +38,7 @@ def _identity_getter(getter, *args, **kwargs):
   return getter(*args, **kwargs)
 
 
-class NonTrainableTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+class NonTrainableTest(parameterized.TestCase, tf.test.TestCase):
 
   def testUsage(self):
     with tf.variable_scope("", custom_getter=snt.custom_getters.non_trainable):
@@ -50,7 +50,7 @@ class NonTrainableTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     self.assertEqual(2, len(tf.global_variables()))
     self.assertEqual(0, len(tf.trainable_variables()))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("NonIdentity", snt.custom_getters.non_trainable, _identity_getter),
       ("IdentityNon", _identity_getter, snt.custom_getters.non_trainable),
   )
@@ -62,7 +62,7 @@ class NonTrainableTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     self.assertEqual(1, len(tf.global_variables()))
     self.assertEqual(0, len(tf.trainable_variables()))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D, _CONV_NET_2D_KWARGS, [1, 13, 13, 3]),
       ("MLP", snt.nets.MLP, _MLP_KWARGS, [1, 16]),
   )

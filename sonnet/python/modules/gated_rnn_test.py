@@ -22,9 +22,9 @@ from __future__ import print_function
 import itertools
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
@@ -76,7 +76,7 @@ def _get_possible_initializer_keys(use_peepholes, use_batch_norm_h,
     return snt.LSTM.get_possible_initializer_keys(use_peepholes)
 
 
-class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 2
@@ -217,7 +217,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertAllClose(real_hidden, next_state_ex[0])
     self.assertAllClose(real_cell, next_state_ex[1])
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(
           (True, False), (True, False), (True, False), (True, False))
   )
@@ -267,7 +267,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
         snt.LSTM(hidden_size, use_peepholes=False,
                  initializers={key: tf.constant_initializer(0)})
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (True, False, False),
       (False, True, False),
       (False, False, True)
@@ -310,7 +310,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
             hidden_size, initializers={key: tf.constant_initializer(0)},
             **options)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(
           (True, False), (True, False), (True, False), (True, False))
   )
@@ -345,7 +345,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       self.assertEqual(type(getattr(lstm, "_" + var_name)),
                        variables.PartitionedVariable)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(
           (True, False), (True, False), (True, False), (True, False))
   )
@@ -384,7 +384,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
   # Pick some hopefully representative combination of parameter values
   # (want to test with seq_len < max_unique_stats and seq_len >
   # max_unique_stats, and some other combinations for good measure).
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (False, 1, 1, 2),
       (True, 3, 1, 2),
       (False, 1, 2, 1),
@@ -555,7 +555,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       self.assertAllClose(hidden1, hidden2)
       self.assertAllClose(cell1, cell2)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (False, False, False, False),
       (False, True, False, False),
       (True, False, True, False),
@@ -609,7 +609,7 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                             hidden_size=1,
                             max_unique_stats=0)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (False, 1),
       (False, 2),
       (True, 1),
@@ -663,9 +663,9 @@ class LSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertEqual(named_init_state[1].name, "bar/state_1_tiled:0")
 
 
-class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
       (snt.Conv1DLSTM, 1, True),
       (snt.Conv2DLSTM, 2, False),
@@ -696,7 +696,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertShapeEqual(expected_shape, next_state[1])
     self.assertShapeEqual(expected_shape, output)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
       (snt.Conv1DLSTM, 1, True),
       (snt.Conv2DLSTM, 2, False),
@@ -741,7 +741,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
                               np.full(variable.get_shape(),
                                       i, dtype=np.float32))
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
       (snt.Conv1DLSTM, 1, True),
       (snt.Conv2DLSTM, 2, False),
@@ -780,7 +780,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
         self.assertEqual(type(getattr(convolution, key)),
                          variables.PartitionedVariable)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
       (snt.Conv1DLSTM, 1, True),
       (snt.Conv2DLSTM, 2, False),
@@ -814,7 +814,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
     self.assertEqual(num_reg_losses, len(lstm.convolutions) * len(keys))
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
       (snt.Conv1DLSTM, 1, True),
       (snt.Conv2DLSTM, 2, False),
@@ -851,7 +851,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       sess.run(init)
       sess.run(train_op)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False, 1, 1),
       (snt.Conv1DLSTM, 1, False, 1, 5),
       (snt.Conv1DLSTM, 1, False, 6, 1),

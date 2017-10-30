@@ -20,12 +20,12 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 from sonnet.python.modules import basic_rnn
 from sonnet.python.modules import gated_rnn
 from sonnet.python.modules import pondering_rnn
 from sonnet.python.modules import rnn_core
-from sonnet.testing import parameterized
 
 import tensorflow as tf
 
@@ -73,7 +73,7 @@ class Output2DCore(rnn_core.RNNCore):
     pass
 
 
-class ACTCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def _test_nested(self, tensor, values_expected):
     with self.test_session() as sess:
@@ -133,7 +133,7 @@ class ACTCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self.assertTrue(np.all(r_t >= 0))
     self.assertTrue(np.all(r_t <= threshold))
 
-  @parameterized.Parameters((13, 11, 7, 3, 5),
+  @parameterized.parameters((13, 11, 7, 3, 5),
                             (3, 3, 3, 1, 5),
                             (1, 1, 1, 1, 1))
   def testACTLSTM(
@@ -146,7 +146,7 @@ class ACTCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     self._testACT(input_size, hidden_size, output_size, seq_len, batch_size,
                   lstm, get_hidden_state)
 
-  @parameterized.Parameters((13, 11, 7, 3, 5),
+  @parameterized.parameters((13, 11, 7, 3, 5),
                             (3, 3, 3, 1, 5),
                             (1, 1, 1, 1, 1))
   def testACTVanilla(

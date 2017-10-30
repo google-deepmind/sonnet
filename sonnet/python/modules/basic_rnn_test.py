@@ -21,11 +21,11 @@ from __future__ import print_function
 import itertools
 
 # Dependency imports
+from absl.testing import parameterized
 import mock
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
@@ -229,7 +229,7 @@ class VanillaRNNTest(tf.test.TestCase):
     self.assertEqual(len(regularizers), 2)
 
 
-class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 3
@@ -362,7 +362,7 @@ class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
       self.assertRegexpMatches(
           v.name, "rnn(1|2)/(in_to_hidden|hidden_to_hidden)/(w|b):0")
 
-  @parameterized.Parameters((True, True), (True, False), (False, True),
+  @parameterized.parameters((True, True), (True, False), (False, True),
                             (False, False))
   def testComputation(self, skip_connections, create_initial_state):
     batch_size = 3
@@ -450,7 +450,7 @@ class DeepRNNTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
 
     self.assertAllClose(output_value, manual_out_value)
 
-  @parameterized.Parameters((False, False), (False, True), (True, False),
+  @parameterized.parameters((False, False), (False, True), (True, False),
                             (True, True))
   def testInitialState(self, trainable, use_custom_initial_value):
     batch_size = 3

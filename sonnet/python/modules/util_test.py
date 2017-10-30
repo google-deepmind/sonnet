@@ -23,10 +23,10 @@ import os
 import tempfile
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 _EXPECTED_FORMATTED_VARIABLE_LIST = (
@@ -45,7 +45,7 @@ _EXPECTED_FORMATTED_VARIABLE_MAP = (
 )
 
 
-class UtilTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
   def testQueryInModule(self):
     module = snt.Linear(output_size=42, name="linear")
@@ -216,7 +216,7 @@ class UtilTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     conv(hidden)
     return conv
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       {"save_partitioned": True, "load_partitioned": True},
       {"save_partitioned": True, "load_partitioned": False},
       {"save_partitioned": False, "load_partitioned": True},

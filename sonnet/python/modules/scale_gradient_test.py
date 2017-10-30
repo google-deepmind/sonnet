@@ -22,15 +22,14 @@ from __future__ import print_function
 import itertools
 
 # Dependency imports
+from absl.testing import parameterized
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 
-class ScaleGradientTest(parameterized.ParameterizedTestCase,
-                        tf.test.TestCase):
+class ScaleGradientTest(parameterized.TestCase, tf.test.TestCase):
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(range(6), [0.0, 0.1, 0.9, 1.0])
   )
   def testOpScale(self, x_, scale):

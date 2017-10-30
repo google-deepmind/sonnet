@@ -19,14 +19,13 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 
-class MLPTest(parameterized.ParameterizedTestCase,
-              tf.test.TestCase):
+class MLPTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
     super(MLPTest, self).setUp()
@@ -53,7 +52,7 @@ class MLPTest(parameterized.ParameterizedTestCase,
     self.assertEqual(mlp.scope_name, "scope/" + unique_name)
     self.assertEqual(mlp.module_name, unique_name)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
@@ -113,7 +112,7 @@ class MLPTest(parameterized.ParameterizedTestCase,
     for i in range(0, len(mlp.layers)):
       self.assertEqual(mlp.layers[i].output_size, self.output_sizes[i])
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
@@ -153,7 +152,7 @@ class MLPTest(parameterized.ParameterizedTestCase,
     self.assertEqual((self.batch_size, self.input_size), mlp.input_shape)
     self.assertEqual(self.output_sizes, list(mlp.output_sizes))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),
@@ -177,7 +176,7 @@ class MLPTest(parameterized.ParameterizedTestCase,
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),
       ("MLPFinalActBias", True, True),

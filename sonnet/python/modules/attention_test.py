@@ -19,9 +19,9 @@ from __future__ import print_function
 
 # Dependency imports
 
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 
@@ -57,7 +57,7 @@ class ConstantZero(snt.AbstractModule):
     return tf.zeros(result_shape, dtype=inputs.dtype)
 
 
-class AttentiveReadTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class AttentiveReadTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUp(self):
     super(AttentiveReadTest, self).setUp()
@@ -171,7 +171,7 @@ class AttentiveReadTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
     with self.assertRaises(snt.IncompatibleShapeError):
       self._attention_mod(self._memory, self._query, memory_mask=memory_mask)
 
-  @parameterized.Parameters(1, 3)
+  @parameterized.parameters(1, 3)
   def testAttentionLogitsModuleShape(self, output_rank):
     # attention_logit_mod must produce a rank 2 Tensor.
     attention_mod = snt.AttentiveRead(ConstantZero(output_rank=output_rank))
@@ -209,7 +209,7 @@ class AttentiveReadTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
         }
         sess.run(x, feed_dict=feed_dict)
 
-  @parameterized.Parameters({
+  @parameterized.parameters({
       "module_cstr": snt.Linear,
       "module_kwargs": {
           "output_size": 1

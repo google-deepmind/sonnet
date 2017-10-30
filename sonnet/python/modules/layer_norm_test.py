@@ -20,15 +20,15 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.ops import variables
 
 
-class LayerNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
 
   def testConstruct(self):
     inputs = tf.placeholder(tf.float32, shape=[None, 64])
@@ -52,7 +52,7 @@ class LayerNormTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
       layer_norm(inputs)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
   )

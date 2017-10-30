@@ -20,9 +20,9 @@ from __future__ import print_function
 
 import itertools
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 
@@ -38,8 +38,7 @@ no_shear_2d = snt.AffineWarpConstraints.no_shear_2d
 no_shear_3d = snt.AffineWarpConstraints.no_shear_3d
 
 
-class AffineGridWarperTest(parameterized.ParameterizedTestCase,
-                           tf.test.TestCase):
+class AffineGridWarperTest(parameterized.TestCase, tf.test.TestCase):
 
   def testShapeInferenceAndChecks(self):
     output_shape2d = (2, 3)
@@ -92,7 +91,7 @@ class AffineGridWarperTest(parameterized.ParameterizedTestCase,
                            output_shape=output_shape3d,
                            constraints=no_constraints(2))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("2d_a", [13, 17], [7, 11], no_constraints(2)),
       ("2d_b", [11, 5], [2, 8], scale_2d(x=.7)),
       ("2d_c", [9, 23], [3, 11], scale_2d(y=1.2)),
@@ -169,7 +168,7 @@ class AffineGridWarperTest(parameterized.ParameterizedTestCase,
                                    [[0.0, 1.0], [1.0, 1.0], [2.0, 1.0]],
                                    [[0.0, 2.0], [1.0, 2.0], [2.0, 2.0]]]]))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("2d_a", [13, 17], [7, 11], no_constraints(2)),
       ("2d_b", [11, 5], [2, 8], scale_2d(x=.7)),
       ("2d_c", [9, 23], [3, 11], scale_2d(y=1.2)),

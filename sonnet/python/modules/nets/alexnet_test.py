@@ -21,17 +21,16 @@ from __future__ import print_function
 
 import functools
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 
 import sonnet as snt
-from sonnet.testing import parameterized
 
 import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-class AlexNetTest(parameterized.ParameterizedTestCase,
-                  tf.test.TestCase):
+class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
 
   def testCalcMinSize(self):
     """Test the minimum input size calculator."""
@@ -42,7 +41,7 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
     self.assertEqual(net._calc_min_size([(None, (3, 1), (3, 2)),
                                          (None, (3, 2), (5, 2))]), 25)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("full", functools.partial(snt.nets.AlexNet, mode=snt.nets.AlexNet.FULL)),
       ("mini", functools.partial(snt.nets.AlexNet, mode=snt.nets.AlexNet.MINI)),
       ("full_module", snt.nets.AlexNetFull),
@@ -57,7 +56,7 @@ class AlexNetTest(parameterized.ParameterizedTestCase,
     inputs = tf.placeholder(tf.float32, shape=input_shape)
     net(inputs, keep_prob, is_training=True)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("all_layers", True),
       ("conv_only", False))
   def testBatchNorm(self, bn_on_fc_layers):

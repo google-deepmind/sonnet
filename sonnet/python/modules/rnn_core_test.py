@@ -20,10 +20,10 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import mock
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.util import nest
@@ -37,9 +37,9 @@ _state_size_element = 6
 
 # Use patch to instantiate RNNCore
 @mock.patch.multiple(snt.RNNCore, __abstractmethods__=set())
-class RNNCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
+class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (False, False, _state_size_tuple),
       (False, True, _state_size_tuple),
       (True, False, _state_size_tuple),
@@ -87,7 +87,7 @@ class RNNCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
           expected_initial_state = np.tile(value_row, (batch_size, 1))
         self.assertAllClose(value, expected_initial_state)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       (False, _state_size_tuple),
       (True, _state_size_tuple),
       (False, _state_size_element),
@@ -117,10 +117,9 @@ class RNNCoreTest(tf.test.TestCase, parameterized.ParameterizedTestCase):
             graph_regularizers[i].name, ".*l1_regularizer.*")
 
 
-class TrainableInitialState(tf.test.TestCase,
-                            parameterized.ParameterizedTestCase):
+class TrainableInitialState(tf.test.TestCase, parameterized.TestCase):
 
-  @parameterized.Parameters((True, MASK_TUPLE), (True, None), (False, False),
+  @parameterized.parameters((True, MASK_TUPLE), (True, None), (False, False),
                             (False, None))
   def testInitialStateComputation(self, tuple_state, mask):
     if tuple_state:

@@ -24,17 +24,16 @@ from functools import partial
 import itertools
 # Dependency imports
 
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
-from sonnet.testing import parameterized
 
 import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
-                           tf.test.TestCase):
+class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
     super(SharedConvNets2DTest, self).setUp()
@@ -43,7 +42,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     self.strides = [1]
     self.paddings = [snt.SAME]
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
                                      output_shapes=[[100, 100]])))
@@ -58,7 +57,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     self.assertEqual(net.scope_name, "scope/" + unique_name)
     self.assertEqual(net.module_name, unique_name)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
                                      output_shapes=[[100, 100]])))
@@ -201,7 +200,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
           paddings=self.paddings,
           data_format="NHCW")
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose",
        partial(snt.nets.ConvNet2DTranspose,
@@ -220,7 +219,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     with self.assertRaisesRegexp(ValueError, err):
       model(input_to_net)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose",
        partial(snt.nets.ConvNet2DTranspose,
@@ -259,7 +258,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
         any("moving_mean" in var.name
             for var in tf.global_variables()))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
                                      output_shapes=[[100, 100]])))
@@ -284,7 +283,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
         len(model_variables),
         len(self.output_channels) * 4 - 2)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
                                      output_shapes=[[100, 100]])))
@@ -304,7 +303,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
         len(model_variables),
         len(self.output_channels))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),
       ("ConvNet2DTranspose", partial(snt.nets.ConvNet2DTranspose,
                                      output_shapes=[[100, 100]])))
@@ -326,7 +325,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     self.assertEqual(model_transpose.use_bias, actual_use_biases)
     self.assertEqual(tuple(reversed(use_bias)), actual_use_biases)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2DNoBias", snt.nets.ConvNet2D, False),
       ("ConvNet2DBias", snt.nets.ConvNet2D, True),
       ("ConvNet2DTransposeNoBias", partial(snt.nets.ConvNet2DTranspose,
@@ -355,7 +354,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D, False),
       ("ConvNet2DFinal", snt.nets.ConvNet2D, True),
       ("ConvNet2DTranspose",
@@ -393,7 +392,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     self.assertEqual(model.activate_final,
                      transposed_model_inherit_activate_final.activate_final)
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(
           [snt.nets.ConvNet2D,
            partial(snt.nets.ConvNet2DTranspose, output_shapes=[[100, 100]])],
@@ -427,7 +426,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
       self.assertEqual(getattr(model, param_name),
                        getattr(transpose_model, param_name))
 
-  @parameterized.Parameters(
+  @parameterized.parameters(
       *itertools.product(
           [snt.nets.ConvNet2D,
            partial(snt.nets.ConvNet2DTranspose, output_shapes=[[100, 100]])],
@@ -464,7 +463,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     else:
       self.assertEqual(param_value, getattr(transpose_model, param_name))
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2DNHWC", snt.nets.ConvNet2D, "NHWC"),
       ("ConvNet2DNCHW", snt.nets.ConvNet2D, "NCHW"),
       ("ConvNet2DTransposeNHWC", partial(
@@ -499,8 +498,7 @@ class SharedConvNets2DTest(parameterized.ParameterizedTestCase,
     self.assertEqual(output.get_shape().as_list(), expected_output_shape)
 
 
-class ConvNet2DTest(parameterized.ParameterizedTestCase,
-                    tf.test.TestCase):
+class ConvNet2DTest(tf.test.TestCase):
 
   def setUp(self):
     super(ConvNet2DTest, self).setUp()

@@ -19,8 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 _CONV_NET_2D_KWARGS = {
@@ -38,7 +38,7 @@ def _identity_getter(getter, *args, **kwargs):
   return getter(*args, **kwargs)
 
 
-class StopGradientTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
+class StopGradientTest(parameterized.TestCase, tf.test.TestCase):
 
   def testUsage(self):
     with tf.variable_scope("", custom_getter=snt.custom_getters.stop_gradient):
@@ -62,7 +62,7 @@ class StopGradientTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
     self.assertEqual(None, names_to_grads["linear1/w:0"])
     self.assertEqual(None, names_to_grads["linear1/b:0"])
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("StopIdentity", snt.custom_getters.stop_gradient, _identity_getter),
       ("IdentityStop", _identity_getter, snt.custom_getters.stop_gradient),
   )
@@ -75,7 +75,7 @@ class StopGradientTest(parameterized.ParameterizedTestCase, tf.test.TestCase):
 
     self.assertEqual(grads, [None])
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D, _CONV_NET_2D_KWARGS, [1, 13, 13, 3]),
       ("MLP", snt.nets.MLP, _MLP_KWARGS, [1, 16]),
   )

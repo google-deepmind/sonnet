@@ -23,12 +23,10 @@ import os
 # Dependency imports
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 
-class RestoreInitializerTest(parameterized.ParameterizedTestCase,
-                             tf.test.TestCase):
+class RestoreInitializerTest(tf.test.TestCase):
 
   def _save_test_checkpoint(self):
 

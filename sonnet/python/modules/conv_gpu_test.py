@@ -22,9 +22,9 @@ from __future__ import print_function
 import functools
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-from sonnet.testing import parameterized
 import tensorflow as tf
 
 from tensorflow.python.platform import test
@@ -37,8 +37,7 @@ def create_constant_initializers(w, b, use_bias=True):
     return {"w": tf.constant_initializer(w)}
 
 
-class ConvTestDataFormats(parameterized.ParameterizedTestCase,
-                          tf.test.TestCase):
+class ConvTestDataFormats(parameterized.TestCase, tf.test.TestCase):
   OUT_CHANNELS = 5
   KERNEL_SHAPE = 3
   INPUT_SHAPE = (2, 19, 19, 4)
@@ -59,7 +58,7 @@ class ConvTestDataFormats(parameterized.ParameterizedTestCase,
       tf.global_variables_initializer().run()
       self.assertAllClose(o1.eval(), o2.eval(), atol=atol)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("WithBias_Stride1", True, 1), ("WithoutBias_Stride1", False, 1),
       ("WithBias_Stride2", True, 2), ("WithoutBias_Stride2", False, 2))
   def testConv2DDataFormats(self, use_bias, stride):
@@ -74,7 +73,7 @@ class ConvTestDataFormats(parameterized.ParameterizedTestCase,
     x = tf.constant(np.random.random(self.INPUT_SHAPE).astype(np.float32))
     self.helperDataFormats(func, x)
 
-  @parameterized.NamedParameters(
+  @parameterized.named_parameters(
       ("WithBias_Stride1", True, 1), ("WithoutBias_Stride1", False, 1),
       ("WithBias_Stride2", True, 2), ("WithoutBias_Stride2", False, 2))
   def testConv2DTransposeDataFormats(self, use_bias, stride):
@@ -100,7 +99,7 @@ class ConvTestDataFormats(parameterized.ParameterizedTestCase,
     x = tf.constant(np.random.random(shape).astype(np.float32))
     self.helperDataFormats(func, x)
 
-  @parameterized.NamedParameters(("WithBias", True), ("WithoutBias", False))
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
   def testConv2DDataFormatsBatchNorm(self, use_bias):
     """Tests data formats for the convolutions with batch normalization."""
 

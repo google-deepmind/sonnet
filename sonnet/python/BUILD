@@ -158,10 +158,10 @@ module_tests = [
     srcs = ["modules/%s%s.py" % (test_subdir, test_name)],
     srcs_version = "PY2AND3",
     deps = [
+        # absl/testing:parameterized dep,
         # mox dep,
         # numpy dep,
         "//sonnet",
-        "//sonnet/testing/parameterized",
         # tensorflow dep,
     ],
 ) for test_name, test_subdir, test_size in module_tests]
@@ -177,8 +177,8 @@ py_test(
         "requires-gpu-sm35",
     ],
     deps = [
+        # absl/testing:parameterized dep,
         "//sonnet",
-        "//sonnet/testing/parameterized",
     ],
 )
 
@@ -189,7 +189,7 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":nest",
-        "//sonnet/testing/parameterized",
+        # absl/testing:parameterized dep,
     ],
 )
 
@@ -236,9 +236,9 @@ custom_getters_tests = [
     srcs = ["custom_getters/%s.py" % test_name],
     tags = test_tags,
     deps = [
+        # absl/testing:parameterized dep,
         # numpy dep,
         "//sonnet",
-        "//sonnet/testing/parameterized",
         # tensorflow dep,
     ],
 ) for test_name, test_size, test_tags in custom_getters_tests]

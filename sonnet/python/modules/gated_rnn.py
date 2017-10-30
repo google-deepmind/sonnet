@@ -1029,7 +1029,7 @@ class ConvLSTM(rnn_core.RNNCore):
 
     Args:
       conv_ndims: Convolution dimensionality (1, 2 or 3).
-      input_shape: Shape of the input as tuple, excluding the batch size.
+      input_shape: Shape of the input as an iterable, excluding the batch size.
       output_channels: Number of output channels of the conv LSTM.
       kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
           used to define kernel size in all dimensions.
@@ -1071,7 +1071,7 @@ class ConvLSTM(rnn_core.RNNCore):
           input_shape, conv_ndims))
 
     self._conv_ndims = conv_ndims
-    self._input_shape = input_shape
+    self._input_shape = tuple(input_shape)
     self._output_channels = output_channels
     self._kernel_shape = kernel_shape
     self._stride = stride
@@ -1112,15 +1112,15 @@ class ConvLSTM(rnn_core.RNNCore):
   @property
   def state_size(self):
     """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
-    hidden_size = tf.TensorShape(self._input_shape[:-1] +
-                                 (self._output_channels,))
+    hidden_size = tf.TensorShape(
+        self._input_shape[:-1] + (self._output_channels,))
     return (hidden_size, hidden_size)
 
   @property
   def output_size(self):
     """`tf.TensorShape` indicating the size of the core output."""
-    return tf.TensorShape(self._input_shape[:-1] +
-                          (self._total_output_channels,))
+    return tf.TensorShape(
+        self._input_shape[:-1] + (self._total_output_channels,))
 
   def _build(self, inputs, state):
     hidden, cell = state

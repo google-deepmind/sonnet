@@ -59,9 +59,11 @@ from sonnet.python.modules.basic import BatchFlatten
 from sonnet.python.modules.basic import BatchReshape
 from sonnet.python.modules.basic import FlattenTrailingDimensions
 from sonnet.python.modules.basic import Linear
+from sonnet.python.modules.basic import merge_leading_dims
 from sonnet.python.modules.basic import MergeDims
 from sonnet.python.modules.basic import SelectInput
 from sonnet.python.modules.basic import SliceByDim
+from sonnet.python.modules.basic import split_leading_dim
 from sonnet.python.modules.basic import TileByDim
 from sonnet.python.modules.basic import TrainableVariable
 from sonnet.python.modules.basic_rnn import DeepRNN

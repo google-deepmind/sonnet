@@ -74,9 +74,13 @@ def merge_leading_dims(tensor, n_dims=2):
   new_size = tf.concat([new_first_dim, other_dims], 0)
   result = tf.reshape(tensor, new_size)
 
+  if all(value is not None for value in tensor_shape_list[:n_dims]):
+    merged_leading_size = np.prod(tensor_shape_list[:n_dims])
+  else:
+    merged_leading_size = None
   # We need to set the result size of this, as otherwise we won't be able to
   # pass to e.g. a Linear. Here we need to know at least the rank of the tensor.
-  result.set_shape([None] + tensor_shape_list[n_dims:])
+  result.set_shape([merged_leading_size] + tensor_shape_list[n_dims:])
   return result
 
 

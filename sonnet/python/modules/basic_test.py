@@ -1077,6 +1077,16 @@ class MergeLeadingDimsTest(tf.test.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(ValueError, err):
       basic.merge_leading_dims(tensor_scalar)
 
+  @parameterized.parameters(
+      ([3, 5, 7, 11, None, 13], [3 * 5 * 7, 11, None, 13]),
+      ([3, None, 7, 11, None, 13], [None, 11, None, 13]),
+  )
+  def testPartialShape(self, input_shape, expected_output_shape):
+    """Tests that resulting partial shape is best guess.."""
+    input_ = tf.placeholder(tf.float32, shape=input_shape)
+    output = basic.merge_leading_dims(input_, 3)
+    self.assertEqual(output.shape.as_list(), expected_output_shape)
+
 
 class BatchFlattenTest(tf.test.TestCase, parameterized.TestCase):
 

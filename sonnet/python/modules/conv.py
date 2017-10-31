@@ -278,6 +278,14 @@ class Conv2D(base.AbstractModule, base.Transposable):
     # The following is for backwards-compatibility from when we used to accept
     # 4-strides of the form [1, m, n, 1].
     if isinstance(stride, collections.Iterable) and len(stride) == 4:
+      if self._data_format == DATA_FORMAT_NHWC:
+        if not stride[0] == stride[3] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and last element must be 1.")
+      elif self._data_format == DATA_FORMAT_NCHW:
+        if not stride[0] == stride[1] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and second element must be 1.")
       self._stride = tuple(stride)[1:-1]
     else:
       self._stride = _fill_and_verify_parameter_shape(stride, 2, "stride")
@@ -682,10 +690,14 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
                                                           "kernel")
     # We want to support passing native strides akin to [1, m, n, 1].
     if isinstance(stride, collections.Iterable) and len(stride) == 4:
-      if (self._data_format == DATA_FORMAT_NHWC and
-          (not stride[0] == stride[3] == 1)):
-        raise base.IncompatibleShapeError(
-            "Invalid stride: First and last element must be 1.")
+      if self._data_format == DATA_FORMAT_NHWC:
+        if not stride[0] == stride[3] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and last element must be 1.")
+      elif self._data_format == DATA_FORMAT_NCHW:
+        if not stride[0] == stride[1] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and second element must be 1.")
       self._stride = tuple(stride)
     else:
       self._stride = _fill_and_one_pad_stride(stride, 2, self._data_format)
@@ -1954,6 +1966,7 @@ class DepthwiseConv2D(base.AbstractModule):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               data_format=DATA_FORMAT_NHWC,
                custom_getter=None,
                name="conv_2d_depthwise"):
     """Constructs a DepthwiseConv2D module.
@@ -1989,6 +2002,9 @@ class DepthwiseConv2D(base.AbstractModule):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NHWC), or the
+          second dimension ("NCHW").
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -2004,6 +2020,8 @@ class DepthwiseConv2D(base.AbstractModule):
           `stride[0] != stride[3]`.
       ValueError: if `channel_multiplier` is not an integer >= 1.
       ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given data_format is not a supported format (see
+        SUPPORTED_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2020,14 +2038,27 @@ class DepthwiseConv2D(base.AbstractModule):
 
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
+
+    if data_format not in SUPPORTED_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+
+    self._data_format = data_format
+
     # We want to support passing native strides akin to [1, m, n, 1]
     if isinstance(stride, collections.Iterable) and len(stride) == 4:
-      if not stride[0] == stride[3] == 1:
-        raise base.IncompatibleShapeError(
-            "Invalid stride: First and last element must be 1.")
+      if self._data_format == DATA_FORMAT_NHWC:
+        if not stride[0] == stride[3] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and last element must be 1.")
+      elif self._data_format == DATA_FORMAT_NCHW:
+        if not stride[0] == stride[1] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and second element must be 1.")
       self._stride = tuple(stride)
     else:
-      self._stride = _fill_and_one_pad_stride(stride, 2)
+      self._stride = _fill_and_one_pad_stride(
+          stride, 2, data_format=self._data_format)
 
     self._padding = _verify_padding(padding)
     self._use_bias = use_bias
@@ -2081,10 +2112,16 @@ class DepthwiseConv2D(base.AbstractModule):
           "Input Tensor must have shape (batch_size, input_height, "
           "input_width, input_channels)")
 
-    if self._input_shape[3] is None:
-      raise base.IncompatibleShapeError(
+    if self._data_format == DATA_FORMAT_NCHW:
+      input_channels = self._input_shape[1]
+    else:
+      input_channels = self._input_shape[3]
+
+    if input_channels is None:
+      raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
-    self._input_channels = self._input_shape[3]
+
+    self._input_channels = input_channels
 
     if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
@@ -2103,7 +2140,7 @@ class DepthwiseConv2D(base.AbstractModule):
     bias_shape = (self._output_channels,)
 
     if "w" not in self._initializers:
-      self._initializers["w"] = create_weight_initializer(weight_shape[:3])
+      self._initializers["w"] = create_weight_initializer(weight_shape[:2])
 
     if "b" not in self._initializers and self._use_bias:
       self._initializers["b"] = create_bias_initializer(bias_shape)
@@ -2117,7 +2154,8 @@ class DepthwiseConv2D(base.AbstractModule):
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      self._w,
                                      strides=self._stride,
-                                     padding=self._padding)
+                                     padding=self._padding,
+                                     data_format=self._data_format)
 
     if self._use_bias:
       self._b = tf.get_variable("b",
@@ -2125,7 +2163,7 @@ class DepthwiseConv2D(base.AbstractModule):
                                 initializer=self._initializers["b"],
                                 partitioner=self._partitioners.get("b", None),
                                 regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
+      outputs = tf.nn.bias_add(outputs, self._b, data_format=self._data_format)
 
     return outputs
 
@@ -2211,6 +2249,11 @@ class DepthwiseConv2D(base.AbstractModule):
     """Returns the regularizers dictionary."""
     return self._regularizers
 
+  @property
+  def data_format(self):
+    """Returns the data format."""
+    return self._data_format
+
 
 class SeparableConv2D(base.AbstractModule):
   """Performs an in-plane convolution to each channel independently.
@@ -2229,6 +2272,7 @@ class SeparableConv2D(base.AbstractModule):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               data_format=DATA_FORMAT_NHWC,
                custom_getter=None,
                name="Separable_conv2d"):
     """Constructs a SeparableConv2D module.
@@ -2265,6 +2309,9 @@ class SeparableConv2D(base.AbstractModule):
         A regularizer should be a function that takes a single `Tensor` as an
         input and returns a scalar `Tensor` output, e.g. the L1 and L2
         regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NHWC), or the
+          second dimension ("NCHW").
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -2279,6 +2326,8 @@ class SeparableConv2D(base.AbstractModule):
       base.IncompatibleShapeError: If `stride` is neither an integer nor a
           list of 2 or 4 integers.
       ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;
+      ValueError: If the given data_format is not a supported format (see
+        SUPPORTED_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2300,18 +2349,27 @@ class SeparableConv2D(base.AbstractModule):
 
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
+
+    if data_format not in SUPPORTED_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+
+    self._data_format = data_format
+
     # We want to support passing native strides akin to [1, m, n, 1].
     if isinstance(stride, collections.Sequence) and len(stride) == 4:
-      if not stride[0] == stride[3] == 1:
-        raise base.IncompatibleShapeError(
-            "Invalid stride: First and last element must be 1.")
-      if not (isinstance(stride[1], numbers.Integral) and
-              isinstance(stride[2], numbers.Integral)):
-        raise base.IncompatibleShapeError(
-            "Invalid stride: stride[1] and [2] must be integer.")
+      if self._data_format == DATA_FORMAT_NHWC:
+        if not stride[0] == stride[3] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and last element must be 1.")
+      elif self._data_format == DATA_FORMAT_NCHW:
+        if not stride[0] == stride[1] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and second element must be 1.")
       self._stride = tuple(stride)
     else:
-      self._stride = _fill_and_one_pad_stride(stride, 2)
+      self._stride = _fill_and_one_pad_stride(
+          stride, 2, data_format=self._data_format)
 
     self._padding = _verify_padding(padding)
     self._use_bias = use_bias
@@ -2360,11 +2418,16 @@ class SeparableConv2D(base.AbstractModule):
           "Input Tensor must have shape (batch_size, input_height, "
           "input_width, input_channels)")
 
-    if self._input_shape[3] is None:
-      raise base.IncompatibleShapeError(
+    if self._data_format == DATA_FORMAT_NCHW:
+      input_channels = self._input_shape[1]
+    else:
+      input_channels = self._input_shape[3]
+
+    if input_channels is None:
+      raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
 
-    self._input_channels = self._input_shape[3]
+    self._input_channels = input_channels
 
     if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was " +
@@ -2377,7 +2440,7 @@ class SeparableConv2D(base.AbstractModule):
     bias_shape = (self._output_channels,)
 
     if "w_dw" not in self._initializers:
-      fan_in_shape = depthwise_weight_shape[:3]
+      fan_in_shape = depthwise_weight_shape[:2]
       self._initializers["w_dw"] = create_weight_initializer(fan_in_shape)
 
     if "w_pw" not in self._initializers:
@@ -2404,7 +2467,8 @@ class SeparableConv2D(base.AbstractModule):
                                      self._w_dw,
                                      self._w_pw,
                                      strides=self._stride,
-                                     padding=self._padding)
+                                     padding=self._padding,
+                                     data_format=self._data_format)
 
     if self._use_bias:
       self._b = tf.get_variable("b",
@@ -2412,7 +2476,7 @@ class SeparableConv2D(base.AbstractModule):
                                 initializer=self._initializers["b"],
                                 partitioner=self._partitioners.get("b", None),
                                 regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
+      outputs = tf.nn.bias_add(outputs, self._b, data_format=self._data_format)
 
     return outputs
 
@@ -2502,6 +2566,11 @@ class SeparableConv2D(base.AbstractModule):
   def regularizers(self):
     """Returns the regularizers dictionary."""
     return self._regularizers
+
+  @property
+  def data_format(self):
+    """Returns the data format."""
+    return self._data_format
 
 
 

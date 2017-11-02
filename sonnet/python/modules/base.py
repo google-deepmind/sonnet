@@ -26,6 +26,7 @@ from __future__ import print_function
 
 import abc
 import collections
+import contextlib
 import inspect
 
 # Dependency imports
@@ -33,6 +34,7 @@ import six
 from sonnet.python.modules import base_info
 from sonnet.python.modules import util
 import tensorflow as tf
+from tensorflow.contrib.eager.python import tfe
 
 # Import error class from base_errors for backward compability.
 
@@ -118,13 +120,20 @@ class AbstractModule(object):
         raise TypeError("Given custom_getter is not callable.")
       self._custom_getter = custom_getter
 
-    self._template = tf.make_template(name,
-                                      self._build_wrapper,
-                                      create_scope_now_=True,
-                                      custom_getter_=self._custom_getter)
+    if tfe.in_eager_mode():
+      self._eager_variable_store = tfe.EagerVariableStore()
+      with tf.variable_scope(name, custom_getter=self._custom_getter) as vs:
+        self._variable_scope = vs
+      self._template = self._eager_template
+    else:
+      self._template = tf.make_template(
+          name,
+          self._build_wrapper,
+          create_scope_now_=True,
+          custom_getter_=self._custom_getter)
+      self._variable_scope = self._template.variable_scope
 
-    self._original_name = name
-    self._unique_name = self._template.variable_scope.name.split("/")[-1]
+    self._unique_name = self._variable_scope.name.split("/")[-1]
 
     # Update __call__ and the object docstrings to enable better introspection
     self.__doc__ = self._build.__doc__
@@ -134,6 +143,24 @@ class AbstractModule(object):
     # modules cannot be connected to multiple graphs, as transparent variable
     # sharing is impossible in that case.
     self._graph = None
+
+  def _eager_template(self, *args, **kwargs):
+    """Simulate wrapping _build_wrapper() in tf.make_template() for eager mode.
+
+    Needed as tf.make_template() isn't supported in eager mode.
+    Requires self._variable_scope to have been instantiated.
+
+    Args:
+      *args: args list for self._build
+      **kwargs: kwargs dict for self._build
+
+    Returns:
+      A tuple containing (output from _build, scope_name).
+    """
+    with tf.variable_scope(
+        self._variable_scope), self._eager_variable_store.as_default():
+      output, this_scope_name = self._build_wrapper(*args, **kwargs)
+    return output, this_scope_name
 
   def _build_wrapper(self, *args, **kwargs):
     """Function which will be wrapped in a Template to do variable sharing.
@@ -290,12 +317,12 @@ class AbstractModule(object):
       NotConnectedError: If the module is not connected to the Graph.
     """
     self._ensure_is_connected()
-    return self._template.variable_scope
+    return self._variable_scope
 
   @property
   def scope_name(self):
     """Returns the full name of the Module's variable scope."""
-    return self._template.variable_scope.name
+    return self._variable_scope.name
 
   @property
   def module_name(self):
@@ -396,7 +423,12 @@ class AbstractModule(object):
     """
     self._check_init_called()
     self._check_same_graph()
-    return tf.variable_scope(self._template.variable_scope, reuse=reuse)
+    if tfe.in_eager_mode():
+      return contextlib.nested(
+          tf.variable_scope(self._variable_scope, reuse=reuse),
+          self._eager_variable_store.as_default())
+    else:
+      return tf.variable_scope(self._variable_scope, reuse=reuse)
 
   def get_variables(self, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
     """Returns tuple of `tf.Variable`s declared inside this module.

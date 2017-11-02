@@ -34,20 +34,24 @@ from sonnet.python.ops import nest
 import tensorflow as tf
 
 
-def merge_leading_dims(tensor, n_dims=2):
+def merge_leading_dims(array_or_tensor, n_dims=2):
   """Merge the first dimensions of a tensor.
 
   Args:
-    tensor: Tensor to have its first dimensions merged.
+    array_or_tensor: Tensor to have its first dimensions merged. Can also
+        be an array or numerical value, which will be converted to a tensor
+        for batch application, if needed.
     n_dims: Number of dimensions to merge.
 
   Returns:
-    The input tensor, with its first dimensions merged.
+    Either the input value converted to a Tensor, with the requested dimensions
+    merged, or the unmodified input value if the input has less than `n_dims`
+    dimensions.
 
   Raises:
-    ValueError: If the rank of `tensor` is not well-defined.
+    ValueError: If the rank of `array_or_tensor` is not well-defined.
   """
-  tensor = tf.convert_to_tensor(tensor)
+  tensor = tf.convert_to_tensor(array_or_tensor)
   tensor_shape_static = tensor.get_shape()
 
   # Check if the rank of the input tensor is well-defined.
@@ -59,7 +63,7 @@ def merge_leading_dims(tensor, n_dims=2):
   # We can only merge the n_dims leading dimensions if the rank of the given
   # tensor is sufficiently large.
   if n_dims > len(tensor_shape_list):
-    return tensor
+    return array_or_tensor
 
   if tensor_shape_static.is_fully_defined():
     new_shape = (

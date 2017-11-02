@@ -1061,11 +1061,11 @@ class MergeLeadingDimsTest(tf.test.TestCase, parameterized.TestCase):
   def testScalarInput(self, scalar):
     """Tests if a statically shaped scalar stays a scalar."""
     # Act.
-    tensor = basic.merge_leading_dims(scalar)
+    result = basic.merge_leading_dims(scalar)
 
     # Assert.
-    # This should be a scalar (i.e. a tensor of rank 0).
-    self.assertEqual(0, len(tensor.get_shape().as_list()))
+    # This should be the same object we passed in.
+    self.assertIs(result, scalar)
 
   def testExceptionUnknownRank(self):
     """Checks if an exception is thrown if the rank of the tensor is unknown."""
@@ -1422,13 +1422,9 @@ class BatchApplyTest(tf.test.TestCase, parameterized.TestCase):
     # Assert.
     self.assertIsNotNone(received_flag_value[0])
 
-    # Recover the original value of the flag from the tensorflow graph.
-    with self.test_session() as sess:
-      session_value = sess.run(received_flag_value[0])
-
     # Recover the flag value from the test inputs.
     flag_value = nest.flatten_iterable([flag_args, flag_kawargs])[0]
-    self.assertEqual(session_value, flag_value)
+    self.assertEqual(received_flag_value[0], flag_value)
 
 
 class SliceByDimTest(tf.test.TestCase):

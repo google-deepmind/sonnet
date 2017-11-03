@@ -27,6 +27,7 @@ import collections as _collections
 # Dependency imports
 import numpy as np
 import six as _six
+import tensorflow as tf
 
 
 from tensorflow.python.util import nest
@@ -115,7 +116,8 @@ def is_iterable(seq):
   Returns:
     True if `seq` is iterable, but not a string.
   """
-  if isinstance(seq, _six.string_types) or isinstance(seq, np.ndarray):
+  if (isinstance(seq, _six.string_types) or isinstance(seq, np.ndarray)
+      or isinstance(seq, tf.Tensor)):
     return False
   try:
     iter(seq)

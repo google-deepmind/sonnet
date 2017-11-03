@@ -369,4 +369,3 @@ ops.register_proto_function(SONNET_COLLECTION_NAME,
                             module_pb2.SonnetModule,
                             to_proto=_module_info_to_proto,
                             from_proto=_module_info_from_proto_safe)
-

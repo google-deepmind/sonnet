@@ -19,7 +19,7 @@ py_library(
         ":util",
         "//sonnet/protos:module_pb2",
         # tensorflow dep,
-        # Tensorflow contrib eager/python:tfe dep,
+        # tensorflow contrib eager/python:tfe dep,
     ],
 )
 
@@ -173,12 +173,12 @@ py_test(
     srcs = ["modules/base_eager_test.py"],
     srcs_version = "PY2AND3",
     deps = [
+        "//testing/pybase:parameterized",
         # mox dep,
         # numpy dep,
         "//sonnet",
-        "//sonnet/testing/parameterized",
         # tensorflow dep,
-        # Tensorflow contrib eager/python:tfe dep,
+        # tensorflow contrib eager/python:tfe dep,
     ],
 )
 

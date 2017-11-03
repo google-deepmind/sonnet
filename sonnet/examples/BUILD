@@ -44,7 +44,7 @@ py_binary(
     ],
     srcs_version = "PY2AND3",
     deps = [
-        # Tensorflow IO dep,
+        # tensorflow IO dep,
         "//sonnet",
         # tensorflow dep,
     ],

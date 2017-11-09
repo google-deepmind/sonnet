@@ -14,10 +14,10 @@ py_library(
         "modules/base_errors.py",
         "modules/base_info.py",
     ],
+    data = ["//sonnet/protos:module_pb2"],
     srcs_version = "PY2AND3",
     deps = [
         ":util",
-        "//sonnet/protos:module_pb2",
         # tensorflow dep,
     ],
 )

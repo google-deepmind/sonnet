@@ -173,7 +173,6 @@ py_test(
     srcs = ["modules/base_eager_test.py"],
     srcs_version = "PY2AND3",
     deps = [
-        "//testing/pybase:parameterized",
         # mox dep,
         # numpy dep,
         "//sonnet",

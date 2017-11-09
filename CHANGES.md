@@ -4,8 +4,6 @@
 
 This version requires TensorFlow version 1.4.0.
 
-* Start of implementation for Eager Mode. This should be considered Alpha &
-  unsupported.
 * Switch parameterized tests to use Abseil.
 * BatchApply passes through scalar non-Tensor inputs unmodified.
 * More flexible mask argument to `Conv2D`.

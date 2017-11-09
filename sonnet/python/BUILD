@@ -19,7 +19,6 @@ py_library(
         ":util",
         "//sonnet/protos:module_pb2",
         # tensorflow dep,
-        # tensorflow contrib eager/python:tfe dep,
     ],
 )
 
@@ -166,20 +165,6 @@ module_tests = [
         # tensorflow dep,
     ],
 ) for test_name, test_subdir, test_size in module_tests]
-
-py_test(
-    name = "base_eager_test",
-    size = "small",
-    srcs = ["modules/base_eager_test.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        # mox dep,
-        # numpy dep,
-        "//sonnet",
-        # tensorflow dep,
-        # tensorflow contrib eager/python:tfe dep,
-    ],
-)
 
 py_test(
     name = "conv_gpu_test",

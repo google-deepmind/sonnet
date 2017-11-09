@@ -1,7 +1,12 @@
 # Sonnet Changelog
 
-## Version 1.14 - Monday, 09. October 2017
+## Version 1.14 - Thursdauy, 09. November 2017
 
+* Start of implementationm for Eager Mode. This should be considered Alpha &
+  unsupported.
+* Switch parameterized tests to use Abseil.
+* BatchApply passes through scalar non-Tensor inputs unmodified.
+* More flexible mask argument to `Conv2D`.
 * Added Sonnet `ModuleInfo` to the "sonnet" graph collection. This allows to
   keep track of which modules generated which connected sub-graphs. This
   information is serialised and available when loading a meta-graph-def. This

@@ -1,8 +1,10 @@
 # Sonnet Changelog
 
-## Version 1.14 - Thursdauy, 09. November 2017
+## Version 1.14 - Thursday, 09. November 2017
 
-* Start of implementationm for Eager Mode. This should be considered Alpha &
+This version requires TensorFlow version 1.4.0.
+
+* Start of implementation for Eager Mode. This should be considered Alpha &
   unsupported.
 * Switch parameterized tests to use Abseil.
 * BatchApply passes through scalar non-Tensor inputs unmodified.

@@ -64,6 +64,43 @@
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">function</span>
 
 
+<span class="k">def</span> <span class="nf">_clip_gradient_op</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Create an op that clips gradients using a Defun.</span>
+
+<span class="sd">  The tensorflow Defun decorator creates an op and tensorflow caches these op</span>
+<span class="sd">  automatically according to `func_name`. Using a Defun decorator twice with the</span>
+<span class="sd">  same `func_name` does not create a new op, instead the cached op is used.</span>
+
+<span class="sd">  This method produces a new op the first time it is called with a given `dtype`</span>
+<span class="sd">  argument, and then uses the cached op each time it is called after that with</span>
+<span class="sd">  the same `dtype`. The min and max clip values are given as arguments for the</span>
+<span class="sd">  forward pass method so that they can be used in the backwards pass.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    dtype: the dtype of the net whose gradient is being clipped.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The op that clips gradients.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">clip_gradient_backward</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">grad</span><span class="p">):</span>
+    <span class="n">clip_value_min</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">clip_value_max</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">clipped_grad</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">clipped_grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+  <span class="k">def</span> <span class="nf">clip_gradient_forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="p">):</span>
+    <span class="k">del</span> <span class="n">clip_value_min</span>  <span class="c1"># Unused.</span>
+    <span class="k">del</span> <span class="n">clip_value_max</span>  <span class="c1"># Unused.</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+  <span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;ClipGradient_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">function</span><span class="o">.</span><span class="n">Defun</span><span class="p">(</span>
+      <span class="n">dtype</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
+      <span class="n">python_grad_func</span><span class="o">=</span><span class="n">clip_gradient_backward</span><span class="p">,</span>
+      <span class="n">func_name</span><span class="o">=</span><span class="n">func_name</span><span class="p">)(</span><span class="n">clip_gradient_forward</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="clip_gradient"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.clip_gradient.clip_gradient">[docs]</a><span class="k">def</span> <span class="nf">clip_gradient</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Clips respective gradients of a given tensor.</span>
 
@@ -80,20 +117,20 @@
 
 <span class="sd">  Returns:</span>
 <span class="sd">    A `tf.Tensor` with the same type as the input tensor.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If `net` dtype is non-float.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-
-  <span class="k">def</span> <span class="nf">_clip_gradient_backward</span><span class="p">(</span><span class="n">unused_op</span><span class="p">,</span> <span class="n">grad</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="p">)</span>
-
-  <span class="nd">@function</span><span class="o">.</span><span class="n">Defun</span><span class="p">(</span>
-      <span class="n">net</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-      <span class="n">python_grad_func</span><span class="o">=</span><span class="n">_clip_gradient_backward</span><span class="p">,</span>
-      <span class="n">func_name</span><span class="o">=</span><span class="s2">&quot;ClipGradient&quot;</span><span class="p">)</span>
-  <span class="k">def</span> <span class="nf">_clip_gradient_forward</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">x</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">net</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">is_floating</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;clip_gradient does not support non-float `net` inputs.&quot;</span><span class="p">)</span>
 
   <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;clip_gradient&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="n">net</span><span class="p">]):</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">_clip_gradient_forward</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>  <span class="c1"># Convert ref dtypes to regular dtypes.</span>
+    <span class="n">min_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">clip_value_min</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">max_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">clip_value_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">clip_gradient_op</span> <span class="o">=</span> <span class="n">_clip_gradient_op</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">clip_gradient_op</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">min_tensor</span><span class="p">,</span> <span class="n">max_tensor</span><span class="p">)</span>
     <span class="n">output</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
 
   <span class="k">return</span> <span class="n">output</span></div>
@@ -130,7 +167,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

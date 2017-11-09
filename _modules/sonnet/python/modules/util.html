@@ -723,9 +723,17 @@
         <span class="n">name_scope</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name_scope</span><span class="p">):</span>
         <span class="n">sub_scope</span> <span class="o">=</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">sub_scope</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">sub_scope</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
           <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
+            <span class="c1"># to the TF graph</span>
+            <span class="n">method_positional_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+                <span class="n">method</span><span class="p">,</span> <span class="n">out_ops</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="o">*</span><span class="n">method_positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+          <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
           <span class="k">return</span> <span class="n">out_ops</span>
 
   <span class="k">return</span> <span class="n">wrapper</span></div>
@@ -793,7 +801,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

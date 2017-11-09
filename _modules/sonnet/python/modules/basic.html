@@ -76,20 +76,24 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 
-<div class="viewcode-block" id="merge_leading_dims"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.merge_leading_dims">[docs]</a><span class="k">def</span> <span class="nf">merge_leading_dims</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">n_dims</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="merge_leading_dims"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.merge_leading_dims">[docs]</a><span class="k">def</span> <span class="nf">merge_leading_dims</span><span class="p">(</span><span class="n">array_or_tensor</span><span class="p">,</span> <span class="n">n_dims</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Merge the first dimensions of a tensor.</span>
 
 <span class="sd">  Args:</span>
-<span class="sd">    tensor: Tensor to have its first dimensions merged.</span>
+<span class="sd">    array_or_tensor: Tensor to have its first dimensions merged. Can also</span>
+<span class="sd">        be an array or numerical value, which will be converted to a tensor</span>
+<span class="sd">        for batch application, if needed.</span>
 <span class="sd">    n_dims: Number of dimensions to merge.</span>
 
 <span class="sd">  Returns:</span>
-<span class="sd">    The input tensor, with its first dimensions merged.</span>
+<span class="sd">    Either the input value converted to a Tensor, with the requested dimensions</span>
+<span class="sd">    merged, or the unmodified input value if the input has less than `n_dims`</span>
+<span class="sd">    dimensions.</span>
 
 <span class="sd">  Raises:</span>
-<span class="sd">    ValueError: If the rank of `tensor` is not well-defined.</span>
+<span class="sd">    ValueError: If the rank of `array_or_tensor` is not well-defined.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+  <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">array_or_tensor</span><span class="p">)</span>
   <span class="n">tensor_shape_static</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
 
   <span class="c1"># Check if the rank of the input tensor is well-defined.</span>
@@ -101,7 +105,7 @@
   <span class="c1"># We can only merge the n_dims leading dimensions if the rank of the given</span>
   <span class="c1"># tensor is sufficiently large.</span>
   <span class="k">if</span> <span class="n">n_dims</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor_shape_list</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">tensor</span>
+    <span class="k">return</span> <span class="n">array_or_tensor</span>
 
   <span class="k">if</span> <span class="n">tensor_shape_static</span><span class="o">.</span><span class="n">is_fully_defined</span><span class="p">():</span>
     <span class="n">new_shape</span> <span class="o">=</span> <span class="p">(</span>
@@ -116,9 +120,13 @@
   <span class="n">new_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_first_dim</span><span class="p">,</span> <span class="n">other_dims</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">new_size</span><span class="p">)</span>
 
+  <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tensor_shape_list</span><span class="p">[:</span><span class="n">n_dims</span><span class="p">]):</span>
+    <span class="n">merged_leading_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">tensor_shape_list</span><span class="p">[:</span><span class="n">n_dims</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">merged_leading_size</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="c1"># We need to set the result size of this, as otherwise we won&#39;t be able to</span>
   <span class="c1"># pass to e.g. a Linear. Here we need to know at least the rank of the tensor.</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">merged_leading_size</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
 
@@ -1402,7 +1410,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

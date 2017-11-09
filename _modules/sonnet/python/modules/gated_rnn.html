@@ -1071,7 +1071,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">      conv_ndims: Convolution dimensionality (1, 2 or 3).</span>
-<span class="sd">      input_shape: Shape of the input as tuple, excluding the batch size.</span>
+<span class="sd">      input_shape: Shape of the input as an iterable, excluding the batch size.</span>
 <span class="sd">      output_channels: Number of output channels of the conv LSTM.</span>
 <span class="sd">      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is</span>
 <span class="sd">          used to define kernel size in all dimensions.</span>
@@ -1113,7 +1113,7 @@
           <span class="n">input_shape</span><span class="p">,</span> <span class="n">conv_ndims</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_conv_ndims</span> <span class="o">=</span> <span class="n">conv_ndims</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="n">input_shape</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">kernel_shape</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">stride</span>
@@ -1154,15 +1154,15 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Tuple of `tf.TensorShape`s indicating the size of state tensors.&quot;&quot;&quot;</span>
-    <span class="n">hidden_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
-                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,))</span>
+    <span class="n">hidden_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,))</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
-                          <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span><span class="p">,))</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span><span class="p">,))</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
     <span class="n">hidden</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">state</span>
@@ -1408,7 +1408,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

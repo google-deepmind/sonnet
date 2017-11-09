@@ -35,6 +35,30 @@ sonnet\.python\.modules\.base module
     :undoc-members:
     :show-inheritance:
 
+sonnet\.python\.modules\.base\_errors module
+--------------------------------------------
+
+.. automodule:: sonnet.python.modules.base_errors
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet\.python\.modules\.base\_info module
+------------------------------------------
+
+.. automodule:: sonnet.python.modules.base_info
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet\.python\.modules\.base\_info\_test module
+------------------------------------------------
+
+.. automodule:: sonnet.python.modules.base_info_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 sonnet\.python\.modules\.base\_test module
 ------------------------------------------
 

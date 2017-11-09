@@ -196,11 +196,18 @@
   <span class="k">return</span> <span class="n">padding</span>
 
 
-<span class="k">def</span> <span class="nf">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Expands the provided stride to size n and pads it with 1s.&quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
       <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">_fill_shape</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">_fill_shape</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="n">data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="n">_fill_shape</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
+                       <span class="s2">&quot;</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_DATA_FORMATS</span><span class="p">))</span>
+
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">stride</span>
   <span class="k">else</span><span class="p">:</span>
@@ -268,8 +275,8 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
-<span class="sd">      mask: Optional 2D or 4D array, tuple or numpy array containing values to</span>
-<span class="sd">          multiply the weights by component-wise.</span>
+<span class="sd">      mask: A 2D or 4D tensor, or an object convertible to a 2D or 4D tensor</span>
+<span class="sd">        which is used to multiplied component-wise with the weights (Optional).</span>
 <span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
 <span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
 <span class="sd">          second dimension (&quot;NCHW&quot;).</span>
@@ -287,7 +294,7 @@
 <span class="sd">      base.IncompatibleShapeError: If the given rate is not an integer; or if</span>
 <span class="sd">          the given rate is not a sequence of two integers.</span>
 <span class="sd">      base.IncompatibleShapeError: If a mask is given and its rank is neither 2</span>
-<span class="sd">          nor 4.</span>
+<span class="sd">          nor 4, or if it is a TensorFlow Tensor with a not fully defined shape.</span>
 <span class="sd">      base.NotSupportedError: If rate in any dimension and the stride in any</span>
 <span class="sd">          dimension are simultaneously &gt; 1.</span>
 <span class="sd">      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.</span>
@@ -297,7 +304,7 @@
 <span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">        are not callable.</span>
-<span class="sd">      TypeError: If mask is given and is not an array, tuple or a numpy array.</span>
+<span class="sd">      TypeError: If mask is given and it is not convertible to a Tensor.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">Conv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
@@ -313,6 +320,14 @@
     <span class="c1"># The following is for backwards-compatibility from when we used to accept</span>
     <span class="c1"># 4-strides of the form [1, m, n, 1].</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and second element must be 1.&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;stride&quot;</span><span class="p">)</span>
@@ -333,10 +348,17 @@
         <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)):</span>
+          <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Mask needs to have dtype float32 or float64&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_fully_defined</span><span class="p">():</span>
+          <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Mask needs to have a statically defined shape&quot;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid type for mask: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mask</span><span class="p">)))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
-      <span class="n">mask_rank</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">ndim</span>
+      <span class="n">mask_rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span>
       <span class="k">if</span> <span class="n">mask_rank</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">mask_rank</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
             <span class="s2">&quot;Invalid mask rank: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mask_rank</span><span class="p">))</span>
@@ -424,18 +446,16 @@
     <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">mask_rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">ndim</span>
-      <span class="n">mask_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span>
-      <span class="k">if</span> <span class="n">mask_rank</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mask_shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">:</span>
+      <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
+      <span class="n">mask_shape</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mask_shape</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">):</span>
           <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-              <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">))</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-      <span class="k">elif</span> <span class="n">mask_rank</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mask_shape</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">):</span>
-          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-              <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">))</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
+              <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">)))</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">mask_shape</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mask_shape</span><span class="p">)))</span>
       <span class="n">w</span> <span class="o">*=</span> <span class="n">mask</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
@@ -469,7 +489,7 @@
     <span class="sd">&quot;&quot;&quot;Returns the stride.&quot;&quot;&quot;</span>
     <span class="c1"># Backwards compatibility with old stride format.</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+    <span class="k">return</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -712,12 +732,17 @@
                                                           <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
     <span class="c1"># We want to support passing native strides akin to [1, m, n, 1].</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and second element must be 1.&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
@@ -1983,6 +2008,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_depthwise&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a DepthwiseConv2D module.</span>
@@ -2018,6 +2044,9 @@
 <span class="sd">        regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
+<span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
+<span class="sd">          second dimension (&quot;NCHW&quot;).</span>
 <span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
 <span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
 <span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
@@ -2033,6 +2062,8 @@
 <span class="sd">          `stride[0] != stride[3]`.</span>
 <span class="sd">      ValueError: if `channel_multiplier` is not an integer &gt;= 1.</span>
 <span class="sd">      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.</span>
+<span class="sd">      ValueError: If the given data_format is not a supported format (see</span>
+<span class="sd">        SUPPORTED_DATA_FORMATS).</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
@@ -2049,14 +2080,27 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                                           <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_DATA_FORMATS</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
+                       <span class="s2">&quot;</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_DATA_FORMATS</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+
     <span class="c1"># We want to support passing native strides akin to [1, m, n, 1]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and second element must be 1.&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span>
+          <span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
@@ -2110,10 +2154,16 @@
           <span class="s2">&quot;Input Tensor must have shape (batch_size, input_height, &quot;</span>
           <span class="s2">&quot;input_width, input_channels)&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+      <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">input_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">UnderspecifiedError</span><span class="p">(</span>
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="n">input_channels</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
@@ -2132,7 +2182,7 @@
     <span class="n">bias_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="s2">&quot;b&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_bias_initializer</span><span class="p">(</span><span class="n">bias_shape</span><span class="p">)</span>
@@ -2146,7 +2196,8 @@
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">depthwise_conv2d</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span>
                                      <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
-                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">)</span>
+                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span>
+                                     <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
@@ -2154,7 +2205,7 @@
                                 <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
                                 <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                                 <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-      <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">bias_add</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">)</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">bias_add</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">outputs</span>
 
@@ -2238,7 +2289,12 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span></div>
 
 
 <div class="viewcode-block" id="SeparableConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D">[docs]</a><span class="k">class</span> <span class="nc">SeparableConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2258,6 +2314,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Separable_conv2d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a SeparableConv2D module.</span>
@@ -2294,6 +2351,9 @@
 <span class="sd">        A regularizer should be a function that takes a single `Tensor` as an</span>
 <span class="sd">        input and returns a scalar `Tensor` output, e.g. the L1 and L2</span>
 <span class="sd">        regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
+<span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
+<span class="sd">          second dimension (&quot;NCHW&quot;).</span>
 <span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
 <span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
 <span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
@@ -2308,6 +2368,8 @@
 <span class="sd">      base.IncompatibleShapeError: If `stride` is neither an integer nor a</span>
 <span class="sd">          list of 2 or 4 integers.</span>
 <span class="sd">      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;</span>
+<span class="sd">      ValueError: If the given data_format is not a supported format (see</span>
+<span class="sd">        SUPPORTED_DATA_FORMATS).</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">        keys other than &#39;w_dw&#39;, &#39;w_pw&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
@@ -2329,18 +2391,27 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
                                                           <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_DATA_FORMATS</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
+                       <span class="s2">&quot;</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_DATA_FORMATS</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+
     <span class="c1"># We want to support passing native strides akin to [1, m, n, 1].</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span>
-              <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-            <span class="s2">&quot;Invalid stride: stride[1] and [2] must be integer.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+              <span class="s2">&quot;Invalid stride: First and second element must be 1.&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span>
+          <span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
@@ -2389,11 +2460,16 @@
           <span class="s2">&quot;Input Tensor must have shape (batch_size, input_height, &quot;</span>
           <span class="s2">&quot;input_width, input_channels)&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
+      <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">input_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">UnderspecifiedError</span><span class="p">(</span>
           <span class="s2">&quot;Number of input channels must be known at module build time&quot;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="n">input_channels</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input must have dtype tf.float32, but dtype was &quot;</span> <span class="o">+</span>
@@ -2406,7 +2482,7 @@
     <span class="n">bias_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w_dw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
-      <span class="n">fan_in_shape</span> <span class="o">=</span> <span class="n">depthwise_weight_shape</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+      <span class="n">fan_in_shape</span> <span class="o">=</span> <span class="n">depthwise_weight_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w_dw&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w_pw&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
@@ -2433,7 +2509,8 @@
                                      <span class="bp">self</span><span class="o">.</span><span class="n">_w_dw</span><span class="p">,</span>
                                      <span class="bp">self</span><span class="o">.</span><span class="n">_w_pw</span><span class="p">,</span>
                                      <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
-                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">)</span>
+                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span>
+                                     <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
@@ -2441,7 +2518,7 @@
                                 <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">],</span>
                                 <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
                                 <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-      <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">bias_add</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">)</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">bias_add</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">outputs</span>
 
@@ -2530,7 +2607,12 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span></div>
 
 
 
@@ -3160,7 +3242,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

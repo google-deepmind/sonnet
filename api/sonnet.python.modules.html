@@ -214,121 +214,10 @@ support using the separate .name property.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="sonnet.python.modules.base.ConnectedSubGraph">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">ConnectedSubGraph</code><span class="sig-paren">(</span><em>builder</em>, <em>name_scope</em>, <em>inputs</em>, <em>outputs</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.python.modules.base.ConnectedSubGraph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.ConnectedSubGraph.builder">
-<code class="descname">builder</code><a class="headerlink" href="#sonnet.python.modules.base.ConnectedSubGraph.builder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.ConnectedSubGraph.inputs">
-<code class="descname">inputs</code><a class="headerlink" href="#sonnet.python.modules.base.ConnectedSubGraph.inputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.ConnectedSubGraph.name_scope">
-<code class="descname">name_scope</code><a class="headerlink" href="#sonnet.python.modules.base.ConnectedSubGraph.name_scope" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.ConnectedSubGraph.outputs">
-<code class="descname">outputs</code><a class="headerlink" href="#sonnet.python.modules.base.ConnectedSubGraph.outputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.DifferentGraphError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">DifferentGraphError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#DifferentGraphError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.DifferentGraphError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when trying to connect a Sonnet module to multiple Graphs.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.Error">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Error</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
-<p>Base class for all errors from snt.</p>
-<p>This is thrown to indicate a Neural Network specific problem, e.g. wrong
-module arity, module is not connected to the graph when it should be,
-tried to wire together incompatible modules, etc.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.IncompatibleShapeError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">IncompatibleShapeError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#IncompatibleShapeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.IncompatibleShapeError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when the shape of the input at build time is incompatible.</p>
-</dd></dl>
-
-<dl class="class">
 <dt id="sonnet.python.modules.base.Module">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">Module</code><span class="sig-paren">(</span><em>build</em>, <em>custom_getter=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#Module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.Module" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Module wrapping a function provided by the user.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.NotConnectedError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">NotConnectedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#NotConnectedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.NotConnectedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when operating on a module that has not yet been connected.</p>
-<p>Some module properties / methods are valid to access before the module
-has been connected into the graph, but some are not. This Error is
-raised when the user attempts to do anything not valid before
-connection.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.NotInitializedError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">NotInitializedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#NotInitializedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.NotInitializedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when connecting an uninitialized Sonnet module.</p>
-<p>Before they can be connected, all Sonnet modules must call
-<code class="docutils literal"><span class="pre">AbstractModule.__init__</span></code> (e.g. via a <code class="docutils literal"><span class="pre">super</span></code> call).</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.NotSupportedError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">NotSupportedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#NotSupportedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.NotSupportedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when something that cannot be supported is requested.</p>
-<p>For example a Dilated Convolution module cannot be transposed.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="sonnet.python.modules.base.ParentNotBuiltError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">ParentNotBuiltError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#ParentNotBuiltError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.ParentNotBuiltError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
-<p>Error raised when the parent of a module has not been built yet.</p>
-<p>For example, when making a transpose of modules that inherit from
-<code class="docutils literal"><span class="pre">module.Transposable</span></code>, the parent has to be connected to the graph
-before the child transpose to ensure that shape inference has already
-occurred.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="sonnet.python.modules.base.SubgraphInputs">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">SubgraphInputs</code><span class="sig-paren">(</span><em>args</em>, <em>kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.python.modules.base.SubgraphInputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.SubgraphInputs.args">
-<code class="descname">args</code><a class="headerlink" href="#sonnet.python.modules.base.SubgraphInputs.args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.base.SubgraphInputs.kwargs">
-<code class="descname">kwargs</code><a class="headerlink" href="#sonnet.python.modules.base.SubgraphInputs.kwargs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -372,10 +261,84 @@ flags controlling transposition.</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-sonnet.python.modules.base_errors">
+<span id="sonnet-python-modules-base-errors-module"></span><h2>sonnet.python.modules.base_errors module<a class="headerlink" href="#module-sonnet.python.modules.base_errors" title="Permalink to this headline">¶</a></h2>
+<p>Sonnet exception classes.</p>
 <dl class="exception">
-<dt id="sonnet.python.modules.base.UnderspecifiedError">
-<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base.</code><code class="descname">UnderspecifiedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#UnderspecifiedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.UnderspecifiedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.Error" title="sonnet.python.modules.base.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Error</span></code></a></p>
+<dt id="sonnet.python.modules.base_errors.DifferentGraphError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">DifferentGraphError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#DifferentGraphError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.DifferentGraphError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when trying to connect a Sonnet module to multiple Graphs.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.Error">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">Error</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base class for all errors from snt.</p>
+<p>This is thrown to indicate a Neural Network specific problem, e.g. wrong
+module arity, module is not connected to the graph when it should be,
+tried to wire together incompatible modules, etc.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.IncompatibleShapeError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">IncompatibleShapeError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#IncompatibleShapeError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.IncompatibleShapeError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when the shape of the input at build time is incompatible.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.ModuleInfoError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">ModuleInfoError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#ModuleInfoError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.ModuleInfoError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when Sonnet <code class="docutils literal"><span class="pre">ModuleInfo</span></code> cannot be serialized.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.NotConnectedError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">NotConnectedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#NotConnectedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.NotConnectedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when operating on a module that has not yet been connected.</p>
+<p>Some module properties / methods are valid to access before the module
+has been connected into the graph, but some are not. This Error is
+raised when the user attempts to do anything not valid before
+connection.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.NotInitializedError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">NotInitializedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#NotInitializedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.NotInitializedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when connecting an uninitialized Sonnet module.</p>
+<p>Before they can be connected, all Sonnet modules must call
+<code class="docutils literal"><span class="pre">AbstractModule.__init__</span></code> (e.g. via a <code class="docutils literal"><span class="pre">super</span></code> call).</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.NotSupportedError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">NotSupportedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#NotSupportedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.NotSupportedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when something that cannot be supported is requested.</p>
+<p>For example a Dilated Convolution module cannot be transposed.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.ParentNotBuiltError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">ParentNotBuiltError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#ParentNotBuiltError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.ParentNotBuiltError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
+<p>Error raised when the parent of a module has not been built yet.</p>
+<p>For example, when making a transpose of modules that inherit from
+<code class="docutils literal"><span class="pre">module.Transposable</span></code>, the parent has to be connected to the graph
+before the child transpose to ensure that shape inference has already
+occurred.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="sonnet.python.modules.base_errors.UnderspecifiedError">
+<em class="property">exception </em><code class="descclassname">sonnet.python.modules.base_errors.</code><code class="descname">UnderspecifiedError</code><a class="reference internal" href="../_modules/sonnet/python/modules/base_errors.html#UnderspecifiedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base_errors.UnderspecifiedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base_errors.Error" title="sonnet.python.modules.base_errors.Error"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base_errors.Error</span></code></a></p>
 <p>Error raised when too little information is available.</p>
 <p>This does not typically mean the user is trying to do something that
 doesn’t work (in which case <code class="docutils literal"><span class="pre">IncompatibleShapeError</span></code> should be used),
@@ -383,6 +346,73 @@ just that some more information needs to be provided in order to build
 the Graph.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-sonnet.python.modules.base_info">
+<span id="sonnet-python-modules-base-info-module"></span><h2>sonnet.python.modules.base_info module<a class="headerlink" href="#module-sonnet.python.modules.base_info" title="Permalink to this headline">¶</a></h2>
+<p>Sonnet module information, stored in the graph collections.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.base_info.ConnectedSubGraph">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.base_info.</code><code class="descname">ConnectedSubGraph</code><span class="sig-paren">(</span><em>module</em>, <em>name_scope</em>, <em>inputs</em>, <em>outputs</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.python.modules.base_info.ConnectedSubGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ConnectedSubGraph.inputs">
+<code class="descname">inputs</code><a class="headerlink" href="#sonnet.python.modules.base_info.ConnectedSubGraph.inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ConnectedSubGraph.module">
+<code class="descname">module</code><a class="headerlink" href="#sonnet.python.modules.base_info.ConnectedSubGraph.module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ConnectedSubGraph.name_scope">
+<code class="descname">name_scope</code><a class="headerlink" href="#sonnet.python.modules.base_info.ConnectedSubGraph.name_scope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ConnectedSubGraph.outputs">
+<code class="descname">outputs</code><a class="headerlink" href="#sonnet.python.modules.base_info.ConnectedSubGraph.outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.base_info.ModuleInfo">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.base_info.</code><code class="descname">ModuleInfo</code><span class="sig-paren">(</span><em>module_name</em>, <em>scope_name</em>, <em>class_name</em>, <em>connected_subgraphs</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.python.modules.base_info.ModuleInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ModuleInfo.class_name">
+<code class="descname">class_name</code><a class="headerlink" href="#sonnet.python.modules.base_info.ModuleInfo.class_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ModuleInfo.connected_subgraphs">
+<code class="descname">connected_subgraphs</code><a class="headerlink" href="#sonnet.python.modules.base_info.ModuleInfo.connected_subgraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ModuleInfo.module_name">
+<code class="descname">module_name</code><a class="headerlink" href="#sonnet.python.modules.base_info.ModuleInfo.module_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base_info.ModuleInfo.scope_name">
+<code class="descname">scope_name</code><a class="headerlink" href="#sonnet.python.modules.base_info.ModuleInfo.scope_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="sonnet-python-modules-base-info-test-module">
+<h2>sonnet.python.modules.base_info_test module<a class="headerlink" href="#sonnet-python-modules-base-info-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="sonnet-python-modules-base-test-module">
 <h2>sonnet.python.modules.base_test module<a class="headerlink" href="#sonnet-python-modules-base-test-module" title="Permalink to this headline">¶</a></h2>
@@ -730,12 +760,17 @@ dimension, e.g. <code class="docutils literal"><span class="pre">bias_dims=[0]</
 
 <dl class="function">
 <dt id="sonnet.python.modules.basic.merge_leading_dims">
-<code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">merge_leading_dims</code><span class="sig-paren">(</span><em>tensor</em>, <em>n_dims=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#merge_leading_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.merge_leading_dims" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">merge_leading_dims</code><span class="sig-paren">(</span><em>array_or_tensor</em>, <em>n_dims=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#merge_leading_dims"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.merge_leading_dims" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merge the first dimensions of a tensor.</p>
-<p>Args: tensor: Tensor to have its first dimensions merged. n_dims:
-Number of dimensions to merge.</p>
-<p>Returns: The input tensor, with its first dimensions merged.</p>
-<p>Raises: ValueError: If the rank of <code class="docutils literal"><span class="pre">tensor</span></code> is not well-defined.</p>
+<p>Args: array_or_tensor: Tensor to have its first dimensions merged. Can
+also be an array or numerical value, which will be converted to a tensor
+for batch application, if needed. n_dims: Number of dimensions to
+merge.</p>
+<p>Returns: Either the input value converted to a Tensor, with the
+requested dimensions merged, or the unmodified input value if the input
+has less than <code class="docutils literal"><span class="pre">n_dims</span></code> dimensions.</p>
+<p>Raises: ValueError: If the rank of <code class="docutils literal"><span class="pre">array_or_tensor</span></code> is not
+well-defined.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1202,6 +1237,7 @@ The minimum value to clip by. clip_value_max: A 0-D Tensor or scalar.
 The maximum value to clip by. name: A name for the operation (optional,
 default ‘clip_gradient’).</p>
 <p>Returns: A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> with the same type as the input tensor.</p>
+<p>Raises: ValueError: If <code class="docutils literal"><span class="pre">net</span></code> dtype is non-float.</p>
 </dd></dl>
 
 </div>
@@ -1836,7 +1872,7 @@ the module does not use bias.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.DepthwiseConv2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">DepthwiseConv2D</code><span class="sig-paren">(</span><em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_2d_depthwise'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#DepthwiseConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">DepthwiseConv2D</code><span class="sig-paren">(</span><em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_2d_depthwise'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#DepthwiseConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Spatial depthwise 2D convolution module, including bias.</p>
 <p>This acts as a light wrapper around the TensorFlow ops
@@ -1857,6 +1893,12 @@ the module does not use bias.</p>
 <dt id="sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier">
 <code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the channel multiplier.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.DepthwiseConv2D.data_format">
+<code class="descname">data_format</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.data_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the data format.</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -2028,7 +2070,7 @@ the module does not use bias.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.SeparableConv2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='Separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='Separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Performs an in-plane convolution to each channel independently.</p>
 <p>This acts as a light wrapper around the TensorFlow op
@@ -2049,6 +2091,12 @@ the module does not use bias.</p>
 <dt id="sonnet.python.modules.conv.SeparableConv2D.channel_multiplier">
 <code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the channel multiplier.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.SeparableConv2D.data_format">
+<code class="descname">data_format</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.data_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the data format.</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -3070,6 +3118,8 @@ have the effect of lowering the learning rate.</p>
 <p>Args: net: A <code class="docutils literal"><span class="pre">tf.Tensor</span></code>. scale: The scale factor for the gradient on
 the backwards pass. name: A name for the operation (optional).</p>
 <p>Returns: A <code class="docutils literal"><span class="pre">tf.Tensor</span></code> with the same type as the input tensor.</p>
+<p>Raises: ValueError: If <code class="docutils literal"><span class="pre">net</span></code> dtype is non-float and <code class="docutils literal"><span class="pre">scale</span></code> is not
+zero or one.</p>
 </dd></dl>
 
 </div>
@@ -3526,6 +3576,9 @@ variables).</p>
 <li><a class="reference internal" href="#module-sonnet.python.modules.attention">sonnet.python.modules.attention module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-attention-test-module">sonnet.python.modules.attention_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.base">sonnet.python.modules.base module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.base_errors">sonnet.python.modules.base_errors module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.base_info">sonnet.python.modules.base_info module</a></li>
+<li><a class="reference internal" href="#sonnet-python-modules-base-info-test-module">sonnet.python.modules.base_info_test module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-base-test-module">sonnet.python.modules.base_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.basic">sonnet.python.modules.basic module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.basic_rnn">sonnet.python.modules.basic_rnn module</a></li>
@@ -3597,7 +3650,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

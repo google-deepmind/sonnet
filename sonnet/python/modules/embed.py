@@ -59,6 +59,7 @@ class Embed(base.AbstractModule):
                partitioners=None,
                regularizers=None,
                trainable=True,
+               custom_getter=None,
                name="embed"):
     """Constructs an Embed module.
 
@@ -86,6 +87,10 @@ class Embed(base.AbstractModule):
       trainable: if True, the embeddings will be updated during training. If
         False, they are fixed to their initial values. If `trainable=False` and
         a regularizer is given, the resulting loss stays constant.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
       name: string. Name for this module.
 
     Raises:
@@ -103,7 +108,7 @@ class Embed(base.AbstractModule):
                        "embedding_dim, initializers, or partitioners is "
                        "needed.")
 
-    super(Embed, self).__init__(name=name)
+    super(Embed, self).__init__(custom_getter=custom_getter, name=name)
     self._existing_vocab = None
     if existing_vocab is None:
       self._vocab_size = vocab_size

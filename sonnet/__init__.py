@@ -106,6 +106,7 @@ from sonnet.python.modules.spatial_transformer import GridWarper
 from sonnet.python.modules.util import check_initializers
 from sonnet.python.modules.util import check_partitioners
 from sonnet.python.modules.util import check_regularizers
+from sonnet.python.modules.util import custom_getter_router
 from sonnet.python.modules.util import format_variable_map
 from sonnet.python.modules.util import format_variables
 from sonnet.python.modules.util import get_normalized_variable_map

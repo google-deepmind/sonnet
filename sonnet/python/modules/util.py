@@ -275,7 +275,7 @@ def _get_sliced_variables(var_list):
 # pylint: enable=protected-access
 
 
-def _custom_getter_router(custom_getter_map, name_fn):
+def custom_getter_router(custom_getter_map, name_fn):
   """Creates a custom getter than matches requests to dict of custom getters.
 
   Custom getters are callables which implement the

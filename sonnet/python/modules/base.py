@@ -110,7 +110,7 @@ class AbstractModule(object):
     # If the given custom getter is a dictionary with a per-variable custom
     # getter, wrap it into a single custom getter.
     if isinstance(custom_getter, collections.Mapping):
-      self._custom_getter = util._custom_getter_router(  # pylint: disable=protected-access
+      self._custom_getter = util.custom_getter_router(
           custom_getter_map=custom_getter,
           name_fn=lambda name: name[len(self.scope_name) + 1:])
     else:

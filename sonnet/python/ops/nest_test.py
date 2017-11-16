@@ -167,18 +167,18 @@ class NestTest(tf.test.TestCase):
 
   def testPackIterableAs_notIterableError(self):
     with self.assertRaisesRegexp(TypeError,
-                                 "flat_iterable must be an iterable"):
+                                 "flat_sequence must be a sequence"):
       nest.pack_iterable_as("hi", "bye")
 
   def testPackIterableAs_scalarStructureError(self):
     with self.assertRaisesRegexp(
-        ValueError, r"Structure is a scalar but len\(flat_iterable\) == 2 > 1"):
+        ValueError, r"Structure is a scalar but len\(flat_sequence\) == 2 > 1"):
       nest.pack_iterable_as("hi", ["bye", "twice"])
 
   def testPackIterableAs_wrongLengthsError(self):
     with self.assertRaisesRegexp(
         ValueError,
-        "Structure had 2 elements, but flat_iterable had 3 elements."):
+        "Structure had 2 elements, but flat_sequence had 3 elements."):
       nest.pack_iterable_as(["hello", "world"],
                             ["and", "goodbye", "again"])
 

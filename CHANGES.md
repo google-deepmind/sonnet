@@ -1,5 +1,13 @@
 # Sonnet Changelog
 
+
+## Version 1.15 - Monday, 20. November 2017
+
+* `sonnet.nest` `*iterable` functions now point to their equivalent from TF.
+* Small documentation changes.
+* Add `custom_getter` option to `sonnet.Embed`.
+
+
 ## Version 1.14 - Thursday, 09. November 2017
 
 This version requires TensorFlow version 1.4.0.

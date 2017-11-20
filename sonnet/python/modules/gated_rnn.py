@@ -73,6 +73,13 @@ class LSTM(rnn_core.RNNCore):
 
     https://research.google.com/pubs/archive/43905.pdf
 
+  #### Recurrent projections
+
+  Projection of the recurrent state, to reduce model parameters and speed up
+  computation. For more details see:
+
+    https://arxiv.org/abs/1402.1128
+
   Attributes:
     state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.
     output_size: `tf.TensorShape` indicating the size of the core output.
@@ -84,7 +91,9 @@ class LSTM(rnn_core.RNNCore):
   W_F_DIAG = "w_f_diag"  # weight for prev_cell -> forget gate peephole
   W_I_DIAG = "w_i_diag"  # weight for prev_cell -> input gate peephole
   W_O_DIAG = "w_o_diag"  # weight for prev_cell -> output gate peephole
-  POSSIBLE_INITIALIZER_KEYS = {W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG}
+  W_H_PROJECTION = "w_h_projection"  # weight for (opt) projection of h in state
+  POSSIBLE_INITIALIZER_KEYS = {
+      W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG, W_H_PROJECTION}
 
   def __init__(self,
                hidden_size,
@@ -95,6 +104,7 @@ class LSTM(rnn_core.RNNCore):
                use_peepholes=False,
                use_layer_norm=False,
                hidden_clip_value=None,
+               projection_size=None,
                cell_clip_value=None,
                custom_getter=None,
                name="lstm"):
@@ -120,6 +130,8 @@ class LSTM(rnn_core.RNNCore):
         normalization.
       hidden_clip_value: Optional number; if set, then the LSTM hidden state
         vector is clipped by this value.
+      projection_size: Optional number; if set, then the LSTM hidden state is
+        projected to this size via a learnable projection matrix.
       cell_clip_value: Optional number; if set, then the LSTM cell vector is
         clipped by this value.
       custom_getter: Callable that takes as a first argument the true getter,
@@ -145,8 +157,11 @@ class LSTM(rnn_core.RNNCore):
     self._use_layer_norm = use_layer_norm
     self._hidden_clip_value = hidden_clip_value
     self._cell_clip_value = cell_clip_value
+    self._use_projection = projection_size is not None
+    self._hidden_state_size = projection_size or hidden_size
+
     self.possible_keys = self.get_possible_initializer_keys(
-        use_peepholes=use_peepholes)
+        use_peepholes=use_peepholes, use_projection=self._use_projection)
     self._initializers = util.check_initializers(initializers,
                                                  self.possible_keys)
     self._partitioners = util.check_initializers(partitioners,
@@ -159,7 +174,8 @@ class LSTM(rnn_core.RNNCore):
       raise ValueError("The value of cell_clip_value should be nonnegative.")
 
   @classmethod
-  def get_possible_initializer_keys(cls, use_peepholes=False):
+  def get_possible_initializer_keys(cls, use_peepholes=False,
+                                    use_projection=False):
     """Returns the keys the dictionary of variable initializers may contain.
 
     The set of all possible initializer keys are:
@@ -173,6 +189,8 @@ class LSTM(rnn_core.RNNCore):
       cls:The class.
       use_peepholes: Boolean that indicates whether peephole connections are
         used.
+      use_projection: Boolean that indicates whether a recurrent projection
+        layer is used.
 
     Returns:
       Set with strings corresponding to the strings that may be passed to the
@@ -183,6 +201,8 @@ class LSTM(rnn_core.RNNCore):
     if not use_peepholes:
       possible_keys.difference_update(
           {cls.W_F_DIAG, cls.W_I_DIAG, cls.W_O_DIAG})
+    if not use_projection:
+      possible_keys.difference_update({cls.W_H_PROJECTION})
     return possible_keys
 
   def _build(self, inputs, prev_state):
@@ -201,9 +221,9 @@ class LSTM(rnn_core.RNNCore):
     Returns:
       A tuple (output, next_state) where 'output' is a Tensor of size
       `[batch_size, hidden_size]` and 'next_state' is a tuple
-      (next_hidden, next_cell) where next_hidden and next_cell have size
-      `[batch_size, hidden_size]`.
-
+      (next_hidden, next_cell) where `next_hidden` and `next_cell` have size
+      `[batch_size, hidden_size]`. If `projection_size` is specified, then
+      `next_hidden` will have size `[batch_size, projection_size]`.
     Raises:
       ValueError: If connecting the module into the graph any time after the
         first time, and the inferred size of the inputs does not match previous
@@ -249,6 +269,9 @@ class LSTM(rnn_core.RNNCore):
       cell_output += self._w_o_diag * cell_output
     next_hidden = tf.tanh(cell_output) * tf.sigmoid(o)
 
+    if self._use_projection:
+      next_hidden = tf.matmul(next_hidden, self._w_h_projection)
+
     return next_hidden, (next_hidden, next_cell)
 
   def _create_gate_variables(self, input_shape, dtype):
@@ -256,27 +279,34 @@ class LSTM(rnn_core.RNNCore):
     if len(input_shape) != 2:
       raise ValueError(
           "Rank of shape must be {} not: {}".format(2, len(input_shape)))
-    input_size = input_shape.dims[1].value
 
-    b_shape = [4 * self._hidden_size]
-
-    equiv_input_size = self._hidden_size + input_size
+    equiv_input_size = self._hidden_state_size + input_shape.dims[1].value
     initializer = basic.create_linear_initializer(equiv_input_size)
 
     self._w_xh = tf.get_variable(
         self.W_GATES,
-        shape=[self._hidden_size + input_size, 4 * self._hidden_size],
+        shape=[equiv_input_size, 4 * self._hidden_size],
         dtype=dtype,
         initializer=self._initializers.get(self.W_GATES, initializer),
         partitioner=self._partitioners.get(self.W_GATES),
         regularizer=self._regularizers.get(self.W_GATES))
     self._b = tf.get_variable(
         self.B_GATES,
-        shape=b_shape,
+        shape=[4 * self._hidden_size],
         dtype=dtype,
         initializer=self._initializers.get(self.B_GATES, initializer),
         partitioner=self._partitioners.get(self.B_GATES),
         regularizer=self._regularizers.get(self.B_GATES))
+    if self._use_projection:
+      w_h_initializer = basic.create_linear_initializer(self._hidden_size)
+      self._w_h_projection = tf.get_variable(
+          self.W_H_PROJECTION,
+          shape=[self._hidden_size, self._hidden_state_size],
+          dtype=dtype,
+          initializer=self._initializers.get(self.W_H_PROJECTION,
+                                             w_h_initializer),
+          partitioner=self._partitioners.get(self.W_H_PROJECTION),
+          regularizer=self._regularizers.get(self.W_H_PROJECTION))
 
   def _create_peephole_variables(self, dtype):
     """Initialize the variables used for the peephole connections."""
@@ -305,13 +335,13 @@ class LSTM(rnn_core.RNNCore):
   @property
   def state_size(self):
     """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
-    return (tf.TensorShape([self._hidden_size]),
+    return (tf.TensorShape([self._hidden_state_size]),
             tf.TensorShape([self._hidden_size]))
 
   @property
   def output_size(self):
     """`tf.TensorShape` indicating the size of the core output."""
-    return tf.TensorShape([self._hidden_size])
+    return tf.TensorShape([self._hidden_state_size])
 
   @property
   def use_peepholes(self):

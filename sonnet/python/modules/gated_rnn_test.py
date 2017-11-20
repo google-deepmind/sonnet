@@ -116,13 +116,17 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertShapeEqual(np.ndarray((2 * hidden_size, 4 * hidden_size)),
                           param_map[snt.LSTM.W_GATES].initial_value)
 
-  def testComputation(self):
+  @parameterized.named_parameters(
+      [("lstm", None), ("lstm_with_recurrent_projection", 6)])
+  def testComputation(self, projection_size):
     batch_size = 2
     hidden_size = 4
+    hidden_state_size = projection_size or hidden_size
     inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
     prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    lstm = snt.LSTM(hidden_size)
+    prev_hidden = tf.placeholder(tf.float32,
+                                 shape=[batch_size, hidden_state_size])
+    lstm = snt.LSTM(hidden_size, projection_size=projection_size)
     _, next_state = lstm(inputs, (prev_hidden, prev_cell))
     next_hidden, next_cell = next_state
     lstm_variables = lstm.get_variables()
@@ -131,7 +135,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     # With random data, check the TF calculation matches the Numpy version.
     input_data = np.random.randn(batch_size, hidden_size)
-    prev_hidden_data = np.random.randn(batch_size, hidden_size)
+    prev_hidden_data = np.random.randn(batch_size, hidden_state_size)
     prev_cell_data = np.random.randn(batch_size, hidden_size)
 
     with self.test_session() as session:
@@ -139,12 +143,14 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
       fetches = [(next_hidden, next_cell),
                  param_map[snt.LSTM.W_GATES],
                  param_map[snt.LSTM.B_GATES]]
+      if projection_size is not None:
+        fetches.append(param_map[snt.LSTM.W_H_PROJECTION])
       output = session.run(fetches,
                            {inputs: input_data,
                             prev_cell: prev_cell_data,
                             prev_hidden: prev_hidden_data})
 
-    next_state_ex, gate_weights_ex, gate_biases_ex = output
+    next_state_ex, gate_weights_ex, gate_biases_ex = output[:3]
     in_and_hid = np.concatenate((input_data, prev_hidden_data), axis=1)
     real_gate = np.dot(in_and_hid, gate_weights_ex) + gate_biases_ex
     # i = input_gate, j = next_input, f = forget_gate, o = output_gate
@@ -152,6 +158,8 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     real_cell = (prev_cell_data / (1 + np.exp(-(f + lstm._forget_bias))) +
                  1 / (1 + np.exp(-i)) * np.tanh(j))
     real_hidden = np.tanh(real_cell) * 1 / (1 + np.exp(-o))
+    if projection_size is not None:
+      real_hidden = np.matmul(real_hidden, output[-1])
 
     self.assertAllClose(real_hidden, next_state_ex[0])
     self.assertAllClose(real_cell, next_state_ex[1])

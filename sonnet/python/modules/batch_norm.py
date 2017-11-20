@@ -112,8 +112,7 @@ class BatchNorm(base.AbstractModule):
       ...
 
       update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
-      with tf.control_dependencies([update_ops]):
-        train_op = tf.group(train_op)
+      train_op = tf.group(train_op, update_ops)
 
   Then, whenever `train_op` is run so also are the moving average update ops.
 

@@ -25,8 +25,7 @@ from __future__ import print_function
 # Dependency imports
 import tensorflow as tf
 
-from tensorflow.python.util import nest
-
+nest = tf.contrib.framework.nest
 
 _DONE_WARN = {}
 
@@ -36,8 +35,8 @@ def with_deprecation_warning(fn, extra_message=''):
   def new_fn(*args, **kwargs):
     if extra_message not in _DONE_WARN:
       tf.logging.warning(
-          'Sonnet nest is deprecated. Please use: '
-          'from tensorflow.python.util import nest. '
+          'Sonnet nest is deprecated. Please use '
+          'tf.contrib.framework.nest instead'
           + extra_message
       )
       _DONE_WARN[extra_message] = True

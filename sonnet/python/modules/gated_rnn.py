@@ -354,6 +354,90 @@ class LSTM(rnn_core.RNNCore):
     return self._use_layer_norm
 
 
+class RecurrentDropoutWrapper(rnn_core.RNNCore):
+  """Wraps an RNNCore so that recurrent dropout can be applied."""
+
+  def __init__(self, core, keep_probs):
+    """Builds a new wrapper around a given core.
+
+    Args:
+      core: the RNN core to be wrapped.
+      keep_probs: the recurrent dropout keep probabilities to apply.
+        This should have the same structure has core.init_state. No dropout is
+        applied for leafs set to None.
+    """
+
+    super(RecurrentDropoutWrapper, self).__init__(
+        custom_getter=None, name=core.module_name + "_recdropout")
+    self._core = core
+    self._keep_probs = keep_probs
+
+    # self._dropout_state_size is a list of shape for the state parts to which
+    # dropout is to be applied.
+    # self._dropout_index has the same shape as the core state. Leafs contain
+    # either None if no dropout is applied or an integer representing an index
+    # in self._dropout_state_size.
+    self._dropout_state_size = []
+
+    def set_dropout_state_size(keep_prob, state_size):
+      if keep_prob is not None:
+        self._dropout_state_size.append(state_size)
+        return len(self._dropout_state_size) - 1
+      return None
+
+    self._dropout_indexes = tf.contrib.framework.nest.map_structure(
+        set_dropout_state_size, keep_probs, core.state_size)
+
+  def _build(self, inputs, prev_state):
+    core_state, dropout_masks = prev_state
+    output, next_core_state = self._core(inputs, core_state)
+
+    # Dropout masks are generated via tf.nn.dropout so they actually include
+    # rescaling: the mask value is 1/keep_prob if no dropout is applied.
+    next_core_state = tf.contrib.framework.nest.map_structure(
+        lambda i, state: state if i is None else state * dropout_masks[i],
+        self._dropout_indexes, next_core_state)
+
+    return output, (next_core_state, dropout_masks)
+
+  def initial_state(self, batch_size, dtype=tf.float32, trainable=False,
+                    trainable_initializers=None, trainable_regularizers=None,
+                    name=None):
+    """Builds the default start state tensor of zeros."""
+    core_initial_state = self._core.initial_state(
+        batch_size, dtype=dtype, trainable=trainable,
+        trainable_initializers=trainable_initializers,
+        trainable_regularizers=trainable_regularizers, name=name)
+
+    dropout_masks = [None] * len(self._dropout_state_size)
+    def set_dropout_mask(index, state, keep_prob):
+      if index is not None:
+        ones = tf.ones_like(state, dtype=dtype)
+        dropout_masks[index] = tf.nn.dropout(ones, keep_prob=keep_prob)
+    tf.contrib.framework.nest.map_structure(
+        set_dropout_mask,
+        self._dropout_indexes, core_initial_state, self._keep_probs)
+
+    return core_initial_state, dropout_masks
+
+  @property
+  def state_size(self):
+    return self._core.state_size, self._dropout_state_size
+
+  @property
+  def output_size(self):
+    return self._core.output_size
+
+  @property
+  def without_dropout(self):
+    return self._core
+
+
+def lstm_with_recurrent_dropout(hidden_size, keep_prob=0.5, **kwargs):
+  lstm = LSTM(hidden_size, **kwargs)
+  return RecurrentDropoutWrapper(lstm, (keep_prob, None))
+
+
 class BatchNormLSTM(rnn_core.RNNCore):
   """LSTM recurrent network cell with optional peepholes, batch normalization.
 

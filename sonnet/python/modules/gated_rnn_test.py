@@ -276,6 +276,75 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                  initializers={key: tf.constant_initializer(0)})
 
   @parameterized.parameters(
+      (1e-8, 14),
+      (0.5, 7),
+      (1 - 1e-8, 0)
+  )
+  def testRecurrentDropout(self, keep_prob, expected_zeros):
+    """Performs various recurrent dropout checks.
+
+    - is_training has no impact when the keep prob is very close to 1.
+    - The return is deterministic for keep probs 0 or close to 1.
+    - The final hidden state has 0s at the same position as the mask.
+
+    Args:
+      keep_prob: the recurrent dropout keep probability.
+      expected_zeros: the number of expected zeros in the dropout mask.
+    """
+
+    batch_size = 2
+    input_size = 3
+    hidden_size = 7
+    seq_len = 5
+
+    # This test is not deterministic in the case keep_prob=0.5.
+    # Fixing the seed ensures that we always get the same dropout mask.
+    tf.set_random_seed(42)
+    np.random.seed(42)
+    cell = snt.lstm_with_recurrent_dropout(hidden_size, keep_prob=keep_prob)
+    inputs = tf.placeholder(
+        tf.float32, shape=[batch_size, seq_len, input_size])
+    train_output, ((train_hidden, _), [train_mask]) = tf.nn.dynamic_rnn(
+        cell,
+        inputs,
+        initial_state=cell.initial_state(batch_size, tf.float32),
+        dtype=tf.float32)
+    valid_output, _ = tf.nn.dynamic_rnn(
+        cell.without_dropout,
+        inputs,
+        initial_state=cell.without_dropout.initial_state(
+            batch_size, tf.float32),
+        dtype=tf.float32)
+    with self.test_session() as session:
+      tf.global_variables_initializer().run()
+      # Use the same input data for each row.
+      input_data = np.stack([np.random.rand(seq_len, input_size)] * batch_size)
+
+      train_out, valid_out, hidden, mask = session.run(
+          [train_output, valid_output, train_hidden, train_mask],
+          feed_dict={inputs: input_data})
+      almost_one = abs(1 - keep_prob) < 1e-5
+      if almost_one:
+        self.assertAllClose(train_out, valid_out)
+      else:
+        self.assertGreater(np.max(train_out - valid_out), 0.05)
+
+      self.assertAllClose(valid_out[0], valid_out[1])
+      deterministic = almost_one or abs(keep_prob < 1e-5)
+      if deterministic:
+        self.assertAllClose(train_out[0], train_out[1])
+      else:
+        self.assertGreater(np.max(train_out[0] - train_out[1]), 0.1)
+
+      self.assertEqual(expected_zeros, np.sum(hidden == 0))
+      self.assertEqual(expected_zeros, np.sum(mask == 0))
+      self.assertAllEqual(mask == 0, hidden == 0)
+      if keep_prob > 1e-5:
+        self.assertEqual(
+            mask.size - expected_zeros,
+            np.sum(np.abs(mask - 1 / keep_prob) < 1e-7))
+
+  @parameterized.parameters(
       (True, False, False),
       (False, True, False),
       (False, False, True)

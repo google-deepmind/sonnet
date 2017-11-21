@@ -36,7 +36,7 @@ def with_deprecation_warning(fn, extra_message=''):
     if extra_message not in _DONE_WARN:
       tf.logging.warning(
           'Sonnet nest is deprecated. Please use '
-          'tf.contrib.framework.nest instead'
+          'tf.contrib.framework.nest instead. '
           + extra_message
       )
       _DONE_WARN[extra_message] = True

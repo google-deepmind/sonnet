@@ -91,6 +91,7 @@ from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU
 from sonnet.python.modules.gated_rnn import LSTM
 from sonnet.python.modules.gated_rnn import lstm_with_recurrent_dropout
+from sonnet.python.modules.gated_rnn import lstm_with_zoneout
 from sonnet.python.modules.layer_norm import LayerNorm
 from sonnet.python.modules.pondering_rnn import ACTCore
 from sonnet.python.modules.residual import Residual

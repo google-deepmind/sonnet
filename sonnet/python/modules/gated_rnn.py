@@ -428,14 +428,115 @@ class RecurrentDropoutWrapper(rnn_core.RNNCore):
   def output_size(self):
     return self._core.output_size
 
-  @property
-  def without_dropout(self):
-    return self._core
-
 
 def lstm_with_recurrent_dropout(hidden_size, keep_prob=0.5, **kwargs):
+  """LSTM with recurrent dropout.
+
+  Args:
+    hidden_size: the LSTM hidden size.
+    keep_prob: the probability to keep an entry when applying dropout.
+    **kwargs: Extra keyword arguments to pass to the LSTM.
+
+  Returns:
+    A tuple (train_lstm, test_lstm) where train_lstm is an LSTM with
+    recurrent dropout enabled to be used for training and test_lstm
+    is the same LSTM without recurrent dropout.
+  """
+
   lstm = LSTM(hidden_size, **kwargs)
-  return RecurrentDropoutWrapper(lstm, (keep_prob, None))
+  return RecurrentDropoutWrapper(lstm, (keep_prob, None)), lstm
+
+
+class ZoneoutWrapper(rnn_core.RNNCore):
+  """Wraps an RNNCore so that zoneout can be applied.
+
+  Zoneout was introduced in https://arxiv.org/abs/1606.01305
+  It consists of randomly freezing some RNN state in the same way recurrent
+  dropout would replace this state with zero.
+  """
+
+  def __init__(self, core, keep_probs, is_training):
+    """Builds a new wrapper around a given core.
+
+    Args:
+      core: the RNN core to be wrapped.
+      keep_probs: the probabilities to use the updated states rather than
+        keeping the old state values. This is one minus the probability
+        that zoneout gets applied.
+        This should have the same structure has core.init_state. No zoneout is
+        applied for leafs set to None.
+      is_training: when set, apply some stochastic zoneout. Otherwise perform
+        a linear combination of the previous state and the current state based
+        on the zoneout probability.
+    """
+
+    super(ZoneoutWrapper, self).__init__(
+        custom_getter=None, name=core.module_name + "_zoneout")
+    self._core = core
+    self._keep_probs = keep_probs
+    self._is_training = is_training
+
+  def _build(self, inputs, prev_state):
+    output, next_state = self._core(inputs, prev_state)
+
+    def apply_zoneout(keep_prob, next_s, prev_s):
+      if keep_prob is None:
+        return next_s
+      if self._is_training:
+        diff = next_s - prev_s
+        # The dropout returns 0 with probability 1 - keep_prob and in this case
+        # this function returns prev_s
+        # It returns diff / keep_prob otherwise and then this function returns
+        # prev_s + diff = next_s
+        return prev_s + tf.nn.dropout(diff, keep_prob) * keep_prob
+      else:
+        return prev_s * (1 - keep_prob) + next_s * keep_prob
+
+    next_state = tf.contrib.framework.nest.map_structure(
+        apply_zoneout, self._keep_probs, next_state, prev_state)
+
+    return output, next_state
+
+  def initial_state(self, batch_size, dtype=tf.float32, trainable=False,
+                    trainable_initializers=None, trainable_regularizers=None,
+                    name=None):
+    """Builds the default start state tensor of zeros."""
+    return self._core.initial_state(
+        batch_size, dtype=dtype, trainable=trainable,
+        trainable_initializers=trainable_initializers,
+        trainable_regularizers=trainable_regularizers, name=name)
+
+  @property
+  def state_size(self):
+    return self._core.state_size
+
+  @property
+  def output_size(self):
+    return self._core.output_size
+
+
+def lstm_with_zoneout(hidden_size, keep_prob_c=0.5, keep_prob_h=0.95, **kwargs):
+  """LSTM with recurrent dropout.
+
+  Args:
+    hidden_size: the LSTM hidden size.
+    keep_prob_c: the probability to use the new value of the cell state rather
+      than freezing it.
+    keep_prob_h: the probability to use the new value of the hidden state
+      rather than freezing it.
+    **kwargs: Extra keyword arguments to pass to the LSTM.
+
+  Returns:
+    A tuple (train_lstm, test_lstm) where train_lstm is an LSTM with
+    recurrent dropout enabled to be used for training and test_lstm
+    is the same LSTM without zoneout.
+  """
+
+  lstm = LSTM(hidden_size, **kwargs)
+  keep_probs = keep_prob_h, keep_prob_c
+  train_lstm = ZoneoutWrapper(lstm, keep_probs, is_training=True)
+  test_lstm = ZoneoutWrapper(lstm, keep_probs, is_training=False)
+  return train_lstm, test_lstm
 
 
 class BatchNormLSTM(rnn_core.RNNCore):

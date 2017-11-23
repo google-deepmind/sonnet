@@ -101,6 +101,7 @@
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;embed&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs an Embed module.</span>
 
@@ -128,6 +129,10 @@
 <span class="sd">      trainable: if True, the embeddings will be updated during training. If</span>
 <span class="sd">        False, they are fixed to their initial values. If `trainable=False` and</span>
 <span class="sd">        a regularizer is given, the resulting loss stays constant.</span>
+<span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
+<span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
+<span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
+<span class="sd">        documentation for information about the custom_getter API.</span>
 <span class="sd">      name: string. Name for this module.</span>
 
 <span class="sd">    Raises:</span>
@@ -145,7 +150,7 @@
                        <span class="s2">&quot;embedding_dim, initializers, or partitioners is &quot;</span>
                        <span class="s2">&quot;needed.&quot;</span><span class="p">)</span>
 
-    <span class="nb">super</span><span class="p">(</span><span class="n">Embed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Embed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_existing_vocab</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">existing_vocab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_vocab_size</span> <span class="o">=</span> <span class="n">vocab_size</span>

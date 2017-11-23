@@ -152,7 +152,7 @@
     <span class="c1"># If the given custom getter is a dictionary with a per-variable custom</span>
     <span class="c1"># getter, wrap it into a single custom getter.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">_custom_getter_router</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">custom_getter_router</span><span class="p">(</span>
           <span class="n">custom_getter_map</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
           <span class="n">name_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
     <span class="k">else</span><span class="p">:</span>

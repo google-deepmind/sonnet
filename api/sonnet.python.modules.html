@@ -1024,8 +1024,7 @@ performance penalty.</p>
 <span class="o">...</span>
 
 <span class="n">update_ops</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">UPDATE_OPS</span><span class="p">))</span>
-<span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([</span><span class="n">update_ops</span><span class="p">]):</span>
-  <span class="n">train_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">train_op</span><span class="p">)</span>
+<span class="n">train_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">train_op</span><span class="p">,</span> <span class="n">update_ops</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Then, whenever <code class="docutils literal"><span class="pre">train_op</span></code> is run so also are the moving average update
@@ -2202,7 +2201,7 @@ the module does not use bias.</p>
 <p>Modules for embedding integer ids.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.embed.Embed">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.embed.</code><code class="descname">Embed</code><span class="sig-paren">(</span><em>vocab_size=None</em>, <em>embed_dim=None</em>, <em>existing_vocab=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>trainable=True</em>, <em>name='embed'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/embed.html#Embed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.embed.Embed" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.embed.</code><code class="descname">Embed</code><span class="sig-paren">(</span><em>vocab_size=None</em>, <em>embed_dim=None</em>, <em>existing_vocab=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>trainable=True</em>, <em>custom_getter=None</em>, <em>name='embed'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/embed.html#Embed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.embed.Embed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Module for embedding tokens in a low-dimensional space.</p>
 <dl class="attribute">
@@ -3381,6 +3380,32 @@ dictionaries) or None. keys: Iterable of valid keys for
 <p>Raises: KeyError: If an regularizers is provided for a key not in
 <code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided regularizers is not a callable
 function, or if the dict of regularizers is not in fact a dict.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.util.custom_getter_router">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">custom_getter_router</code><span class="sig-paren">(</span><em>custom_getter_map</em>, <em>name_fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#custom_getter_router"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.custom_getter_router" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a custom getter than matches requests to dict of custom getters.</p>
+<p>Custom getters are callables which implement the [custom getter API]
+(<a class="reference external" href="https://www.tensorflow.org/versions/r1.0/api_docs/python/tf/get_variable">https://www.tensorflow.org/versions/r1.0/api_docs/python/tf/get_variable</a>).</p>
+<p>The returned custom getter dispatches calls based on pattern matching
+the name of the requested variable to the keys of custom_getter_map.
+For example,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;.*/w&quot;</span><span class="p">:</span> <span class="n">snt</span><span class="o">.</span><span class="n">custom_getters</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>will match all variables named with the suffix “/w”. The <code class="docutils literal"><span class="pre">name_fn</span></code> is
+provided to allow processing of the name, such as stripping off a scope
+prefix before matching.</p>
+<p>Args: custom_getter_map: Mapping of regular expressions to custom
+getter functions. name_fn: Callable to map variable name through before
+matching to regular expressions. This might, for example, strip off a
+scope prefix.</p>
+<p>Returns: A custom getter.</p>
+<p>Raises: TypeError: If an entry in <code class="docutils literal"><span class="pre">custom_getter_map</span></code> is not a
+callable function.</p>
 </dd></dl>
 
 <dl class="function">

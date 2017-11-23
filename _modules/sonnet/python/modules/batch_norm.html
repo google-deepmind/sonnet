@@ -154,8 +154,7 @@
 <span class="sd">      ...</span>
 
 <span class="sd">      update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))</span>
-<span class="sd">      with tf.control_dependencies([update_ops]):</span>
-<span class="sd">        train_op = tf.group(train_op)</span>
+<span class="sd">      train_op = tf.group(train_op, update_ops)</span>
 
 <span class="sd">  Then, whenever `train_op` is run so also are the moving average update ops.</span>
 

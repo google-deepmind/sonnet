@@ -317,7 +317,7 @@
 <span class="c1"># pylint: enable=protected-access</span>
 
 
-<span class="k">def</span> <span class="nf">_custom_getter_router</span><span class="p">(</span><span class="n">custom_getter_map</span><span class="p">,</span> <span class="n">name_fn</span><span class="p">):</span>
+<div class="viewcode-block" id="custom_getter_router"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.custom_getter_router">[docs]</a><span class="k">def</span> <span class="nf">custom_getter_router</span><span class="p">(</span><span class="n">custom_getter_map</span><span class="p">,</span> <span class="n">name_fn</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Creates a custom getter than matches requests to dict of custom getters.</span>
 
 <span class="sd">  Custom getters are callables which implement the</span>
@@ -385,7 +385,7 @@
       <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;More than one custom_getter matched </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">): </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
           <span class="n">name</span><span class="p">,</span> <span class="n">bare_name</span><span class="p">,</span> <span class="p">[</span><span class="n">pattern</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]))</span>
 
-  <span class="k">return</span> <span class="n">_custom_getter</span>
+  <span class="k">return</span> <span class="n">_custom_getter</span></div>
 
 
 <div class="viewcode-block" id="get_normalized_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_normalized_variable_map">[docs]</a><span class="k">def</span> <span class="nf">get_normalized_variable_map</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span>

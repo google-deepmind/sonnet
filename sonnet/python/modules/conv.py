@@ -45,6 +45,9 @@ ALLOWED_PADDINGS = {SAME, VALID}
 DATA_FORMAT_NCHW = "NCHW"
 DATA_FORMAT_NHWC = "NHWC"
 SUPPORTED_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
+DATA_FORMAT_NCW = "NCW"
+DATA_FORMAT_NWC = "NWC"
+SUPPORTED_1D_DATA_FORMATS = {DATA_FORMAT_NCW, DATA_FORMAT_NWC}
 
 
 def _default_transpose_size(input_shape, stride, kernel_shape=None,
@@ -158,13 +161,15 @@ def _fill_and_one_pad_stride(stride, n, data_format=DATA_FORMAT_NHWC):
   """Expands the provided stride to size n and pads it with 1s."""
   if isinstance(stride, numbers.Integral) or (
       isinstance(stride, collections.Iterable) and len(stride) <= n):
-    if data_format == DATA_FORMAT_NHWC:
+    if data_format == DATA_FORMAT_NHWC or data_format == DATA_FORMAT_NWC:
       return (1,) + _fill_shape(stride, n) + (1,)
-    elif data_format == DATA_FORMAT_NCHW:
+    elif data_format == DATA_FORMAT_NCHW or data_format == DATA_FORMAT_NCW:
       return (1, 1,) + _fill_shape(stride, n)
     else:
-      raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+      raise ValueError(
+          "Invalid data_format {:s}. Allowed formats "
+          "{:s}".format(data_format,
+                        SUPPORTED_DATA_FORMATS | SUPPORTED_1D_DATA_FORMATS))
 
   elif isinstance(stride, collections.Iterable) and len(stride) == n + 2:
     return stride
@@ -953,7 +958,8 @@ class Conv1D(base.AbstractModule, base.Transposable):
 
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, custom_getter=None,
+               partitioners=None, regularizers=None,
+               data_format=DATA_FORMAT_NWC, custom_getter=None,
                name="conv_1d"):
     """Constructs a Conv1D module.
 
@@ -972,7 +978,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
       stride: Sequence of kernel strides (of size 1), or integer that is used to
           define stride in all dimensions.
       rate: Sequence of dilation rates (of size 1), or integer that is used to
-          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          define dilation rate in all dimensions. 1 corresponds to standard
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
@@ -991,6 +997,9 @@ class Conv1D(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NWC), or the
+          second dimension (NCW).
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -1007,6 +1016,8 @@ class Conv1D(base.AbstractModule, base.Transposable):
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given data_format is not a supported format (see
+        SUPPORTED_1D_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1018,9 +1029,21 @@ class Conv1D(base.AbstractModule, base.Transposable):
     self._input_shape = None
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 1,
                                                           "kernel")
+    if data_format not in SUPPORTED_1D_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+    self._data_format = data_format
     # The following is for backwards-compatibility from when we used to accept
     # 3-strides of the form [1, m, 1].
     if isinstance(stride, collections.Iterable) and len(stride) == 3:
+      if self._data_format == DATA_FORMAT_NWC:
+        if not stride[0] == stride[2] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and last element must be 1.")
+      elif self._data_format == DATA_FORMAT_NCW:
+        if not stride[0] == stride[1] == 1:
+          raise base.IncompatibleShapeError(
+              "Invalid stride: First and second element must be 1.")
       self._stride = tuple(stride)[1:-1]
     else:
       self._stride = _fill_and_verify_parameter_shape(stride, 1, "stride")
@@ -1078,11 +1101,14 @@ class Conv1D(base.AbstractModule, base.Transposable):
           "Input Tensor must have shape (batch_size, input_length, input_"
           "channels)")
 
-    if self._input_shape[2] is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
+    if self._data_format == DATA_FORMAT_NCW:
+      input_channels = self._input_shape[1]
     else:
       input_channels = self._input_shape[2]
+
+    if input_channels is None:
+      raise base.UnderspecifiedError(
+          "Number of input channels must be known at module build time")
 
     if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError(
@@ -1109,7 +1135,8 @@ class Conv1D(base.AbstractModule, base.Transposable):
                               regularizer=self._regularizers.get("w", None))
 
     outputs = tf.nn.convolution(inputs, self._w, strides=self._stride,
-                                padding=self._padding, dilation_rate=self._rate)
+                                padding=self._padding, dilation_rate=self._rate,
+                                data_format=self._data_format)
 
     if self._use_bias:
       self._b = tf.get_variable("b",
@@ -1117,7 +1144,12 @@ class Conv1D(base.AbstractModule, base.Transposable):
                                 initializer=self._initializers["b"],
                                 partitioner=self._partitioners.get("b", None),
                                 regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
+
+      if self._data_format == DATA_FORMAT_NCW:
+        # tf.nn.bias_add does not accept a 1D input tensor in NCW data format.
+        outputs += tf.reshape(self._b, [1, self.output_channels, 1])
+      else:
+        outputs = tf.nn.bias_add(outputs, self._b, data_format="NHWC")
 
     return outputs
 
@@ -1144,7 +1176,7 @@ class Conv1D(base.AbstractModule, base.Transposable):
     """Returns the stride."""
     # Backwards compatibility with old stride format.
 
-    return (1,) + self._stride + (1,)
+    return _fill_and_one_pad_stride(self._stride, 1, self._data_format)
 
   @property
   def rate(self):
@@ -1185,6 +1217,11 @@ class Conv1D(base.AbstractModule, base.Transposable):
   def regularizers(self):
     """Returns the regularizers dictionary."""
     return self._regularizers
+
+  @property
+  def data_format(self):
+    """Returns the data format."""
+    return self._data_format
 
   # Implement Transposable interface
   def transpose(self, name=None):
@@ -1566,6 +1603,7 @@ class CausalConv1D(Conv1D):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               data_format=DATA_FORMAT_NWC,
                custom_getter=None,
                name="causal_conv_1d"):
     """Constructs a CausalConv1D module.
@@ -1581,7 +1619,7 @@ class CausalConv1D(Conv1D):
       stride: Sequence of kernel strides (of size 1), or integer that is used to
           define stride in all dimensions.
       rate: Sequence of dilation rates (of size 1), or integer that is used to
-          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          define dilation rate in all dimensions. 1 corresponds to standard
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
       use_bias: Whether to include bias parameters. Default `True`.
@@ -1599,6 +1637,9 @@ class CausalConv1D(Conv1D):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NWC), or the
+          second dimension (NCW).
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -1614,6 +1655,8 @@ class CausalConv1D(Conv1D):
           the given rate is not a sequence of two integers.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
+      ValueError: If the given data_format is not a supported format (see
+        SUPPORTED_1D_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1629,6 +1672,7 @@ class CausalConv1D(Conv1D):
         initializers=initializers,
         partitioners=partitioners,
         regularizers=regularizers,
+        data_format=data_format,
         custom_getter=custom_getter,
         name=name)
 
@@ -1666,12 +1710,15 @@ class CausalConv1D(Conv1D):
           "Input Tensor must have shape (batch_size, input_length, input_"
           "channels)")
 
-
-    if self._input_shape[2] is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
+    if self._data_format == DATA_FORMAT_NCW:
+      input_channels = self._input_shape[1]
     else:
       input_channels = self._input_shape[2]
+
+
+    if input_channels is None:
+      raise base.UnderspecifiedError(
+          "Number of input channels must be known at module build time")
 
     if not tf.float32.is_compatible_with(inputs.dtype):
       raise TypeError("Input must have dtype tf.float32, but dtype was {}".
@@ -1695,14 +1742,18 @@ class CausalConv1D(Conv1D):
         regularizer=self._regularizers.get("w", None))
 
     pad_amount = int((self._kernel_shape[0] - 1) * self._rate[0])
-    padded_inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
+    if self._data_format == DATA_FORMAT_NCW:
+      padded_inputs = tf.pad(inputs, paddings=[[0, 0], [0, 0], [pad_amount, 0]])
+    else:
+      padded_inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
 
     outputs = tf.nn.convolution(
         padded_inputs,
         self._w,
         strides=self._stride,
         padding=VALID,
-        dilation_rate=self._rate)
+        dilation_rate=self._rate,
+        data_format=self._data_format)
 
     if self._use_bias:
       self._b = tf.get_variable(
@@ -1711,7 +1762,12 @@ class CausalConv1D(Conv1D):
           initializer=self._initializers["b"],
           partitioner=self._partitioners.get("b", None),
           regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
+
+      if self._data_format == DATA_FORMAT_NCW:
+        # tf.nn.bias_add does not accept a 1D input tensor in NCW data format.
+        outputs += tf.reshape(self._b, [1, self.output_channels, 1])
+      else:
+        outputs = tf.nn.bias_add(outputs, self._b, data_format="NHWC")
 
     return outputs
 

@@ -56,7 +56,7 @@ def _get_flat_core_sizes(cores):
 def _get_shape_without_batch_dimension(tensor_nest):
   """Converts Tensor nest to a TensorShape nest, removing batch dimension."""
   def _strip_batch_and_convert_to_shape(tensor):
-    return tensor[0].get_shape()
+    return tensor.get_shape()[1:]
   return nest.map_structure(_strip_batch_and_convert_to_shape, tensor_nest)
 
 

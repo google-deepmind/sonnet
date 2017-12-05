@@ -54,6 +54,9 @@ import tensorflow as tf
 from tensorflow.python.ops import array_ops
 
 
+LSTMState = collections.namedtuple("LSTMState", ("hidden", "cell"))
+
+
 class LSTM(rnn_core.RNNCore):
   """LSTM recurrent network cell with optional peepholes & layer normalization.
 
@@ -220,7 +223,7 @@ class LSTM(rnn_core.RNNCore):
 
     Returns:
       A tuple (output, next_state) where 'output' is a Tensor of size
-      `[batch_size, hidden_size]` and 'next_state' is a tuple
+      `[batch_size, hidden_size]` and 'next_state' is a `LSTMState` namedtuple
       (next_hidden, next_cell) where `next_hidden` and `next_cell` have size
       `[batch_size, hidden_size]`. If `projection_size` is specified, then
       `next_hidden` will have size `[batch_size, projection_size]`.
@@ -272,7 +275,7 @@ class LSTM(rnn_core.RNNCore):
     if self._use_projection:
       next_hidden = tf.matmul(next_hidden, self._w_h_projection)
 
-    return next_hidden, (next_hidden, next_cell)
+    return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
 
   def _create_gate_variables(self, input_shape, dtype):
     """Initialize the variables used for the gates."""
@@ -335,8 +338,8 @@ class LSTM(rnn_core.RNNCore):
   @property
   def state_size(self):
     """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
-    return (tf.TensorShape([self._hidden_state_size]),
-            tf.TensorShape([self._hidden_size]))
+    return LSTMState(tf.TensorShape([self._hidden_state_size]),
+                     tf.TensorShape([self._hidden_size]))
 
   @property
   def output_size(self):
@@ -444,7 +447,7 @@ def lstm_with_recurrent_dropout(hidden_size, keep_prob=0.5, **kwargs):
   """
 
   lstm = LSTM(hidden_size, **kwargs)
-  return RecurrentDropoutWrapper(lstm, (keep_prob, None)), lstm
+  return RecurrentDropoutWrapper(lstm, LSTMState(keep_prob, None)), lstm
 
 
 class ZoneoutWrapper(rnn_core.RNNCore):
@@ -533,7 +536,7 @@ def lstm_with_zoneout(hidden_size, keep_prob_c=0.5, keep_prob_h=0.95, **kwargs):
   """
 
   lstm = LSTM(hidden_size, **kwargs)
-  keep_probs = keep_prob_h, keep_prob_c
+  keep_probs = LSTMState(keep_prob_h, keep_prob_c)
   train_lstm = ZoneoutWrapper(lstm, keep_probs, is_training=True)
   test_lstm = ZoneoutWrapper(lstm, keep_probs, is_training=False)
   return train_lstm, test_lstm

@@ -387,7 +387,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         inputs,
         dtype=tf.float32)
     _, (next_train_h, next_train_c) = train_cell(
-        inputs[:, 0], (train_h, train_c))
+        inputs[:, 0], snt.LSTMState(train_h, train_c))
     valid_output, _ = tf.nn.dynamic_rnn(
         test_cell,
         inputs,
@@ -819,11 +819,11 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     unnamed_init_state = lstm.initial_state(4, trainable=True)
     named_init_state = lstm.initial_state(4, trainable=True, name="bar")
     self.assertEqual(unnamed_init_state[0].name,
-                     "foo_initial_state/state_0_tiled:0")
+                     "foo_initial_state/state_hidden_tiled:0")
     self.assertEqual(unnamed_init_state[1].name,
-                     "foo_initial_state/state_1_tiled:0")
-    self.assertEqual(named_init_state[0].name, "bar/state_0_tiled:0")
-    self.assertEqual(named_init_state[1].name, "bar/state_1_tiled:0")
+                     "foo_initial_state/state_cell_tiled:0")
+    self.assertEqual(named_init_state[0].name, "bar/state_hidden_tiled:0")
+    self.assertEqual(named_init_state[1].name, "bar/state_cell_tiled:0")
 
 
 class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):

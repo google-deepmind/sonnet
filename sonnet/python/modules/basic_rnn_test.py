@@ -535,27 +535,27 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
     deep_rnn_state = deep_rnn.initial_state(batch_size, trainable=True)
     self.assertEqual(
         deep_rnn_state[0][0].name,
-        "deep_rnn_initial_state/a_initial_state/state_0_tiled:0")
+        "deep_rnn_initial_state/a_initial_state/state_hidden_tiled:0")
     self.assertEqual(
         deep_rnn_state[0][1].name,
-        "deep_rnn_initial_state/a_initial_state/state_1_tiled:0")
+        "deep_rnn_initial_state/a_initial_state/state_cell_tiled:0")
     self.assertEqual(
         deep_rnn_state[1][0].name,
-        "deep_rnn_initial_state/b_initial_state/state_0_tiled:0")
+        "deep_rnn_initial_state/b_initial_state/state_hidden_tiled:0")
     self.assertEqual(
         deep_rnn_state[1][1].name,
-        "deep_rnn_initial_state/b_initial_state/state_1_tiled:0")
+        "deep_rnn_initial_state/b_initial_state/state_cell_tiled:0")
 
     other_start_state = deep_rnn.initial_state(
         batch_size, trainable=True, name="blah")
     self.assertEqual(other_start_state[0][0].name,
-                     "blah/a_initial_state/state_0_tiled:0")
+                     "blah/a_initial_state/state_hidden_tiled:0")
     self.assertEqual(other_start_state[0][1].name,
-                     "blah/a_initial_state/state_1_tiled:0")
+                     "blah/a_initial_state/state_cell_tiled:0")
     self.assertEqual(other_start_state[1][0].name,
-                     "blah/b_initial_state/state_0_tiled:0")
+                     "blah/b_initial_state/state_hidden_tiled:0")
     self.assertEqual(other_start_state[1][1].name,
-                     "blah/b_initial_state/state_1_tiled:0")
+                     "blah/b_initial_state/state_cell_tiled:0")
 
   def testSkipConnectionOptions(self):
     batch_size = 3

@@ -98,7 +98,7 @@ class AbstractModule(object):
     """
     if _sentinel is not None:
       raise ValueError("Calling AbstractModule.__init__ without named "
-                       "arguments is deprecated.")
+                       "arguments is not supported.")
 
     if name is None:
       name = util.to_snake_case(self.__class__.__name__)

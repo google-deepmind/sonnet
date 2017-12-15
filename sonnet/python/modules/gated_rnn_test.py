@@ -336,7 +336,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
       if deterministic:
         self.assertAllClose(train_out[0], train_out[1])
       else:
-        self.assertGreater(np.max(train_out[0] - train_out[1]), 0.1)
+        self.assertGreater(np.max(train_out[0] - train_out[1]), 0.002)
 
       self.assertEqual(expected_zeros, np.sum(hidden == 0))
       self.assertEqual(expected_zeros, np.sum(mask == 0))
@@ -348,7 +348,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
       (1 - 1e-8, 0, 0),
-      (0.5, 4, 6),
+      (0.5, 6, 6),
       (1e-8, 14, 14)
   )
   def testZoneout(self, keep_prob, expected_frozen_h, expected_frozen_c):
@@ -421,7 +421,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         # Ensure that the training output is not deterministic.
         self.assertGreater(
             np.max(np.abs(outputs["train_out"][0] - outputs["train_out"][1])),
-            0.1)
+            0.04)
 
       self.assertEqual(
           expected_frozen_h,

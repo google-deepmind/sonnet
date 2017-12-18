@@ -247,15 +247,17 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       convolution_t = convolution.transpose()
       self.assertEqual(convolution_t.partitioners, convolution.partitioners)
 
-  @parameterized.parameters(*itertools.product(modules, (True, False)))
-  def testVariables(self, module_info, use_bias):
+  @parameterized.parameters(*itertools.product(modules,
+                                               (True, False),
+                                               (tf.float16, tf.float32)))
+  def testVariables(self, module_info, use_bias, dtype):
     """The correct number of variables are created."""
     module, num_input_dims, module_kwargs = module_info
 
     mod_name = "module"
 
     input_shape = (10,) * (num_input_dims + 2)
-    inputs = tf.placeholder(tf.float32, input_shape)
+    inputs = tf.placeholder(dtype, input_shape)
 
     with tf.variable_scope("scope"):
       conv_mod = module(name=mod_name, use_bias=use_bias, **module_kwargs)
@@ -267,6 +269,8 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       conv_mod.get_variables()
 
     output = conv_mod(inputs)
+
+    self.assertEqual(dtype, output.dtype)
 
     # Check that the graph and module has the correct number of variables: one
     # two, or three, depending on module and configuration.
@@ -535,9 +539,9 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
                        initializers=create_constant_initializers(
                            1.0, 1.0, use_bias))
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
-      err = "Input must have dtype tf.float32.*"
+      err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
@@ -912,7 +916,7 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=(4, 4), mask=mask)(x)
     self.assertTrue(str(cm.exception).startswith(
-        "Mask needs to have dtype float32 or float64"))
+        "Mask needs to have dtype float16, float32 or float64"))
 
 
 class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
@@ -1236,9 +1240,9 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
                        initializers=create_constant_initializers(
                            1.0, 1.0, use_bias))
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([1, 5, 1]), dtype=dtype)
-      err = "Input must have dtype tf.float32.*"
+      err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
@@ -1588,10 +1592,10 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
         name="conv1",
         use_bias=use_bias)
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([batch_size, in_length,
                                in_channels]), dtype=dtype)
-      err = "Input must have dtype tf.float32.*"
+      err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
@@ -1997,9 +2001,9 @@ class DepthwiseConv2DTest(parameterized.TestCase, tf.test.TestCase):
         use_bias=use_bias,
         initializers=create_constant_initializers(1.0, 1.0, use_bias))
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
-      err = "Input must have dtype tf.float32.*"
+      err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
@@ -2335,9 +2339,9 @@ class SeparableConv2DTest(parameterized.TestCase, tf.test.TestCase):
         initializers=create_separable_constant_initializers(
             1.0, 1.0, 1.0, use_bias))
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
-      err = "Input must have dtype tf.float32.*"
+      err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
         conv1(x)
 
@@ -2740,9 +2744,9 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
                            "b": tf.constant_initializer(1.0),
                        })
 
-    for dtype in (tf.float16, tf.float64):
+    for dtype in (tf.uint32, tf.float64):
       x = tf.constant(np.ones([1, 5, 5, 5, 1]), dtype=dtype)
-      self.assertRaisesRegexp(TypeError, "Input must have dtype tf.float32.*",
+      self.assertRaisesRegexp(TypeError, "Input must have dtype tf.float.*",
                               conv1, x)
 
   @parameterized.named_parameters(

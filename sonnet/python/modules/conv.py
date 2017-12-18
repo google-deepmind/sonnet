@@ -3082,13 +3082,11 @@ class Conv3DTranspose(base.AbstractModule, base.Transposable):
     bias_shape = (self.output_channels,)
 
     if "w" not in self._initializers:
-      fan_in = weight_shape[:3] + (weight_shape[4],)
-      stddev = 1 / math.sqrt(np.prod(fan_in))
-      self._initializers["w"] = tf.truncated_normal_initializer(stddev=stddev)
+      fan_in_shape = weight_shape[:3] + (weight_shape[4],)
+      self._initializers["w"] = create_weight_initializer(fan_in_shape)
 
     if "b" not in self._initializers and self._use_bias:
-      stddev = 1 / math.sqrt(np.prod(bias_shape))
-      self._initializers["b"] = tf.truncated_normal_initializer(stddev=stddev)
+      self._initializers["b"] = create_bias_initializer(bias_shape)
 
     self._w = tf.get_variable("w",
                               shape=weight_shape,

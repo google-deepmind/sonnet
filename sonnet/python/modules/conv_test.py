@@ -2797,6 +2797,23 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
+  def testBiasInitializerIsZeroByDefault(self):
+    """Test that the default initializer for the bias consists of zeros."""
+
+    conv1 = snt.Conv3D(
+        output_channels=5,
+        kernel_shape=3,
+        stride=1)
+
+    conv1(tf.placeholder(tf.float32, [5, 10, 10, 10, 7]))
+
+    with self.test_session():
+      tf.variables_initializer([conv1.w, conv1.b]).run()
+
+      self.assertAllClose(
+          conv1.b.eval(),
+          np.zeros([5], dtype=np.float32))
+
   @parameterized.named_parameters(
       ("WithBias", True),
       ("WithoutBias", False))
@@ -3024,6 +3041,23 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
       sess.run(outputs)
       with self.assertRaises(tf.errors.InvalidArgumentError):
         sess.run(outputs_2)
+
+  def testBiasInitializerIsZeroByDefault(self):
+    """Test that the default initializer for the bias consists of zeros."""
+
+    conv1 = snt.Conv3DTranspose(
+        output_channels=7,
+        kernel_shape=3,
+        stride=1)
+
+    conv1(tf.placeholder(tf.float32, [7, 10, 10, 10, 5]))
+
+    with self.test_session():
+      tf.variables_initializer([conv1.w, conv1.b]).run()
+
+      self.assertAllClose(
+          conv1.b.eval(),
+          np.zeros([7], dtype=np.float32))
 
   @parameterized.named_parameters(
       ("WithBias", True),

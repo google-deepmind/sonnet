@@ -458,7 +458,9 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
                    use_bias=[True, True, False])
 
     transpose_model = model.transpose(**{param_name: param_value})
-    if isinstance(param_value, collections.Iterable):
+    if isinstance(param_value, collections.Mapping):
+      self.assertDictEqual(param_value, getattr(transpose_model, param_name))
+    elif isinstance(param_value, collections.Iterable):
       self.assertItemsEqual(param_value, getattr(transpose_model, param_name))
     else:
       self.assertEqual(param_value, getattr(transpose_model, param_name))

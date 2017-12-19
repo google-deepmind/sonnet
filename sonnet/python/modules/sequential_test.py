@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
 # Dependency imports
 import mock
 import six
@@ -104,6 +105,24 @@ class SequentialTest(tf.test.TestCase):
 
       first_call_args = mocked_logging_warning.call_args[0]
       self.assertTrue("will always return an empty tuple" in first_call_args[0])
+
+  def testNoLayers(self):
+    # These two should really do the same thing.
+    seq_with_identity = snt.Sequential([tf.identity])
+    seq_with_no_layers = snt.Sequential([])
+
+    inputs = tf.constant(3)
+    identity_output = seq_with_identity(inputs)
+    no_layers_output = seq_with_no_layers(inputs)
+
+    # Make sure output is not a list / tuple, for either of the above cases.
+    self.assertFalse(isinstance(identity_output, collections.Sequence))
+    self.assertFalse(isinstance(no_layers_output, collections.Sequence))
+
+    with self.test_session() as session:
+      identity_output_np, no_layers_output_np = session.run(
+          [identity_output, no_layers_output])
+      self.assertAllEqual(identity_output_np, no_layers_output_np)
 
 
 if __name__ == "__main__":

@@ -88,6 +88,16 @@ class Sequential(base.AbstractModule):
     """
     net = args
 
+    if not self._layers:
+      # If the sequential is passed a single arg, this will end up being
+      # wrapped in an extra layer of tuple by *args. Normally we internally
+      # handle this in the loop below, but if there are no layers we unpack here
+      # in order to make Sequential([]) act like an identity, which seems right.
+      if len(args) == 1:
+        return args[0]
+      else:
+        return args
+
     for layer in self._layers:
       if isinstance(net, tuple):
         net = layer(*net)

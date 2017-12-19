@@ -120,6 +120,17 @@ def _check_nested_callables(dictionary, object_name):
           .format(object_name, key))
 
 
+def _assert_is_dict(maybe_dict, valid_keys):
+  """Raises a TypeError iff `maybe_dict` is not a dict."""
+  # This covers a common mistake when people use incorrect dictionary nesting
+  # for initializers / partitioners etc. The previous error message was quite
+  # opaque, this should be much clearer.
+  if not isinstance(maybe_dict, collections.Mapping):
+    raise TypeError(
+        "Expected a dict with possible keys %s, received %s" %
+        (str(valid_keys), str(maybe_dict)))
+
+
 def check_initializers(initializers, keys):
   """Checks the given initializers.
 
@@ -139,10 +150,12 @@ def check_initializers(initializers, keys):
 
   Raises:
     KeyError: If an initializer is provided for a key not in `keys`.
-    TypeError: If a provided initializer is not a callable function.
+    TypeError: If a provided initializer is not a callable function, or
+      `initializers` is not a Mapping.
   """
   if initializers is None:
     return {}
+  _assert_is_dict(initializers, valid_keys=keys)
 
   keys = set(keys)
 
@@ -178,10 +191,12 @@ def check_partitioners(partitioners, keys):
 
   Raises:
     KeyError: If an partitioner is provided for a key not in `keys`.
-    TypeError: If a provided partitioner is not a callable function.
+    TypeError: If a provided partitioner is not a callable function, or
+      `partitioners` is not a Mapping.
   """
   if partitioners is None:
     return {}
+  _assert_is_dict(partitioners, valid_keys=keys)
 
   keys = set(keys)
 
@@ -217,11 +232,12 @@ def check_regularizers(regularizers, keys):
 
   Raises:
     KeyError: If an regularizers is provided for a key not in `keys`.
-    TypeError: If a provided regularizers is not a callable function, or if the
-      dict of regularizers is not in fact a dict.
+    TypeError: If a provided regularizer is not a callable function, or
+      `regularizers` is not a Mapping.
   """
   if regularizers is None:
     return {}
+  _assert_is_dict(regularizers, valid_keys=keys)
 
   keys = set(keys)
 

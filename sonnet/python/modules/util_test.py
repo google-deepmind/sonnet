@@ -367,25 +367,6 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
         "key_d": tf.contrib.layers.l2_regularizer(scale=0.5)}
     snt.check_regularizers(regularizers=regularizers, keys=keys)
 
-  def testInvalidDicts(self):
-    batch_size = 3
-    # Mistake seen in the wild - https://github.com/deepmind/sonnet/issues/74
-    # Should actually be {'hidden_to_hidden': {'w': some_initializers(), ...}}
-    initializers = {"hidden_to_hidden": tf.truncated_normal_initializer(0, 1)}
-    vanilla_rnn = snt.VanillaRNN(hidden_size=23, initializers=initializers)
-    with self.assertRaisesRegexp(TypeError, "Expected a dict"):
-      vanilla_rnn(tf.zeros([batch_size, 4], dtype=tf.float32),
-                  vanilla_rnn.zero_state(batch_size, dtype=tf.float32))
-
-    # Error: should be a dict mapping strings to partitioners/regularizers.
-    partitioners = tf.fixed_size_partitioner(num_shards=16)
-    with self.assertRaisesRegexp(TypeError, "Expected a dict"):
-      snt.LSTM(hidden_size=42, partitioners=partitioners)
-
-    regularizers = tf.contrib.layers.l1_regularizer(scale=0.5)
-    with self.assertRaisesRegexp(TypeError, "Expected a dict"):
-      snt.GRU(hidden_size=108, regularizers=regularizers)
-
   def testHasVariableScope(self):
     self.assertFalse(snt.has_variable_scope("string"))
     linear = snt.Linear(10)

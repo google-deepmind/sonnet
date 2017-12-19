@@ -536,14 +536,14 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       ("IsTestingBoolVal", False, True, False, True),
       ("IsTestingBoolValMovingAverage", False, False, False, True),
       ("IsTrainingScaleBoolVal", True, False, True, True),
-      ("IsTestingScaleBoolVal", True, True, True, True),
-      ("IsTestingScaleBoolValMovingAverage", True, False, True, True),
+      ("IsTestingScaleBoolVal", False, True, True, True),
+      ("IsTestingScaleBoolValMovingAverage", False, False, True, True),
       ("IsTrainingTensorVal", True, False, False, False),
       ("IsTestingTensorVal", False, True, False, False),
       ("IsTestingTensorValMovingAverage", False, False, False, False),
       ("IsTrainingScaleTensorVal", True, False, True, False),
-      ("IsTestingScaleTensorVal", True, True, True, False),
-      ("IsTestingScaleTensorValMovingAverage", True, False, True, False))
+      ("IsTestingScaleTensorVal", False, True, True, False),
+      ("IsTestingScaleTensorValMovingAverage", False, False, True, False))
   def testFusedBatchNorm(self, is_training, test_local_stats, scale,
                          is_training_python_bool):
     input_shape = (32, 9, 9, 8)

@@ -105,15 +105,6 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       bn7 = snt.BatchNorm(axis=[-1])
       bn7(inputs, is_training=True)
 
-  def testFloat16Error(self):
-    inputs = tf.placeholder(tf.float16, shape=[None, 64, 32, 3])
-    batch_norm = snt.BatchNorm()
-
-    err = (r"BatchNorm does not support `tf\.float16`, insufficient precision "
-           "for calculating sufficient statistics.")
-    with self.assertRaisesRegexp(snt.NotSupportedError, err):
-      batch_norm(inputs, is_training=True)
-
   @parameterized.named_parameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
@@ -128,6 +119,17 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(dtype, batch_norm.moving_variance.dtype.base_dtype)
     self.assertEqual(dtype, batch_norm.gamma.dtype.base_dtype)
     self.assertEqual(dtype, batch_norm.beta.dtype.base_dtype)
+
+  def testFloat16(self):
+    inputs = tf.placeholder(tf.float16, shape=[None, 64, 32, 3])
+    batch_norm = snt.BatchNorm(offset=True, scale=True)
+    output = batch_norm(inputs, is_training=True)
+
+    self.assertEqual(tf.float16, output.dtype)
+    self.assertEqual(tf.float32, batch_norm.moving_mean.dtype.base_dtype)
+    self.assertEqual(tf.float32, batch_norm.moving_variance.dtype.base_dtype)
+    self.assertEqual(tf.float16, batch_norm.gamma.dtype.base_dtype)
+    self.assertEqual(tf.float16, batch_norm.beta.dtype.base_dtype)
 
   def _get_inputs(self, dtype=tf.float32):
     v = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0], dtype=dtype.as_numpy_dtype)
@@ -159,6 +161,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       self.assertAllClose(np.zeros([7, 6]), out_v, rtol=1e-6, atol=1e-6)
 
   @parameterized.named_parameters(
+      ("Float16", tf.float16),
       ("Float32", tf.float32),
       ("Float64", tf.float64),
   )
@@ -220,8 +223,9 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       correct_mm = (1.0 - bn._decay_rate) * v + bn._decay_rate * correct_mm
       correct_mv = np.ones([1, 6]) * bn._decay_rate**2
 
-      self.assertAllClose(np.reshape(correct_mm, [1, 6]), mm)
-      self.assertAllClose(np.reshape(correct_mv, [1, 6]), mv)
+      atol = 1.e-2 if dtype == tf.float16 else 1.e-6
+      self.assertAllClose(np.reshape(correct_mm, [1, 6]), mm, atol=atol)
+      self.assertAllClose(np.reshape(correct_mv, [1, 6]), mv, atol=atol)
 
   def testCheckStatsPython(self):
     """The correct normalization is being used for different Python flags."""
@@ -587,6 +591,34 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
         self.assertAllClose(y1, y2, atol=1e-4)
         self.assertAllClose(mean1, mean2, atol=1e-4)
         self.assertAllClose(var1, var2, atol=1e-4)
+
+  @parameterized.named_parameters(
+      ("IsTraining", True, False),
+      ("IsTesting", False, True),
+      ("IsTestingMovingAverage", False, False))
+  def testFusedBatchNormFloat16(self, is_training, test_local_stats):
+    input_shape = (31, 7, 7, 5)
+    iterations = 3
+    x = tf.placeholder(tf.float16, shape=input_shape)
+    bn1 = snt.BatchNorm(update_ops_collection=None)
+    bn2 = snt.BatchNorm(fused=True, update_ops_collection=None)
+
+    feed_dict = {x: np.random.random(input_shape)}
+
+    o1 = bn1(x, is_training=is_training, test_local_stats=test_local_stats)
+    o2 = bn2(x, is_training=is_training, test_local_stats=test_local_stats)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      params = [
+          o1, o2, bn1._moving_mean, bn1._moving_variance, bn2._moving_mean,
+          bn2._moving_variance
+      ]
+      for _ in range(iterations):
+        y1, y2, mean1, var1, mean2, var2 = sess.run(params, feed_dict=feed_dict)
+        self.assertAllClose(y1, y2, atol=1e-2)
+        self.assertAllClose(mean1, mean2, atol=1e-2)
+        self.assertAllClose(var1, var2, atol=1e-2)
 
 
 if __name__ == "__main__":

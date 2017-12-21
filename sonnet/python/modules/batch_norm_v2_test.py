@@ -13,11 +13,13 @@
 # limitations under the License.
 # ============================================================================
 
-"""Tests for sonnet.python.modules.batch_norm."""
+"""Tests for sonnet.python.modules.batch_norm_v2."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+
+import os
 
 # Dependency imports
 from absl.testing import parameterized
@@ -25,15 +27,13 @@ import numpy as np
 import sonnet as snt
 import tensorflow as tf
 
-from tensorflow.python.ops import variables
 
-
-class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
+class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
 
   def testConstruct(self):
     inputs = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
 
-    batch_norm1 = snt.BatchNorm(offset=False, scale=False)
+    batch_norm1 = snt.BatchNormV2(offset=False, scale=False, fused=False)
     batch_norm1(inputs, is_training=True)
 
     err = "Batch normalization doesn't have an offset, so no beta"
@@ -44,15 +44,15 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(snt.Error, err):
       _ = batch_norm1.gamma
 
-    batch_norm2 = snt.BatchNorm(offset=True, scale=False)
+    batch_norm2 = snt.BatchNormV2(offset=True, scale=False)
     batch_norm2(inputs, is_training=True)
     _ = batch_norm2.beta
 
-    batch_norm3 = snt.BatchNorm(offset=False, scale=True)
+    batch_norm3 = snt.BatchNormV2(offset=False, scale=True)
     batch_norm3(inputs, is_training=True)
     _ = batch_norm3.gamma
 
-    batch_norm4 = snt.BatchNorm(offset=True, scale=True)
+    batch_norm4 = snt.BatchNormV2(offset=True, scale=True)
     batch_norm4(inputs, is_training=True)
     _ = batch_norm4.beta
     _ = batch_norm4.gamma
@@ -68,50 +68,46 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
                 is_training=is_training_ph,
                 test_local_stats=test_local_stats_ph)
 
-  def testReductionIndices(self):
+  @parameterized.parameters(
+      ["NC", "NWC", "NHWC", "NDHWC", "NCW", "NCHW", "NCDHW"])
+  def testDataFormats(self, data_format):
     """Check that differing reduction indices give the correct output shape."""
+    dim_sizes = {
+        "N": None,
+        "D": 10,
+        "H": 64,
+        "W": 32,
+        "C": 3
+    }
+    inputs = tf.placeholder_with_default(
+        tf.zeros([dim_sizes[dim_name] or 5 for dim_name in data_format]),
+        [dim_sizes[dim_name] for dim_name in data_format])
 
-    inputs = tf.placeholder(tf.float32, shape=[None, 64, 32, 3])
+    bn = snt.BatchNormV2(data_format=data_format, offset=False)
+    bn(inputs, is_training=True)
+    mean_shape = bn.moving_mean.get_shape()
+    correct_mean_shape = [
+        dim_sizes["C"] if dim_name == "C" else 1 for dim_name in data_format
+    ]
+    self.assertEqual(mean_shape, correct_mean_shape)
 
-    bn1 = snt.BatchNorm(axis=[0], offset=False)
-    bn1(inputs, is_training=True)
-    self.assertEqual(bn1.moving_mean.get_shape(), (1, 64, 32, 3))
-
-    bn2 = snt.BatchNorm(axis=[0, 1], offset=False)
-    bn2(inputs, is_training=True)
-    self.assertEqual(bn2.moving_mean.get_shape(), (1, 1, 32, 3))
-
-    bn3 = snt.BatchNorm(axis=[0, 2], offset=False)
-    bn3(inputs, is_training=True)
-    self.assertEqual(bn3.moving_mean.get_shape(), (1, 64, 1, 3))
-
-    bn4 = snt.BatchNorm(offset=False)
-    bn4(inputs, is_training=True)
-    self.assertEqual(bn4.moving_mean.get_shape(), (1, 1, 1, 3))
-
-    err = (r"Too many indices specified in axis: "
-           r"len\(\[0, 1, 2, 3, 0\]\) > len\(\(\?, 64, 32, 3\)\)")
-    with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
-      bn5 = snt.BatchNorm(axis=[0, 1, 2, 3, 0])
-      bn5(inputs, is_training=True)
-
-    err = r"One or more index in axis is too large for input shape: \[4\] >= 4"
-    with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
-      bn6 = snt.BatchNorm(axis=[4])
-      bn6(inputs, is_training=True)
-
-    err = r"Indices in axis must be non-negative: \[-1\] < 0"
-    with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
-      bn7 = snt.BatchNorm(axis=[-1])
-      bn7(inputs, is_training=True)
+    for use_gpu in [True, False]:
+      with self.test_session(use_gpu=use_gpu) as sess:
+        for bn_data_format in "NC NWC NHWC NDHWC NCW NCHW NCDHW".split():
+          if len(data_format) != len(bn_data_format):
+            bn = snt.BatchNormV2(data_format=bn_data_format, offset=False)
+            err = r"Incorrect data format {} for input shape .*".format(
+                bn_data_format)
+            with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
+              outputs = bn(inputs, is_training=True)
+              sess.run(outputs)
 
   @parameterized.named_parameters(
       ("Float32", tf.float32),
-      ("Float64", tf.float64),
   )
   def testDataType(self, dtype):
     inputs = tf.placeholder(dtype, shape=[None, 64, 32, 3])
-    batch_norm = snt.BatchNorm(offset=True, scale=True)
+    batch_norm = snt.BatchNormV2(offset=True, scale=True)
     output = batch_norm(inputs, is_training=True)
 
     self.assertEqual(dtype, output.dtype)
@@ -122,7 +118,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
   def testFloat16(self):
     inputs = tf.placeholder(tf.float16, shape=[None, 64, 32, 3])
-    batch_norm = snt.BatchNorm(offset=True, scale=True)
+    batch_norm = snt.BatchNormV2(offset=True, scale=True, fused=False)
     output = batch_norm(inputs, is_training=True)
 
     self.assertEqual(tf.float16, output.dtype)
@@ -144,7 +140,12 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     _, _, inputs = self._get_inputs()
 
     # Use small decay_rate to update faster.
-    bn = snt.BatchNorm(offset=False, scale=False, decay_rate=0.1)
+    bn = snt.BatchNormV2(
+        data_format="NC",
+        offset=False,
+        scale=False,
+        decay_rate=0.1,
+        update_ops_collection=tf.GraphKeys.UPDATE_OPS)
     out1 = bn(inputs, is_training=False, test_local_stats=False)
 
     # Build the update ops.
@@ -166,7 +167,6 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
   @parameterized.named_parameters(
       ("Float16", tf.float16),
       ("Float32", tf.float32),
-      ("Float64", tf.float64),
   )
   def testCheckStatsDouble(self, dtype):
     """The correct statistics are being computed for double connection.
@@ -195,7 +195,12 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     """
 
     v, _, inputs = self._get_inputs(dtype)
-    bn = snt.BatchNorm(offset=False, scale=False, decay_rate=0.9)
+    bn = snt.BatchNormV2(
+        data_format="NC",
+        offset=False,
+        scale=False,
+        decay_rate=0.9,
+        update_ops_collection=tf.GraphKeys.UPDATE_OPS)
 
     with tf.name_scope("net1"):
       bn(inputs, is_training=True)
@@ -227,6 +232,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       correct_mv = np.ones([1, 6]) * bn._decay_rate**2
 
       atol = 1.e-2 if dtype == tf.float16 else 1.e-6
+
       self.assertAllClose(np.reshape(correct_mm, [1, 6]), mm, atol=atol)
       self.assertAllClose(np.reshape(correct_mv, [1, 6]), mv, atol=atol)
 
@@ -235,7 +241,13 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     v, input_v, inputs = self._get_inputs()
 
-    bn = snt.BatchNorm(offset=False, scale=False, decay_rate=0.5)
+    bn = snt.BatchNormV2(
+        data_format="NC",
+        offset=False,
+        scale=False,
+        decay_rate=0.5,
+        update_ops_collection=tf.GraphKeys.UPDATE_OPS
+    )
     out1 = bn(inputs, is_training=True, test_local_stats=True)
     out2 = bn(inputs, is_training=False, test_local_stats=True)
     out3 = bn(inputs, is_training=False, test_local_stats=False)
@@ -264,7 +276,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
       # Out2: Tested using local batch stats.
       # Better numerical precision due to using shifted estimators.
-      self.assertAllClose(np.zeros([7, 6]), out2_)
+      self.assertAllClose(np.zeros([7, 6]), out2_, rtol=1e-6, atol=1e-5)
 
       # Out3: Tested using moving average stats.
       self.assertAllClose(
@@ -281,10 +293,12 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     v, input_v, inputs = self._get_inputs()
 
-    bn = snt.BatchNorm(offset=False,
-                       scale=False,
-                       decay_rate=0.5,
-                       update_ops_collection=update_ops_collection)
+    bn = snt.BatchNormV2(
+        data_format="NC",
+        offset=False,
+        scale=False,
+        decay_rate=0.5,
+        update_ops_collection=update_ops_collection)
 
     is_training = tf.placeholder(tf.bool)
     test_local_stats = tf.placeholder(tf.bool)
@@ -331,7 +345,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       self.assertAllClose(mm1, mm2)
       self.assertAllClose(mv1, mv2)
 
-      self.assertAllClose(np.zeros([7, 6]), out_v)
+      self.assertAllClose(np.zeros([7, 6]), out_v, rtol=1e-6, atol=1e-5)
 
       # Run with `is_training=False`, `test_local_stats=False`.
       # Should have used moving average stats.
@@ -353,7 +367,10 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     inputs1 = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
     inputs2 = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
 
-    bn = snt.BatchNorm(offset=True, scale=True)
+    bn = snt.BatchNormV2(
+        offset=True,
+        scale=True,
+        update_ops_collection=tf.GraphKeys.UPDATE_OPS)
 
     bn(inputs1, is_training=True)
     bn(inputs2, is_training=False)
@@ -365,12 +382,15 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(len(update_ops), 2)
 
   def testUpdatesInsideCond(self):
-    """Demonstrate that updates inside a cond fail.
-
-    """
+    """Demonstrate that updates inside a cond fail."""
 
     _, input_v, inputs = self._get_inputs()
-    bn = snt.BatchNorm(offset=False, scale=False, decay_rate=0.5)
+    bn = snt.BatchNormV2(
+        data_format="NC",
+        offset=False,
+        scale=False,
+        decay_rate=0.5,
+        update_ops_collection=tf.GraphKeys.UPDATE_OPS)
     condition = tf.placeholder(tf.bool)
     cond = tf.cond(condition,
                    lambda: bn(inputs, is_training=True),
@@ -400,7 +420,8 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
-    bn = snt.BatchNorm(offset=False, scale=False)
+    bn = snt.BatchNormV2(
+        offset=False, scale=False, data_format="NWC")
 
     # Outputs should be equal to inputs.
     out = bn(inputs,
@@ -422,30 +443,30 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
   def testInvalidInitializerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
-      snt.BatchNorm(
+      snt.BatchNormV2(
           initializers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
 
     err = "Initializer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
-      snt.BatchNorm(initializers={"gamma": tf.zeros([1, 2, 3])})
+      snt.BatchNormV2(initializers={"gamma": tf.zeros([1, 2, 3])})
 
   def testInvalidPartitionerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid partitioner keys.*"):
-      snt.BatchNorm(
+      snt.BatchNormV2(
           partitioners={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
 
     err = "Partitioner for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
-      snt.BatchNorm(partitioners={"gamma": tf.zeros([1, 2, 3])})
+      snt.BatchNormV2(partitioners={"gamma": tf.zeros([1, 2, 3])})
 
   def testInvalidRegularizationParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
-      snt.BatchNorm(
+      snt.BatchNormV2(
           regularizers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
 
     err = "Regularizer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
-      snt.BatchNorm(regularizers={"gamma": tf.zeros([1, 2, 3])})
+      snt.BatchNormV2(regularizers={"gamma": tf.zeros([1, 2, 3])})
 
   @parameterized.named_parameters(
       ("BNNoOffsetScale", False, True),
@@ -466,7 +487,11 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
-    bn = snt.BatchNorm(offset=offset, scale=scale, initializers=initializers)
+    bn = snt.BatchNormV2(
+        data_format="NWC",
+        offset=offset,
+        scale=scale,
+        initializers=initializers)
     self.assertEqual(bn.initializers, initializers)
     bn(inputs, is_training=True)
 
@@ -498,7 +523,11 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
-    bn = snt.BatchNorm(offset=offset, scale=scale, regularizers=regularizers)
+    bn = snt.BatchNormV2(
+        data_format="NWC",
+        offset=offset,
+        scale=scale,
+        regularizers=regularizers)
     self.assertEqual(bn.regularizers, regularizers)
     bn(inputs, is_training=True)
 
@@ -529,14 +558,18 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
-    bn = snt.BatchNorm(offset=offset, scale=scale, partitioners=partitioners)
+    bn = snt.BatchNormV2(
+        data_format="NWC",
+        offset=offset,
+        scale=scale,
+        partitioners=partitioners)
     self.assertEqual(bn.partitioners, partitioners)
     bn(inputs, is_training=True)
 
     if scale:
-      self.assertEqual(type(bn.gamma), variables.PartitionedVariable)
+      self.assertLen(tf.global_variables("batch_norm/gamma"), 2)
     if offset:
-      self.assertEqual(type(bn.beta), variables.PartitionedVariable)
+      self.assertLen(tf.global_variables("batch_norm/beta"), 2)
 
   @parameterized.named_parameters(
       ("IsTrainingBoolVal", True, False, False, True),
@@ -551,24 +584,13 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       ("IsTrainingScaleTensorVal", True, False, True, False),
       ("IsTestingScaleTensorVal", False, True, True, False),
       ("IsTestingScaleTensorValMovingAverage", False, False, True, False))
-  def testFusedBatchNorm(self, is_training, test_local_stats, scale,
-                         is_training_python_bool):
+  def testFusedBatchNormV2(self, is_training, test_local_stats, scale,
+                           is_training_python_bool):
     input_shape = (32, 9, 9, 8)
     iterations = 5
     x = tf.placeholder(tf.float32, shape=input_shape)
-    bn1 = snt.BatchNorm(scale=scale, update_ops_collection=None)
-
-    with self.assertRaises(NotImplementedError):
-      # Input does not have 4 dimensions but fused is True.
-      xlinear = tf.placeholder(tf.float32, shape=(2, 3))
-      snt.BatchNorm(fused=True, scale=scale)(xlinear, is_training=True)
-
-    with self.assertRaises(ValueError):
-      # The axis is incorrect
-      snt.BatchNorm(axis=(1, 2, 3), fused=True, scale=scale)(
-          x, is_training=True)
-
-    bn2 = snt.BatchNorm(scale=scale, fused=True, update_ops_collection=None)
+    bn1 = snt.BatchNormV2(scale=scale)
+    bn2 = snt.BatchNormV2(fused=False, scale=scale)
 
     xx = np.random.random(input_shape)
     feed_dict = {x: xx}
@@ -603,8 +625,8 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     input_shape = (31, 7, 7, 5)
     iterations = 3
     x = tf.placeholder(tf.float16, shape=input_shape)
-    bn1 = snt.BatchNorm(update_ops_collection=None)
-    bn2 = snt.BatchNorm(fused=True, update_ops_collection=None)
+    bn1 = snt.BatchNormV2(fused=False)
+    bn2 = snt.BatchNormV2()
 
     feed_dict = {x: np.random.random(input_shape)}
 
@@ -622,6 +644,34 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
         self.assertAllClose(y1, y2, atol=1e-2)
         self.assertAllClose(mean1, mean2, atol=1e-2)
         self.assertAllClose(var1, var2, atol=1e-2)
+
+  def testCheckpointCompatibility(self):
+    save_path = os.path.join(self.get_temp_dir(), "basic_save_restore")
+
+    input_shape_1 = (31, 7, 7, 5)
+    input_shape_2 = (31, 5, 7, 7)
+
+    x1 = tf.placeholder(tf.float32, shape=input_shape_1)
+    bn1 = snt.BatchNormV2(data_format="NHWC")
+    bn1(x1, is_training=True)
+    saver1 = snt.get_saver(bn1)
+
+    x2 = tf.placeholder(tf.float32, shape=input_shape_2)
+    bn2 = snt.BatchNormV2(data_format="NCHW")
+    bn2(x2, is_training=False)
+    saver2 = snt.get_saver(bn2)
+
+    x3 = tf.placeholder(tf.float32, shape=input_shape_1)
+    bn3 = snt.BatchNormV2(data_format="NCHW")
+    bn3(x3, is_training=False)
+    saver3 = snt.get_saver(bn3)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      saver1.save(sess, save_path)
+      saver2.restore(sess, save_path)
+      with self.assertRaises(tf.errors.InvalidArgumentError):
+        saver3.restore(sess, save_path)
 
 
 if __name__ == "__main__":

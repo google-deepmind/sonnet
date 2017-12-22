@@ -145,7 +145,7 @@ class BatchNormV2(base.AbstractModule):
                                      conv.SUPPORTED_1D_DATA_FORMATS,
                                      conv.SUPPORTED_DATA_FORMATS)
 
-  def __init__(self, data_format="NHWC", offset=True, scale=False,
+  def __init__(self, data_format=None, offset=True, scale=False,
                decay_rate=0.999, eps=1e-3, initializers=None,
                partitioners=None, regularizers=None,
                update_ops_collection=None, fused=True,
@@ -157,8 +157,9 @@ class BatchNormV2(base.AbstractModule):
     additional elements of the minibatch.
 
     Args:
-      data_format: The data format. Can be "NHWC" (default),
-        "NCHW", "NWC", "NCW", "NC", "NDHWC", or "NCDHW".
+      data_format: The data format. Can be "NC", "NWC", "NCW", "NHWC", "NCHW",
+        "NDHWC", or "NCDHW". If not provided we assume the channel dimension is
+        last.
       offset: Optional boolean to specify whether or not to apply a trained
         component-wise bias after the batch normalization and scaling.
       scale: Optional boolean to specify whether or not to apply a trained
@@ -195,13 +196,10 @@ class BatchNormV2(base.AbstractModule):
     """
     super(BatchNormV2, self).__init__(name=name)
 
-    if data_format not in self.SUPPORTED_DATA_FORMATS:
+    if data_format not in self.SUPPORTED_DATA_FORMATS.union({None}):
       raise ValueError("Invalid data_format: %r" % (data_format,))
 
     self._data_format = data_format
-    self._channel_index = data_format.index("C")
-    self._axis = range(len(data_format))
-    del self._axis[self._channel_index]
     self._offset = offset
     self._scale = scale
     self._decay_rate = decay_rate
@@ -519,10 +517,29 @@ class BatchNormV2(base.AbstractModule):
     """
     input_shape = input_batch.get_shape()
 
+    if not self._data_format:
+      if len(input_shape) == 2:
+        self._data_format = "NC"
+      elif len(input_shape) == 3:
+        self._data_format = "NWC"
+      elif len(input_shape) == 4:
+        self._data_format = "NHWC"
+      elif len(input_shape) == 5:
+        self._data_format = "NDHWC"
+      else:
+        raise base.IncompatibleShapeError(
+            "Input shape {} has too many or too few dimensions.".format(
+                input_shape))
+
+    self._channel_index = self._data_format.index("C")
+    self._axis = range(len(self._data_format))
+    del self._axis[self._channel_index]
+
     if len(self._data_format) != len(input_shape):
       raise base.IncompatibleShapeError(
           "Incorrect data format {} for input shape {}.".format(
               self._data_format, input_shape))
+
     dtype = input_batch.dtype.base_dtype
     # Maintain moving averages at a minimum precision of tf.float32.
     stat_dtype = tf.float32 if dtype == tf.float16 else dtype

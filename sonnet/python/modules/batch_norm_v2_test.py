@@ -71,7 +71,7 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
   @parameterized.parameters(
       ["NC", "NWC", "NHWC", "NDHWC", "NCW", "NCHW", "NCDHW"])
   def testDataFormats(self, data_format):
-    """Check that differing reduction indices give the correct output shape."""
+    """Check that differing data formats give the correct output shape."""
     dim_sizes = {
         "N": None,
         "D": 10,
@@ -83,13 +83,18 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
         tf.zeros([dim_sizes[dim_name] or 5 for dim_name in data_format]),
         [dim_sizes[dim_name] for dim_name in data_format])
 
-    bn = snt.BatchNormV2(data_format=data_format, offset=False)
-    bn(inputs, is_training=True)
-    mean_shape = bn.moving_mean.get_shape()
-    correct_mean_shape = [
-        dim_sizes["C"] if dim_name == "C" else 1 for dim_name in data_format
-    ]
-    self.assertEqual(mean_shape, correct_mean_shape)
+    bn_data_formats = [data_format]
+    if data_format.endswith("C"):
+      bn_data_formats.append(None)
+
+    for bn_data_format in bn_data_formats:
+      bn = snt.BatchNormV2(data_format=bn_data_format, offset=False)
+      bn(inputs, is_training=True)
+      mean_shape = bn.moving_mean.get_shape()
+      correct_mean_shape = [
+          dim_sizes["C"] if dim_name == "C" else 1 for dim_name in data_format
+      ]
+      self.assertEqual(mean_shape, correct_mean_shape)
 
     for use_gpu in [True, False]:
       with self.test_session(use_gpu=use_gpu) as sess:
@@ -141,7 +146,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
 
     # Use small decay_rate to update faster.
     bn = snt.BatchNormV2(
-        data_format="NC",
         offset=False,
         scale=False,
         decay_rate=0.1,
@@ -196,7 +200,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
 
     v, _, inputs = self._get_inputs(dtype)
     bn = snt.BatchNormV2(
-        data_format="NC",
         offset=False,
         scale=False,
         decay_rate=0.9,
@@ -242,7 +245,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     v, input_v, inputs = self._get_inputs()
 
     bn = snt.BatchNormV2(
-        data_format="NC",
         offset=False,
         scale=False,
         decay_rate=0.5,
@@ -294,7 +296,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     v, input_v, inputs = self._get_inputs()
 
     bn = snt.BatchNormV2(
-        data_format="NC",
         offset=False,
         scale=False,
         decay_rate=0.5,
@@ -386,7 +387,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
 
     _, input_v, inputs = self._get_inputs()
     bn = snt.BatchNormV2(
-        data_format="NC",
         offset=False,
         scale=False,
         decay_rate=0.5,
@@ -421,7 +421,7 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
     bn = snt.BatchNormV2(
-        offset=False, scale=False, data_format="NWC")
+        offset=False, scale=False)
 
     # Outputs should be equal to inputs.
     out = bn(inputs,
@@ -488,7 +488,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
     bn = snt.BatchNormV2(
-        data_format="NWC",
         offset=offset,
         scale=scale,
         initializers=initializers)
@@ -524,7 +523,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
     bn = snt.BatchNormV2(
-        data_format="NWC",
         offset=offset,
         scale=scale,
         regularizers=regularizers)
@@ -559,7 +557,6 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)
     bn = snt.BatchNormV2(
-        data_format="NWC",
         offset=offset,
         scale=scale,
         partitioners=partitioners)

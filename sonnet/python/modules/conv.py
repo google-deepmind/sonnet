@@ -48,6 +48,9 @@ SUPPORTED_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
 DATA_FORMAT_NCW = "NCW"
 DATA_FORMAT_NWC = "NWC"
 SUPPORTED_1D_DATA_FORMATS = {DATA_FORMAT_NCW, DATA_FORMAT_NWC}
+DATA_FORMAT_NDHWC = "NDHWC"
+DATA_FORMAT_NCDHW = "NCDHW"
+SUPPORTED_3D_DATA_FORMATS = {DATA_FORMAT_NDHWC, DATA_FORMAT_NCDHW}
 
 
 def _default_transpose_size(input_shape, stride, kernel_shape=None,
@@ -161,16 +164,14 @@ def _fill_and_one_pad_stride(stride, n, data_format=DATA_FORMAT_NHWC):
   """Expands the provided stride to size n and pads it with 1s."""
   if isinstance(stride, numbers.Integral) or (
       isinstance(stride, collections.Iterable) and len(stride) <= n):
-    if data_format == DATA_FORMAT_NHWC or data_format == DATA_FORMAT_NWC:
-      return (1,) + _fill_shape(stride, n) + (1,)
-    elif data_format == DATA_FORMAT_NCHW or data_format == DATA_FORMAT_NCW:
+    if data_format.startswith("NC"):
       return (1, 1,) + _fill_shape(stride, n)
+    elif data_format.startswith("N") and data_format.endswith("C"):
+      return (1,) + _fill_shape(stride, n) + (1,)
     else:
       raise ValueError(
-          "Invalid data_format {:s}. Allowed formats "
-          "{:s}".format(data_format,
-                        SUPPORTED_DATA_FORMATS | SUPPORTED_1D_DATA_FORMATS))
-
+          "Invalid data_format {:s}. Must start with N and have a channel dim "
+          "either follow the N dim or come at the end".format(data_format))
   elif isinstance(stride, collections.Iterable) and len(stride) == n + 2:
     return stride
   else:
@@ -199,8 +200,8 @@ def create_bias_initializer(unused_bias_shape, dtype=tf.float32):
   return tf.zeros_initializer(dtype=dtype)
 
 
-class Conv2D(base.AbstractModule, base.Transposable):
-  """Spatial convolution and dilated convolution module, including bias.
+class _ConvND(base.AbstractModule):
+  """N-dimensional convolution and dilated convolution module, including bias.
 
   This acts as a light wrapper around the TensorFlow ops `tf.nn.convolution`
   abstracting away variable creation and sharing.
@@ -210,8 +211,8 @@ class Conv2D(base.AbstractModule, base.Transposable):
                padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, mask=None,
                data_format=DATA_FORMAT_NHWC, custom_getter=None,
-               name="conv_2d"):
-    """Constructs a Conv2D module.
+               name="conv_nd"):
+    """Constructs a _ConvND module.
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
@@ -223,12 +224,13 @@ class Conv2D(base.AbstractModule, base.Transposable):
           invocation is deferred to graph construction time, the user must only
           ensure that output_channels can be called, returning an integer,
           when `build` is called.
-      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
-          used to define kernel size in all dimensions.
-      stride: Sequence of kernel strides (of size 2), or integer that is used to
-          define stride in all dimensions.
-      rate: Sequence of dilation rates (of size 2), or integer that is used to
-          define dilation rate in all dimensions. 1 corresponds to standard 2D
+      kernel_shape: Sequence of kernel sizes (up to size N), or an integer.
+         `kernel_shape` will be expanded to define a kernel size in all
+         dimensions.
+      stride: Sequence of strides (up to size N), or an integer.
+         `stride` will be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of size N), or integer that is used to
+          define dilation rate in all dimensions. 1 corresponds to standard ND
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
@@ -247,11 +249,9 @@ class Conv2D(base.AbstractModule, base.Transposable):
         regularizers are used. A regularizer should be a function that takes
         a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
-      mask: A 2D or 4D tensor, or an object convertible to a 2D or 4D tensor
-        which is multiplied component-wise with the weights (Optional).
-      data_format: A string. Specifies whether the channel dimension
-          of the input and output is the last dimension (default, NHWC), or the
-          second dimension ("NCHW").
+      mask: A convertible to a ND tensor which is multiplied
+        component-wise with the weights (Optional).
+      data_format: The data format of the input.
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -265,45 +265,35 @@ class Conv2D(base.AbstractModule, base.Transposable):
           the given stride is not a sequence of two integers.
       base.IncompatibleShapeError: If the given rate is not an integer; or if
           the given rate is not a sequence of two integers.
-      base.IncompatibleShapeError: If a mask is given and its rank is neither 2
-          nor 4, or if it is a TensorFlow Tensor with a not fully defined shape.
+      base.IncompatibleShapeError: If a mask is a TensorFlow Tensor with
+          a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
-      ValueError: If the given data_format is not a supported format (see
-        SUPPORTED_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
       TypeError: If mask is given and it is not convertible to a Tensor.
     """
-    super(Conv2D, self).__init__(custom_getter=custom_getter, name=name)
+    super(_ConvND, self).__init__(custom_getter=custom_getter, name=name)
 
+    self._n = len(data_format) - 2
+    self._input_channels = None
     self._output_channels = output_channels
-    self._input_shape = None
-    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
+    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, self._n,
                                                           "kernel")
-    if data_format not in SUPPORTED_DATA_FORMATS:
-      raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
-
     self._data_format = data_format
+
     # The following is for backwards-compatibility from when we used to accept
-    # 4-strides of the form [1, m, n, 1].
-    if isinstance(stride, collections.Iterable) and len(stride) == 4:
-      if self._data_format == DATA_FORMAT_NHWC:
-        if not stride[0] == stride[3] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and last element must be 1.")
-      elif self._data_format == DATA_FORMAT_NCHW:
-        if not stride[0] == stride[1] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and second element must be 1.")
+    # N-strides of the form [1, ..., 1].
+    if (isinstance(stride, collections.Iterable) and
+        len(stride) == len(data_format)):
       self._stride = tuple(stride)[1:-1]
     else:
-      self._stride = _fill_and_verify_parameter_shape(stride, 2, "stride")
-    self._rate = _fill_and_verify_parameter_shape(rate, 2, "rate")
+      self._stride = _fill_and_verify_parameter_shape(stride, self._n, "stride")
+
+    self._rate = _fill_and_verify_parameter_shape(rate, self._n, "rate")
 
     if any(x > 1 for x in self._stride) and any(x > 1 for x in self._rate):
       raise base.NotSupportedError(
@@ -332,10 +322,6 @@ class Conv2D(base.AbstractModule, base.Transposable):
               "Mask needs to have a statically defined shape")
       else:
         raise TypeError("Invalid type for mask: {}".format(type(mask)))
-      mask_rank = self._mask.shape.ndims
-      if mask_rank != 2 and mask_rank != 4:
-        raise base.IncompatibleShapeError(
-            "Invalid mask rank: {}".format(mask_rank))
     else:
       self._mask = None
 
@@ -344,21 +330,20 @@ class Conv2D(base.AbstractModule, base.Transposable):
     return {"w", "b"} if use_bias else {"w"}
 
   def _build(self, inputs):
-    """Connects the Conv2D module into the graph, with input Tensor `inputs`.
+    """Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
     If this is not the first time the module has been connected to the graph,
-    the input Tensor provided here must have the same final 3 dimensions, in
+    the input Tensor provided here must have the same final N-1 dimensions, in
     order for the existing variables to be the correct size for the
-    multiplication. The batch size may differ for each connection.
+    multiplication; the batch size may differ for each connection.
 
     Args:
-      inputs: A 4D Tensor of shape [batch_size, input_height, input_width,
-          input_channels] or [batch_size, input_channels, input_height,
-          input_width](NCHW), and of type `tf.float16` or `tf.float32`.
+      inputs: A ND Tensor of the same rank as `data_format`, and either of types
+      `tf.float16` or `tf.float32`.
 
     Returns:
-      A 4D Tensor of shape [batch_size, output_height, output_width,
-          output_channels] or [batch_size, out_channels, out_height, out_width].
+      A ND Tensor of shape [batch_size, output_dim_1, output_dim_2, ...,
+          output_channels].
 
     Raises:
       ValueError: If connecting the module into the graph any time after the
@@ -376,35 +361,31 @@ class Conv2D(base.AbstractModule, base.Transposable):
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
 
-    if len(self._input_shape) != 4:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_height, input_"
-          "width, input_channels) or (batch_size, input_channels, input_height,"
-          " input_width) but was {}.".format(self._input_shape))
+    if len(self._input_shape) != len(self._data_format):
+      raise base.IncompatibleShapeError((
+          "Input Tensor must have rank {} corresponding to "
+          "data_format {}, but instead was {}.").format(
+              len(self._data_format), self._data_format, self._input_shape))
 
-    if self._data_format == DATA_FORMAT_NCHW:
-      input_channels = self._input_shape[1]
-    else:
-      input_channels = self._input_shape[3]
-
+    input_channels = None
+    input_index = None
+    for i, c in enumerate(self._data_format):
+      if c == "C":
+        input_channels = self._input_shape[i]
+        input_index = i
+        break
     if input_channels is None:
       raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
-
     self._input_channels = input_channels
 
     _verify_inputs_dtype(inputs)
 
-    weight_shape = (
-        self._kernel_shape[0],
-        self._kernel_shape[1],
-        self._input_channels,
-        self.output_channels)
-
+    weight_shape = self._kernel_shape + (input_channels, self.output_channels)
     bias_shape = (self.output_channels,)
 
     if "w" not in self._initializers:
-      self._initializers["w"] = create_weight_initializer(weight_shape[:3],
+      self._initializers["w"] = create_weight_initializer(weight_shape[:-1],
                                                           dtype=inputs.dtype)
 
     if "b" not in self._initializers and self._use_bias:
@@ -421,17 +402,24 @@ class Conv2D(base.AbstractModule, base.Transposable):
     w = self._w
 
     if self._mask is not None:
-      mask = self._mask
-      mask_shape = mask.shape.as_list()
-      if len(mask_shape) == 2:
-        if mask_shape != list(self._kernel_shape):
-          raise base.IncompatibleShapeError(
-              "Invalid mask shape: {}".format(tuple(mask_shape)))
-        mask = tf.expand_dims(tf.expand_dims(mask, -1), -1)
-      elif mask_shape != list(weight_shape):
+      if self._mask.shape.ndims > len(weight_shape):
         raise base.IncompatibleShapeError(
-            "Invalid mask shape: {}".format(tuple(mask_shape)))
-      w *= mask
+            "Invalid mask shape: {}. Max shape: {}".format(
+                self._mask.shape.ndims, len(self._data_format)
+            )
+        )
+      if self._mask.shape != weight_shape[:self._mask.shape.ndims]:
+        raise base.IncompatibleShapeError(
+            "Invalid mask shape: {}. Weight shape: {}".format(
+                self._mask.shape, weight_shape
+            )
+        )
+      # TF broadcasting is a bit fragile.
+      # Expand the shape of self._mask by one dim at a time to the right
+      # until the rank matches `weight_shape`.
+      while self._mask.shape.ndims < len(weight_shape):
+        self._mask = tf.expand_dims(self._mask, -1)
+      w *= self._mask
 
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,
                                 padding=self._padding, dilation_rate=self._rate,
@@ -444,7 +432,17 @@ class Conv2D(base.AbstractModule, base.Transposable):
                                 initializer=self._initializers["b"],
                                 partitioner=self._partitioners.get("b", None),
                                 regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b, data_format=self._data_format)
+
+      # tf.nn.bias_add only supports 2 data formats.
+      if self._data_format in (DATA_FORMAT_NHWC, DATA_FORMAT_NCHW):
+        # Supported as-is.
+        outputs = tf.nn.bias_add(outputs, self._b,
+                                 data_format=self._data_format)
+      else:
+        # Create our own bias vector.
+        bias_correct_dim = [1] * len(self._data_format)
+        bias_correct_dim[input_index] = self.output_channels
+        outputs += tf.reshape(self._b, bias_correct_dim)
 
     return outputs
 
@@ -453,6 +451,8 @@ class Conv2D(base.AbstractModule, base.Transposable):
     """Returns the number of output channels."""
     if callable(self._output_channels):
       self._output_channels = self._output_channels()
+    # Channel must be integer.
+    self._output_channels = int(self._output_channels)
     return self._output_channels
 
   @property
@@ -465,7 +465,7 @@ class Conv2D(base.AbstractModule, base.Transposable):
     """Returns the stride."""
     # Backwards compatibility with old stride format.
 
-    return _fill_and_one_pad_stride(self._stride, 2, self._data_format)
+    return _fill_and_one_pad_stride(self._stride, self._n, self._data_format)
 
   @property
   def rate(self):
@@ -531,39 +531,128 @@ class Conv2D(base.AbstractModule, base.Transposable):
     """Returns the data format."""
     return self._data_format
 
-  def clone(self, name=None):
-    """Returns a cloned `Conv2D` module.
-
-    Args:
-      name: Optional string assigning name of cloned module. The default name
-        is constructed by appending "_clone" to `self.module_name`.
-
-    Returns:
-      `Conv2D` module.
-    """
-    if name is None:
-      name = self.module_name + "_clone"
-
-    return Conv2D(output_channels=self.output_channels,
-                  kernel_shape=self.kernel_shape,
-                  stride=self.stride,
-                  rate=self.rate,
-                  padding=self.padding,
-                  use_bias=self.has_bias,
-                  initializers=self.initializers,
-                  partitioners=self.partitioners,
-                  regularizers=self.regularizers,
-                  mask=self.mask,
-                  data_format=self.data_format,
-                  custom_getter=self._custom_getter,
-                  name=name)
-
   # Implements Transposable interface.
   @property
   def input_shape(self):
     """Returns the input shape."""
     self._ensure_is_connected()
     return self._input_shape
+
+  def clone(self, name=None):
+    """Returns a cloned `_ConvND` module.
+
+    Args:
+      name: Optional string assigning name of cloned module. The default name
+        is constructed by appending "_clone" to `self.module_name`.
+
+    Returns:
+      A copy of the current class.
+    """
+    if name is None:
+      name = self.module_name + "_clone"
+
+    return type(self)(output_channels=self.output_channels,
+                      kernel_shape=self.kernel_shape,
+                      stride=self.stride,
+                      rate=self.rate,
+                      padding=self.padding,
+                      use_bias=self.has_bias,
+                      initializers=self.initializers,
+                      partitioners=self.partitioners,
+                      regularizers=self.regularizers,
+                      mask=self.mask,
+                      data_format=self.data_format,
+                      custom_getter=self._custom_getter,
+                      name=name)
+
+
+class Conv2D(_ConvND, base.Transposable):
+  """Spatial convolution and dilated convolution module, including bias.
+
+  This acts as a light wrapper around the class `_ConvND`.
+  """
+
+  def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
+               padding=SAME, use_bias=True, initializers=None,
+               partitioners=None, regularizers=None, mask=None,
+               data_format=DATA_FORMAT_NHWC, custom_getter=None,
+               name="conv_2d"):
+    """Constructs a Conv2D module.
+
+    See the following documentation for an explanation of VALID versus SAME
+    padding modes:
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
+
+    Args:
+      output_channels: Number of output channels. `output_channels` can be
+          either a number or a callable. In the latter case, since the function
+          invocation is deferred to graph construction time, the user must only
+          ensure that output_channels can be called, returning an integer,
+          when `build` is called.
+      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
+          used to define kernel size in all dimensions.
+      stride: Sequence of kernel strides (of size 2), or integer that is used to
+          define stride in all dimensions.
+      rate: Sequence of dilation rates (of size 2), or integer that is used to
+          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          convolution, `rate > 1` corresponds to dilated convolution. Cannot be
+          > 1 if any of `stride` is also > 1.
+      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      use_bias: Whether to include bias parameters. Default `True`.
+      initializers: Optional dict containing ops to initialize the filters (with
+          key 'w') or biases (with key 'b'). The default initializer for the
+          weights is a truncated normal initializer, which is commonly used
+          when the inputs are zero centered (see
+          https://arxiv.org/pdf/1502.03167v3.pdf). The default initializer for
+          the bias is a zero initializer.
+      partitioners: Optional dict containing partitioners to partition
+          weights (with key 'w') or biases (with key 'b'). As a default, no
+          partitioners are used.
+      regularizers: Optional dict containing regularizers for the filters
+        (with key 'w') and the biases (with key 'b'). As a default, no
+        regularizers are used. A regularizer should be a function that takes
+        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
+        the L1 and L2 regularizers in `tf.contrib.layers`.
+      mask: A convertible to a 4D tensor which is multiplied
+        component-wise with the weights (Optional).
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NHWC), or the
+          second dimension (NCHW).
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the `tf.get_variable`
+        documentation for information about the custom_getter API.
+      name: Name of the module.
+
+    Raises:
+      base.IncompatibleShapeError: If the given kernel shape is not an integer;
+          or if the given kernel shape is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given stride is not an integer; or if
+          the given stride is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given rate is not an integer; or if
+          the given rate is not a sequence of two integers.
+      base.IncompatibleShapeError: If a mask is given and its rank is neither 2
+          nor 4, or if it is a TensorFlow Tensor with a not fully defined shape.
+      base.NotSupportedError: If rate in any dimension and the stride in any
+          dimension are simultaneously > 1.
+      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given data_format is not a supported format (see
+        SUPPORTED_DATA_FORMATS).
+      KeyError: If `initializers`, `partitioners` or `regularizers` contain any
+        keys other than 'w' or 'b'.
+      TypeError: If any of the given initializers, partitioners or regularizers
+        are not callable.
+      TypeError: If mask is given and it is not convertible to a Tensor.
+    """
+    if data_format not in SUPPORTED_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+    super(Conv2D, self).__init__(
+        output_channels=output_channels, kernel_shape=kernel_shape,
+        stride=stride, rate=rate, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, mask=mask, data_format=data_format,
+        custom_getter=custom_getter, name=name)
 
   # Implements Transposable interface.
   def transpose(self, name=None):
@@ -964,17 +1053,15 @@ class Conv2DTranspose(base.AbstractModule, base.Transposable):
                   name=name)
 
 
-
-class Conv1D(base.AbstractModule, base.Transposable):
+class Conv1D(_ConvND, base.Transposable):
   """1D convolution module, including optional bias.
 
-  This acts as a light wrapper around the TensorFlow op `tf.nn.convolution`,
-  abstracting away variable creation and sharing.
+  This acts as a light wrapper around the class `_ConvND`.
   """
 
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None,
+               partitioners=None, regularizers=None, mask=None,
                data_format=DATA_FORMAT_NWC, custom_getter=None,
                name="conv_1d"):
     """Constructs a Conv1D module.
@@ -1009,17 +1096,20 @@ class Conv1D(base.AbstractModule, base.Transposable):
           weights (with key 'w') or biases (with key 'b'). As a default, no
           partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        regularizers are used. A regularizer should be a function that takes
-        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
-        the L1 and L2 regularizers in `tf.contrib.layers`.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          regularizers are used. A regularizer should be a function that takes
+          a single `Tensor` as an input and returns a scalar `Tensor` output,
+          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
+      mask: A convertible to a 3D tensor which is multiplied
+          component-wise with the weights (Optional).
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NWC), or the
           second dimension (NCW).
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1039,208 +1129,15 @@ class Conv1D(base.AbstractModule, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv1D, self).__init__(custom_getter=custom_getter, name=name)
-
-    self._output_channels = output_channels
-    self._input_shape = None
-    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 1,
-                                                          "kernel")
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
                        "{:s}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
-    self._data_format = data_format
-    # The following is for backwards-compatibility from when we used to accept
-    # 3-strides of the form [1, m, 1].
-    if isinstance(stride, collections.Iterable) and len(stride) == 3:
-      if self._data_format == DATA_FORMAT_NWC:
-        if not stride[0] == stride[2] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and last element must be 1.")
-      elif self._data_format == DATA_FORMAT_NCW:
-        if not stride[0] == stride[1] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and second element must be 1.")
-      self._stride = tuple(stride)[1:-1]
-    else:
-      self._stride = _fill_and_verify_parameter_shape(stride, 1, "stride")
-    self._rate = _fill_and_verify_parameter_shape(rate, 1, "rate")
-
-    if any(x > 1 for x in self._stride) and any(x > 1 for x in self._rate):
-      raise base.NotSupportedError(
-          "Cannot have stride > 1 with rate > 1")
-
-    self._padding = _verify_padding(padding)
-    self._use_bias = use_bias
-    self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
-    self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
-    self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
-    self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
-
-  @classmethod
-  def get_possible_initializer_keys(cls, use_bias=True):
-    return {"w", "b"} if use_bias else {"w"}
-
-  def _build(self, inputs):
-    """Connects the Conv1D module into the graph, with input Tensor `inputs`.
-
-    If this is not the first time the module has been connected to the graph,
-    the input Tensor provided here must have the same final 2 dimensions, in
-    order for the existing variables to be the correct size for the
-    multiplication. The batch size may differ for each connection.
-
-    Args:
-      inputs: A 3D Tensor of shape [batch_size, input_length, input_channels]
-           and of type `tf.float16` or `tf.float32`.
-
-    Returns:
-      A 3D Tensor of shape [batch_size, output_length, output_channels].
-
-    Raises:
-      ValueError: If connecting the module into the graph any time after the
-          first time and the inferred size of the input does not match previous
-          invocations.
-      base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions.
-      base.IncompatibleShapeError: If a mask is present and its shape is
-          incompatible with the shape of the weights.
-      base.UnderspecifiedError: If the input tensor has an unknown
-          `input_channels`.
-      TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
-    """
-    # Handle input whose shape is unknown during graph creation.
-    self._input_shape = tuple(inputs.get_shape().as_list())
-
-    if len(self._input_shape) != 3:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_length, input_"
-          "channels)")
-
-    if self._data_format == DATA_FORMAT_NCW:
-      input_channels = self._input_shape[1]
-    else:
-      input_channels = self._input_shape[2]
-
-    if input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
-
-    weight_shape = (
-        self._kernel_shape[0],
-        input_channels,
-        self.output_channels)
-
-    bias_shape = (self.output_channels,)
-
-    if "w" not in self._initializers:
-      self._initializers["w"] = create_weight_initializer(weight_shape[:2],
-                                                          dtype=inputs.dtype)
-
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
-
-    self._w = tf.get_variable("w",
-                              shape=weight_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["w"],
-                              partitioner=self._partitioners.get("w", None),
-                              regularizer=self._regularizers.get("w", None))
-
-    outputs = tf.nn.convolution(inputs, self._w, strides=self._stride,
-                                padding=self._padding, dilation_rate=self._rate,
-                                data_format=self._data_format)
-
-    if self._use_bias:
-      self._b = tf.get_variable("b",
-                                shape=bias_shape,
-                                dtype=inputs.dtype,
-                                initializer=self._initializers["b"],
-                                partitioner=self._partitioners.get("b", None),
-                                regularizer=self._regularizers.get("b", None))
-
-      if self._data_format == DATA_FORMAT_NCW:
-        # tf.nn.bias_add does not accept a 1D input tensor in NCW data format.
-        outputs += tf.reshape(self._b, [1, self.output_channels, 1])
-      else:
-        outputs = tf.nn.bias_add(outputs, self._b, data_format="NHWC")
-
-    return outputs
-
-  @property
-  def output_channels(self):
-    """Returns the number of output channels."""
-    if callable(self._output_channels):
-      self._output_channels = self._output_channels()
-    return self._output_channels
-
-  @property
-  def input_shape(self):
-    """Returns the input shape."""
-    self._ensure_is_connected()
-    return self._input_shape
-
-  @property
-  def kernel_shape(self):
-    """Returns the kernel shape."""
-    return self._kernel_shape
-
-  @property
-  def stride(self):
-    """Returns the stride."""
-    # Backwards compatibility with old stride format.
-
-    return _fill_and_one_pad_stride(self._stride, 1, self._data_format)
-
-  @property
-  def rate(self):
-    """Returns the dilation rate."""
-    return self._rate
-
-  @property
-  def padding(self):
-    """Returns the padding algorithm."""
-    return self._padding
-
-  @property
-  def w(self):
-    """Returns the Variable containing the weight matrix."""
-    return self._w
-
-  @property
-  def b(self):
-    """Returns the Variable containing the bias."""
-    return self._b
-
-  @property
-  def has_bias(self):
-    """Returns `True` if bias Variable is present in the module."""
-    return self._use_bias
-
-  @property
-  def initializers(self):
-    """Returns the initializers dictionary."""
-    return self._initializers
-
-  @property
-  def partitioners(self):
-    """Returns the partitioners dictionary."""
-    return self._partitioners
-
-  @property
-  def regularizers(self):
-    """Returns the regularizers dictionary."""
-    return self._regularizers
-
-  @property
-  def data_format(self):
-    """Returns the data format."""
-    return self._data_format
+    super(Conv1D, self).__init__(
+        output_channels=output_channels, kernel_shape=kernel_shape,
+        stride=stride, rate=rate, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, mask=mask, data_format=data_format,
+        custom_getter=custom_getter, name=name)
 
   # Implement Transposable interface
   def transpose(self, name=None):
@@ -2671,18 +2568,16 @@ class SeparableConv2D(base.AbstractModule):
     return self._data_format
 
 
-
-class Conv3D(base.AbstractModule):
+class Conv3D(_ConvND, base.Transposable):
   """Volumetric convolution module, including optional bias.
 
-  This acts as a light wrapper around the TensorFlow op `tf.nn.conv3d`,
-  abstracting away variable creation and sharing.
+  This acts as a light wrapper around the class `_ConvND`.
   """
 
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
-               partitioners=None, regularizers=None, custom_getter=None,
-               name="conv_3d"):
+               partitioners=None, regularizers=None, mask=None,
+               custom_getter=None, name="conv_3d"):
     """Constructs a Conv3D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -2715,14 +2610,17 @@ class Conv3D(base.AbstractModule):
           weights (with key 'w') or biases (with key 'b'). As a default, no
           partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        regularizers are used. A regularizer should be a function that takes
-        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
-        the L1 and L2 regularizers in `tf.contrib.layers`.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          regularizers are used. A regularizer should be a function that takes
+          a single `Tensor` as an input and returns a scalar `Tensor` output,
+          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
+      mask: An object convertible to a 5D tensor which is multiplied
+          component-wise with the weights (Optional).
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2740,184 +2638,12 @@ class Conv3D(base.AbstractModule):
       TypeError: If any of the given initializers, partitioners or regularizers
         are not callable.
     """
-    super(Conv3D, self).__init__(custom_getter=custom_getter, name=name)
-
-    self._output_channels = output_channels
-    self._input_shape = None
-    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 3,
-                                                          "kernel")
-    # The following is for backwards-compatibility from when we used to accept
-    # 3-strides of the form [1, m, n, o, 1].
-    if isinstance(stride, collections.Iterable) and len(stride) == 5:
-      self._stride = tuple(stride)[1:-1]
-    else:
-      self._stride = _fill_and_verify_parameter_shape(stride, 3, "stride")
-    self._rate = _fill_and_verify_parameter_shape(rate, 3, "rate")
-
-    if any(x > 1 for x in self._stride) and any(x > 1 for x in self._rate):
-      raise base.NotSupportedError(
-          "Cannot have stride > 1 with rate > 1")
-
-    self._padding = _verify_padding(padding)
-    self._use_bias = use_bias
-    self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
-    self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
-    self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
-    self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
-
-  @classmethod
-  def get_possible_initializer_keys(cls, use_bias=True):
-    return {"w", "b"} if use_bias else {"w"}
-
-  def _build(self, inputs):
-    """Connects the Conv3D module into the graph, with input Tensor `inputs`.
-
-    If this is not the first time the module has been connected to the graph,
-    the input Tensor provided here must have the same final dimension
-    (i.e. `input_channels`), in order for the existing variables to be the
-    correct size for the multiplication. The batch size may differ for each
-    connection.
-
-    Args:
-      inputs: A 5D Tensor of shape `[batch_size, input_depth, input_height,
-        input_width, input_channels]` and of type `tf.float16` or `tf.float32`.
-
-    Returns:
-      A 5D Tensor of shape `[batch_size, output_depth, output_height,
-        output_width, output_channels]` with the same dtype as `inputs`.
-
-    Raises:
-      ValueError: If connecting the module into the graph any time after the
-          first time and the inferred size of the input does not match previous
-          invocations.
-      base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions.
-      base.UnderspecifiedError: If the input tensor has an unknown
-          `input_channels`.
-      TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
-    """
-    # Handle input whose shape is unknown during graph creation.
-    self._input_shape = tuple(inputs.get_shape().as_list())
-
-    if len(self._input_shape) != 5:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_depth, "
-          "input_height, input_width, input_channels)")
-
-    if self._input_shape[4] is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-    else:
-      input_channels = self._input_shape[4]
-
-    _verify_inputs_dtype(inputs)
-
-    weight_shape = (
-        self._kernel_shape[0],
-        self._kernel_shape[1],
-        self._kernel_shape[2],
-        input_channels,
-        self.output_channels)
-
-    bias_shape = (self.output_channels,)
-
-    if "w" not in self._initializers:
-      self._initializers["w"] = create_weight_initializer(weight_shape[:4],
-                                                          dtype=inputs.dtype)
-
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
-
-    self._w = tf.get_variable("w",
-                              shape=weight_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["w"],
-                              partitioner=self._partitioners.get("w", None),
-                              regularizer=self._regularizers.get("w", None))
-
-    outputs = tf.nn.convolution(inputs, self._w, strides=self._stride,
-                                padding=self._padding, dilation_rate=self._rate)
-
-    if self._use_bias:
-      self._b = tf.get_variable("b",
-                                shape=bias_shape,
-                                dtype=inputs.dtype,
-                                initializer=self._initializers["b"],
-                                partitioner=self._partitioners.get("b", None),
-                                regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
-
-    return outputs
-
-  @property
-  def output_channels(self):
-    """Returns the number of output channels."""
-    if callable(self._output_channels):
-      self._output_channels = self._output_channels()
-    return self._output_channels
-
-  @property
-  def input_shape(self):
-    """Returns the input shape."""
-    self._ensure_is_connected()
-    return self._input_shape
-
-  @property
-  def kernel_shape(self):
-    """Returns the kernel shape."""
-    return self._kernel_shape
-
-  @property
-  def stride(self):
-    """Returns the stride."""
-    # Backwards compatibility with old stride format.
-
-    return (1,) + self._stride + (1,)
-
-  @property
-  def padding(self):
-    """Returns the padding algorithm."""
-    return self._padding
-
-  @property
-  def w(self):
-    """Returns the Variable containing the weight matrix."""
-    self._ensure_is_connected()
-    return self._w
-
-  @property
-  def b(self):
-    """Returns the Variable containing the bias."""
-    self._ensure_is_connected()
-    if not self._use_bias:
-      raise AttributeError(
-          "No bias Variable in Conv2D Module when `use_bias=False`.")
-    return self._b
-
-  @property
-  def has_bias(self):
-    """Returns `True` if bias Variable is present in the module."""
-    return self._use_bias
-
-  @property
-  def initializers(self):
-    """Returns the initializers dictionary."""
-    return self._initializers
-
-  @property
-  def partitioners(self):
-    """Returns the partitioners dictionary."""
-    return self._partitioners
-
-  @property
-  def regularizers(self):
-    """Returns the regularizers dictionary."""
-    return self._regularizers
+    super(Conv3D, self).__init__(
+        output_channels=output_channels, kernel_shape=kernel_shape,
+        stride=stride, rate=rate, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, mask=mask, data_format=DATA_FORMAT_NDHWC,
+        custom_getter=custom_getter, name=name)
 
   # Implements Transposable interface.
   def transpose(self, name=None):

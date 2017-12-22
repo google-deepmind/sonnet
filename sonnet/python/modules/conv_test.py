@@ -301,7 +301,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
 
     inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 1))
 
-    err = "Input Tensor must have shape"
+    err = "Input Tensor must have"
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       conv_mod(inputs)
 
@@ -314,7 +314,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
     inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 1))
     inputs = snt.BatchFlatten()(inputs)
 
-    err = "Input Tensor must have shape"
+    err = "Input Tensor must have"
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       conv_mod(inputs)
 
@@ -824,6 +824,23 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertAllEqual(net_transposed_output.get_shape().as_list(),
                         input_to_net.get_shape().as_list())
 
+  def testMask1D(self):
+    """1D Masks are applied properly."""
+    mask = np.ones((3,), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(1, 5, 5, 2))
+    conv1 = snt.Conv2D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 18 * np.ones((1, 3, 3, 1))
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
   def testMask2D(self):
     """2D Masks are applied properly."""
 
@@ -847,6 +864,23 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
       tf.variables_initializer([conv1.w]).run()
       self.assertAllClose(np.reshape(out.eval(), [3, 3]), expected_out)
 
+  def testMask3D(self):
+    """3D Masks are applied properly."""
+    mask = np.ones((3, 3, 2), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(1, 5, 5, 2))
+    conv1 = snt.Conv2D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 18 * np.ones((1, 3, 3, 1))
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
   def testMask4D(self):
     """4D Masks are applied properly."""
 
@@ -868,23 +902,36 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
       tf.variables_initializer([conv1.w]).run()
       self.assertAllClose(np.reshape(out.eval(), [3, 3]), expected_out)
 
-  def testMaskErrorInvalidRank(self):
-    """Errors are thrown for invalid mask rank."""
+  def testMaskErrorIncompatibleRank1(self):
+    """Errors are thrown for incompatible rank 1 mask."""
 
     np_mask = np.ones((3,))
+    x = tf.constant(0.0, shape=(2, 8, 8, 6))
 
     # Test with both numpy arrays and Tensors.
     for mask in (np_mask, tf.convert_to_tensor(np_mask)):
       with self.assertRaises(snt.Error) as cm:
-        snt.Conv2D(output_channels=4, kernel_shape=3, mask=mask)
-      self.assertEqual(
-          str(cm.exception),
-          "Invalid mask rank: {}".format(np_mask.ndim))
+        snt.Conv2D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
 
   def testMaskErrorIncompatibleRank2(self):
     """Errors are thrown for incompatible rank 2 mask."""
 
     np_mask = np.ones((3, 3))
+    x = tf.constant(0.0, shape=(2, 8, 8, 6))
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv2D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank3(self):
+    """Errors are thrown for incompatible rank 3 mask."""
+
+    np_mask = np.ones((2, 4, 4))
     x = tf.constant(0.0, shape=(2, 8, 8, 6))
 
     # Test with both numpy arrays and Tensors.
@@ -1411,6 +1458,107 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
       self.assertAllClose(
           out1.eval(),
           out2.eval())
+
+  def testMask1D(self):
+    """1D Masks are applied properly."""
+    mask = np.ones((3,), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(1, 5, 2))
+    conv1 = snt.Conv1D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = np.reshape(np.array([6, 6, 6]), (1, 3, 1))
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask2D(self):
+    """2D Masks are applied properly."""
+    mask = np.ones((3, 2), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(1, 5, 2))
+    conv1 = snt.Conv1D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = np.reshape(np.array([6, 6, 6]), (1, 3, 1))
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask3D(self):
+    """3D Masks are applied properly."""
+    mask = np.ones((3, 2, 1), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(1, 5, 2))
+    conv1 = snt.Conv1D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = np.reshape(np.array([6, 6, 6]), (1, 3, 1))
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMaskErrorIncompatibleRank1(self):
+    """Errors are thrown for incompatible rank 1 mask."""
+
+    np_mask = np.ones((3,))
+    x = tf.constant(0.0, shape=(2, 8, 6))
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv1D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank2(self):
+    """Errors are thrown for incompatible rank 2 mask."""
+
+    np_mask = np.ones((3, 3))
+    x = tf.constant(0.0, shape=(2, 8, 6))
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv1D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank3(self):
+    """Errors are thrown for incompatible rank 3 mask."""
+
+    np_mask = np.ones((2, 4, 4))
+    x = tf.constant(0.0, shape=(2, 8, 6))
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv1D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIfIncorrectDtype(self):
+    """Errors are thrown when a Tensor with incorrect dtype is used."""
+
+    mask = tf.constant(0, shape=(4, 4), dtype=tf.int32)
+    x = tf.constant(0.0, shape=(2, 8, 6))
+
+    with self.assertRaises(TypeError) as cm:
+      snt.Conv1D(output_channels=4, kernel_shape=4, mask=mask)(x)
+    self.assertTrue(str(cm.exception).startswith(
+        "Mask needs to have dtype float16, float32 or float64"))
 
 
 class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
@@ -2941,6 +3089,167 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
       self.assertAllClose(
           out1.eval(),
           out2.eval())
+
+  def testMask1D(self):
+    """1D Masks are applied properly."""
+    mask = 0.5 * np.ones((3,), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(5, 5, 5, 5, 5))
+    conv1 = snt.Conv3D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 67.5 * np.ones((5, 3, 3, 3, 1), dtype=np.float32)
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask2D(self):
+    """2D Masks are applied properly."""
+    mask = np.ones((3, 3), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(5, 5, 5, 5, 5))
+    conv1 = snt.Conv3D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 135 * np.ones((5, 3, 3, 3, 1), dtype=np.float32)
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask3D(self):
+    """3D Masks are applied properly."""
+    mask = np.ones((3, 3, 3), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(5, 5, 5, 5, 5))
+    conv1 = snt.Conv3D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 135 * np.ones((5, 3, 3, 3, 1), dtype=np.float32)
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask4D(self):
+    """4D Masks are applied properly."""
+    mask = np.ones((3, 3, 3, 5), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(5, 5, 5, 5, 5))
+    conv1 = snt.Conv3D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 135 * np.ones((5, 3, 3, 3, 1), dtype=np.float32)
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMask5D(self):
+    """5D Mask are applied properly."""
+    mask = np.ones((3, 3, 3, 5, 1), dtype=np.float32)
+    inputs = tf.constant(1.0, shape=(5, 5, 5, 5, 5))
+    conv1 = snt.Conv3D(
+        output_channels=1,
+        kernel_shape=3,
+        mask=mask,
+        padding=snt.VALID,
+        use_bias=False,
+        initializers=create_constant_initializers(1.0, 0.0, use_bias=False))
+    out = conv1(inputs)
+    expected_out = 135 * np.ones((5, 3, 3, 3, 1), dtype=np.float32)
+    with self.test_session():
+      tf.variables_initializer([conv1.w]).run()
+      self.assertAllClose(out.eval(), expected_out)
+
+  def testMaskErrorIncompatibleRank1(self):
+    """Errors are thrown for incompatible rank 1 mask."""
+
+    np_mask = np.ones((2,), dtype=np.float32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5), dtype=np.float32)
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv3D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank2(self):
+    """Errors are thrown for incompatible rank 2 mask."""
+
+    np_mask = np.ones((5, 2), dtype=np.float32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5), dtype=np.float32)
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv3D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank3(self):
+    """Errors are thrown for incompatible rank 3 mask."""
+
+    np_mask = np.ones((5, 5, 2), dtype=np.float32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5), dtype=np.float32)
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv3D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank4(self):
+    """Errors are thrown for incompatible rank 4 mask."""
+
+    np_mask = np.ones((5, 5, 5, 2), dtype=np.float32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5), dtype=np.float32)
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv3D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIncompatibleRank5(self):
+    """Errors are thrown for incompatible rank 5 mask."""
+
+    np_mask = np.ones((5, 5, 5, 5, 2), dtype=np.float32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5), dtype=np.float32)
+
+    # Test with both numpy arrays and Tensors.
+    for mask in (np_mask, tf.convert_to_tensor(np_mask)):
+      with self.assertRaises(snt.Error) as cm:
+        snt.Conv3D(output_channels=4, kernel_shape=5, mask=mask)(x)
+      self.assertTrue(str(cm.exception).startswith(
+          "Invalid mask shape: {}".format(np_mask.shape)))
+
+  def testMaskErrorIfIncorrectDtype(self):
+    """Errors are thrown when a Tensor with incorrect dtype is used."""
+
+    mask = tf.constant(0, shape=(4, 4), dtype=tf.int32)
+    x = tf.constant(0.0, shape=(2, 8, 6, 5, 5))
+
+    with self.assertRaises(TypeError) as cm:
+      snt.Conv3D(output_channels=4, kernel_shape=(4, 4, 4), mask=mask)(x)
+    self.assertTrue(str(cm.exception).startswith(
+        "Mask needs to have dtype float16, float32 or float64"))
 
 
 class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):

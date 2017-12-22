@@ -161,9 +161,14 @@ class Embed(base.AbstractModule):
           regularizer=self._regularizers.get(self.EMBEDDINGS, None),
           trainable=self._trainable)
 
+    # On the backwards pass, we want to convert the gradient from
+    # indexed-slices to a regular tensor before sending it back to the
+    # parameter server. This avoids excess computation on the parameter server.
+
+    embeddings = util.convert_gradient_to_tensor(self._embeddings)
+
     # Lookup embeddings
-    return tf.nn.embedding_lookup(
-        self._embeddings, ids, name="embedding_lookup")
+    return tf.nn.embedding_lookup(embeddings, ids, name="embedding_lookup")
 
   @property
   def vocab_size(self):

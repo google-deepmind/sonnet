@@ -281,7 +281,7 @@ class AbstractModule(object):
 
     The only case where it does make sense to access the variable_scope before
     connection is to get the post-uniquification name, which we support using
-    the separate .name property.
+    the separate .scope_name property.
 
     Returns:
       variable_scope: `tf.VariableScope` instance of the internal `tf.Template`.

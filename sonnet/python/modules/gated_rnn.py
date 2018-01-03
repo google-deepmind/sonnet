@@ -1551,3 +1551,180 @@ class GRU(rnn_core.RNNCore):
   @property
   def output_size(self):
     return tf.TensorShape([self._hidden_size])
+
+
+class HighwayCore(rnn_core.RNNCore):
+  """Recurrent Highway Network cell.
+
+  The implementation is based on: https://arxiv.org/pdf/1607.03474v5.pdf
+  As per the first lines of section 5 of the reference paper, 1 - T is
+  used instead of a dedicated C gate.
+
+  Attributes:
+    state_size: Integer indicating the size of state tensor.
+    output_size: Integer indicating the size of the core output.
+  """
+
+  # Keys that may be provided for parameter initializers.
+  WT = "wt"  # weight for input or previous state -> T gate
+  BT = "bt"  # bias for previous state -> T gate
+  WH = "wh"  # weight for input or previous state -> H gate
+  BH = "bh"  # bias for previous state -> H gate
+
+  def __init__(
+      self,
+      hidden_size,
+      num_layers,
+      initializers=None,
+      partitioners=None,
+      regularizers=None,
+      custom_getter=None,
+      name="highwaycore"):
+    """Construct a new Recurrent Highway core.
+
+    Args:
+      hidden_size: (int) Hidden size dimensionality.
+      num_layers: (int) Number of highway layers.
+      initializers: Dict containing ops to initialize the weights. This
+        dict may contain any of the keys returned by
+        `HighwayCore.get_possible_initializer_keys`.
+      partitioners: Optional dict containing partitioners to partition
+        the weights and biases. As a default, no partitioners are used. This
+        dict may contain any of the keys returned by
+        `HighwayCore.get_possible_initializer_keys`.
+      regularizers: Optional dict containing regularizers for the weights and
+        biases. As a default, no regularizers are used. This
+        dict may contain any of the keys returned by
+        `HighwayCore.get_possible_initializer_keys`.
+      custom_getter: Callable that takes as a first argument the true getter,
+        and allows overwriting the internal get_variable method. See the
+        `tf.get_variable` documentation for more details.
+      name: Name of the module.
+
+    Raises:
+      KeyError: if `initializers` contains any keys not returned by
+        `HighwayCore.get_possible_initializer_keys`.
+      KeyError: if `partitioners` contains any keys not returned by
+        `HighwayCore.get_possible_initializer_keys`.
+      KeyError: if `regularizers` contains any keys not returned by
+        `HighwayCore.get_possible_initializer_keys`.
+    """
+    super(HighwayCore, self).__init__(custom_getter=custom_getter, name=name)
+    self._hidden_size = hidden_size
+    self._num_layers = num_layers
+    self._initializers = util.check_initializers(
+        initializers, self.get_possible_initializer_keys(num_layers))
+    self._partitioners = util.check_partitioners(
+        partitioners, self.get_possible_initializer_keys(num_layers))
+    self._regularizers = util.check_regularizers(
+        regularizers, self.get_possible_initializer_keys(num_layers))
+
+  @classmethod
+  def get_possible_initializer_keys(cls, num_layers):
+    """Returns the keys the dictionary of variable initializers may contain.
+
+    The set of all possible initializer keys are:
+      wt: weight for input -> T gate
+      wh: weight for input -> H gate
+      wtL: weight for prev state -> T gate for layer L (indexed from 0)
+      whL: weight for prev state -> H gate for layer L (indexed from 0)
+      btL: bias for prev state -> T gate for layer L (indexed from 0)
+      bhL: bias for prev state -> H gate for layer L (indexed from 0)
+
+    Args:
+      num_layers: (int) Number of highway layers.
+    Returns:
+      Set with strings corresponding to the strings that may be passed to the
+        constructor.
+    """
+    keys = [cls.WT, cls.WH]
+    for layer_index in xrange(num_layers):
+      layer_str = str(layer_index)
+      keys += [
+          cls.WT + layer_str,
+          cls.BT + layer_str,
+          cls.WH + layer_str,
+          cls.BH + layer_str]
+    return set(keys)
+
+  def _build(self, inputs, prev_state):
+    """Connects the highway core module into the graph.
+
+    Args:
+      inputs: Tensor of size `[batch_size, input_size]`.
+      prev_state: Tensor of size `[batch_size, hidden_size]`.
+
+    Returns:
+      A tuple (output, next_state) where `output` is a Tensor of size
+      `[batch_size, hidden_size]` and `next_state` is a Tensor of size
+      `[batch_size, hidden_size]`.
+
+    Raises:
+      ValueError: If connecting the module into the graph any time after the
+        first time, and the inferred size of the inputs does not match previous
+        invocations.
+    """
+    input_size = inputs.get_shape()[1]
+    weight_shape = (input_size, self._hidden_size)
+    u_shape = (self._hidden_size, self._hidden_size)
+    bias_shape = (self._hidden_size,)
+
+    def _get_variable(name, shape):
+      return tf.get_variable(
+          name,
+          shape,
+          dtype=inputs.dtype,
+          initializer=self._initializers.get(name),
+          partitioner=self._partitioners.get(name),
+          regularizer=self._regularizers.get(name))
+
+    pre_highway_wt = _get_variable(self.WT, weight_shape)
+    pre_highway_wh = _get_variable(self.WH, weight_shape)
+    state = prev_state
+    for layer_index in xrange(self._num_layers):
+      layer_str = str(layer_index)
+      layer_wt = _get_variable(self.WT + layer_str, u_shape)
+      layer_bt = _get_variable(self.BT + layer_str, bias_shape)
+      layer_wh = _get_variable(self.WH + layer_str, u_shape)
+      layer_bh = _get_variable(self.BH + layer_str, bias_shape)
+      linear_t = tf.matmul(state, layer_wt) + layer_bt
+      linear_h = tf.matmul(state, layer_wh) + layer_bh
+      if layer_index == 0:
+        linear_t += tf.matmul(inputs, pre_highway_wt)
+        linear_h += tf.matmul(inputs, pre_highway_wh)
+      output_t = tf.sigmoid(linear_t)
+      output_h = tf.tanh(linear_h)
+      state = state * (1 - output_t) + output_h * output_t
+
+    return state, state
+
+  @property
+  def state_size(self):
+    return tf.TensorShape([self._hidden_size])
+
+  @property
+  def output_size(self):
+    return tf.TensorShape([self._hidden_size])
+
+
+def highway_core_with_recurrent_dropout(
+    hidden_size,
+    num_layers,
+    keep_prob=0.5,
+    **kwargs):
+  """Highway core with recurrent dropout.
+
+  Args:
+    hidden_size: (int) Hidden size dimensionality.
+    num_layers: (int) Number of highway layers.
+    keep_prob: the probability to keep an entry when applying dropout.
+    **kwargs: Extra keyword arguments to pass to the highway core.
+
+  Returns:
+    A tuple (train_core, test_core) where train_core is a higway core with
+    recurrent dropout enabled to be used for training and test_core is the
+    same highway core without recurrent dropout.
+  """
+
+  core = HighwayCore(hidden_size, num_layers, **kwargs)
+  return RecurrentDropoutWrapper(core, keep_prob), core

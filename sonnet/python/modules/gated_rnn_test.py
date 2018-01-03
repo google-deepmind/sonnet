@@ -1209,5 +1209,102 @@ class GRUTest(tf.test.TestCase):
                      len(keys))
 
 
+class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
+
+  def testShape(self):
+    batch_size = 2
+    hidden_size = 4
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    core = snt.HighwayCore(hidden_size, num_layers=3)
+    output, next_state = core(inputs, state)
+    shape = np.ndarray((batch_size, hidden_size))
+    self.assertShapeEqual(shape, next_state)
+    self.assertShapeEqual(shape, output)
+
+  def testVariables(self):
+    batch_size = 5
+    input_size = 10
+    hidden_size = 20
+    num_layers = 3
+    mod_name = "rnn"
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, input_size])
+    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    core = snt.HighwayCore(hidden_size, num_layers, name=mod_name)
+    self.assertEqual(core.scope_name, mod_name)
+    with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
+      core.get_variables()
+    core(inputs, state)
+
+    core_variables = core.get_variables()
+    self.assertEqual(len(core_variables), 2 + 4 * num_layers)
+    param_map = {param.name.split("/")[-1].split(":")[0]: param
+                 for param in core_variables}
+    self.assertShapeEqual(np.ndarray((input_size, hidden_size)),
+                          param_map["wt"].initial_value)
+    self.assertShapeEqual(np.ndarray((input_size, hidden_size)),
+                          param_map["wh"].initial_value)
+    for layer_index in xrange(num_layers):
+      layer_str = str(layer_index)
+      self.assertShapeEqual(np.ndarray(hidden_size),
+                            param_map["bt" + layer_str].initial_value)
+      self.assertShapeEqual(np.ndarray(hidden_size),
+                            param_map["bh" + layer_str].initial_value)
+      self.assertShapeEqual(np.ndarray((hidden_size, hidden_size)),
+                            param_map["wt" + layer_str].initial_value)
+      self.assertShapeEqual(np.ndarray((hidden_size, hidden_size)),
+                            param_map["wh" + layer_str].initial_value)
+
+  @parameterized.parameters(True, False)
+  def testComputation(self, with_dropout):
+    """Checks that the TF and numpy versions match on random data."""
+
+    def sigmoid(x):
+      return 1 / (1 + np.exp(-x))
+
+    batch_size = 2
+    input_size = 3
+    hidden_size = 5
+    num_layers = 2
+    inputs = tf.placeholder(tf.float64, shape=[batch_size, input_size])
+    state_in = tf.placeholder(tf.float64, shape=[batch_size, hidden_size])
+    if with_dropout:
+      core, test_core = snt.highway_core_with_recurrent_dropout(
+          hidden_size, num_layers, keep_prob=1.0)
+      initial_state = core.initial_state(batch_size, dtype=tf.float64)
+      _, state = core(inputs, (state_in, initial_state[1]))
+      core_variables = test_core.get_variables()
+    else:
+      core = snt.HighwayCore(hidden_size, num_layers, name="rnn")
+      _, state = core(inputs, state_in)
+      core_variables = core.get_variables()
+    param_map = {param.name.split("/")[-1].split(":")[0]: param
+                 for param in core_variables}
+
+    input_data = np.random.randn(batch_size, input_size)
+    state_data = np.random.randn(batch_size, hidden_size)
+
+    param_names = ["wt", "wh"]
+    param_names += ["wt0", "bt0", "wh0", "bh0", "wt1", "bt1", "wh1", "bh1"]
+    with self.test_session() as session:
+      tf.global_variables_initializer().run()
+      fetches = [state] + [param_map[name] for name in param_names]
+      output = session.run(fetches, {inputs: input_data, state_in: state_data})
+
+    state_ex, wt, wh, wt0, bt0, wh0, bh0, wt1, bt1, wh1, bh1 = output
+    # Layer 1 computation.
+    t = sigmoid(np.dot(input_data, wt) + np.dot(state_data, wt0) + bt0)
+    h = np.tanh(np.dot(input_data, wh) + np.dot(state_data, wh0) + bh0)
+    state_data = (1 - t) * state_data + t * h
+    # Layer 2 computation.
+    t = sigmoid(np.dot(state_data, wt1) + bt1)
+    h = np.tanh(np.dot(state_data, wh1) + bh1)
+    state_data = (1 - t) * state_data + t * h
+
+    if with_dropout:
+      state_ex = state_ex[0]
+    self.assertAllClose(state_data, state_ex)
+
+
 if __name__ == "__main__":
   tf.test.main()

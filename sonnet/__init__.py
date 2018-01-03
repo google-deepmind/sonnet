@@ -90,6 +90,8 @@ from sonnet.python.modules.gated_rnn import BatchNormLSTM
 from sonnet.python.modules.gated_rnn import Conv1DLSTM
 from sonnet.python.modules.gated_rnn import Conv2DLSTM
 from sonnet.python.modules.gated_rnn import GRU
+from sonnet.python.modules.gated_rnn import highway_core_with_recurrent_dropout
+from sonnet.python.modules.gated_rnn import HighwayCore
 from sonnet.python.modules.gated_rnn import LSTM
 from sonnet.python.modules.gated_rnn import lstm_with_recurrent_dropout
 from sonnet.python.modules.gated_rnn import lstm_with_zoneout

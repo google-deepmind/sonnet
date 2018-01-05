@@ -42,12 +42,14 @@ SAME = "SAME"
 VALID = "VALID"
 ALLOWED_PADDINGS = {SAME, VALID}
 
-DATA_FORMAT_NCHW = "NCHW"
-DATA_FORMAT_NHWC = "NHWC"
-SUPPORTED_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
 DATA_FORMAT_NCW = "NCW"
 DATA_FORMAT_NWC = "NWC"
 SUPPORTED_1D_DATA_FORMATS = {DATA_FORMAT_NCW, DATA_FORMAT_NWC}
+
+DATA_FORMAT_NCHW = "NCHW"
+DATA_FORMAT_NHWC = "NHWC"
+SUPPORTED_2D_DATA_FORMATS = {DATA_FORMAT_NCHW, DATA_FORMAT_NHWC}
+
 DATA_FORMAT_NDHWC = "NDHWC"
 DATA_FORMAT_NCDHW = "NCDHW"
 SUPPORTED_3D_DATA_FORMATS = {DATA_FORMAT_NDHWC, DATA_FORMAT_NCDHW}
@@ -1156,13 +1158,14 @@ class Conv1D(_ConvND, base.Transposable):
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
-      ValueError: If the data_format is not in `SUPPORTED_1D_DATA_FORMATS`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       TypeError: If mask is given and it is not convertible to a Tensor.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_1D_DATA_FORMATS`).
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
@@ -1284,6 +1287,8 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_1D_DATA_FORMATS`).
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
@@ -1395,13 +1400,14 @@ class CausalConv1D(_ConvND):
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID`.
-      ValueError: If the data_format is not in `SUPPORTED_1D_DATA_FORMATS`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       TypeError: If mask is given and it is not convertible to a Tensor.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_1D_DATA_FORMATS`).
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
@@ -1458,19 +1464,20 @@ class Conv2D(_ConvND, base.Transposable):
           weights (with key 'w') or biases (with key 'b'). As a default, no
           partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        regularizers are used. A regularizer should be a function that takes
-        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
-        the L1 and L2 regularizers in `tf.contrib.layers`.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          regularizers are used. A regularizer should be a function that takes
+          a single `Tensor` as an input and returns a scalar `Tensor` output,
+          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
       mask: A convertible to a 4D tensor which is multiplied
-        component-wise with the weights (Optional).
+          component-wise with the weights (Optional).
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension (NCHW).
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1485,18 +1492,18 @@ class Conv2D(_ConvND, base.Transposable):
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
-      ValueError: If the given data_format is not a supported format (see
-        SUPPORTED_DATA_FORMATS).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
-        keys other than 'w' or 'b'.
+          keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
-        are not callable.
+          are not callable.
       TypeError: If mask is given and it is not convertible to a Tensor.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+        `SUPPORTED_2D_DATA_FORMATS`).
     """
-    if data_format not in SUPPORTED_DATA_FORMATS:
+    if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
     super(Conv2D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
@@ -1610,18 +1617,18 @@ class Conv2DTranspose(_ConvNDTranspose, base.Transposable):
       base.IncompatibleShapeError: If the given stride is neither an integer nor
           a sequence of two or four integers.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
-      ValueError: If the given data_format is not a supported format (see
-          SUPPORTED_DATA_FORMATS).
       ValueError: If the given kernel_shape is `None`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_2D_DATA_FORMATS`).
     """
-    if data_format not in SUPPORTED_DATA_FORMATS:
+    if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     super(Conv2DTranspose, self).__init__(
         output_channels=output_channels, output_shape=output_shape,
@@ -1731,6 +1738,8 @@ class Conv3D(_ConvND, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_3D_DATA_FORMATS`).
     """
     if data_format not in SUPPORTED_3D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
@@ -1853,6 +1862,8 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_3D_DATA_FORMATS`).
     """
     if data_format not in SUPPORTED_3D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
@@ -1916,14 +1927,15 @@ class InPlaneConv2D(base.AbstractModule):
           filters (with key 'w') or biases (with key 'b'). As a default, no
           partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        regularizers are used. A regularizer should be a function that takes
-        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
-        the L1 and L2 regularizers in `tf.contrib.layers`.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          regularizers are used. A regularizer should be a function that takes
+          a single `Tensor` as an input and returns a scalar `Tensor` output,
+          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -1935,9 +1947,9 @@ class InPlaneConv2D(base.AbstractModule):
           dimensions are not equal to 1.
       ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
-        keys other than 'w' or 'b'.
+          keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
-        are not callable.
+          are not callable.
     """
     super(InPlaneConv2D, self).__init__(custom_getter=custom_getter, name=name)
 
@@ -2169,20 +2181,21 @@ class DepthwiseConv2D(base.AbstractModule):
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b').
       partitioners: Optional dict containing partitioners for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        partitioners are used.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with key 'w') and the biases (with key 'b'). As a default, no
-        regularizers are used. A regularizer should be a function that takes
-        a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
-        the L1 and L2 regularizers in `tf.contrib.layers`.
+          (with key 'w') and the biases (with key 'b'). As a default, no
+          regularizers are used. A regularizer should be a function that takes
+          a single `Tensor` as an input and returns a scalar `Tensor` output,
+          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension ("NCHW").
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2195,11 +2208,11 @@ class DepthwiseConv2D(base.AbstractModule):
       ValueError: if `channel_multiplier` is not an integer >= 1.
       ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.
       ValueError: If the given data_format is not a supported format (see
-        SUPPORTED_DATA_FORMATS).
+          `SUPPORTED_2D_DATA_FORMATS`).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
-        keys other than 'w' or 'b'.
+          keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
-        are not callable.
+          are not callable.
     """
     super(DepthwiseConv2D, self).__init__(custom_getter=custom_getter,
                                           name=name)
@@ -2213,9 +2226,9 @@ class DepthwiseConv2D(base.AbstractModule):
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
 
-    if data_format not in SUPPORTED_DATA_FORMATS:
+    if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     self._data_format = data_format
 
@@ -2482,18 +2495,19 @@ class SeparableConv2D(base.AbstractModule):
           filters (with key 'w') or biases (with key 'b'). As a default, no
           partitioners are used.
       regularizers: Optional dict containing regularizers for the filters
-        (with keys 'w_dw' for depthwise and 'w_pw' for pointwise) and the
-        biases (with key 'b'). As a default, no regularizers are used.
-        A regularizer should be a function that takes a single `Tensor` as an
-        input and returns a scalar `Tensor` output, e.g. the L1 and L2
-        regularizers in `tf.contrib.layers`.
+          (with keys 'w_dw' for depthwise and 'w_pw' for pointwise) and the
+          biases (with key 'b'). As a default, no regularizers are used.
+          A regularizer should be a function that takes a single `Tensor` as an
+          input and returns a scalar `Tensor` output, e.g. the L1 and L2
+          regularizers in `tf.contrib.layers`.
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NHWC), or the
           second dimension ("NCHW").
       custom_getter: Callable or dictionary of callables to use as
-        custom getters inside the module. If a dictionary, the keys
-        correspond to regexes to match variable names. See the `tf.get_variable`
-        documentation for information about the custom_getter API.
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -2505,11 +2519,11 @@ class SeparableConv2D(base.AbstractModule):
           list of 2 or 4 integers.
       ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;
       ValueError: If the given data_format is not a supported format (see
-        SUPPORTED_DATA_FORMATS).
+          `SUPPORTED_2D_DATA_FORMATS`).
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
-        keys other than 'w_dw', 'w_pw' or 'b'.
+          keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
-        are not callable.
+          are not callable.
     """
     super(SeparableConv2D, self).__init__(custom_getter=custom_getter,
                                           name=name)
@@ -2528,9 +2542,9 @@ class SeparableConv2D(base.AbstractModule):
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
                                                           "kernel")
 
-    if data_format not in SUPPORTED_DATA_FORMATS:
+    if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_DATA_FORMATS))
+                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     self._data_format = data_format
 

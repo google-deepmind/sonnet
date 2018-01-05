@@ -970,7 +970,7 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
 
     x = tf.constant(0.0, shape=(2, 8, 8, 6))
     data_format = "NWCH"
-    self.assertNotIn(data_format, conv.SUPPORTED_DATA_FORMATS)
+    self.assertNotIn(data_format, conv.SUPPORTED_2D_DATA_FORMATS)
 
     with self.assertRaisesRegexp(ValueError, "Invalid data_format"):
       snt.Conv2D(output_channels=4, kernel_shape=(4, 4),

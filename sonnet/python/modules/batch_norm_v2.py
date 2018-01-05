@@ -140,10 +140,10 @@ class BatchNormV2(base.AbstractModule):
   POSSIBLE_PARTITIONER_KEYS = {GAMMA, BETA}
   POSSIBLE_REGULARIZER_KEYS = {GAMMA, BETA}
 
-
-  SUPPORTED_DATA_FORMATS = set.union({"NC", "NDHWC", "NCDHW"},
+  SUPPORTED_DATA_FORMATS = set.union({"NC"},
                                      conv.SUPPORTED_1D_DATA_FORMATS,
-                                     conv.SUPPORTED_DATA_FORMATS)
+                                     conv.SUPPORTED_2D_DATA_FORMATS,
+                                     conv.SUPPORTED_3D_DATA_FORMATS)
 
   def __init__(self, data_format=None, offset=True, scale=False,
                decay_rate=0.999, eps=1e-3, initializers=None,

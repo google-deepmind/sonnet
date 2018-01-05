@@ -120,6 +120,81 @@ class Conv1DTestDataFormats(parameterized.TestCase, tf.test.TestCase):
     self.checkEquality(o1, o2)
 
 
+class CausalConv1DTestDataFormats(parameterized.TestCase, tf.test.TestCase):
+  OUT_CHANNELS = 4
+  KERNEL_SHAPE = 3
+  INPUT_SHAPE = (2, 17, 18)
+
+  def setUp(self):
+    name = "{}.{}".format(type(self).__name__, self._testMethodName)
+    if not test.is_gpu_available():
+      self.skipTest("No GPU was detected, so {} will be skipped.".format(name))
+
+  def checkEquality(self, o1, o2, w1=None, w2=None, atol=1e-5):
+    with self.test_session(use_gpu=True, force_gpu=True):
+      tf.global_variables_initializer().run()
+      self.assertAllClose(o1.eval(), o2.eval(), atol=atol)
+
+  @parameterized.named_parameters(
+      ("WithBias_Stride1", True, 1), ("WithoutBias_Stride1", False, 1),
+      ("WithBias_Stride2", True, 2), ("WithoutBias_Stride2", False, 2))
+  def testCausalConv1DDataFormats(self, use_bias, stride):
+    """Check the module produces the same result for supported data formats."""
+    func = functools.partial(
+        snt.CausalConv1D,
+        output_channels=self.OUT_CHANNELS,
+        kernel_shape=self.KERNEL_SHAPE,
+        use_bias=use_bias,
+        stride=stride,
+        initializers=create_initializers(use_bias))
+
+    conv1 = func(name="NWC", data_format="NWC")
+    x = tf.constant(np.random.random(self.INPUT_SHAPE).astype(np.float32))
+    o1 = conv1(x)
+
+    # We will force both modules to share the same weights by creating
+    # a custom getter that returns the weights from the first conv module when
+    # tf.get_variable is called.
+    custom_getter = {"w": create_custom_field_getter(conv1, "w"),
+                     "b": create_custom_field_getter(conv1, "b")}
+    conv2 = func(name="NCW", data_format="NCW", custom_getter=custom_getter)
+    x_transpose = tf.transpose(x, perm=(0, 2, 1))
+    o2 = tf.transpose(conv2(x_transpose), perm=(0, 2, 1))
+
+    self.checkEquality(o1, o2)
+
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
+  def testCausalConv1DDataFormatsBatchNorm(self, use_bias):
+    """Similar to `testCausalConv1DDataFormats`. Checks BatchNorm support."""
+
+    def func(name, data_format, custom_getter=None):
+      conv = snt.CausalConv1D(
+          name=name,
+          output_channels=self.OUT_CHANNELS,
+          kernel_shape=self.KERNEL_SHAPE,
+          use_bias=use_bias,
+          initializers=create_initializers(use_bias),
+          data_format=data_format,
+          custom_getter=custom_getter)
+      if data_format == "NWC":
+        bn = snt.BatchNorm(scale=True, update_ops_collection=None)
+      else:  # data_format = "NCW"
+        bn = snt.BatchNorm(scale=True, update_ops_collection=None, axis=(0, 2))
+      return snt.Sequential([conv, functools.partial(bn, is_training=True)])
+
+    conv1 = func(name="NWC", data_format="NWC")
+    x = tf.constant(np.random.random(self.INPUT_SHAPE).astype(np.float32))
+    o1 = conv1(x)
+
+    custom_getter = {"w": create_custom_field_getter(conv1.layers[0], "w"),
+                     "b": create_custom_field_getter(conv1.layers[0], "b")}
+    conv2 = func(name="NCW", data_format="NCW", custom_getter=custom_getter)
+    x_transpose = tf.transpose(x, perm=(0, 2, 1))
+    o2 = tf.transpose(conv2(x_transpose), perm=(0, 2, 1))
+
+    self.checkEquality(o1, o2)
+
+
 class Conv2DTestDataFormats(parameterized.TestCase, tf.test.TestCase):
   OUT_CHANNELS = 5
   KERNEL_SHAPE = 3

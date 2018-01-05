@@ -965,6 +965,17 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertTrue(str(cm.exception).startswith(
         "Mask needs to have dtype float16, float32 or float64"))
 
+  def testDataFormatNotSupported(self):
+    """Errors are thrown when an unsupported data_format is used."""
+
+    x = tf.constant(0.0, shape=(2, 8, 8, 6))
+    data_format = "NWCH"
+    self.assertNotIn(data_format, conv.SUPPORTED_DATA_FORMATS)
+
+    with self.assertRaisesRegexp(ValueError, "Invalid data_format"):
+      snt.Conv2D(output_channels=4, kernel_shape=(4, 4),
+                 data_format=data_format)(x)
+
 
 class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
@@ -1560,6 +1571,51 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertTrue(str(cm.exception).startswith(
         "Mask needs to have dtype float16, float32 or float64"))
 
+  def testClone(self):
+    net = snt.Conv1D(name="conv1d",
+                     output_channels=4,
+                     kernel_shape=3,
+                     stride=5)
+    clone1 = net.clone()
+    clone2 = net.clone(name="clone2")
+
+    input_to_net = tf.placeholder(tf.float32, shape=[None, 100, 3])
+    net_out = net(input_to_net)
+    clone1_out = clone1(input_to_net)
+    clone2_out = clone2(input_to_net)
+
+    all_vars = tf.trainable_variables()
+    net_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=net.variable_scope.name + "/")
+    clone1_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone1.variable_scope.name + "/")
+    clone2_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone2.variable_scope.name + "/")
+
+    self.assertEqual(net.output_channels, clone1.output_channels)
+    self.assertEqual(net.module_name + "_clone", clone1.module_name)
+    self.assertEqual("clone2", clone2.module_name)
+    self.assertEqual(len(all_vars), 3*len(net_vars))
+    self.assertEqual(len(net_vars), len(clone1_vars))
+    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone1_out.get_shape().as_list())
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone2_out.get_shape().as_list())
+
+  def testDataFormatNotSupported(self):
+    """Errors are thrown when an unsupported data_format is used."""
+
+    x = tf.constant(0.0, shape=(2, 8, 6))
+    data_format = "WNC"
+    self.assertNotIn(data_format, conv.SUPPORTED_1D_DATA_FORMATS)
+
+    with self.assertRaisesRegexp(ValueError, "Invalid data_format"):
+      snt.Conv1D(output_channels=4, kernel_shape=4, data_format=data_format)(x)
+
 
 class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
@@ -1967,6 +2023,52 @@ class CausalConv1DTest(parameterized.TestCase, tf.test.TestCase):
 
     self.assertAllClose(first_replica_out, second_replica_out)
     self.assertAllClose(first_replica_out_changed, second_replica_out_changed)
+
+  def testClone(self):
+    net = snt.CausalConv1D(name="conv1d",
+                           output_channels=4,
+                           kernel_shape=3,
+                           stride=5)
+    clone1 = net.clone()
+    clone2 = net.clone(name="clone2")
+
+    input_to_net = tf.placeholder(tf.float32, shape=[None, 100, 3])
+    net_out = net(input_to_net)
+    clone1_out = clone1(input_to_net)
+    clone2_out = clone2(input_to_net)
+
+    all_vars = tf.trainable_variables()
+    net_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=net.variable_scope.name + "/")
+    clone1_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone1.variable_scope.name + "/")
+    clone2_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone2.variable_scope.name + "/")
+
+    self.assertEqual(net.output_channels, clone1.output_channels)
+    self.assertEqual(net.module_name + "_clone", clone1.module_name)
+    self.assertEqual("clone2", clone2.module_name)
+    self.assertEqual(len(all_vars), 3*len(net_vars))
+    self.assertEqual(len(net_vars), len(clone1_vars))
+    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone1_out.get_shape().as_list())
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone2_out.get_shape().as_list())
+
+  def testDataFormatNotSupported(self):
+    """Errors are thrown when an unsupported data_format is used."""
+
+    x = tf.constant(0.0, shape=(2, 8, 6))
+    data_format = "WNC"
+    self.assertNotIn(data_format, conv.SUPPORTED_1D_DATA_FORMATS)
+
+    with self.assertRaisesRegexp(ValueError, "Invalid data_format"):
+      snt.CausalConv1D(output_channels=4, kernel_shape=4,
+                       data_format=data_format)(x)
 
 
 class InPlaneConv2DTest(parameterized.TestCase, tf.test.TestCase):
@@ -3250,6 +3352,51 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
       snt.Conv3D(output_channels=4, kernel_shape=(4, 4, 4), mask=mask)(x)
     self.assertTrue(str(cm.exception).startswith(
         "Mask needs to have dtype float16, float32 or float64"))
+
+  def testClone(self):
+    net = snt.Conv3D(name="conv3d",
+                     output_channels=4,
+                     kernel_shape=3,
+                     stride=5)
+    clone1 = net.clone()
+    clone2 = net.clone(name="clone2")
+
+    input_to_net = tf.placeholder(tf.float32, shape=[None, 101, 102, 103, 3])
+    net_out = net(input_to_net)
+    clone1_out = clone1(input_to_net)
+    clone2_out = clone2(input_to_net)
+
+    all_vars = tf.trainable_variables()
+    net_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=net.variable_scope.name + "/")
+    clone1_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone1.variable_scope.name + "/")
+    clone2_vars = tf.get_collection(
+        tf.GraphKeys.TRAINABLE_VARIABLES,
+        scope=clone2.variable_scope.name + "/")
+
+    self.assertEqual(net.output_channels, clone1.output_channels)
+    self.assertEqual(net.module_name + "_clone", clone1.module_name)
+    self.assertEqual("clone2", clone2.module_name)
+    self.assertEqual(len(all_vars), 3*len(net_vars))
+    self.assertEqual(len(net_vars), len(clone1_vars))
+    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone1_out.get_shape().as_list())
+    self.assertEqual(net_out.get_shape().as_list(),
+                     clone2_out.get_shape().as_list())
+
+  def testDataFormatNotSupported(self):
+    """Errors are thrown when an unsupported data_format is used."""
+
+    x = tf.constant(0.0, shape=(2, 7, 8, 9, 6))
+    data_format = "NCHWD"
+    self.assertNotIn(data_format, conv.SUPPORTED_3D_DATA_FORMATS)
+
+    with self.assertRaisesRegexp(ValueError, "Invalid data_format"):
+      snt.Conv3D(output_channels=4, kernel_shape=4, data_format=data_format)(x)
 
 
 class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):

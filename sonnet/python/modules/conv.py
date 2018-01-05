@@ -400,7 +400,12 @@ class _ConvND(base.AbstractModule):
 
     _verify_inputs_dtype(inputs)
 
-    w = self._construct_w(inputs)
+    self._w = self._construct_w(inputs)
+
+    if self._mask is not None:
+      w = self._apply_mask()
+    else:
+      w = self._w
 
     if self._causal_padding:
       inputs = self._construct_causal_input(inputs)
@@ -418,7 +423,6 @@ class _ConvND(base.AbstractModule):
     """Construct the convolution weight matrix.
 
     Figures out the shape of the weight matrix, initialize it, and return it.
-    Also applies the passed-in mask, if one was given.
 
     Args:
       inputs: A Tensor of shape `data_format` and of type `tf.float16` or
@@ -426,12 +430,6 @@ class _ConvND(base.AbstractModule):
 
     Returns:
       w: A weight matrix of the same type as `inputs`.
-
-    Raises:
-      base.IncompatibleShapeError: If the mask shape has more dimensions than
-          the weight matrix.
-      base.IncompatibleShapeError: If the mask and the weight matrix don't
-          match on shape.
     """
     weight_shape = self._kernel_shape + (self._input_channels,
                                          self.output_channels)
@@ -440,34 +438,47 @@ class _ConvND(base.AbstractModule):
       self._initializers["w"] = create_weight_initializer(weight_shape[:-1],
                                                           dtype=inputs.dtype)
 
-    self._w = tf.get_variable("w",
-                              shape=weight_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["w"],
-                              partitioner=self._partitioners.get("w", None),
-                              regularizer=self._regularizers.get("w", None))
+    w = tf.get_variable("w",
+                        shape=weight_shape,
+                        dtype=inputs.dtype,
+                        initializer=self._initializers["w"],
+                        partitioner=self._partitioners.get("w", None),
+                        regularizer=self._regularizers.get("w", None))
 
+    return w
+
+  def _apply_mask(self):
+    """Applies the passed-in mask to the convolution matrix.
+
+    Returns:
+      w: A copy of the convolution matrix that has had the mask applied.
+
+    Raises:
+      base.IncompatibleShapeError: If the mask shape has more dimensions than
+          the weight matrix.
+      base.IncompatibleShapeError: If the mask and the weight matrix don't
+          match on shape.
+    """
     w = self._w
 
-    if self._mask is not None:
-      if self._mask.shape.ndims > len(weight_shape):
-        raise base.IncompatibleShapeError(
-            "Invalid mask shape: {}. Max shape: {}".format(
-                self._mask.shape.ndims, len(self._data_format)
-            )
-        )
-      if self._mask.shape != weight_shape[:self._mask.shape.ndims]:
-        raise base.IncompatibleShapeError(
-            "Invalid mask shape: {}. Weight shape: {}".format(
-                self._mask.shape, weight_shape
-            )
-        )
-      # TF broadcasting is a bit fragile.
-      # Expand the shape of self._mask by one dim at a time to the right
-      # until the rank matches `weight_shape`.
-      while self._mask.shape.ndims < len(weight_shape):
-        self._mask = tf.expand_dims(self._mask, -1)
-      w *= self._mask
+    if self._mask.shape.ndims > w.shape.ndims:
+      raise base.IncompatibleShapeError(
+          "Invalid mask shape: {}. Max shape: {}".format(
+              self._mask.shape.ndims, len(self._data_format)
+          )
+      )
+    if self._mask.shape != w.shape[:self._mask.shape.ndims]:
+      raise base.IncompatibleShapeError(
+          "Invalid mask shape: {}. Weight shape: {}".format(
+              self._mask.shape, w.shape
+          )
+      )
+    # TF broadcasting is a bit fragile.
+    # Expand the shape of self._mask by one dim at a time to the right
+    # until the rank matches `weight_shape`.
+    while self._mask.shape.ndims < w.shape.ndims:
+      self._mask = tf.expand_dims(self._mask, -1)
+    w *= self._mask
 
     return w
 
@@ -821,11 +832,12 @@ class _ConvNDTranspose(base.AbstractModule):
 
     # First, figure out what the non-(N,C) dims will be.
     if self._use_default_output_shape:
-      self._output_shape = (
-          lambda: _default_transpose_size(self._input_shape[1:-1],  # pylint: disable=g-long-lambda
-                                          self.stride[1:-1],
-                                          kernel_shape=self.kernel_shape,
-                                          padding=self.padding))
+      def _default_transpose_size_wrapper():
+        return _default_transpose_size(self._input_shape[1:-1],
+                                       self.stride[1:-1],
+                                       kernel_shape=self.kernel_shape,
+                                       padding=self.padding)
+      self._output_shape = _default_transpose_size_wrapper
     if len(self.output_shape) != self._n:
       raise base.IncompatibleShapeError(
           "Output shape must have rank {}, but instead was {}".format(
@@ -889,17 +901,7 @@ class _ConvNDTranspose(base.AbstractModule):
     Returns:
       outputs: The `outputs` argument that has had a bias applied.
     """
-
-    bias_shape = (self.output_channels,)
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
-    self._b = tf.get_variable("b",
-                              shape=bias_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["b"],
-                              partitioner=self._partitioners.get("b", None),
-                              regularizer=self._regularizers.get("b", None))
+    self._b = self._construct_b(inputs)
 
     # tf.nn.bias_add only supports 2 data formats, but we'll use it
     # for those. Otherwise, we'll apply the bias ourselves.
@@ -912,6 +914,28 @@ class _ConvNDTranspose(base.AbstractModule):
       outputs += tf.reshape(self._b, bias_correct_dim)
 
     return outputs
+
+  def _construct_b(self, inputs):
+    """Construct the convolution bias vector.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+
+    Returns:
+      b: The bias vector to apply.
+    """
+    bias_shape = (self.output_channels,)
+    if "b" not in self._initializers:
+      self._initializers["b"] = create_bias_initializer(bias_shape,
+                                                        dtype=inputs.dtype)
+    b = tf.get_variable("b",
+                        shape=bias_shape,
+                        dtype=inputs.dtype,
+                        initializer=self._initializers["b"],
+                        partitioner=self._partitioners.get("b", None),
+                        regularizer=self._regularizers.get("b", None))
+    return b
 
   def _construct_w(self, inputs):
     """Construct the convolution weight matrix.

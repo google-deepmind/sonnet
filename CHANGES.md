@@ -1,6 +1,21 @@
 # Sonnet Changelog
 
 
+## Version 1.16 - Monday, 8. January 2018
+
+* `snt.LSTM` now returns a namedtuple for state.
+* Added support for `tf.float16` inputs in convolution and BatchNorm modules.
+* `snt.Conv3D` now initializes biases to zero by default.
+* Added LSTM with recurrent dropout & zoneout.
+* Changed behavior of `snt.Sequential` to act as identity when it contains no
+  layers.
+* Implemented `snt.BatchNormV2`, with different interface and more sensible
+  default behavior than `snt.BatchNorm`.
+* Added a Recurrent Highway Network cell (`snt.HighwayCore`).
+* Refactored Convolutional modules (`snt.Conv{1,2,3}D`,
+  `snt.Conv{1,2,3}DTranspose` and `snt.CausalConv1D`) to use a common parent,
+  and improved test coverage.
+
 ## Version 1.15 - Monday, 20. November 2017
 
 * `sonnet.nest` `*iterable` functions now point to their equivalent from TF.

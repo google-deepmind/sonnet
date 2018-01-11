@@ -348,18 +348,15 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
       (1 - 1e-8, 0, 0),
-      (0.5, 6, 6),
+      (0.5, None, None),
       (1e-8, 14, 14)
   )
   def testZoneout(self, keep_prob, expected_frozen_h, expected_frozen_c):
     """Performs various zoneout checks.
 
-    - The training and testing versions have the same output when keep_prob
-      is close to 0 or close to 1. The returned output for the training version
-      is also deterministic in this case.
-    - When applying one step of zoneout LSTM, the resulting state has a number
-      of output matching the initial state that depends on the zoneout
-      probability.
+    The training and testing versions have the same output when keep_prob
+    is close to 0 or close to 1. The returned output for the training version
+    is also deterministic in this case.
 
     Args:
       keep_prob: the probability to use the updated version of the state.
@@ -374,10 +371,6 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 7
     seq_len = 5
 
-    # This test is not deterministic in the case keep_prob=0.5.
-    # Fixing the seed ensures that we always get the same dropout mask.
-    tf.set_random_seed(42)
-    np.random.seed(42)
     train_cell, test_cell = snt.lstm_with_zoneout(
         hidden_size, keep_prob_c=keep_prob, keep_prob_h=keep_prob)
     inputs = tf.placeholder(
@@ -413,6 +406,12 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
       if deterministic:
         self.assertAllClose(outputs["train_out"], outputs["valid_out"])
         self.assertAllClose(outputs["train_out"][0], outputs["train_out"][1])
+        self.assertEqual(
+            expected_frozen_h,
+            np.sum(outputs["train_h"] == outputs["next_train_h"]))
+        self.assertEqual(
+            expected_frozen_c,
+            np.sum(outputs["train_c"] == outputs["next_train_c"]))
       else:
         # Ensure that the training and validation outputs are different.
         self.assertGreater(
@@ -422,13 +421,6 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         self.assertGreater(
             np.max(np.abs(outputs["train_out"][0] - outputs["train_out"][1])),
             0.04)
-
-      self.assertEqual(
-          expected_frozen_h,
-          np.sum(outputs["train_h"] == outputs["next_train_h"]))
-      self.assertEqual(
-          expected_frozen_c,
-          np.sum(outputs["train_c"] == outputs["next_train_c"]))
 
   @parameterized.parameters(
       (True, False, False),

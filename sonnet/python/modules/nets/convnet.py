@@ -149,7 +149,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     self._input_shape = None
 
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
-      raise ValueError("Invalid data_format {:s}. Allowed formats "
+      raise ValueError("Invalid data_format {}. Allowed formats "
                        "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
     self._data_format = data_format
 

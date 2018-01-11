@@ -192,13 +192,15 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
              use_bias=2)
 
     err = "Invalid data_format"
-    with self.assertRaisesRegexp(ValueError, err):
-      module(
-          output_channels=self.output_channels,
-          kernel_shapes=self.kernel_shapes,
-          strides=self.strides,
-          paddings=self.paddings,
-          data_format="NHCW")
+    # Also checks that the error works with non-string types
+    for data_format in ["NHCW", 3]:
+      with self.assertRaisesRegexp(ValueError, err):
+        module(
+            output_channels=self.output_channels,
+            kernel_shapes=self.kernel_shapes,
+            strides=self.strides,
+            paddings=self.paddings,
+            data_format=data_format)
 
   @parameterized.named_parameters(
       ("ConvNet2D", snt.nets.ConvNet2D),

@@ -1116,6 +1116,100 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
     self.assertAllEqual(initializers, initializers_copy)
 
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testTransposeNHWC(self, use_bias):
+    """Test transpose for NHWC format."""
+
+    conv2_transpose = snt.Conv2DTranspose(
+        output_channels=5,
+        output_shape=(5, 4),
+        kernel_shape=3,
+        padding=snt.VALID,
+        stride=1,
+        name="conv2_transpose",
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NHWC)
+    conv2 = conv2_transpose.transpose()
+
+    # Check kernel shapes, strides and padding match.
+    self.assertEqual(conv2_transpose.kernel_shape, conv2.kernel_shape)
+    self.assertEqual((1,) + conv2_transpose.stride[1:3] + (1,), conv2.stride)
+    self.assertEqual(conv2_transpose.padding, conv2.padding)
+
+    # Before conv2_transpose is connected, we cannot know how many
+    # `output_channels` conv1 should have.
+    err = "Variables in conv2_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      _ = conv2.output_channels
+
+    # After connection the number of `output_channels` is known.
+    batch_size = 32
+    in_height = 2
+    in_width = 3
+    in_channels = 4
+    x = tf.constant(np.random.randn(batch_size, in_height, in_width,
+                                    in_channels),
+                    dtype=np.float32)
+    conv2_transpose(x)
+    self.assertEqual(in_channels, conv2.output_channels)
+
+    # However, even after connection, the `input_shape` of the forward
+    # convolution is not known until it is itself connected (i.e. it can be
+    # connected to a different shape input from the `output_shape` of the
+    # transpose convolution!)
+    err = "Variables in conv2_transpose_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      self.assertEqual(conv2_transpose.output_shape, conv2.input_shape)
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testTransposeNCHW(self, use_bias):
+    """Test transpose for NCHW format."""
+
+    conv2_transpose = snt.Conv2DTranspose(
+        output_channels=5,
+        output_shape=(5, 4),
+        kernel_shape=3,
+        padding=snt.VALID,
+        stride=1,
+        name="conv2_transpose",
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NCHW)
+    conv2 = conv2_transpose.transpose()
+
+    # Check kernel shapes, strides and padding match.
+    self.assertEqual(conv2_transpose.kernel_shape, conv2.kernel_shape)
+    self.assertEqual((1,) + conv2_transpose.stride[1:3] + (1,), conv2.stride)
+    self.assertEqual(conv2_transpose.padding, conv2.padding)
+
+    # Before conv2_transpose is connected, we cannot know how many
+    # `output_channels` conv1 should have.
+    err = "Variables in conv2_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      _ = conv2.output_channels
+
+    # After connection the number of `output_channels` is known.
+    batch_size = 32
+    in_height = 2
+    in_width = 3
+    in_channels = 4
+    x = tf.constant(np.random.randn(batch_size, in_channels, in_height,
+                                    in_width),
+                    dtype=np.float32)
+    conv2_transpose(x)
+    self.assertEqual(in_channels, conv2.output_channels)
+
+    # However, even after connection, the `input_shape` of the forward
+    # convolution is not known until it is itself connected (i.e. it can be
+    # connected to a different shape input from the `output_shape` of the
+    # transpose convolution!)
+    err = "Variables in conv2_transpose_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      self.assertEqual(conv2_transpose.output_shape, conv2.input_shape)
+
 
 class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
 
@@ -1845,9 +1939,10 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
            padding, use_bias, out_shape, stride_shape))
-  def testTranspose(self, batch_size, in_length, in_channels, out_channels,
-                    kernel_shape, padding, use_bias, out_shape, stride_shape):
-    """Test transpose."""
+  def testTransposeNWC(self, batch_size, in_length, in_channels, out_channels,
+                       kernel_shape, padding, use_bias, out_shape,
+                       stride_shape):
+    """Test transpose for NWC format."""
 
     conv1_transpose = snt.Conv1DTranspose(
         output_channels=out_channels,
@@ -1856,12 +1951,13 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
         padding=padding,
         stride=stride_shape,
         name="conv1_transpose",
-        use_bias=use_bias)
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NWC)
     conv1 = conv1_transpose.transpose()
 
     # Check kernel shapes, strides and padding match.
     self.assertEqual(conv1_transpose.kernel_shape, conv1.kernel_shape)
-    self.assertEqual((1, conv1_transpose.stride[2], 1), conv1.stride)
+    self.assertEqual((1, conv1_transpose.stride[1], 1), conv1.stride)
     self.assertEqual(conv1_transpose.padding, conv1.padding)
 
     # Before conv1_transpose is connected, we cannot know how many
@@ -1872,6 +1968,50 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
     # After connection the number of `output_channels` is known.
     x = tf.constant(np.random.randn(batch_size, in_length, in_channels),
+                    dtype=np.float32)
+    conv1_transpose(x)
+    self.assertEqual(in_channels, conv1.output_channels)
+
+    # However, even after connection, the `input_shape` of the forward
+    # convolution is not known until it is itself connected (i.e. it can be
+    # connected to a different shape input from the `output_shape` of the
+    # transpose convolution!)
+    err = "Variables in conv1_transpose_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      self.assertEqual(conv1_transpose.output_shape, conv1.input_shape)
+
+  @parameterized.parameters(
+      *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
+           padding, use_bias, out_shape, stride_shape))
+  def testTransposeNCW(self, batch_size, in_length, in_channels, out_channels,
+                       kernel_shape, padding, use_bias, out_shape,
+                       stride_shape):
+    """Test transpose for NCW format."""
+
+    conv1_transpose = snt.Conv1DTranspose(
+        output_channels=out_channels,
+        output_shape=out_shape,
+        kernel_shape=kernel_shape,
+        padding=padding,
+        stride=stride_shape,
+        name="conv1_transpose",
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NCW)
+    conv1 = conv1_transpose.transpose()
+
+    # Check kernel shapes, strides and padding match.
+    self.assertEqual(conv1_transpose.kernel_shape, conv1.kernel_shape)
+    self.assertEqual((1, 1, conv1_transpose.stride[2]), conv1.stride)
+    self.assertEqual(conv1_transpose.padding, conv1.padding)
+
+    # Before conv1_transpose is connected, we cannot know how many
+    # `output_channels` conv1 should have.
+    err = "Variables in conv1_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      conv1.output_channels  # pylint: disable=pointless-statement
+
+    # After connection the number of `output_channels` is known.
+    x = tf.constant(np.random.randn(batch_size, in_channels, in_length),
                     dtype=np.float32)
     conv1_transpose(x)
     self.assertEqual(in_channels, conv1.output_channels)
@@ -3416,8 +3556,8 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     self.kernel_shape_h = 5
     self.kernel_shape_w = 7
     self.stride_d = 1
-    self.stride_h = 1
-    self.stride_w = 1
+    self.stride_h = 2
+    self.stride_w = 3
     self.padding = snt.SAME
 
     self.in_shape = (self.batch_size, self.in_depth, self.in_height,
@@ -3544,6 +3684,97 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(net_transposed_output.get_shape(),
                      input_to_net.get_shape())
 
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testTransposeNDHWC(self, use_bias):
+    """Test transpose for NDHWC format."""
+
+    conv3_transpose = snt.Conv3DTranspose(
+        output_channels=self.out_channels,
+        output_shape=self.out_shape,
+        kernel_shape=self.kernel_shape,
+        padding=self.padding,
+        stride=self.strides,
+        name="conv3_transpose",
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NDHWC)
+    conv3 = conv3_transpose.transpose()
+
+    # Check kernel shapes, strides and padding match.
+    self.assertEqual(conv3_transpose.kernel_shape, conv3.kernel_shape)
+    self.assertEqual((1,) + self.strides + (1,), conv3.stride)
+    self.assertEqual(conv3_transpose.padding, conv3.padding)
+
+    # Before conv3_transpose is connected, we cannot know how many
+    # `output_channels` conv1 should have.
+    err = "Variables in conv3_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      _ = conv3.output_channels
+
+    # After connection the number of `output_channels` is known.
+    x = tf.constant(np.random.randn(self.batch_size,
+                                    self.in_depth,
+                                    self.in_height,
+                                    self.in_width,
+                                    self.in_channels),
+                    dtype=np.float32)
+    conv3_transpose(x)
+    self.assertEqual(self.in_channels, conv3.output_channels)
+
+    # However, even after connection, the `input_shape` of the forward
+    # convolution is not known until it is itself connected (i.e. it can be
+    # connected to a different shape input from the `output_shape` of the
+    # transpose convolution!)
+    err = "Variables in conv3_transpose_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      self.assertEqual(conv3_transpose.output_shape, conv3.input_shape)
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testTransposeNCDHW(self, use_bias):
+    """Test transpose for NCDHW format."""
+
+    conv3_transpose = snt.Conv3DTranspose(
+        output_channels=self.out_channels,
+        output_shape=self.out_shape,
+        kernel_shape=self.kernel_shape,
+        padding=self.padding,
+        stride=self.strides,
+        name="conv3_transpose",
+        use_bias=use_bias,
+        data_format=conv.DATA_FORMAT_NCDHW)
+    conv3 = conv3_transpose.transpose()
+
+    # Check kernel shapes, strides and padding match.
+    self.assertEqual(conv3_transpose.kernel_shape, conv3.kernel_shape)
+    self.assertEqual((1, 1) + self.strides, conv3.stride)
+    self.assertEqual(conv3_transpose.padding, conv3.padding)
+
+    # Before conv3_transpose is connected, we cannot know how many
+    # `output_channels` conv1 should have.
+    err = "Variables in conv3_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      _ = conv3.output_channels
+
+    # After connection the number of `output_channels` is known.
+    x = tf.constant(np.random.randn(self.batch_size,
+                                    self.in_channels,
+                                    self.in_depth,
+                                    self.in_height,
+                                    self.in_width),
+                    dtype=np.float32)
+    conv3_transpose(x)
+    self.assertEqual(self.in_channels, conv3.output_channels)
+
+    # However, even after connection, the `input_shape` of the forward
+    # convolution is not known until it is itself connected (i.e. it can be
+    # connected to a different shape input from the `output_shape` of the
+    # transpose convolution!)
+    err = "Variables in conv3_transpose_transpose not instantiated yet"
+    with self.assertRaisesRegexp(snt.NotConnectedError, err):
+      self.assertEqual(conv3_transpose.output_shape, conv3.input_shape)
 
 if __name__ == "__main__":
   tf.test.main()

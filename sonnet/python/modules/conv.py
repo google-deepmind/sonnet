@@ -629,6 +629,12 @@ class _ConvND(base.AbstractModule):
     self._ensure_is_connected()
     return self._input_shape
 
+  @property
+  def input_channels(self):
+    """Returns the number of input channels."""
+    self._ensure_is_connected()
+    return self._input_channels
+
   def clone(self, name=None):
     """Returns a cloned `_ConvND` module.
 
@@ -1110,6 +1116,12 @@ class _ConvNDTranspose(base.AbstractModule):
     self._ensure_is_connected()
     return self._input_shape
 
+  @property
+  def input_channels(self):
+    """Returns the number of input channels."""
+    self._ensure_is_connected()
+    return self._input_channels
+
 
 class Conv1D(_ConvND, base.Transposable):
   """1D convolution module, including optional bias.
@@ -1337,12 +1349,17 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
     Returns:
       `Conv1D` module.
     """
-
     if name is None:
       name = self.module_name + "_transpose"
-    return Conv1D(output_channels=lambda: self.input_shape[-1],
+
+    if self._data_format == DATA_FORMAT_NWC:
+      stride = self.stride[1:-1]
+    else:  # self._data_format == DATA_FORMAT_NCW
+      stride = self.stride[2:]
+
+    return Conv1D(output_channels=lambda: self.input_channels,
                   kernel_shape=self.kernel_shape,
-                  stride=(self._stride[2],),
+                  stride=stride,
                   padding=self.padding,
                   use_bias=self._use_bias,
                   initializers=self.initializers,
@@ -1675,9 +1692,15 @@ class Conv2DTranspose(_ConvNDTranspose, base.Transposable):
     """
     if name is None:
       name = self.module_name + "_transpose"
-    return Conv2D(output_channels=lambda: self.input_shape[-1],
+
+    if self._data_format == DATA_FORMAT_NHWC:
+      stride = self.stride[1:-1]
+    else:  # self._data_format == DATA_FORMAT_NCHW
+      stride = self.stride[2:]
+
+    return Conv2D(output_channels=lambda: self.input_channels,
                   kernel_shape=self.kernel_shape,
-                  stride=self.stride[1:-1],
+                  stride=stride,
                   padding=self.padding,
                   use_bias=self._use_bias,
                   initializers=self.initializers,
@@ -1904,12 +1927,17 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
   # Implement Transposable interface
   def transpose(self, name=None):
     """Returns transposed Conv3DTranspose module, i.e. a Conv3D module."""
-
     if name is None:
       name = self.module_name + "_transpose"
-    return Conv3D(output_channels=lambda: self.input_shape[-1],
+
+    if self._data_format == DATA_FORMAT_NDHWC:
+      stride = self.stride[1:-1]
+    else:  # self._data_format == DATA_FORMAT_NCDHW
+      stride = self.stride[2:]
+
+    return Conv3D(output_channels=lambda: self.input_channels,
                   kernel_shape=self.kernel_shape,
-                  stride=self.stride[1:-1],
+                  stride=stride,
                   padding=self.padding,
                   use_bias=self._use_bias,
                   initializers=self.initializers,

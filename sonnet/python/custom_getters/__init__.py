@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet.python.custom_getters import bayes_by_backprop
 from sonnet.python.custom_getters.context import Context
 from sonnet.python.custom_getters.non_trainable import non_trainable
 from sonnet.python.custom_getters.restore_initializer import restore_initializer

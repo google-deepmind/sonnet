@@ -14,6 +14,7 @@ py_library(
     ],
     srcs_version = "PY2AND3",
     deps = [
+        ":brnn_ptb",
         ":module_with_build_args",
         ":rnn_shakespeare",
     ],
@@ -45,6 +46,20 @@ py_binary(
     srcs_version = "PY2AND3",
     deps = [
         # tensorflow IO dep,
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
+py_binary(
+    name = "brnn_ptb",
+    srcs = [
+        "brnn_ptb.py",
+        "ptb_reader.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        # numpy dep,
         "//sonnet",
         # tensorflow dep,
     ],

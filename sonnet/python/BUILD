@@ -38,6 +38,7 @@ py_library(
     name = "custom_getters",
     srcs = [
         "custom_getters/__init__.py",
+        "custom_getters/bayes_by_backprop.py",
         "custom_getters/context.py",
         "custom_getters/non_trainable.py",
         "custom_getters/restore_initializer.py",
@@ -210,6 +211,11 @@ py_test(
 )
 
 custom_getters_tests = [
+    (
+        "bayes_by_backprop_test",
+        "medium",
+        [],
+    ),
     (
         "context_test",
         "small",

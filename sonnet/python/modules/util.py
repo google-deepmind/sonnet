@@ -564,10 +564,10 @@ def reuse_variables(method):
   adds a scope for the wrapped method name. For example:
 
   ```python
-  class MyModule(object):
+  class MyClass(object):
 
     def __init__(self, name):
-      with tf.variable_scope(name) as variable_scope:
+      with tf.variable_scope(None, default_name=name) as variable_scope:
         self.variable_scope = variable_scope
 
     @snt.reuse_variables
@@ -575,7 +575,7 @@ def reuse_variables(method):
       x = tf.get_variable("x", shape=tensor.get_shape())
       return tensor + x
 
-  module = MyModule("my_module_name")
+  module = MyClass("my_module_name")
   input_tensor = tf.zeros(shape=(5,))
 
   # This creates the variable "my_module_name/x"
@@ -618,7 +618,7 @@ def reuse_variables(method):
       class Reusable(object):
 
         def __init__(self, name):
-          with tf.variable_scope(name) as vs:
+          with tf.variable_scope(None, default_name=name) as vs:
             self.variable_scope = vs
 
         @snt.reuse_variables

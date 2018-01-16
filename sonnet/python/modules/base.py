@@ -308,6 +308,11 @@ class AbstractModule(object):
     return bool(self._connected_subgraphs)
 
   @property
+  def graph(self):
+    """Returns the Graph instance which the module is connected to, or None."""
+    return self._graph
+
+  @property
   def connected_subgraphs(self):
     """Returns the subgraphs created by this module so far."""
     return tuple(self._connected_subgraphs)
@@ -405,6 +410,9 @@ class AbstractModule(object):
     and so does not know about any modules that were constructed elsewhere but
     used inside this module.
 
+    This method explicitly re-enters the Graph which this module has been
+    connected to.
+
     Args:
       collection: Collection to restrict query to. By default this is
         `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
@@ -416,8 +424,14 @@ class AbstractModule(object):
     Raises:
       NotConnectedError: If the module is not connected to the Graph.
     """
-    return util.get_variables_in_scope(
-        self.variable_scope, collection=collection)
+    self._ensure_is_connected()
+    # Explicitly re-enter Graph, in case the module is being queried with a
+    # different default Graph from the one it was connected to. If this was not
+    # here then querying the variables from a different graph scope would
+    # produce an empty tuple.
+    with self._graph.as_default():
+      return util.get_variables_in_scope(
+          self.variable_scope, collection=collection)
 
   def __getstate__(self):
     raise NotSupportedError(

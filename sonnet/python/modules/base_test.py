@@ -384,6 +384,29 @@ class ModuleTest(tf.test.TestCase):
       with self.assertRaisesRegexp(TypeError, err):
         module = create_module(custom_getter={"w": 0}, name="mod7")
 
+  def testGetVariablesDifferentGraphScope(self):
+    with tf.Graph().as_default():
+      inputs = tf.constant(np.random.rand(10, 10), dtype=tf.float32)
+      simple_module = SimpleModule()
+      simple_module(inputs)  # pylint: disable=not-callable
+      # Should have 2 variables whether queried in or out of the Graph scope.
+      self.assertEqual(len(simple_module.get_variables()), 2)
+    self.assertEqual(len(simple_module.get_variables()), 2)
+
+  def testGraphProperty(self):
+    with tf.Graph().as_default() as graph_1:
+      id_a = IdentityModule()
+      id_a(tf.constant(np.zeros(10)))  # pylint: disable=not-callable
+      id_b = IdentityModule()
+      id_b(tf.constant(np.ones(5)))  # pylint: disable=not-callable
+    with tf.Graph().as_default() as graph_2:
+      id_c = IdentityModule()
+      id_c(tf.constant(np.eye(3)))  # pylint: disable=not-callable
+    self.assertEqual(id_a.graph, id_b.graph)
+    self.assertEqual(id_a.graph, graph_1)
+    self.assertNotEqual(id_a.graph, id_c.graph)
+    self.assertEqual(id_c.graph, graph_2)
+
 
 if __name__ == "__main__":
   tf.test.main()

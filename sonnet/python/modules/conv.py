@@ -478,7 +478,9 @@ class _ConvND(base.AbstractModule):
     # until the rank matches `weight_shape`.
     while self._mask.shape.ndims < w.shape.ndims:
       self._mask = tf.expand_dims(self._mask, -1)
-    w *= self._mask
+
+    # ResourceVariables currently don't support *=.
+    w = w * self._mask  # pylint: disable=g-no-augmented-assignment
 
     return w
 

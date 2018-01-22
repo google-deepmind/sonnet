@@ -48,7 +48,7 @@ assert_same_structure = with_deprecation_warning(nest.assert_same_structure)
 flatten = with_deprecation_warning(nest.flatten)
 flatten_iterable = with_deprecation_warning(
     nest.flatten,
-    'In addition, `flattern_iterable` is renamed to `flatten`.'
+    'In addition, `flatten_iterable` is renamed to `flatten`.'
 )
 is_sequence = with_deprecation_warning(nest.is_sequence)
 is_iterable = with_deprecation_warning(

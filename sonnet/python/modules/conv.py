@@ -84,17 +84,10 @@ def _default_transpose_size(input_shape, stride, kernel_shape=None,
   Returns:
     output_shape: A tuple of sizes for a transposed convolution that divide
       evenly with the given strides, kernel shapes, and padding algorithm.
-
-  Raises:
-    TypeError: if `input_shape` is not a Sequence;
   """
-  if not isinstance(input_shape, collections.Sequence):
-    if input_shape is None:
-      raise TypeError("input_shape is None; if using Sonnet, are you sure you "
-                      "have connected the module to inputs?")
-    raise TypeError("input_shape is of type {}, must be a sequence."
-                    .format(type(input_shape)))
-
+  if not input_shape:
+    raise TypeError("input_shape is None; if using Sonnet, are you sure you "
+                    "have connected the module to inputs?")
   input_length = len(input_shape)
   stride = _fill_and_verify_parameter_shape(stride, input_length, "stride")
   padding = _verify_padding(padding)
@@ -110,7 +103,7 @@ def _default_transpose_size(input_shape, stride, kernel_shape=None,
 
 
 def _fill_shape(x, n):
-  """Idempotentally converts an integer to a tuple of integers of a given size.
+  """Converts a dimension to a tuple of dimensions of a given size.
 
   This is used to allow shorthand notation for various configuration parameters.
   A user can provide either, for example, `2` or `[2, 2]` as a kernel shape, and
@@ -118,12 +111,13 @@ def _fill_shape(x, n):
   `(1, 2)`.
 
   Args:
-    x: An integer or an iterable of integers
+    x: An integer, tf.Dimension, or an iterable of them.
     n: An integer, the size of the desired output list
 
   Returns:
     If `x` is an integer, a tuple of size `n` containing `n` copies of `x`.
-    If `x` is an iterable of integers of size `n`, it returns `tuple(x)`.
+    If `x` is an iterable of integers or tf.Dimension of size `n`, it returns
+      `tuple(x)`.
 
   Raises:
     TypeError: If n is not a positive integer;
@@ -132,16 +126,18 @@ def _fill_shape(x, n):
   if not isinstance(n, numbers.Integral) or n < 1:
     raise TypeError("n must be a positive integer")
 
-  if isinstance(x, numbers.Integral) and x > 0:
+  if (isinstance(x, numbers.Integral) or isinstance(x, tf.Dimension)) and x > 0:
     return (x,) * n
-  elif (isinstance(x, collections.Iterable) and len(x) == n and
-        all(isinstance(v, numbers.Integral) for v in x) and
-        all(v > 0 for v in x)):
-    return tuple(x)
-  else:
-    raise TypeError("x is {}, must be either a positive integer "
-                    "or an iterable of positive integers of size {}"
-                    .format(x, n))
+
+  try:
+    if len(x) == n and all(v > 0 for v in x):
+      return tuple(x)
+  except TypeError:
+    pass
+
+  raise TypeError("x is {}, must be either a positive integer "
+                  "or an iterable of positive integers of size {}"
+                  .format(x, n))
 
 
 def _fill_and_verify_parameter_shape(x, n, parameter_label):
@@ -200,6 +196,25 @@ def create_weight_initializer(fan_in_shape, dtype=tf.float32):
 def create_bias_initializer(unused_bias_shape, dtype=tf.float32):
   """Returns a default initializer for the biases of a convolutional module."""
   return tf.zeros_initializer(dtype=dtype)
+
+
+def _find_channel_index(data_format):
+  """Returns the index of the channel dimension.
+
+  Args:
+    data_format: A string of characters corresponding to Tensor dimensionality.
+
+  Returns:
+    channel_index: An integer indicating the channel dimension.
+
+  Raises:
+    ValueError: If no channel dimension was found.
+  """
+  for i, c in enumerate(data_format):
+    if c == "C":
+      return i
+  raise ValueError("data_format requires a channel dimension. Got: {}"
+                   .format(data_format))
 
 
 class _ConvND(base.AbstractModule):
@@ -346,15 +361,7 @@ class _ConvND(base.AbstractModule):
     else:
       self._mask = None
 
-    channel_index = None
-    for i, c in enumerate(self._data_format):
-      if c == "C":
-        channel_index = i
-        break
-    if channel_index is None:
-      raise ValueError("data_format requires a channel dimension. Got: {}"
-                       .format(self._data_format))
-    self._channel_index = channel_index
+    self._channel_index = _find_channel_index(self._data_format)
 
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
@@ -382,6 +389,8 @@ class _ConvND(base.AbstractModule):
           invocations.
       base.IncompatibleShapeError: If the input tensor has the wrong number
           of dimensions.
+      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+          defined.
       base.IncompatibleShapeError: If a mask is present and its shape is
           incompatible with the shape of the weights.
       TypeError: If input Tensor dtype is not compatible with either
@@ -389,7 +398,6 @@ class _ConvND(base.AbstractModule):
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
-
     if len(self._input_shape) != len(self._data_format):
       raise base.IncompatibleShapeError((
           "Input Tensor must have rank {} corresponding to "
@@ -397,6 +405,9 @@ class _ConvND(base.AbstractModule):
               len(self._data_format), self._data_format, self._input_shape))
 
     self._input_channels = self._input_shape[self._channel_index]
+    if self._input_channels is None:
+      raise base.UnderspecifiedError(
+          "Number of input channels must be known at module build time")
 
     _verify_inputs_dtype(inputs)
 
@@ -690,14 +701,15 @@ class _ConvNDTranspose(base.AbstractModule):
           must only ensure `output_channels` can be called, returning an
           integer, when build is called.
       output_shape: Output shape of transpose convolution.
-          Can be either an iterable of integers or a callable. In the latter
-          case, since the function invocation is deferred to graph construction
-          time, the user must only ensure that `output_shape` can be called,
-          returning an iterable of format `(out_height, out_width)` when `build`
-          is called. Note that `output_shape` defines the size of output signal
-          domain, as opposed to the shape of the output `Tensor`. If a None
-          value is given, a default shape is automatically calculated (see
-          docstring of _default_transpose_size function for more details).
+          Can be either an iterable of integers or `Dimension`s, a
+          `TensorShape`, or a callable. In the latter case, since the function
+          invocation is deferred to graph construction time, the user must only
+          ensure that `output_shape` can be called, returning an iterable of
+          output shapes when `build` is called. Note that `output_shape` defines
+          the size of output signal domain, as opposed to the shape of the
+          output `Tensor`. If a None value is given, a default shape is
+          automatically calculated (see docstring of
+          `_default_transpose_size` function for more details).
       kernel_shape: Sequence of kernel sizes (of size N), or integer that is
           used to define kernel size in all dimensions.
       stride: Sequence of kernel strides (of size N), or integer that is used
@@ -787,15 +799,7 @@ class _ConvNDTranspose(base.AbstractModule):
     self._regularizers = util.check_regularizers(
         regularizers, self.possible_keys)
 
-    channel_index = None
-    for i, c in enumerate(self._data_format):
-      if c == "C":
-        channel_index = i
-        break
-    if channel_index is None:
-      raise ValueError("data_format requires a channel dimension. Got: {}"
-                       .format(self._data_format))
-    self._channel_index = channel_index
+    self._channel_index = _find_channel_index(self._data_format)
 
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
@@ -820,15 +824,17 @@ class _ConvNDTranspose(base.AbstractModule):
       ValueError: If connecting the module into the graph any time after the
           first time and the inferred size of the input does not match previous
           invocations.
-      base.IncompatibleShapeError: If the input tensor has the wrong number of
-          dimensionn, or if `output_shape` is an iterable and is not in the
-          format `(out_height, out_width)`.
+      base.IncompatibleShapeError: If the input tensor has the wrong number
+          of dimensions.
+      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+          defined.
+      base.IncompatibleShapeError: If `output_shape` is an iterable and is not
+          in the format `(out_height, out_width)`.
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
-
     if len(self._input_shape) != len(self._data_format):
       raise base.IncompatibleShapeError((
           "Input Tensor must have rank {} corresponding to "
@@ -836,15 +842,26 @@ class _ConvNDTranspose(base.AbstractModule):
               len(self._data_format), self._data_format, self._input_shape))
 
     self._input_channels = self._input_shape[self._channel_index]
+    if self._input_channels is None:
+      raise base.UnderspecifiedError(
+          "Number of input channels must be known at module build time")
+
     _verify_inputs_dtype(inputs)
 
     # First, figure out what the non-(N,C) dims will be.
     if self._use_default_output_shape:
       def _default_transpose_size_wrapper():
-        return _default_transpose_size(self._input_shape[1:-1],
-                                       self.stride[1:-1],
+        if self._data_format.startswith("NC"):
+          input_size = self._input_shape[2:]
+          stride = self.stride[2:]
+        else:  # self._data_format == N*WC
+          input_size = self._input_shape[1:-1]
+          stride = self.stride[1:-1]
+        return _default_transpose_size(input_size,
+                                       stride,
                                        kernel_shape=self.kernel_shape,
                                        padding=self.padding)
+
       self._output_shape = _default_transpose_size_wrapper
     if len(self.output_shape) != self._n:
       raise base.IncompatibleShapeError(
@@ -1006,8 +1023,7 @@ class _ConvNDTranspose(base.AbstractModule):
     elif self._data_format.startswith("N") and self._data_format.endswith("C"):
       out_shape_tuple = out_shape + out_channels
 
-    conv_output_shape = tf.convert_to_tensor(out_shape_tuple)
-    output_shape = tf.concat([batch_size, conv_output_shape], 0)
+    output_shape = tf.concat([batch_size, out_shape_tuple], 0)
     return output_shape
 
   def _recover_shape_information(self, inputs, outputs):
@@ -2052,24 +2068,23 @@ class InPlaneConv2D(base.AbstractModule):
           first time and the inferred input size does not match previous
           invocations.
       base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions; or if the input tensor has an unknown `input_channels`.
+          of dimensions.
+      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+          defined.
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
-
     if len(self._input_shape) != 4:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_height, "
-          "input_width, input_channels)")
+      raise base.IncompatibleShapeError((
+          "Input Tensor must have rank 4, but instead was {}.").format(
+              self._input_shape))
 
-    if self._input_shape[3] is None:
-      raise base.IncompatibleShapeError(
+    self._input_channels = self._input_shape[-1]
+    if self._input_channels is None:
+      raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
-
-    self._input_channels = self._input_shape[3]
 
     _verify_inputs_dtype(inputs)
 
@@ -2267,6 +2282,7 @@ class DepthwiseConv2D(base.AbstractModule):
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
+      ValueError: If the passed-in data_format doesn't have a channel dimension.
     """
     super(DepthwiseConv2D, self).__init__(custom_getter=custom_getter,
                                           name=name)
@@ -2314,6 +2330,8 @@ class DepthwiseConv2D(base.AbstractModule):
     self._input_channels = None  # Determined in build() from the input.
     self._output_channels = None  # Ditto, determined from the input and kernel.
 
+    self._channel_index = _find_channel_index(self._data_format)
+
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
     return {"w", "b"} if use_bias else {"w"}
@@ -2342,29 +2360,24 @@ class DepthwiseConv2D(base.AbstractModule):
           first time and the inferred size of the input does not match previous
           invocations.
       base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions; or if the input tensor has an unknown `input_channels`.
+          of dimensions.
+      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+          defined.
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
+    if len(self._input_shape) != len(self._data_format):
+      raise base.IncompatibleShapeError((
+          "Input Tensor must have rank {} corresponding to "
+          "data_format {}, but instead was {}.").format(
+              len(self._data_format), self._data_format, self._input_shape))
 
-    if len(self._input_shape) != 4:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_height, "
-          "input_width, input_channels)")
-
-    if self._data_format == DATA_FORMAT_NCHW:
-      input_channels = self._input_shape[1]
-    else:
-      input_channels = self._input_shape[3]
-
-    if input_channels is None:
+    self._input_channels = self._input_shape[self._channel_index]
+    if self._input_channels is None:
       raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
-
-    self._input_channels = input_channels
 
     _verify_inputs_dtype(inputs)
 
@@ -2578,6 +2591,7 @@ class SeparableConv2D(base.AbstractModule):
           keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
+      ValueError: If the passed-in data_format doesn't have a channel dimension.
     """
     super(SeparableConv2D, self).__init__(custom_getter=custom_getter,
                                           name=name)
@@ -2629,6 +2643,8 @@ class SeparableConv2D(base.AbstractModule):
     self._input_shape = None  # Determined in build() from the input.
     self._input_channels = None  # Determined in build() from the input.
 
+    self._channel_index = _find_channel_index(self._data_format)
+
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
     return {"w_dw", "w_pw", "b"} if use_bias else {"w_dw", "w_pw"}
@@ -2650,33 +2666,28 @@ class SeparableConv2D(base.AbstractModule):
       ValueError: If connecting the module into the graph any time after the
           first time and the inferred input size does not match previous
           invocations.
+      base.IncompatibleShapeError: If the input tensor has the wrong number
+          of dimensions.
+      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+          defined.
       ValueError: If `channel_multiplier` * `input_channels` >
           `output_channels`, which means that the separable convolution is
           overparameterized.
-      base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions; or if the input tensor has an unknown `input_channels`.
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-
     # Handle input whose shape is unknown during graph creation.
     self._input_shape = tuple(inputs.get_shape().as_list())
+    if len(self._input_shape) != len(self._data_format):
+      raise base.IncompatibleShapeError((
+          "Input Tensor must have rank {} corresponding to "
+          "data_format {}, but instead was {}.").format(
+              len(self._data_format), self._data_format, self._input_shape))
 
-    if len(self._input_shape) != 4:
-      raise base.IncompatibleShapeError(
-          "Input Tensor must have shape (batch_size, input_height, "
-          "input_width, input_channels)")
-
-    if self._data_format == DATA_FORMAT_NCHW:
-      input_channels = self._input_shape[1]
-    else:
-      input_channels = self._input_shape[3]
-
-    if input_channels is None:
+    self._input_channels = self._input_shape[self._channel_index]
+    if self._input_channels is None:
       raise base.UnderspecifiedError(
           "Number of input channels must be known at module build time")
-
-    self._input_channels = input_channels
 
     _verify_inputs_dtype(inputs)
 

@@ -306,6 +306,17 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       conv_mod(inputs)
 
   @parameterized.parameters(*itertools.product(modules, (True, False)))
+  def testNonDefinedChannelsDimension(self, module_info, use_bias):
+    """Error is thrown if the input's channel dimension isn't defined."""
+    module, num_input_dims, module_kwargs = module_info
+    conv_mod = module(use_bias=use_bias, **module_kwargs)
+
+    inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 1) + (None,))
+    err = "Number of input channels"
+    with self.assertRaisesRegexp(snt.UnderspecifiedError, err):
+      conv_mod(inputs)
+
+  @parameterized.parameters(*itertools.product(modules, (True, False)))
   def testFlattenedError(self, module_info, use_bias):
     """Error is thrown if the input has been incorrectly flattened."""
     module, num_input_dims, module_kwargs = module_info
@@ -1056,7 +1067,7 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
     conv1 = snt.Conv2DTranspose(name="conv2d_1",
                                 output_channels=10,
-                                output_shape=10,
+                                output_shape=tf.Dimension(10),
                                 kernel_shape=5,
                                 padding=snt.SAME,
                                 stride=2,
@@ -1117,14 +1128,17 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     self.assertAllEqual(initializers, initializers_copy)
 
   @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
-  def testTransposeNHWC(self, use_bias):
+      ("WithBiasWithOutputShape", True, True),
+      ("WithBiasWithoutOutputShape", True, False),
+      ("WithoutBiasWithOutputShape", False, True),
+      ("WithoutBiasWithoutOutputShape", False, False))
+  def testTransposeNHWC(self, use_bias, use_output_shape):
     """Test transpose for NHWC format."""
+    output_shape = tf.TensorShape((4, 5))
 
     conv2_transpose = snt.Conv2DTranspose(
         output_channels=5,
-        output_shape=(5, 4),
+        output_shape=output_shape if use_output_shape else None,
         kernel_shape=3,
         padding=snt.VALID,
         stride=1,
@@ -1155,6 +1169,9 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     conv2_transpose(x)
     self.assertEqual(in_channels, conv2.output_channels)
 
+    # As is `output_channels`.
+    self.assertEqual(output_shape, conv2_transpose.output_shape)
+
     # However, even after connection, the `input_shape` of the forward
     # convolution is not known until it is itself connected (i.e. it can be
     # connected to a different shape input from the `output_shape` of the
@@ -1164,14 +1181,17 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(conv2_transpose.output_shape, conv2.input_shape)
 
   @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
-  def testTransposeNCHW(self, use_bias):
+      ("WithBiasWithOutputShape", True, True),
+      ("WithBiasWithoutOutputShape", True, False),
+      ("WithoutBiasWithOutputShape", False, True),
+      ("WithoutBiasWithoutOutputShape", False, False))
+  def testTransposeNCHW(self, use_bias, use_output_shape):
     """Test transpose for NCHW format."""
+    output_shape = tf.TensorShape((4, 5))
 
     conv2_transpose = snt.Conv2DTranspose(
         output_channels=5,
-        output_shape=(5, 4),
+        output_shape=output_shape if use_output_shape else None,
         kernel_shape=3,
         padding=snt.VALID,
         stride=1,
@@ -1201,6 +1221,9 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
                     dtype=np.float32)
     conv2_transpose(x)
     self.assertEqual(in_channels, conv2.output_channels)
+
+    # As is `output_channels`.
+    self.assertEqual(output_shape, conv2_transpose.output_shape)
 
     # However, even after connection, the `input_shape` of the forward
     # convolution is not known until it is itself connected (i.e. it can be
@@ -1723,11 +1746,12 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
   padding = [snt.SAME, snt.SAME, snt.VALID, snt.VALID, snt.VALID]
   use_bias = [True, False, True, False, True]
   out_length = []
+  use_output_shape = [True, False, True, False, True]
 
   for i, pad in enumerate(padding):
     if pad == snt.SAME:
       out_length.append(in_length[i] * stride[i])
-    if pad == snt.VALID:
+    elif pad == snt.VALID:
       out_length.append(in_length[i] * stride[i] + kernel_shape[i] - 1)
 
   in_shape = tuple(zip(batch_size, in_length, in_channels))
@@ -1743,13 +1767,18 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(out_channels, kernel_shape, padding, use_bias, in_shape, out_shape,
-           stride_shape))
+           stride_shape, use_output_shape))
   def testMissingBatchSize(self, out_channels, kernel_shape, padding,
-                           use_bias, in_shape, out_shape, stride_shape):
+                           use_bias, in_shape, out_shape, stride_shape,
+                           use_output_shape):
     """Check functionality with unknown batch size at build time."""
 
+    if use_output_shape:
+      output_shape_arg = out_shape
+    else:
+      output_shape_arg = None
     conv1 = snt.Conv1DTranspose(output_channels=out_channels,
-                                output_shape=out_shape,
+                                output_shape=output_shape_arg,
                                 kernel_shape=kernel_shape,
                                 padding=padding,
                                 stride=stride_shape,
@@ -1768,18 +1797,23 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_length, out_channels,
-           kernel_shape, padding, use_bias, in_shape, out_shape, stride_shape))
+           kernel_shape, padding, use_bias, in_shape, out_shape, stride_shape,
+           use_output_shape))
   def testShapesSame(self, batch_size, in_length, in_channels, out_length,
                      out_channels, kernel_shape, padding, use_bias, in_shape,
-                     out_shape, stride_shape):
+                     out_shape, stride_shape, use_output_shape):
     """The generated shapes are correct."""
+    if use_output_shape:
+      output_shape_arg = out_shape
+    else:
+      output_shape_arg = None
 
     inputs = tf.placeholder(
         tf.float32,
         shape=[batch_size, in_length, in_channels])
 
     conv1 = snt.Conv1DTranspose(output_channels=out_channels,
-                                output_shape=out_shape,
+                                output_shape=output_shape_arg,
                                 kernel_shape=kernel_shape,
                                 padding=padding,
                                 stride=stride_shape,
@@ -1802,14 +1836,14 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
               [out_channels]))
 
   @parameterized.parameters(
-      *zip(out_channels, padding, use_bias, in_shape, out_shape, stride_shape))
+      *zip(out_channels, padding, use_bias, in_shape, out_shape, stride_shape,
+           use_output_shape))
   def testKernelShape(self, out_channels, padding, use_bias, in_shape,
-                      out_shape, stride_shape):
+                      out_shape, stride_shape, use_output_shape):
     """Errors are thrown for invalid kernel shapes."""
-
     snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=[3],
         padding=padding,
         stride=stride_shape,
@@ -1817,7 +1851,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
         use_bias=use_bias)
     snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=3,
         padding=padding,
         stride=stride_shape,
@@ -1827,27 +1861,28 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     err = "Invalid kernel"
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       snt.Conv1DTranspose(output_channels=out_channels,
-                          output_shape=out_shape,
+                          output_shape=out_shape if use_output_shape else None,
                           kernel_shape=[3, 3],
                           name="conv1",
                           use_bias=use_bias)
 
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       snt.Conv1DTranspose(output_channels=out_channels,
-                          output_shape=out_shape,
+                          output_shape=out_shape if use_output_shape else None,
                           kernel_shape=[3, 3, 3, 3],
                           name="conv1",
                           use_bias=use_bias)
 
   @parameterized.parameters(
-      *zip(out_channels, padding, use_bias, in_shape, out_shape))
+      *zip(out_channels, padding, use_bias, in_shape, out_shape,
+           use_output_shape))
   def testStrideError(self, out_channels, padding, use_bias, in_shape,
-                      out_shape):
+                      out_shape, use_output_shape):
     """Errors are thrown for invalid strides."""
 
     snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=3,
         padding=padding,
         stride=1,
@@ -1858,7 +1893,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
            "integers of size 1")
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       snt.Conv1DTranspose(output_channels=out_channels,
-                          output_shape=out_shape,
+                          output_shape=out_shape if use_output_shape else None,
                           kernel_shape=3,
                           padding=padding,
                           stride=[1, 1],
@@ -1867,7 +1902,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, err):
       snt.Conv1DTranspose(output_channels=out_channels,
-                          output_shape=out_shape,
+                          output_shape=out_shape if use_output_shape else None,
                           kernel_shape=3,
                           padding=padding,
                           stride=[1, 1, 1, 1],
@@ -1876,14 +1911,14 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-           padding, use_bias, out_shape, stride_shape))
+           padding, use_bias, out_shape, stride_shape, use_output_shape))
   def testInputTypeError(self, batch_size, in_length, in_channels, out_channels,
                          kernel_shape, padding, use_bias, out_shape,
-                         stride_shape):
+                         stride_shape, use_output_shape):
     """Errors are thrown for invalid input types."""
     conv1 = snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=kernel_shape,
         padding=padding,
         stride=stride_shape,
@@ -1899,14 +1934,15 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-           padding, use_bias, out_shape, stride_shape))
+           padding, use_bias, out_shape, stride_shape, use_output_shape))
   def testSharing(self, batch_size, in_length, in_channels, out_channels,
-                  kernel_shape, padding, use_bias, out_shape, stride_shape):
+                  kernel_shape, padding, use_bias, out_shape, stride_shape,
+                  use_output_shape):
     """Sharing is working."""
 
     conv1 = snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=kernel_shape,
         padding=padding,
         stride=stride_shape,
@@ -1938,15 +1974,15 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-           padding, use_bias, out_shape, stride_shape))
+           padding, use_bias, out_shape, stride_shape, use_output_shape))
   def testTransposeNWC(self, batch_size, in_length, in_channels, out_channels,
                        kernel_shape, padding, use_bias, out_shape,
-                       stride_shape):
+                       stride_shape, use_output_shape):
     """Test transpose for NWC format."""
 
     conv1_transpose = snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=kernel_shape,
         padding=padding,
         stride=stride_shape,
@@ -1972,6 +2008,9 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     conv1_transpose(x)
     self.assertEqual(in_channels, conv1.output_channels)
 
+    # As is `output_shape`.
+    self.assertIn(out_shape, conv1_transpose.output_shape)
+
     # However, even after connection, the `input_shape` of the forward
     # convolution is not known until it is itself connected (i.e. it can be
     # connected to a different shape input from the `output_shape` of the
@@ -1982,15 +2021,15 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
-           padding, use_bias, out_shape, stride_shape))
+           padding, use_bias, out_shape, stride_shape, use_output_shape))
   def testTransposeNCW(self, batch_size, in_length, in_channels, out_channels,
                        kernel_shape, padding, use_bias, out_shape,
-                       stride_shape):
+                       stride_shape, use_output_shape):
     """Test transpose for NCW format."""
 
     conv1_transpose = snt.Conv1DTranspose(
         output_channels=out_channels,
-        output_shape=out_shape,
+        output_shape=out_shape if use_output_shape else None,
         kernel_shape=kernel_shape,
         padding=padding,
         stride=stride_shape,
@@ -2016,6 +2055,9 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     conv1_transpose(x)
     self.assertEqual(in_channels, conv1.output_channels)
 
+    # As is `output_shape`.
+    self.assertIn(out_shape, conv1_transpose.output_shape)
+
     # However, even after connection, the `input_shape` of the forward
     # convolution is not known until it is itself connected (i.e. it can be
     # connected to a different shape input from the `output_shape` of the
@@ -2031,7 +2073,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     initializers_copy = dict(initializers)
 
     conv1 = snt.Conv1DTranspose(
-        output_shape=(10,),
+        output_shape=tf.Dimension(10),
         output_channels=1,
         kernel_shape=3,
         stride=1,
@@ -2264,7 +2306,6 @@ class InPlaneConv2DTest(parameterized.TestCase, tf.test.TestCase):
     conv1 = snt.InPlaneConv2D(kernel_shape=3, initializers=initializers)
 
     conv1(tf.placeholder(tf.float32, [1, 10, 10, 2]))
-
     self.assertAllEqual(initializers, initializers_copy)
 
 
@@ -3641,6 +3682,25 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
       sess.run(outputs)
       with self.assertRaises(tf.errors.InvalidArgumentError):
         sess.run(outputs_2)
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testOutputShapeInference(self, use_bias):
+    """Tests if output shapes are valid when not specified."""
+    inputs = tf.zeros(shape=[3, 5, 5, 5, 2], dtype=tf.float32)
+
+    conv1 = snt.Conv3DTranspose(name="conv3d_1",
+                                output_channels=10,
+                                output_shape=None,
+                                kernel_shape=5,
+                                padding=snt.SAME,
+                                stride=2,
+                                use_bias=use_bias)
+
+    outputs = conv1(inputs)
+
+    self.assertTrue(outputs.get_shape().is_compatible_with((3, 10, 10, 10, 10)))
 
   def testBiasInitializerIsZeroByDefault(self):
     """Test that the default initializer for the bias consists of zeros."""

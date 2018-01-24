@@ -324,7 +324,7 @@ class TextModel(snt.AbstractModule):
     """Builds sub-graph to generate a string, sampled from the model.
 
     Args:
-      initial_logits: Starting logits to sampling from.
+      initial_logits: Starting logits to sample from.
       initial_state: Starting state for the RNN core.
       sequence_length: Number of characters to sample.
 

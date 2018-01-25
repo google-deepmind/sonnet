@@ -246,6 +246,53 @@ def _find_channel_index(data_format):
                    .format(data_format))
 
 
+def _apply_bias(inputs, outputs, channel_index, data_format, output_channels,
+                initializers, partitioners, regularizers):
+  """Initialize and apply a bias to the outputs.
+
+  Figures out the shape of the bias vector, initialize it, and applies it.
+
+  Args:
+    inputs: A Tensor of shape `data_format`.
+    outputs: A Tensor of shape `data_format`.
+    channel_index: The index of the channel dimension in `inputs`.
+    data_format: Format of `inputs`.
+    output_channels: Channel dimensionality for `outputs`.
+    initializers: Optional dict containing ops to initialize the biases
+      (with key 'b').
+    partitioners: Optional dict containing partitioners to partition the
+      biases (with key 'b').
+    regularizers: Optional dict containing regularizers for the biases
+      (with key 'b').
+
+  Returns:
+    b: The constructed bias variable.
+    outputs: The `outputs` argument that has had a bias applied.
+  """
+  bias_shape = (output_channels,)
+  if "b" not in initializers:
+    initializers["b"] = create_bias_initializer(bias_shape,
+                                                dtype=inputs.dtype)
+  b = tf.get_variable("b",
+                      shape=bias_shape,
+                      dtype=inputs.dtype,
+                      initializer=initializers["b"],
+                      partitioner=partitioners.get("b", None),
+                      regularizer=regularizers.get("b", None))
+
+  # tf.nn.bias_add only supports 2 data formats.
+  if data_format in (DATA_FORMAT_NHWC, DATA_FORMAT_NCHW):
+    # Supported as-is.
+    outputs = tf.nn.bias_add(outputs, b, data_format=data_format)
+  else:
+    # Create our own bias vector.
+    bias_correct_dim = [1] * len(data_format)
+    bias_correct_dim[channel_index] = output_channels
+    outputs += tf.reshape(b, bias_correct_dim)
+
+  return b, outputs
+
+
 class _ConvND(base.AbstractModule):
   """N-dimensional convolution and dilated convolution module, including bias.
 
@@ -444,7 +491,10 @@ class _ConvND(base.AbstractModule):
                                 data_format=self._data_format)
 
     if self._use_bias:
-      outputs = self._apply_bias(inputs, outputs)
+      self._b, outputs = _apply_bias(
+          inputs, outputs, self._channel_index, self._data_format,
+          self._output_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     return outputs
 
@@ -529,44 +579,6 @@ class _ConvND(base.AbstractModule):
     else:  # self._data_format == DATA_FORMAT_NWC
       inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
     return inputs
-
-  def _apply_bias(self, inputs, outputs):
-    """Initialize and apply a bias to the outputs.
-
-    Figures out the shape of the bias vector, initialize it, and applies it.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-      outputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-
-    Returns:
-      outputs: The `outputs` argument that has had a bias applied.
-    """
-    bias_shape = (self.output_channels,)
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
-    self._b = tf.get_variable("b",
-                              shape=bias_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["b"],
-                              partitioner=self._partitioners.get("b", None),
-                              regularizer=self._regularizers.get("b", None))
-
-    # tf.nn.bias_add only supports 2 data formats.
-    if self._data_format in (DATA_FORMAT_NHWC, DATA_FORMAT_NCHW):
-      # Supported as-is.
-      outputs = tf.nn.bias_add(outputs, self._b,
-                               data_format=self._data_format)
-    else:
-      # Create our own bias vector.
-      bias_correct_dim = [1] * len(self._data_format)
-      bias_correct_dim[self._channel_index] = self.output_channels
-      outputs += tf.reshape(self._b, bias_correct_dim)
-
-    return outputs
 
   @property
   def output_channels(self):
@@ -914,60 +926,13 @@ class _ConvNDTranspose(base.AbstractModule):
                                        data_format=self._data_format)
 
     if self._use_bias:
-      outputs = self._apply_bias(inputs, outputs)
+      self._b, outputs = _apply_bias(
+          inputs, outputs, self._channel_index, self._data_format,
+          self._output_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     outputs = self._recover_shape_information(inputs, outputs)
     return outputs
-
-  def _apply_bias(self, inputs, outputs):
-    """Initialize and apply a bias to the outputs.
-
-    Figures out the shape of the bias vector, initialize it, and applies it.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-      outputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-
-    Returns:
-      outputs: The `outputs` argument that has had a bias applied.
-    """
-    self._b = self._construct_b(inputs)
-
-    # tf.nn.bias_add only supports 2 data formats, but we'll use it
-    # for those. Otherwise, we'll apply the bias ourselves.
-    if self._data_format in (DATA_FORMAT_NHWC, DATA_FORMAT_NCHW):
-      outputs = tf.nn.bias_add(outputs, self._b,
-                               data_format=self._data_format)
-    else:
-      bias_correct_dim = [1] * len(self._data_format)
-      bias_correct_dim[self._channel_index] = self.output_channels
-      outputs += tf.reshape(self._b, bias_correct_dim)
-
-    return outputs
-
-  def _construct_b(self, inputs):
-    """Construct the convolution bias vector.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-
-    Returns:
-      b: The bias vector to apply.
-    """
-    bias_shape = (self.output_channels,)
-    if "b" not in self._initializers:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
-    b = tf.get_variable("b",
-                        shape=bias_shape,
-                        dtype=inputs.dtype,
-                        initializer=self._initializers["b"],
-                        partitioner=self._partitioners.get("b", None),
-                        regularizer=self._regularizers.get("b", None))
-    return b
 
   def _construct_w(self, inputs):
     """Construct the convolution weight matrix.
@@ -2090,15 +2055,10 @@ class InPlaneConv2D(base.AbstractModule):
         self._kernel_shape[1],
         1,
         1)
-    bias_shape = (self._input_channels,)
 
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
                                                           dtype=inputs.dtype)
-
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
 
     self._w = tf.get_variable("w",
                               shape=weight_shape,
@@ -2114,13 +2074,10 @@ class InPlaneConv2D(base.AbstractModule):
                                      padding=self._padding)
 
     if self._use_bias:
-      self._b = tf.get_variable("b",
-                                shape=bias_shape,
-                                dtype=inputs.dtype,
-                                initializer=self._initializers["b"],
-                                partitioner=self._partitioners.get("b", None),
-                                regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b)
+      self._b, outputs = _apply_bias(
+          inputs, outputs, self._channel_index, self._data_format,
+          self._input_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     return outputs
 
@@ -2377,15 +2334,9 @@ class DepthwiseConv2D(base.AbstractModule):
     weight_shape = (self._kernel_shape[0], self._kernel_shape[1],
                     self._input_channels, self._channel_multiplier)
 
-    bias_shape = (self._output_channels,)
-
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
                                                           dtype=inputs.dtype)
-
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
 
     self._w = tf.get_variable("w",
                               shape=weight_shape,
@@ -2401,13 +2352,10 @@ class DepthwiseConv2D(base.AbstractModule):
                                      data_format=self._data_format)
 
     if self._use_bias:
-      self._b = tf.get_variable("b",
-                                shape=bias_shape,
-                                dtype=inputs.dtype,
-                                initializer=self._initializers["b"],
-                                partitioner=self._partitioners.get("b", None),
-                                regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b, data_format=self._data_format)
+      self._b, outputs = _apply_bias(
+          inputs, outputs, self._channel_index, self._data_format,
+          self._output_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     return outputs
 
@@ -2670,7 +2618,6 @@ class SeparableConv2D(base.AbstractModule):
                               self._input_channels, self._channel_multiplier)
     pointwise_input_size = self._channel_multiplier * self._input_channels
     pointwise_weight_shape = (1, 1, pointwise_input_size, self._output_channels)
-    bias_shape = (self._output_channels,)
 
     if "w_dw" not in self._initializers:
       fan_in_shape = depthwise_weight_shape[:2]
@@ -2681,10 +2628,6 @@ class SeparableConv2D(base.AbstractModule):
       fan_in_shape = pointwise_weight_shape[:3]
       self._initializers["w_pw"] = create_weight_initializer(fan_in_shape,
                                                              dtype=inputs.dtype)
-
-    if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(bias_shape,
-                                                        dtype=inputs.dtype)
 
     self._w_dw = tf.get_variable(
         "w_dw",
@@ -2709,13 +2652,10 @@ class SeparableConv2D(base.AbstractModule):
                                      data_format=self._data_format)
 
     if self._use_bias:
-      self._b = tf.get_variable("b",
-                                shape=bias_shape,
-                                dtype=inputs.dtype,
-                                initializer=self._initializers["b"],
-                                partitioner=self._partitioners.get("b", None),
-                                regularizer=self._regularizers.get("b", None))
-      outputs = tf.nn.bias_add(outputs, self._b, data_format=self._data_format)
+      self._b, outputs = _apply_bias(
+          inputs, outputs, self._channel_index, self._data_format,
+          self._output_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     return outputs
 

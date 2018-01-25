@@ -700,7 +700,7 @@ class AddBiasTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(type(bias.b), variables.PartitionedVariable)
 
 
-class TrainableVariableTest(tf.test.TestCase):
+class TrainableVariableTest(tf.test.TestCase, parameterized.TestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -826,6 +826,34 @@ class TrainableVariableTest(tf.test.TestCase):
     var()
 
     self.assertEqual(type(var.w), variables.PartitionedVariable)
+
+  @parameterized.parameters(
+      (True,),
+      (False,))
+  def testCustomGetter(self, with_stop_gradient):
+    def maybe_stop_gradients_custom_getter(getter, *args, **kwargs):
+      actual_variable = getter(*args, **kwargs)
+      if with_stop_gradient:
+        return tf.stop_gradient(actual_variable)
+      else:
+        return actual_variable
+
+    var = snt.TrainableVariable(
+        shape=(), custom_getter=maybe_stop_gradients_custom_getter,
+        name="non_trainable_variable")
+    output = (var() * tf.constant(1.0)) ** 2
+
+    # We need to differentiate with respect to the actual variable object,
+    # rather than var.w which is the output of the custom_getter (and possibly
+    # the stop_gradient).
+    actual_var = var.get_variables()[0]
+    grads = tf.gradients(output, actual_var)
+
+    # Gradient may or mnay not exist depending on the custom getter.
+    if with_stop_gradient:
+      self.assertIsNone(grads[0])
+    else:
+      self.assertTrue(grads[0] is not None)
 
 
 class BatchReshapeTest(tf.test.TestCase, parameterized.TestCase):

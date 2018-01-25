@@ -848,6 +848,7 @@ class TrainableVariable(base.AbstractModule):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               custom_getter=None,
                name="trainable_variable"):
     """Constructs a TrainableVariable module.
 
@@ -863,6 +864,8 @@ class TrainableVariable(base.AbstractModule):
         should be a function that takes a single `Tensor` as an input and
         returns a scalar `Tensor` output, e.g. the L1 and L2 regularizers in
         `tf.contrib.layers`.
+      custom_getter: Optional callable or dictionary of callables to use as
+        custom_getter for the module.
       name: Name of the module.
 
     Raises:
@@ -873,7 +876,8 @@ class TrainableVariable(base.AbstractModule):
       TypeError: If any of the given partitioners are not callable.
       TypeError: If any of the given regularizers are not callable.
     """
-    super(TrainableVariable, self).__init__(name=name)
+    super(TrainableVariable, self).__init__(custom_getter=custom_getter,
+                                            name=name)
 
     self._shape = tuple(shape)
     self._dtype = dtype

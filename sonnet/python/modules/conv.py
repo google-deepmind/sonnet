@@ -178,13 +178,42 @@ def _fill_and_one_pad_stride(stride, n, data_format=DATA_FORMAT_NHWC):
         " positive integers of size {}".format(stride, type(stride), n))
 
 
-def _verify_inputs_dtype(inputs):
-  """Verifies that the inputs are of a supported floating point type."""
+def _verify_inputs(inputs, channel_index, data_format):
+  """Verifies `inputs` is semantically correct.
+
+  Args:
+    inputs: An input tensor provided by the user.
+    channel_index: The index of the channel dimension.
+    data_format: The format of the data in `inputs`.
+
+  Raises:
+    base.IncompatibleShapeError: If the shape of `inputs` doesn't match
+      `data_format`.
+    base.UnderspecifiedError: If the channel dimension of `inputs` isn't
+      defined.
+    TypeError: If input Tensor dtype is not compatible with either
+      `tf.float16` or `tf.float32`.
+  """
+  # Check shape.
+  input_shape = tuple(inputs.get_shape().as_list())
+  if len(input_shape) != len(data_format):
+    raise base.IncompatibleShapeError((
+        "Input Tensor must have rank {} corresponding to "
+        "data_format {}, but instead was {}.").format(
+            len(input_shape), data_format, input_shape))
+
+  # Check type.
   if not (tf.float16.is_compatible_with(inputs.dtype) or
           tf.float32.is_compatible_with(inputs.dtype)):
     raise TypeError(
         "Input must have dtype tf.float16 or tf.float32, but dtype was {}"
         .format(inputs.dtype))
+
+  # Check channel dim.
+  input_channels = input_shape[channel_index]
+  if input_channels is None:
+    raise base.UnderspecifiedError(
+        "Number of input channels must be known at module build time")
 
 
 def create_weight_initializer(fan_in_shape, dtype=tf.float32):
@@ -396,20 +425,9 @@ class _ConvND(base.AbstractModule):
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-    # Handle input whose shape is unknown during graph creation.
+    _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
-    if len(self._input_shape) != len(self._data_format):
-      raise base.IncompatibleShapeError((
-          "Input Tensor must have rank {} corresponding to "
-          "data_format {}, but instead was {}.").format(
-              len(self._data_format), self._data_format, self._input_shape))
-
     self._input_channels = self._input_shape[self._channel_index]
-    if self._input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
 
     self._w = self._construct_w(inputs)
 
@@ -833,20 +851,9 @@ class _ConvNDTranspose(base.AbstractModule):
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-    # Handle input whose shape is unknown during graph creation.
+    _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
-    if len(self._input_shape) != len(self._data_format):
-      raise base.IncompatibleShapeError((
-          "Input Tensor must have rank {} corresponding to "
-          "data_format {}, but instead was {}.").format(
-              len(self._data_format), self._data_format, self._input_shape))
-
     self._input_channels = self._input_shape[self._channel_index]
-    if self._input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
 
     # First, figure out what the non-(N,C) dims will be.
     if self._use_default_output_shape:
@@ -2043,8 +2050,8 @@ class InPlaneConv2D(base.AbstractModule):
     self._regularizers = util.check_regularizers(
         regularizers, self.possible_keys)
 
-    self._input_shape = None  # Determined in build() from the input.
-    self._input_channels = None  # Determined in build() from the input.
+    self._data_format = "NHWC"
+    self._channel_index = 3
 
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
@@ -2074,19 +2081,9 @@ class InPlaneConv2D(base.AbstractModule):
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-    # Handle input whose shape is unknown during graph creation.
+    _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
-    if len(self._input_shape) != 4:
-      raise base.IncompatibleShapeError((
-          "Input Tensor must have rank 4, but instead was {}.").format(
-              self._input_shape))
-
-    self._input_channels = self._input_shape[-1]
-    if self._input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
+    self._input_channels = self._input_shape[self._channel_index]
 
     weight_shape = (
         self._kernel_shape[0],
@@ -2366,20 +2363,9 @@ class DepthwiseConv2D(base.AbstractModule):
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-    # Handle input whose shape is unknown during graph creation.
+    _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
-    if len(self._input_shape) != len(self._data_format):
-      raise base.IncompatibleShapeError((
-          "Input Tensor must have rank {} corresponding to "
-          "data_format {}, but instead was {}.").format(
-              len(self._data_format), self._data_format, self._input_shape))
-
     self._input_channels = self._input_shape[self._channel_index]
-    if self._input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
 
     # For depthwise conv, output_channels = in_channels * channel_multiplier.
     # By default, depthwise conv applies a different filter to every input
@@ -2676,20 +2662,9 @@ class SeparableConv2D(base.AbstractModule):
       TypeError: If input Tensor dtype is not compatible with either
           `tf.float16` or `tf.float32`.
     """
-    # Handle input whose shape is unknown during graph creation.
+    _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
-    if len(self._input_shape) != len(self._data_format):
-      raise base.IncompatibleShapeError((
-          "Input Tensor must have rank {} corresponding to "
-          "data_format {}, but instead was {}.").format(
-              len(self._data_format), self._data_format, self._input_shape))
-
     self._input_channels = self._input_shape[self._channel_index]
-    if self._input_channels is None:
-      raise base.UnderspecifiedError(
-          "Number of input channels must be known at module build time")
-
-    _verify_inputs_dtype(inputs)
 
     depthwise_weight_shape = (self._kernel_shape[0], self._kernel_shape[1],
                               self._input_channels, self._channel_multiplier)

@@ -1,8 +1,15 @@
 # Sonnet Changelog
 
 
-## Version 1.16 - Monday, 8. January 2018
+## Version 1.16 - Monday, 29. January 2018
 
+This version requires TensorFlow version 1.5.0.
+
+* Custom getters added for Bayes-By-Backprop, along with example which
+  reproduces paper experiment.
+* Refactoring and improve tests for convolutional modules.
+* Enable custom_getter for `snt.TrainableVariable`.
+* Support for `tf.ResourceVariable` in `snt.Conv2D`.
 * `snt.LSTM` now returns a namedtuple for state.
 * Added support for `tf.float16` inputs in convolution and BatchNorm modules.
 * `snt.Conv3D` now initializes biases to zero by default.
@@ -15,6 +22,7 @@
 * Refactored Convolutional modules (`snt.Conv{1,2,3}D`,
   `snt.Conv{1,2,3}DTranspose` and `snt.CausalConv1D`) to use a common parent,
   and improved test coverage.
+* Disable brittle unit tests which relied on fixing RNG seeds.
 
 ## Version 1.15 - Monday, 20. November 2017
 

@@ -532,7 +532,8 @@ class BatchNormV2(base.AbstractModule):
                 input_shape))
 
     self._channel_index = self._data_format.index("C")
-    self._axis = range(len(self._data_format))
+    # Use list to turn range into iterator in python3.
+    self._axis = list(range(len(self._data_format)))
     del self._axis[self._channel_index]
 
     if len(self._data_format) != len(input_shape):
@@ -546,9 +547,9 @@ class BatchNormV2(base.AbstractModule):
 
     self._num_channels = int(input_shape[self._channel_index])
     if self._channel_index == 1:
-      self._image_shape = map(int, input_shape[2:])
+      self._image_shape = [int(x) for x in input_shape[2:]]
     else:
-      self._image_shape = map(int, input_shape[1:-1])
+      self._image_shape = [int(x) for x in input_shape[1:-1]]
 
     self._expanded_mean_shape = [1] * len(input_shape)
     self._expanded_mean_shape[self._channel_index] = self._num_channels

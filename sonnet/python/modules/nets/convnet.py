@@ -150,7 +150,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
 
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
     self._data_format = data_format
 
     self._initializers = util.check_initializers(
@@ -515,7 +515,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       start_dim, end_dim = 2, 4
     else:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     for layer in reversed(self._layers):
       output_shapes.append(lambda l=layer: l.input_shape[start_dim:end_dim])

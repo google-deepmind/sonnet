@@ -528,4 +528,7 @@ def get_variable_metadata(scope_name_substring=None):
   if scope_name_substring is not None:
     all_variable_metadata = [x for x in all_variable_metadata
                              if scope_name_substring in x.scope_name]
+  else:
+    # Ensure all_variable_metadata is always a list.
+    all_variable_metadata = list(all_variable_metadata)
   return all_variable_metadata

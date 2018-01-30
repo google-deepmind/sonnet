@@ -20,6 +20,7 @@ from __future__ import print_function
 
 
 import numpy as np
+from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
 import tensorflow as tf

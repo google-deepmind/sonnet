@@ -24,6 +24,7 @@ import itertools
 # Dependency imports
 from absl.testing import parameterized
 import numpy as np
+from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import tensorflow as tf
 

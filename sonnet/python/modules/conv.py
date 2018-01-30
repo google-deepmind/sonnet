@@ -1195,7 +1195,7 @@ class Conv1D(_ConvND, base.Transposable):
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
     super(Conv1D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
@@ -1318,7 +1318,7 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
 
     super(Conv1DTranspose, self).__init__(
         output_channels=output_channels, output_shape=output_shape,
@@ -1442,7 +1442,7 @@ class CausalConv1D(_ConvND):
     """
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
     super(CausalConv1D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
@@ -1534,7 +1534,7 @@ class Conv2D(_ConvND, base.Transposable):
     """
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
     super(Conv2D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
@@ -1659,7 +1659,7 @@ class Conv2DTranspose(_ConvNDTranspose, base.Transposable):
     """
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     super(Conv2DTranspose, self).__init__(
         output_channels=output_channels, output_shape=output_shape,
@@ -1780,7 +1780,7 @@ class Conv3D(_ConvND, base.Transposable):
     """
     if data_format not in SUPPORTED_3D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_3D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_3D_DATA_FORMATS))
     super(Conv3D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
@@ -1904,7 +1904,7 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
     """
     if data_format not in SUPPORTED_3D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_3D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_3D_DATA_FORMATS))
 
     super(Conv3DTranspose, self).__init__(
         output_channels=output_channels, output_shape=output_shape,
@@ -2546,7 +2546,7 @@ class SeparableConv2D(base.AbstractModule):
 
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
-                       "{:s}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     self._data_format = data_format
 

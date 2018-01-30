@@ -474,7 +474,7 @@ different decorated methods and each decorated method has its own
     class Reusable(object):
 
       def __init__(self, name):
-        with tf.variable_scope(name) as vs:
+        with tf.variable_scope(None, default_name=name) as vs:
           self.variable_scope = vs
 
       @snt.reuse_variables
@@ -552,7 +552,7 @@ See below for an example of bad variable reuse:
     class BadReusable(object):
 
       def __init__(self, name):
-        with tf.variable_scope(name) as vs:
+        with tf.variable_scope(None, default_name=name) as vs:
           self.variable_scope = vs
 
       @snt.reuse_variables

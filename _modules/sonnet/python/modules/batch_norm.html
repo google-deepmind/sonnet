@@ -244,7 +244,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
         <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_REGULARIZER_KEYS</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_build_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_batch</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_build_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_batch</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">stat_dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Builds the statistics part of the graph when using moving variance.</span>
 
 <span class="sd">    Args:</span>
@@ -252,17 +252,17 @@
 <span class="sd">      axis: Indices of `input_batch` to reduce over.</span>
 <span class="sd">      use_batch_stats: Boolean to indicate if batch statistics should be</span>
 <span class="sd">        calculated, otherwise moving averages are returned.</span>
-<span class="sd">      dtype: TensorFlow datatype to use for the moving mean and variance.</span>
+<span class="sd">      stat_dtype: TensorFlow datatype to use for the moving mean and variance.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      Tuple of (mean, variance).</span>
+<span class="sd">      Tuple of (mean, variance), each of the same datatype as `input_batch`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Set up our moving statistics. When connecting in parallel, this is shared.</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MOVING_MEAN</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MOVING_MEAN</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_mean_initializer</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_moving_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
         <span class="s2">&quot;moving_mean&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">stat_dtype</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mean_shape</span><span class="p">,</span>
         <span class="n">collections</span><span class="o">=</span><span class="p">[</span>
             <span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">MOVING_AVERAGE_VARIABLES</span><span class="p">,</span>
@@ -275,7 +275,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MOVING_VARIANCE</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_variance_initializer</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_moving_variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
         <span class="s2">&quot;moving_variance&quot;</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">stat_dtype</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_mean_shape</span><span class="p">,</span>
         <span class="n">collections</span><span class="o">=</span><span class="p">[</span>
             <span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">MOVING_AVERAGE_VARIABLES</span><span class="p">,</span>
@@ -292,10 +292,20 @@
       <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span>
 
     <span class="k">def</span> <span class="nf">build_moving_stats</span><span class="p">():</span>
-      <span class="k">return</span> <span class="p">(</span>
-          <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_mean</span><span class="p">),</span>
-          <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_variance</span><span class="p">),</span>
-      <span class="p">)</span>
+      <span class="sd">&quot;&quot;&quot;Retrieves the moving statistics.&quot;&quot;&quot;</span>
+      <span class="c1"># If necessary, cast the moving statistics to match the input type.</span>
+      <span class="c1"># This is required by tf.nn.batch_normalization.</span>
+      <span class="n">input_dtype</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>
+      <span class="k">if</span> <span class="n">stat_dtype</span> <span class="o">==</span> <span class="n">input_dtype</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_mean</span><span class="p">),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_variance</span><span class="p">),</span>
+        <span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_mean</span><span class="p">,</span> <span class="n">input_dtype</span><span class="p">),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_moving_variance</span><span class="p">,</span> <span class="n">input_dtype</span><span class="p">),</span>
+        <span class="p">)</span>
 
     <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">smart_cond</span><span class="p">(</span>
         <span class="n">use_batch_stats</span><span class="p">,</span>
@@ -392,6 +402,9 @@
 
   <span class="k">def</span> <span class="nf">_fused_batch_norm_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_batch</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates a fused batch normalization op.&quot;&quot;&quot;</span>
+    <span class="c1"># Store the original shape of the mean and variance.</span>
+    <span class="n">mean_shape</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="n">variance_shape</span> <span class="o">=</span> <span class="n">variance</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
     <span class="c1"># The fused batch norm expects the mean, variance, gamma and beta</span>
     <span class="c1"># tensors to have dimension 1, so we flatten them to remove the</span>
     <span class="c1"># extra dimensions.</span>
@@ -422,9 +435,12 @@
         <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">use_batch_stats_fused_batch_norm</span><span class="p">,</span>
         <span class="n">moving_average_fused_batch_norm</span><span class="p">)</span>
 
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">mean_shape</span><span class="p">)</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">variance_shape</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">batch_norm_op</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span>
 
-  <span class="k">def</span> <span class="nf">_batch_norm_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_batch</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_batch_norm_op</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_batch</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">,</span>
+                     <span class="n">stat_dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates a batch normalization op.</span>
 
 <span class="sd">    It uses the tf.nn.batch_normalization op by default and the</span>
@@ -432,24 +448,24 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">      input_batch: A input Tensor of arbitrary dimension.</span>
-<span class="sd">      mean: A mean tensor.</span>
-<span class="sd">      variance: A variance tensor.</span>
+<span class="sd">      mean: A mean tensor, of the same dtype as `input_batch`.</span>
+<span class="sd">      variance: A variance tensor, of the same dtype as `input_batch`.</span>
 <span class="sd">      use_batch_stats: A bool value that indicates whether the operation should</span>
 <span class="sd">         use the batch statistics.</span>
+<span class="sd">      stat_dtype: TensorFlow datatype used for the moving mean and variance.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A batch normalization operation.</span>
-<span class="sd">      The current mean tensor.</span>
-<span class="sd">      The current variance tensor.</span>
+<span class="sd">      The current mean tensor, of datatype `stat_dtype`.</span>
+<span class="sd">      The current variance tensor, of datatype `stat_dtype`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fused</span><span class="p">:</span>
-      <span class="c1"># Store the original shape of the mean and variance.</span>
-      <span class="n">mean_shape</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
-      <span class="n">variance_shape</span> <span class="o">=</span> <span class="n">variance</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+      <span class="c1"># For the non-training case where not using batch stats,</span>
+      <span class="c1"># pass in the moving statistic variables directly.</span>
+      <span class="c1"># These will already be in the correct dtype, even for float16 input.</span>
       <span class="n">batch_norm_op</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fused_batch_norm_op</span><span class="p">(</span>
-          <span class="n">input_batch</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">)</span>
-      <span class="n">mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">mean_shape</span><span class="p">)</span>
-      <span class="n">variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">variance_shape</span><span class="p">)</span>
+          <span class="n">input_batch</span><span class="p">,</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_moving_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_moving_variance</span><span class="p">,</span> <span class="n">use_batch_stats</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">batch_norm_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
           <span class="n">input_batch</span><span class="p">,</span>
@@ -459,15 +475,25 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="p">,</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_eps</span><span class="p">,</span>
           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm&quot;</span><span class="p">)</span>
+      <span class="c1"># We&#39;ll echo the supplied mean and variance so that they can also be used</span>
+      <span class="c1"># to update the moving statistics. Cast to matching type if necessary.</span>
+      <span class="k">if</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="o">!=</span> <span class="n">stat_dtype</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">stat_dtype</span><span class="p">)</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">stat_dtype</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">batch_norm_op</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span>
 
   <span class="k">def</span> <span class="nf">_build_scale_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Sets up optional scale and offset factors.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># tf.nn.fused_batch_norm accepts float16 batch data, but not scale/offset.</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fused</span> <span class="ow">and</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="p">:</span>
+      <span class="n">dtype</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span>
+
     <span class="c1"># The fused batch norm operation needs the beta, gamma variables,</span>
     <span class="c1"># so in this case we build them and set the trainable option according</span>
     <span class="c1"># to the values of _offset and _scale.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_beta</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fused</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">BETA</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">BETA</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_beta_initializer</span><span class="p">()</span>
@@ -536,13 +562,9 @@
       <span class="c1"># Reduce over all dimensions except the last.</span>
       <span class="n">axis</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-    <span class="c1"># See following for important note on accuracy for dtype=tf.float16</span>
-    <span class="c1"># https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/nn_impl.py#L63</span>
-    <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">dtype</span>
-    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
-          <span class="s2">&quot;BatchNorm does not support `tf.float16`, insufficient &quot;</span>
-          <span class="s2">&quot;precision for calculating sufficient statistics.&quot;</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>
+    <span class="c1"># Maintain moving averages at a minimum precision of tf.float32.</span>
+    <span class="n">stat_dtype</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span> <span class="k">else</span> <span class="n">dtype</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_mean_shape</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">axis</span><span class="p">:</span>
@@ -551,13 +573,13 @@
     <span class="n">use_batch_stats</span> <span class="o">=</span> <span class="n">is_training</span> <span class="o">|</span> <span class="n">test_local_stats</span>
 
     <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_statistics</span><span class="p">(</span><span class="n">input_batch</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span>
-                                            <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+                                            <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">stat_dtype</span><span class="p">)</span>
 
     <span class="c1"># Sets up optional gamma and beta parameters</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_scale_offset</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
     <span class="c1"># Sets up the batch normalization op.</span>
     <span class="n">out</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_op</span><span class="p">(</span><span class="n">input_batch</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span>
-                                              <span class="n">use_batch_stats</span><span class="p">)</span>
+                                              <span class="n">use_batch_stats</span><span class="p">,</span> <span class="n">stat_dtype</span><span class="p">)</span>
     <span class="c1"># Sets up the update op.</span>
     <span class="n">update_ops</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_update_ops</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">is_training</span><span class="p">)</span>
 
@@ -647,7 +669,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

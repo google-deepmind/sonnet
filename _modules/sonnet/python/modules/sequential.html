@@ -130,6 +130,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">net</span> <span class="o">=</span> <span class="n">args</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">:</span>
+      <span class="c1"># If the sequential is passed a single arg, this will end up being</span>
+      <span class="c1"># wrapped in an extra layer of tuple by *args. Normally we internally</span>
+      <span class="c1"># handle this in the loop below, but if there are no layers we unpack here</span>
+      <span class="c1"># in order to make Sequential([]) act like an identity, which seems right.</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">args</span>
+
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">:</span>
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="o">*</span><span class="n">net</span><span class="p">)</span>
@@ -187,7 +197,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

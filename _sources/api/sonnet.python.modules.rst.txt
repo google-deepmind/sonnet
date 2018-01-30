@@ -115,6 +115,22 @@ sonnet\.python\.modules\.batch\_norm\_test module
     :undoc-members:
     :show-inheritance:
 
+sonnet\.python\.modules\.batch\_norm\_v2 module
+-----------------------------------------------
+
+.. automodule:: sonnet.python.modules.batch_norm_v2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet\.python\.modules\.batch\_norm\_v2\_test module
+-----------------------------------------------------
+
+.. automodule:: sonnet.python.modules.batch_norm_v2_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 sonnet\.python\.modules\.block\_matrix module
 ---------------------------------------------
 

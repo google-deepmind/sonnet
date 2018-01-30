@@ -464,7 +464,7 @@ different decorated methods and each decorated method has its own
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span> <span class="o">=</span> <span class="n">vs</span>
 
   <span class="nd">@snt</span><span class="o">.</span><span class="n">reuse_variables</span>
@@ -538,7 +538,7 @@ separate variables and an error will occur in either<code class="docutils litera
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BadReusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span> <span class="o">=</span> <span class="n">vs</span>
 
   <span class="nd">@snt</span><span class="o">.</span><span class="n">reuse_variables</span>
@@ -876,7 +876,7 @@ serialized instances where those members don’t exist.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

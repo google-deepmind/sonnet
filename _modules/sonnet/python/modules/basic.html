@@ -890,6 +890,7 @@
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;trainable_variable&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a TrainableVariable module.</span>
 
@@ -905,6 +906,8 @@
 <span class="sd">        should be a function that takes a single `Tensor` as an input and</span>
 <span class="sd">        returns a scalar `Tensor` output, e.g. the L1 and L2 regularizers in</span>
 <span class="sd">        `tf.contrib.layers`.</span>
+<span class="sd">      custom_getter: Optional callable or dictionary of callables to use as</span>
+<span class="sd">        custom_getter for the module.</span>
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
@@ -915,7 +918,8 @@
 <span class="sd">      TypeError: If any of the given partitioners are not callable.</span>
 <span class="sd">      TypeError: If any of the given regularizers are not callable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">TrainableVariable</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">TrainableVariable</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
+                                            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">dtype</span>
@@ -1410,7 +1414,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

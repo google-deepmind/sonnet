@@ -140,7 +140,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">_sentinel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Calling AbstractModule.__init__ without named &quot;</span>
-                       <span class="s2">&quot;arguments is deprecated.&quot;</span><span class="p">)</span>
+                       <span class="s2">&quot;arguments is not supported.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">to_snake_case</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
@@ -323,7 +323,7 @@
 
 <span class="sd">    The only case where it does make sense to access the variable_scope before</span>
 <span class="sd">    connection is to get the post-uniquification name, which we support using</span>
-<span class="sd">    the separate .name property.</span>
+<span class="sd">    the separate .scope_name property.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      variable_scope: `tf.VariableScope` instance of the internal `tf.Template`.</span>
@@ -348,6 +348,11 @@
   <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns true iff the Module been connected to the Graph at least once.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the Graph instance which the module is connected to, or None.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">connected_subgraphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -447,6 +452,9 @@
 <span class="sd">    and so does not know about any modules that were constructed elsewhere but</span>
 <span class="sd">    used inside this module.</span>
 
+<span class="sd">    This method explicitly re-enters the Graph which this module has been</span>
+<span class="sd">    connected to.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">      collection: Collection to restrict query to. By default this is</span>
 <span class="sd">        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn&#39;t include non-trainable</span>
@@ -458,8 +466,14 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_variables_in_scope</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="c1"># Explicitly re-enter Graph, in case the module is being queried with a</span>
+    <span class="c1"># different default Graph from the one it was connected to. If this was not</span>
+    <span class="c1"># here then querying the variables from a different graph scope would</span>
+    <span class="c1"># produce an empty tuple.</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+      <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_variables_in_scope</span><span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
@@ -620,7 +634,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

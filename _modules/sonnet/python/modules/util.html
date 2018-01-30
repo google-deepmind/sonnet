@@ -162,6 +162,17 @@
           <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">object_name</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
 
 
+<span class="k">def</span> <span class="nf">_assert_is_dictlike</span><span class="p">(</span><span class="n">maybe_dictlike</span><span class="p">,</span> <span class="n">valid_keys</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Raises a TypeError iff `maybe_dictlike` is not a dictlike object.&quot;&quot;&quot;</span>
+  <span class="c1"># This covers a common mistake when people use incorrect dictionary nesting</span>
+  <span class="c1"># for initializers / partitioners etc. The previous error message was quite</span>
+  <span class="c1"># opaque, this should be much clearer.</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">maybe_dictlike</span><span class="p">,</span> <span class="s2">&quot;__getitem__&quot;</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+        <span class="s2">&quot;Expected a dict-like object with possible keys </span><span class="si">%s</span><span class="s2">, received </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+        <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_keys</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">maybe_dictlike</span><span class="p">)))</span>
+
+
 <div class="viewcode-block" id="check_initializers"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_initializers">[docs]</a><span class="k">def</span> <span class="nf">check_initializers</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Checks the given initializers.</span>
 
@@ -181,10 +192,12 @@
 
 <span class="sd">  Raises:</span>
 <span class="sd">    KeyError: If an initializer is provided for a key not in `keys`.</span>
-<span class="sd">    TypeError: If a provided initializer is not a callable function.</span>
+<span class="sd">    TypeError: If a provided initializer is not a callable function, or</span>
+<span class="sd">      `initializers` is not a Mapping.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">initializers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{}</span>
+  <span class="n">_assert_is_dictlike</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span> <span class="n">valid_keys</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
 
   <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
@@ -220,10 +233,12 @@
 
 <span class="sd">  Raises:</span>
 <span class="sd">    KeyError: If an partitioner is provided for a key not in `keys`.</span>
-<span class="sd">    TypeError: If a provided partitioner is not a callable function.</span>
+<span class="sd">    TypeError: If a provided partitioner is not a callable function, or</span>
+<span class="sd">      `partitioners` is not a Mapping.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">partitioners</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{}</span>
+  <span class="n">_assert_is_dictlike</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span> <span class="n">valid_keys</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
 
   <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
@@ -259,11 +274,12 @@
 
 <span class="sd">  Raises:</span>
 <span class="sd">    KeyError: If an regularizers is provided for a key not in `keys`.</span>
-<span class="sd">    TypeError: If a provided regularizers is not a callable function, or if the</span>
-<span class="sd">      dict of regularizers is not in fact a dict.</span>
+<span class="sd">    TypeError: If a provided regularizer is not a callable function, or</span>
+<span class="sd">      `regularizers` is not a Mapping.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">regularizers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{}</span>
+  <span class="n">_assert_is_dictlike</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">valid_keys</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
 
   <span class="n">keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
@@ -590,10 +606,10 @@
 <span class="sd">  adds a scope for the wrapped method name. For example:</span>
 
 <span class="sd">  ```python</span>
-<span class="sd">  class MyModule(object):</span>
+<span class="sd">  class MyClass(object):</span>
 
 <span class="sd">    def __init__(self, name):</span>
-<span class="sd">      with tf.variable_scope(name) as variable_scope:</span>
+<span class="sd">      with tf.variable_scope(None, default_name=name) as variable_scope:</span>
 <span class="sd">        self.variable_scope = variable_scope</span>
 
 <span class="sd">    @snt.reuse_variables</span>
@@ -601,7 +617,7 @@
 <span class="sd">      x = tf.get_variable(&quot;x&quot;, shape=tensor.get_shape())</span>
 <span class="sd">      return tensor + x</span>
 
-<span class="sd">  module = MyModule(&quot;my_module_name&quot;)</span>
+<span class="sd">  module = MyClass(&quot;my_module_name&quot;)</span>
 <span class="sd">  input_tensor = tf.zeros(shape=(5,))</span>
 
 <span class="sd">  # This creates the variable &quot;my_module_name/x&quot;</span>
@@ -644,7 +660,7 @@
 <span class="sd">      class Reusable(object):</span>
 
 <span class="sd">        def __init__(self, name):</span>
-<span class="sd">          with tf.variable_scope(name) as vs:</span>
+<span class="sd">          with tf.variable_scope(None, default_name=name) as vs:</span>
 <span class="sd">            self.variable_scope = vs</span>
 
 <span class="sd">        @snt.reuse_variables</span>
@@ -801,7 +817,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

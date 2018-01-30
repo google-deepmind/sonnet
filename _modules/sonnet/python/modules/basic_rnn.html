@@ -98,7 +98,7 @@
 <span class="k">def</span> <span class="nf">_get_shape_without_batch_dimension</span><span class="p">(</span><span class="n">tensor_nest</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Converts Tensor nest to a TensorShape nest, removing batch dimension.&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">_strip_batch_and_convert_to_shape</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
   <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="n">_strip_batch_and_convert_to_shape</span><span class="p">,</span> <span class="n">tensor_nest</span><span class="p">)</span>
 
 
@@ -619,7 +619,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -96,6 +96,9 @@
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">array_ops</span>
 
 
+<span class="n">LSTMState</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;LSTMState&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;hidden&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span><span class="p">))</span>
+
+
 <div class="viewcode-block" id="LSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM">[docs]</a><span class="k">class</span> <span class="nc">LSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;LSTM recurrent network cell with optional peepholes &amp; layer normalization.</span>
 
@@ -115,6 +118,13 @@
 
 <span class="sd">    https://research.google.com/pubs/archive/43905.pdf</span>
 
+<span class="sd">  #### Recurrent projections</span>
+
+<span class="sd">  Projection of the recurrent state, to reduce model parameters and speed up</span>
+<span class="sd">  computation. For more details see:</span>
+
+<span class="sd">    https://arxiv.org/abs/1402.1128</span>
+
 <span class="sd">  Attributes:</span>
 <span class="sd">    state_size: Tuple of `tf.TensorShape`s indicating the size of state tensors.</span>
 <span class="sd">    output_size: `tf.TensorShape` indicating the size of the core output.</span>
@@ -126,7 +136,9 @@
   <span class="n">W_F_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_f_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; forget gate peephole</span>
   <span class="n">W_I_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_i_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; input gate peephole</span>
   <span class="n">W_O_DIAG</span> <span class="o">=</span> <span class="s2">&quot;w_o_diag&quot;</span>  <span class="c1"># weight for prev_cell -&gt; output gate peephole</span>
-  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span><span class="n">W_GATES</span><span class="p">,</span> <span class="n">B_GATES</span><span class="p">,</span> <span class="n">W_F_DIAG</span><span class="p">,</span> <span class="n">W_I_DIAG</span><span class="p">,</span> <span class="n">W_O_DIAG</span><span class="p">}</span>
+  <span class="n">W_H_PROJECTION</span> <span class="o">=</span> <span class="s2">&quot;w_h_projection&quot;</span>  <span class="c1"># weight for (opt) projection of h in state</span>
+  <span class="n">POSSIBLE_INITIALIZER_KEYS</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="n">W_GATES</span><span class="p">,</span> <span class="n">B_GATES</span><span class="p">,</span> <span class="n">W_F_DIAG</span><span class="p">,</span> <span class="n">W_I_DIAG</span><span class="p">,</span> <span class="n">W_O_DIAG</span><span class="p">,</span> <span class="n">W_H_PROJECTION</span><span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                <span class="n">hidden_size</span><span class="p">,</span>
@@ -137,6 +149,7 @@
                <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">hidden_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">projection_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">cell_clip_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lstm&quot;</span><span class="p">):</span>
@@ -162,6 +175,8 @@
 <span class="sd">        normalization.</span>
 <span class="sd">      hidden_clip_value: Optional number; if set, then the LSTM hidden state</span>
 <span class="sd">        vector is clipped by this value.</span>
+<span class="sd">      projection_size: Optional number; if set, then the LSTM hidden state is</span>
+<span class="sd">        projected to this size via a learnable projection matrix.</span>
 <span class="sd">      cell_clip_value: Optional number; if set, then the LSTM cell vector is</span>
 <span class="sd">        clipped by this value.</span>
 <span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
@@ -187,8 +202,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span> <span class="o">=</span> <span class="n">use_layer_norm</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_clip_value</span> <span class="o">=</span> <span class="n">hidden_clip_value</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cell_clip_value</span> <span class="o">=</span> <span class="n">cell_clip_value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_projection</span> <span class="o">=</span> <span class="n">projection_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_state_size</span> <span class="o">=</span> <span class="n">projection_size</span> <span class="ow">or</span> <span class="n">hidden_size</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span>
-        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">)</span>
+        <span class="n">use_peepholes</span><span class="o">=</span><span class="n">use_peepholes</span><span class="p">,</span> <span class="n">use_projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_projection</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span>
                                                  <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span>
@@ -201,7 +219,8 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value of cell_clip_value should be nonnegative.&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="LSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_peepholes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">use_projection</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the keys the dictionary of variable initializers may contain.</span>
 
 <span class="sd">    The set of all possible initializer keys are:</span>
@@ -215,6 +234,8 @@
 <span class="sd">      cls:The class.</span>
 <span class="sd">      use_peepholes: Boolean that indicates whether peephole connections are</span>
 <span class="sd">        used.</span>
+<span class="sd">      use_projection: Boolean that indicates whether a recurrent projection</span>
+<span class="sd">        layer is used.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
@@ -225,6 +246,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_peepholes</span><span class="p">:</span>
       <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span>
           <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">})</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_projection</span><span class="p">:</span>
+      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">possible_keys</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
@@ -242,10 +265,10 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A tuple (output, next_state) where &#39;output&#39; is a Tensor of size</span>
-<span class="sd">      `[batch_size, hidden_size]` and &#39;next_state&#39; is a tuple</span>
-<span class="sd">      (next_hidden, next_cell) where next_hidden and next_cell have size</span>
-<span class="sd">      `[batch_size, hidden_size]`.</span>
-
+<span class="sd">      `[batch_size, hidden_size]` and &#39;next_state&#39; is a `LSTMState` namedtuple</span>
+<span class="sd">      (next_hidden, next_cell) where `next_hidden` and `next_cell` have size</span>
+<span class="sd">      `[batch_size, hidden_size]`. If `projection_size` is specified, then</span>
+<span class="sd">      `next_hidden` will have size `[batch_size, projection_size]`.</span>
 <span class="sd">    Raises:</span>
 <span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
 <span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
@@ -291,34 +314,44 @@
       <span class="n">cell_output</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_o_diag</span> <span class="o">*</span> <span class="n">cell_output</span>
     <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">cell_output</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">next_hidden</span><span class="p">,</span> <span class="p">(</span><span class="n">next_hidden</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_projection</span><span class="p">:</span>
+      <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">next_hidden</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w_h_projection</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">next_hidden</span><span class="p">,</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">hidden</span><span class="o">=</span><span class="n">next_hidden</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">next_cell</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_create_gate_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize the variables used for the gates.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
           <span class="s2">&quot;Rank of shape must be </span><span class="si">{}</span><span class="s2"> not: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)))</span>
-    <span class="n">input_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-    <span class="n">b_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]</span>
-
-    <span class="n">equiv_input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">+</span> <span class="n">input_size</span>
+    <span class="n">equiv_input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_state_size</span> <span class="o">+</span> <span class="n">input_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
     <span class="n">initializer</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">create_linear_initializer</span><span class="p">(</span><span class="n">equiv_input_size</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_w_xh</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">,</span>
-        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">+</span> <span class="n">input_size</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">equiv_input_size</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">,</span> <span class="n">initializer</span><span class="p">),</span>
         <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">),</span>
         <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_GATES</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">,</span>
-        <span class="n">shape</span><span class="o">=</span><span class="n">b_shape</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">],</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">,</span> <span class="n">initializer</span><span class="p">),</span>
         <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">),</span>
         <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_GATES</span><span class="p">))</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_projection</span><span class="p">:</span>
+      <span class="n">w_h_initializer</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">create_linear_initializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_w_h_projection</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">,</span>
+          <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_state_size</span><span class="p">],</span>
+          <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+          <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">,</span>
+                                             <span class="n">w_h_initializer</span><span class="p">),</span>
+          <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">),</span>
+          <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">_create_peephole_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize the variables used for the peephole connections.&quot;&quot;&quot;</span>
@@ -347,13 +380,13 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Tuple of `tf.TensorShape`s indicating the size of state tensors.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]),</span>
-            <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_state_size</span><span class="p">]),</span>
+                     <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">]))</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_state_size</span><span class="p">])</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">use_peepholes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -364,6 +397,191 @@
   <span class="k">def</span> <span class="nf">use_layer_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span></div>
+
+
+<div class="viewcode-block" id="RecurrentDropoutWrapper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper">[docs]</a><span class="k">class</span> <span class="nc">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Wraps an RNNCore so that recurrent dropout can be applied.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds a new wrapper around a given core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      core: the RNN core to be wrapped.</span>
+<span class="sd">      keep_probs: the recurrent dropout keep probabilities to apply.</span>
+<span class="sd">        This should have the same structure has core.init_state. No dropout is</span>
+<span class="sd">        applied for leafs set to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">RecurrentDropoutWrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_recdropout&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">core</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_keep_probs</span> <span class="o">=</span> <span class="n">keep_probs</span>
+
+    <span class="c1"># self._dropout_state_size is a list of shape for the state parts to which</span>
+    <span class="c1"># dropout is to be applied.</span>
+    <span class="c1"># self._dropout_index has the same shape as the core state. Leafs contain</span>
+    <span class="c1"># either None if no dropout is applied or an integer representing an index</span>
+    <span class="c1"># in self._dropout_state_size.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">set_dropout_state_size</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="n">state_size</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">keep_prob</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+      <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_indexes</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="n">set_dropout_state_size</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">state_size</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="n">core_state</span><span class="p">,</span> <span class="n">dropout_masks</span> <span class="o">=</span> <span class="n">prev_state</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">next_core_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">core_state</span><span class="p">)</span>
+
+    <span class="c1"># Dropout masks are generated via tf.nn.dropout so they actually include</span>
+    <span class="c1"># rescaling: the mask value is 1/keep_prob if no dropout is applied.</span>
+    <span class="n">next_core_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">i</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">state</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">state</span> <span class="o">*</span> <span class="n">dropout_masks</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_indexes</span><span class="p">,</span> <span class="n">next_core_state</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="n">next_core_state</span><span class="p">,</span> <span class="n">dropout_masks</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RecurrentDropoutWrapper.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">trainable_initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable_regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the default start state tensor of zeros.&quot;&quot;&quot;</span>
+    <span class="n">core_initial_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">,</span>
+        <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
+        <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">dropout_masks</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">set_dropout_mask</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ones</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dropout_masks</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">ones</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="n">keep_prob</span><span class="p">)</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="n">set_dropout_mask</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_indexes</span><span class="p">,</span> <span class="n">core_initial_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_probs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">core_initial_state</span><span class="p">,</span> <span class="n">dropout_masks</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div>
+
+
+<div class="viewcode-block" id="lstm_with_recurrent_dropout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.lstm_with_recurrent_dropout">[docs]</a><span class="k">def</span> <span class="nf">lstm_with_recurrent_dropout</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;LSTM with recurrent dropout.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    hidden_size: the LSTM hidden size.</span>
+<span class="sd">    keep_prob: the probability to keep an entry when applying dropout.</span>
+<span class="sd">    **kwargs: Extra keyword arguments to pass to the LSTM.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple (train_lstm, test_lstm) where train_lstm is an LSTM with</span>
+<span class="sd">    recurrent dropout enabled to be used for training and test_lstm</span>
+<span class="sd">    is the same LSTM without recurrent dropout.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span> <span class="n">lstm</span></div>
+
+
+<div class="viewcode-block" id="ZoneoutWrapper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ZoneoutWrapper">[docs]</a><span class="k">class</span> <span class="nc">ZoneoutWrapper</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Wraps an RNNCore so that zoneout can be applied.</span>
+
+<span class="sd">  Zoneout was introduced in https://arxiv.org/abs/1606.01305</span>
+<span class="sd">  It consists of randomly freezing some RNN state in the same way recurrent</span>
+<span class="sd">  dropout would replace this state with zero.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds a new wrapper around a given core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      core: the RNN core to be wrapped.</span>
+<span class="sd">      keep_probs: the probabilities to use the updated states rather than</span>
+<span class="sd">        keeping the old state values. This is one minus the probability</span>
+<span class="sd">        that zoneout gets applied.</span>
+<span class="sd">        This should have the same structure has core.init_state. No zoneout is</span>
+<span class="sd">        applied for leafs set to None.</span>
+<span class="sd">      is_training: when set, apply some stochastic zoneout. Otherwise perform</span>
+<span class="sd">        a linear combination of the previous state and the current state based</span>
+<span class="sd">        on the zoneout probability.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">ZoneoutWrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_zoneout&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_core</span> <span class="o">=</span> <span class="n">core</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_keep_probs</span> <span class="o">=</span> <span class="n">keep_probs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="o">=</span> <span class="n">is_training</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="n">output</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">apply_zoneout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="n">next_s</span><span class="p">,</span> <span class="n">prev_s</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">keep_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">next_s</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span><span class="p">:</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">next_s</span> <span class="o">-</span> <span class="n">prev_s</span>
+        <span class="c1"># The dropout returns 0 with probability 1 - keep_prob and in this case</span>
+        <span class="c1"># this function returns prev_s</span>
+        <span class="c1"># It returns diff / keep_prob otherwise and then this function returns</span>
+        <span class="c1"># prev_s + diff = next_s</span>
+        <span class="k">return</span> <span class="n">prev_s</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">)</span> <span class="o">*</span> <span class="n">keep_prob</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">prev_s</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">keep_prob</span><span class="p">)</span> <span class="o">+</span> <span class="n">next_s</span> <span class="o">*</span> <span class="n">keep_prob</span>
+
+    <span class="n">next_state</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+        <span class="n">apply_zoneout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_probs</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">next_state</span>
+
+<div class="viewcode-block" id="ZoneoutWrapper.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ZoneoutWrapper.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">trainable_initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable_regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the default start state tensor of zeros.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">,</span>
+        <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
+        <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">state_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div>
+
+
+<div class="viewcode-block" id="lstm_with_zoneout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.lstm_with_zoneout">[docs]</a><span class="k">def</span> <span class="nf">lstm_with_zoneout</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">keep_prob_c</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">keep_prob_h</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;LSTM with recurrent dropout.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    hidden_size: the LSTM hidden size.</span>
+<span class="sd">    keep_prob_c: the probability to use the new value of the cell state rather</span>
+<span class="sd">      than freezing it.</span>
+<span class="sd">    keep_prob_h: the probability to use the new value of the hidden state</span>
+<span class="sd">      rather than freezing it.</span>
+<span class="sd">    **kwargs: Extra keyword arguments to pass to the LSTM.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple (train_lstm, test_lstm) where train_lstm is an LSTM with</span>
+<span class="sd">    recurrent dropout enabled to be used for training and test_lstm</span>
+<span class="sd">    is the same LSTM without zoneout.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="n">keep_probs</span> <span class="o">=</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">keep_prob_h</span><span class="p">,</span> <span class="n">keep_prob_c</span><span class="p">)</span>
+  <span class="n">train_lstm</span> <span class="o">=</span> <span class="n">ZoneoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+  <span class="n">test_lstm</span> <span class="o">=</span> <span class="n">ZoneoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">train_lstm</span><span class="p">,</span> <span class="n">test_lstm</span></div>
 
 
 <div class="viewcode-block" id="BatchNormLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM">[docs]</a><span class="k">class</span> <span class="nc">BatchNormLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -1375,6 +1593,183 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="HighwayCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.HighwayCore">[docs]</a><span class="k">class</span> <span class="nc">HighwayCore</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Recurrent Highway Network cell.</span>
+
+<span class="sd">  The implementation is based on: https://arxiv.org/pdf/1607.03474v5.pdf</span>
+<span class="sd">  As per the first lines of section 5 of the reference paper, 1 - T is</span>
+<span class="sd">  used instead of a dedicated C gate.</span>
+
+<span class="sd">  Attributes:</span>
+<span class="sd">    state_size: Integer indicating the size of state tensor.</span>
+<span class="sd">    output_size: Integer indicating the size of the core output.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># Keys that may be provided for parameter initializers.</span>
+  <span class="n">WT</span> <span class="o">=</span> <span class="s2">&quot;wt&quot;</span>  <span class="c1"># weight for input or previous state -&gt; T gate</span>
+  <span class="n">BT</span> <span class="o">=</span> <span class="s2">&quot;bt&quot;</span>  <span class="c1"># bias for previous state -&gt; T gate</span>
+  <span class="n">WH</span> <span class="o">=</span> <span class="s2">&quot;wh&quot;</span>  <span class="c1"># weight for input or previous state -&gt; H gate</span>
+  <span class="n">BH</span> <span class="o">=</span> <span class="s2">&quot;bh&quot;</span>  <span class="c1"># bias for previous state -&gt; H gate</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">hidden_size</span><span class="p">,</span>
+      <span class="n">num_layers</span><span class="p">,</span>
+      <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;highwaycore&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a new Recurrent Highway core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      hidden_size: (int) Hidden size dimensionality.</span>
+<span class="sd">      num_layers: (int) Number of highway layers.</span>
+<span class="sd">      initializers: Dict containing ops to initialize the weights. This</span>
+<span class="sd">        dict may contain any of the keys returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
+<span class="sd">        the weights and biases. As a default, no partitioners are used. This</span>
+<span class="sd">        dict may contain any of the keys returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">      regularizers: Optional dict containing regularizers for the weights and</span>
+<span class="sd">        biases. As a default, no regularizers are used. This</span>
+<span class="sd">        dict may contain any of the keys returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
+<span class="sd">        and allows overwriting the internal get_variable method. See the</span>
+<span class="sd">        `tf.get_variable` documentation for more details.</span>
+<span class="sd">      name: Name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      KeyError: if `initializers` contains any keys not returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `partitioners` contains any keys not returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">      KeyError: if `regularizers` contains any keys not returned by</span>
+<span class="sd">        `HighwayCore.get_possible_initializer_keys`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">HighwayCore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span> <span class="o">=</span> <span class="n">num_layers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
+        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">num_layers</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
+        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">num_layers</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
+        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">num_layers</span><span class="p">))</span>
+
+<div class="viewcode-block" id="HighwayCore.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.HighwayCore.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the keys the dictionary of variable initializers may contain.</span>
+
+<span class="sd">    The set of all possible initializer keys are:</span>
+<span class="sd">      wt: weight for input -&gt; T gate</span>
+<span class="sd">      wh: weight for input -&gt; H gate</span>
+<span class="sd">      wtL: weight for prev state -&gt; T gate for layer L (indexed from 0)</span>
+<span class="sd">      whL: weight for prev state -&gt; H gate for layer L (indexed from 0)</span>
+<span class="sd">      btL: bias for prev state -&gt; T gate for layer L (indexed from 0)</span>
+<span class="sd">      bhL: bias for prev state -&gt; H gate for layer L (indexed from 0)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      num_layers: (int) Number of highway layers.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
+<span class="sd">        constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">WT</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">WH</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">num_layers</span><span class="p">):</span>
+      <span class="n">layer_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+      <span class="n">keys</span> <span class="o">+=</span> <span class="p">[</span>
+          <span class="bp">cls</span><span class="o">.</span><span class="n">WT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
+          <span class="bp">cls</span><span class="o">.</span><span class="n">BT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
+          <span class="bp">cls</span><span class="o">.</span><span class="n">WH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
+          <span class="bp">cls</span><span class="o">.</span><span class="n">BH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the highway core module into the graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: Tensor of size `[batch_size, input_size]`.</span>
+<span class="sd">      prev_state: Tensor of size `[batch_size, hidden_size]`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A tuple (output, next_state) where `output` is a Tensor of size</span>
+<span class="sd">      `[batch_size, hidden_size]` and `next_state` is a Tensor of size</span>
+<span class="sd">      `[batch_size, hidden_size]`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
+<span class="sd">        first time, and the inferred size of the inputs does not match previous</span>
+<span class="sd">        invocations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_size</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">weight_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">)</span>
+    <span class="n">u_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">)</span>
+    <span class="n">bias_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">_get_variable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
+          <span class="n">name</span><span class="p">,</span>
+          <span class="n">shape</span><span class="p">,</span>
+          <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+          <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+          <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+          <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="n">pre_highway_wt</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">WT</span><span class="p">,</span> <span class="n">weight_shape</span><span class="p">)</span>
+    <span class="n">pre_highway_wh</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">WH</span><span class="p">,</span> <span class="n">weight_shape</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">prev_state</span>
+    <span class="k">for</span> <span class="n">layer_index</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">):</span>
+      <span class="n">layer_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_index</span><span class="p">)</span>
+      <span class="n">layer_wt</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">WT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span> <span class="n">u_shape</span><span class="p">)</span>
+      <span class="n">layer_bt</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span> <span class="n">bias_shape</span><span class="p">)</span>
+      <span class="n">layer_wh</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">WH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span> <span class="n">u_shape</span><span class="p">)</span>
+      <span class="n">layer_bh</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span> <span class="n">bias_shape</span><span class="p">)</span>
+      <span class="n">linear_t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">layer_wt</span><span class="p">)</span> <span class="o">+</span> <span class="n">layer_bt</span>
+      <span class="n">linear_h</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">layer_wh</span><span class="p">)</span> <span class="o">+</span> <span class="n">layer_bh</span>
+      <span class="k">if</span> <span class="n">layer_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">linear_t</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">pre_highway_wt</span><span class="p">)</span>
+        <span class="n">linear_h</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">pre_highway_wh</span><span class="p">)</span>
+      <span class="n">output_t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">linear_t</span><span class="p">)</span>
+      <span class="n">output_h</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">linear_h</span><span class="p">)</span>
+      <span class="n">state</span> <span class="o">=</span> <span class="n">state</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">output_t</span><span class="p">)</span> <span class="o">+</span> <span class="n">output_h</span> <span class="o">*</span> <span class="n">output_t</span>
+
+    <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="n">state</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="highway_core_with_recurrent_dropout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.highway_core_with_recurrent_dropout">[docs]</a><span class="k">def</span> <span class="nf">highway_core_with_recurrent_dropout</span><span class="p">(</span>
+    <span class="n">hidden_size</span><span class="p">,</span>
+    <span class="n">num_layers</span><span class="p">,</span>
+    <span class="n">keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Highway core with recurrent dropout.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    hidden_size: (int) Hidden size dimensionality.</span>
+<span class="sd">    num_layers: (int) Number of highway layers.</span>
+<span class="sd">    keep_prob: the probability to keep an entry when applying dropout.</span>
+<span class="sd">    **kwargs: Extra keyword arguments to pass to the highway core.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A tuple (train_core, test_core) where train_core is a higway core with</span>
+<span class="sd">    recurrent dropout enabled to be used for training and test_core is the</span>
+<span class="sd">    same highway core without recurrent dropout.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">core</span> <span class="o">=</span> <span class="n">HighwayCore</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">),</span> <span class="n">core</span></div>
 </pre></div>
 
           </div>
@@ -1408,7 +1803,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

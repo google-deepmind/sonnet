@@ -67,8 +67,7 @@
 <span class="c1"># Dependency imports</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
-
+<span class="n">nest</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span>
 
 <span class="n">_DONE_WARN</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -78,8 +77,8 @@
   <span class="k">def</span> <span class="nf">new_fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">extra_message</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_DONE_WARN</span><span class="p">:</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-          <span class="s1">&#39;Sonnet nest is deprecated. Please use: &#39;</span>
-          <span class="s1">&#39;from tensorflow.python.util import nest. &#39;</span>
+          <span class="s1">&#39;Sonnet nest is deprecated. Please use &#39;</span>
+          <span class="s1">&#39;tf.contrib.framework.nest instead. &#39;</span>
           <span class="o">+</span> <span class="n">extra_message</span>
       <span class="p">)</span>
       <span class="n">_DONE_WARN</span><span class="p">[</span><span class="n">extra_message</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -91,7 +90,7 @@
 <span class="n">flatten</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span><span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">)</span>
 <span class="n">flatten_iterable</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span>
     <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">,</span>
-    <span class="s1">&#39;In addition, `flattern_iterable` is renamed to `flatten`.&#39;</span>
+    <span class="s1">&#39;In addition, `flatten_iterable` is renamed to `flatten`.&#39;</span>
 <span class="p">)</span>
 <span class="n">is_sequence</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span><span class="n">nest</span><span class="o">.</span><span class="n">is_sequence</span><span class="p">)</span>
 <span class="n">is_iterable</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span>
@@ -155,7 +154,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

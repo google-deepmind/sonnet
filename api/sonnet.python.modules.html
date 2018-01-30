@@ -156,11 +156,19 @@ passed to the constructor.</p>
 <p>Note that this operates by searching this module’s variable scope, and
 so does not know about any modules that were constructed elsewhere but
 used inside this module.</p>
+<p>This method explicitly re-enters the Graph which this module has been
+connected to.</p>
 <p>Args: collection: Collection to restrict query to. By default this is
 <code class="docutils literal"><span class="pre">tf.Graphkeys.TRAINABLE_VARIABLES</span></code>, which doesn’t include
 non-trainable variables such as moving averages.</p>
 <p>Returns: A tuple of <code class="docutils literal"><span class="pre">tf.Variable</span></code> objects.</p>
 <p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base.AbstractModule.graph">
+<code class="descname">graph</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Graph instance which the module is connected to, or None.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -205,7 +213,7 @@ Therefore we raise an error here if the variable_scope is requested
 before connection.</p>
 <p>The only case where it does make sense to access the variable_scope
 before connection is to get the post-uniquification name, which we
-support using the separate .name property.</p>
+support using the separate .scope_name property.</p>
 <p>Returns: variable_scope: <code class="docutils literal"><span class="pre">tf.VariableScope</span></code> instance of the internal
 <code class="docutils literal"><span class="pre">tf.Template</span></code>.</p>
 <p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
@@ -712,7 +720,7 @@ example:</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.basic.TrainableVariable">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">TrainableVariable</code><span class="sig-paren">(</span><em>shape</em>, <em>dtype=tf.float32</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='trainable_variable'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#TrainableVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.TrainableVariable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.basic.</code><code class="descname">TrainableVariable</code><span class="sig-paren">(</span><em>shape</em>, <em>dtype=tf.float32</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='trainable_variable'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic.html#TrainableVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic.TrainableVariable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Provides learnable parameter Tensor.</p>
 <dl class="attribute">
@@ -1139,6 +1147,190 @@ with <code class="docutils literal"><span class="pre">test_local_stats=True</spa
 <div class="section" id="sonnet-python-modules-batch-norm-test-module">
 <h2>sonnet.python.modules.batch_norm_test module<a class="headerlink" href="#sonnet-python-modules-batch-norm-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-sonnet.python.modules.batch_norm_v2">
+<span id="sonnet-python-modules-batch-norm-v2-module"></span><h2>sonnet.python.modules.batch_norm_v2 module<a class="headerlink" href="#module-sonnet.python.modules.batch_norm_v2" title="Permalink to this headline">¶</a></h2>
+<p>Batch normalization module for Sonnet.</p>
+<p>This contains the module BatchNormV2, which performs batch normalization
+on its inputs. It has an optional post-normalization scale and offset,
+and it maintains moving averages of the statistics for use at test time.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.batch_norm_v2.</code><code class="descname">BatchNormV2</code><span class="sig-paren">(</span><em>data_format=None</em>, <em>offset=True</em>, <em>scale=False</em>, <em>decay_rate=0.999</em>, <em>eps=0.001</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>update_ops_collection=None</em>, <em>fused=True</em>, <em>name='batch_norm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/batch_norm_v2.html#BatchNormV2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Batch normalization module, including optional affine transformation.</p>
+<p>This module maintains exponential moving averages of the mean and
+variance, which can be optionally used to normalize at test time.</p>
+<p>At training time, batch statistics (mean, variance) are not shared
+between separate connections. The moving averages are shared between
+separate connections. At both training and test time, the optional
+affine transformation (<code class="docutils literal"><span class="pre">*</span> <span class="pre">gamma</span> <span class="pre">+</span> <span class="pre">beta</span></code>) is shared between separate
+connections.</p>
+<p>This is also the case for distributed replica training, where the batch
+statistics are not aggregated across replicas, but the moving averages
+are shared globally.</p>
+<p>When connecting the module to the graph, <code class="docutils literal"><span class="pre">is_training=True</span></code> means that</p>
+<ul class="simple">
+<li>Update ops are created to update the moving averages with the current
+batch’s statistics.</li>
+<li>Features are normalized using the <em>current batch’s statistics</em>. The
+<code class="docutils literal"><span class="pre">test_local_stats</span></code> setting is ignored. The moving averages are
+<strong>not</strong> used.</li>
+</ul>
+<p>whereas <code class="docutils literal"><span class="pre">is_training=False</span></code> means that</p>
+<ul class="simple">
+<li>Update ops are not created.</li>
+<li>Features are normalized using either:<ul>
+<li>The moving averages if <code class="docutils literal"><span class="pre">test_local_stats=False</span></code> (default).</li>
+<li>The test batch statistics if <code class="docutils literal"><span class="pre">test_local_stats=True</span></code>.</li>
+</ul>
+</li>
+</ul>
+<p>The moving averages are used by default at test time, but local batch
+statistics can be used by specifying a flag when connecting. One often
+wants to use local batch statistics at test time to track the progress
+while the model is trained as it would ensure that moving average
+updates do not affect the training curves. Once the training is
+finished, it’s often advantageous to use moving average statistics,
+since it would make evaluation agnostic to the batch size, and might
+even lead to small improvements over the local batch statistics.</p>
+<p>The moving averages will be updated automatically by default, but not if
+<code class="docutils literal"><span class="pre">update_ops_collection</span></code> is provided: in that case they will only be
+updated when the ops in that collection are run.</p>
+<p>For example, to run the updates automatically:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">bn</span> <span class="o">=</span> <span class="n">BatchNormV2</span><span class="p">()</span>
+<span class="n">train_net</span> <span class="o">=</span> <span class="n">bn</span><span class="p">(</span><span class="n">train_inputs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>this does, however, have the effect of blocking the forwards pass of the
+network until the update ops have been run and may have a small
+performance penalty.</p>
+<p>For example, to run the updates manually:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">bn</span> <span class="o">=</span> <span class="n">BatchNormV2</span><span class="p">(</span><span class="n">update_ops_collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">UPDATE_OPS</span><span class="p">)</span>
+<span class="n">train_net</span> <span class="o">=</span> <span class="n">bn</span><span class="p">(</span><span class="n">train_inputs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="o">...</span>
+
+<span class="n">update_ops</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="o">*</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">UPDATE_OPS</span><span class="p">))</span>
+<span class="n">train_op</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">train_op</span><span class="p">,</span> <span class="n">update_ops</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, whenever <code class="docutils literal"><span class="pre">train_op</span></code> is run so also are the moving average update
+ops.</p>
+<p>Some batch normalization caveats:</p>
+<ul class="simple">
+<li>Batch normalization will remove the effect of adding a bias, so e.g.
+<code class="docutils literal"><span class="pre">use_bias=False</span></code> should be used for an immediately preceding
+snt.Linear module.</li>
+<li>If your data batches aren’t i.i.d. then batch normalization can allow
+your network to ‘cheat’ by using the batch statistics to peek at the
+rest of the batch. This can exhibit itself as a higher test score
+with <code class="docutils literal"><span class="pre">test_local_stats=True</span></code> than <code class="docutils literal"><span class="pre">test_local_stats=False</span></code>.</li>
+</ul>
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.BETA">
+<code class="descname">BETA</code><em class="property"> = 'beta'</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.BETA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.GAMMA">
+<code class="descname">GAMMA</code><em class="property"> = 'gamma'</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.GAMMA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.MOVING_MEAN">
+<code class="descname">MOVING_MEAN</code><em class="property"> = 'moving_mean'</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.MOVING_MEAN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.MOVING_VARIANCE">
+<code class="descname">MOVING_VARIANCE</code><em class="property"> = 'moving_variance'</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.MOVING_VARIANCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_INITIALIZER_KEYS">
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['moving_mean', 'beta', 'moving_variance', 'gamma'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_PARTITIONER_KEYS">
+<code class="descname">POSSIBLE_PARTITIONER_KEYS</code><em class="property"> = set(['beta', 'gamma'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_PARTITIONER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_REGULARIZER_KEYS">
+<code class="descname">POSSIBLE_REGULARIZER_KEYS</code><em class="property"> = set(['beta', 'gamma'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_REGULARIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.SUPPORTED_DATA_FORMATS">
+<code class="descname">SUPPORTED_DATA_FORMATS</code><em class="property"> = set(['NHWC', 'NDHWC', 'NWC', 'NCHW', 'NC', 'NCDHW', 'NCW'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.SUPPORTED_DATA_FORMATS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.beta">
+<code class="descname">beta</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.beta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.gamma">
+<code class="descname">gamma</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.initializers">
+<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.initializers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.moving_mean">
+<code class="descname">moving_mean</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.moving_mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.moving_variance">
+<code class="descname">moving_variance</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.moving_variance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.partitioners">
+<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.partitioners" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.regularizers">
+<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.regularizers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.batch_norm_v2.create_beta_initializer">
+<code class="descclassname">sonnet.python.modules.batch_norm_v2.</code><code class="descname">create_beta_initializer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/batch_norm_v2.html#create_beta_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.create_beta_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a default initializer for the <code class="docutils literal"><span class="pre">beta</span></code> in batch norm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.batch_norm_v2.create_gamma_initializer">
+<code class="descclassname">sonnet.python.modules.batch_norm_v2.</code><code class="descname">create_gamma_initializer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/batch_norm_v2.html#create_gamma_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.create_gamma_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a default initializer for the <code class="docutils literal"><span class="pre">gamma</span></code> in batch norm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.batch_norm_v2.create_mean_initializer">
+<code class="descclassname">sonnet.python.modules.batch_norm_v2.</code><code class="descname">create_mean_initializer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/batch_norm_v2.html#create_mean_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.create_mean_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a default initializer for the <code class="docutils literal"><span class="pre">moving_mean</span></code> in batch norm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.batch_norm_v2.create_variance_initializer">
+<code class="descclassname">sonnet.python.modules.batch_norm_v2.</code><code class="descname">create_variance_initializer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/batch_norm_v2.html#create_variance_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.create_variance_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a default initializer for the <code class="docutils literal"><span class="pre">moving_variance</span></code> in batch norm.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="sonnet-python-modules-batch-norm-v2-test-module">
+<h2>sonnet.python.modules.batch_norm_v2_test module<a class="headerlink" href="#sonnet-python-modules-batch-norm-v2-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-sonnet.python.modules.block_matrix">
 <span id="sonnet-python-modules-block-matrix-module"></span><h2>sonnet.python.modules.block_matrix module<a class="headerlink" href="#module-sonnet.python.modules.block_matrix" title="Permalink to this headline">¶</a></h2>
 <p>Modules for dealing with block matrices.</p>
@@ -1250,94 +1442,22 @@ default ‘clip_gradient’).</p>
 <code class="docutils literal"><span class="pre">snt.Module</span></code>, with easy weight sharing.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.conv.CausalConv1D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">CausalConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='causal_conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#CausalConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.CausalConv1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.conv.Conv1D" title="sonnet.python.modules.conv.Conv1D"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv.Conv1D</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">CausalConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>padding='VALID'</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='causal_conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#CausalConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.CausalConv1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>1D convolution module, including optional bias.</p>
-<p>This acts as a light wrapper around Conv1D ensuring that the outputs at
-index <code class="docutils literal"><span class="pre">i</span></code> only depend on indices smaller than <code class="docutils literal"><span class="pre">i</span></code> (also known as a
-causal convolution). For further details on the theoretical background,
-refer to:</p>
+<p>This acts as a light wrapper around _ConvND ensuring that the outputs
+at index <code class="docutils literal"><span class="pre">i</span></code> only depend on indices smaller than <code class="docutils literal"><span class="pre">i</span></code> (also known as
+a causal convolution). For further details on the theoretical
+background, refer to:</p>
 <p><a class="reference external" href="https://arxiv.org/abs/1610.10099">https://arxiv.org/abs/1610.10099</a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv1D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvND</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>1D convolution module, including optional bias.</p>
-<p>This acts as a light wrapper around the TensorFlow op
-<code class="docutils literal"><span class="pre">tf.nn.convolution</span></code>, abstracting away variable creation and sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv1D.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.rate">
-<code class="descname">rate</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the dilation rate.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
+<p>This acts as a light wrapper around the class <code class="docutils literal"><span class="pre">_ConvND</span></code>.</p>
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv1D.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.transpose" title="Permalink to this definition">¶</a></dt>
@@ -1348,98 +1468,16 @@ default name is constructed by appending “_transpose” to <code class="docuti
 <p>Raises: base.NotSupportedError: If <code class="docutils literal"><span class="pre">rate</span></code> in any dimension &gt; 1.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1D.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1D.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv1DTranspose">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv1DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shape=None</em>, <em>kernel_shape=None</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_1d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv1DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shape=None</em>, <em>kernel_shape=None</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='conv_1d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvNDTranspose</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>1D transposed / reverse / up 1D convolution module, including bias.</p>
 <p>This performs a 1D transpose convolution by lightly wrapping the
 TensorFlow op <code class="docutils literal"><span class="pre">tf.nn.conv2d_transpose</span></code>, setting the size of the height
 dimension of the image to 1.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1DTranspose.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.output_shape">
-<code class="descname">output_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the output shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv1DTranspose.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv1DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
@@ -1449,118 +1487,14 @@ default name is constructed by appending “_transpose” to <code class="docuti
 <p>Returns: <code class="docutils literal"><span class="pre">Conv1D</span></code> module.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv1DTranspose.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv1DTranspose.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv2D">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvND</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>Spatial convolution and dilated convolution module, including bias.</p>
-<p>This acts as a light wrapper around the TensorFlow ops
-<code class="docutils literal"><span class="pre">tf.nn.convolution</span></code> abstracting away variable creation and sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sonnet.python.modules.conv.Conv2D.clone">
-<code class="descname">clone</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2D.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.clone" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a cloned <code class="docutils literal"><span class="pre">Conv2D</span></code> module.</p>
-<p>Args: name: Optional string assigning name of cloned module. The default
-name is constructed by appending “_clone” to <code class="docutils literal"><span class="pre">self.module_name</span></code>.</p>
-<p>Returns: <code class="docutils literal"><span class="pre">Conv2D</span></code> module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.data_format">
-<code class="descname">data_format</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.data_format" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the data format.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv2D.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.mask">
-<code class="descname">mask</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the mask.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.rate">
-<code class="descname">rate</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the dilation rate.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
+<p>This acts as a light wrapper around the class <code class="docutils literal"><span class="pre">_ConvND</span></code>.</p>
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv2D.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.transpose" title="Permalink to this definition">¶</a></dt>
@@ -1571,98 +1505,16 @@ default name is constructed by appending “_transpose” to <code class="docuti
 <p>Raises: base.NotSupportedError: If <code class="docutils literal"><span class="pre">rate</span></code> in any dimension &gt; 1.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2D.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2D.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv2DTranspose">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv2DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shape=None</em>, <em>kernel_shape=None</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_2d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvNDTranspose</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>Spatial transposed / reverse / up 2D convolution module, including bias.</p>
 <p>This acts as a light wrapper around the TensorFlow op
 <code class="docutils literal"><span class="pre">tf.nn.conv2d_transpose</span></code> abstracting away variable creation and
 sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2DTranspose.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.output_shape">
-<code class="descname">output_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the output shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv2DTranspose.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv2DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
@@ -1672,86 +1524,14 @@ default name is constructed by appending “_transpose” to <code class="docuti
 <p>Returns: <code class="docutils literal"><span class="pre">Conv2D</span></code> module.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv2DTranspose.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv2DTranspose.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv3D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv3D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_3d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv3D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>data_format='NDHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_3d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvND</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>Volumetric convolution module, including optional bias.</p>
-<p>This acts as a light wrapper around the TensorFlow op <code class="docutils literal"><span class="pre">tf.nn.conv3d</span></code>,
-abstracting away variable creation and sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv3D.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
+<p>This acts as a light wrapper around the class <code class="docutils literal"><span class="pre">_ConvND</span></code>.</p>
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv3D.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.transpose" title="Permalink to this definition">¶</a></dt>
@@ -1762,109 +1542,21 @@ default name is constructed by appending “_transpose” to <code class="docuti
 <p>Raises: base.NotSupportedError: If <code class="docutils literal"><span class="pre">rate</span></code> in any dimension &gt; 1.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3D.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3D.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.Conv3DTranspose">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv3DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shape=None</em>, <em>kernel_shape=None</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_3d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">Conv3DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shape=None</em>, <em>kernel_shape=None</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NDHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_3d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.conv._ConvNDTranspose</span></code>, <a class="reference internal" href="#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>Volumetric transposed / reverse / up 3D convolution module, including
 bias.</p>
 <p>This acts as a light wrapper around the TensorFlow op
 <code class="docutils literal"><span class="pre">tf.nn.conv3d_transpose</span></code> abstracting away variable creation and
 sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: module.NotConnectedError: If the module has not been connected
-to the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3DTranspose.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the intializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.output_shape">
-<code class="descname">output_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.output_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the output shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="sonnet.python.modules.conv.Conv3DTranspose.transpose">
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#Conv3DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed Conv3DTranspose module, i.e. a Conv3D module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.Conv3DTranspose.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.Conv3DTranspose.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2179,13 +1871,13 @@ the module does not use bias.</p>
 
 <dl class="function">
 <dt id="sonnet.python.modules.conv.create_bias_initializer">
-<code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">create_bias_initializer</code><span class="sig-paren">(</span><em>unused_bias_shape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#create_bias_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.create_bias_initializer" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">create_bias_initializer</code><span class="sig-paren">(</span><em>unused_bias_shape</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#create_bias_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.create_bias_initializer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a default initializer for the biases of a convolutional module.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="sonnet.python.modules.conv.create_weight_initializer">
-<code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">create_weight_initializer</code><span class="sig-paren">(</span><em>fan_in_shape</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#create_weight_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.create_weight_initializer" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">create_weight_initializer</code><span class="sig-paren">(</span><em>fan_in_shape</em>, <em>dtype=tf.float32</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#create_weight_initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.create_weight_initializer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a default initializer for the weights of a convolutional module.</p>
 </dd></dl>
 
@@ -2679,8 +2371,65 @@ passed to the constructor.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">HighwayCore</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>num_layers</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='highwaycore'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#HighwayCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>Recurrent Highway Network cell.</p>
+<p>The implementation is based on: <a class="reference external" href="https://arxiv.org/pdf/1607.03474v5.pdf">https://arxiv.org/pdf/1607.03474v5.pdf</a>
+As per the first lines of section 5 of the reference paper, 1 - T is
+used instead of a dedicated C gate.</p>
+<p>Attributes: state_size: Integer indicating the size of state tensor.
+output_size: Integer indicating the size of the core output.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.BH">
+<code class="descname">BH</code><em class="property"> = 'bh'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.BH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.BT">
+<code class="descname">BT</code><em class="property"> = 'bt'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.BT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.WH">
+<code class="descname">WH</code><em class="property"> = 'wh'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.WH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.WT">
+<code class="descname">WT</code><em class="property"> = 'wt'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.WT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.get_possible_initializer_keys">
+<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>num_layers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#HighwayCore.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
+<p>The set of all possible initializer keys are: wt: weight for input -&gt; T
+gate wh: weight for input -&gt; H gate wtL: weight for prev state -&gt; T gate
+for layer L (indexed from 0) whL: weight for prev state -&gt; H gate for
+layer L (indexed from 0) btL: bias for prev state -&gt; T gate for layer L
+(indexed from 0) bhL: bias for prev state -&gt; H gate for layer L (indexed
+from 0)</p>
+<p>Args: num_layers: (int) Number of highway layers. Returns: Set with
+strings corresponding to the strings that may be passed to the
+constructor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.output_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.HighwayCore.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.HighwayCore.state_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.LSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_layer_norm=False</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_layer_norm=False</em>, <em>hidden_clip_value=None</em>, <em>projection_size=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>LSTM recurrent network cell with optional peepholes &amp; layer
 normalization.</p>
@@ -2692,6 +2441,9 @@ reduce the scale of forgetting in the beginning of the training.</p>
 constructor. These connections can aid increasing the precision of
 output timing, for more details see:</p>
 <p><a class="reference external" href="https://research.google.com/pubs/archive/43905.pdf">https://research.google.com/pubs/archive/43905.pdf</a></p>
+<p>Projection of the recurrent state, to reduce model parameters and speed
+up computation. For more details see:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1402.1128">https://arxiv.org/abs/1402.1128</a></p>
 <p>Attributes: state_size: Tuple of <code class="docutils literal"><span class="pre">tf.TensorShape</span></code>s indicating the
 size of state tensors. output_size: <code class="docutils literal"><span class="pre">tf.TensorShape</span></code> indicating the
 size of the core output. use_peepholes: Boolean indicating whether
@@ -2703,7 +2455,7 @@ peephole connections are used.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b_gates', 'w_o_diag', 'w_f_diag', 'w_i_diag', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'b_gates', 'w_o_diag', 'w_i_diag', 'w_gates', 'w_h_projection'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2714,6 +2466,11 @@ peephole connections are used.</p>
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.LSTM.W_GATES">
 <code class="descname">W_GATES</code><em class="property"> = 'w_gates'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_GATES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTM.W_H_PROJECTION">
+<code class="descname">W_H_PROJECTION</code><em class="property"> = 'w_h_projection'</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.W_H_PROJECTION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2728,14 +2485,15 @@ peephole connections are used.</p>
 
 <dl class="classmethod">
 <dt id="sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_peepholes=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_peepholes=False</em>, <em>use_projection=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTM.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
 <p>The set of all possible initializer keys are: w_gates: weight for gates
 b_gates: bias of gates w_f_diag: weight for prev_cell -&gt; forget gate
 peephole w_i_diag: weight for prev_cell -&gt; input gate peephole
 w_o_diag: weight for prev_cell -&gt; output gate peephole</p>
 <p>Args: cls:The class. use_peepholes: Boolean that indicates whether
-peephole connections are used.</p>
+peephole connections are used. use_projection: Boolean that indicates
+whether a recurrent projection layer is used.</p>
 <p>Returns: Set with strings corresponding to the strings that may be
 passed to the constructor.</p>
 </dd></dl>
@@ -2764,6 +2522,112 @@ passed to the constructor.</p>
 <dd><p>Boolean indicating whether peephole connections are used.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.LSTMState">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTMState</code><span class="sig-paren">(</span><em>hidden</em>, <em>cell</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTMState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTMState.cell">
+<code class="descname">cell</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTMState.cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.LSTMState.hidden">
+<code class="descname">hidden</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTMState.hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">RecurrentDropoutWrapper</code><span class="sig-paren">(</span><em>core</em>, <em>keep_probs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#RecurrentDropoutWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>Wraps an RNNCore so that recurrent dropout can be applied.</p>
+<dl class="method">
+<dt id="sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>dtype=tf.float32</em>, <em>trainable=False</em>, <em>trainable_initializers=None</em>, <em>trainable_regularizers=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#RecurrentDropoutWrapper.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state tensor of zeros.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.output_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper.state_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.ZoneoutWrapper">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ZoneoutWrapper</code><span class="sig-paren">(</span><em>core</em>, <em>keep_probs</em>, <em>is_training</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ZoneoutWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ZoneoutWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>Wraps an RNNCore so that zoneout can be applied.</p>
+<p>Zoneout was introduced in <a class="reference external" href="https://arxiv.org/abs/1606.01305">https://arxiv.org/abs/1606.01305</a> It consists
+of randomly freezing some RNN state in the same way recurrent dropout
+would replace this state with zero.</p>
+<dl class="method">
+<dt id="sonnet.python.modules.gated_rnn.ZoneoutWrapper.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>dtype=tf.float32</em>, <em>trainable=False</em>, <em>trainable_initializers=None</em>, <em>trainable_regularizers=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ZoneoutWrapper.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ZoneoutWrapper.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state tensor of zeros.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.ZoneoutWrapper.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ZoneoutWrapper.output_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.ZoneoutWrapper.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ZoneoutWrapper.state_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.gated_rnn.highway_core_with_recurrent_dropout">
+<code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">highway_core_with_recurrent_dropout</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>num_layers</em>, <em>keep_prob=0.5</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#highway_core_with_recurrent_dropout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.highway_core_with_recurrent_dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Highway core with recurrent dropout.</p>
+<p>Args: hidden_size: (int) Hidden size dimensionality. num_layers: (int)
+Number of highway layers. keep_prob: the probability to keep an entry
+when applying dropout. **kwargs: Extra keyword arguments to pass to
+the highway core.</p>
+<p>Returns: A tuple (train_core, test_core) where train_core is a higway
+core with recurrent dropout enabled to be used for training and
+test_core is the same highway core without recurrent dropout.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.gated_rnn.lstm_with_recurrent_dropout">
+<code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">lstm_with_recurrent_dropout</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>keep_prob=0.5</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#lstm_with_recurrent_dropout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.lstm_with_recurrent_dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>LSTM with recurrent dropout.</p>
+<p>Args: hidden_size: the LSTM hidden size. keep_prob: the probability to
+keep an entry when applying dropout. **kwargs: Extra keyword arguments
+to pass to the LSTM.</p>
+<p>Returns: A tuple (train_lstm, test_lstm) where train_lstm is an LSTM
+with recurrent dropout enabled to be used for training and test_lstm is
+the same LSTM without recurrent dropout.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.gated_rnn.lstm_with_zoneout">
+<code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">lstm_with_zoneout</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>keep_prob_c=0.5</em>, <em>keep_prob_h=0.95</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#lstm_with_zoneout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.lstm_with_zoneout" title="Permalink to this definition">¶</a></dt>
+<dd><p>LSTM with recurrent dropout.</p>
+<p>Args: hidden_size: the LSTM hidden size. keep_prob_c: the probability
+to use the new value of the cell state rather than freezing it.
+keep_prob_h: the probability to use the new value of the hidden state
+rather than freezing it. **kwargs: Extra keyword arguments to pass to
+the LSTM.</p>
+<p>Returns: A tuple (train_lstm, test_lstm) where train_lstm is an LSTM
+with recurrent dropout enabled to be used for training and test_lstm is
+the same LSTM without zoneout.</p>
 </dd></dl>
 
 </div>
@@ -3341,7 +3205,7 @@ dictionaries) or None. keys: Iterable of valid keys for
 <code class="docutils literal"><span class="pre">initializers=None</span></code>, an empty dictionary will be returned.</p>
 <p>Raises: KeyError: If an initializer is provided for a key not in
 <code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided initializer is not a callable
-function.</p>
+function, or <code class="docutils literal"><span class="pre">initializers</span></code> is not a Mapping.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3360,7 +3224,7 @@ dictionaries) or None. keys: Iterable of valid keys for
 an empty dictionary will be returned.</p>
 <p>Raises: KeyError: If an partitioner is provided for a key not in
 <code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided partitioner is not a callable
-function.</p>
+function, or <code class="docutils literal"><span class="pre">partitioners</span></code> is not a Mapping.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3378,8 +3242,8 @@ dictionaries) or None. keys: Iterable of valid keys for
 <p>Returns: Copy of checked dictionary of regularizers. If
 <code class="docutils literal"><span class="pre">regularizers=None</span></code>, an empty dictionary will be returned.</p>
 <p>Raises: KeyError: If an regularizers is provided for a key not in
-<code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided regularizers is not a callable
-function, or if the dict of regularizers is not in fact a dict.</p>
+<code class="docutils literal"><span class="pre">keys</span></code>. TypeError: If a provided regularizer is not a callable
+function, or <code class="docutils literal"><span class="pre">regularizers</span></code> is not a Mapping.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3537,10 +3401,10 @@ enters the same variable scope with <code class="docutils literal"><span class="
 provided by the caller object. Ops are created with an additional
 <code class="docutils literal"><span class="pre">tf.name_scope()</span></code>, which adds a scope for the wrapped method name. For
 example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">variable_scope</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">variable_scope</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span> <span class="o">=</span> <span class="n">variable_scope</span>
 
   <span class="nd">@snt</span><span class="o">.</span><span class="n">reuse_variables</span>
@@ -3548,7 +3412,7 @@ example:</p>
     <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">tensor</span> <span class="o">+</span> <span class="n">x</span>
 
-<span class="n">module</span> <span class="o">=</span> <span class="n">MyModule</span><span class="p">(</span><span class="s2">&quot;my_module_name&quot;</span><span class="p">)</span>
+<span class="n">module</span> <span class="o">=</span> <span class="n">MyClass</span><span class="p">(</span><span class="s2">&quot;my_module_name&quot;</span><span class="p">)</span>
 <span class="n">input_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,))</span>
 
 <span class="c1"># This creates the variable &quot;my_module_name/x&quot;</span>
@@ -3611,6 +3475,8 @@ variables).</p>
 <li><a class="reference internal" href="#sonnet-python-modules-basic-test-module">sonnet.python.modules.basic_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.batch_norm">sonnet.python.modules.batch_norm module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-batch-norm-test-module">sonnet.python.modules.batch_norm_test module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.batch_norm_v2">sonnet.python.modules.batch_norm_v2 module</a></li>
+<li><a class="reference internal" href="#sonnet-python-modules-batch-norm-v2-test-module">sonnet.python.modules.batch_norm_v2_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.block_matrix">sonnet.python.modules.block_matrix module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-block-matrix-test-module">sonnet.python.modules.block_matrix_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.clip_gradient">sonnet.python.modules.clip_gradient module</a></li>
@@ -3675,7 +3541,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

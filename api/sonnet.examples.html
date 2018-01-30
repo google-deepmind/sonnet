@@ -44,6 +44,171 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-sonnet.examples.brnn_ptb">
+<span id="sonnet-examples-brnn-ptb-module"></span><h2>sonnet.examples.brnn_ptb module<a class="headerlink" href="#module-sonnet.examples.brnn_ptb" title="Permalink to this headline">¶</a></h2>
+<p>Open Source implementation of Bayesian RNN on Penn Treebank.</p>
+<p>Please see <a class="reference external" href="https://arxiv.org/pdf/1704.02798.pdf">https://arxiv.org/pdf/1704.02798.pdf</a>, section 7.1.</p>
+<p>Download the Penn Treebank (PTB) dataset from:
+<a class="reference external" href="http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz">http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz</a></p>
+<p>Usage: python ./brnn_ptb.py –data_path=</p>
+<p>Above, is the path to the ‘data’ subdirectory within the directory
+resulting from unpacking the .tgz file whose link is given above.</p>
+<dl class="class">
+<dt id="sonnet.examples.brnn_ptb.CustomScaleMixture">
+<em class="property">class </em><code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">CustomScaleMixture</code><span class="sig-paren">(</span><em>pi</em>, <em>sigma1</em>, <em>sigma2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#CustomScaleMixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.CustomScaleMixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="sonnet.examples.brnn_ptb.CustomScaleMixture.log_prob">
+<code class="descname">log_prob</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#CustomScaleMixture.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.CustomScaleMixture.log_prob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.examples.brnn_ptb.DataOps">
+<em class="property">class </em><code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">DataOps</code><span class="sig-paren">(</span><em>sparse_obs</em>, <em>sparse_target</em><span class="sig-paren">)</span><a class="headerlink" href="#sonnet.examples.brnn_ptb.DataOps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="sonnet.examples.brnn_ptb.DataOps.sparse_obs">
+<code class="descname">sparse_obs</code><a class="headerlink" href="#sonnet.examples.brnn_ptb.DataOps.sparse_obs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.brnn_ptb.DataOps.sparse_target">
+<code class="descname">sparse_target</code><a class="headerlink" href="#sonnet.examples.brnn_ptb.DataOps.sparse_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer">
+<em class="property">class </em><code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">GlobalNormClippingOptimizer</code><span class="sig-paren">(</span><em>opt</em>, <em>clip_norm</em>, <em>use_locking=False</em>, <em>name='GlobalNormClippingOptimizer'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#GlobalNormClippingOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tensorflow.python.training.optimizer.Optimizer</span></code></p>
+<p>Optimizer that clips gradients by global norm.</p>
+<dl class="method">
+<dt id="sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer.apply_gradients">
+<code class="descname">apply_gradients</code><span class="sig-paren">(</span><em>grads_and_vars</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#GlobalNormClippingOptimizer.apply_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer.apply_gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer.compute_gradients">
+<code class="descname">compute_gradients</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#GlobalNormClippingOptimizer.compute_gradients"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer.compute_gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.examples.brnn_ptb.PTB">
+<em class="property">class </em><code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">PTB</code><span class="sig-paren">(</span><em>subset</em>, <em>seq_len</em>, <em>batch_size</em>, <em>name='PTB'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#PTB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.PTB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Wraps the PTB reader of the TensorFlow tutorial.</p>
+<dl class="attribute">
+<dt id="sonnet.examples.brnn_ptb.PTB.num_batches">
+<code class="descname">num_batches</code><a class="headerlink" href="#sonnet.examples.brnn_ptb.PTB.num_batches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.brnn_ptb.PTB.to_string">
+<code class="descname">to_string</code><span class="sig-paren">(</span><em>idx_seq</em>, <em>join_token=' '</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#PTB.to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.PTB.to_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.examples.brnn_ptb.PTB.to_string_tensor">
+<code class="descname">to_string_tensor</code><span class="sig-paren">(</span><em>time_major_idx_seq_batch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#PTB.to_string_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.PTB.to_string_tensor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.examples.brnn_ptb.PTB.vocab_size">
+<code class="descname">vocab_size</code><a class="headerlink" href="#sonnet.examples.brnn_ptb.PTB.vocab_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.build_logits">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">build_logits</code><span class="sig-paren">(</span><em>data_ops</em>, <em>embed_layer</em>, <em>rnn_core</em>, <em>output_linear</em>, <em>name_prefix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#build_logits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.build_logits" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the core model logic.</p>
+<p>Unrolls a Bayesian RNN over the given sequence.</p>
+<p>Args: data_ops: A <code class="docutils literal"><span class="pre">sequence_data.SequenceDataOps</span></code> namedtuple.
+embed_layer: A <code class="docutils literal"><span class="pre">snt.Embed</span></code> instance. rnn_core: A <code class="docutils literal"><span class="pre">snt.RNNCore</span></code>
+instance. output_linear: A <code class="docutils literal"><span class="pre">snt.Linear</span></code> instance. name_prefix: A
+string to use to prefix local variable names.</p>
+<p>Returns: A 3D time-major tensor representing the model’s logits for a
+sequence of predictions. Shape <code class="docutils literal"><span class="pre">[time_steps,</span> <span class="pre">batch_size,</span> <span class="pre">vocab_size]</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.build_loss">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">build_loss</code><span class="sig-paren">(</span><em>model_logits</em>, <em>sparse_targets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#build_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.build_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the log loss given predictions and targets.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.build_modules">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">build_modules</code><span class="sig-paren">(</span><em>is_training</em>, <em>vocab_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#build_modules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.build_modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the modules used in the graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.custom_scale_mixture_prior_builder">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">custom_scale_mixture_prior_builder</code><span class="sig-paren">(</span><em>getter</em>, <em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#custom_scale_mixture_prior_builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.custom_scale_mixture_prior_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A builder for the gaussian scale-mixture prior of Fortunato et al.</p>
+<p>Please see <a class="reference external" href="https://arxiv.org/abs/1704.02798">https://arxiv.org/abs/1704.02798</a>, section 7.1</p>
+<p>Args: getter: The <code class="docutils literal"><span class="pre">getter</span></code> passed to a <code class="docutils literal"><span class="pre">custom_getter</span></code>. Please see
+the documentation for <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. name: The <code class="docutils literal"><span class="pre">name</span></code> argument
+passed to <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>.</p>
+<p>Returns: An instance of <code class="docutils literal"><span class="pre">tf.contrib.distributions.Distribution</span></code>
+representing the prior distribution over the variable in question.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.lstm_posterior_builder">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">lstm_posterior_builder</code><span class="sig-paren">(</span><em>getter</em>, <em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#lstm_posterior_builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.lstm_posterior_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A builder for a particular diagonal gaussian posterior.</p>
+<p>Args: getter: The <code class="docutils literal"><span class="pre">getter</span></code> passed to a <code class="docutils literal"><span class="pre">custom_getter</span></code>. Please see
+the documentation for <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. name: The <code class="docutils literal"><span class="pre">name</span></code> argument
+passed to <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>.</p>
+<p>Returns: An instance of <code class="docutils literal"><span class="pre">tf.contrib.distributions.Distribution</span></code>
+representing the posterior distribution over the variable in question.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.main">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">main</code><span class="sig-paren">(</span><em>unused_argv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.non_lstm_posterior_builder">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">non_lstm_posterior_builder</code><span class="sig-paren">(</span><em>getter</em>, <em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#non_lstm_posterior_builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.non_lstm_posterior_builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A builder for a particular diagonal gaussian posterior.</p>
+<p>Args: getter: The <code class="docutils literal"><span class="pre">getter</span></code> passed to a <code class="docutils literal"><span class="pre">custom_getter</span></code>. Please see
+the documentation for <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. name: The <code class="docutils literal"><span class="pre">name</span></code> argument
+passed to <code class="docutils literal"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
+<code class="docutils literal"><span class="pre">tf.get_variable</span></code>.</p>
+<p>Returns: An instance of <code class="docutils literal"><span class="pre">tf.contrib.distributions.Distribution</span></code>
+representing the posterior distribution over the variable in question.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.test">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">test</code><span class="sig-paren">(</span><em>logdir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a network on the PTB test set, restoring from the latest checkpoint.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.examples.brnn_ptb.train">
+<code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">train</code><span class="sig-paren">(</span><em>logdir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a network on the PTB training set, checkpointing the weights.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-sonnet.examples.dataset_shakespeare">
 <span id="sonnet-examples-dataset-shakespeare-module"></span><h2>sonnet.examples.dataset_shakespeare module<a class="headerlink" href="#module-sonnet.examples.dataset_shakespeare" title="Permalink to this headline">¶</a></h2>
 <p>Classes to load textual data from Shakespeare’s plays.</p>
@@ -188,44 +353,42 @@ this script.</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-sonnet.examples.rnn_shakespeare">
-<span id="sonnet-examples-rnn-shakespeare-module"></span><h2>sonnet.examples.rnn_shakespeare module<a class="headerlink" href="#module-sonnet.examples.rnn_shakespeare" title="Permalink to this headline">¶</a></h2>
-<p>Example script to train a stacked LSTM on the Tiny Shakespeare dataset.</p>
-<dl class="class">
-<dt id="sonnet.examples.rnn_shakespeare.TextModel">
-<em class="property">class </em><code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">TextModel</code><span class="sig-paren">(</span><em>num_embedding</em>, <em>num_hidden</em>, <em>lstm_depth</em>, <em>output_size</em>, <em>use_dynamic_rnn=True</em>, <em>use_skip_connections=True</em>, <em>name='text_model'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#TextModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.TextModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
-<p>A deep LSTM model, for use on the Tiny Shakespeare dataset.</p>
-<dl class="method">
-<dt id="sonnet.examples.rnn_shakespeare.TextModel.generate_string">
-<code class="descname">generate_string</code><span class="sig-paren">(</span><em>obj</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#TextModel.generate_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.TextModel.generate_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>Builds sub-graph to generate a string, sampled from the model.</p>
-<p>Args: initial_logits: Starting logits to sampling from. initial_state:
-Starting state for the RNN core. sequence_length: Number of characters
-to sample.</p>
-<p>Returns: A Tensor of characters, with dimensions
-<code class="docutils literal"><span class="pre">[sequence_length,</span> <span class="pre">batch_size,</span>&#160;&#160; <span class="pre">output_size]</span></code>.</p>
-</dd></dl>
-
+<div class="section" id="module-sonnet.examples.ptb_reader">
+<span id="sonnet-examples-ptb-reader-module"></span><h2>sonnet.examples.ptb_reader module<a class="headerlink" href="#module-sonnet.examples.ptb_reader" title="Permalink to this headline">¶</a></h2>
+<p>A fork of the Penn Treebank reader from TensorFlow’s RNN tutorial.</p>
+<dl class="function">
+<dt id="sonnet.examples.ptb_reader.ptb_producer">
+<code class="descclassname">sonnet.examples.ptb_reader.</code><code class="descname">ptb_producer</code><span class="sig-paren">(</span><em>raw_data</em>, <em>batch_size</em>, <em>num_steps</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/ptb_reader.html#ptb_producer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.ptb_reader.ptb_producer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate on the raw PTB data.</p>
+<p>This chunks up raw_data into batches of examples and returns Tensors
+that are drawn from these batches.</p>
+<p>Args: raw_data: one of the raw data outputs from ptb_raw_data.
+batch_size: int, the batch size. num_steps: int, the number of
+unrolls. name: the name of this operation (optional).</p>
+<p>Returns: A pair of Tensors, each shaped [batch_size, num_steps]. The
+second element of the tuple is the same data time-shifted to the right
+by one.</p>
+<p>Raises: tf.errors.InvalidArgumentError: if batch_size or num_steps are
+too high.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="sonnet.examples.rnn_shakespeare.build_graph">
-<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">build_graph</code><span class="sig-paren">(</span><em>lstm_depth=3</em>, <em>batch_size=32</em>, <em>num_embedding=32</em>, <em>num_hidden=128</em>, <em>truncation_length=64</em>, <em>sample_length=1000</em>, <em>max_grad_norm=5</em>, <em>initial_learning_rate=0.1</em>, <em>reduce_learning_rate_multiplier=0.1</em>, <em>optimizer_epsilon=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#build_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.build_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs the computation graph.</p>
+<dt id="sonnet.examples.ptb_reader.ptb_raw_data">
+<code class="descclassname">sonnet.examples.ptb_reader.</code><code class="descname">ptb_raw_data</code><span class="sig-paren">(</span><em>data_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/ptb_reader.html#ptb_raw_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.ptb_reader.ptb_raw_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load PTB raw data from data directory “data_path”.</p>
+<p>Reads PTB text files, converts strings to integer ids, and performs
+mini-batching of the inputs.</p>
+<p>The PTB dataset comes from Tomas Mikolov’s webpage:</p>
+<p><a class="reference external" href="http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz">http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz</a></p>
+<p>Args: data_path: string path to the directory where simple-examples.tgz
+has been extracted.</p>
+<p>Returns: tuple (train_data, valid_data, test_data, vocabulary) where
+each of the data objects can be passed to PTBIterator.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="sonnet.examples.rnn_shakespeare.main">
-<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">main</code><span class="sig-paren">(</span><em>unused_argv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="sonnet.examples.rnn_shakespeare.train">
-<code class="descclassname">sonnet.examples.rnn_shakespeare.</code><code class="descname">train</code><span class="sig-paren">(</span><em>num_training_iterations</em>, <em>report_interval</em>, <em>reduce_learning_rate_interval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/rnn_shakespeare.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.rnn_shakespeare.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Trains a deep LSTM model on the Tiny Shakespeare dataset.</p>
-</dd></dl>
-
+</div>
+<div class="section" id="sonnet-examples-rnn-shakespeare-module">
+<h2>sonnet.examples.rnn_shakespeare module<a class="headerlink" href="#sonnet-examples-rnn-shakespeare-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="sonnet-examples-rnn-shakespeare-test-module">
 <h2>sonnet.examples.rnn_shakespeare_test module<a class="headerlink" href="#sonnet-examples-rnn-shakespeare-test-module" title="Permalink to this headline">¶</a></h2>
@@ -246,9 +409,11 @@ to sample.</p>
   <ul>
 <li><a class="reference internal" href="#">sonnet.examples package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples.brnn_ptb">sonnet.examples.brnn_ptb module</a></li>
 <li><a class="reference internal" href="#module-sonnet.examples.dataset_shakespeare">sonnet.examples.dataset_shakespeare module</a></li>
 <li><a class="reference internal" href="#module-sonnet.examples.module_with_build_args">sonnet.examples.module_with_build_args module</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples.rnn_shakespeare">sonnet.examples.rnn_shakespeare module</a></li>
+<li><a class="reference internal" href="#module-sonnet.examples.ptb_reader">sonnet.examples.ptb_reader module</a></li>
+<li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-module">sonnet.examples.rnn_shakespeare module</a></li>
 <li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-test-module">sonnet.examples.rnn_shakespeare_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.examples">Module contents</a></li>
 </ul>
@@ -286,7 +451,7 @@ to sample.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

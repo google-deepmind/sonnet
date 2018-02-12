@@ -242,6 +242,7 @@ custom_getters_tests = [
     name = test_name,
     size = test_size,
     srcs = ["custom_getters/%s.py" % test_name],
+    srcs_version = "PY2AND3",
     tags = test_tags,
     deps = [
         # absl/testing:parameterized dep,

@@ -199,8 +199,8 @@ def _verify_inputs(inputs, channel_index, data_format):
   if len(input_shape) != len(data_format):
     raise base.IncompatibleShapeError((
         "Input Tensor must have rank {} corresponding to "
-        "data_format {}, but instead was {}.").format(
-            len(input_shape), data_format, input_shape))
+        "data_format {}, but instead was {} of rank {}.").format(
+            len(data_format), data_format, input_shape, len(input_shape)))
 
   # Check type.
   if not (tf.float16.is_compatible_with(inputs.dtype) or

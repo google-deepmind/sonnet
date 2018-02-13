@@ -73,7 +73,7 @@ def merge_leading_dims(array_or_tensor, n_dims=2):
 
   # Shape can't be inferred statically.
   tensor_shape = tf.shape(tensor)
-  new_first_dim = tf.reduce_prod(tensor_shape[:n_dims], keep_dims=True)
+  new_first_dim = tf.reduce_prod(tensor_shape[:n_dims], keepdims=True)
   other_dims = tensor_shape[n_dims:]
   new_size = tf.concat([new_first_dim, other_dims], 0)
   result = tf.reshape(tensor, new_size)

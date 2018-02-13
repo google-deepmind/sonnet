@@ -558,7 +558,7 @@ class _ConvND(base.AbstractModule):
     while self._mask.shape.ndims < w.shape.ndims:
       self._mask = tf.expand_dims(self._mask, -1)
 
-    # ResourceVariables currently don't support *=.
+    # tf.Variable & tf.ResourceVariable don't support *=.
     w = w * self._mask  # pylint: disable=g-no-augmented-assignment
 
     return w

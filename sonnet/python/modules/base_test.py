@@ -107,6 +107,25 @@ class ComplexModule(base.AbstractModule):
     return self._b(self._a(inputs))  # pylint: disable=not-callable
 
 
+class ModuleWithSubmodules(base.AbstractModule):
+
+  def __init__(self,
+               submodule_a,
+               submodule_b,
+               custom_getter=None,
+               name="module_with_submodules"):
+    super(ModuleWithSubmodules, self).__init__(
+        custom_getter=custom_getter, name=name)
+
+    self._submodule_a = submodule_a
+    self._submodule_b = submodule_b
+
+  def _build(self, inputs):
+    c = SimpleModule(name="simple_build")
+    d = ComplexModule(name="complex_build")
+    return d(self._submodule_a(inputs)) +  self._submodule_b(c(inputs))  # pylint: disable=not-callable
+
+
 class AbstractModuleTest(tf.test.TestCase):
 
   def testInitializerKeys(self):
@@ -297,6 +316,144 @@ class AbstractModuleTest(tf.test.TestCase):
       module = ComplexModule(custom_getter={"w": custom_getter}, name="mod6")
       module(inputs)  # pylint: disable=not-callable
       self.assertEqual(12, len(tf.trainable_variables()))  # No variables.
+
+  def testGetAllVariables(self):
+    inputs = tf.placeholder(tf.float32, [10, 10])
+    submodule_a = SimpleModule(name="simple_submodule")
+    submodule_b = ComplexModule(name="complex_submodule")
+    module = ModuleWithSubmodules(
+        submodule_a=submodule_a, submodule_b=submodule_b)
+    with self.assertRaisesRegexp(base.NotConnectedError,
+                                 "not instantiated yet"):
+      module.get_all_variables()
+    module(inputs)  # pylint: disable=not-callable
+
+    # Check correct for SimpleModule.
+    submodule_a_variables = submodule_a.get_variables()
+    submodule_a_variable_names = sorted(
+        [str(v.name) for v in submodule_a_variables])
+    submodule_a_all_variables = submodule_a.get_all_variables()
+    submodule_a_all_variable_names = sorted(
+        [str(v.name) for v in submodule_a_all_variables])
+    self.assertEqual(submodule_a_variable_names, submodule_a_all_variable_names)
+    self.assertEqual([
+        "simple_submodule/b:0",
+        "simple_submodule/w:0",
+    ], submodule_a_variable_names)
+
+    # Check correct for ComplexModule
+    submodule_b_variables = submodule_b.get_all_variables()
+    submodule_b_variable_names = sorted(
+        [str(v.name) for v in submodule_b_variables])
+    self.assertEqual([
+        "complex_submodule/linear_1/b:0",
+        "complex_submodule/linear_1/w:0",
+        "complex_submodule/linear_2/b:0",
+        "complex_submodule/linear_2/w:0",
+    ], submodule_b_variable_names)
+
+    all_variables = module.get_all_variables()
+    all_variable_names = sorted([str(v.name) for v in all_variables])
+    self.assertEqual([
+        "complex_submodule/linear_1/b:0",
+        "complex_submodule/linear_1/w:0",
+        "complex_submodule/linear_2/b:0",
+        "complex_submodule/linear_2/w:0",
+        "module_with_submodules/complex_build/linear_1/b:0",
+        "module_with_submodules/complex_build/linear_1/w:0",
+        "module_with_submodules/complex_build/linear_2/b:0",
+        "module_with_submodules/complex_build/linear_2/w:0",
+        "module_with_submodules/simple_build/b:0",
+        "module_with_submodules/simple_build/w:0",
+        "simple_submodule/b:0",
+        "simple_submodule/w:0",
+    ], all_variable_names)
+
+    self.assertEqual(
+        0,
+        len(module.get_all_variables(collection=tf.GraphKeys.LOCAL_VARIABLES)))
+
+    # Create another ModuleWithSubmodules with the same submodules
+    module = ModuleWithSubmodules(
+        submodule_a=submodule_a, submodule_b=submodule_b)
+    module(inputs)  # pylint: disable=not-callable
+
+    all_variables = module.get_all_variables()
+    all_variable_names = sorted([str(v.name) for v in all_variables])
+    self.assertEqual([
+        "complex_submodule/linear_1/b:0",
+        "complex_submodule/linear_1/w:0",
+        "complex_submodule/linear_2/b:0",
+        "complex_submodule/linear_2/w:0",
+        "module_with_submodules_1/complex_build/linear_1/b:0",
+        "module_with_submodules_1/complex_build/linear_1/w:0",
+        "module_with_submodules_1/complex_build/linear_2/b:0",
+        "module_with_submodules_1/complex_build/linear_2/w:0",
+        "module_with_submodules_1/simple_build/b:0",
+        "module_with_submodules_1/simple_build/w:0",
+        "simple_submodule/b:0",
+        "simple_submodule/w:0",
+    ], all_variable_names)
+
+  def testGetAllLocalVariables(self):
+    def local_custom_getter(getter, *args, **kwargs):
+      kwargs["trainable"] = False
+      if "collections" in kwargs and kwargs["collections"] is not None:
+        kwargs["collections"] += [tf.GraphKeys.LOCAL_VARIABLES]
+      else:
+        kwargs["collections"] = [tf.GraphKeys.LOCAL_VARIABLES]
+      return getter(*args, **kwargs)
+
+    inputs = tf.placeholder(tf.float32, [10, 10])
+    # Create a new ModuleWithSubmodules that uses all local variables
+    with tf.variable_scope("", custom_getter=local_custom_getter):
+      submodule_a = SimpleModule(name="simple_submodule")
+      submodule_b = ComplexModule(name="complex_submodule")
+      local_module = ModuleWithSubmodules(
+          submodule_a=submodule_a, submodule_b=submodule_b)
+    local_module(inputs)  # pylint: disable=not-callable
+
+    self.assertEqual(
+        0,
+        len(local_module.get_all_variables()))
+    self.assertEqual(0, len(tf.all_variables()))
+    self.assertEqual(12, len(tf.local_variables()))
+
+    all_variables = local_module.get_all_variables(
+        collection=tf.GraphKeys.LOCAL_VARIABLES)
+    all_variable_names = sorted([str(v.name) for v in all_variables])
+    self.assertEqual([
+        "complex_submodule/linear_1/b:0",
+        "complex_submodule/linear_1/w:0",
+        "complex_submodule/linear_2/b:0",
+        "complex_submodule/linear_2/w:0",
+        "module_with_submodules/complex_build/linear_1/b:0",
+        "module_with_submodules/complex_build/linear_1/w:0",
+        "module_with_submodules/complex_build/linear_2/b:0",
+        "module_with_submodules/complex_build/linear_2/w:0",
+        "module_with_submodules/simple_build/b:0",
+        "module_with_submodules/simple_build/w:0",
+        "simple_submodule/b:0",
+        "simple_submodule/w:0",
+    ], all_variable_names)
+
+  def testGetAllVariablesWithConditionalConstruction(self):
+    inputs = tf.placeholder(tf.float32, [10, 10])
+    cond = tf.constant(0.)
+    module_a = SimpleModule(name="module_a")
+    module_b = SimpleModule(name="module_b")
+
+    _ = tf.cond(cond > 0, lambda: module_a(inputs), lambda: module_b(inputs))  # pylint: disable=not-callable
+
+    # check module_a
+    all_variables = module_a.get_all_variables()
+    all_variable_names = sorted([str(v.name) for v in all_variables])
+    self.assertEqual(["module_a/b:0", "module_a/w:0"], all_variable_names)
+
+    # check module_b
+    all_variables = module_b.get_all_variables()
+    all_variable_names = sorted([str(v.name) for v in all_variables])
+    self.assertEqual(["module_b/b:0", "module_b/w:0"], all_variable_names)
 
 
 def _make_model_with_params(inputs, output_size):

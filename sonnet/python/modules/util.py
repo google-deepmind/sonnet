@@ -698,7 +698,11 @@ def reuse_variables(method):
       with tf.name_scope(name_scope):
         sub_scope = to_snake_case(method.__name__)
         with tf.name_scope(sub_scope) as scope:
-          out_ops = method(obj, *args, **kwargs)
+          if hasattr(obj, "_capture_variables"):
+            with obj._capture_variables():  # pylint: disable=protected-access
+              out_ops = method(obj, *args, **kwargs)
+          else:
+            out_ops = method(obj, *args, **kwargs)
           initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
           try:
             # If `obj` is a Sonnet module, let it know it's been connected

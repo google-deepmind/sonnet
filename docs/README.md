@@ -757,19 +757,25 @@ without regard for what library was used to put that graph together.
 
 ### Q: How do I list all the variables which are used _in any way_ in a Module?
 
-A: Currently, not easily possible. Although there is a `get_variables()` method,
-it only searches the `VariableScope` defined inside a module, which
-will contain any internally constructed variables or modules. However, the
-actual _computation_ done by a module could use other modules - for
-example, the `snt.Sequential` module in the example section above. The modules
-passed into the constructor have by definition been constructed before the
-`Sequential`, and so they have different variable scopes. Currently, once
-the Sequential is connected into the graph, querying it with
-`get_variables()` will return an empty tuple.
+A: You can use `get_all_variables()` to find all the variables that a module or
+any of its submodules have created with `tf.get_variable()`.
 
-The DeepMind Research Engineering team is considering future additions to the
-`Module` API which remedy this, without requiring extra effort from module
-implementors.
+Like `get_variables()` this returns all variables that are inside of the module's
+(variable) scope. However, `get_all_variables()` also returns all of the
+variables from any submodules with disjoint (variable) scopes. These submodules
+have either been passed into the module's constructor, or have been constructed
+by the module but outside of `_build()` or `_enter_variable_scope()`.
+
+Note that by definition this will not return variables that have not been
+created by `tf.get_variable()`. This is relevant for modules that use
+`@snt.reuse_variables`. If a method decorated with `@snt.reuse_variable` is
+not called then `get_all_variables()` will not return any variables used inside
+of it.
+
+Note that by definition this returns _all_ of a module's variables. This means
+that a module will return _all_ its submodule's variables, even if it only uses
+a subset of the submodule's variables (ie. it does not call a method decorated
+by `@snt.reuse_variables` on the submodule).
 
 ### Q: How do I serialize Sonnet module instances?
 

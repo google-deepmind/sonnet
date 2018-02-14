@@ -452,6 +452,58 @@ class ReuseVarsTest(tf.test.TestCase):
     def not_inherited_method_with_reuse(self):
       return tf.get_variable("c", shape=[1])
 
+  class ModuleReuse(snt.AbstractModule):
+
+    def __init__(self, shape, name="multi_template_test"):
+      super(ReuseVarsTest.ModuleReuse, self).__init__(name=name)
+      self._shape = shape
+
+    @util.reuse_variables
+    def a(self):
+      return tf.get_variable("a", shape=self._shape)
+
+    @util.reuse_variables
+    def add_b(self, inputs):
+      return inputs + tf.get_variable("b", shape=self._shape)
+
+    def _build(self, inputs):
+      return self.add_b(inputs + self.a())
+
+  def test_get_all_variables(self):
+    np.random.seed(100)
+    batch_size = 3
+    in_size = 4
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, in_size])
+
+    module = ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list())
+
+    module.a()
+    all_variable_names = sorted([v.name for v in module._all_variables])
+    self.assertEqual(["multi_template_test/a_1:0"], all_variable_names)
+
+    module(inputs)  # pylint: disable=not-callable
+    all_variable_names = sorted([v.name for v in module.get_all_variables()])
+    self.assertEqual(["multi_template_test/a_1:0", "multi_template_test/b:0"],
+                     all_variable_names)
+
+    seq = snt.Sequential([
+        ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list()),
+        ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list()),
+        ReuseVarsTest.ModuleReuse(inputs.get_shape().as_list()),
+    ])
+
+    for layer in seq.layers:
+      layer.add_b(inputs)
+    self.assertEqual(0, len(seq._all_variables))
+
+    seq(inputs)
+    all_variable_names = sorted([v.name for v in seq.get_all_variables()])
+    self.assertEqual([
+        "multi_template_test_1/a_1:0", "multi_template_test_1/b:0",
+        "multi_template_test_2/a_1:0", "multi_template_test_2/b:0",
+        "multi_template_test_3/a_1:0", "multi_template_test_3/b:0",
+    ], all_variable_names)
+
   def test_reuse_method(self):
     obj1 = ReuseVarsTest.VariableContainer("scope1")
     obj2 = ReuseVarsTest.VariableContainer("scope2")
@@ -501,23 +553,6 @@ class ReuseVarsTest(tf.test.TestCase):
     self.assertEqual("scope2/a", obj2.method_with_reuse().op.name)
     self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
     self.assertEqual("scope2/c", obj2.not_inherited_method_with_reuse().op.name)
-
-  class ModuleReuse(snt.AbstractModule):
-
-    def __init__(self, shape, name="multi_template_test"):
-      super(ReuseVarsTest.ModuleReuse, self).__init__(name=name)
-      self._shape = shape
-
-    @util.reuse_variables
-    def a(self):
-      return tf.get_variable("a", shape=self._shape)
-
-    @util.reuse_variables
-    def add_b(self, inputs):
-      return inputs + tf.get_variable("b", shape=self._shape)
-
-    def _build(self, inputs):
-      return self.add_b(inputs + self.a())
 
   def test_reuse_abstract_module(self):
     np.random.seed(100)

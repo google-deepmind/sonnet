@@ -9,7 +9,7 @@ networks.
 Sonnet can be installed from pip, with or without GPU support.
 
 This installation is compatible with Linux/Mac OS X and Python 2.7 and
-3.{4,5,6}. The version of TensorFlow installed must be at least 1.2. Installing
+3.{4,5,6}. The version of TensorFlow installed must be 1.5. Installing
 Sonnet supports the [virtualenv installation mode](https://www.tensorflow.org/install/install_linux#installing_with_virtualenv)
 of TensorFlow, as well as the [native pip install](https://www.tensorflow.org/install/install_linux#installing_with_native_pip).
 

@@ -1,5 +1,11 @@
 # Sonnet Changelog
 
+## Version 1.17 - Tuesday, 21. February 2018
+
+* `.get_all_variables()` method added to AbstractModule. This returns all
+  variables which affect the computation of a Module, whether they were declared
+  internally or passed into the Module's constructor.
+* Various bug fixes and documentation improvements.
 
 ## Version 1.16 - Monday, 29. January 2018
 

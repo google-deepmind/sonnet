@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title> &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     'git',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
@@ -48,7 +39,7 @@ neural networks.</p>
 <p>The following code constructs a Linear module and connects it to
 multiple inputs. The variables (i.e., the weights and biases of the
 linear transformation) are automatically shared.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
 
 <span class="c1"># Provide your own functions to generate data Tensors.</span>
 <span class="n">train_data</span> <span class="o">=</span> <span class="n">get_training_data</span><span class="p">()</span>
@@ -73,20 +64,20 @@ linear transformation) are automatically shared.</p>
 <p>The main principle of Sonnet is to first <em>construct</em> Python objects
 which represent some part of a neural network, and then separately
 <em>connect</em> these objects into the TensorFlow computation graph. The
-objects are subclasses of <code class="docutils literal"><span class="pre">sonnet.AbstractModule</span></code> and as such are
-referred to as <code class="docutils literal"><span class="pre">Modules</span></code>.</p>
+objects are subclasses of <code class="docutils literal notranslate"><span class="pre">sonnet.AbstractModule</span></code> and as such are
+referred to as <code class="docutils literal notranslate"><span class="pre">Modules</span></code>.</p>
 <p>Modules may be connected into the graph multiple times, and any
 variables declared in that module will be automatically shared on
 subsequent connection calls. Low level aspects of TensorFlow which
 control variable sharing, including specifying variable scope names, and
-using the <code class="docutils literal"><span class="pre">reuse=</span></code> flag, are abstracted away from the user.</p>
+using the <code class="docutils literal notranslate"><span class="pre">reuse=</span></code> flag, are abstracted away from the user.</p>
 <p>Separating configuration and connection allows easy construction of
 higher-order Modules, i.e., modules that wrap other modules. For
-instance, the <code class="docutils literal"><span class="pre">BatchApply</span></code> module merges a number of leading
+instance, the <code class="docutils literal notranslate"><span class="pre">BatchApply</span></code> module merges a number of leading
 dimensions of a tensor into a single dimension, connects a provided
 module, and then splits the leading dimension of the result to match the
 input. At construction time, the inner module is passed in as an
-argument to the <code class="docutils literal"><span class="pre">BatchApply</span></code> constructor. At run time, the module
+argument to the <code class="docutils literal notranslate"><span class="pre">BatchApply</span></code> constructor. At run time, the module
 first performs a reshape operation on inputs, then applies the module
 passed into the constructor, and then inverts the reshape operation.</p>
 <p>An additional advantage of representing Modules by Python objects is
@@ -102,15 +93,15 @@ the object, and are used by different methods of the module.</p>
 <div class="section" id="importing-sonnet">
 <h2>Importing Sonnet<a class="headerlink" href="#importing-sonnet" title="Permalink to this headline">¶</a></h2>
 <p>The recommended way to import Sonnet is to alias it to a variable named
-<code class="docutils literal"><span class="pre">snt</span></code>:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
+<code class="docutils literal notranslate"><span class="pre">snt</span></code>:</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
 </pre></div>
 </div>
-<p>Every module is then accessible under the namespace <code class="docutils literal"><span class="pre">snt</span></code>, and the
-rest of this document will use <code class="docutils literal"><span class="pre">snt</span></code> for brevity.</p>
+<p>Every module is then accessible under the namespace <code class="docutils literal notranslate"><span class="pre">snt</span></code>, and the
+rest of this document will use <code class="docutils literal notranslate"><span class="pre">snt</span></code> for brevity.</p>
 <p>The following code constructs a module that is composed of other
 modules:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
 
 <span class="c1"># Our data is coming in via multiple inputs, so to apply the same model to each</span>
 <span class="c1"># we will need to use variable sharing.</span>
@@ -135,7 +126,7 @@ modules:</p>
 </div>
 <p>The following code adds initializers and regularizers to a Linear
 module:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sonnet</span> <span class="k">as</span> <span class="nn">snt</span>
 
 <span class="n">train_data</span> <span class="o">=</span> <span class="n">get_training_data</span><span class="p">()</span>
 <span class="n">test_data</span> <span class="o">=</span> <span class="n">get_test_data</span><span class="p">()</span>
@@ -170,9 +161,9 @@ module:</p>
 <div class="section" id="defining-your-own-modules">
 <h2>Defining your own modules<a class="headerlink" href="#defining-your-own-modules" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="inherit-from-snt-abstractmodule">
-<h3>Inherit from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code><a class="headerlink" href="#inherit-from-snt-abstractmodule" title="Permalink to this headline">¶</a></h3>
+<h3>Inherit from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code><a class="headerlink" href="#inherit-from-snt-abstractmodule" title="Permalink to this headline">¶</a></h3>
 <p>To define a module, create a new class which inherits from
-<code class="docutils literal"><span class="pre">snt.AbstractModule</span></code>. The constructor of your class should accept any
+<code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code>. The constructor of your class should accept any
 configuration which defines the operation of that module, and store it
 in a member variable prefixed with an underscore, to indicate that it is
 private.</p>
@@ -181,10 +172,10 @@ private.</p>
 <h3>Call superclass constructor<a class="headerlink" href="#call-superclass-constructor" title="Permalink to this headline">¶</a></h3>
 <p>The first thing the constructor does should be to call the superclass
 constructor, passing in the name for the module - if you forget to do
-this, the variable sharing will break. A <code class="docutils literal"><span class="pre">name</span></code> kwarg should always be
+this, the variable sharing will break. A <code class="docutils literal notranslate"><span class="pre">name</span></code> kwarg should always be
 provided as the final one of the list, with the default value being a
-<code class="docutils literal"><span class="pre">snake_case</span></code> version of the class name.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyMLP</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<code class="docutils literal notranslate"><span class="pre">snake_case</span></code> version of the class name.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyMLP</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Docstring for MyMLP.&quot;&quot;&quot;</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span>
                <span class="n">nonlinearity</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_mlp&quot;</span><span class="p">):</span>
@@ -197,10 +188,10 @@ provided as the final one of the list, with the default value being a
 </div>
 </div>
 <div class="section" id="implement-build-method">
-<h3>Implement <code class="docutils literal"><span class="pre">_build()</span></code> method<a class="headerlink" href="#implement-build-method" title="Permalink to this headline">¶</a></h3>
+<h3>Implement <code class="docutils literal notranslate"><span class="pre">_build()</span></code> method<a class="headerlink" href="#implement-build-method" title="Permalink to this headline">¶</a></h3>
 <p>The only other method implementation which must be provided is
-<code class="docutils literal"><span class="pre">_build()</span></code>. This will be called whenever the module is connected into
-the <code class="docutils literal"><span class="pre">tf.Graph</span></code>. It receives some input, which may be empty, a single
+<code class="docutils literal notranslate"><span class="pre">_build()</span></code>. This will be called whenever the module is connected into
+the <code class="docutils literal notranslate"><span class="pre">tf.Graph</span></code>. It receives some input, which may be empty, a single
 Tensor, or some arbitrary structure containing multiple Tensors.
 Multiple Tensors can be provided with either a tuple or namedtuple, the
 elements of which in turn can be Tensors or further tuples /
@@ -209,7 +200,7 @@ Tensor has a color channel then it <em>must</em> be the last dimension. While
 in many cases the library will not explicitly prevent you, the use of
 lists and dicts is not supported, as the mutability of these structures
 can lead to subtle bugs.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Following on from code snippet above..</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Following on from code snippet above..</span>
 <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Compute output Tensor from input Tensor.&quot;&quot;&quot;</span>
   <span class="n">lin_x_to_h</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;x_to_h&quot;</span><span class="p">)</span>
@@ -217,35 +208,35 @@ can lead to subtle bugs.</p>
   <span class="k">return</span> <span class="n">lin_h_to_o</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nonlinearity</span><span class="p">(</span><span class="n">lin_x_to_h</span><span class="p">(</span><span class="n">inputs</span><span class="p">)))</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">_build</span></code> method may include any or all of the following processes:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">_build</span></code> method may include any or all of the following processes:</p>
 <ul class="simple">
 <li>Construct and use internal modules</li>
 <li>Use modules which already exist, and were passed into the constructor</li>
 <li>Create variables directly.</li>
 </ul>
 <p>If you create variables yourself, it is <em>crucial</em> to create them with
-<code class="docutils literal"><span class="pre">tf.get_variable</span></code>. Calling the <code class="docutils literal"><span class="pre">tf.Variable</span></code> constructor directly
+<code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. Calling the <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> constructor directly
 will only work the first time the module is connected, but on the second
 call you will receive an error message “Trainable variable created when
 calling a template after the first time”.</p>
 <p>The modules in the above example are created separately, passing in
 various configurations, and then the final line connects them all into
 the graph. The return line should be read from right to left - the
-inputs Tensor is passed into the first Linear, <code class="docutils literal"><span class="pre">lin_x_to_h</span></code>, the
+inputs Tensor is passed into the first Linear, <code class="docutils literal notranslate"><span class="pre">lin_x_to_h</span></code>, the
 output of which is passed into whatever nonlinearity was stored in the
 constructor, the output of which goes through another Linear to produce
 the result. Note that we give short meaningful names to the internal
 Linear instances.</p>
 <p>Note that the nonlinearity above can be either a raw TF op, eg
-<code class="docutils literal"><span class="pre">tf.tanh</span></code> or <code class="docutils literal"><span class="pre">tf.sigmoid</span></code>, or an instance of a Sonnet module. In
+<code class="docutils literal notranslate"><span class="pre">tf.tanh</span></code> or <code class="docutils literal notranslate"><span class="pre">tf.sigmoid</span></code>, or an instance of a Sonnet module. In
 keeping with Python standards, we may choose to not check this
-explicitly, and so we may receive an error when <code class="docutils literal"><span class="pre">_build</span></code> is called. It
+explicitly, and so we may receive an error when <code class="docutils literal notranslate"><span class="pre">_build</span></code> is called. It
 is also acceptable to add constraints and sanity checking inside
-<code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-<p>Note that in the above code, new instances of <code class="docutils literal"><span class="pre">snt.Linear</span></code> are
-generated each time <code class="docutils literal"><span class="pre">_build()</span></code> is called, and you may think this will
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code>.</p>
+<p>Note that in the above code, new instances of <code class="docutils literal notranslate"><span class="pre">snt.Linear</span></code> are
+generated each time <code class="docutils literal notranslate"><span class="pre">_build()</span></code> is called, and you may think this will
 create different, unshared variables. This is not the case - only 4
-variables (2 for each <code class="docutils literal"><span class="pre">Linear</span></code>) will be created, no matter how many
+variables (2 for each <code class="docutils literal notranslate"><span class="pre">Linear</span></code>) will be created, no matter how many
 times the MLP instance is connected into the graph. How this is works is
 a low level TF detail, and subject to change - see
 tf.variable_op_scope for details.</p>
@@ -258,9 +249,9 @@ this section are any Modules which are <em>constructed</em> inside the code of
 another Module, which we will refer to as the Parent Module. An example
 is an LSTM, where most implementations will internally construct one or
 more Linear modules to contain the weights.</p>
-<p>It’s recommended that submodules are created in <code class="docutils literal"><span class="pre">_build()</span></code>. Doing it
+<p>It’s recommended that submodules are created in <code class="docutils literal notranslate"><span class="pre">_build()</span></code>. Doing it
 this way means you get the correct nesting of variable scopes, eg:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ParentModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ParentModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;parent_module&quot;</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">ParentModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
@@ -271,13 +262,13 @@ this way means you get the correct nesting of variable scopes, eg:</p>
 </pre></div>
 </div>
 <p>The variables created by the Linear will have a name something like
-<code class="docutils literal"><span class="pre">parent_module/linear/w</span></code>, which is what you probably want in this kind
+<code class="docutils literal notranslate"><span class="pre">parent_module/linear/w</span></code>, which is what you probably want in this kind
 of situation.</p>
 <p>Some users prefer for practical or stylistic reasons to construct
 everything in the constructor, before anything is used. This is fine,
 but for proper variable nesting <em>any submodules must be constructed
 inside a ``self._enter_variable_scope`` call</em>.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">OtherParentModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">OtherParentModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;other_parent_module&quot;</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">OtherParentModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
@@ -291,10 +282,10 @@ inside a ``self._enter_variable_scope`` call</em>.</p>
 <p>The above example is fine, and will have the same variable names etc.
 Different people prefer different styles and both of the above are
 considered correct.</p>
-<p>The pitfall here is forgetting to call <code class="docutils literal"><span class="pre">self._enter_variable_scope()</span></code>.
+<p>The pitfall here is forgetting to call <code class="docutils literal notranslate"><span class="pre">self._enter_variable_scope()</span></code>.
 Things will still “work” but the scopes will not be nested as you might
 expected:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">WrongModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">WrongModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;wrong_module&quot;</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">WrongModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span> <span class="o">=</span> <span class="n">hidden_size</span>
@@ -307,8 +298,8 @@ expected:</p>
 <p>The above example works okay in terms of the resulting network’s
 calculations, but is considered a bug due to the resulting flat (instead
 of hierarchical) variable namespace. The variables in the linear will be
-called <code class="docutils literal"><span class="pre">&quot;linear/w&quot;</span></code> which is completely disjoint from the
-<code class="docutils literal"><span class="pre">&quot;wrong_module&quot;</span></code> namespace.</p>
+called <code class="docutils literal notranslate"><span class="pre">&quot;linear/w&quot;</span></code> which is completely disjoint from the
+<code class="docutils literal notranslate"><span class="pre">&quot;wrong_module&quot;</span></code> namespace.</p>
 </div>
 <div class="section" id="recurrent-modules">
 <h3>Recurrent Modules<a class="headerlink" href="#recurrent-modules" title="Permalink to this headline">¶</a></h3>
@@ -319,7 +310,7 @@ TensorFlow terminology), which perform one time step of computation.
 These are ready to be unrolled in time using TensorFlow’s unrolling
 operations.</p>
 <p>One example of an LSTM that is unrolled in time is the following:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">hidden_size</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hidden_size</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="c1"># input_sequence should be a tensor of size</span>
 <span class="c1"># [time_steps, batch_size, input_features]</span>
@@ -330,20 +321,20 @@ operations.</p>
     <span class="n">lstm</span><span class="p">,</span> <span class="n">input_sequence</span><span class="p">,</span> <span class="n">initial_state</span><span class="o">=</span><span class="n">initial_state</span><span class="p">,</span> <span class="n">time_major</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal"><span class="pre">batch_size</span></code> parameter passed to the <code class="docutils literal"><span class="pre">initial_state()</span></code> method
-can also be an <code class="docutils literal"><span class="pre">int32</span></code> Tensor.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> parameter passed to the <code class="docutils literal notranslate"><span class="pre">initial_state()</span></code> method
+can also be an <code class="docutils literal notranslate"><span class="pre">int32</span></code> Tensor.</p>
 <p>For a more comprehensive demonstration on the usage of recurrent
 modules, a fully-documented example of a deep LSTM with skip connections
 trained on the Shakespeare dataset is available.</p>
 </div>
 <div class="section" id="defining-your-own-recurrent-modules">
 <h4>Defining your own recurrent modules<a class="headerlink" href="#defining-your-own-recurrent-modules" title="Permalink to this headline">¶</a></h4>
-<p>A recurrent module is any subclass of <code class="docutils literal"><span class="pre">snt.RNNCore</span></code>, which inherits
-from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code> and has an interface compatible with
-<code class="docutils literal"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>. This allows us to use the variable sharing
+<p>A recurrent module is any subclass of <code class="docutils literal notranslate"><span class="pre">snt.RNNCore</span></code>, which inherits
+from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code> and has an interface compatible with
+<code class="docutils literal notranslate"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>. This allows us to use the variable sharing
 model from Sonnet whilst also using the cores inside TensorFlow’s RNN
 Containers.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Add1RNN</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Add1RNN</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Simple core that adds 1 to its state and produces zero outputs.</span>
 
 <span class="sd">  This core computes the following:</span>
@@ -398,42 +389,42 @@ Containers.</p>
             <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">batch_size</span><span class="p">]</span> <span class="o">+</span> <span class="n">sz2</span><span class="o">.</span><span class="n">as_list</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Apart from the <code class="docutils literal"><span class="pre">_build</span></code> method from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code>, a
-recurrent module must also implement the <code class="docutils literal"><span class="pre">state_size</span></code> and
-<code class="docutils literal"><span class="pre">output_size</span></code> properties, which provide the expected size of the
-recurrent state, and an example of it, respectively. <code class="docutils literal"><span class="pre">snt.RNNCore</span></code>
-defines a <code class="docutils literal"><span class="pre">initial_state</span></code> method that can be used to generate a zero
+<p>Apart from the <code class="docutils literal notranslate"><span class="pre">_build</span></code> method from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code>, a
+recurrent module must also implement the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> and
+<code class="docutils literal notranslate"><span class="pre">output_size</span></code> properties, which provide the expected size of the
+recurrent state, and an example of it, respectively. <code class="docutils literal notranslate"><span class="pre">snt.RNNCore</span></code>
+defines a <code class="docutils literal notranslate"><span class="pre">initial_state</span></code> method that can be used to generate a zero
 initial state or a trainable initial state (based on the aforementioned
 properties). Optionally, any recurrent module can define its own
-<code class="docutils literal"><span class="pre">initial_state</span></code> method. Note that a <code class="docutils literal"><span class="pre">zero_state</span></code> method is also
-available (as in <code class="docutils literal"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>) to produce a correctly
+<code class="docutils literal notranslate"><span class="pre">initial_state</span></code> method. Note that a <code class="docutils literal notranslate"><span class="pre">zero_state</span></code> method is also
+available (as in <code class="docutils literal notranslate"><span class="pre">tf.nn.rnn_cell.RNNCell</span></code>) to produce a correctly
 sized state value filled with zeros. In some situations (LSTM, etc) it
 may be acceptable to begin with a state containing all zeros, but in
 other situations this is too limiting, and we may want to (eg) fill some
 part of the state with random noise.</p>
 <p>A common option is to make the initial state of an RNN trainable,
-meaning the state is produced from some <code class="docutils literal"><span class="pre">tf.Variable</span></code>s which are
+meaning the state is produced from some <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s which are
 trained via backpropagation. If a core supports this, it should provide
-kwargs <code class="docutils literal"><span class="pre">trainable=</span></code> and <code class="docutils literal"><span class="pre">name=</span></code> for <code class="docutils literal"><span class="pre">initial_state()</span></code>. The
-<code class="docutils literal"><span class="pre">name=</span></code> kwarg can be used to provide a prefix for the (potentially
+kwargs <code class="docutils literal notranslate"><span class="pre">trainable=</span></code> and <code class="docutils literal notranslate"><span class="pre">name=</span></code> for <code class="docutils literal notranslate"><span class="pre">initial_state()</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">name=</span></code> kwarg can be used to provide a prefix for the (potentially
 multiple) variable name(s) which will be created.</p>
 </div>
 </div>
 <div class="section" id="the-transposable-interface">
 <h3>The Transposable interface<a class="headerlink" href="#the-transposable-interface" title="Permalink to this headline">¶</a></h3>
 <p>Sonnet defines an interface for modules supporting <em>transposition</em>,
-called <code class="docutils literal"><span class="pre">snt.Transposable</span></code>. Transposition is a flexible concept (e.g.
+called <code class="docutils literal notranslate"><span class="pre">snt.Transposable</span></code>. Transposition is a flexible concept (e.g.
 not necessarily related to matrix transposition as defined in algebra),
 and in this context it entails the definition of a new module with
 attributes which are somehow related to the original module, <em>without</em>
 strictly implying any form of variable sharing. For example, given a
-<code class="docutils literal"><span class="pre">snt.Linear</span></code> which maps from input size <em>A</em> to output size <em>B</em>, via
-transposition we will return another <code class="docutils literal"><span class="pre">snt.Linear</span></code> module whose weight
+<code class="docutils literal notranslate"><span class="pre">snt.Linear</span></code> which maps from input size <em>A</em> to output size <em>B</em>, via
+transposition we will return another <code class="docutils literal notranslate"><span class="pre">snt.Linear</span></code> module whose weight
 matrix shape is the transpose of the original one, thus mapping from
-input size <em>B</em> to output size <em>A</em>; given a <code class="docutils literal"><span class="pre">snt.Conv2D</span></code> module we will
-return a matching <code class="docutils literal"><span class="pre">snt.Conv2DTranspose</span></code> module.</p>
-<p>The <code class="docutils literal"><span class="pre">snt.Transposable</span></code> interface requires that transposable modules
-implement a method called <code class="docutils literal"><span class="pre">transpose</span></code>, returning a module which is the
+input size <em>B</em> to output size <em>A</em>; given a <code class="docutils literal notranslate"><span class="pre">snt.Conv2D</span></code> module we will
+return a matching <code class="docutils literal notranslate"><span class="pre">snt.Conv2DTranspose</span></code> module.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">snt.Transposable</span></code> interface requires that transposable modules
+implement a method called <code class="docutils literal notranslate"><span class="pre">transpose</span></code>, returning a module which is the
 transposed version of the one the method is called on. Whilst <em>not</em>
 enforced by Sonnet, chaining the method twice should be expected to
 return a module with the same specifications as the original module.</p>
@@ -442,26 +433,26 @@ ensure that parameters needed to instantiate the module are provided as
 functions whose evaluation is <em>deferred</em> to graph construction time.
 This mechanism allows for transposed modules to be instantiated <em>before</em>
 the original module is connected to the graph. An example of this
-behavior can be found in <code class="docutils literal"><span class="pre">snt.Linear</span></code>, where the <code class="docutils literal"><span class="pre">output_size</span></code>
-argument of the transposed module is defined as a <code class="docutils literal"><span class="pre">lambda</span></code> returning
-the <code class="docutils literal"><span class="pre">input_shape</span></code> property of the original module; upon evaluation
-<code class="docutils literal"><span class="pre">input_shape</span></code> will raise an error unless the module has not been
-connected to the graph, but this is not an issue since the <code class="docutils literal"><span class="pre">lambda</span></code> is
+behavior can be found in <code class="docutils literal notranslate"><span class="pre">snt.Linear</span></code>, where the <code class="docutils literal notranslate"><span class="pre">output_size</span></code>
+argument of the transposed module is defined as a <code class="docutils literal notranslate"><span class="pre">lambda</span></code> returning
+the <code class="docutils literal notranslate"><span class="pre">input_shape</span></code> property of the original module; upon evaluation
+<code class="docutils literal notranslate"><span class="pre">input_shape</span></code> will raise an error unless the module has not been
+connected to the graph, but this is not an issue since the <code class="docutils literal notranslate"><span class="pre">lambda</span></code> is
 not called until the transposed module is connected to the graph.</p>
 </div>
 </div>
 <div class="section" id="variable-reuse-with-snt-reuse-variables-experimental">
-<h2>Variable reuse with <code class="docutils literal"><span class="pre">&#64;snt.reuse_variables</span></code> (<strong>experimental</strong>)<a class="headerlink" href="#variable-reuse-with-snt-reuse-variables-experimental" title="Permalink to this headline">¶</a></h2>
-<p>Some use cases require a <code class="docutils literal"><span class="pre">tf.VariableScope</span></code> to be shared across
-multiple methods, which isn’t possible with <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code>. For
-example, a generative model may define a <code class="docutils literal"><span class="pre">sample()</span></code> and <code class="docutils literal"><span class="pre">log_pdf()</span></code>
-method that share parts of the same <code class="docutils literal"><span class="pre">tf.Graph</span></code>.</p>
-<p>Adding the <code class="docutils literal"><span class="pre">&#64;snt.reuse_variables</span></code> decorator to a method will enable
-variable reuse in much the same manner as <code class="docutils literal"><span class="pre">_build()</span></code>. The most notable
-difference is that a single <code class="docutils literal"><span class="pre">tf.VariableScope</span></code> will be used across
+<h2>Variable reuse with <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code> (<strong>experimental</strong>)<a class="headerlink" href="#variable-reuse-with-snt-reuse-variables-experimental" title="Permalink to this headline">¶</a></h2>
+<p>Some use cases require a <code class="docutils literal notranslate"><span class="pre">tf.VariableScope</span></code> to be shared across
+multiple methods, which isn’t possible with <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code>. For
+example, a generative model may define a <code class="docutils literal notranslate"><span class="pre">sample()</span></code> and <code class="docutils literal notranslate"><span class="pre">log_pdf()</span></code>
+method that share parts of the same <code class="docutils literal notranslate"><span class="pre">tf.Graph</span></code>.</p>
+<p>Adding the <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code> decorator to a method will enable
+variable reuse in much the same manner as <code class="docutils literal notranslate"><span class="pre">_build()</span></code>. The most notable
+difference is that a single <code class="docutils literal notranslate"><span class="pre">tf.VariableScope</span></code> will be used across
 different decorated methods and each decorated method has its own
-<code class="docutils literal"><span class="pre">reuse</span></code> flag that is used to enter the variable scope.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<code class="docutils literal notranslate"><span class="pre">reuse</span></code> flag that is used to enter the variable scope.</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
@@ -519,23 +510,23 @@ different decorated methods and each decorated method has its own
 <span class="n">reconstructed_from_latent</span> <span class="o">=</span> <span class="n">nae</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>In the above example, any variables created by <code class="docutils literal"><span class="pre">nae.encode()</span></code>,
-<code class="docutils literal"><span class="pre">nae.decode()</span></code> or <code class="docutils literal"><span class="pre">nae()</span></code> exist in the same <code class="docutils literal"><span class="pre">tf.VariableScope</span></code>. In
-addition, since each decorated method has its own <code class="docutils literal"><span class="pre">reuse</span></code> flag we
+<p>In the above example, any variables created by <code class="docutils literal notranslate"><span class="pre">nae.encode()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">nae.decode()</span></code> or <code class="docutils literal notranslate"><span class="pre">nae()</span></code> exist in the same <code class="docutils literal notranslate"><span class="pre">tf.VariableScope</span></code>. In
+addition, since each decorated method has its own <code class="docutils literal notranslate"><span class="pre">reuse</span></code> flag we
 don’t need to worry about having to create all variables on the first
 method call, or about the calling order at all. We can even nest
-(decorated) methods within other (decorated) methods - the <code class="docutils literal"><span class="pre">reuse</span></code>
+(decorated) methods within other (decorated) methods - the <code class="docutils literal notranslate"><span class="pre">reuse</span></code>
 flag is always set correctly since the variable scope is re-entered for
 every method call.</p>
 <p>However every decorated method must be the <em>sole</em> owner of its
-variables. For example, if we use <code class="docutils literal"><span class="pre">tf.get_variable(&quot;w_dec&quot;,</span> <span class="pre">...)</span></code>
-inside <code class="docutils literal"><span class="pre">NaiveAutoEncoder.encode</span></code>, this will <em>not</em> do variable sharing.
-Instead, TensorFlow will treat <code class="docutils literal"><span class="pre">tf.get_variable(&quot;w_dec&quot;,</span> <span class="pre">...)</span></code> in
-<code class="docutils literal"><span class="pre">NaiveAutoEncoder.enodec</span></code> and <code class="docutils literal"><span class="pre">NaiveAutoEncoder.decode()</span></code> as
-separate variables and an error will occur in either<code class="docutils literal"><span class="pre">obj.a()</span></code> or
-<code class="docutils literal"><span class="pre">obj.build()</span></code> (whichever is called second).</p>
+variables. For example, if we use <code class="docutils literal notranslate"><span class="pre">tf.get_variable(&quot;w_dec&quot;,</span> <span class="pre">...)</span></code>
+inside <code class="docutils literal notranslate"><span class="pre">NaiveAutoEncoder.encode</span></code>, this will <em>not</em> do variable sharing.
+Instead, TensorFlow will treat <code class="docutils literal notranslate"><span class="pre">tf.get_variable(&quot;w_dec&quot;,</span> <span class="pre">...)</span></code> in
+<code class="docutils literal notranslate"><span class="pre">NaiveAutoEncoder.enodec</span></code> and <code class="docutils literal notranslate"><span class="pre">NaiveAutoEncoder.decode()</span></code> as
+separate variables and an error will occur in either<code class="docutils literal notranslate"><span class="pre">obj.a()</span></code> or
+<code class="docutils literal notranslate"><span class="pre">obj.build()</span></code> (whichever is called second).</p>
 <p>See below for an example of bad variable reuse:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BadReusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BadReusable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">default_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
@@ -556,12 +547,12 @@ separate variables and an error will occur in either<code class="docutils litera
 </div>
 </div>
 <div class="section" id="wrapping-functions-into-sonnet-modules-using-snt-module">
-<h2>Wrapping functions into Sonnet modules using <code class="docutils literal"><span class="pre">snt.Module</span></code><a class="headerlink" href="#wrapping-functions-into-sonnet-modules-using-snt-module" title="Permalink to this headline">¶</a></h2>
+<h2>Wrapping functions into Sonnet modules using <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code><a class="headerlink" href="#wrapping-functions-into-sonnet-modules-using-snt-module" title="Permalink to this headline">¶</a></h2>
 <p>Whilst the recommended way of defining new Sonnet modules is to inherit
-from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code>, the library also offers an alternative
+from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code>, the library also offers an alternative
 route to succinctly instantiate modules wrapping user-provided
 functions.</p>
-<p>The <code class="docutils literal"><span class="pre">snt.Module</span></code> class constructor takes a callable and returns a
+<p>The <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code> class constructor takes a callable and returns a
 Sonnet module. The provided function is invoked when the module is
 called, thus specifying how new nodes are added to the computational
 graph and how to compute output Tensors from input Tensors. Please refer
@@ -573,27 +564,27 @@ to the module documentation for more details and examples.</p>
 <h3>Q: Why <em>another</em> TF library?<a class="headerlink" href="#q-why-another-tf-library" title="Permalink to this headline">¶</a></h3>
 <p>A: The existing libraries were judged insufficiently flexible for the
 DeepMind use case where extensive use is made of weight sharing. Making
-everything use <code class="docutils literal"><span class="pre">tf.make_template</span></code>, and therefore support weight
+everything use <code class="docutils literal notranslate"><span class="pre">tf.make_template</span></code>, and therefore support weight
 sharing from the start, seemed to have sufficient benefits to outweight
 the development cost. The paradigm of separating configuration from
 connection also allows easy composability of modules.</p>
 </div>
 <div class="section" id="q-can-i-access-different-variables-on-subsequent-calls-to-the-same-build">
 <h3>Q: Can I access different variables on subsequent calls to the same build()?<a class="headerlink" href="#q-can-i-access-different-variables-on-subsequent-calls-to-the-same-build" title="Permalink to this headline">¶</a></h3>
-<p>A: No. This is enforced by <code class="docutils literal"><span class="pre">tf.make_template</span></code>, which considers it an
+<p>A: No. This is enforced by <code class="docutils literal notranslate"><span class="pre">tf.make_template</span></code>, which considers it an
 error to access different / extra variables on subsequent calls.</p>
 </div>
 <div class="section" id="q-what-if-i-mistakenly-give-two-modules-the-same-name">
 <h3>Q: What if I mistakenly give two modules the same name?<a class="headerlink" href="#q-what-if-i-mistakenly-give-two-modules-the-same-name" title="Permalink to this headline">¶</a></h3>
 <p>A: Modules which appear to be constructed with the same name will have
 distinct names, and variable scopes. Under the hood, Sonnet uses
-<code class="docutils literal"><span class="pre">tf.make_template</span></code> which essentially wraps a python function together
-with some <code class="docutils literal"><span class="pre">tf.VariableScope</span></code>, ensuring that every call to the function
+<code class="docutils literal notranslate"><span class="pre">tf.make_template</span></code> which essentially wraps a python function together
+with some <code class="docutils literal notranslate"><span class="pre">tf.VariableScope</span></code>, ensuring that every call to the function
 happens in the same scope, and that all calls after the first are set to
 reuse variables. One feature of the templating is that it will
-<code class="docutils literal"><span class="pre">uniquify</span></code> any provided names, if they have already been entered in
+<code class="docutils literal notranslate"><span class="pre">uniquify</span></code> any provided names, if they have already been entered in
 the same scope. For example:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">lin_1</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lin_1</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
 <span class="n">lin_2</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="mi">84</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>  <span class="c1"># this name is already taken.</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">lin_1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># prints &quot;linear&quot;</span>
@@ -606,21 +597,21 @@ the same scope. For example:</p>
 <div class="section" id="q-do-i-have-to-name-my-modules">
 <h3>Q: Do I <em>have</em> to name my modules?<a class="headerlink" href="#q-do-i-have-to-name-my-modules" title="Permalink to this headline">¶</a></h3>
 <p>A: No. Modules have a default name, which should be the class name in
-<code class="docutils literal"><span class="pre">snake_case</span></code>, and that will be used as the name with uniquification
+<code class="docutils literal notranslate"><span class="pre">snake_case</span></code>, and that will be used as the name with uniquification
 (see above) if necessary. However, we recommend providing a name for
 modules which contain variables, as the name provided becomes the name
 of the internal scope, and thus defines the variable names. Most modules
-are written to declare internal weights with names like <code class="docutils literal"><span class="pre">&quot;w&quot;</span></code> and
-<code class="docutils literal"><span class="pre">&quot;b&quot;</span></code> for weights and bias - it’s vastly preferable to do have a list
+are written to declare internal weights with names like <code class="docutils literal notranslate"><span class="pre">&quot;w&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">&quot;b&quot;</span></code> for weights and bias - it’s vastly preferable to do have a list
 of weights like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sdae</span><span class="o">/</span><span class="n">encoder_linear</span><span class="o">/</span><span class="n">w</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sdae</span><span class="o">/</span><span class="n">encoder_linear</span><span class="o">/</span><span class="n">w</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">encoder_linear</span><span class="o">/</span><span class="n">b</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">decoder_linear</span><span class="o">/</span><span class="n">w</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">decoder_linear</span><span class="o">/</span><span class="n">b</span>
 </pre></div>
 </div>
 <p>rather than:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sdae</span><span class="o">/</span><span class="n">linear</span><span class="o">/</span><span class="n">w</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sdae</span><span class="o">/</span><span class="n">linear</span><span class="o">/</span><span class="n">w</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">linear</span><span class="o">/</span><span class="n">b</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">linear_1</span><span class="o">/</span><span class="n">w</span>
 <span class="n">sdae</span><span class="o">/</span><span class="n">linear_1</span><span class="o">/</span><span class="n">b</span>
@@ -631,12 +622,12 @@ of weights like:</p>
 <div class="section" id="q-how-do-i-find-out-what-variables-are-declared-by-a-module">
 <h3>Q: How do I find out what variables are declared by a module?<a class="headerlink" href="#q-how-do-i-find-out-what-variables-are-declared-by-a-module" title="Permalink to this headline">¶</a></h3>
 <p>A: You can query a module to find out all the variables in its scope
-using the <code class="docutils literal"><span class="pre">get_variables()</span></code> method. Note that this will throw an error
+using the <code class="docutils literal notranslate"><span class="pre">get_variables()</span></code> method. Note that this will throw an error
 if the module is not connected into the graph, as the variables do not
 exist at that point so the relevant scope will be empty.</p>
 </div>
 <div class="section" id="q-should-i-be-putting-calls-to-variable-scope-in-my-code">
-<h3>Q: Should I be putting calls to <code class="docutils literal"><span class="pre">variable_scope</span></code> in my code?<a class="headerlink" href="#q-should-i-be-putting-calls-to-variable-scope-in-my-code" title="Permalink to this headline">¶</a></h3>
+<h3>Q: Should I be putting calls to <code class="docutils literal notranslate"><span class="pre">variable_scope</span></code> in my code?<a class="headerlink" href="#q-should-i-be-putting-calls-to-variable-scope-in-my-code" title="Permalink to this headline">¶</a></h3>
 <p>A: Every module implicitly creates an internal variable_scope, which it
 re-enters each time it connects to the graph. Assuming all the variables
 in your model are inside Sonnet modules, it is not necessary to use
@@ -645,18 +636,18 @@ scopes yourself.</p>
 <div class="section" id="q-can-i-mix-this-with-raw-tf-ops">
 <h3>Q: Can I mix this with raw TF ops?<a class="headerlink" href="#q-can-i-mix-this-with-raw-tf-ops" title="Permalink to this headline">¶</a></h3>
 <p>A: Yes. An op which doesn’t declare variables internally, and so is
-effectively a pure function, can be used inside module <code class="docutils literal"><span class="pre">_build</span></code>
+effectively a pure function, can be used inside module <code class="docutils literal notranslate"><span class="pre">_build</span></code>
 implementations, and also to plumb together values between modules.</p>
 </div>
 <div class="section" id="q-should-everything-in-sonnet-be-implemented-as-a-module">
 <h3>Q: Should everything in Sonnet be implemented as a Module?<a class="headerlink" href="#q-should-everything-in-sonnet-be-implemented-as-a-module" title="Permalink to this headline">¶</a></h3>
-<p>No, computations which do not create <code class="docutils literal"><span class="pre">tf.Variable</span></code>s and do not store
+<p>No, computations which do not create <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s and do not store
 internal configurations <em>can</em> be implemented in the regular TF Op style,
 ie a python function that receives input tensors, keyword arguments, and
 returns tensor outputs.</p>
-<p>If an op is going to create variables (ie call <code class="docutils literal"><span class="pre">tf.get_variable</span></code>
+<p>If an op is going to create variables (ie call <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>
 anywhere internally, including indirectly) it must be implemented as a
-subclass of <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code> so that variable sharing is correctly
+subclass of <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code> so that variable sharing is correctly
 handled.</p>
 <p>Note that if a computation doesn’t create any Variables, it <em>may</em> still
 be desirable to implement it with a Module instead of an Op.</p>
@@ -666,12 +657,12 @@ example of this is the content addressing modules in the Differentiable
 Neural Computer. These modules receive a number of configuration
 parameters (size of each word in memory, number of read heads) and some
 function of these inputs defines what the valid input size is. We use a
-<code class="docutils literal"><span class="pre">snt.Linear</span></code> of the correct output size before this module, in order
+<code class="docutils literal notranslate"><span class="pre">snt.Linear</span></code> of the correct output size before this module, in order
 to provide the correct dimensionality. As a module this is easy -
 provide the configuration at construction time, then a method
-<code class="docutils literal"><span class="pre">.param_size()</span></code> which gives the required input dimensionality. We can
+<code class="docutils literal notranslate"><span class="pre">.param_size()</span></code> which gives the required input dimensionality. We can
 then make the correct size of input tensor and perform the connection.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CosineWeights</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CosineWeights</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word_size</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cosine_weights&quot;</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">CosineWeights</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_word_size</span> <span class="o">=</span> <span class="n">word_size</span>
@@ -692,8 +683,8 @@ then make the correct size of input tensor and perform the connection.</p>
 </pre></div>
 </div>
 <p>If the above was implemented as an op
-<code class="docutils literal"><span class="pre">cosine_weights(memory,</span> <span class="pre">cos_params,</span> <span class="pre">word_size,</span> <span class="pre">num_heads)</span></code> then the
-logic to indicate the desired size of <code class="docutils literal"><span class="pre">cos_params</span></code> would have to be
+<code class="docutils literal notranslate"><span class="pre">cosine_weights(memory,</span> <span class="pre">cos_params,</span> <span class="pre">word_size,</span> <span class="pre">num_heads)</span></code> then the
+logic to indicate the desired size of <code class="docutils literal notranslate"><span class="pre">cos_params</span></code> would have to be
 stored in a separate function. Encapsulating the related functions into
 one module results in cleaner code.</p>
 <p>Another example of where this flexibility is useful is when an Op has a
@@ -702,7 +693,7 @@ with some which are conceptually inputs. We often want to use the same
 configuration in multiple places, for different inputs, and so writing a
 Module which can be constructed with the configuration and then passed
 around may be useful.</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">functools</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">functools</span>
 <span class="c1"># 1. Define our computation as some op</span>
 <span class="k">def</span> <span class="nf">useful_op</span><span class="p">(</span><span class="n">input_a</span><span class="p">,</span> <span class="n">input_b</span><span class="p">,</span>
               <span class="n">use_clipping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solve_agi</span><span class="o">=</span><span class="s1">&#39;maybe&#39;</span><span class="p">):</span>
@@ -732,7 +723,7 @@ style of using functools or needing to pass both the Op and a dictionary
 around. In which case, rewriting the Op as a Module can be a nice
 solution - in particular, the difference between configuration
 parameters and inputs from the Graph are now made explicit:</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">UsefulModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">UsefulModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_clipping</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">remove_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">solve_agi</span><span class="o">=</span><span class="s1">&#39;maybe&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;useful_module&#39;</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">UsefulModule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -749,46 +740,50 @@ parameters and inputs from the Graph are now made explicit:</p>
 <p>A: Sonnet modules, once constructed, follow the Tensor-In-Tensor-Out
 principle, so can be mixed with functions from TF-Slim, etc. Note that
 this may lead to unexpected behaviour - TF-Slim controls sharing by
-passing explicit <code class="docutils literal"><span class="pre">scope=</span></code> and <code class="docutils literal"><span class="pre">reuse=</span></code> kwargs into the layer
-functions - if you use a TF-Slim layer inside the <code class="docutils literal"><span class="pre">_build()</span></code> method of
+passing explicit <code class="docutils literal notranslate"><span class="pre">scope=</span></code> and <code class="docutils literal notranslate"><span class="pre">reuse=</span></code> kwargs into the layer
+functions - if you use a TF-Slim layer inside the <code class="docutils literal notranslate"><span class="pre">_build()</span></code> method of
 a Sonnet module, then calling it multiple times is not likely to work
 correctly.</p>
 </div>
 <div class="section" id="q-shouldn-t-i-be-overriding-call-in-modules">
 <h3>Q: Shouldn’t I be overriding __call__ in modules?<a class="headerlink" href="#q-shouldn-t-i-be-overriding-call-in-modules" title="Permalink to this headline">¶</a></h3>
-<p>A: No. <code class="docutils literal"><span class="pre">AbstractModule.__init__</span></code> provides an implementation of
-<code class="docutils literal"><span class="pre">__call__</span></code>, which calls an internal function wrapped in a Template,
-which in turn wraps the <code class="docutils literal"><span class="pre">_build</span></code> method. Overriding <code class="docutils literal"><span class="pre">__call__</span></code>
+<p>A: No. <code class="docutils literal notranslate"><span class="pre">AbstractModule.__init__</span></code> provides an implementation of
+<code class="docutils literal notranslate"><span class="pre">__call__</span></code>, which calls an internal function wrapped in a Template,
+which in turn wraps the <code class="docutils literal notranslate"><span class="pre">_build</span></code> method. Overriding <code class="docutils literal notranslate"><span class="pre">__call__</span></code>
 yourself will likely break variable sharing.</p>
 </div>
 <div class="section" id="q-what-is-the-overhead-of-using-sonnet-vs-other-libraries-vs-raw-tf">
 <h3>Q: What is the overhead of using Sonnet vs other libraries vs raw TF?<a class="headerlink" href="#q-what-is-the-overhead-of-using-sonnet-vs-other-libraries-vs-raw-tf" title="Permalink to this headline">¶</a></h3>
 <p>A: None. Sonnet is only involved when constructing the computation
-graph. Once you are at the stage of using <code class="docutils literal"><span class="pre">Session.run()</span></code> you are
+graph. Once you are at the stage of using <code class="docutils literal notranslate"><span class="pre">Session.run()</span></code> you are
 simply executing Ops, without regard for what library was used to put
 that graph together.</p>
 </div>
 <div class="section" id="q-how-do-i-list-all-the-variables-which-are-used-in-any-way-in-a-module">
 <h3>Q: How do I list all the variables which are used <em>in any way</em> in a Module?<a class="headerlink" href="#q-how-do-i-list-all-the-variables-which-are-used-in-any-way-in-a-module" title="Permalink to this headline">¶</a></h3>
-<p>A: Currently, not easily possible. Although there is a
-<code class="docutils literal"><span class="pre">get_variables()</span></code> method, it only searches the <code class="docutils literal"><span class="pre">VariableScope</span></code>
-defined inside a module, which will contain any internally constructed
-variables or modules. However, the actual <em>computation</em> done by a module
-could use other modules - for example, the <code class="docutils literal"><span class="pre">snt.Sequential</span></code> module in
-the example section above. The modules passed into the constructor have
-by definition been constructed before the <code class="docutils literal"><span class="pre">Sequential</span></code>, and so they
-have different variable scopes. Currently, once the Sequential is
-connected into the graph, querying it with <code class="docutils literal"><span class="pre">get_variables()</span></code> will
-return an empty tuple.</p>
-<p>The DeepMind Research Engineering team is considering future additions
-to the <code class="docutils literal"><span class="pre">Module</span></code> API which remedy this, without requiring extra effort
-from module implementors.</p>
+<p>A: You can use <code class="docutils literal notranslate"><span class="pre">get_all_variables()</span></code> to find all the variables that a
+module or any of its submodules have created with <code class="docutils literal notranslate"><span class="pre">tf.get_variable()</span></code>.</p>
+<p>Like <code class="docutils literal notranslate"><span class="pre">get_variables()</span></code> this returns all variables that are inside of
+the module’s (variable) scope. However, <code class="docutils literal notranslate"><span class="pre">get_all_variables()</span></code> also
+returns all of the variables from any submodules with disjoint
+(variable) scopes. These submodules have either been passed into the
+module’s constructor, or have been constructed by the module but outside
+of <code class="docutils literal notranslate"><span class="pre">_build()</span></code> or <code class="docutils literal notranslate"><span class="pre">_enter_variable_scope()</span></code>.</p>
+<p>Note that by definition this will not return variables that have not
+been created by <code class="docutils literal notranslate"><span class="pre">tf.get_variable()</span></code>. This is relevant for modules that
+use <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code>. If a method decorated with
+<code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variable</span></code> is not called then <code class="docutils literal notranslate"><span class="pre">get_all_variables()</span></code> will
+not return any variables used inside of it.</p>
+<p>Note that by definition this returns <em>all</em> of a module’s variables. This
+means that a module will return <em>all</em> its submodule’s variables, even if
+it only uses a subset of the submodule’s variables (ie. it does not call
+a method decorated by <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code> on the submodule).</p>
 </div>
 <div class="section" id="q-how-do-i-serialize-sonnet-module-instances">
 <h3>Q: How do I serialize Sonnet module instances?<a class="headerlink" href="#q-how-do-i-serialize-sonnet-module-instances" title="Permalink to this headline">¶</a></h3>
 <p>A: We do not support serializing module instances, via pickle or any
 other method. Modules contain inherently non-serializable artifacts,
-such as references to <code class="docutils literal"><span class="pre">Variable</span></code>s and <code class="docutils literal"><span class="pre">Graph</span></code>s. To save a model,
+such as references to <code class="docutils literal notranslate"><span class="pre">Variable</span></code>s and <code class="docutils literal notranslate"><span class="pre">Graph</span></code>s. To save a model,
 you should instead serialize the configuration information which will
 allow you to regenerate the Graph, such as the name and constructor
 parameters of some top level module. This avoids any complications with
@@ -812,7 +807,7 @@ directions</a>.</p>
 <h3>(virtualenv TensorFlow installation) Activate virtualenv<a class="headerlink" href="#virtualenv-tensorflow-installation-activate-virtualenv" title="Permalink to this headline">¶</a></h3>
 <p>If using virtualenv, activate your virtualenv for the rest of the
 installation, otherwise skip this step:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
 $ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
 </pre></div>
 </div>
@@ -820,37 +815,37 @@ $ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
 <div class="section" id="build-and-run-the-installer">
 <h3>Build and run the installer<a class="headerlink" href="#build-and-run-the-installer" title="Permalink to this headline">¶</a></h3>
 <p>First clone the Sonnet source code:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/deepmind/sonnet
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/deepmind/sonnet
 </pre></div>
 </div>
 <p>Then run the install script to create a wheel file in a temporary
 directory:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ mkdir /tmp/sonnet
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ mkdir /tmp/sonnet
 $ bazel build :install
 $ ./bazel-bin/install /tmp/sonnet
 </pre></div>
 </div>
 <p>To build the GPU version instead, add a flag to the
-<code class="docutils literal"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span></code> command above:
-<code class="docutils literal"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span> <span class="pre">--define</span> <span class="pre">gpu=true</span></code>.</p>
-<p>By default, the wheel file is built using <code class="docutils literal"><span class="pre">python</span></code>. You can optionally
+<code class="docutils literal notranslate"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span></code> command above:
+<code class="docutils literal notranslate"><span class="pre">bazel</span> <span class="pre">build</span> <span class="pre">:install</span> <span class="pre">--define</span> <span class="pre">gpu=true</span></code>.</p>
+<p>By default, the wheel file is built using <code class="docutils literal notranslate"><span class="pre">python</span></code>. You can optionally
 specify another python binary in the previous command to build the wheel
-file, such as <code class="docutils literal"><span class="pre">python3</span></code>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ ./bazel-bin/install /tmp/sonnet python3
+file, such as <code class="docutils literal notranslate"><span class="pre">python3</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./bazel-bin/install /tmp/sonnet python3
 </pre></div>
 </div>
-<p><code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span></code> the generated wheel file:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ pip install /tmp/sonnet/*.whl
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> the generated wheel file:</p>
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install /tmp/sonnet/*.whl
 </pre></div>
 </div>
 <p>If Sonnet was already installed, uninstall prior to calling
-<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span></code> on the wheel file:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ pip uninstall dm-sonnet  # or dm-sonnet-gpu
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> on the wheel file:</p>
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip uninstall dm-sonnet  # or dm-sonnet-gpu
 </pre></div>
 </div>
 <p>You can verify that Sonnet has been successfully installed by, for
 example, trying to instantiate and connect a Linear module:</p>
-<div class="code shell highlight-default"><div class="highlight"><pre><span></span>$ cd ~/
+<div class="code shell highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd ~/
 $ python
 &gt;&gt;&gt; import sonnet as snt
 &gt;&gt;&gt; input_ = tf.zeros(3, 5)
@@ -882,9 +877,9 @@ $ python
 <li><a class="reference internal" href="#general-principles">General Principles</a></li>
 <li><a class="reference internal" href="#importing-sonnet">Importing Sonnet</a></li>
 <li><a class="reference internal" href="#defining-your-own-modules">Defining your own modules</a><ul>
-<li><a class="reference internal" href="#inherit-from-snt-abstractmodule">Inherit from <code class="docutils literal"><span class="pre">snt.AbstractModule</span></code></a></li>
+<li><a class="reference internal" href="#inherit-from-snt-abstractmodule">Inherit from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code></a></li>
 <li><a class="reference internal" href="#call-superclass-constructor">Call superclass constructor</a></li>
-<li><a class="reference internal" href="#implement-build-method">Implement <code class="docutils literal"><span class="pre">_build()</span></code> method</a></li>
+<li><a class="reference internal" href="#implement-build-method">Implement <code class="docutils literal notranslate"><span class="pre">_build()</span></code> method</a></li>
 <li><a class="reference internal" href="#where-should-the-submodules-be-declared">Where should the submodules be declared?</a></li>
 <li><a class="reference internal" href="#recurrent-modules">Recurrent Modules</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
@@ -894,15 +889,15 @@ $ python
 <li><a class="reference internal" href="#the-transposable-interface">The Transposable interface</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#variable-reuse-with-snt-reuse-variables-experimental">Variable reuse with <code class="docutils literal"><span class="pre">&#64;snt.reuse_variables</span></code> (<strong>experimental</strong>)</a></li>
-<li><a class="reference internal" href="#wrapping-functions-into-sonnet-modules-using-snt-module">Wrapping functions into Sonnet modules using <code class="docutils literal"><span class="pre">snt.Module</span></code></a></li>
+<li><a class="reference internal" href="#variable-reuse-with-snt-reuse-variables-experimental">Variable reuse with <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code> (<strong>experimental</strong>)</a></li>
+<li><a class="reference internal" href="#wrapping-functions-into-sonnet-modules-using-snt-module">Wrapping functions into Sonnet modules using <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code></a></li>
 <li><a class="reference internal" href="#faq">FAQ</a><ul>
 <li><a class="reference internal" href="#q-why-another-tf-library">Q: Why <em>another</em> TF library?</a></li>
 <li><a class="reference internal" href="#q-can-i-access-different-variables-on-subsequent-calls-to-the-same-build">Q: Can I access different variables on subsequent calls to the same build()?</a></li>
 <li><a class="reference internal" href="#q-what-if-i-mistakenly-give-two-modules-the-same-name">Q: What if I mistakenly give two modules the same name?</a></li>
 <li><a class="reference internal" href="#q-do-i-have-to-name-my-modules">Q: Do I <em>have</em> to name my modules?</a></li>
 <li><a class="reference internal" href="#q-how-do-i-find-out-what-variables-are-declared-by-a-module">Q: How do I find out what variables are declared by a module?</a></li>
-<li><a class="reference internal" href="#q-should-i-be-putting-calls-to-variable-scope-in-my-code">Q: Should I be putting calls to <code class="docutils literal"><span class="pre">variable_scope</span></code> in my code?</a></li>
+<li><a class="reference internal" href="#q-should-i-be-putting-calls-to-variable-scope-in-my-code">Q: Should I be putting calls to <code class="docutils literal notranslate"><span class="pre">variable_scope</span></code> in my code?</a></li>
 <li><a class="reference internal" href="#q-can-i-mix-this-with-raw-tf-ops">Q: Can I mix this with raw TF ops?</a></li>
 <li><a class="reference internal" href="#q-should-everything-in-sonnet-be-implemented-as-a-module">Q: Should everything in Sonnet be implemented as a Module?</a></li>
 <li><a class="reference internal" href="#q-can-i-mix-this-with-other-high-level-tf-apis-eg-tf-slim">Q: Can I mix this with other high level TF APIs, eg TF Slim?</a></li>
@@ -940,12 +935,14 @@ $ python
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -956,7 +953,7 @@ $ python
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.block_matrix &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     'git',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
@@ -223,8 +214,8 @@
 
   <span class="k">def</span> <span class="nf">_content_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Number of content blocks in block row `r`.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_rows</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left_zero_blocks</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_zero_blocks</span><span class="p">(</span><span class="n">r</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_rows</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left_zero_blocks</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right_zero_blocks</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="BlockDiagonalMatrix"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.block_matrix.BlockDiagonalMatrix">[docs]</a><span class="k">class</span> <span class="nc">BlockDiagonalMatrix</span><span class="p">(</span><span class="n">BlockTriangularMatrix</span><span class="p">):</span>
@@ -265,8 +256,8 @@
         <span class="n">block_shape</span><span class="o">=</span><span class="n">block_shape</span><span class="p">,</span>
         <span class="n">block_rows</span><span class="o">=</span><span class="n">block_rows</span><span class="p">,</span>
         <span class="n">include_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">include_off_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="n">include_off_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span></div>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -284,12 +275,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -300,7 +293,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

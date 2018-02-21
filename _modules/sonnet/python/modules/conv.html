@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.conv &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     'git',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
@@ -241,8 +232,8 @@
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_format</span><span class="p">):</span>
     <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">((</span>
         <span class="s2">&quot;Input Tensor must have rank </span><span class="si">{}</span><span class="s2"> corresponding to &quot;</span>
-        <span class="s2">&quot;data_format </span><span class="si">{}</span><span class="s2">, but instead was </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">),</span> <span class="n">data_format</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">))</span>
+        <span class="s2">&quot;data_format </span><span class="si">{}</span><span class="s2">, but instead was </span><span class="si">{}</span><span class="s2"> of rank </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span> <span class="n">data_format</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)))</span>
 
   <span class="c1"># Check type.</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
@@ -260,13 +251,13 @@
 
 <div class="viewcode-block" id="create_weight_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.create_weight_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_weight_initializer</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a default initializer for the weights of a convolutional module.&quot;&quot;&quot;</span>
-  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">))</span>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="create_bias_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.create_bias_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_bias_initializer</span><span class="p">(</span><span class="n">unused_bias_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a convolutional module.&quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a convolutional module.&quot;&quot;&quot;</span></div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_find_channel_index</span><span class="p">(</span><span class="n">data_format</span><span class="p">):</span>
@@ -600,7 +591,7 @@
     <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&lt;</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># ResourceVariables currently don&#39;t support *=.</span>
+    <span class="c1"># tf.Variable &amp; tf.ResourceVariable don&#39;t support *=.</span>
     <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>  <span class="c1"># pylint: disable=g-no-augmented-assignment</span>
 
     <span class="k">return</span> <span class="n">w</span>
@@ -1281,8 +1272,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conv1DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv1DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv1DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1398,8 +1389,8 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="CausalConv1D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.CausalConv1D">[docs]</a><span class="k">class</span> <span class="nc">CausalConv1D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">):</span>
@@ -1490,8 +1481,8 @@
         <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
         <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">causal_padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">causal_padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span></div>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv2D">[docs]</a><span class="k">class</span> <span class="nc">Conv2D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1621,8 +1612,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conv2DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv2DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv2DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1739,8 +1730,8 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conv3D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3D">[docs]</a><span class="k">class</span> <span class="nc">Conv3D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1866,8 +1857,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Conv3DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv3DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1976,8 +1967,8 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="InPlaneConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D">[docs]</a><span class="k">class</span> <span class="nc">InPlaneConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2061,8 +2052,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="mi">3</span>
 
 <div class="viewcode-block" id="InPlaneConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span></div>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
@@ -2197,8 +2188,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span></div>
+    <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
 
 
 <div class="viewcode-block" id="DepthwiseConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D">[docs]</a><span class="k">class</span> <span class="nc">DepthwiseConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2329,8 +2320,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="n">_find_channel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DepthwiseConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span></div>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
@@ -2485,8 +2476,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span></div>
+    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
 
 
 <div class="viewcode-block" id="SeparableConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D">[docs]</a><span class="k">class</span> <span class="nc">SeparableConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2622,8 +2613,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="n">_find_channel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SeparableConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">}</span></div>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
@@ -2790,8 +2781,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span></div>
+    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
 </pre></div>
 
           </div>
@@ -2809,12 +2800,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -2825,7 +2818,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

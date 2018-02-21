@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.nets.dilation &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../../',
-        VERSION:     'git',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
@@ -156,8 +147,8 @@
       <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">),</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">))</span>
   <span class="n">is_same_channel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
-      <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+      <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="noisy_identity_kernel_initializer"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.noisy_identity_kernel_initializer">[docs]</a><span class="k">def</span> <span class="nf">noisy_identity_kernel_initializer</span><span class="p">(</span><span class="n">base_num_channels</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
@@ -232,8 +223,8 @@
         <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
             <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_num_channels</span> <span class="o">/</span> <span class="n">out_channels</span><span class="p">),</span>
         <span class="n">noise</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">_noisy_identity_kernel_initializer</span></div>
+</div>
+  <span class="k">return</span> <span class="n">_noisy_identity_kernel_initializer</span>
 
 
 <div class="viewcode-block" id="Dilation"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.Dilation">[docs]</a><span class="k">class</span> <span class="nc">Dilation</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -388,8 +379,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">conv_modules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span>
 </pre></div>
 
           </div>
@@ -407,12 +398,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -423,7 +416,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

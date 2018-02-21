@@ -1,5 +1,5 @@
-sonnet\.python package
-======================
+sonnet.python package
+=====================
 
 Subpackages
 -----------

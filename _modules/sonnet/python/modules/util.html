@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.util &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     'git',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
@@ -30,8 +22,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
@@ -92,8 +83,8 @@
     <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">value</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not a variable scope: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+  <span class="k">else</span><span class="p">:</span></div>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not a variable scope: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="get_variables_in_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variables_in_scope">[docs]</a><span class="k">def</span> <span class="nf">get_variables_in_scope</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
@@ -113,8 +104,8 @@
   <span class="c1"># Escape the name in case it contains any &quot;.&quot; characters. Add a closing slash</span>
   <span class="c1"># so we will not search any scopes that have this scope name as a prefix.</span>
   <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
-
-  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">scope_name</span><span class="p">))</span></div>
+</div>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">scope_name</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="get_variables_in_module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_variables_in_module">[docs]</a><span class="k">def</span> <span class="nf">get_variables_in_module</span><span class="p">(</span><span class="n">module</span><span class="p">,</span>
@@ -136,8 +127,8 @@
 
 <span class="sd">  Raises:</span>
 <span class="sd">    NotConnectedError: If the module is not connected to the Graph.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">module</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
+<span class="sd">  &quot;&quot;&quot;</span></div>
+  <span class="k">return</span> <span class="n">module</span><span class="o">.</span><span class="n">get_variables</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_check_nested_callables</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">object_name</span><span class="p">):</span>
@@ -210,8 +201,8 @@
             <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
 
   <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">initializers</span><span class="p">,</span> <span class="s2">&quot;Initializer&quot;</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span></div>
+</div>
+  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">initializers</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="check_partitioners"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_partitioners">[docs]</a><span class="k">def</span> <span class="nf">check_partitioners</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
@@ -251,8 +242,8 @@
             <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
 
   <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">partitioners</span><span class="p">,</span> <span class="s2">&quot;Partitioner&quot;</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">partitioners</span></div>
+</div>
+  <span class="k">return</span> <span class="n">partitioners</span>
 
 
 <div class="viewcode-block" id="check_regularizers"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.check_regularizers">[docs]</a><span class="k">def</span> <span class="nf">check_regularizers</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
@@ -292,8 +283,8 @@
             <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)))</span>
 
   <span class="n">_check_nested_callables</span><span class="p">(</span><span class="n">regularizers</span><span class="p">,</span> <span class="s2">&quot;Regularizer&quot;</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span></div>
+</div>
+  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">regularizers</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_is_scope_prefix</span><span class="p">(</span><span class="n">scope_name</span><span class="p">,</span> <span class="n">prefix_name</span><span class="p">):</span>
@@ -400,8 +391,8 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;More than one custom_getter matched </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">): </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
           <span class="n">name</span><span class="p">,</span> <span class="n">bare_name</span><span class="p">,</span> <span class="p">[</span><span class="n">pattern</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]))</span>
-
-  <span class="k">return</span> <span class="n">_custom_getter</span></div>
+</div>
+  <span class="k">return</span> <span class="n">_custom_getter</span>
 
 
 <div class="viewcode-block" id="get_normalized_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_normalized_variable_map">[docs]</a><span class="k">def</span> <span class="nf">get_normalized_variable_map</span><span class="p">(</span><span class="n">scope_or_module</span><span class="p">,</span>
@@ -457,8 +448,8 @@
     <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">var_map</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mixing slices and non-slices with the same name: &quot;</span> <span class="o">+</span>
                        <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-    <span class="n">var_map</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_group</span>
-  <span class="k">return</span> <span class="n">var_map</span></div>
+    <span class="n">var_map</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_group</span></div>
+  <span class="k">return</span> <span class="n">var_map</span>
 
 
 <div class="viewcode-block" id="get_saver"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.get_saver">[docs]</a><span class="k">def</span> <span class="nf">get_saver</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collections</span><span class="o">=</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">,),</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
@@ -485,13 +476,13 @@
   <span class="n">variable_map</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="n">collections</span><span class="p">:</span>
     <span class="n">variable_map</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">get_normalized_variable_map</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
-
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">var_list</span><span class="o">=</span><span class="n">variable_map</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">var_list</span><span class="o">=</span><span class="n">variable_map</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="has_variable_scope"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.has_variable_scope">[docs]</a><span class="k">def</span> <span class="nf">has_variable_scope</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Determines whether the given object has a variable scope.&quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="s2">&quot;variable_scope&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+  <span class="sd">&quot;&quot;&quot;Determines whether the given object has a variable scope.&quot;&quot;&quot;</span></div>
+  <span class="k">return</span> <span class="s2">&quot;variable_scope&quot;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -520,8 +511,8 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_or_vars</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
       <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">var_or_vars</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">variable</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_or_vars</span></div>
+    <span class="k">else</span><span class="p">:</span></div>
+      <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">var_or_vars</span>
 
 
 <span class="k">def</span> <span class="nf">_get_vars_to_collections</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
@@ -554,8 +545,8 @@
       <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;undefined&quot;</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
-  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="format_variable_map"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.format_variable_map">[docs]</a><span class="k">def</span> <span class="nf">format_variable_map</span><span class="p">(</span><span class="n">variable_map</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -569,8 +560,8 @@
     <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
-  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="log_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.log_variables">[docs]</a><span class="k">def</span> <span class="nf">log_variables</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -585,8 +576,8 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables</span><span class="p">()</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables</span><span class="p">()</span>
-  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">format_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
+  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">format_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span></div>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="reuse_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.reuse_variables">[docs]</a><span class="k">def</span> <span class="nf">reuse_variables</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
@@ -740,7 +731,11 @@
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name_scope</span><span class="p">):</span>
         <span class="n">sub_scope</span> <span class="o">=</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">sub_scope</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
-          <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_capture_variables&quot;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">obj</span><span class="o">.</span><span class="n">_capture_variables</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
+              <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
           <span class="k">try</span><span class="p">:</span>
             <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
@@ -751,8 +746,8 @@
           <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">pass</span>
           <span class="k">return</span> <span class="n">out_ops</span>
-
-  <span class="k">return</span> <span class="n">wrapper</span></div>
+</div>
+  <span class="k">return</span> <span class="n">wrapper</span>
 
 
 <div class="viewcode-block" id="name_for_callable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.name_for_callable">[docs]</a><span class="k">def</span> <span class="nf">name_for_callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -767,8 +762,8 @@
 
   <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;&lt;lambda&gt;&quot;</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+  <span class="k">else</span><span class="p">:</span></div>
+    <span class="k">return</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="to_snake_case"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.to_snake_case">[docs]</a><span class="k">def</span> <span class="nf">to_snake_case</span><span class="p">(</span><span class="n">camel_case</span><span class="p">):</span>
@@ -782,8 +777,8 @@
   <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([A-Z])&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
   <span class="c1"># Add underscore before alphanumeric chunks.</span>
   <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([0-9][^_]*)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
-  <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span>
-  <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+  <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span></div>
+  <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 </pre></div>
 
           </div>
@@ -801,12 +796,14 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -817,7 +814,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

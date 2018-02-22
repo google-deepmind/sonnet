@@ -30,7 +30,7 @@ Typical usage example of the standard LSTM without peephole connections:
   # Simple LSTM op on some input
   rnn = snt.LSTM(hidden_size)
   input = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-  out, next_state = rnn(input, rnn.initial_state())
+  out, next_state = rnn(input, rnn.initial_state(batch_size))
   ```
 """
 from __future__ import absolute_import

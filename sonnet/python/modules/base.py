@@ -572,7 +572,7 @@ class AbstractModule(object):
         variables such as moving averages.
 
     Returns:
-      A tuple of `tf.Variable` objects.
+      A sorted (by variable name) tuple of `tf.Variable` objects.
 
     Raises:
       NotConnectedError: If the module is not connected to the Graph.
@@ -580,7 +580,9 @@ class AbstractModule(object):
     self._ensure_is_connected()
     collection_variables = set(tf.get_collection(collection))
     # Return variables in self._all_variables that are in `collection`
-    return tuple(self._all_variables & collection_variables)
+    return tuple(
+        sorted(
+            self._all_variables & collection_variables, key=lambda v: v.name))
 
   def __getstate__(self):
     raise NotSupportedError(

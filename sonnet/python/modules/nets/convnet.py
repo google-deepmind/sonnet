@@ -54,6 +54,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                kernel_shapes,
                strides,
                paddings,
+               rates=(1,),
                activation=tf.nn.relu,
                activate_final=False,
                initializers=None,
@@ -85,6 +86,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       paddings: Iterable of padding options, either `snt.SAME` or
         `snt.VALID`; if the Iterable contains one element only, the same padding
         is used in each layer of the network.
+      rates: Iterable of dilation rates as defined in `conv.Conv2D`; if the
+        list contains one element only, the same rate is used in each layer of
+        the network.
       activation: An activation op.
       activate_final: Boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
@@ -116,6 +120,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       ValueError: If `output_channels` is empty; or if `kernel_shapes` has not
         length 1 or `len(output_channels)`; or if `strides` has not
         length 1 or `len(output_channels)`; or if `paddings` has not
+        length 1 or `len(output_channels)`; or if `rates` has not
         length 1 or `len(output_channels)`; or if the given data_format is not a
         supported format ("NHWC" or "NCHW").
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
@@ -138,6 +143,10 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     if not isinstance(paddings, collections.Iterable):
       raise TypeError("paddings must be iterable")
     paddings = tuple(paddings)
+
+    if not isinstance(rates, collections.Iterable):
+      raise TypeError("rates must be iterable")
+    rates = tuple(rates)
 
     super(ConvNet2D, self).__init__(name=name)
 
@@ -180,6 +189,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       raise ValueError(
           """paddings must be of length 1 or len(output_channels)""")
 
+    self._rates = _replicate_elements(rates, self._num_layers)
+    if len(self._rates) != self._num_layers:
+      raise ValueError(
+          """rates must be of length 1 or len(output_channels)""")
+
     self._use_batch_norm = use_batch_norm
 
     self._batch_norm_config = batch_norm_config or {}
@@ -202,6 +216,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                                        output_channels=self._output_channels[i],
                                        kernel_shape=self._kernel_shapes[i],
                                        stride=self._strides[i],
+                                       rate=self._rates[i],
                                        padding=self._paddings[i],
                                        use_bias=self._use_bias[i],
                                        initializers=self._initializers,
@@ -278,6 +293,10 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
   @property
   def paddings(self):
     return self._paddings
+
+  @property
+  def rates(self):
+    return self._rates
 
   @property
   def kernel_shapes(self):
@@ -505,7 +524,12 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         the number of layers.
       ValueError: If the given data_format is not a supported format ("NHWC" or
         "NCHW").
+      NotImplementedError: If the convolutions are dilated.
     """
+    for rate in self._rates:
+      if rate != 1:
+        raise NotImplementedError("Transpose dilated convolutions "
+                                  "are not supported")
     output_shapes = []
     if data_format is None:
       data_format = self._data_format

@@ -120,5 +120,5 @@ class Sequential(base.AbstractModule):
         "and so this will always be empty. See the documentation for more "
         "details, but tl;dr if you need to connect some modules sequentially "
         "and call get_variables on the result, writing a simple custom module "
-        "is the simplest way.")
+        "is the simplest way. Another option is to call get_all_variables().")
     return super(Sequential, self).get_variables(*args, **kwargs)

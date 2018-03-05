@@ -160,7 +160,9 @@ class AbstractModule(object):
     """Performs the initialisation necessary for all AbstractModule instances.
 
     Every subclass of AbstractModule must begin their constructor with a call to
-    this constructor, i.e. `super(MySubModule, self).__init__(name=name)`.
+    this constructor, i.e.
+
+    `super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
 
     If you instantiate sub-modules in __init__ you must create them within the
     `_enter_variable_scope` context manager to ensure they are in the module's

@@ -690,29 +690,31 @@ def reuse_variables(method):
     # Enter the pure variable scope with reuse correctly set
     with variable_scope_ops._pure_variable_scope(  # pylint:disable=protected-access
         variable_scope, reuse=reuse) as pure_variable_scope:
-      # Force tf.name_scope to treat variable_scope.original_name_scope as
-      # an "absolute" scope name so we can re-enter it.
-      name_scope = variable_scope.original_name_scope
-      if name_scope[-1] != "/":
-        name_scope += "/"
-      with tf.name_scope(name_scope):
-        sub_scope = to_snake_case(method.__name__)
-        with tf.name_scope(sub_scope) as scope:
+      current_name_scope = tf.get_default_graph().get_name_scope()
+      # Force tf.name_scope to treat current_name_scope as an "absolute" scope
+      # so we can re-enter it.
+      if current_name_scope and current_name_scope[-1] != "/":
+        current_name_scope += "/"
+      with tf.name_scope(current_name_scope):
+        module_name = pure_variable_scope.name
+        method_name = to_snake_case(method.__name__)
+        method_name_scope = "{}/{}".format(module_name, method_name)
+        with tf.name_scope(method_name_scope) as scope:
           if hasattr(obj, "_capture_variables"):
             with obj._capture_variables():  # pylint: disable=protected-access
               out_ops = method(obj, *args, **kwargs)
           else:
             out_ops = method(obj, *args, **kwargs)
-          initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
-          try:
-            # If `obj` is a Sonnet module, let it know it's been connected
-            # to the TF graph
-            method_positional_args = [obj] + list(args)
-            obj._add_connected_subgraph(  # pylint: disable=protected-access
-                method, out_ops, scope, *method_positional_args, **kwargs)
-          except AttributeError:
-            pass
-          return out_ops
+      initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
+      try:
+        # If `obj` is a Sonnet module, let it know it's been connected
+        # to the TF graph
+        method_positional_args = [obj] + list(args)
+        obj._add_connected_subgraph(  # pylint: disable=protected-access
+            method, out_ops, scope, *method_positional_args, **kwargs)
+      except AttributeError:
+        pass
+    return out_ops
 
   return wrapper
 

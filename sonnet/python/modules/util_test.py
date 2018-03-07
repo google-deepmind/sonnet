@@ -499,9 +499,9 @@ class ReuseVarsTest(tf.test.TestCase):
     seq(inputs)
     all_variable_names = sorted([v.name for v in seq.get_all_variables()])
     self.assertEqual([
-        "multi_template_test_1/a_1:0", "multi_template_test_1/b:0",
-        "multi_template_test_2/a_1:0", "multi_template_test_2/b:0",
-        "multi_template_test_3/a_1:0", "multi_template_test_3/b:0",
+        "multi_template_test_1/a:0", "multi_template_test_1/b:0",
+        "multi_template_test_2/a:0", "multi_template_test_2/b:0",
+        "multi_template_test_3/a:0", "multi_template_test_3/b:0",
     ], all_variable_names)
 
   def test_reuse_method(self):
@@ -681,6 +681,11 @@ class ReuseVarsTest(tf.test.TestCase):
 
     self.assertEqual("scope1/add_b/add", obj1.add_b(zeros).op.name)
     self.assertEqual("scope1/add_b_1/add", obj1.add_b(zeros).op.name)
+    with tf.name_scope("outer_scope"):
+      self.assertEqual("outer_scope/scope1/add_b/add",
+                       obj1.add_b(zeros).op.name)
+      self.assertEqual("outer_scope/scope1/add_b_1/add",
+                       obj1.add_b(zeros).op.name)
 
     self.assertEqual("scope1/add_a/add", obj1.add_a(zeros).op.name)
     self.assertEqual("scope1/add_a_1/add", obj1.add_a(zeros).op.name)
@@ -700,7 +705,7 @@ class ReuseVarsTest(tf.test.TestCase):
 
     observed_tensor_names = get_tensor_names_from_default_graph()
     # Keep this for compatibility with versions of tensorflow lower than 1.6
-    if len(observed_tensor_names) == 38:
+    if len(observed_tensor_names) == 40:
       expected_tensor_names = [
           u"zeros/shape_as_tensor:0",
           u"zeros/Const:0",
@@ -708,18 +713,20 @@ class ReuseVarsTest(tf.test.TestCase):
           u"scope1/b:0",
           u"scope1/add_b/add:0",
           u"scope1/add_b_1/add:0",
+          u"outer_scope/scope1/add_b/add:0",
+          u"outer_scope/scope1/add_b_1/add:0",
           u"scope1/a:0",
           u"scope1/add_a/add:0",
           u"scope1/add_a_1/add:0",
           u"scope1/nested_add/ones/shape_as_tensor:0",
           u"scope1/nested_add/ones/Const:0",
           u"scope1/nested_add/ones:0",
-          u"scope1/add_a_2/add:0",
+          u"scope1/nested_add/scope1/add_a/add:0",
           u"scope1/nested_add/add:0",
           u"scope1/nested_add_1/ones/shape_as_tensor:0",
           u"scope1/nested_add_1/ones/Const:0",
           u"scope1/nested_add_1/ones:0",
-          u"scope1/add_a_3/add:0",
+          u"scope1/nested_add_1/scope1/add_a/add:0",
           u"scope1/nested_add_1/add:0",
           u"ones/shape_as_tensor:0",
           u"ones/Const:0",
@@ -733,12 +740,12 @@ class ReuseVarsTest(tf.test.TestCase):
           u"scope2/nested_add/ones/shape_as_tensor:0",
           u"scope2/nested_add/ones/Const:0",
           u"scope2/nested_add/ones:0",
-          u"scope2/add_a_2/add:0",
+          u"scope2/nested_add/scope2/add_a/add:0",
           u"scope2/nested_add/add:0",
           u"scope2/nested_add_1/ones/shape_as_tensor:0",
           u"scope2/nested_add_1/ones/Const:0",
           u"scope2/nested_add_1/ones:0",
-          u"scope2/add_a_3/add:0",
+          u"scope2/nested_add_1/scope2/add_a/add:0",
           u"scope2/nested_add_1/add:0"
       ]
     else:

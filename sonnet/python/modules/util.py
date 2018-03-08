@@ -68,9 +68,11 @@ def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   """
   scope_name = get_variable_scope_name(scope)
 
-  # Escape the name in case it contains any "." characters. Add a closing slash
-  # so we will not search any scopes that have this scope name as a prefix.
-  scope_name = re.escape(scope_name) + "/"
+  if scope_name:
+    # Escape the name in case it contains any "." characters. Add a closing
+    # slash so we will not search any scopes that have this scope name as a
+    # prefix.
+    scope_name = re.escape(scope_name) + "/"
 
   return tuple(tf.get_collection(collection, scope_name))
 

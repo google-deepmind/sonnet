@@ -74,6 +74,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(set(snt.get_variables_in_scope(s2)), {v2, v3})
     self.assertEqual(snt.get_variables_in_scope(s1.name), (v1,))
     self.assertEqual(set(snt.get_variables_in_scope(s2.name)), {v2, v3})
+    self.assertEqual(set(snt.get_variables_in_scope("")), {v1, v2, v3})
 
   def testIsScopePrefix(self):
     self.assertTrue(util._is_scope_prefix("a/b/c", ""))

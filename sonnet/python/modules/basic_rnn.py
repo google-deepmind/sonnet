@@ -201,7 +201,7 @@ class DeepRNN(rnn_core.RNNCore):
   ```python
   prev_state1, prev_state2 = prev_state
   lstm1_output, next_state1 = lstm1(input, prev_state1)
-  lstm2_output, next_state2 = lstm(
+  lstm2_output, next_state2 = lstm2(
       tf.concat([input, lstm1_output], 1), prev_state2)
 
   next_state = (next_state1, next_state2)

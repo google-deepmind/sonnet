@@ -27,11 +27,12 @@ import numbers
 # Dependency imports
 
 import numpy as np
-from pytflib import nest
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import util
 import tensorflow as tf
+
+nest = tf.contrib.framework.nest
 
 
 def merge_leading_dims(array_or_tensor, n_dims=2):

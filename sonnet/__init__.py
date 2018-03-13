@@ -126,5 +126,5 @@ from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
 
-__version__ = '1.17'
+__version__ = '1.18'
 

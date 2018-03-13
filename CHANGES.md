@@ -1,5 +1,13 @@
 # Sonnet Changelog
 
+## Version 1.18 - Monday, 12. March 2018
+
+* Documentation fixes.
+* Changed the way reuse_variables handles name scopes.
+* `.get_variable_scope()` now supports a root scope (empty string).
+* `snt.ConvNet2D` can now take an optional argument specifying dilation rates.
+* `.get_all_variables()` now returns variables sorted by name.
+
 ## Version 1.17 - Tuesday, 21. February 2018
 
 * `.get_all_variables()` method added to AbstractModule. This returns all

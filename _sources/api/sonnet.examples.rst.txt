@@ -1,51 +1,51 @@
-sonnet.examples package
-=======================
+sonnet\.examples package
+========================
 
 Submodules
 ----------
 
-sonnet.examples.brnn\_ptb module
---------------------------------
+sonnet\.examples\.brnn\_ptb module
+----------------------------------
 
 .. automodule:: sonnet.examples.brnn_ptb
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet.examples.dataset\_shakespeare module
--------------------------------------------
+sonnet\.examples\.dataset\_shakespeare module
+---------------------------------------------
 
 .. automodule:: sonnet.examples.dataset_shakespeare
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet.examples.module\_with\_build\_args module
-------------------------------------------------
+sonnet\.examples\.module\_with\_build\_args module
+--------------------------------------------------
 
 .. automodule:: sonnet.examples.module_with_build_args
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet.examples.ptb\_reader module
-----------------------------------
+sonnet\.examples\.ptb\_reader module
+------------------------------------
 
 .. automodule:: sonnet.examples.ptb_reader
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet.examples.rnn\_shakespeare module
----------------------------------------
+sonnet\.examples\.rnn\_shakespeare module
+-----------------------------------------
 
 .. automodule:: sonnet.examples.rnn_shakespeare
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet.examples.rnn\_shakespeare\_test module
----------------------------------------------
+sonnet\.examples\.rnn\_shakespeare\_test module
+-----------------------------------------------
 
 .. automodule:: sonnet.examples.rnn_shakespeare_test
     :members:

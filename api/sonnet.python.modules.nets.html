@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.nets package &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -132,7 +132,7 @@ must be &gt;= this number in size.</p>
 <p>A minimal interface convolutional networks module.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>rates=(1</em>, <em>)</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>A 2D Convolutional Network module.</p>
 <dl class="attribute">
@@ -198,6 +198,11 @@ must be &gt;= this number in size.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.rates">
+<code class="descname">rates</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.rates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D.regularizers">
 <code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.regularizers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -212,8 +217,8 @@ must be &gt;= this number in size.</p>
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed version of this network.</p>
 <p>Args: name: Optional string specifying the name of the transposed
-module. The default name is constructed by appending “<em>transpose” to
-``self.module_name``. output</em>channels: Optional iterable of numbers of
+module. The default name is constructed by appending “_transpose” to
+<code class="docutils literal notranslate"><span class="pre">self.module_name</span></code>. output_channels: Optional iterable of numbers of
 output channels. kernel_shapes: Optional iterable of kernel sizes. The
 default value is constructed by reversing <code class="docutils literal notranslate"><span class="pre">self.kernel_shapes</span></code>.
 strides: Optional iterable of kernel strides. The default value is
@@ -243,7 +248,8 @@ of the input and output is the last dimension. Default is
 <p>Returns: Matching <code class="docutils literal notranslate"><span class="pre">ConvNet2DTranspose</span></code> module.</p>
 <p>Raises: ValueError: If output_channels is specified and its length does
 not match the number of layers. ValueError: If the given data_format is
-not a supported format (“NHWC” or “NCHW”).</p>
+not a supported format (“NHWC” or “NCHW”). NotImplementedError: If the
+convolutions are dilated.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -273,8 +279,8 @@ not a supported format (“NHWC” or “NCHW”).</p>
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed version of this network.</p>
 <p>Args: name: Optional string specifying the name of the transposed
-module. The default name is constructed by appending “<em>transpose” to
-``self.module_name``. output</em>channels: Optional iterable of numbers of
+module. The default name is constructed by appending “_transpose” to
+<code class="docutils literal notranslate"><span class="pre">self.module_name</span></code>. output_channels: Optional iterable of numbers of
 output channels. kernel_shapes: Optional iterable of kernel sizes. The
 default value is constructed by reversing <code class="docutils literal notranslate"><span class="pre">self.kernel_shapes</span></code>.
 strides: Optional iterable of kernel strides. The default value is
@@ -480,8 +486,8 @@ dimension.</p>
 <code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>activate_final=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed <code class="docutils literal notranslate"><span class="pre">MLP</span></code>.</p>
 <p>Args: name: Optional string specifying the name of the transposed
-module. The default name is constructed by appending “<em>transpose” to
-``self.module_name``. activate</em>final: Optional boolean determining if
+module. The default name is constructed by appending “_transpose” to
+<code class="docutils literal notranslate"><span class="pre">self.module_name</span></code>. activate_final: Optional boolean determining if
 the activation and batch normalization, if turned on, are applied to the
 final layer.</p>
 <p>Returns: Matching transposed <code class="docutils literal notranslate"><span class="pre">MLP</span></code> module.</p>
@@ -560,7 +566,7 @@ final layer.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

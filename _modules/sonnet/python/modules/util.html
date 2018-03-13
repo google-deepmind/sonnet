@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.util &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
@@ -101,9 +101,11 @@
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">scope_name</span> <span class="o">=</span> <span class="n">get_variable_scope_name</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
 
-  <span class="c1"># Escape the name in case it contains any &quot;.&quot; characters. Add a closing slash</span>
-  <span class="c1"># so we will not search any scopes that have this scope name as a prefix.</span>
-  <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+  <span class="k">if</span> <span class="n">scope_name</span><span class="p">:</span>
+    <span class="c1"># Escape the name in case it contains any &quot;.&quot; characters. Add a closing</span>
+    <span class="c1"># slash so we will not search any scopes that have this scope name as a</span>
+    <span class="c1"># prefix.</span>
+    <span class="n">scope_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
 </div>
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">scope_name</span><span class="p">))</span>
 
@@ -723,29 +725,31 @@
     <span class="c1"># Enter the pure variable scope with reuse correctly set</span>
     <span class="k">with</span> <span class="n">variable_scope_ops</span><span class="o">.</span><span class="n">_pure_variable_scope</span><span class="p">(</span>  <span class="c1"># pylint:disable=protected-access</span>
         <span class="n">variable_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_variable_scope</span><span class="p">:</span>
-      <span class="c1"># Force tf.name_scope to treat variable_scope.original_name_scope as</span>
-      <span class="c1"># an &quot;absolute&quot; scope name so we can re-enter it.</span>
-      <span class="n">name_scope</span> <span class="o">=</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">original_name_scope</span>
-      <span class="k">if</span> <span class="n">name_scope</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
-        <span class="n">name_scope</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
-      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name_scope</span><span class="p">):</span>
-        <span class="n">sub_scope</span> <span class="o">=</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">sub_scope</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
+      <span class="n">current_name_scope</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span><span class="o">.</span><span class="n">get_name_scope</span><span class="p">()</span>
+      <span class="c1"># Force tf.name_scope to treat current_name_scope as an &quot;absolute&quot; scope</span>
+      <span class="c1"># so we can re-enter it.</span>
+      <span class="k">if</span> <span class="n">current_name_scope</span> <span class="ow">and</span> <span class="n">current_name_scope</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
+        <span class="n">current_name_scope</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span>
+      <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">current_name_scope</span><span class="p">):</span>
+        <span class="n">module_name</span> <span class="o">=</span> <span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">method_name</span> <span class="o">=</span> <span class="n">to_snake_case</span><span class="p">(</span><span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">method_name_scope</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">method_name_scope</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
           <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_capture_variables&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">obj</span><span class="o">.</span><span class="n">_capture_variables</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
               <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-          <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-          <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
-            <span class="c1"># to the TF graph</span>
-            <span class="n">method_positional_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
-                <span class="n">method</span><span class="p">,</span> <span class="n">out_ops</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="o">*</span><span class="n">method_positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-          <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">pass</span>
-          <span class="k">return</span> <span class="n">out_ops</span>
+      <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
+        <span class="c1"># to the TF graph</span>
+        <span class="n">method_positional_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+            <span class="n">method</span><span class="p">,</span> <span class="n">out_ops</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="o">*</span><span class="n">method_positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+      <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">out_ops</span>
 </div>
   <span class="k">return</span> <span class="n">wrapper</span>
 
@@ -814,7 +818,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

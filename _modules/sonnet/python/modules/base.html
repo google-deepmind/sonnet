@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.base &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
@@ -193,7 +193,9 @@
     <span class="sd">&quot;&quot;&quot;Performs the initialisation necessary for all AbstractModule instances.</span>
 
 <span class="sd">    Every subclass of AbstractModule must begin their constructor with a call to</span>
-<span class="sd">    this constructor, i.e. `super(MySubModule, self).__init__(name=name)`.</span>
+<span class="sd">    this constructor, i.e.</span>
+
+<span class="sd">    `super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.</span>
 
 <span class="sd">    If you instantiate sub-modules in __init__ you must create them within the</span>
 <span class="sd">    `_enter_variable_scope` context manager to ensure they are in the module&#39;s</span>
@@ -605,15 +607,17 @@
 <span class="sd">        variables such as moving averages.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      A tuple of `tf.Variable` objects.</span>
+<span class="sd">      A sorted (by variable name) tuple of `tf.Variable` objects.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
     <span class="n">collection_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">))</span>
-    <span class="c1"># Return variables in self._all_variables that are in `collection`</span></div>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">)</span>
+    <span class="c1"># Return variables in self._all_variables that are in `collection`</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="nb">sorted</span><span class="p">(</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
@@ -776,7 +780,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

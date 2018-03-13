@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules package &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -137,7 +137,7 @@ more information.</p>
 <p>Args: collection: Collection to restrict query to. By default this is
 <code class="docutils literal notranslate"><span class="pre">tf.Graphkeys.TRAINABLE_VARIABLES</span></code>, which doesn’t include
 non-trainable variables such as moving averages.</p>
-<p>Returns: A tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> objects.</p>
+<p>Returns: A sorted (by variable name) tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> objects.</p>
 <p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
 </dd></dl>
 
@@ -831,7 +831,7 @@ output are used.</p>
 <p>The computation set up inside the DeepRNN has the same effect as:</p>
 <div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prev_state1</span><span class="p">,</span> <span class="n">prev_state2</span> <span class="o">=</span> <span class="n">prev_state</span>
 <span class="n">lstm1_output</span><span class="p">,</span> <span class="n">next_state1</span> <span class="o">=</span> <span class="n">lstm1</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">prev_state1</span><span class="p">)</span>
-<span class="n">lstm2_output</span><span class="p">,</span> <span class="n">next_state2</span> <span class="o">=</span> <span class="n">lstm</span><span class="p">(</span>
+<span class="n">lstm2_output</span><span class="p">,</span> <span class="n">next_state2</span> <span class="o">=</span> <span class="n">lstm2</span><span class="p">(</span>
     <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="nb">input</span><span class="p">,</span> <span class="n">lstm1_output</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="n">prev_state2</span><span class="p">)</span>
 
 <span class="n">next_state</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_state1</span><span class="p">,</span> <span class="n">next_state2</span><span class="p">)</span>
@@ -1993,7 +1993,7 @@ other model parameters may be passed to the constructor.</p>
 <p>hidden_size = 10 batch_size = 2</p>
 <p># Simple LSTM op on some input rnn = snt.LSTM(hidden_size) input =
 tf.placeholder(tf.float32, shape=[batch_size, hidden_size]) out,
-next_state = rnn(input, rnn.initial_state()) ```</p>
+next_state = rnn(input, rnn.initial_state(batch_size)) ```</p>
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">BatchNormLSTM</code><span class="sig-paren">(</span><em>hidden_size</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_peepholes=False</em>, <em>use_batch_norm_h=True</em>, <em>use_batch_norm_x=False</em>, <em>use_batch_norm_c=False</em>, <em>max_unique_stats=1</em>, <em>hidden_clip_value=None</em>, <em>cell_clip_value=None</em>, <em>custom_getter=None</em>, <em>name='batch_norm_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#BatchNormLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM" title="Permalink to this definition">¶</a></dt>
@@ -2074,7 +2074,7 @@ Boolean indicating whether batch norm (c) is enabled.</p>
 <p>Wraps an RNNCore so that the build method receives extra args and
 kwargs.</p>
 <p>This will pass the additional input <code class="docutils literal notranslate"><span class="pre">args</span></code> and <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> to the
-<em>build function of the snt.RNNCore after the input and prev</em>state
+_build function of the snt.RNNCore after the input and prev_state
 inputs.</p>
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs.output_size">
@@ -2128,12 +2128,12 @@ test_local_stats.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'gamma_x', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'w_gates', 'gamma_x'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS">
-<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'gamma_x', 'w_gates'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'w_gates', 'gamma_x'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -3618,7 +3618,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

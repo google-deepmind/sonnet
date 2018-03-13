@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>sonnet.python.modules.nets.convnet &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../../_static/alabaster.css" type="text/css" />
@@ -87,6 +87,7 @@
                <span class="n">kernel_shapes</span><span class="p">,</span>
                <span class="n">strides</span><span class="p">,</span>
                <span class="n">paddings</span><span class="p">,</span>
+               <span class="n">rates</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
                <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
                <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -118,6 +119,9 @@
 <span class="sd">      paddings: Iterable of padding options, either `snt.SAME` or</span>
 <span class="sd">        `snt.VALID`; if the Iterable contains one element only, the same padding</span>
 <span class="sd">        is used in each layer of the network.</span>
+<span class="sd">      rates: Iterable of dilation rates as defined in `conv.Conv2D`; if the</span>
+<span class="sd">        list contains one element only, the same rate is used in each layer of</span>
+<span class="sd">        the network.</span>
 <span class="sd">      activation: An activation op.</span>
 <span class="sd">      activate_final: Boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
@@ -149,6 +153,7 @@
 <span class="sd">      ValueError: If `output_channels` is empty; or if `kernel_shapes` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if `strides` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if `paddings` has not</span>
+<span class="sd">        length 1 or `len(output_channels)`; or if `rates` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if the given data_format is not a</span>
 <span class="sd">        supported format (&quot;NHWC&quot; or &quot;NCHW&quot;).</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
@@ -171,6 +176,10 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paddings</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;paddings must be iterable&quot;</span><span class="p">)</span>
     <span class="n">paddings</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">paddings</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;rates must be iterable&quot;</span><span class="p">)</span>
+    <span class="n">rates</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">ConvNet2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
@@ -213,6 +222,11 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
           <span class="sd">&quot;&quot;&quot;paddings must be of length 1 or len(output_channels)&quot;&quot;&quot;</span><span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rates</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rates</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sd">&quot;&quot;&quot;rates must be of length 1 or len(output_channels)&quot;&quot;&quot;</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span> <span class="ow">or</span> <span class="p">{}</span>
@@ -235,6 +249,7 @@
                                        <span class="n">output_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_strides</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                       <span class="n">rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rates</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
@@ -311,6 +326,10 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">paddings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paddings</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">rates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rates</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">kernel_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -538,7 +557,12 @@
 <span class="sd">        the number of layers.</span>
 <span class="sd">      ValueError: If the given data_format is not a supported format (&quot;NHWC&quot; or</span>
 <span class="sd">        &quot;NCHW&quot;).</span>
+<span class="sd">      NotImplementedError: If the convolutions are dilated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">rate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rates</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">rate</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Transpose dilated convolutions &quot;</span>
+                                  <span class="s2">&quot;are not supported&quot;</span><span class="p">)</span>
     <span class="n">output_shapes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">data_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
@@ -819,7 +843,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

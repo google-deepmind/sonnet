@@ -846,3 +846,4 @@ adding new members to modules, and then having to deal with old
 serialized instances where those members don't exist.
 
 .. |Sonnet| image:: images/sonnet_logo.png
+

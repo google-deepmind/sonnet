@@ -27,10 +27,10 @@ import numbers
 # Dependency imports
 
 import numpy as np
+from pytflib import nest
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import util
-from sonnet.python.ops import nest
 import tensorflow as tf
 
 
@@ -983,11 +983,11 @@ class BatchApply(base.AbstractModule):
       A Tensor or nested list or dictionary of Tensors as a result of applying
       the process above. ("None" return values are also supported.)
     """
-    flattened = nest.flatten_iterable([args, kwargs])
+    flattened = nest.flatten([args, kwargs])
     merged_flattened = [
         merge_leading_dims(inp, self._n_dims) if inp is not None else None
         for inp in flattened]
-    merged_args, merged_kwargs = nest.pack_iterable_as([args, kwargs],
+    merged_args, merged_kwargs = nest.pack_sequence_as([args, kwargs],
                                                        merged_flattened)
 
     results = self._module(*merged_args, **merged_kwargs)
@@ -1002,10 +1002,10 @@ class BatchApply(base.AbstractModule):
       else:
         return split_leading_dim(result, example_input, self._n_dims)
 
-    flat_results = nest.flatten_iterable(results)
+    flat_results = nest.flatten(results)
     flat_unmerged_results = [_split_to_original_leading_dims(result)
                              for result in flat_results]
-    return nest.pack_iterable_as(results, flat_unmerged_results)
+    return nest.pack_sequence_as(results, flat_unmerged_results)
 
 
 class SliceByDim(base.AbstractModule):

@@ -30,6 +30,7 @@ py_library(
         ":base",
         ":nest",
         ":util",
+        "# nest dep",
         # tensorflow dep,
     ],
 )

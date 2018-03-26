@@ -317,7 +317,7 @@ class AbstractModule(object):
 
     Upon entering this context manager the module adds itself onto the top
     of the module call stack. Any variables created with `tf.get_variable()`
-    inside `  _build()` or `_enter_variable_scope()` while this module is on top
+    inside `_build()` or `_enter_variable_scope()` while this module is on top
     of the call stack will be added to `self._all_variables`.
 
     Before exiting the context the module removes itself from the top of the

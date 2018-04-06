@@ -40,6 +40,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     self.output_channels = [2, 3, 4]
     self.kernel_shapes = [[3, 3]]
     self.strides = [1]
+    self.rates = [1, 2, 1]
     self.paddings = [snt.SAME]
 
   @parameterized.named_parameters(
@@ -509,11 +510,13 @@ class ConvNet2DTest(tf.test.TestCase):
     self.output_channels = [2, 3, 4]
     self.kernel_shapes = [[3, 3]]
     self.strides = [1]
+    self.rates = [2]
     self.paddings = [snt.SAME]
 
   def testConstructor(self):
     net = snt.nets.ConvNet2D(output_channels=self.output_channels,
                              kernel_shapes=self.kernel_shapes,
+                             rates=self.rates,
                              strides=self.strides,
                              paddings=self.paddings)
     self.assertEqual(len(net.layers), len(self.output_channels))
@@ -524,6 +527,7 @@ class ConvNet2DTest(tf.test.TestCase):
                        (1,) + fill_shape(self.strides[0], 2) + (1,))
       self.assertEqual(layer.kernel_shape, fill_shape(self.kernel_shapes[0], 2))
       self.assertEqual(layer.padding, self.paddings[0])
+      self.assertEqual(layer.rate, (self.rates[0], self.rates[0]))
       self.assertEqual(layer.output_channels, net.output_channels[i])
       self.assertEqual(layer.stride,
                        (1,) + fill_shape(net.strides[i], 2) + (1,))
@@ -603,6 +607,7 @@ class ConvNet2DTest(tf.test.TestCase):
 
     module = snt.nets.ConvNet2D(output_channels=self.output_channels,
                                 kernel_shapes=self.kernel_shapes,
+                                rates=self.rates,
                                 strides=self.strides,
                                 paddings=self.paddings,
                                 use_bias=use_bias,
@@ -625,6 +630,7 @@ class ConvNet2DTest(tf.test.TestCase):
 
     module = snt.nets.ConvNet2D(output_channels=self.output_channels,
                                 kernel_shapes=self.kernel_shapes,
+                                rates=self.rates,
                                 strides=self.strides,
                                 paddings=self.paddings,
                                 partitioners=partitioners)
@@ -637,6 +643,17 @@ class ConvNet2DTest(tf.test.TestCase):
     for layer in module._layers:
       self.assertEqual(type(layer.w), variables.PartitionedVariable)
       self.assertEqual(type(layer.b), variables.PartitionedVariable)
+
+  def testIncorrectRatesLength(self):
+    rates = [1, 2]
+    self.assertNotEqual(len(rates), len(self.output_channels))
+    with self.assertRaisesRegexp(
+        ValueError, "rates must be of length 1 * or"):
+      _ = snt.nets.ConvNet2D(output_channels=self.output_channels,
+                             kernel_shapes=self.kernel_shapes,
+                             rates=rates,
+                             strides=self.strides,
+                             paddings=self.paddings)
 
 
 class ConvNet2DTransposeTest(tf.test.TestCase):

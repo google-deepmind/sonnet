@@ -2410,8 +2410,9 @@ class DepthwiseConv2DTest(parameterized.TestCase, tf.test.TestCase):
     snt.DepthwiseConv2D(channel_multiplier=1, kernel_shape=3, stride=[1] * 4,
                         use_bias=use_bias)
 
-    error_msg = (r"stride is \[1, 1, 1\] \(.*\), must be either a positive "
-                 r"integer or an iterable of positive integers of size 2")
+    error_msg = (r"Invalid stride shape: x is \[1, 1, 1\], must be "
+                 r"either a positive integer or an iterable of positive "
+                 r"integers of size 2")
     with self.assertRaisesRegexp(snt.IncompatibleShapeError, error_msg):
       snt.DepthwiseConv2D(channel_multiplier=3,
                           kernel_shape=3,

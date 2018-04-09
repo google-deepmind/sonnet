@@ -303,7 +303,7 @@ class _ConvND(base.AbstractModule):
   def __init__(self, output_channels, kernel_shape, stride=1, rate=1,
                padding=SAME, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, mask=None,
-               data_format=DATA_FORMAT_NHWC, causal_padding=False,
+               data_format=DATA_FORMAT_NHWC,
                custom_getter=None, name="conv_nd"):
     """Constructs a _ConvND module.
 
@@ -345,8 +345,6 @@ class _ConvND(base.AbstractModule):
       mask: A convertible to a ND tensor which is multiplied
           component-wise with the weights (Optional).
       data_format: The data format of the input.
-      causal_padding: A boolean that controls whether to pad the input in such
-          a way as to run a causal convolution.
       custom_getter: Callable or dictionary of callables to use as
           custom getters inside the module. If a dictionary, the keys
           correspond to regexes to match variable names. See the
@@ -365,9 +363,6 @@ class _ConvND(base.AbstractModule):
           a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      base.NotSupportedError: `causal_padding` is True but dim of conv is > 1.
-      base.NotSupportedError: `causal_padding` is True but
-          padding != `snt.VALID`.
       ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
@@ -400,17 +395,6 @@ class _ConvND(base.AbstractModule):
           "Cannot have stride > 1 with rate > 1")
 
     self._padding = _verify_padding(padding)
-    self._causal_padding = causal_padding
-
-    if self._causal_padding:
-      if self._n != 1:
-        raise base.NotSupportedError(
-            "Causal padding is only supported for 1D Conv. Dimensionality of "
-            "convolution: {}".format(self._n))
-      if self._padding != VALID:
-        raise base.NotSupportedError(
-            "Causal padding requires padding argument to be VALID."
-            "Got: {}".format(self._padding))
 
     self._use_bias = use_bias
     self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
@@ -482,9 +466,6 @@ class _ConvND(base.AbstractModule):
       w = self._apply_mask()
     else:
       w = self._w
-
-    if self._causal_padding:
-      inputs = self._construct_causal_input(inputs)
 
     outputs = self._apply_conv(inputs, w)
 
@@ -576,23 +557,6 @@ class _ConvND(base.AbstractModule):
     w = w * self._mask  # pylint: disable=g-no-augmented-assignment
 
     return w
-
-  def _construct_causal_input(self, inputs):
-    """Turn the input causal using padding.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-
-    Returns:
-      inputs: The `inputs` argument that has had causal padding added.
-    """
-    pad_amount = int((self._kernel_shape[0] - 1) * self._rate[0])
-    if self._data_format == DATA_FORMAT_NCW:
-      inputs = tf.pad(inputs, paddings=[[0, 0], [0, 0], [pad_amount, 0]])
-    else:  # self._data_format == DATA_FORMAT_NWC
-      inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
-    return inputs
 
   @property
   def output_channels(self):
@@ -1458,13 +1422,48 @@ class CausalConv1D(_ConvND):
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
                        "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+    if padding != VALID:
+      raise base.NotSupportedError(
+          "Causal padding requires padding argument to be VALID."
+          "Got: {}".format(padding))
     super(CausalConv1D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
         stride=stride, rate=rate, padding=padding, use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
         regularizers=regularizers, mask=mask,
-        data_format=data_format, causal_padding=True,
+        data_format=data_format,
         custom_getter=custom_getter, name=name)
+
+  def _construct_causal_input(self, inputs):
+    """Turn the input causal using padding.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+
+    Returns:
+      inputs: The `inputs` argument that has had causal padding added.
+    """
+    pad_amount = int((self._kernel_shape[0] - 1) * self._rate[0])
+    if self._data_format == DATA_FORMAT_NCW:
+      inputs = tf.pad(inputs, paddings=[[0, 0], [0, 0], [pad_amount, 0]])
+    else:  # self._data_format == DATA_FORMAT_NWC
+      inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
+    return inputs
+
+  def _apply_conv(self, inputs, w):
+    """Apply a convolution operation on `inputs` using variable `w`.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+      w: A weight matrix of the same type as `inputs`.
+
+    Returns:
+      outputs: The result of the convolution operation on `inputs`.
+    """
+    inputs = self._construct_causal_input(inputs)
+    return super(CausalConv1D, self)._apply_conv(inputs, w)
 
 
 class Conv2D(_ConvND, base.Transposable):

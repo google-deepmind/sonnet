@@ -395,7 +395,7 @@ class Conv1DTransposeTestDataFormats(parameterized.TestCase, tf.test.TestCase):
   def testConv1DTransposeDataFormats(self, use_bias, stride):
     """Check the module produces the same result for supported data formats."""
     input_shape = (self.INPUT_SHAPE.input_batch,
-                   np.ceil(self.INPUT_SHAPE.input_width / stride),
+                   int(np.ceil(self.INPUT_SHAPE.input_width / stride)),
                    self.INPUT_SHAPE.input_channels)
 
     func = functools.partial(
@@ -479,8 +479,8 @@ class Conv2DTransposeTestDataFormats(parameterized.TestCase, tf.test.TestCase):
   def testConv2DTransposeDataFormats(self, use_bias, stride):
     """Check the module produces the same result for supported data formats."""
     input_shape = (self.INPUT_SHAPE.input_batch,
-                   np.ceil(self.INPUT_SHAPE.input_height / stride),
-                   np.ceil(self.INPUT_SHAPE.input_width / stride),
+                   int(np.ceil(self.INPUT_SHAPE.input_height / stride)),
+                   int(np.ceil(self.INPUT_SHAPE.input_width / stride)),
                    self.INPUT_SHAPE.input_channels)
 
     func = functools.partial(
@@ -568,9 +568,9 @@ class Conv3DTransposeTestDataFormats(parameterized.TestCase, tf.test.TestCase):
   def testConv3DTransposeDataFormats(self, use_bias, stride):
     """Check the module produces the same result for supported data formats."""
     input_shape = (self.INPUT_SHAPE.input_batch,
-                   np.ceil(self.INPUT_SHAPE.input_depth / stride),
-                   np.ceil(self.INPUT_SHAPE.input_height / stride),
-                   np.ceil(self.INPUT_SHAPE.input_width / stride),
+                   int(np.ceil(self.INPUT_SHAPE.input_depth / stride)),
+                   int(np.ceil(self.INPUT_SHAPE.input_height / stride)),
+                   int(np.ceil(self.INPUT_SHAPE.input_width / stride)),
                    self.INPUT_SHAPE.input_channels)
 
     func = functools.partial(

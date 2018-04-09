@@ -486,16 +486,30 @@ class _ConvND(base.AbstractModule):
     if self._causal_padding:
       inputs = self._construct_causal_input(inputs)
 
-    outputs = tf.nn.convolution(inputs, w, strides=self._stride,
-                                padding=self._padding, dilation_rate=self._rate,
-                                data_format=self._data_format)
+    outputs = self._apply_conv(inputs, w)
 
     if self._use_bias:
       self._b, outputs = _apply_bias(
-          inputs, outputs, self._channel_index, self._data_format,
-          self._output_channels, self._initializers, self._partitioners,
-          self._regularizers)
+          inputs, outputs, self._channel_index, self.data_format,
+          self.output_channels, self.initializers, self.partitioners,
+          self.regularizers)
 
+    return outputs
+
+  def _apply_conv(self, inputs, w):
+    """Apply a convolution operation on `inputs` using variable `w`.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+      w: A weight matrix of the same type as `inputs`.
+
+    Returns:
+      outputs: The result of the convolution operation on `inputs`.
+    """
+    outputs = tf.nn.convolution(inputs, w, strides=self._stride,
+                                padding=self.padding, dilation_rate=self.rate,
+                                data_format=self.data_format)
     return outputs
 
   def _construct_w(self, inputs):
@@ -510,7 +524,7 @@ class _ConvND(base.AbstractModule):
     Returns:
       w: A weight matrix of the same type as `inputs`.
     """
-    weight_shape = self._kernel_shape + (self._input_channels,
+    weight_shape = self._kernel_shape + (self.input_channels,
                                          self.output_channels)
 
     if "w" not in self._initializers:
@@ -520,9 +534,9 @@ class _ConvND(base.AbstractModule):
     w = tf.get_variable("w",
                         shape=weight_shape,
                         dtype=inputs.dtype,
-                        initializer=self._initializers["w"],
-                        partitioner=self._partitioners.get("w", None),
-                        regularizer=self._regularizers.get("w", None))
+                        initializer=self.initializers["w"],
+                        partitioner=self.partitioners.get("w", None),
+                        regularizer=self.regularizers.get("w", None))
 
     return w
 
@@ -675,7 +689,8 @@ class _ConvND(base.AbstractModule):
   @property
   def input_channels(self):
     """Returns the number of input channels."""
-    self._ensure_is_connected()
+    if self._input_channels is None:
+      self._ensure_is_connected()
     return self._input_channels
 
   def clone(self, name=None):
@@ -1938,7 +1953,7 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
                   name=name)
 
 
-class InPlaneConv2D(base.AbstractModule):
+class InPlaneConv2D(_ConvND):
   """Applies an in-plane convolution to each channel with tied filter weights.
 
   This acts as a light wrapper around the TensorFlow op
@@ -1948,7 +1963,8 @@ class InPlaneConv2D(base.AbstractModule):
 
   def __init__(self, kernel_shape, stride=1, padding=SAME, use_bias=True,
                initializers=None, partitioners=None, regularizers=None,
-               custom_getter=None, name="in_plane_conv2d"):
+               data_format=DATA_FORMAT_NHWC, custom_getter=None,
+               name="in_plane_conv2d"):
     """Constructs an InPlaneConv2D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -1973,6 +1989,9 @@ class InPlaneConv2D(base.AbstractModule):
           regularizers are used. A regularizer should be a function that takes
           a single `Tensor` as an input and returns a scalar `Tensor` output,
           e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NHWC), or the
+          second dimension (NCHW).
       custom_getter: Callable or dictionary of callables to use as
           custom getters inside the module. If a dictionary, the keys
           correspond to regexes to match variable names. See the
@@ -1981,182 +2000,75 @@ class InPlaneConv2D(base.AbstractModule):
       name: Name of the module.
 
     Raises:
-      TypeError: If `kernel_shape` is not an integer or a sequence of 2
-          integers.
-      ValueError: If `stride` is neither an integer nor a sequence of 2 or
-          4 integers.
-      ValueError: If stride is a sequence of 4 integers, the first and last
-          dimensions are not equal to 1.
-      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_2D_DATA_FORMATS`).
+      base.IncompatibleShapeError: If the given kernel shape is not an integer;
+          or if the given kernel shape is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given stride is not an integer; or if
+          the given stride is not a sequence of two integers.
+      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
+      ValueError: If the passed-in data_format doesn't have a channel dimension.
     """
-    super(InPlaneConv2D, self).__init__(custom_getter=custom_getter, name=name)
+    if data_format not in SUPPORTED_2D_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
+    super(InPlaneConv2D, self).__init__(
+        output_channels=lambda: self.input_channels,
+        kernel_shape=kernel_shape,
+        stride=stride, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, data_format=data_format,
+        custom_getter=custom_getter, name=name)
 
-    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
-                                                          "kernel")
-    # We want to support passing native strides akin to [1, m, n, 1].
-    if isinstance(stride, collections.Iterable) and len(stride) == 4:
-      if not stride[0] == stride[3] == 1:
-        raise ValueError("Invalid stride: First and last element must be 1.")
-      self._stride = tuple(stride)
-    else:
-      self._stride = _fill_and_one_pad_stride(stride, 2)
+  def _construct_w(self, inputs):
+    """Construct the convolution weight matrix.
 
-    self._padding = _verify_padding(padding)
-    self._use_bias = use_bias
-    self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
-    self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
-    self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
-    self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
-
-    self._data_format = "NHWC"
-    self._channel_index = 3
-
-  @classmethod
-  def get_possible_initializer_keys(cls, use_bias=True):
-    return {"w", "b"} if use_bias else {"w"}
-
-  def _build(self, inputs):
-    """Connects the module into the graph, with input Tensor `inputs`.
+    Figures out the shape of the weight matrix, initialize it, and return it.
 
     Args:
-      inputs: A 4D Tensor of shape:
-        [batch_size, input_height, input_width, input_channels]
-        and of type `tf.float16` or `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
 
     Returns:
-      A 4D Tensor of shape:
-        [batch_size, output_height, output_width, input_channels]
-        with the same dtype as `inputs`.
-
-    Raises:
-      ValueError: If connecting the module into the graph any time after the
-          first time and the inferred input size does not match previous
-          invocations.
-      base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions.
-      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
-          defined.
-      TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
+      w: A weight matrix of the same type as `inputs` and of shape
+        [kernel_shape, 1, 1].
     """
-    _verify_inputs(inputs, self._channel_index, self._data_format)
-    self._input_shape = tuple(inputs.get_shape().as_list())
-    self._input_channels = self._input_shape[self._channel_index]
-
-    weight_shape = (
-        self._kernel_shape[0],
-        self._kernel_shape[1],
-        1,
-        1)
+    weight_shape = self.kernel_shape + (1, 1)
 
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
                                                           dtype=inputs.dtype)
 
-    self._w = tf.get_variable("w",
-                              shape=weight_shape,
-                              dtype=inputs.dtype,
-                              initializer=self._initializers["w"],
-                              partitioner=self._partitioners.get("w", None),
-                              regularizer=self._regularizers.get("w", None))
+    w = tf.get_variable("w",
+                        shape=weight_shape,
+                        dtype=inputs.dtype,
+                        initializer=self.initializers["w"],
+                        partitioner=self.partitioners.get("w", None),
+                        regularizer=self.regularizers.get("w", None))
+    return w
 
-    tiled_weights = tf.tile(self._w, [1, 1, self._input_channels, 1])
-    outputs = tf.nn.depthwise_conv2d(inputs,
-                                     tiled_weights,
-                                     strides=self._stride,
-                                     padding=self._padding)
+  def _apply_conv(self, inputs, w):
+    """Apply a depthwise_conv2d operation on `inputs` using variable `w`.
 
-    if self._use_bias:
-      self._b, outputs = _apply_bias(
-          inputs, outputs, self._channel_index, self._data_format,
-          self._input_channels, self._initializers, self._partitioners,
-          self._regularizers)
-
-    return outputs
-
-  @property
-  def input_channels(self):
-    """Returns the number of input channels."""
-    self._ensure_is_connected()
-    return self._input_channels
-
-  @property
-  def output_channels(self):
-    """Returns the number of output channels i.e. number of input channels."""
-    self._ensure_is_connected()
-    return self._input_channels
-
-  @property
-  def input_shape(self):
-    """Returns the input shape."""
-    self._ensure_is_connected()
-    return self._input_shape
-
-  @property
-  def kernel_shape(self):
-    """Returns the kernel shape."""
-    return self._kernel_shape
-
-  @property
-  def stride(self):
-    """Returns the stride."""
-    return self._stride
-
-  @property
-  def padding(self):
-    """Returns the padding algorithm."""
-    return self._padding
-
-  @property
-  def w(self):
-    """Returns the Variable containing the weight matrix."""
-    self._ensure_is_connected()
-    return self._w
-
-  @property
-  def b(self):
-    """Returns the Variable containing the bias.
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+      w: A weight matrix of the same type as `inputs`.
 
     Returns:
-      Variable object containing the bias, from the most recent __call__.
-
-    Raises:
-      base.NotConnectedError: If the module has not been connected to the graph
-          yet, meaning the variables do not exist.
-      AttributeError: If the module does not use bias.
+      outputs: The result of the convolution operation on `inputs`.
     """
-    self._ensure_is_connected()
-    if not self._use_bias:
-      raise AttributeError(
-          "No bias Variable in InPlaneConv2D Module when `use_bias=False`.")
-    return self._b
-
-  @property
-  def has_bias(self):
-    """Returns `True` if bias Variable is present in the module."""
-    return self._use_bias
-
-  @property
-  def initializers(self):
-    """Returns the initializers dictionary."""
-    return self._initializers
-
-  @property
-  def partitioners(self):
-    """Returns the partitioners dictionary."""
-    return self._partitioners
-
-  @property
-  def regularizers(self):
-    """Returns the regularizers dictionary."""
-    return self._regularizers
+    tiled_weights = tf.tile(w, [1, 1, self.input_channels, 1])
+    outputs = tf.nn.depthwise_conv2d(inputs,
+                                     tiled_weights,
+                                     strides=self.stride,
+                                     padding=self.padding,
+                                     data_format=self.data_format)
+    return outputs
 
 
 class DepthwiseConv2D(base.AbstractModule):

@@ -1,5 +1,12 @@
 # Sonnet Changelog
 
+## Version 1.19 - Tuesday, 10. April 2018
+
+* Refactoring of convolutional network modules. `snt.InPlaneConv2D` now uses
+  `_Conv2D` and `snt.DepthwiseConv2D` uses `_ConvND`.
+* Remove `skip_connection` from `snt.ConvLSTM`.
+* Update on tests to conform to new versions of Numpy and Tensorflow.
+
 ## Version 1.18 - Monday, 12. March 2018
 
 * Documentation fixes.

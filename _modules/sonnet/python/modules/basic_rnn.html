@@ -205,8 +205,8 @@
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="DeepRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.DeepRNN">[docs]</a><span class="k">class</span> <span class="nc">DeepRNN</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -452,8 +452,8 @@
               <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">[</span><span class="n">recurrent_idx</span><span class="p">],</span>
               <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">[</span><span class="n">recurrent_idx</span><span class="p">])</span>
           <span class="n">initial_state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">core_initial_state</span><span class="p">)</span>
-          <span class="n">recurrent_idx</span> <span class="o">+=</span> <span class="mi">1</span></div>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">initial_state</span><span class="p">)</span>
+          <span class="n">recurrent_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">initial_state</span><span class="p">)</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -516,8 +516,8 @@
           <span class="s2">&quot;but this may not be correct. If you see shape errors following this &quot;</span>
           <span class="s2">&quot;warning, you must change the cores used in the DeepRNN so that &quot;</span>
           <span class="s2">&quot;the final core used has a correct .output_size property.&quot;</span><span class="p">,</span>
-          <span class="n">final_core</span><span class="p">,</span> <span class="n">guessed_output_size</span><span class="p">)</span></div>
-      <span class="k">return</span> <span class="n">guessed_output_size</span>
+          <span class="n">final_core</span><span class="p">,</span> <span class="n">guessed_output_size</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">guessed_output_size</span></div>
 
 
 <div class="viewcode-block" id="ModelRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.ModelRNN">[docs]</a><span class="k">class</span> <span class="nc">ModelRNN</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -575,8 +575,8 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span></div>
 </pre></div>
 
           </div>
@@ -612,7 +612,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

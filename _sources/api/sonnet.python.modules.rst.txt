@@ -1,5 +1,5 @@
-sonnet\.python\.modules package
-===============================
+sonnet.python.modules package
+=============================
 
 Subpackages
 -----------
@@ -11,344 +11,344 @@ Subpackages
 Submodules
 ----------
 
-sonnet\.python\.modules\.attention module
------------------------------------------
+sonnet.python.modules.attention module
+--------------------------------------
 
 .. automodule:: sonnet.python.modules.attention
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.attention\_test module
------------------------------------------------
+sonnet.python.modules.attention\_test module
+--------------------------------------------
 
 .. automodule:: sonnet.python.modules.attention_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.base module
-------------------------------------
+sonnet.python.modules.base module
+---------------------------------
 
 .. automodule:: sonnet.python.modules.base
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.base\_errors module
---------------------------------------------
+sonnet.python.modules.base\_errors module
+-----------------------------------------
 
 .. automodule:: sonnet.python.modules.base_errors
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.base\_info module
-------------------------------------------
+sonnet.python.modules.base\_info module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.base_info
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.base\_info\_test module
-------------------------------------------------
+sonnet.python.modules.base\_info\_test module
+---------------------------------------------
 
 .. automodule:: sonnet.python.modules.base_info_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.base\_test module
-------------------------------------------
+sonnet.python.modules.base\_test module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.base_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.basic module
--------------------------------------
+sonnet.python.modules.basic module
+----------------------------------
 
 .. automodule:: sonnet.python.modules.basic
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.basic\_rnn module
-------------------------------------------
+sonnet.python.modules.basic\_rnn module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.basic_rnn
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.basic\_rnn\_test module
-------------------------------------------------
+sonnet.python.modules.basic\_rnn\_test module
+---------------------------------------------
 
 .. automodule:: sonnet.python.modules.basic_rnn_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.basic\_test module
--------------------------------------------
+sonnet.python.modules.basic\_test module
+----------------------------------------
 
 .. automodule:: sonnet.python.modules.basic_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.batch\_norm module
--------------------------------------------
+sonnet.python.modules.batch\_norm module
+----------------------------------------
 
 .. automodule:: sonnet.python.modules.batch_norm
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.batch\_norm\_test module
--------------------------------------------------
+sonnet.python.modules.batch\_norm\_test module
+----------------------------------------------
 
 .. automodule:: sonnet.python.modules.batch_norm_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.batch\_norm\_v2 module
------------------------------------------------
+sonnet.python.modules.batch\_norm\_v2 module
+--------------------------------------------
 
 .. automodule:: sonnet.python.modules.batch_norm_v2
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.batch\_norm\_v2\_test module
------------------------------------------------------
+sonnet.python.modules.batch\_norm\_v2\_test module
+--------------------------------------------------
 
 .. automodule:: sonnet.python.modules.batch_norm_v2_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.block\_matrix module
----------------------------------------------
+sonnet.python.modules.block\_matrix module
+------------------------------------------
 
 .. automodule:: sonnet.python.modules.block_matrix
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.block\_matrix\_test module
----------------------------------------------------
+sonnet.python.modules.block\_matrix\_test module
+------------------------------------------------
 
 .. automodule:: sonnet.python.modules.block_matrix_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.clip\_gradient module
-----------------------------------------------
+sonnet.python.modules.clip\_gradient module
+-------------------------------------------
 
 .. automodule:: sonnet.python.modules.clip_gradient
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.clip\_gradient\_test module
-----------------------------------------------------
+sonnet.python.modules.clip\_gradient\_test module
+-------------------------------------------------
 
 .. automodule:: sonnet.python.modules.clip_gradient_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.conv module
-------------------------------------
+sonnet.python.modules.conv module
+---------------------------------
 
 .. automodule:: sonnet.python.modules.conv
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.conv\_gpu\_test module
------------------------------------------------
+sonnet.python.modules.conv\_gpu\_test module
+--------------------------------------------
 
 .. automodule:: sonnet.python.modules.conv_gpu_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.conv\_test module
-------------------------------------------
+sonnet.python.modules.conv\_test module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.conv_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.embed module
--------------------------------------
+sonnet.python.modules.embed module
+----------------------------------
 
 .. automodule:: sonnet.python.modules.embed
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.embed\_test module
--------------------------------------------
+sonnet.python.modules.embed\_test module
+----------------------------------------
 
 .. automodule:: sonnet.python.modules.embed_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.experimental module
---------------------------------------------
+sonnet.python.modules.experimental module
+-----------------------------------------
 
 .. automodule:: sonnet.python.modules.experimental
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.gated\_rnn module
-------------------------------------------
+sonnet.python.modules.gated\_rnn module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.gated_rnn
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.gated\_rnn\_test module
-------------------------------------------------
+sonnet.python.modules.gated\_rnn\_test module
+---------------------------------------------
 
 .. automodule:: sonnet.python.modules.gated_rnn_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.layer\_norm module
--------------------------------------------
+sonnet.python.modules.layer\_norm module
+----------------------------------------
 
 .. automodule:: sonnet.python.modules.layer_norm
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.layer\_norm\_test module
--------------------------------------------------
+sonnet.python.modules.layer\_norm\_test module
+----------------------------------------------
 
 .. automodule:: sonnet.python.modules.layer_norm_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.pondering\_rnn module
-----------------------------------------------
+sonnet.python.modules.pondering\_rnn module
+-------------------------------------------
 
 .. automodule:: sonnet.python.modules.pondering_rnn
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.pondering\_rnn\_test module
-----------------------------------------------------
+sonnet.python.modules.pondering\_rnn\_test module
+-------------------------------------------------
 
 .. automodule:: sonnet.python.modules.pondering_rnn_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.residual module
-----------------------------------------
+sonnet.python.modules.residual module
+-------------------------------------
 
 .. automodule:: sonnet.python.modules.residual
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.residual\_test module
-----------------------------------------------
+sonnet.python.modules.residual\_test module
+-------------------------------------------
 
 .. automodule:: sonnet.python.modules.residual_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.rnn\_core module
------------------------------------------
+sonnet.python.modules.rnn\_core module
+--------------------------------------
 
 .. automodule:: sonnet.python.modules.rnn_core
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.rnn\_core\_test module
------------------------------------------------
+sonnet.python.modules.rnn\_core\_test module
+--------------------------------------------
 
 .. automodule:: sonnet.python.modules.rnn_core_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.scale\_gradient module
------------------------------------------------
+sonnet.python.modules.scale\_gradient module
+--------------------------------------------
 
 .. automodule:: sonnet.python.modules.scale_gradient
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.scale\_gradient\_test module
------------------------------------------------------
+sonnet.python.modules.scale\_gradient\_test module
+--------------------------------------------------
 
 .. automodule:: sonnet.python.modules.scale_gradient_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.sequential module
-------------------------------------------
+sonnet.python.modules.sequential module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.sequential
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.sequential\_test module
-------------------------------------------------
+sonnet.python.modules.sequential\_test module
+---------------------------------------------
 
 .. automodule:: sonnet.python.modules.sequential_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.spatial\_transformer module
-----------------------------------------------------
+sonnet.python.modules.spatial\_transformer module
+-------------------------------------------------
 
 .. automodule:: sonnet.python.modules.spatial_transformer
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.spatial\_transformer\_test module
-----------------------------------------------------------
+sonnet.python.modules.spatial\_transformer\_test module
+-------------------------------------------------------
 
 .. automodule:: sonnet.python.modules.spatial_transformer_test
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.util module
-------------------------------------
+sonnet.python.modules.util module
+---------------------------------
 
 .. automodule:: sonnet.python.modules.util
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.modules\.util\_test module
-------------------------------------------
+sonnet.python.modules.util\_test module
+---------------------------------------
 
 .. automodule:: sonnet.python.modules.util_test
     :members:

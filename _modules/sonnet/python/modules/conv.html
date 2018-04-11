@@ -251,13 +251,13 @@
 
 <div class="viewcode-block" id="create_weight_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.create_weight_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_weight_initializer</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a default initializer for the weights of a convolutional module.&quot;&quot;&quot;</span>
-  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">))</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">fan_in_shape</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="create_bias_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.create_bias_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_bias_initializer</span><span class="p">(</span><span class="n">unused_bias_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a convolutional module.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a convolutional module.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_find_channel_index</span><span class="p">(</span><span class="n">data_format</span><span class="p">):</span>
@@ -336,7 +336,7 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_channels</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">causal_padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_nd&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs a _ConvND module.</span>
 
@@ -378,8 +378,6 @@
 <span class="sd">      mask: A convertible to a ND tensor which is multiplied</span>
 <span class="sd">          component-wise with the weights (Optional).</span>
 <span class="sd">      data_format: The data format of the input.</span>
-<span class="sd">      causal_padding: A boolean that controls whether to pad the input in such</span>
-<span class="sd">          a way as to run a causal convolution.</span>
 <span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
 <span class="sd">          custom getters inside the module. If a dictionary, the keys</span>
 <span class="sd">          correspond to regexes to match variable names. See the</span>
@@ -398,9 +396,6 @@
 <span class="sd">          a not fully defined shape.</span>
 <span class="sd">      base.NotSupportedError: If rate in any dimension and the stride in any</span>
 <span class="sd">          dimension are simultaneously &gt; 1.</span>
-<span class="sd">      base.NotSupportedError: `causal_padding` is True but dim of conv is &gt; 1.</span>
-<span class="sd">      base.NotSupportedError: `causal_padding` is True but</span>
-<span class="sd">          padding != `snt.VALID`.</span>
 <span class="sd">      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">          keys other than &#39;w&#39; or &#39;b&#39;.</span>
@@ -433,17 +428,6 @@
           <span class="s2">&quot;Cannot have stride &gt; 1 with rate &gt; 1&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_causal_padding</span> <span class="o">=</span> <span class="n">causal_padding</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_causal_padding</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
-            <span class="s2">&quot;Causal padding is only supported for 1D Conv. Dimensionality of &quot;</span>
-            <span class="s2">&quot;convolution: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">))</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">!=</span> <span class="n">VALID</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
-            <span class="s2">&quot;Causal padding requires padding argument to be VALID.&quot;</span>
-            <span class="s2">&quot;Got: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span>
@@ -516,19 +500,30 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_causal_padding</span><span class="p">:</span>
-      <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_causal_input</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
-                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span> <span class="n">dilation_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">,</span>
-                                <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_conv</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">_apply_bias</span><span class="p">(</span>
-          <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">)</span>
+          <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">,</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="n">outputs</span>
+
+  <span class="k">def</span> <span class="nf">_apply_conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply a convolution operation on `inputs` using variable `w`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      outputs: The result of the convolution operation on `inputs`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">convolution</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
+                                <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span> <span class="n">dilation_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span>
+                                <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">outputs</span>
 
   <span class="k">def</span> <span class="nf">_construct_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
@@ -543,7 +538,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">weight_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span><span class="p">,</span>
+    <span class="n">weight_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_channels</span><span class="p">,</span>
                                          <span class="bp">self</span><span class="o">.</span><span class="n">output_channels</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
@@ -553,9 +548,9 @@
     <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
                         <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
-                        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+                        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
+                        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">w</span>
 
@@ -595,23 +590,6 @@
     <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>  <span class="c1"># pylint: disable=g-no-augmented-assignment</span>
 
     <span class="k">return</span> <span class="n">w</span>
-
-  <span class="k">def</span> <span class="nf">_construct_causal_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Turn the input causal using padding.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">      inputs: The `inputs` argument that has had causal padding added.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">pad_amount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCW</span><span class="p">:</span>
-      <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">paddings</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pad_amount</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># self._data_format == DATA_FORMAT_NWC</span>
-      <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">paddings</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pad_amount</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
-    <span class="k">return</span> <span class="n">inputs</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -708,7 +686,8 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">input_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the number of input channels.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span>
 
   <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1272,8 +1251,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Conv1DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv1DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv1DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1389,8 +1368,8 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CausalConv1D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.CausalConv1D">[docs]</a><span class="k">class</span> <span class="nc">CausalConv1D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">):</span>
@@ -1476,13 +1455,48 @@
     <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_1D_DATA_FORMATS</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
                        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_1D_DATA_FORMATS</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">padding</span> <span class="o">!=</span> <span class="n">VALID</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
+          <span class="s2">&quot;Causal padding requires padding argument to be VALID.&quot;</span>
+          <span class="s2">&quot;Got: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">padding</span><span class="p">))</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">CausalConv1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
         <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="n">kernel_shape</span><span class="p">,</span>
         <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
         <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">causal_padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span></div>
+        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
         <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_construct_causal_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Turn the input causal using padding.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      inputs: The `inputs` argument that has had causal padding added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pad_amount</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCW</span><span class="p">:</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">paddings</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pad_amount</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># self._data_format == DATA_FORMAT_NWC</span>
+      <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">paddings</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">pad_amount</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">inputs</span>
+
+  <span class="k">def</span> <span class="nf">_apply_conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply a convolution operation on `inputs` using variable `w`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      outputs: The result of the convolution operation on `inputs`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_causal_input</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">CausalConv1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_apply_conv</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Conv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv2D">[docs]</a><span class="k">class</span> <span class="nc">Conv2D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1612,8 +1626,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Conv2DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv2DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv2DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1730,8 +1744,8 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Conv3D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3D">[docs]</a><span class="k">class</span> <span class="nc">Conv3D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1857,8 +1871,8 @@
                            <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                            <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                            <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                           <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Conv3DTranspose"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3DTranspose">[docs]</a><span class="k">class</span> <span class="nc">Conv3DTranspose</span><span class="p">(</span><span class="n">_ConvNDTranspose</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -1967,11 +1981,11 @@
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
                   <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span></div></div>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                  <span class="n">custom_getter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="InPlaneConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D">[docs]</a><span class="k">class</span> <span class="nc">InPlaneConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="viewcode-block" id="InPlaneConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D">[docs]</a><span class="k">class</span> <span class="nc">InPlaneConv2D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Applies an in-plane convolution to each channel with tied filter weights.</span>
 
 <span class="sd">  This acts as a light wrapper around the TensorFlow op</span>
@@ -1981,7 +1995,8 @@
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">SAME</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in_plane_conv2d&quot;</span><span class="p">):</span>
+               <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;in_plane_conv2d&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs an InPlaneConv2D module.</span>
 
 <span class="sd">    See the following documentation for an explanation of VALID versus SAME</span>
@@ -2006,6 +2021,9 @@
 <span class="sd">          regularizers are used. A regularizer should be a function that takes</span>
 <span class="sd">          a single `Tensor` as an input and returns a scalar `Tensor` output,</span>
 <span class="sd">          e.g. the L1 and L2 regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      data_format: A string. Specifies whether the channel dimension</span>
+<span class="sd">          of the input and output is the last dimension (default, NHWC), or the</span>
+<span class="sd">          second dimension (NCHW).</span>
 <span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
 <span class="sd">          custom getters inside the module. If a dictionary, the keys</span>
 <span class="sd">          correspond to regexes to match variable names. See the</span>
@@ -2014,185 +2032,78 @@
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">      TypeError: If `kernel_shape` is not an integer or a sequence of 2</span>
-<span class="sd">          integers.</span>
-<span class="sd">      ValueError: If `stride` is neither an integer nor a sequence of 2 or</span>
-<span class="sd">          4 integers.</span>
-<span class="sd">      ValueError: If stride is a sequence of 4 integers, the first and last</span>
-<span class="sd">          dimensions are not equal to 1.</span>
-<span class="sd">      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.</span>
+<span class="sd">      ValueError: If the given data_format is not a supported format (see</span>
+<span class="sd">          `SUPPORTED_2D_DATA_FORMATS`).</span>
+<span class="sd">      base.IncompatibleShapeError: If the given kernel shape is not an integer;</span>
+<span class="sd">          or if the given kernel shape is not a sequence of two integers.</span>
+<span class="sd">      base.IncompatibleShapeError: If the given stride is not an integer; or if</span>
+<span class="sd">          the given stride is not a sequence of two integers.</span>
+<span class="sd">      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">          keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">          are not callable.</span>
+<span class="sd">      ValueError: If the passed-in data_format doesn&#39;t have a channel dimension.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">InPlaneConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_2D_DATA_FORMATS</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
+                       <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_2D_DATA_FORMATS</span><span class="p">))</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">InPlaneConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_channels</span><span class="p">,</span>
+        <span class="n">kernel_shape</span><span class="o">=</span><span class="n">kernel_shape</span><span class="p">,</span>
+        <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
-                                                          <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
-    <span class="c1"># We want to support passing native strides akin to [1, m, n, 1].</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_construct_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct the convolution weight matrix.</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
-        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
-        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
-        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="s2">&quot;NHWC&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="mi">3</span>
-
-<div class="viewcode-block" id="InPlaneConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span>
-
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
+<span class="sd">    Figures out the shape of the weight matrix, initialize it, and return it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A 4D Tensor of shape:</span>
-<span class="sd">        [batch_size, input_height, input_width, input_channels]</span>
-<span class="sd">        and of type `tf.float16` or `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      A 4D Tensor of shape:</span>
-<span class="sd">        [batch_size, output_height, output_width, input_channels]</span>
-<span class="sd">        with the same dtype as `inputs`.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
-<span class="sd">          first time and the inferred input size does not match previous</span>
-<span class="sd">          invocations.</span>
-<span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
-<span class="sd">          of dimensions.</span>
-<span class="sd">      base.UnderspecifiedError: If the channel dimension of `inputs` isn&#39;t</span>
-<span class="sd">          defined.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not compatible with either</span>
-<span class="sd">          `tf.float16` or `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs` and of shape</span>
+<span class="sd">        [kernel_shape, 1, 1].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_verify_inputs</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">]</span>
-
-    <span class="n">weight_shape</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="mi">1</span><span class="p">,</span>
-        <span class="mi">1</span><span class="p">)</span>
+    <span class="n">weight_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_shape</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
                                                           <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
-                              <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
-                              <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                              <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
-                              <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                              <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
+                        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">w</span>
 
-    <span class="n">tiled_weights</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">depthwise_conv2d</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
-                                     <span class="n">tiled_weights</span><span class="p">,</span>
-                                     <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
-                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_apply_conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply a depthwise_conv2d operation on `inputs` using variable `w`.</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">_apply_bias</span><span class="p">(</span>
-          <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">outputs</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">input_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the number of input channels.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the number of output channels i.e. number of input channels.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the input shape.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">kernel_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the kernel shape.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">stride</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the stride.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">padding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the padding algorithm.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the Variable containing the weight matrix.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the Variable containing the bias.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      Variable object containing the bias, from the most recent __call__.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      base.NotConnectedError: If the module has not been connected to the graph</span>
-<span class="sd">          yet, meaning the variables do not exist.</span>
-<span class="sd">      AttributeError: If the module does not use bias.</span>
+<span class="sd">      outputs: The result of the convolution operation on `inputs`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-          <span class="s2">&quot;No bias Variable in InPlaneConv2D Module when `use_bias=False`.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">has_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns `True` if bias Variable is present in the module.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">initializers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the initializers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">partitioners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the partitioners dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
+    <span class="n">tiled_weights</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_channels</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">depthwise_conv2d</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
+                                     <span class="n">tiled_weights</span><span class="p">,</span>
+                                     <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+                                     <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outputs</span></div>
 
 
-<div class="viewcode-block" id="DepthwiseConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D">[docs]</a><span class="k">class</span> <span class="nc">DepthwiseConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+<div class="viewcode-block" id="DepthwiseConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D">[docs]</a><span class="k">class</span> <span class="nc">DepthwiseConv2D</span><span class="p">(</span><span class="n">_ConvND</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Spatial depthwise 2D convolution module, including bias.</span>
 
 <span class="sd">  This acts as a light wrapper around the TensorFlow ops</span>
@@ -2255,229 +2166,95 @@
 <span class="sd">      name: Name of the module.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">      base.IncompatibleShapeError: If `kernel_shape` is not an integer or a</span>
-<span class="sd">          sequence of 3 integers.</span>
-<span class="sd">      base.IncompatibleShapeError: If `stride` is neither an integer nor a</span>
-<span class="sd">          sequence of 2 or 4 integers.</span>
-<span class="sd">      base.IncompatibleShapeError: If `stride` is a sequence of 4 integers and</span>
-<span class="sd">          `stride[0] != stride[3]`.</span>
-<span class="sd">      ValueError: if `channel_multiplier` is not an integer &gt;= 1.</span>
-<span class="sd">      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`.</span>
+<span class="sd">      ValueError: If `channel_multiplier` isn&#39;t of type (`numbers.Integral` or</span>
+<span class="sd">          `tf.Dimension`).</span>
+<span class="sd">      ValueError: If `channel_multiplier` is less than 1.</span>
 <span class="sd">      ValueError: If the given data_format is not a supported format (see</span>
 <span class="sd">          `SUPPORTED_2D_DATA_FORMATS`).</span>
+<span class="sd">      base.IncompatibleShapeError: If the given kernel shape is not an integer;</span>
+<span class="sd">          or if the given kernel shape is not a sequence of two integers.</span>
+<span class="sd">      base.IncompatibleShapeError: If the given stride is not an integer; or if</span>
+<span class="sd">          the given stride is not a sequence of two integers.</span>
+<span class="sd">      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">          keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
 <span class="sd">          are not callable.</span>
 <span class="sd">      ValueError: If the passed-in data_format doesn&#39;t have a channel dimension.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">DepthwiseConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
-                                          <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel_multiplier</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">and</span>
+        <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel_multiplier</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Dimension</span><span class="p">)):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s2">&quot;channel_multiplier (</span><span class="si">{}</span><span class="s2">), must be of type &quot;</span>
+                        <span class="s2">&quot;(`tf.Dimension`, `numbers.Integral`).&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">channel_multiplier</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">channel_multiplier</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;channel_multiplier (</span><span class="si">{}</span><span class="s2">), must be &gt;= 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+          <span class="n">channel_multiplier</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel_multiplier</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">)</span> <span class="ow">or</span>
-        <span class="n">channel_multiplier</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;channel_multiplier (=</span><span class="si">%d</span><span class="s2">), must be integer &gt;= 1&quot;</span> <span class="o">%</span>
-                       <span class="n">channel_multiplier</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span> <span class="o">=</span> <span class="n">channel_multiplier</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span> <span class="o">=</span> <span class="n">_fill_and_verify_parameter_shape</span><span class="p">(</span><span class="n">kernel_shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
-                                                          <span class="s2">&quot;kernel&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SUPPORTED_2D_DATA_FORMATS</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data_format </span><span class="si">{:s}</span><span class="s2">. Allowed formats &quot;</span>
-                       <span class="s2">&quot;</span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_2D_DATA_FORMATS</span><span class="p">))</span>
+                       <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">SUPPORTED_2D_DATA_FORMATS</span><span class="p">))</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">=</span> <span class="n">data_format</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">DepthwiseConv2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_channels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span><span class="p">,</span>
+        <span class="n">kernel_shape</span><span class="o">=</span><span class="n">kernel_shape</span><span class="p">,</span>
+        <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span> <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="c1"># We want to support passing native strides akin to [1, m, n, 1]</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NHWC</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-              <span class="s2">&quot;Invalid stride: First and last element must be 1.&quot;</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span> <span class="o">==</span> <span class="n">DATA_FORMAT_NCHW</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">stride</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stride</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
-              <span class="s2">&quot;Invalid stride: First and second element must be 1.&quot;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">stride</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">=</span> <span class="n">_fill_and_one_pad_stride</span><span class="p">(</span>
-          <span class="n">stride</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_construct_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct the convolution weight matrix.</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">_verify_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_initializers</span><span class="p">(</span>
-        <span class="n">initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_partitioners</span><span class="p">(</span>
-        <span class="n">partitioners</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
-        <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Determined in build() from the input.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Determined in build() from the input.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Ditto, determined from the input and kernel.</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="n">_find_channel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
-
-<div class="viewcode-block" id="DepthwiseConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span>
-
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
-
-<span class="sd">    If this is not the first time the module has been connected to the graph,</span>
-<span class="sd">    the input Tensor provided here must have the same final 3 dimensions, in</span>
-<span class="sd">    order for the existing variables to be the correct size for the</span>
-<span class="sd">    multiplication. The batch size may differ for each connection.</span>
+<span class="sd">    Figures out the shape of the weight matrix, initializes it, and returns it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A 4D Tensor of shape:</span>
-<span class="sd">        `[batch_size, input_height, input_width, input_channels]`</span>
-<span class="sd">        and of type `tf.float16` or `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      A 4D Tensor of shape:</span>
-<span class="sd">        `[batch_size, output_height, output_width, output_channels]`, where</span>
-<span class="sd">        `output_channels = input_channels * channel_multiplier`;</span>
-<span class="sd">        see `kernel_shape`.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
-<span class="sd">          first time and the inferred size of the input does not match previous</span>
-<span class="sd">          invocations.</span>
-<span class="sd">      base.IncompatibleShapeError: If the input tensor has the wrong number</span>
-<span class="sd">          of dimensions.</span>
-<span class="sd">      base.UnderspecifiedError: If the channel dimension of `inputs` isn&#39;t</span>
-<span class="sd">          defined.</span>
-<span class="sd">      TypeError: If input Tensor dtype is not compatible with either</span>
-<span class="sd">          `tf.float16` or `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs` and of shape</span>
+<span class="sd">        [kernel_sizes, input_channels, channel_multiplier].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_verify_inputs</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">]</span>
-
     <span class="c1"># For depthwise conv, output_channels = in_channels * channel_multiplier.</span>
     <span class="c1"># By default, depthwise conv applies a different filter to every input</span>
     <span class="c1"># channel. If channel_multiplier &gt; 1, one input channel is used to produce</span>
     <span class="c1"># `channel_multiplier` outputs, which are then concatenated together.</span>
     <span class="c1"># This results in:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span>
-
-    <span class="n">weight_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span><span class="p">)</span>
+    <span class="n">weight_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_shape</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_channels</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;w&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_weight_initializer</span><span class="p">(</span><span class="n">weight_shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
                                                           <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
-                              <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
-                              <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                              <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
-                              <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                              <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">weight_shape</span><span class="p">,</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">],</span>
+                        <span class="n">partitioner</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">w</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">depthwise_conv2d</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">,</span>
-                                     <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
-                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span>
-                                     <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_apply_conv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Apply a depthwise_conv2d operation on `inputs` using variable `w`.</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">_apply_bias</span><span class="p">(</span>
-          <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">outputs</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">input_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the number of input channels.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_channels</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the number of output channels.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the input shape.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">kernel_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the kernel shape.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">channel_multiplier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the channel multiplier.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_multiplier</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">stride</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the stride.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">padding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the padding algorithm.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">w</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the Variable containing the weight matrix.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the Variable containing the bias.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
+<span class="sd">          `tf.float32`.</span>
+<span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      Variable object containing the bias, from the most recent __call__.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">      base.NotConnectedError: If the module has not been connected to the graph</span>
-<span class="sd">          yet, meaning the variables do not exist.</span>
-<span class="sd">      AttributeError: If the module does not use bias.</span>
+<span class="sd">      outputs: The result of the convolution operation on `inputs`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-          <span class="s2">&quot;No bias Variable in DepthwiseConv2D Module when `use_bias=False`.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">has_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns `True` if bias Variable is present in the module.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">initializers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the initializers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">partitioners</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the partitioners dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">regularizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the regularizers dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">depthwise_conv2d</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
+                                     <span class="n">w</span><span class="p">,</span>
+                                     <span class="n">strides</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span>
+                                     <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+                                     <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_format</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outputs</span></div>
 
 
 <div class="viewcode-block" id="SeparableConv2D"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D">[docs]</a><span class="k">class</span> <span class="nc">SeparableConv2D</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -2613,8 +2390,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span> <span class="o">=</span> <span class="n">_find_channel_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SeparableConv2D.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">}</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w_dw&quot;</span><span class="p">,</span> <span class="s2">&quot;w_pw&quot;</span><span class="p">}</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the module into the graph, with input Tensor `inputs`.</span>
@@ -2781,8 +2558,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">data_format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span>
+    <span class="sd">&quot;&quot;&quot;Returns the data format.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span></div>
 </pre></div>
 
           </div>
@@ -2818,7 +2595,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -147,8 +147,8 @@
       <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">),</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">middle_pixel</span><span class="p">))</span>
   <span class="n">is_same_channel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span>
-      <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+      <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="p">),</span> <span class="n">_range_along_dimension</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">is_same_channel</span><span class="p">,</span> <span class="n">is_middle_pixel</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="noisy_identity_kernel_initializer"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.noisy_identity_kernel_initializer">[docs]</a><span class="k">def</span> <span class="nf">noisy_identity_kernel_initializer</span><span class="p">(</span><span class="n">base_num_channels</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
@@ -223,8 +223,8 @@
         <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
             <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_num_channels</span> <span class="o">/</span> <span class="n">out_channels</span><span class="p">),</span>
         <span class="n">noise</span><span class="p">)</span>
-</div>
-  <span class="k">return</span> <span class="n">_noisy_identity_kernel_initializer</span>
+
+  <span class="k">return</span> <span class="n">_noisy_identity_kernel_initializer</span></div>
 
 
 <div class="viewcode-block" id="Dilation"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.dilation.Dilation">[docs]</a><span class="k">class</span> <span class="nc">Dilation</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -379,8 +379,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">conv_modules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_modules</span></div>
 </pre></div>
 
           </div>
@@ -416,7 +416,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

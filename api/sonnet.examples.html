@@ -105,11 +105,13 @@ none of the variables have gradients.</p>
 “variable”. Note that “gradient” can be a <code class="docutils literal notranslate"><span class="pre">Tensor</span></code>, an
 <code class="docutils literal notranslate"><span class="pre">IndexedSlices</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if there is no gradient for the given
 variable.</p>
-<p>Args: loss: A Tensor containing the value to minimize. var_list:
-Optional list or tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> to update to minimize
-<code class="docutils literal notranslate"><span class="pre">loss</span></code>. Defaults to the list of variables collected in the graph under
-the key <code class="docutils literal notranslate"><span class="pre">GraphKeys.TRAINABLE_VARIABLES</span></code>. gate_gradients: How to gate
-the computation of gradients. Can be <code class="docutils literal notranslate"><span class="pre">GATE_NONE</span></code>, <code class="docutils literal notranslate"><span class="pre">GATE_OP</span></code>, or
+<p>Args: loss: A Tensor containing the value to minimize or a callable
+taking no arguments which returns the value to minimize. When eager
+execution is enabled it must be a callable. var_list: Optional list or
+tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> to update to minimize <code class="docutils literal notranslate"><span class="pre">loss</span></code>. Defaults to the
+list of variables collected in the graph under the key
+<code class="docutils literal notranslate"><span class="pre">GraphKeys.TRAINABLE_VARIABLES</span></code>. gate_gradients: How to gate the
+computation of gradients. Can be <code class="docutils literal notranslate"><span class="pre">GATE_NONE</span></code>, <code class="docutils literal notranslate"><span class="pre">GATE_OP</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">GATE_GRAPH</span></code>. aggregation_method: Specifies the method used to
 combine gradient terms. Valid values are defined in the class
 <code class="docutils literal notranslate"><span class="pre">AggregationMethod</span></code>. colocate_gradients_with_ops: If True, try
@@ -119,17 +121,11 @@ colocating gradients with the corresponding op. grad_loss: Optional. A
 present, but gradient can be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 <p>Raises: TypeError: If <code class="docutils literal notranslate"><span class="pre">var_list</span></code> contains anything else than
 <code class="docutils literal notranslate"><span class="pre">Variable</span></code> objects. ValueError: If some arguments are invalid.
-RuntimeError: If called with eager execution enabled and if
-<code class="docutils literal notranslate"><span class="pre">grad_loss</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">loss</span></code> is not callable.</p>
-<p>&#64;compatibility(eager) When eager execution is enabled, <code class="docutils literal notranslate"><span class="pre">loss</span></code> should
-be a Python function that takes elements of <code class="docutils literal notranslate"><span class="pre">var_list</span></code> as arguments
-and computes the value to be minimized. If <code class="docutils literal notranslate"><span class="pre">var_list</span></code> is None,
-<code class="docutils literal notranslate"><span class="pre">loss</span></code> should take no arguments. Gradient computation is done with
-respect to the elements of <code class="docutils literal notranslate"><span class="pre">var_list</span></code> if not None, else with respect
-to any trainable variables created during the execution of the <code class="docutils literal notranslate"><span class="pre">loss</span></code>
-function. <code class="docutils literal notranslate"><span class="pre">gate_gradients</span></code>, <code class="docutils literal notranslate"><span class="pre">aggregation_method</span></code>,
-<code class="docutils literal notranslate"><span class="pre">colocate_gradients_with_ops</span></code> and <code class="docutils literal notranslate"><span class="pre">grad_loss</span></code> are ignored when eager
-execution is enabled. &#64;end_compatibility</p>
+RuntimeError: If called with eager execution enabled and <code class="docutils literal notranslate"><span class="pre">loss</span></code> is not
+callable.</p>
+<p>&#64;compatibility(eager) When eager execution is enabled,
+<code class="docutils literal notranslate"><span class="pre">gate_gradients</span></code>, <code class="docutils literal notranslate"><span class="pre">aggregation_method</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">colocate_gradients_with_ops</span></code> are ignored. &#64;end_compatibility</p>
 </dd></dl>
 
 </dd></dl>
@@ -488,7 +484,7 @@ each of the data objects can be passed to PTBIterator.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

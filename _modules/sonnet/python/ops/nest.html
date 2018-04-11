@@ -73,8 +73,8 @@
           <span class="o">+</span> <span class="n">extra_message</span>
       <span class="p">)</span>
       <span class="n">_DONE_WARN</span><span class="p">[</span><span class="n">extra_message</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">new_fn</span>
+    <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">new_fn</span></div>
 
 
 <span class="n">assert_same_structure</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span><span class="n">nest</span><span class="o">.</span><span class="n">assert_same_structure</span><span class="p">)</span>
@@ -104,8 +104,8 @@
 
 
 <div class="viewcode-block" id="pack_iterable_as"><a class="viewcode-back" href="../../../../api/sonnet.python.ops.html#sonnet.python.ops.nest.pack_iterable_as">[docs]</a><span class="k">def</span> <span class="nf">pack_iterable_as</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;See `nest.pack_sequence_as`. Provided for named-arg compatibility.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">)</span>
+  <span class="sd">&quot;&quot;&quot;See `nest.pack_sequence_as`. Provided for named-arg compatibility.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">flat_iterable</span><span class="p">)</span></div>
 
 
 <span class="n">pack_iterable_as</span> <span class="o">=</span> <span class="n">with_deprecation_warning</span><span class="p">(</span>
@@ -147,7 +147,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

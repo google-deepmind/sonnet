@@ -1,19 +1,19 @@
-sonnet\.python\.ops package
-===========================
+sonnet.python.ops package
+=========================
 
 Submodules
 ----------
 
-sonnet\.python\.ops\.initializers module
-----------------------------------------
+sonnet.python.ops.initializers module
+-------------------------------------
 
 .. automodule:: sonnet.python.ops.initializers
     :members:
     :undoc-members:
     :show-inheritance:
 
-sonnet\.python\.ops\.nest module
---------------------------------
+sonnet.python.ops.nest module
+-----------------------------
 
 .. automodule:: sonnet.python.ops.nest
     :members:

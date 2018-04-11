@@ -63,8 +63,9 @@
 <span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">xrange</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
-<span class="kn">from</span> <span class="nn">sonnet.python.ops</span> <span class="k">import</span> <span class="n">nest</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="n">nest</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span>
 
 
 <div class="viewcode-block" id="merge_leading_dims"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.merge_leading_dims">[docs]</a><span class="k">def</span> <span class="nf">merge_leading_dims</span><span class="p">(</span><span class="n">array_or_tensor</span><span class="p">,</span> <span class="n">n_dims</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -117,8 +118,8 @@
     <span class="n">merged_leading_size</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="c1"># We need to set the result size of this, as otherwise we won&#39;t be able to</span>
   <span class="c1"># pass to e.g. a Linear. Here we need to know at least the rank of the tensor.</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">merged_leading_size</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span></div>
-  <span class="k">return</span> <span class="n">result</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">([</span><span class="n">merged_leading_size</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="n">n_dims</span><span class="p">:])</span>
+  <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="split_leading_dim"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.split_leading_dim">[docs]</a><span class="k">def</span> <span class="nf">split_leading_dim</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">n_dims</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
@@ -148,19 +149,19 @@
   <span class="n">known_dims_after_first</span> <span class="o">=</span> <span class="n">tensor_shape_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
   <span class="n">output_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">split_sizes</span><span class="p">,</span> <span class="n">dims_after_first</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">known_split_sizes</span> <span class="o">+</span> <span class="n">known_dims_after_first</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">result</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">known_split_sizes</span> <span class="o">+</span> <span class="n">known_dims_after_first</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="create_linear_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.create_linear_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_linear_initializer</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Returns a default initializer for weights of a linear module.&quot;&quot;&quot;</span>
-  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">input_size</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="n">stddev</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">input_size</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">stddev</span><span class="o">=</span><span class="n">stddev</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="create_bias_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.create_bias_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_bias_initializer</span><span class="p">(</span><span class="n">unused_bias_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a linear/AddBias module.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the biases of a linear/AddBias module.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Linear"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear">[docs]</a><span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -223,8 +224,8 @@
         <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">possible_keys</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Linear.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">use_bias</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;w&quot;</span><span class="p">}</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the Linear module into the graph, with input Tensor `inputs`.</span>
@@ -371,8 +372,8 @@
                   <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">,</span>
                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-                  <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span></div>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                  <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
   <span class="c1"># Implements Transposable interface.</span>
   <span class="nd">@property</span>
@@ -398,8 +399,8 @@
                   <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">,</span>
                   <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
                   <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-                  <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span></div></div>
-                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                  <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="calculate_bias_shape"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.calculate_bias_shape">[docs]</a><span class="k">def</span> <span class="nf">calculate_bias_shape</span><span class="p">(</span><span class="n">input_shape</span><span class="p">,</span> <span class="n">bias_dims</span><span class="p">):</span>
@@ -439,8 +440,8 @@
     <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">input_rank</span><span class="p">):</span>
       <span class="k">if</span> <span class="n">bias_shape</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">dim</span>
-        <span class="k">break</span></div>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bias_shape</span><span class="p">[</span><span class="n">start</span><span class="p">:])</span>  <span class="c1"># Do not apply across minibatch dimension.</span>
+        <span class="k">break</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">bias_shape</span><span class="p">[</span><span class="n">start</span><span class="p">:])</span>  <span class="c1"># Do not apply across minibatch dimension.</span></div>
 
 
 <div class="viewcode-block" id="AddBias"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.AddBias">[docs]</a><span class="k">class</span> <span class="nc">AddBias</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -650,8 +651,8 @@
     <span class="k">return</span> <span class="n">AddBias</span><span class="p">(</span><span class="n">output_shape</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">,</span>
                    <span class="n">bias_dims</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bias_dims</span><span class="p">,</span>
                    <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
-                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span></div></div>
-                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                   <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BatchReshape"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.BatchReshape">[docs]</a><span class="k">class</span> <span class="nc">BatchReshape</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -811,8 +812,8 @@
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_transpose&quot;</span>
     <span class="k">return</span> <span class="n">BatchReshape</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_shape</span><span class="p">,</span>
-                        <span class="n">preserve_dims</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_preserve_dims</span><span class="p">,</span></div></div>
-                        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                        <span class="n">preserve_dims</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_preserve_dims</span><span class="p">,</span>
+                        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BatchFlatten"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.BatchFlatten">[docs]</a><span class="k">class</span> <span class="nc">BatchFlatten</span><span class="p">(</span><span class="n">BatchReshape</span><span class="p">):</span>
@@ -835,8 +836,8 @@
 <span class="sd">          The preserved dimensions can be unknown at building time.</span>
 <span class="sd">      name: Name of the module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">BatchFlatten</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span></div>
-        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">preserve_dims</span><span class="o">=</span><span class="n">preserve_dims</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BatchFlatten</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">preserve_dims</span><span class="o">=</span><span class="n">preserve_dims</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FlattenTrailingDimensions"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.FlattenTrailingDimensions">[docs]</a><span class="k">class</span> <span class="nc">FlattenTrailingDimensions</span><span class="p">(</span><span class="n">BatchReshape</span><span class="p">):</span>
@@ -866,8 +867,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">dim_from</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument dim_from should be &gt;= 1.&quot;</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">FlattenTrailingDimensions</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span></div>
-        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">preserve_dims</span><span class="o">=</span><span class="n">dim_from</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">FlattenTrailingDimensions</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">preserve_dims</span><span class="o">=</span><span class="n">dim_from</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TrainableVariable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.TrainableVariable">[docs]</a><span class="k">class</span> <span class="nc">TrainableVariable</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -950,8 +951,8 @@
 <span class="sd">      base.Error: If the module has not been connected to the graph yet,</span>
 <span class="sd">          meaning the variables do not exist.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span></div>
 
 
 <div class="viewcode-block" id="BatchApply"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.BatchApply">[docs]</a><span class="k">class</span> <span class="nc">BatchApply</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -1016,11 +1017,11 @@
 <span class="sd">      A Tensor or nested list or dictionary of Tensors as a result of applying</span>
 <span class="sd">      the process above. (&quot;None&quot; return values are also supported.)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">flattened</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_iterable</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">])</span>
+    <span class="n">flattened</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">])</span>
     <span class="n">merged_flattened</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">merge_leading_dims</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_dims</span><span class="p">)</span> <span class="k">if</span> <span class="n">inp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">flattened</span><span class="p">]</span>
-    <span class="n">merged_args</span><span class="p">,</span> <span class="n">merged_kwargs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_iterable_as</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">],</span>
+    <span class="n">merged_args</span><span class="p">,</span> <span class="n">merged_kwargs</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">([</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">],</span>
                                                        <span class="n">merged_flattened</span><span class="p">)</span>
 
     <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_module</span><span class="p">(</span><span class="o">*</span><span class="n">merged_args</span><span class="p">,</span> <span class="o">**</span><span class="n">merged_kwargs</span><span class="p">)</span>
@@ -1035,10 +1036,10 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">split_leading_dim</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">example_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_dims</span><span class="p">)</span>
 
-    <span class="n">flat_results</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten_iterable</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">flat_results</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
     <span class="n">flat_unmerged_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">_split_to_original_leading_dims</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-                             <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">flat_results</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_iterable_as</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">flat_unmerged_results</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">flat_results</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">flat_unmerged_results</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SliceByDim"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.SliceByDim">[docs]</a><span class="k">class</span> <span class="nc">SliceByDim</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -1134,8 +1135,8 @@
     <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dims</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_begin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">):</span>
       <span class="n">full_begin</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">begin</span>
       <span class="n">full_size</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
-</div>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="n">full_begin</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">full_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="n">full_begin</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">full_size</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TileByDim"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.TileByDim">[docs]</a><span class="k">class</span> <span class="nc">TileByDim</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -1208,8 +1209,8 @@
     <span class="c1"># Updates lists with what the user provided.</span>
     <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">multiple</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dims</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multiples</span><span class="p">):</span>
       <span class="n">full_multiples</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">multiple</span>
-</div>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">multiples</span><span class="o">=</span><span class="n">full_multiples</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">multiples</span><span class="o">=</span><span class="n">full_multiples</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MergeDims"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.MergeDims">[docs]</a><span class="k">class</span> <span class="nc">MergeDims</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -1282,8 +1283,8 @@
       <span class="n">merged_tensors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span> <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">nest</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">inputs</span><span class="p">)]</span>
       <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">merged_tensors</span><span class="p">)</span>
 
-    <span class="c1"># inputs is a single tf.Tensor</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="c1"># inputs is a single tf.Tensor</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SelectInput"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic.SelectInput">[docs]</a><span class="k">class</span> <span class="nc">SelectInput</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -1370,8 +1371,8 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      ValueError: If any entry of `idx` is out of bounds with respect to the</span>
 <span class="sd">          size of `inputs`.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -1407,7 +1408,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

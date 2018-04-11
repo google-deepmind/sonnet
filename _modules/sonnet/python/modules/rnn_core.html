@@ -193,8 +193,8 @@
     <span class="n">flat_initial_state</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">initial_state_variable</span><span class="p">,</span> <span class="n">tile_dims</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">tiled_name</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span></div>
-                               <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_initial_state</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                               <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_initial_state</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RNNCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
@@ -270,8 +270,8 @@
         <span class="k">return</span> <span class="n">trainable_initial_state</span><span class="p">(</span>
             <span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span>
             <span class="n">initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
-            <span class="n">regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span></div>
-            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -304,8 +304,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Keep scope for backwards compatibility.</span>
     <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;ZeroState&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="n">batch_size</span><span class="p">]):</span>
-      <span class="k">return</span> <span class="n">rnn_cell_impl</span><span class="o">.</span><span class="n">_zero_state_tensors</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span></div></div>
-          <span class="bp">self</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">rnn_cell_impl</span><span class="o">.</span><span class="n">_zero_state_tensors</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TrainableInitialState"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.TrainableInitialState">[docs]</a><span class="k">class</span> <span class="nc">TrainableInitialState</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -376,8 +376,8 @@
       <span class="n">flat_learnable_state</span> <span class="o">=</span> <span class="p">[</span><span class="n">_single_learnable_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">state_id</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
                               <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flat_initial_state</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span><span class="p">,</span></div>
-                                 <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_learnable_state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span><span class="p">,</span>
+                                 <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_learnable_state</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -413,7 +413,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

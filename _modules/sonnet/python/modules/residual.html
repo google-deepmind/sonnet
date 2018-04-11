@@ -73,8 +73,8 @@
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_module</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-    <span class="n">residual</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">inp</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">inp</span> <span class="o">+</span> <span class="n">out</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">residual</span>
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span><span class="k">lambda</span> <span class="n">inp</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">inp</span> <span class="o">+</span> <span class="n">out</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">residual</span></div>
 
 
 <div class="viewcode-block" id="ResidualCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.ResidualCore">[docs]</a><span class="k">class</span> <span class="nc">ResidualCore</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -98,8 +98,8 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">output_size</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span></div>
 
 
 <div class="viewcode-block" id="SkipConnectionCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore">[docs]</a><span class="k">class</span> <span class="nc">SkipConnectionCore</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -145,8 +145,8 @@
                           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">output_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">final_input_dim</span><span class="p">,))</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span></div>
 </pre></div>
 
           </div>
@@ -182,7 +182,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

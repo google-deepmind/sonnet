@@ -350,7 +350,7 @@
 
 <span class="sd">    Upon entering this context manager the module adds itself onto the top</span>
 <span class="sd">    of the module call stack. Any variables created with `tf.get_variable()`</span>
-<span class="sd">    inside `  _build()` or `_enter_variable_scope()` while this module is on top</span>
+<span class="sd">    inside `_build()` or `_enter_variable_scope()` while this module is on top</span>
 <span class="sd">    of the call stack will be added to `self._all_variables`.</span>
 
 <span class="sd">    Before exiting the context the module removes itself from the top of the</span>
@@ -499,8 +499,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
 <span class="sd">          constructor.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;POSSIBLE_INITIALIZER_KEYS&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;POSSIBLE_INITIALIZER_KEYS&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span></div>
 
   <span class="k">def</span> <span class="nf">_ensure_is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Raise an Error if the module has not been connected yet.</span>
@@ -592,8 +592,8 @@
     <span class="c1"># here then querying the variables from a different graph scope would</span>
     <span class="c1"># produce an empty tuple.</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
-      <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_variables_in_scope</span><span class="p">(</span></div>
-          <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">get_variables_in_scope</span><span class="p">(</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">collection</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AbstractModule.get_all_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.get_all_variables">[docs]</a>  <span class="k">def</span> <span class="nf">get_all_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns all `tf.Variable`s used when the module is connected.</span>
@@ -616,14 +616,14 @@
     <span class="n">collection_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">))</span>
     <span class="c1"># Return variables in self._all_variables that are in `collection`</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="nb">sorted</span><span class="p">(</span></div>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="nb">sorted</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
 
   <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
         <span class="s2">&quot;Sonnet AbstractModule instances cannot be serialized. You should &quot;</span>
-        <span class="s2">&quot;instead serialize all necessary configuration which will allow &quot;</span></div>
-        <span class="s2">&quot;modules to be rebuilt.&quot;</span><span class="p">)</span>
+        <span class="s2">&quot;instead serialize all necessary configuration which will allow &quot;</span>
+        <span class="s2">&quot;modules to be rebuilt.&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Transposable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Transposable">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
@@ -664,12 +664,12 @@
 <span class="sd">      **kwargs: Additional Python flags controlling transposition.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      Transposed version of the module.</span></div>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">      Transposed version of the module.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Transposable.input_shape"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Transposable.input_shape">[docs]</a>  <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div></div>
-    <span class="sd">&quot;&quot;&quot;Returns shape of input `Tensor` passed at last call to `build`.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">input_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns shape of input `Tensor` passed at last call to `build`.&quot;&quot;&quot;</span></div></div>
 
 
 <div class="viewcode-block" id="Module"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.Module">[docs]</a><span class="k">class</span> <span class="nc">Module</span><span class="p">(</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -743,8 +743,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span> <span class="o">=</span> <span class="n">build</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Forwards call to the passed-in build function.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Forwards call to the passed-in build function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -780,7 +780,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

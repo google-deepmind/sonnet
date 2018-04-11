@@ -1575,213 +1575,23 @@ sharing.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.conv.DepthwiseConv2D">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">DepthwiseConv2D</code><span class="sig-paren">(</span><em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_2d_depthwise'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#DepthwiseConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Spatial depthwise 2D convolution module, including bias.</p>
 <p>This acts as a light wrapper around the TensorFlow ops
 <code class="docutils literal notranslate"><span class="pre">tf.nn.depthwise_conv2d</span></code>, abstracting away variable creation and
 sharing.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier">
-<code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the channel multiplier.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.data_format">
-<code class="descname">data_format</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.data_format" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the data format.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#DepthwiseConv2D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
-<p>This provides the user with a way of knowing the initializer keys that
-are available without having to instantiate a sonnet module. Subclasses
-may override this class method if they need additional arguments to
-determine what initializer keys may be provided.</p>
-<p>Returns: Set with strings corresponding to the strings that may be
-passed to the constructor.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.input_channels">
-<code class="descname">input_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.input_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of input channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.DepthwiseConv2D.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.InPlaneConv2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">InPlaneConv2D</code><span class="sig-paren">(</span><em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='in_plane_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#InPlaneConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">InPlaneConv2D</code><span class="sig-paren">(</span><em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='in_plane_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#InPlaneConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Applies an in-plane convolution to each channel with tied filter
 weights.</p>
 <p>This acts as a light wrapper around the TensorFlow op
 <code class="docutils literal notranslate"><span class="pre">tf.nn.depthwise_conv2d</span></code>; it differs from the DepthWiseConv2D module
 in that it has tied weights (i.e. the same filter) for all the in-out
 channel pairs.</p>
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.get_possible_initializer_keys">
-<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#InPlaneConv2D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
-<p>This provides the user with a way of knowing the initializer keys that
-are available without having to instantiate a sonnet module. Subclasses
-may override this class method if they need additional arguments to
-determine what initializer keys may be provided.</p>
-<p>Returns: Set with strings corresponding to the strings that may be
-passed to the constructor.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.input_channels">
-<code class="descname">input_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.input_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of input channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels i.e. number of input channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.InPlaneConv2D.w">
-<code class="descname">w</code><a class="headerlink" href="#sonnet.python.modules.conv.InPlaneConv2D.w" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the weight matrix.</p>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -2300,7 +2110,7 @@ passed to the constructor.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.ConvLSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>skip_connection=False</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>Convolutional LSTM.</p>
 <dl class="attribute">
@@ -3618,7 +3428,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

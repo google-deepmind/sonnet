@@ -238,8 +238,8 @@
       <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span>
           <span class="p">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_F_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_I_DIAG</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">W_O_DIAG</span><span class="p">})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_projection</span><span class="p">:</span>
-      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">})</span></div>
-    <span class="k">return</span> <span class="n">possible_keys</span>
+      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">W_H_PROJECTION</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">possible_keys</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the LSTM module into the graph.</span>
@@ -386,8 +386,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">use_layer_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span>
+    <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span></div>
 
 
 <div class="viewcode-block" id="RecurrentDropoutWrapper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.RecurrentDropoutWrapper">[docs]</a><span class="k">class</span> <span class="nc">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -453,16 +453,16 @@
     <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
         <span class="n">set_dropout_mask</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_indexes</span><span class="p">,</span> <span class="n">core_initial_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_probs</span><span class="p">)</span>
-</div>
-    <span class="k">return</span> <span class="n">core_initial_state</span><span class="p">,</span> <span class="n">dropout_masks</span>
+
+    <span class="k">return</span> <span class="n">core_initial_state</span><span class="p">,</span> <span class="n">dropout_masks</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dropout_state_size</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div>
 
 
 <div class="viewcode-block" id="lstm_with_recurrent_dropout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.lstm_with_recurrent_dropout">[docs]</a><span class="k">def</span> <span class="nf">lstm_with_recurrent_dropout</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -479,8 +479,8 @@
 <span class="sd">    is the same LSTM without recurrent dropout.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span> <span class="n">lstm</span>
+  <span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="kc">None</span><span class="p">)),</span> <span class="n">lstm</span></div>
 
 
 <div class="viewcode-block" id="ZoneoutWrapper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ZoneoutWrapper">[docs]</a><span class="k">class</span> <span class="nc">ZoneoutWrapper</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -539,16 +539,16 @@
     <span class="sd">&quot;&quot;&quot;Builds the default start state tensor of zeros.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
         <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">,</span>
-        <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span></div>
-        <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">trainable_initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
+        <span class="n">trainable_regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">state_size</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div>
 
 
 <div class="viewcode-block" id="lstm_with_zoneout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.lstm_with_zoneout">[docs]</a><span class="k">def</span> <span class="nf">lstm_with_zoneout</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">keep_prob_c</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">keep_prob_h</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -571,8 +571,8 @@
   <span class="n">lstm</span> <span class="o">=</span> <span class="n">LSTM</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   <span class="n">keep_probs</span> <span class="o">=</span> <span class="n">LSTMState</span><span class="p">(</span><span class="n">keep_prob_h</span><span class="p">,</span> <span class="n">keep_prob_c</span><span class="p">)</span>
   <span class="n">train_lstm</span> <span class="o">=</span> <span class="n">ZoneoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">test_lstm</span> <span class="o">=</span> <span class="n">ZoneoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">train_lstm</span><span class="p">,</span> <span class="n">test_lstm</span>
+  <span class="n">test_lstm</span> <span class="o">=</span> <span class="n">ZoneoutWrapper</span><span class="p">(</span><span class="n">lstm</span><span class="p">,</span> <span class="n">keep_probs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">train_lstm</span><span class="p">,</span> <span class="n">test_lstm</span></div>
 
 
 <div class="viewcode-block" id="BatchNormLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM">[docs]</a><span class="k">class</span> <span class="nc">BatchNormLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -801,8 +801,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      snt.RNNCore wrapping this class with the extra input(s) added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">(</span></div>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BatchNormLSTM</span><span class="o">.</span><span class="n">CoreWithExtraBuildArgs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BatchNormLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span>
@@ -848,8 +848,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_batch_norm_x</span><span class="p">:</span>
       <span class="n">possible_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">GAMMA_X</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">use_batch_norm_c</span><span class="p">:</span>
-      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">GAMMA_C</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">BETA_C</span><span class="p">})</span></div>
-    <span class="k">return</span> <span class="n">possible_keys</span>
+      <span class="n">possible_keys</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">cls</span><span class="o">.</span><span class="n">GAMMA_C</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">BETA_C</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">possible_keys</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the LSTM module into the graph.</span>
@@ -1108,8 +1108,8 @@
               <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
               <span class="n">initializers</span><span class="o">=</span><span class="n">trainable_initializers</span><span class="p">,</span>
               <span class="n">regularizers</span><span class="o">=</span><span class="n">trainable_regularizers</span><span class="p">,</span>
-              <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
-        <span class="k">return</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+              <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state_scope</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span></div>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1203,8 +1203,8 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">case</span><span class="p">(</span><span class="n">pred_fn_pairs</span><span class="p">,</span> <span class="n">create_batch_norm</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>  <span class="c1"># needed for tf.case shape inference</span>
         <span class="k">return</span> <span class="n">out</span>
-      <span class="k">else</span><span class="p">:</span></div>
-        <span class="k">return</span> <span class="n">create_batch_norm</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">create_batch_norm</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BatchNormLSTM.CoreWithExtraBuildArgs"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.CoreWithExtraBuildArgs">[docs]</a>  <span class="k">class</span> <span class="nc">CoreWithExtraBuildArgs</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Wraps an RNNCore so that the build method receives extra args and kwargs.</span>
@@ -1237,8 +1237,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-      <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span></div></div>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span>
+      <span class="sd">&quot;&quot;&quot;`tf.TensorShape` indicating the size of the core output.&quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="o">.</span><span class="n">output_size</span></div></div>
 
 
 <div class="viewcode-block" id="ConvLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ConvLSTM">[docs]</a><span class="k">class</span> <span class="nc">ConvLSTM</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -1246,8 +1246,8 @@
 
 <div class="viewcode-block" id="ConvLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">conv_ndims</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="n">conv_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_conv_class</span><span class="p">(</span><span class="n">conv_ndims</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">conv_class</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="p">)</span>
+    <span class="n">conv_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_conv_class</span><span class="p">(</span><span class="n">conv_ndims</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">conv_class</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="p">)</span></div>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_get_conv_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">conv_ndims</span><span class="p">):</span>
@@ -1269,7 +1269,6 @@
                <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">conv</span><span class="o">.</span><span class="n">SAME</span><span class="p">,</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">skip_connection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1292,8 +1291,6 @@
 <span class="sd">          convolution. Cannot be &gt; 1 if any of stride is also &gt; 1.</span>
 <span class="sd">      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.</span>
 <span class="sd">      use_bias: Use bias in convolutions.</span>
-<span class="sd">      skip_connection: If set to `True`, concatenate the input to the output</span>
-<span class="sd">          of the conv LSTM. Default: `False`.</span>
 <span class="sd">      forget_bias: Forget bias.</span>
 <span class="sd">      initializers: Dict containing ops to initialize the convolutional weights.</span>
 <span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
@@ -1314,9 +1311,6 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_conv_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_conv_class</span><span class="p">(</span><span class="n">conv_ndims</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">skip_connection</span> <span class="ow">and</span> <span class="n">stride</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`stride` needs to be 1 when using skip connection&quot;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">conv_ndims</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid input_shape </span><span class="si">{}</span><span class="s2"> for conv_ndims=</span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
           <span class="n">input_shape</span><span class="p">,</span> <span class="n">conv_ndims</span><span class="p">))</span>
@@ -1330,7 +1324,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">padding</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connection</span> <span class="o">=</span> <span class="n">skip_connection</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">initializers</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">partitioners</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">regularizers</span>
@@ -1338,8 +1331,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span> <span class="o">//=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connection</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_new_convolution</span><span class="p">)</span>
 
@@ -1385,22 +1376,19 @@
     <span class="n">next_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">forget_gate</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span><span class="p">)</span> <span class="o">*</span> <span class="n">cell</span>
     <span class="n">next_cell</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">input_gate</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">next_input</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">next_cell</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">output_gate</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_connection</span><span class="p">:</span>
-      <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">output</span><span class="p">,</span> <span class="n">inputs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
-    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Conv1DLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.Conv1DLSTM">[docs]</a><span class="k">class</span> <span class="nc">Conv1DLSTM</span><span class="p">(</span><span class="n">ConvLSTM</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;1D convolutional LSTM.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Conv1DLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.Conv1DLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DLSTM</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_bias</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DLSTM</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_bias</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_1d_lstm&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.&quot;&quot;&quot;</span></div>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conv_ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv1DLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conv_ndims</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Conv2DLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.Conv2DLSTM">[docs]</a><span class="k">class</span> <span class="nc">Conv2DLSTM</span><span class="p">(</span><span class="n">ConvLSTM</span><span class="p">):</span>
@@ -1408,12 +1396,12 @@
 
 
 <div class="viewcode-block" id="Conv2DLSTM.get_possible_initializer_keys"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.Conv2DLSTM.get_possible_initializer_keys">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DLSTM</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">use_bias</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DLSTM</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">use_bias</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_lstm&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.&quot;&quot;&quot;</span></div>
-    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conv_ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">Conv2DLSTM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conv_ndims</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GRU"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.GRU">[docs]</a><span class="k">class</span> <span class="nc">GRU</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -1498,8 +1486,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">      Set with strings corresponding to the strings that may be passed to the</span>
 <span class="sd">        constructor.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GRU</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GRU</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the GRU module into the graph.</span>
@@ -1582,8 +1570,8 @@
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="HighwayCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.HighwayCore">[docs]</a><span class="k">class</span> <span class="nc">HighwayCore</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
@@ -1677,8 +1665,8 @@
           <span class="bp">cls</span><span class="o">.</span><span class="n">WT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
           <span class="bp">cls</span><span class="o">.</span><span class="n">BT</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
           <span class="bp">cls</span><span class="o">.</span><span class="n">WH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">,</span>
-          <span class="bp">cls</span><span class="o">.</span><span class="n">BH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">]</span></div>
-    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+          <span class="bp">cls</span><span class="o">.</span><span class="n">BH</span> <span class="o">+</span> <span class="n">layer_str</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the highway core module into the graph.</span>
@@ -1736,8 +1724,8 @@
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_hidden_size</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="highway_core_with_recurrent_dropout"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.highway_core_with_recurrent_dropout">[docs]</a><span class="k">def</span> <span class="nf">highway_core_with_recurrent_dropout</span><span class="p">(</span>
@@ -1759,8 +1747,8 @@
 <span class="sd">    same highway core without recurrent dropout.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="n">core</span> <span class="o">=</span> <span class="n">HighwayCore</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">),</span> <span class="n">core</span>
+  <span class="n">core</span> <span class="o">=</span> <span class="n">HighwayCore</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">),</span> <span class="n">core</span></div>
 </pre></div>
 
           </div>
@@ -1796,7 +1784,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

@@ -66,23 +66,23 @@
 
 
 <div class="viewcode-block" id="create_beta_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.create_beta_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_beta_initializer</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `beta` in batch norm.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">()</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `beta` in batch norm.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="create_gamma_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.create_gamma_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_gamma_initializer</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `gamma` in batch norm.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">()</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `gamma` in batch norm.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="create_mean_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.create_mean_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_mean_initializer</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `moving_mean` in batch norm.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">()</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `moving_mean` in batch norm.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="create_variance_initializer"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.create_variance_initializer">[docs]</a><span class="k">def</span> <span class="nf">create_variance_initializer</span><span class="p">():</span>
-  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `moving_variance` in batch norm.&quot;&quot;&quot;</span></div>
-  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">()</span>
+  <span class="sd">&quot;&quot;&quot;Returns a default initializer for the `moving_variance` in batch norm.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="BatchNorm"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.BatchNorm">[docs]</a><span class="k">class</span> <span class="nc">BatchNorm</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
@@ -625,8 +625,8 @@
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span>
           <span class="s2">&quot;Batch normalization doesn&#39;t have a scale, so no gamma&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span></div>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span></div>
 </pre></div>
 
           </div>
@@ -662,7 +662,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

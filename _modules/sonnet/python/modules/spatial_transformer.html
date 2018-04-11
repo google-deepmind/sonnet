@@ -133,8 +133,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the shape of the output grid.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span>
+    <span class="sd">&quot;&quot;&quot;Returns a tuple containing the shape of the output grid.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_shape</span></div>
 
 
 <span class="k">def</span> <span class="nf">_create_affine_features</span><span class="p">(</span><span class="n">output_shape</span><span class="p">,</span> <span class="n">source_shape</span><span class="p">):</span>
@@ -487,8 +487,8 @@
       <span class="k">return</span> <span class="n">agw</span><span class="p">(</span><span class="n">inverse_gw_inputs</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;_inverse&#39;</span></div></div>
-    <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">_affine_grid_warper_inverse</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;_inverse&#39;</span>
+    <span class="k">return</span> <span class="n">base</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">_affine_grid_warper_inverse</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="AffineWarpConstraints"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints">[docs]</a><span class="k">class</span> <span class="nc">AffineWarpConstraints</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -575,57 +575,57 @@
       <span class="n">x</span> <span class="o">=</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">additional_constraints</span><span class="p">)</span>
     <span class="n">new_constraints</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_constraints</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">constraints</span><span class="p">):</span>
-      <span class="n">new_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_combine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)])</span></div>
-    <span class="k">return</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">new_constraints</span><span class="p">)</span>
+      <span class="n">new_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_combine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">AffineWarpConstraints</span><span class="p">(</span><span class="n">new_constraints</span><span class="p">)</span></div>
 
   <span class="c1"># Collection of utlities to initialize an AffineGridWarper in 2D and 3D.</span>
 <div class="viewcode-block" id="AffineWarpConstraints.no_constraints"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_constraints">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">no_constraints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">num_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Empty set of constraints for a num_dim-ensional affine transform.&quot;&quot;&quot;</span></div>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),)</span> <span class="o">*</span> <span class="n">num_dim</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Empty set of constraints for a num_dim-ensional affine transform.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_dim</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),)</span> <span class="o">*</span> <span class="n">num_dim</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.translation_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_2d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">translation_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assign contraints on translation components of affine transform in 2d.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span></div>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.translation_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_3d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">translation_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assign contraints on translation components of affine transform in 3d.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span></div>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">]])</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.scale_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.scale_2d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">scale_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assigns contraints on scaling components of affine transform in 2d.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span></div>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.scale_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.scale_3d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">scale_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assigns contraints on scaling components of affine transform in 3d.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span></div>
-                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.shear_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.shear_2d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">shear_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assigns contraints on shear components of affine transform in 2d.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span></div>
-                <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.no_shear_2d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_shear_2d">[docs]</a>  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">no_shear_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span></div>
-    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">shear_2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">no_shear_2d</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">shear_2d</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AffineWarpConstraints.no_shear_3d"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.no_shear_3d">[docs]</a>  <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">no_shear_3d</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assigns contraints on shear components of affine transform in 3d.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">([[</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span></div></div>
-                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]])</span></div></div>
 </pre></div>
 
           </div>
@@ -661,7 +661,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

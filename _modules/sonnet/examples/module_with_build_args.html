@@ -81,8 +81,8 @@
   <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
   <span class="n">outputs</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">BatchFlatten</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
   <span class="n">outputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="n">keep_prob</span><span class="p">)</span>
-  <span class="n">outputs</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span></div>
-  <span class="k">return</span> <span class="n">outputs</span>
+  <span class="n">outputs</span> <span class="o">=</span> <span class="n">snt</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">output_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">outputs</span></div>
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api/sonnet.examples.html#sonnet.examples.module_with_build_args.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">unused_argv</span><span class="p">):</span>
@@ -114,8 +114,8 @@
     <span class="c1"># Check that there is indeed a difference between train_model_outputs and</span>
     <span class="c1"># test_model_outputs.</span>
     <span class="n">train_outputs</span><span class="p">,</span> <span class="n">test_outputs</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">train_model_outputs</span><span class="p">,</span>
-                                            <span class="n">test_model_outputs</span><span class="p">])</span></div>
-    <span class="k">assert</span> <span class="p">(</span><span class="n">train_outputs</span> <span class="o">!=</span> <span class="n">test_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+                                            <span class="n">test_model_outputs</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">train_outputs</span> <span class="o">!=</span> <span class="n">test_outputs</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
   <span class="n">tf</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -154,7 +154,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

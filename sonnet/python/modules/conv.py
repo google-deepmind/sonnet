@@ -2165,7 +2165,7 @@ class DepthwiseConv2D(_ConvND):
                        "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     super(DepthwiseConv2D, self).__init__(
-        output_channels=lambda: self.input_channels * self._channel_multiplier,
+        output_channels=lambda: self.input_channels * self.channel_multiplier,
         kernel_shape=kernel_shape,
         stride=stride, padding=padding, use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
@@ -2191,7 +2191,7 @@ class DepthwiseConv2D(_ConvND):
     # `channel_multiplier` outputs, which are then concatenated together.
     # This results in:
     weight_shape = self.kernel_shape + (self.input_channels,
-                                        self._channel_multiplier)
+                                        self.channel_multiplier)
 
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
@@ -2223,8 +2223,13 @@ class DepthwiseConv2D(_ConvND):
                                      data_format=self.data_format)
     return outputs
 
+  @property
+  def channel_multiplier(self):
+    """Returns the channel multiplier argument."""
+    return self._channel_multiplier
 
-class SeparableConv2D(base.AbstractModule):
+
+class SeparableConv2D(_ConvND):
   """Performs an in-plane convolution to each channel independently.
 
   This acts as a light wrapper around the TensorFlow op
@@ -2289,78 +2294,57 @@ class SeparableConv2D(base.AbstractModule):
       name: Name of the module.
 
     Raises:
-      ValueError: If either `output_channels` or `channel_multiplier` is not an
-          integer or less than 1.
-      base.IncompatibleShapeError: If `kernel_shape` is not an integer or a
-          list of 3 integers.
-      base.IncompatibleShapeError: If `stride` is neither an integer nor a
-          list of 2 or 4 integers.
-      ValueError: If `padding` is not `snt.VALID` or `snt.SAME`;
+      ValueError: If `channel_multiplier` isn't of type (`numbers.Integral` or
+          `tf.Dimension`).
+      ValueError: If `channel_multiplier` is less than 1.
       ValueError: If the given data_format is not a supported format (see
           `SUPPORTED_2D_DATA_FORMATS`).
+      base.IncompatibleShapeError: If the given kernel shape is not an integer;
+          or if the given kernel shape is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given stride is not an integer; or if
+          the given stride is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given rate is not an integer; or if
+          the given rate is not a sequence of two integers.
+      base.IncompatibleShapeError: If a mask is a TensorFlow Tensor with
+          a not fully defined shape.
+      base.NotSupportedError: If rate in any dimension and the stride in any
+          dimension are simultaneously > 1.
+      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
           are not callable.
+      TypeError: If mask is given and it is not convertible to a Tensor.
       ValueError: If the passed-in data_format doesn't have a channel dimension.
     """
-    super(SeparableConv2D, self).__init__(custom_getter=custom_getter,
-                                          name=name)
-
-    if not isinstance(output_channels, numbers.Integral) or output_channels < 1:
-      raise ValueError("output_channels (={}), must be integer >= 1".format(
-          output_channels))
-    self._output_channels = output_channels
-
-    if (not isinstance(channel_multiplier, numbers.Integral) or
-        channel_multiplier < 1):
-      raise ValueError("channel_multiplier ({}), must be integer >= 1".format(
+    if (not isinstance(channel_multiplier, numbers.Integral) and
+        not isinstance(channel_multiplier, tf.Dimension)):
+      raise ValueError(("channel_multiplier ({}), must be of type "
+                        "(`tf.Dimension`, `numbers.Integral`).").format(
+                            channel_multiplier))
+    if channel_multiplier < 1:
+      raise ValueError("channel_multiplier ({}), must be >= 1".format(
           channel_multiplier))
-    self._channel_multiplier = channel_multiplier
 
-    self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, 2,
-                                                          "kernel")
+    self._channel_multiplier = channel_multiplier
 
     if data_format not in SUPPORTED_2D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
                        "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
-    self._data_format = data_format
-
-    # We want to support passing native strides akin to [1, m, n, 1].
-    if isinstance(stride, collections.Sequence) and len(stride) == 4:
-      if self._data_format == DATA_FORMAT_NHWC:
-        if not stride[0] == stride[3] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and last element must be 1.")
-      elif self._data_format == DATA_FORMAT_NCHW:
-        if not stride[0] == stride[1] == 1:
-          raise base.IncompatibleShapeError(
-              "Invalid stride: First and second element must be 1.")
-      self._stride = tuple(stride)
-    else:
-      self._stride = _fill_and_one_pad_stride(
-          stride, 2, data_format=self._data_format)
-
-    self._padding = _verify_padding(padding)
-    self._use_bias = use_bias
-    self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
-    self._initializers = util.check_initializers(
-        initializers, self.possible_keys)
-    self._partitioners = util.check_partitioners(
-        partitioners, self.possible_keys)
-    self._regularizers = util.check_regularizers(
-        regularizers, self.possible_keys)
-    self._input_shape = None  # Determined in build() from the input.
-    self._input_channels = None  # Determined in build() from the input.
-
-    self._channel_index = _find_channel_index(self._data_format)
+    super(SeparableConv2D, self).__init__(
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, data_format=data_format,
+        custom_getter=custom_getter, name=name)
 
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
     return {"w_dw", "w_pw", "b"} if use_bias else {"w_dw", "w_pw"}
 
-  def _build(self, inputs):
+  def _construct_w(self, inputs):
     """Connects the module into the graph, with input Tensor `inputs`.
 
     Args:
@@ -2369,32 +2353,16 @@ class SeparableConv2D(base.AbstractModule):
           and of type `tf.float16` or `tf.float32`.
 
     Returns:
-      A 4D Tensor of shape:
-          [batch_size, output_height, output_width, output_channels]
-          with the same dtype as `inputs`.
-
-    Raises:
-      ValueError: If connecting the module into the graph any time after the
-          first time and the inferred input size does not match previous
-          invocations.
-      base.IncompatibleShapeError: If the input tensor has the wrong number
-          of dimensions.
-      base.UnderspecifiedError: If the channel dimension of `inputs` isn't
-          defined.
-      ValueError: If `channel_multiplier` * `input_channels` >
-          `output_channels`, which means that the separable convolution is
-          overparameterized.
-      TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
+      A tuple of two 4D Tensors, each with the same dtype as `inputs`:
+        1. w_dw, the depthwise weight matrix, of shape:
+          [kernel_size, input_channels, channel_multiplier]
+        2. w_pw, the pointwise weight matrix, of shape:
+          [1, 1, channel_multiplier * input_channels, output_channels].
     """
-    _verify_inputs(inputs, self._channel_index, self._data_format)
-    self._input_shape = tuple(inputs.get_shape().as_list())
-    self._input_channels = self._input_shape[self._channel_index]
-
-    depthwise_weight_shape = (self._kernel_shape[0], self._kernel_shape[1],
-                              self._input_channels, self._channel_multiplier)
-    pointwise_input_size = self._channel_multiplier * self._input_channels
-    pointwise_weight_shape = (1, 1, pointwise_input_size, self._output_channels)
+    depthwise_weight_shape = self.kernel_shape + (self.input_channels,
+                                                  self.channel_multiplier)
+    pointwise_input_size = self.channel_multiplier * self.input_channels
+    pointwise_weight_shape = (1, 1, pointwise_input_size, self.output_channels)
 
     if "w_dw" not in self._initializers:
       fan_in_shape = depthwise_weight_shape[:2]
@@ -2406,124 +2374,60 @@ class SeparableConv2D(base.AbstractModule):
       self._initializers["w_pw"] = create_weight_initializer(fan_in_shape,
                                                              dtype=inputs.dtype)
 
-    self._w_dw = tf.get_variable(
+    w_dw = tf.get_variable(
         "w_dw",
         shape=depthwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self._initializers["w_dw"],
-        partitioner=self._partitioners.get("w_dw", None),
-        regularizer=self._regularizers.get("w_dw", None))
-    self._w_pw = tf.get_variable(
+        initializer=self.initializers["w_dw"],
+        partitioner=self.partitioners.get("w_dw", None),
+        regularizer=self.regularizers.get("w_dw", None))
+
+    w_pw = tf.get_variable(
         "w_pw",
         shape=pointwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self._initializers["w_pw"],
-        partitioner=self._partitioners.get("w_pw", None),
-        regularizer=self._regularizers.get("w_pw", None))
+        initializer=self.initializers["w_pw"],
+        partitioner=self.partitioners.get("w_pw", None),
+        regularizer=self.regularizers.get("w_pw", None))
 
+    return w_dw, w_pw
+
+  def _apply_conv(self, inputs, w):
+    """Apply a `separable_conv2d` operation on `inputs` using `w`.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+      w: A tuple of weight matrices of the same type as `inputs`, the first
+        being the depthwise weight matrix, and the second being the pointwise
+        weight matrix.
+
+    Returns:
+      outputs: The result of the convolution operation on `inputs`.
+    """
+    w_dw, w_pw = w
     outputs = tf.nn.separable_conv2d(inputs,
-                                     self._w_dw,
-                                     self._w_pw,
-                                     strides=self._stride,
+                                     w_dw,
+                                     w_pw,
+                                     strides=self.stride,
                                      padding=self._padding,
-                                     data_format=self._data_format)
-
-    if self._use_bias:
-      self._b, outputs = _apply_bias(
-          inputs, outputs, self._channel_index, self._data_format,
-          self._output_channels, self._initializers, self._partitioners,
-          self._regularizers)
-
+                                     data_format=self.data_format)
     return outputs
 
   @property
-  def input_channels(self):
-    """Returns the number of input channels."""
-    self._ensure_is_connected()
-    return self._input_channels
-
-  @property
-  def output_channels(self):
-    """Returns the number of output channels."""
-    return self._output_channels
-
-  @property
   def channel_multiplier(self):
-    """Returns the channel multiplier."""
+    """Returns the channel multiplier argument."""
     return self._channel_multiplier
-
-  @property
-  def input_shape(self):
-    """Returns the input shape."""
-    self._ensure_is_connected()
-    return self._input_shape
-
-  @property
-  def kernel_shape(self):
-    """Returns the kernel shape."""
-    return self._kernel_shape
-
-  @property
-  def stride(self):
-    """Returns the stride."""
-    return self._stride
-
-  @property
-  def padding(self):
-    """Returns the padding algorithm."""
-    return self._padding
 
   @property
   def w_dw(self):
     """Returns the Variable containing the depthwise weight matrix."""
     self._ensure_is_connected()
-    return self._w_dw
+    return self._w[0]
 
   @property
   def w_pw(self):
     """Returns the Variable containing the pointwise weight matrix."""
     self._ensure_is_connected()
-    return self._w_pw
+    return self._w[1]
 
-  @property
-  def b(self):
-    """Returns the Variable containing the bias.
-
-    Returns:
-      Variable object containing the bias, from the most recent __call__.
-
-    Raises:
-      base.NotConnectedError: If the module has not been connected to the graph
-          yet, meaning the variables do not exist.
-      AttributeError: If the module does not use bias.
-    """
-    self._ensure_is_connected()
-    if not self._use_bias:
-      raise AttributeError(
-          "No bias Variable in SeparableConv2D Module when `use_bias=False`.")
-    return self._b
-
-  @property
-  def has_bias(self):
-    """Returns `True` if bias Variable is present in the module."""
-    return self._use_bias
-
-  @property
-  def initializers(self):
-    """Returns the initializers dictionary."""
-    return self._initializers
-
-  @property
-  def partitioners(self):
-    """Returns the partitioners dictionary."""
-    return self._partitioners
-
-  @property
-  def regularizers(self):
-    """Returns the regularizers dictionary."""
-    return self._regularizers
-
-  @property
-  def data_format(self):
-    """Returns the data format."""
-    return self._data_format

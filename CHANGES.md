@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.20 - Tuesday, 24. April 2018
+
+* Merge SeparableConv2D into _ConvND.
+* Fix brnn_ptb for python3.
+
 ## Version 1.19 - Tuesday, 10. April 2018
 
 * Refactoring of convolutional network modules. `snt.InPlaneConv2D` now uses

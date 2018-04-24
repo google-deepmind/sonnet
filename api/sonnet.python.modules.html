@@ -1580,6 +1580,12 @@ sharing.</p>
 <p>This acts as a light wrapper around the TensorFlow ops
 <code class="docutils literal notranslate"><span class="pre">tf.nn.depthwise_conv2d</span></code>, abstracting away variable creation and
 sharing.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier">
+<code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the channel multiplier argument.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -1597,32 +1603,15 @@ channel pairs.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.conv.SeparableConv2D">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='Separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Performs an in-plane convolution to each channel independently.</p>
 <p>This acts as a light wrapper around the TensorFlow op
 <code class="docutils literal notranslate"><span class="pre">tf.nn.separable_conv2d</span></code>, abstracting away variable creation and
 sharing.</p>
 <dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.b">
-<code class="descname">b</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the Variable containing the bias.</p>
-<p>Returns: Variable object containing the bias, from the most recent
-<strong>call</strong>.</p>
-<p>Raises: base.NotConnectedError: If the module has not been connected to
-the graph yet, meaning the variables do not exist. AttributeError: If
-the module does not use bias.</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="sonnet.python.modules.conv.SeparableConv2D.channel_multiplier">
 <code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the channel multiplier.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.data_format">
-<code class="descname">data_format</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.data_format" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the data format.</p>
+<dd><p>Returns the channel multiplier argument.</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -1635,66 +1624,6 @@ may override this class method if they need additional arguments to
 determine what initializer keys may be provided.</p>
 <p>Returns: Set with strings corresponding to the strings that may be
 passed to the constructor.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.has_bias">
-<code class="descname">has_bias</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.has_bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if bias Variable is present in the module.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.initializers">
-<code class="descname">initializers</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.initializers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initializers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.input_channels">
-<code class="descname">input_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.input_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of input channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.input_shape">
-<code class="descname">input_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.input_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the input shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.kernel_shape">
-<code class="descname">kernel_shape</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.kernel_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the kernel shape.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.output_channels">
-<code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.output_channels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of output channels.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.padding">
-<code class="descname">padding</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.padding" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the padding algorithm.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.partitioners">
-<code class="descname">partitioners</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.partitioners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the partitioners dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.regularizers">
-<code class="descname">regularizers</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.regularizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the regularizers dictionary.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="sonnet.python.modules.conv.SeparableConv2D.stride">
-<code class="descname">stride</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D.stride" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the stride.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3428,7 +3357,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

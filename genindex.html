@@ -117,8 +117,6 @@
       <ul>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.b">(sonnet.python.modules.basic.Linear attribute)</a>
 </li>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.b">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
       </ul></li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.B_GATES">B_GATES (sonnet.python.modules.gated_rnn.BatchNormLSTM attribute)</a>
 
@@ -152,10 +150,10 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.BatchNorm.BETA">BETA (sonnet.python.modules.batch_norm.BatchNorm attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.BatchNorm.beta">beta (sonnet.python.modules.batch_norm.BatchNorm attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm_v2.BatchNormV2.BETA">BETA (sonnet.python.modules.batch_norm_v2.BatchNormV2 attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm_v2.BatchNormV2.beta">beta (sonnet.python.modules.batch_norm_v2.BatchNormV2 attribute)</a>
@@ -206,8 +204,12 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTMState.cell">cell (sonnet.python.modules.gated_rnn.LSTMState attribute)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.channel_multiplier">channel_multiplier (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D.channel_multiplier">channel_multiplier (sonnet.python.modules.conv.DepthwiseConv2D attribute)</a>
+
+      <ul>
+        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.channel_multiplier">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.dataset_shakespeare.TokenDataSource.CHAR_EOS">CHAR_EOS (sonnet.examples.dataset_shakespeare.TokenDataSource attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.check_initializers">check_initializers() (in module sonnet.python.modules.util)</a>
@@ -254,10 +256,10 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv2DTranspose">Conv2DTranspose (class in sonnet.python.modules.conv)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3D">Conv3D (class in sonnet.python.modules.conv)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3D">Conv3D (class in sonnet.python.modules.conv)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.Conv3DTranspose">Conv3DTranspose (class in sonnet.python.modules.conv)</a>
 </li>
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNet.conv_modules">conv_modules (sonnet.python.modules.nets.alexnet.AlexNet attribute)</a>
@@ -328,8 +330,6 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.data_format">data_format (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.brnn_ptb.DataOps">DataOps (class in sonnet.examples.brnn_ptb)</a>
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.dataset_shakespeare.TokenDataSource.decode">decode() (sonnet.examples.dataset_shakespeare.TokenDataSource method)</a>
@@ -483,19 +483,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.has_bias">has_bias (sonnet.python.modules.basic.Linear attribute)</a>
-
-      <ul>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.has_bias">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
-      </ul></li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.has_variable_scope">has_variable_scope() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTMState.hidden">hidden (sonnet.python.modules.gated_rnn.LSTMState attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.VanillaRNN.HIDDEN_TO_HIDDEN">HIDDEN_TO_HIDDEN (sonnet.python.modules.basic_rnn.VanillaRNN attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.VanillaRNN.hidden_to_hidden_linear">hidden_to_hidden_linear (sonnet.python.modules.basic_rnn.VanillaRNN attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.VanillaRNN.hidden_to_hidden_variables">hidden_to_hidden_variables (sonnet.python.modules.basic_rnn.VanillaRNN attribute)</a>
@@ -541,8 +537,6 @@
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm_v2.BatchNormV2.initializers">(sonnet.python.modules.batch_norm_v2.BatchNormV2 attribute)</a>
 </li>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.initializers">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.layer_norm.LayerNorm.initializers">(sonnet.python.modules.layer_norm.LayerNorm attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.alexnet.AlexNet.initializers">(sonnet.python.modules.nets.alexnet.AlexNet attribute)</a>
@@ -556,16 +550,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.InPlaneConv2D">InPlaneConv2D (class in sonnet.python.modules.conv)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.input_channels">input_channels (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.AddBias.input_shape">input_shape (sonnet.python.modules.basic.AddBias attribute)</a>
 
       <ul>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.BatchReshape.input_shape">(sonnet.python.modules.basic.BatchReshape attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.input_shape">(sonnet.python.modules.basic.Linear attribute)</a>
-</li>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.input_shape">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.input_shape">(sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
@@ -593,10 +583,6 @@
 
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.kernel_shape">kernel_shape (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
-  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.kernel_shapes">kernel_shapes (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
@@ -758,12 +744,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.examples.html#sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask.obs">obs (sonnet.examples.dataset_shakespeare.SequenceDataOpsNoMask attribute)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.output_channels">output_channels (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-
-      <ul>
-        <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.output_channels">(sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
+      <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.output_channels">output_channels (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
-      </ul></li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.block_matrix.BlockTriangularMatrix.output_shape">output_shape (sonnet.python.modules.block_matrix.BlockTriangularMatrix attribute)</a>
 
       <ul>
@@ -824,8 +806,6 @@
 </li>
       <li><a href="api/sonnet.python.ops.html#sonnet.python.ops.nest.pack_sequence_as">pack_sequence_as() (in module sonnet.python.ops.nest)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.padding">padding (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
-</li>
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.paddings">paddings (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_errors.ParentNotBuiltError">ParentNotBuiltError</a>
@@ -836,8 +816,6 @@
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.BatchNorm.partitioners">(sonnet.python.modules.batch_norm.BatchNorm attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm_v2.BatchNormV2.partitioners">(sonnet.python.modules.batch_norm_v2.BatchNormV2 attribute)</a>
-</li>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.partitioners">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.layer_norm.LayerNorm.partitioners">(sonnet.python.modules.layer_norm.LayerNorm attribute)</a>
 </li>
@@ -926,8 +904,6 @@
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.BatchNorm.regularizers">(sonnet.python.modules.batch_norm.BatchNorm attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm_v2.BatchNormV2.regularizers">(sonnet.python.modules.batch_norm_v2.BatchNormV2 attribute)</a>
-</li>
-        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.regularizers">(sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.layer_norm.LayerNorm.regularizers">(sonnet.python.modules.layer_norm.LayerNorm attribute)</a>
 </li>
@@ -1042,10 +1018,10 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#module-sonnet.python.modules.embed">sonnet.python.modules.embed (module)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#module-sonnet.python.modules.experimental">sonnet.python.modules.experimental (module)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sonnet.python.modules.html#module-sonnet.python.modules.experimental">sonnet.python.modules.experimental (module)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#module-sonnet.python.modules.gated_rnn">sonnet.python.modules.gated_rnn (module)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#module-sonnet.python.modules.layer_norm">sonnet.python.modules.layer_norm (module)</a>
@@ -1123,8 +1099,6 @@
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.bayes_by_backprop.stochastic_kl_builder">stochastic_kl_builder() (in module sonnet.python.custom_getters.bayes_by_backprop)</a>
 </li>
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.stop_gradient.stop_gradient">stop_gradient() (in module sonnet.python.custom_getters.stop_gradient)</a>
-</li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.SeparableConv2D.stride">stride (sonnet.python.modules.conv.SeparableConv2D attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.strides">strides (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
@@ -1384,7 +1358,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

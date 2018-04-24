@@ -12,6 +12,14 @@ sonnet.examples.brnn\_ptb module
     :undoc-members:
     :show-inheritance:
 
+sonnet.examples.brnn\_ptb\_test module
+--------------------------------------
+
+.. automodule:: sonnet.examples.brnn_ptb_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 sonnet.examples.dataset\_shakespeare module
 -------------------------------------------
 

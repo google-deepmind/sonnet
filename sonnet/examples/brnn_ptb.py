@@ -35,6 +35,7 @@ import os
 # Dependency imports
 
 import numpy as np
+import six
 import sonnet as snt
 from sonnet.examples import ptb_reader
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
@@ -312,7 +313,7 @@ def build_modules(is_training, vocab_size):
                     custom_getter=lstm_bbb_custom_getter,
                     forget_bias=0.0,
                     name="lstm_layer_{}".format(i))
-           for i in xrange(FLAGS.n_layers)]
+           for i in six.moves.range(FLAGS.n_layers)]
   rnn_core = snt.DeepRNN(
       cores,
       skip_connections=False,
@@ -478,7 +479,8 @@ def train(logdir):
         num_updates_v, ptb_train.num_batches)
     tf.logging.info("On start, epoch: {}\t step: {}".format(
         epoch_idx_start, step_idx_start))
-    for epoch_idx in xrange(epoch_idx_start, FLAGS.num_training_epochs):
+    for epoch_idx in six.moves.range(epoch_idx_start,
+                                     FLAGS.num_training_epochs):
       tf.logging.info("Beginning Epoch {}/{}".format(
           epoch_idx, FLAGS.num_training_epochs))
       tf.logging.info(
@@ -487,7 +489,7 @@ def train(logdir):
       valid_cost = 0
       valid_steps = 0
       _run_session_with_no_hooks(sess, zero_valid_state)
-      for _ in xrange(ptb_valid.num_batches):
+      for _ in six.moves.range(ptb_valid.num_batches):
         valid_cost_v, num_updates_v = _run_session_with_no_hooks(
             sess, [valid_loss, global_step])
         valid_cost += valid_cost_v
@@ -503,7 +505,7 @@ def train(logdir):
       # Run a training epoch.
       epoch_cost = 0
       epoch_steps = 0
-      for batch_idx in xrange(step_idx_start, ptb_train.num_batches):
+      for batch_idx in six.moves.range(step_idx_start, ptb_train.num_batches):
         scalars_res, num_updates_v = sess.run(
             [log_ops_to_run["scalar"], global_step_and_train])
         epoch_cost += scalars_res["task_loss"]
@@ -517,7 +519,9 @@ def train(logdir):
           scalars_res, strings_res = _run_session_with_no_hooks(
               sess, [log_ops_to_run["scalar"], log_ops_to_run["text"]])
           tf.logging.info("Num weight updates: {}".format(num_updates_v))
-          for name, result in scalars_res.items() + strings_res.items():
+          for name, result in six.iteritems(scalars_res):
+            tf.logging.info("{}: {}".format(name, result))
+          for name, result in six.iteritems(strings_res):
             tf.logging.info("{}: {}".format(name, result))
 
       word_level_perplexity = np.exp(epoch_cost / epoch_steps)

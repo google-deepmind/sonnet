@@ -76,3 +76,13 @@ py_test(
         ":rnn_shakespeare",
     ],
 )
+
+py_test(
+    name = "brnn_ptb_test",
+    size = "large",
+    srcs = ["brnn_ptb_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":brnn_ptb",
+    ],
+)

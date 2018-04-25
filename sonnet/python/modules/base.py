@@ -191,7 +191,8 @@ class AbstractModule(object):
     if name is None:
       name = util.to_snake_case(self.__class__.__name__)
     elif not isinstance(name, six.string_types):
-      raise TypeError("Name must be a string.")
+      raise TypeError("Name must be a string, not {} of type {}.".format(
+          name, type(name)))
 
     self._connected_subgraphs = []
 

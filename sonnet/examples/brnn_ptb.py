@@ -347,7 +347,7 @@ def build_logits(data_ops, embed_layer, rnn_core, output_linear, name_prefix):
 
   # Construct variables for holding the RNN state.
   initial_rnn_state = nest.map_structure(
-      lambda t: tf.get_local_variable(  # pylint: disable=g-long-lambda
+      lambda t: tf.get_local_variable(  # pylint: disable long lambda warning
           "{}/rnn_state/{}".format(name_prefix, t.op.name), initializer=t),
       rnn_core.initial_state(FLAGS.batch_size))
   assign_zero_rnn_state = nest.map_structure(

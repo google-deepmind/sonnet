@@ -549,6 +549,61 @@ def log_variables(variables=None):
     tf.logging.info(row)
 
 
+def _num_bytes_to_human_readable(num_bytes):
+  """Returns human readable string of how much memory `num_bytes` fills."""
+  if num_bytes < (2 ** 10):
+    return "%d B" % num_bytes
+  elif num_bytes < (2 ** 20):
+    return "%.3f KB" % (float(num_bytes) / (2 ** 10))
+  elif num_bytes < (2 ** 30):
+    return "%.3f MB" % (float(num_bytes) / (2 ** 20))
+  else:
+    return "%.3f GB" % (float(num_bytes) / (2 ** 30))
+
+
+def summarize_variables(variables=None):
+  """Logs a summary of variable information.
+
+  This function groups Variables by dtype and prints out the number of Variables
+  and the total number of scalar values for each datatype, as well as the total
+  memory consumed.
+
+  For Variables of type tf.string, the memory usage cannot be accurately
+  calculated from the Graph as the memory requirements change based on what
+  strings are actually stored, which can only be determined inside a session.
+  In this case, the amount of memory used to stored the pointers to the strings
+  is logged, along with a warning.
+
+  Args:
+    variables: iterable of variables; if not provided, then all variables
+      (in the default graph) are summarized.
+  """
+  if variables is None:
+    variables = tf.global_variables() + tf.local_variables()
+  total_num_scalars = 0
+  total_num_bytes = 0
+  # Sort by string representation of type name, so output is deterministic.
+  unique_types_ordered = sorted(set([v.dtype.base_dtype for v in variables]),
+                                key=lambda dtype: "%r" % dtype)
+  for dtype in unique_types_ordered:
+    if dtype == tf.string:
+      tf.logging.warning(
+          "NB: string Variables present. The memory usage for these  Variables "
+          "will not be accurately computed as it depends on the exact strings "
+          "stored in a particular session.")
+    vars_of_type = [v for v in variables if v.dtype.base_dtype == dtype]
+    num_scalars = sum(v.shape.num_elements() for v in vars_of_type)
+    num_bytes = num_scalars * dtype.size
+    tf.logging.info("%r: %d variables comprising %d scalars, %s",
+                    dtype, len(vars_of_type), num_scalars,
+                    _num_bytes_to_human_readable(num_bytes))
+    total_num_scalars += num_scalars
+    total_num_bytes += num_bytes
+  tf.logging.info("Total: %d variables comprising %d scalars, %s",
+                  len(variables), total_num_scalars,
+                  _num_bytes_to_human_readable(total_num_bytes))
+
+
 def reuse_variables(method):
   """Wraps an arbitrary method so it does variable sharing.
 

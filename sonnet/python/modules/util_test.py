@@ -24,6 +24,7 @@ import tempfile
 
 # Dependency imports
 from absl.testing import parameterized
+import mock
 import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
@@ -430,6 +431,48 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
       with tf.variable_scope("m2"):
         v2 = tf.get_local_variable("v2", shape=[5, 6])
     snt.log_variables([v2, v1])
+
+  @parameterized.parameters(
+      (5, "5 B"),
+      (1023, "1023 B"),
+      (1024, "1.000 KB"),
+      (1536, "1.500 KB"),
+      (2 ** 20, "1.000 MB"),
+      (2 ** 21, "2.000 MB"),
+      (2 ** 30, "1.000 GB"),
+      (2 ** 31, "2.000 GB"))
+  def testNumBytesToHumanReadable(self, num_bytes, expected_string):
+    self.assertEqual(util._num_bytes_to_human_readable(num_bytes),
+                     expected_string)
+
+  # pylint: disable long lambda warning
+  @parameterized.parameters(
+      (lambda: tf.get_variable("a", dtype=tf.int64, shape=1024),
+       ["tf.int64: 1 variables comprising 1024 scalars, 8.000 KB",
+        "Total: 1 variables comprising 1024 scalars, 8.000 KB"]),
+
+      (lambda: (tf.get_variable("b", dtype=tf.float32, shape=100000),
+                tf.get_variable("c", dtype=tf.float32, shape=5000)),
+       ["tf.float32: 2 variables comprising 105000 scalars, 410.156 KB",
+        "Total: 2 variables comprising 105000 scalars, 410.156 KB"]),
+
+      (lambda: (tf.get_variable("d", dtype=tf.int16, shape=1024),
+                tf.get_variable("e", dtype=tf.int64, shape=2048)),
+       ["tf.int16: 1 variables comprising 1024 scalars, 2.000 KB",
+        "tf.int64: 1 variables comprising 2048 scalars, 16.000 KB",
+        "Total: 2 variables comprising 3072 scalars, 18.000 KB"])
+  )
+  def testSummarizeVariables(self, graph_creator_fn, expected_strings):
+    with mock.patch.object(tf.logging, "info") as mocked_logging_info:
+      graph_creator_fn()
+      snt.summarize_variables()
+      self.assertTrue(len(expected_strings),
+                      len(mocked_logging_info.call_args_list))
+      for expected, actual in zip(expected_strings,
+                                  mocked_logging_info.call_args_list):
+        actual_args = actual[0]  # The rest of this structure is empty kwargs.
+        self.assertEqual(expected, actual_args[0] % actual_args[1:])
+  # pylint: enable long lambda warning
 
 
 class ReuseVarsTest(tf.test.TestCase):

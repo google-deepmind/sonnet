@@ -52,7 +52,6 @@ from sonnet.python.modules.base_errors import NotInitializedError
 from sonnet.python.modules.base_errors import NotSupportedError
 from sonnet.python.modules.base_errors import ParentNotBuiltError
 from sonnet.python.modules.base_errors import UnderspecifiedError
-from sonnet.python.modules.base_errors import UnderspecifiedError
 from sonnet.python.modules.base_info import SONNET_COLLECTION_NAME
 from sonnet.python.modules.basic import AddBias
 from sonnet.python.modules.basic import BatchApply
@@ -122,6 +121,7 @@ from sonnet.python.modules.util import get_variables_in_scope
 from sonnet.python.modules.util import has_variable_scope
 from sonnet.python.modules.util import log_variables
 from sonnet.python.modules.util import reuse_variables
+from sonnet.python.modules.util import summarize_variables
 from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer

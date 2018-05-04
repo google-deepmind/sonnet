@@ -71,6 +71,7 @@ py_library(
         "modules/nets/convnet.py",
         "modules/nets/dilation.py",
         "modules/nets/mlp.py",
+        "modules/nets/vqvae.py",
         "modules/pondering_rnn.py",
         "modules/residual.py",
         "modules/rnn_core.py",
@@ -153,6 +154,7 @@ module_tests = [
     ("sequential_test", "", "small"),
     ("spatial_transformer_test", "", "small"),
     ("util_test", "", "small"),
+    ("vqvae_test", "nets/", "small"),
 ]
 
 [py_test(

@@ -1,0 +1,81 @@
+"""Tests for sonnet.python.modules.nets.vqvae."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from absl.testing import parameterized
+
+import numpy as np
+import sonnet as snt
+import tensorflow as tf
+
+
+class VqvaeTest(parameterized.TestCase, tf.test.TestCase):
+
+  @parameterized.parameters(
+      (snt.nets.VectorQuantizer,
+       {'embedding_dim': 4, 'num_embeddings': 8,
+        'commitment_cost': 0.25}),
+      (snt.nets.VectorQuantizerEMA,
+       {'embedding_dim': 6, 'num_embeddings': 13,
+        'commitment_cost': 0.5, 'decay': 0.1})
+  )
+  def testConstruct(self, constructor, kwargs):
+    vqvae = constructor(**kwargs)
+    # Batch of input vectors to quantize
+    inputs_np = np.random.randn(16, kwargs['embedding_dim']).astype(np.float32)
+    inputs = tf.constant(inputs_np)
+
+    # Set is_training to False, otherwise for the EMA case just evaluating the
+    # forward pass will change the embeddings, meaning that some of our computed
+    # closest embeddings will be incorrect.
+    vq_output = vqvae(inputs, is_training=False)
+
+    # Output shape is correct
+    self.assertEqual(vq_output['quantize'].shape, inputs.shape)
+
+    init_op = tf.global_variables_initializer()
+    with self.test_session() as session:
+      session.run(init_op)
+      vq_output_np, embeddings_np = session.run([vq_output, vqvae.embeddings])
+
+    self.assertEqual(embeddings_np.shape, (kwargs['embedding_dim'],
+                                           kwargs['num_embeddings']))
+
+    # Check that each input was assigned to the embedding it is closest to.
+    distances = ((inputs_np ** 2).sum(axis=1, keepdims=True)
+                 - 2 * np.dot(inputs_np, embeddings_np)
+                 + (embeddings_np**2).sum(axis=0, keepdims=True))
+    closest_index = np.argmax(-distances, axis=1)
+    self.assertAllEqual(closest_index,
+                        np.argmax(vq_output_np['encodings'], axis=1))
+
+  @parameterized.parameters(
+      (snt.nets.VectorQuantizer,
+       {'embedding_dim': 4, 'num_embeddings': 8,
+        'commitment_cost': 0.25}),
+      (snt.nets.VectorQuantizerEMA,
+       {'embedding_dim': 6, 'num_embeddings': 13,
+        'commitment_cost': 0.5, 'decay': 0.1})
+  )
+  def testShapeChecking(self, constructor, kwargs):
+    vqvae = constructor(**kwargs)
+    # Make input that is not the right size, but the entire shape is still
+    # divisible by embedding_dim. This will not cause an error on graph
+    # construction, but will trigger the assertion at session.run time.
+    wrong_shape_input = np.random.randn(100, kwargs['embedding_dim'] * 2)
+
+    output = vqvae(tf.constant(wrong_shape_input.astype(np.float32)),
+                   is_training=False)
+
+    init_op = tf.global_variables_initializer()
+    with self.test_session() as session:
+      session.run(init_op)
+      with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
+                                   'assertion failed'):
+        session.run(output)
+
+
+if __name__ == '__main__':
+  tf.test.main()

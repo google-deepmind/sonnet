@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.21 - Tuesday, 08. May 2018
+
+* Add VQ-VAE plus EMA variant to Sonnet.
+* Add snt.summarize_variables to Sonnet.
+
 ## Version 1.20 - Tuesday, 24. April 2018
 
 * Merge SeparableConv2D into _ConvND.

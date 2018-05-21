@@ -2248,7 +2248,7 @@ class SeparableConv2D(_ConvND):
                regularizers=None,
                data_format=DATA_FORMAT_NHWC,
                custom_getter=None,
-               name="Separable_conv2d"):
+               name="separable_conv2d"):
     """Constructs a SeparableConv2D module.
 
     See the following documentation for an explanation of VALID versus SAME
@@ -2431,3 +2431,216 @@ class SeparableConv2D(_ConvND):
     self._ensure_is_connected()
     return self._w[1]
 
+
+class SeparableConv1D(_ConvND):
+  """Performs an in-plane convolution to each channel independently.
+
+  This acts as a light wrapper around the TensorFlow op
+  `tf.nn.separable_conv2d`, abstracting away variable creation and sharing.
+  """
+
+  def __init__(self,
+               output_channels,
+               channel_multiplier,
+               kernel_shape,
+               stride=1,
+               padding=SAME,
+               use_bias=True,
+               initializers=None,
+               partitioners=None,
+               regularizers=None,
+               data_format=DATA_FORMAT_NWC,
+               custom_getter=None,
+               name="separable_conv1d"):
+    """Constructs a SeparableConv1D module.
+
+    See the following documentation for an explanation of VALID versus SAME
+    padding modes:
+    https://www.tensorflow.org/api_guides/python/nn#Convolution
+
+    Args:
+      output_channels: Number of output channels. Must be an integer.
+      channel_multiplier: Number of channels to expand pointwise (depthwise)
+          convolution to. Must be an integer. Must be > 0.
+          When `channel_multiplier` is set to 1, applies a different filter to
+          each input channel. Numbers larger than 1 cause the filter to be
+          applied to `channel_multiplier` input channels. Outputs are
+          concatenated together.
+      kernel_shape: List with 2 elements in the following layout:
+          [filter_height, filter_width] or integer that is
+          used to define the list in all dimensions.
+      stride: List with 4 elements of kernel strides, or integer that is used to
+          define stride in all dimensions. Layout of list:
+          [1, stride_y, stride_x, 1].
+      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      use_bias: Whether to include bias parameters. Default `True`.
+      initializers: Optional dict containing ops to initialize the filters (with
+          keys 'w_dw' for depthwise and 'w_pw' for pointwise) or biases
+          (with key 'b').
+      partitioners: Optional dict containing partitioners to partition the
+          filters (with key 'w') or biases (with key 'b'). As a default, no
+          partitioners are used.
+      regularizers: Optional dict containing regularizers for the filters
+          (with keys 'w_dw' for depthwise and 'w_pw' for pointwise) and the
+          biases (with key 'b'). As a default, no regularizers are used.
+          A regularizer should be a function that takes a single `Tensor` as an
+          input and returns a scalar `Tensor` output, e.g. the L1 and L2
+          regularizers in `tf.contrib.layers`.
+      data_format: A string. Specifies whether the channel dimension
+          of the input and output is the last dimension (default, NWC), or the
+          second dimension ("NCW").
+      custom_getter: Callable or dictionary of callables to use as
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
+      name: Name of the module.
+
+    Raises:
+      ValueError: If `channel_multiplier` isn't of type (`numbers.Integral` or
+          `tf.Dimension`).
+      ValueError: If `channel_multiplier` is less than 1.
+      ValueError: If the given data_format is not a supported format (see
+          `SUPPORTED_1D_DATA_FORMATS`).
+      base.IncompatibleShapeError: If the given kernel shape is not an integer;
+          or if the given kernel shape is not a sequence of one integer.
+      base.IncompatibleShapeError: If the given stride is not an integer; or if
+          the given stride is not a sequence of two integers.
+      base.IncompatibleShapeError: If the given rate is not an integer; or if
+          the given rate is not a sequence of two integers.
+      base.IncompatibleShapeError: If a mask is a TensorFlow Tensor with
+          a not fully defined shape.
+      base.NotSupportedError: If rate in any dimension and the stride in any
+          dimension are simultaneously > 1.
+      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      KeyError: If `initializers`, `partitioners` or `regularizers` contain any
+          keys other than 'w_dw', 'w_pw' or 'b'.
+      TypeError: If any of the given initializers, partitioners or regularizers
+          are not callable.
+      TypeError: If mask is given and it is not convertible to a Tensor.
+      ValueError: If the passed-in data_format doesn't have a channel dimension.
+    """
+    if (not isinstance(channel_multiplier, numbers.Integral) and
+        not isinstance(channel_multiplier, tf.Dimension)):
+      raise ValueError(("channel_multiplier ({}), must be of type "
+                        "(`tf.Dimension`, `numbers.Integral`).").format(
+                            channel_multiplier))
+    if channel_multiplier < 1:
+      raise ValueError("channel_multiplier ({}), must be >= 1".format(
+          channel_multiplier))
+
+    self._channel_multiplier = channel_multiplier
+
+    if data_format not in SUPPORTED_1D_DATA_FORMATS:
+      raise ValueError("Invalid data_format {:s}. Allowed formats "
+                       "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
+
+    super(SeparableConv1D, self).__init__(
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride, padding=padding, use_bias=use_bias,
+        initializers=initializers, partitioners=partitioners,
+        regularizers=regularizers, data_format=data_format,
+        custom_getter=custom_getter, name=name)
+
+  @classmethod
+  def get_possible_initializer_keys(cls, use_bias=True):
+    return {"w_dw", "w_pw", "b"} if use_bias else {"w_dw", "w_pw"}
+
+  def _construct_w(self, inputs):
+    """Connects the module into the graph, with input Tensor `inputs`.
+
+    Args:
+      inputs: A 4D Tensor of shape:
+          [batch_size, input_height, input_width, input_channels]
+          and of type `tf.float16` or `tf.float32`.
+
+    Returns:
+      A tuple of two 4D Tensors, each with the same dtype as `inputs`:
+        1. w_dw, the depthwise weight matrix, of shape:
+          [kernel_size, input_channels, channel_multiplier]
+        2. w_pw, the pointwise weight matrix, of shape:
+          [1, 1, channel_multiplier * input_channels, output_channels].
+    """
+    depthwise_weight_shape = ((1,) + self.kernel_shape +
+                              (self.input_channels, self.channel_multiplier))
+    pointwise_input_size = self.channel_multiplier * self.input_channels
+    pointwise_weight_shape = (1, 1, pointwise_input_size, self.output_channels)
+
+    if "w_dw" not in self._initializers:
+      fan_in_shape = depthwise_weight_shape[:2]
+      self._initializers["w_dw"] = create_weight_initializer(fan_in_shape,
+                                                             dtype=inputs.dtype)
+
+    if "w_pw" not in self._initializers:
+      fan_in_shape = pointwise_weight_shape[:3]
+      self._initializers["w_pw"] = create_weight_initializer(fan_in_shape,
+                                                             dtype=inputs.dtype)
+
+    w_dw = tf.get_variable(
+        "w_dw",
+        shape=depthwise_weight_shape,
+        dtype=inputs.dtype,
+        initializer=self.initializers["w_dw"],
+        partitioner=self.partitioners.get("w_dw", None),
+        regularizer=self.regularizers.get("w_dw", None))
+
+    w_pw = tf.get_variable(
+        "w_pw",
+        shape=pointwise_weight_shape,
+        dtype=inputs.dtype,
+        initializer=self.initializers["w_pw"],
+        partitioner=self.partitioners.get("w_pw", None),
+        regularizer=self.regularizers.get("w_pw", None))
+
+    return w_dw, w_pw
+
+  def _apply_conv(self, inputs, w):
+    """Apply a `separable_conv2d` operation on `inputs` using `w`.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
+          `tf.float32`.
+      w: A tuple of weight matrices of the same type as `inputs`, the first
+        being the depthwise weight matrix, and the second being the pointwise
+        weight matrix.
+
+    Returns:
+      outputs: The result of the convolution operation on `inputs`.
+    """
+    if self._data_format == DATA_FORMAT_NWC:
+      h_dim = 1
+      two_dim_conv_data_format = DATA_FORMAT_NHWC
+    else:
+      h_dim = 2
+      two_dim_conv_data_format = DATA_FORMAT_NCHW
+
+    inputs = tf.expand_dims(inputs, axis=h_dim)
+    two_dim_conv_stride = self.stride[:h_dim] + (1,) + self.stride[h_dim:]
+
+    w_dw, w_pw = w
+    outputs = tf.nn.separable_conv2d(inputs,
+                                     w_dw,
+                                     w_pw,
+                                     strides=two_dim_conv_stride,
+                                     padding=self._padding,
+                                     data_format=two_dim_conv_data_format)
+    outputs = tf.squeeze(outputs, [h_dim])
+    return outputs
+
+  @property
+  def channel_multiplier(self):
+    """Returns the channel multiplier argument."""
+    return self._channel_multiplier
+
+  @property
+  def w_dw(self):
+    """Returns the Variable containing the depthwise weight matrix."""
+    self._ensure_is_connected()
+    return self._w[0]
+
+  @property
+  def w_pw(self):
+    """Returns the Variable containing the pointwise weight matrix."""
+    self._ensure_is_connected()
+    return self._w[1]

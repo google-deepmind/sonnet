@@ -64,6 +64,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                use_bias=True,
                batch_norm_config=None,
                data_format=DATA_FORMAT_NHWC,
+               custom_getter=None,
                name="conv_net_2d"):
     """Constructs a `ConvNet2D` module.
 
@@ -111,6 +112,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       data_format: A string, one of "NCHW" or "NHWC". Specifies whether the
         channel dimension of the input and output is the last dimension
         (default, "NHWC"), or the second dimension ("NCHW").
+      custom_getter: Callable or dictionary of callables to use as
+          custom getters inside the module. If a dictionary, the keys
+          correspond to regexes to match variable names. See the
+          `tf.get_variable` documentation for information about the
+          custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -148,7 +154,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       raise TypeError("rates must be iterable")
     rates = tuple(rates)
 
-    super(ConvNet2D, self).__init__(name=name)
+    super(ConvNet2D, self).__init__(name=name, custom_getter=custom_getter)
 
     if not output_channels:
       raise ValueError("output_channels must not be empty")

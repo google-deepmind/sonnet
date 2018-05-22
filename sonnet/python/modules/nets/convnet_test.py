@@ -644,6 +644,28 @@ class ConvNet2DTest(tf.test.TestCase):
       self.assertEqual(type(layer.w), variables.PartitionedVariable)
       self.assertEqual(type(layer.b), variables.PartitionedVariable)
 
+  def testCustomGetter(self):
+    custom_getter = snt.custom_getters.Context(snt.custom_getters.stop_gradient)
+    module = snt.nets.ConvNet2D(output_channels=self.output_channels,
+                                kernel_shapes=self.kernel_shapes,
+                                rates=self.rates,
+                                strides=self.strides,
+                                paddings=self.paddings,
+                                custom_getter=custom_getter)
+
+    input_shape = [10, 100, 100, 3]
+    input_to_net = tf.placeholder(tf.float32, shape=input_shape)
+
+    out0 = module(input_to_net)
+    with custom_getter:
+      out1 = module(input_to_net)
+    all_vars = tf.trainable_variables()
+    out0_grads = tf.gradients(out0, all_vars)
+    out1_grads = tf.gradients(out1, all_vars)
+    for grad in out0_grads:
+      self.assertNotEqual(None, grad)
+    self.assertEqual([None] * len(out1_grads), out1_grads)
+
   def testIncorrectRatesLength(self):
     rates = [1, 2]
     self.assertNotEqual(len(rates), len(self.output_channels))

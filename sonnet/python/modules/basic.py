@@ -1222,16 +1222,41 @@ class MergeDims(base.AbstractModule):
       raise ValueError("`size` should be strictly greater than 1.")
 
   def _merge(self, tensor):
-    output_shape = tensor.get_shape().as_list()
-    rank = len(output_shape)
-    if rank < self._start + self._size:
+    static_input_shape = tensor.get_shape().as_list()
+    rank = len(static_input_shape)
+    start = self._start
+    if start < 0:
+      start += rank  # uses negative indexing from right
+
+    if rank < start + self._size:
       raise ValueError("Rank of inputs must be at least {}."
                        .format(self._start + self._size))
 
-    # Update the shape of the merged dimensions.
-    output_shape[self._start:self._start + self._size] = [-1]
+    initial = static_input_shape[:start]
+    middle = static_input_shape[start:start + self._size]
+    final = static_input_shape[start + self._size:]
+    if None in middle:
+      middle = [None]
+    else:
+      middle = [np.prod(middle)]
+    static_shape = initial + middle + final
 
-    return tf.reshape(tensor, shape=output_shape)
+    if static_shape.count(None) <= 1:
+      # At most one undefined dimension, so tf.reshape can handle this case.
+      static_shape = [-1 if i is None else i for i in static_shape]
+      return tf.reshape(tensor, static_shape)
+    else:
+      # Need to compute output shape dynamically.
+      dynamic_input_shape = tf.shape(tensor)
+      dynamic_shape = tf.concat(
+          [dynamic_input_shape[:start],
+           [-1],
+           dynamic_input_shape[start + self._size:]],
+          axis=0)
+
+      tensor = tf.reshape(tensor, dynamic_shape)
+      tensor.set_shape(static_shape)  # give it some static shape information
+      return tensor
 
   def _build(self, inputs):
     """Connects the MergeDims module into the graph.

@@ -853,7 +853,7 @@ class TrainableVariableTest(tf.test.TestCase, parameterized.TestCase):
     if with_stop_gradient:
       self.assertIsNone(grads[0])
     else:
-      self.assertTrue(grads[0] is not None)
+      self.assertIsNotNone(grads[0])
 
 
 class BatchReshapeTest(tf.test.TestCase, parameterized.TestCase):
@@ -1629,7 +1629,7 @@ class TileByDimTest(tf.test.TestCase):
       snt.TileByDim(dims=dims, multiples=multiples)
 
 
-class MergeDimsTest(tf.test.TestCase):
+class MergeDimsTest(tf.test.TestCase, parameterized.TestCase):
 
   def testName(self):
     mod_name = "unique_name"
@@ -1647,6 +1647,34 @@ class MergeDimsTest(tf.test.TestCase):
     mod = snt.MergeDims(start=start, size=size)
     output = mod(inputs)
     self.assertEqual(output.get_shape(), out_shape)
+
+  def testInferShape_negStart(self):
+    in_shape = [2, 3, 4, 5, 6]
+    start = -4
+    size = 3
+    out_shape = [2, 3 * 4 * 5, 6]
+    inputs = tf.placeholder(tf.float32, shape=in_shape)
+    mod = snt.MergeDims(start=start, size=size)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape(), out_shape)
+
+  @parameterized.parameters(
+      ([2, None, 4, 5, 6],),
+      ([None, None, 4, 5, 6],),
+      ([2, 3, None, 5, 6],),
+      ([2, None, None, None, 6],))
+  def testWithUndefinedDims(self, in_shape):
+    start = 2
+    size = 2
+    inputs = tf.placeholder(tf.float32, shape=in_shape)
+    mod = snt.MergeDims(start=start, size=size)
+    output = mod(inputs)
+    static_shape = in_shape
+    static_shape[2:4] = [None] if None in in_shape[2:4] else [4 * 5]
+    self.assertEqual(output.get_shape().as_list(), static_shape)
+    with self.test_session():
+      output = output.eval(feed_dict={inputs: np.zeros([2, 3, 4, 5, 6])})
+      self.assertEqual(list(output.shape), [2, 3, 4 * 5, 6])
 
   def testComputation(self):
     # Here we compare the output with the tf.reshape equivalent.

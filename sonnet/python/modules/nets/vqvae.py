@@ -188,6 +188,13 @@ class VectorQuantizerEMA(base.AbstractModule):
         encodings: Tensor containing the discrete encodings, ie which element
           of the quantized space each input element was mapped to.
     """
+    # Ensure that the weights are read fresh for each timestep, which otherwise
+    # would not be guaranteed in an RNN setup. Note that this relies on inputs
+    # having a data dependency with the output of the previous timestep - if
+    # this is not the case, there is no way to serialize the order of weight
+    # updates within the module, so explicit external dependencies must be used.
+    with tf.control_dependencies([inputs]):
+      w = self._w.read_value()
     input_shape = tf.shape(inputs)
     with tf.control_dependencies([
         tf.Assert(tf.equal(input_shape[-1], self._embedding_dim),
@@ -195,13 +202,13 @@ class VectorQuantizerEMA(base.AbstractModule):
       flat_inputs = tf.reshape(inputs, [-1, self._embedding_dim])
 
     distances = (tf.reduce_sum(flat_inputs**2, 1, keepdims=True)
-                 - 2 * tf.matmul(flat_inputs, self._w)
-                 + tf.reduce_sum(self._w ** 2, 0, keepdims=True))
+                 - 2 * tf.matmul(flat_inputs, w)
+                 + tf.reduce_sum(w ** 2, 0, keepdims=True))
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)
     quantized = tf.reshape(
-        tf.matmul(encodings, self._w, transpose_b=True), tf.shape(inputs))
+        tf.matmul(encodings, w, transpose_b=True), tf.shape(inputs))
     e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
 
     if is_training:
@@ -214,9 +221,11 @@ class VectorQuantizerEMA(base.AbstractModule):
       updated_ema_cluster_size = (
           (updated_ema_cluster_size + self._epsilon)
           / (n + self._num_embeddings * self._epsilon) * n)
-      updated_ema_w /= tf.reshape(updated_ema_cluster_size, [1, -1])
+
+      normalised_updated_ema_w = (
+          updated_ema_w / tf.reshape(updated_ema_cluster_size, [1, -1]))
       with tf.control_dependencies([e_latent_loss]):
-        update_w = tf.assign(self._w, updated_ema_w)
+        update_w = tf.assign(self._w, normalised_updated_ema_w)
         with tf.control_dependencies([update_w]):
           loss = self._commitment_cost * e_latent_loss
 

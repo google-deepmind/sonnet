@@ -91,6 +91,31 @@ class VqvaeTest(parameterized.TestCase, tf.test.TestCase):
                                    'assertion failed'):
         session.run(output)
 
+  def testEmaUpdating(self):
+    embedding_dim = 6
+    vqvae = snt.nets.VectorQuantizerEMA(
+        embedding_dim=embedding_dim, num_embeddings=7,
+        commitment_cost=0.5, decay=0.1)
+
+    batch_size = 16
+    input_ph = tf.placeholder(shape=[batch_size, embedding_dim],
+                              dtype=tf.float32)
+    output = vqvae(input_ph, is_training=True)
+    embeddings = vqvae.embeddings
+
+    init_op = tf.global_variables_initializer()
+    with self.test_session() as session:
+      session.run(init_op)
+      # embedding should change every time we put some data through, even though
+      # we are not passing any gradients through.
+      prev_w = session.run(embeddings)
+      for _ in range(10):
+        session.run(output, {input_ph: np.random.randn(batch_size,
+                                                       embedding_dim)})
+        current_w = session.run(embeddings)
+        self.assertFalse((prev_w == current_w).all())
+        prev_w = current_w
+
 
 if __name__ == '__main__':
   tf.test.main()

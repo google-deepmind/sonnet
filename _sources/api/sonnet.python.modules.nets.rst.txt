@@ -68,6 +68,22 @@ sonnet.python.modules.nets.mlp\_test module
     :undoc-members:
     :show-inheritance:
 
+sonnet.python.modules.nets.vqvae module
+---------------------------------------
+
+.. automodule:: sonnet.python.modules.nets.vqvae
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet.python.modules.nets.vqvae\_test module
+---------------------------------------------
+
+.. automodule:: sonnet.python.modules.nets.vqvae_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

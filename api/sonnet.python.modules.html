@@ -9,7 +9,7 @@
     <title>sonnet.python.modules package &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -46,6 +46,8 @@
 <li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#sonnet-python-modules-nets-dilation-test-module">sonnet.python.modules.nets.dilation_test module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#module-sonnet.python.modules.nets.mlp">sonnet.python.modules.nets.mlp module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#sonnet-python-modules-nets-mlp-test-module">sonnet.python.modules.nets.mlp_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#module-sonnet.python.modules.nets.vqvae">sonnet.python.modules.nets.vqvae module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#sonnet-python-modules-nets-vqvae-test-module">sonnet.python.modules.nets.vqvae_test module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sonnet.python.modules.nets.html#module-sonnet.python.modules.nets">Module contents</a></li>
 </ul>
 </li>
@@ -1601,8 +1603,48 @@ channel pairs.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="sonnet.python.modules.conv.SeparableConv1D">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
+<p>Performs an in-plane convolution to each channel independently.</p>
+<p>This acts as a light wrapper around the TensorFlow op
+<code class="docutils literal notranslate"><span class="pre">tf.nn.separable_conv2d</span></code>, abstracting away variable creation and
+sharing.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.SeparableConv1D.channel_multiplier">
+<code class="descname">channel_multiplier</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D.channel_multiplier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the channel multiplier argument.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="sonnet.python.modules.conv.SeparableConv1D.get_possible_initializer_keys">
+<em class="property">classmethod </em><code class="descname">get_possible_initializer_keys</code><span class="sig-paren">(</span><em>use_bias=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv1D.get_possible_initializer_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D.get_possible_initializer_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the keys the dictionary of variable initializers may contain.</p>
+<p>This provides the user with a way of knowing the initializer keys that
+are available without having to instantiate a sonnet module. Subclasses
+may override this class method if they need additional arguments to
+determine what initializer keys may be provided.</p>
+<p>Returns: Set with strings corresponding to the strings that may be
+passed to the constructor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.SeparableConv1D.w_dw">
+<code class="descname">w_dw</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D.w_dw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Variable containing the depthwise weight matrix.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.conv.SeparableConv1D.w_pw">
+<code class="descname">w_pw</code><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D.w_pw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Variable containing the pointwise weight matrix.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="sonnet.python.modules.conv.SeparableConv2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='Separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Performs an in-plane convolution to each channel independently.</p>
 <p>This acts as a light wrapper around the TensorFlow op
@@ -3239,6 +3281,22 @@ example:</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="sonnet.python.modules.util.summarize_variables">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">summarize_variables</code><span class="sig-paren">(</span><em>variables=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#summarize_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.summarize_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs a summary of variable information.</p>
+<p>This function groups Variables by dtype and prints out the number of
+Variables and the total number of scalar values for each datatype, as
+well as the total memory consumed.</p>
+<p>For Variables of type tf.string, the memory usage cannot be accurately
+calculated from the Graph as the memory requirements change based on
+what strings are actually stored, which can only be determined inside a
+session. In this case, the amount of memory used to stored the pointers
+to the strings is logged, along with a warning.</p>
+<p>Args: variables: iterable of variables; if not provided, then all
+variables (in the default graph) are summarized.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="sonnet.python.modules.util.to_snake_case">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">to_snake_case</code><span class="sig-paren">(</span><em>camel_case</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#to_snake_case"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.to_snake_case" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a CamelCase string as a snake_case string.</p>
@@ -3357,7 +3415,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

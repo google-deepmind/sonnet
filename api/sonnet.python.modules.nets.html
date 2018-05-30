@@ -9,7 +9,7 @@
     <title>sonnet.python.modules.nets package &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -132,7 +132,7 @@ must be &gt;= this number in size.</p>
 <p>A minimal interface convolutional networks module.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>rates=(1</em>, <em>)</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>rates=(1</em>, <em>)</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>A 2D Convolutional Network module.</p>
 <dl class="attribute">
@@ -504,6 +504,75 @@ final layer.</p>
 <div class="section" id="sonnet-python-modules-nets-mlp-test-module">
 <h2>sonnet.python.modules.nets.mlp_test module<a class="headerlink" href="#sonnet-python-modules-nets-mlp-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-sonnet.python.modules.nets.vqvae">
+<span id="sonnet-python-modules-nets-vqvae-module"></span><h2>sonnet.python.modules.nets.vqvae module<a class="headerlink" href="#module-sonnet.python.modules.nets.vqvae" title="Permalink to this headline">¶</a></h2>
+<p>Sonnet implementation of VQ-VAE <a class="reference external" href="https://arxiv.org/abs/1711.00937">https://arxiv.org/abs/1711.00937</a>.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.nets.vqvae.VectorQuantizer">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.vqvae.</code><code class="descname">VectorQuantizer</code><span class="sig-paren">(</span><em>embedding_dim</em>, <em>num_embeddings</em>, <em>commitment_cost</em>, <em>name='vq_layer'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/vqvae.html#VectorQuantizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.vqvae.VectorQuantizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Sonnet module representing the VQ-VAE layer.</p>
+<p>Implements the algorithm presented in ‘Neural Discrete Representation
+Learning’ by van den Oord et al. <a class="reference external" href="https://arxiv.org/abs/1711.00937">https://arxiv.org/abs/1711.00937</a></p>
+<p>Input any tensor to be quantized. Last dimension will be used as space
+in which to quantize. All other dimensions will be flattened and will be
+seen as different examples to quantize.</p>
+<p>The output tensor will have the same shape as the input.</p>
+<p>For example a tensor with shape [16, 32, 32, 64] will be reshaped into
+[16384, 64] and all 16384 vectors (each of 64 dimensions) will be
+quantized independently.</p>
+<p>Args: embedding_dim: integer representing the dimensionality of the
+tensors in the quantized space. Inputs to the modules must be in this
+format as well. num_embeddings: integer, the number of vectors in the
+quantized space. commitment_cost: scalar which controls the weighting
+of the loss terms (see equation 4 in the paper - this variable is Beta).</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.vqvae.VectorQuantizer.embeddings">
+<code class="descname">embeddings</code><a class="headerlink" href="#sonnet.python.modules.nets.vqvae.VectorQuantizer.embeddings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.nets.vqvae.VectorQuantizerEMA">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.vqvae.</code><code class="descname">VectorQuantizerEMA</code><span class="sig-paren">(</span><em>embedding_dim</em>, <em>num_embeddings</em>, <em>commitment_cost</em>, <em>decay</em>, <em>epsilon=1e-05</em>, <em>name='VectorQuantizerEMA'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/vqvae.html#VectorQuantizerEMA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.vqvae.VectorQuantizerEMA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Sonnet module representing the VQ-VAE layer.</p>
+<p>Implements a slightly modified version of the algorithm presented in
+‘Neural Discrete Representation Learning’ by van den Oord et al.
+<a class="reference external" href="https://arxiv.org/abs/1711.00937">https://arxiv.org/abs/1711.00937</a></p>
+<p>The difference between VectorQuantizerEMA and VectorQuantizer is that
+this module uses exponential moving averages to update the embedding
+vectors instead of an auxiliary loss. This has the advantage that the
+embedding updates are independent of the choice of optimizer (SGD,
+RMSProp, Adam, K-Fac, …) used for the encoder, decoder and other parts
+of the architecture. For most experiments the EMA version trains faster
+than the non-EMA version.</p>
+<p>Input any tensor to be quantized. Last dimension will be used as space
+in which to quantize. All other dimensions will be flattened and will be
+seen as different examples to quantize.</p>
+<p>The output tensor will have the same shape as the input.</p>
+<p>For example a tensor with shape [16, 32, 32, 64] will be reshaped into
+[16384, 64] and all 16384 vectors (each of 64 dimensions) will be
+quantized independently.</p>
+<p>Args: embedding_dim: integer representing the dimensionality of the
+tensors in the quantized space. Inputs to the modules must be in this
+format as well. num_embeddings: integer, the number of vectors in the
+quantized space. commitment_cost: scalar which controls the weighting
+of the loss terms (see equation 4 in the paper). decay: float, decay for
+the moving averages. epsilon: small float constant to avoid numerical
+instability.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.vqvae.VectorQuantizerEMA.embeddings">
+<code class="descname">embeddings</code><a class="headerlink" href="#sonnet.python.modules.nets.vqvae.VectorQuantizerEMA.embeddings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="sonnet-python-modules-nets-vqvae-test-module">
+<h2>sonnet.python.modules.nets.vqvae_test module<a class="headerlink" href="#sonnet-python-modules-nets-vqvae-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-sonnet.python.modules.nets">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sonnet.python.modules.nets" title="Permalink to this headline">¶</a></h2>
 <p>Common network architectures implemented as Sonnet modules.</p>
@@ -528,6 +597,8 @@ final layer.</p>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-dilation-test-module">sonnet.python.modules.nets.dilation_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.nets.mlp">sonnet.python.modules.nets.mlp module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-nets-mlp-test-module">sonnet.python.modules.nets.mlp_test module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.nets.vqvae">sonnet.python.modules.nets.vqvae module</a></li>
+<li><a class="reference internal" href="#sonnet-python-modules-nets-vqvae-test-module">sonnet.python.modules.nets.vqvae_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.nets">Module contents</a></li>
 </ul>
 </li>
@@ -566,7 +637,7 @@ final layer.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

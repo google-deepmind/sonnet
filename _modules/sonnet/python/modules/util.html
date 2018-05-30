@@ -9,7 +9,7 @@
     <title>sonnet.python.modules.util &#8212; sonnet git documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
@@ -582,6 +582,61 @@
     <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
 
 
+<span class="k">def</span> <span class="nf">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns human readable string of how much memory `num_bytes` fills.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">num_bytes</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> B&quot;</span> <span class="o">%</span> <span class="n">num_bytes</span>
+  <span class="k">elif</span> <span class="n">num_bytes</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2"> KB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">10</span><span class="p">))</span>
+  <span class="k">elif</span> <span class="n">num_bytes</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">30</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2"> MB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span><span class="p">))</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.3f</span><span class="s2"> GB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">30</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="summarize_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.summarize_variables">[docs]</a><span class="k">def</span> <span class="nf">summarize_variables</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Logs a summary of variable information.</span>
+
+<span class="sd">  This function groups Variables by dtype and prints out the number of Variables</span>
+<span class="sd">  and the total number of scalar values for each datatype, as well as the total</span>
+<span class="sd">  memory consumed.</span>
+
+<span class="sd">  For Variables of type tf.string, the memory usage cannot be accurately</span>
+<span class="sd">  calculated from the Graph as the memory requirements change based on what</span>
+<span class="sd">  strings are actually stored, which can only be determined inside a session.</span>
+<span class="sd">  In this case, the amount of memory used to stored the pointers to the strings</span>
+<span class="sd">  is logged, along with a warning.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    variables: iterable of variables; if not provided, then all variables</span>
+<span class="sd">      (in the default graph) are summarized.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables</span><span class="p">()</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables</span><span class="p">()</span>
+  <span class="n">total_num_scalars</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">total_num_bytes</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="c1"># Sort by string representation of type name, so output is deterministic.</span>
+  <span class="n">unique_types_ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]),</span>
+                                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">dtype</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dtype</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">unique_types_ordered</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;NB: string Variables present. The memory usage for these  Variables &quot;</span>
+          <span class="s2">&quot;will not be accurately computed as it depends on the exact strings &quot;</span>
+          <span class="s2">&quot;stored in a particular session.&quot;</span><span class="p">)</span>
+    <span class="n">vars_of_type</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="p">]</span>
+    <span class="n">num_scalars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">num_elements</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vars_of_type</span><span class="p">)</span>
+    <span class="n">num_bytes</span> <span class="o">=</span> <span class="n">num_scalars</span> <span class="o">*</span> <span class="n">dtype</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%r</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> variables comprising </span><span class="si">%d</span><span class="s2"> scalars, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">dtype</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vars_of_type</span><span class="p">),</span> <span class="n">num_scalars</span><span class="p">,</span>
+                    <span class="n">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">))</span>
+    <span class="n">total_num_scalars</span> <span class="o">+=</span> <span class="n">num_scalars</span>
+    <span class="n">total_num_bytes</span> <span class="o">+=</span> <span class="n">num_bytes</span>
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Total: </span><span class="si">%d</span><span class="s2"> variables comprising </span><span class="si">%d</span><span class="s2"> scalars, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                  <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">),</span> <span class="n">total_num_scalars</span><span class="p">,</span>
+                  <span class="n">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">total_num_bytes</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="reuse_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.reuse_variables">[docs]</a><span class="k">def</span> <span class="nf">reuse_variables</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Wraps an arbitrary method so it does variable sharing.</span>
 
@@ -818,7 +873,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
     </div>

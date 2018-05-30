@@ -1,9 +1,12 @@
 # Sonnet Changelog
 
-## Version 1.21 - Tuesday, 08. May 2018
+## Version 1.21 - Wednesday, 30. May 2018
 
-* Add VQ-VAE plus EMA variant to Sonnet.
-* Add snt.summarize_variables to Sonnet.
+* Add VQ-VAE plus EMA variant.
+* Add Jupyter Notebook demonstrating VQ-VAE training.
+* Add snt.SeparableConv1D.
+* ConvNet2D now supports custom getters.
+* Add snt.summarize_variables.
 
 ## Version 1.20 - Tuesday, 24. April 2018
 

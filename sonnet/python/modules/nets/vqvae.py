@@ -87,9 +87,9 @@ class VectorQuantizer(base.AbstractModule):
                   [input_shape])]):
       flat_inputs = tf.reshape(inputs, [-1, self._embedding_dim])
 
-    distances = (tf.reduce_sum(flat_inputs**2, 1, keepdims=True)
+    distances = (tf.reduce_sum(flat_inputs**2, 1, keep_dims=True)
                  - 2 * tf.matmul(flat_inputs, self._w)
-                 + tf.reduce_sum(self._w ** 2, 0, keepdims=True))
+                 + tf.reduce_sum(self._w ** 2, 0, keep_dims=True))
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)

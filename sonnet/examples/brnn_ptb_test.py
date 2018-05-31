@@ -68,6 +68,9 @@ class BrnnPtbTest(tf.test.TestCase):
     FLAGS.hidden_size = 50
     FLAGS.embedding_size = 50
     FLAGS.data_path = tmp_dir
+    # Checkpoint to tmp directory so that test runs hermetically, and there is
+    # no possibility of reusing checkpoints from previous runs.
+    FLAGS.logbasedir = tmp_dir
 
     # Do training, test, evaluation.
     brnn_ptb.main(None)

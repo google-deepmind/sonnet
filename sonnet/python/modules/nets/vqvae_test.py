@@ -59,9 +59,9 @@ class VqvaeTest(parameterized.TestCase, tf.test.TestCase):
                                            kwargs['num_embeddings']))
 
     # Check that each input was assigned to the embedding it is closest to.
-    distances = ((inputs_np ** 2).sum(axis=1, keepdims=True)
+    distances = ((inputs_np ** 2).sum(axis=1, keep_dims=True)
                  - 2 * np.dot(inputs_np, embeddings_np)
-                 + (embeddings_np**2).sum(axis=0, keepdims=True))
+                 + (embeddings_np**2).sum(axis=0, keep_dims=True))
     closest_index = np.argmax(-distances, axis=1)
     self.assertAllEqual(closest_index,
                         np.argmax(vq_output_np['encodings'], axis=1))

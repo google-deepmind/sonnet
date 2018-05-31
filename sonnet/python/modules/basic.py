@@ -1241,18 +1241,20 @@ class MergeDims(base.AbstractModule):
       middle = [np.prod(middle)]
     static_shape = initial + middle + final
 
-    if static_shape.count(None) <= 1:
-      # At most one undefined dimension, so tf.reshape can handle this case.
+    if static_shape.count(None) + static_shape.count(0) <= 1:
+      # At most one undefined (or zero) dimension, so tf.reshape can handle this
+      # case.
       static_shape = [-1 if i is None else i for i in static_shape]
       return tf.reshape(tensor, static_shape)
     else:
       # Need to compute output shape dynamically.
       dynamic_input_shape = tf.shape(tensor)
+      dynamic_initial = dynamic_input_shape[:start]
+      dynamic_middle = tf.reduce_prod(
+          dynamic_input_shape[start:start + self._size], keep_dims=True)
+      dynamic_final = dynamic_input_shape[start + self._size:]
       dynamic_shape = tf.concat(
-          [dynamic_input_shape[:start],
-           [-1],
-           dynamic_input_shape[start + self._size:]],
-          axis=0)
+          [dynamic_initial, dynamic_middle, dynamic_final], axis=0)
 
       tensor = tf.reshape(tensor, dynamic_shape)
       tensor.set_shape(static_shape)  # give it some static shape information

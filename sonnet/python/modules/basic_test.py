@@ -1676,6 +1676,18 @@ class MergeDimsTest(tf.test.TestCase, parameterized.TestCase):
       output = output.eval(feed_dict={inputs: np.zeros([2, 3, 4, 5, 6])})
       self.assertEqual(list(output.shape), [2, 3, 4 * 5, 6])
 
+  def testWithUndefinedAndZeroDim(self):
+    in_shape = [0, None, 2, 3]
+    start = 1
+    size = 2
+    inputs = tf.placeholder(tf.float32, shape=in_shape)
+    mod = snt.MergeDims(start=start, size=size)
+    output = mod(inputs)
+    self.assertEqual(output.get_shape().as_list(), [0, None, 3])
+    with self.test_session() as session:
+      output = session.run(output, feed_dict={inputs: np.zeros([0, 5, 2, 3])})
+    self.assertEqual(list(output.shape), [0, 10, 3])
+
   def testComputation(self):
     # Here we compare the output with the tf.reshape equivalent.
     in_shape = [2, 3, 4, 5, 6]

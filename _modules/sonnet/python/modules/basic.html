@@ -1274,18 +1274,20 @@
       <span class="n">middle</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">middle</span><span class="p">)]</span>
     <span class="n">static_shape</span> <span class="o">=</span> <span class="n">initial</span> <span class="o">+</span> <span class="n">middle</span> <span class="o">+</span> <span class="n">final</span>
 
-    <span class="k">if</span> <span class="n">static_shape</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="c1"># At most one undefined dimension, so tf.reshape can handle this case.</span>
+    <span class="k">if</span> <span class="n">static_shape</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">+</span> <span class="n">static_shape</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># At most one undefined (or zero) dimension, so tf.reshape can handle this</span>
+      <span class="c1"># case.</span>
       <span class="n">static_shape</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">static_shape</span><span class="p">]</span>
       <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">static_shape</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="c1"># Need to compute output shape dynamically.</span>
       <span class="n">dynamic_input_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+      <span class="n">dynamic_initial</span> <span class="o">=</span> <span class="n">dynamic_input_shape</span><span class="p">[:</span><span class="n">start</span><span class="p">]</span>
+      <span class="n">dynamic_middle</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_prod</span><span class="p">(</span>
+          <span class="n">dynamic_input_shape</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">],</span> <span class="n">keep_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="n">dynamic_final</span> <span class="o">=</span> <span class="n">dynamic_input_shape</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">:]</span>
       <span class="n">dynamic_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-          <span class="p">[</span><span class="n">dynamic_input_shape</span><span class="p">[:</span><span class="n">start</span><span class="p">],</span>
-           <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-           <span class="n">dynamic_input_shape</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">:]],</span>
-          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+          <span class="p">[</span><span class="n">dynamic_initial</span><span class="p">,</span> <span class="n">dynamic_middle</span><span class="p">,</span> <span class="n">dynamic_final</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
       <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dynamic_shape</span><span class="p">)</span>
       <span class="n">tensor</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">static_shape</span><span class="p">)</span>  <span class="c1"># give it some static shape information</span>

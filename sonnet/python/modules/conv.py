@@ -391,8 +391,7 @@ class _ConvND(base.AbstractModule):
     self._rate = _fill_and_verify_parameter_shape(rate, self._n, "rate")
 
     if any(x > 1 for x in self._stride) and any(x > 1 for x in self._rate):
-      raise base.NotSupportedError(
-          "Cannot have stride > 1 with rate > 1")
+      raise base.NotSupportedError("Cannot have stride > 1 with rate > 1")
 
     self._padding = _verify_padding(padding)
 
@@ -471,9 +470,9 @@ class _ConvND(base.AbstractModule):
 
     if self._use_bias:
       self._b, outputs = _apply_bias(
-          inputs, outputs, self._channel_index, self.data_format,
-          self.output_channels, self.initializers, self.partitioners,
-          self.regularizers)
+          inputs, outputs, self._channel_index, self._data_format,
+          self.output_channels, self._initializers, self._partitioners,
+          self._regularizers)
 
     return outputs
 
@@ -489,8 +488,8 @@ class _ConvND(base.AbstractModule):
       outputs: The result of the convolution operation on `inputs`.
     """
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,
-                                padding=self.padding, dilation_rate=self.rate,
-                                data_format=self.data_format)
+                                padding=self._padding, dilation_rate=self._rate,
+                                data_format=self._data_format)
     return outputs
 
   def _construct_w(self, inputs):
@@ -505,7 +504,7 @@ class _ConvND(base.AbstractModule):
     Returns:
       w: A weight matrix of the same type as `inputs`.
     """
-    weight_shape = self._kernel_shape + (self.input_channels,
+    weight_shape = self._kernel_shape + (self._input_channels,
                                          self.output_channels)
 
     if "w" not in self._initializers:
@@ -515,9 +514,9 @@ class _ConvND(base.AbstractModule):
     w = tf.get_variable("w",
                         shape=weight_shape,
                         dtype=inputs.dtype,
-                        initializer=self.initializers["w"],
-                        partitioner=self.partitioners.get("w", None),
-                        regularizer=self.regularizers.get("w", None))
+                        initializer=self._initializers["w"],
+                        partitioner=self._partitioners.get("w", None),
+                        regularizer=self._regularizers.get("w", None))
 
     return w
 
@@ -671,16 +670,16 @@ class _ConvND(base.AbstractModule):
       name = self.module_name + "_clone"
 
     return type(self)(output_channels=self.output_channels,
-                      kernel_shape=self.kernel_shape,
-                      stride=self.stride,
-                      rate=self.rate,
-                      padding=self.padding,
-                      use_bias=self.has_bias,
-                      initializers=self.initializers,
-                      partitioners=self.partitioners,
-                      regularizers=self.regularizers,
-                      mask=self.mask,
-                      data_format=self.data_format,
+                      kernel_shape=self._kernel_shape,
+                      stride=self._stride,
+                      rate=self._rate,
+                      padding=self._padding,
+                      use_bias=self._use_bias,
+                      initializers=self._initializers,
+                      partitioners=self._partitioners,
+                      regularizers=self._regularizers,
+                      mask=self._mask,
+                      data_format=self._data_format,
                       custom_getter=self._custom_getter,
                       name=name)
 
@@ -777,8 +776,6 @@ class _ConvNDTranspose(base.AbstractModule):
         self._output_shape = _fill_and_verify_parameter_shape(output_shape,
                                                               self._n,
                                                               "output_shape")
-    self._input_shape = None
-
     if kernel_shape is None:
       raise ValueError("`kernel_shape` cannot be None.")
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, self._n,
@@ -857,10 +854,11 @@ class _ConvNDTranspose(base.AbstractModule):
           stride = self.stride[1:-1]
         return _default_transpose_size(input_size,
                                        stride,
-                                       kernel_shape=self.kernel_shape,
-                                       padding=self.padding)
+                                       kernel_shape=self._kernel_shape,
+                                       padding=self._padding)
 
       self._output_shape = _default_transpose_size_wrapper
+
     if len(self.output_shape) != self._n:
       raise base.IncompatibleShapeError(
           "Output shape must have rank {}, but instead was {}".format(
@@ -1202,21 +1200,21 @@ class Conv1D(_ConvND, base.Transposable):
 
     def output_shape():
       if self._data_format == DATA_FORMAT_NCW:
-        return (self.input_shape[2],)
+        return (self._input_shape[2],)
       else:  # data_format = DATA_FORMAT_NWC
-        return (self.input_shape[1],)
+        return (self._input_shape[1],)
 
     if name is None:
       name = self.module_name + "_transpose"
     return Conv1DTranspose(output_channels=lambda: self._input_channels,
                            output_shape=output_shape,
-                           kernel_shape=self.kernel_shape,
-                           stride=self.stride,
-                           padding=self.padding,
+                           kernel_shape=self._kernel_shape,
+                           stride=self._stride,
+                           padding=self._padding,
                            use_bias=self._use_bias,
-                           initializers=self.initializers,
-                           partitioners=self.partitioners,
-                           regularizers=self.regularizers,
+                           initializers=self._initializers,
+                           partitioners=self._partitioners,
+                           regularizers=self._regularizers,
                            data_format=self._data_format,
                            custom_getter=self._custom_getter,
                            name=name)
@@ -1322,9 +1320,9 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
       name = self.module_name + "_transpose"
 
     if self._data_format == DATA_FORMAT_NWC:
-      stride = self.stride[1:-1]
+      stride = self._stride[1:-1]
     else:  # self._data_format == DATA_FORMAT_NCW
-      stride = self.stride[2:]
+      stride = self._stride[2:]
 
     return Conv1D(output_channels=lambda: self.input_channels,
                   kernel_shape=self.kernel_shape,
@@ -1585,13 +1583,13 @@ class Conv2D(_ConvND, base.Transposable):
 
     return Conv2DTranspose(output_channels=lambda: self._input_channels,
                            output_shape=output_shape,
-                           kernel_shape=self.kernel_shape,
-                           stride=self.stride,
-                           padding=self.padding,
+                           kernel_shape=self._kernel_shape,
+                           stride=self._stride,
+                           padding=self._padding,
                            use_bias=self._use_bias,
-                           initializers=self.initializers,
-                           partitioners=self.partitioners,
-                           regularizers=self.regularizers,
+                           initializers=self._initializers,
+                           partitioners=self._partitioners,
+                           regularizers=self._regularizers,
                            data_format=self._data_format,
                            custom_getter=self._custom_getter,
                            name=name)
@@ -1698,18 +1696,18 @@ class Conv2DTranspose(_ConvNDTranspose, base.Transposable):
       name = self.module_name + "_transpose"
 
     if self._data_format == DATA_FORMAT_NHWC:
-      stride = self.stride[1:-1]
+      stride = self._stride[1:-1]
     else:  # self._data_format == DATA_FORMAT_NCHW
-      stride = self.stride[2:]
+      stride = self._stride[2:]
 
     return Conv2D(output_channels=lambda: self.input_channels,
-                  kernel_shape=self.kernel_shape,
+                  kernel_shape=self._kernel_shape,
                   stride=stride,
-                  padding=self.padding,
+                  padding=self._padding,
                   use_bias=self._use_bias,
-                  initializers=self.initializers,
-                  partitioners=self.partitioners,
-                  regularizers=self.regularizers,
+                  initializers=self._initializers,
+                  partitioners=self._partitioners,
+                  regularizers=self._regularizers,
                   data_format=self._data_format,
                   custom_getter=self._custom_getter,
                   name=name)
@@ -1830,13 +1828,13 @@ class Conv3D(_ConvND, base.Transposable):
       name = self.module_name + "_transpose"
     return Conv3DTranspose(output_channels=lambda: self._input_channels,
                            output_shape=output_shape,
-                           kernel_shape=self.kernel_shape,
-                           stride=self.stride,
-                           padding=self.padding,
+                           kernel_shape=self._kernel_shape,
+                           stride=self._stride,
+                           padding=self._padding,
                            use_bias=self._use_bias,
-                           initializers=self.initializers,
-                           partitioners=self.partitioners,
-                           regularizers=self.regularizers,
+                           initializers=self._initializers,
+                           partitioners=self._partitioners,
+                           regularizers=self._regularizers,
                            data_format=self._data_format,
                            custom_getter=self._custom_getter,
                            name=name)
@@ -1935,18 +1933,18 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
       name = self.module_name + "_transpose"
 
     if self._data_format == DATA_FORMAT_NDHWC:
-      stride = self.stride[1:-1]
+      stride = self._stride[1:-1]
     else:  # self._data_format == DATA_FORMAT_NCDHW
-      stride = self.stride[2:]
+      stride = self._stride[2:]
 
     return Conv3D(output_channels=lambda: self.input_channels,
-                  kernel_shape=self.kernel_shape,
+                  kernel_shape=self._kernel_shape,
                   stride=stride,
-                  padding=self.padding,
+                  padding=self._padding,
                   use_bias=self._use_bias,
-                  initializers=self.initializers,
-                  partitioners=self.partitioners,
-                  regularizers=self.regularizers,
+                  initializers=self._initializers,
+                  partitioners=self._partitioners,
+                  regularizers=self._regularizers,
                   data_format=self._data_format,
                   custom_getter=self._custom_getter,
                   name=name)
@@ -2036,7 +2034,7 @@ class InPlaneConv2D(_ConvND):
       w: A weight matrix of the same type as `inputs` and of shape
         [kernel_shape, 1, 1].
     """
-    weight_shape = self.kernel_shape + (1, 1)
+    weight_shape = self._kernel_shape + (1, 1)
 
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
@@ -2045,9 +2043,9 @@ class InPlaneConv2D(_ConvND):
     w = tf.get_variable("w",
                         shape=weight_shape,
                         dtype=inputs.dtype,
-                        initializer=self.initializers["w"],
-                        partitioner=self.partitioners.get("w", None),
-                        regularizer=self.regularizers.get("w", None))
+                        initializer=self._initializers["w"],
+                        partitioner=self._partitioners.get("w", None),
+                        regularizer=self._regularizers.get("w", None))
     return w
 
   def _apply_conv(self, inputs, w):
@@ -2061,12 +2059,12 @@ class InPlaneConv2D(_ConvND):
     Returns:
       outputs: The result of the convolution operation on `inputs`.
     """
-    tiled_weights = tf.tile(w, [1, 1, self.input_channels, 1])
+    tiled_weights = tf.tile(w, [1, 1, self._input_channels, 1])
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      tiled_weights,
                                      strides=self.stride,
-                                     padding=self.padding,
-                                     data_format=self.data_format)
+                                     padding=self._padding,
+                                     data_format=self._data_format)
     return outputs
 
 
@@ -2165,7 +2163,7 @@ class DepthwiseConv2D(_ConvND):
                        "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
     super(DepthwiseConv2D, self).__init__(
-        output_channels=lambda: self.input_channels * self.channel_multiplier,
+        output_channels=lambda: self._input_channels * self._channel_multiplier,
         kernel_shape=kernel_shape,
         stride=stride, padding=padding, use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
@@ -2190,8 +2188,8 @@ class DepthwiseConv2D(_ConvND):
     # channel. If channel_multiplier > 1, one input channel is used to produce
     # `channel_multiplier` outputs, which are then concatenated together.
     # This results in:
-    weight_shape = self.kernel_shape + (self.input_channels,
-                                        self.channel_multiplier)
+    weight_shape = self._kernel_shape + (self._input_channels,
+                                         self._channel_multiplier)
 
     if "w" not in self._initializers:
       self._initializers["w"] = create_weight_initializer(weight_shape[:2],
@@ -2200,9 +2198,9 @@ class DepthwiseConv2D(_ConvND):
     w = tf.get_variable("w",
                         shape=weight_shape,
                         dtype=inputs.dtype,
-                        initializer=self.initializers["w"],
-                        partitioner=self.partitioners.get("w", None),
-                        regularizer=self.regularizers.get("w", None))
+                        initializer=self._initializers["w"],
+                        partitioner=self._partitioners.get("w", None),
+                        regularizer=self._regularizers.get("w", None))
     return w
 
   def _apply_conv(self, inputs, w):
@@ -2219,8 +2217,8 @@ class DepthwiseConv2D(_ConvND):
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      w,
                                      strides=self.stride,
-                                     padding=self.padding,
-                                     data_format=self.data_format)
+                                     padding=self._padding,
+                                     data_format=self._data_format)
     return outputs
 
   @property
@@ -2359,10 +2357,10 @@ class SeparableConv2D(_ConvND):
         2. w_pw, the pointwise weight matrix, of shape:
           [1, 1, channel_multiplier * input_channels, output_channels].
     """
-    depthwise_weight_shape = self.kernel_shape + (self.input_channels,
-                                                  self.channel_multiplier)
-    pointwise_input_size = self.channel_multiplier * self.input_channels
-    pointwise_weight_shape = (1, 1, pointwise_input_size, self.output_channels)
+    depthwise_weight_shape = self._kernel_shape + (self._input_channels,
+                                                   self._channel_multiplier)
+    pointwise_input_size = self._channel_multiplier * self._input_channels
+    pointwise_weight_shape = (1, 1, pointwise_input_size, self._output_channels)
 
     if "w_dw" not in self._initializers:
       fan_in_shape = depthwise_weight_shape[:2]
@@ -2378,17 +2376,17 @@ class SeparableConv2D(_ConvND):
         "w_dw",
         shape=depthwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self.initializers["w_dw"],
-        partitioner=self.partitioners.get("w_dw", None),
-        regularizer=self.regularizers.get("w_dw", None))
+        initializer=self._initializers["w_dw"],
+        partitioner=self._partitioners.get("w_dw", None),
+        regularizer=self._regularizers.get("w_dw", None))
 
     w_pw = tf.get_variable(
         "w_pw",
         shape=pointwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self.initializers["w_pw"],
-        partitioner=self.partitioners.get("w_pw", None),
-        regularizer=self.regularizers.get("w_pw", None))
+        initializer=self._initializers["w_pw"],
+        partitioner=self._partitioners.get("w_pw", None),
+        regularizer=self._regularizers.get("w_pw", None))
 
     return w_dw, w_pw
 
@@ -2411,7 +2409,7 @@ class SeparableConv2D(_ConvND):
                                      w_pw,
                                      strides=self.stride,
                                      padding=self._padding,
-                                     data_format=self.data_format)
+                                     data_format=self._data_format)
     return outputs
 
   @property
@@ -2562,10 +2560,10 @@ class SeparableConv1D(_ConvND):
         2. w_pw, the pointwise weight matrix, of shape:
           [1, 1, channel_multiplier * input_channels, output_channels].
     """
-    depthwise_weight_shape = ((1,) + self.kernel_shape +
-                              (self.input_channels, self.channel_multiplier))
-    pointwise_input_size = self.channel_multiplier * self.input_channels
-    pointwise_weight_shape = (1, 1, pointwise_input_size, self.output_channels)
+    depthwise_weight_shape = ((1,) + self._kernel_shape +
+                              (self._input_channels, self._channel_multiplier))
+    pointwise_input_size = self._channel_multiplier * self._input_channels
+    pointwise_weight_shape = (1, 1, pointwise_input_size, self._output_channels)
 
     if "w_dw" not in self._initializers:
       fan_in_shape = depthwise_weight_shape[:2]
@@ -2581,17 +2579,17 @@ class SeparableConv1D(_ConvND):
         "w_dw",
         shape=depthwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self.initializers["w_dw"],
-        partitioner=self.partitioners.get("w_dw", None),
-        regularizer=self.regularizers.get("w_dw", None))
+        initializer=self._initializers["w_dw"],
+        partitioner=self._partitioners.get("w_dw", None),
+        regularizer=self._regularizers.get("w_dw", None))
 
     w_pw = tf.get_variable(
         "w_pw",
         shape=pointwise_weight_shape,
         dtype=inputs.dtype,
-        initializer=self.initializers["w_pw"],
-        partitioner=self.partitioners.get("w_pw", None),
-        regularizer=self.regularizers.get("w_pw", None))
+        initializer=self._initializers["w_pw"],
+        partitioner=self._partitioners.get("w_pw", None),
+        regularizer=self._regularizers.get("w_pw", None))
 
     return w_dw, w_pw
 

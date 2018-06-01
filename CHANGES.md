@@ -1,5 +1,11 @@
 # Sonnet Changelog
 
+## Version 1.22 - Friday, 01. June 2018
+
+* Fix Python 3 compatibility issues in VQVAE notebook.
+* Make Bayesian RNN tests more hermetic.
+* Make the convolutional module use private member variables if possible.
+
 ## Version 1.21 - Wednesday, 30. May 2018
 
 * Add VQ-VAE plus EMA variant.
@@ -229,4 +235,3 @@ as a unit when saving checkpoints / model snapshots with tf.Saver. The option is
 set to False by default, for backwards compatibility reasons.
 * `snt.Linear.transpose` creates a new module which now uses the same
 partitioners as the parent module.
-

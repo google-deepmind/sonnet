@@ -154,7 +154,9 @@ class RelationalMemoryTest(parameterized.TestCase, tf.test.TestCase):
       results = session.run(
           {"memory_1": memory_1, "memory_0": memory_0},
           feed_dict={inputs: np.zeros(input_shape)})
-    self.assertNotAllClose(results["memory_0"], results["memory_1"])
+
+    self.assertTrue(np.any(np.not_equal(results["memory_0"],
+                                        results["memory_1"])))
 
   @parameterized.named_parameters(
       ("GateStyleUnit", "unit"), ("GateStyleMemory", "memory")
@@ -208,7 +210,9 @@ class RelationalMemoryTest(parameterized.TestCase, tf.test.TestCase):
       results = session.run(
           {"memory_1": memory_1, "memory_0": memory_0},
           feed_dict={inputs: np.ones(input_shape)})
-    self.assertNotAllClose(results["memory_0"], results["memory_1"])
+
+    self.assertTrue(np.any(np.not_equal(results["memory_0"],
+                                        results["memory_1"])))
 
 if __name__ == "__main__":
   tf.test.main()

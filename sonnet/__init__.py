@@ -98,6 +98,7 @@ from sonnet.python.modules.gated_rnn import lstm_with_zoneout
 from sonnet.python.modules.gated_rnn import LSTMState
 from sonnet.python.modules.layer_norm import LayerNorm
 from sonnet.python.modules.pondering_rnn import ACTCore
+from sonnet.python.modules.relational_memory import RelationalMemory
 from sonnet.python.modules.residual import Residual
 from sonnet.python.modules.residual import ResidualCore
 from sonnet.python.modules.residual import SkipConnectionCore

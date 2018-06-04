@@ -303,8 +303,9 @@ class DeepRNN(rnn_core.RNNCore):
         if core_list[1:] != first_core_list:
           raise ValueError("The outputs of the provided cores are not able "
                            "to be concatenated along the first feature "
-                           "dimension. Core 0 has size %s, whereas Core %d "
-                           "has size %s" % (first_core_list, i, core_list))
+                           "dimension. Core 0 has shape %s, whereas Core %d "
+                           "has shape %s - these must only differ in the first "
+                           "dimension" % (core_sizes[0], i + 1, core_list))
 
   def _build(self, inputs, prev_state):
     """Connects the DeepRNN module into the graph.

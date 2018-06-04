@@ -220,7 +220,7 @@ class RelationalMemory(rnn_core.RNNCore):
     """
     attention_mlp = basic.BatchApply(
         mlp.MLP([self._mem_size] * self._attention_mlp_layers))
-    for _ in xrange(self._num_blocks):
+    for _ in range(self._num_blocks):
       attended_memory = self._multihead_attention(memory)
 
       # Add a skip connection to the multiheaded attention's input.

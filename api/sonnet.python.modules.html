@@ -2626,6 +2626,58 @@ functions.</p>
 <div class="section" id="sonnet-python-modules-pondering-rnn-test-module">
 <h2>sonnet.python.modules.pondering_rnn_test module<a class="headerlink" href="#sonnet-python-modules-pondering-rnn-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-sonnet.python.modules.relational_memory">
+<span id="sonnet-python-modules-relational-memory-module"></span><h2>sonnet.python.modules.relational_memory module<a class="headerlink" href="#module-sonnet.python.modules.relational_memory" title="Permalink to this headline">¶</a></h2>
+<p>Relational Memory architecture.</p>
+<p>An implementation of the architecture described in “Relational Recurrent
+Neural Networks”, Santoro et al., 2018.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.relational_memory.</code><code class="descname">RelationalMemory</code><span class="sig-paren">(</span><em>mem_slots</em>, <em>head_size</em>, <em>num_heads=1</em>, <em>num_blocks=1</em>, <em>forget_bias=1.0</em>, <em>input_bias=0.0</em>, <em>gate_style='unit'</em>, <em>attention_mlp_layers=2</em>, <em>key_size=None</em>, <em>name='relational_memory'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/relational_memory.html#RelationalMemory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>Relational Memory Core.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory.forget_gate">
+<code class="descname">forget_gate</code><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory.forget_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the forget gate Tensor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>trainable=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/relational_memory.html#RelationalMemory.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the initial memory.</p>
+<p>We should ensure each row of the memory is initialized to be unique, so
+initialize the matrix to be the identity. We then pad or truncate as
+necessary so that init_state is of size (batch_size,
+self._mem_slots, self._mem_size).</p>
+<p>Args: batch_size: The size of the batch. trainable: Whether the initial
+state is trainable. This is always True.</p>
+<p>Returns: init_state: A truncated or padded matrix of size (batch_size,
+self._mem_slots, self._mem_size).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory.input_gate">
+<code class="descname">input_gate</code><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory.input_gate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the input gate Tensor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory.output_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.relational_memory.RelationalMemory.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.relational_memory.RelationalMemory.state_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="sonnet-python-modules-relational-memory-test-module">
+<h2>sonnet.python.modules.relational_memory_test module<a class="headerlink" href="#sonnet-python-modules-relational-memory-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-sonnet.python.modules.residual">
 <span id="sonnet-python-modules-residual-module"></span><h2>sonnet.python.modules.residual module<a class="headerlink" href="#module-sonnet.python.modules.residual" title="Permalink to this headline">¶</a></h2>
 <p>Wrappers to add residual and skip connections to Sonnet modules.</p>
@@ -3365,6 +3417,8 @@ variables).</p>
 <li><a class="reference internal" href="#sonnet-python-modules-layer-norm-test-module">sonnet.python.modules.layer_norm_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.pondering_rnn">sonnet.python.modules.pondering_rnn module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-pondering-rnn-test-module">sonnet.python.modules.pondering_rnn_test module</a></li>
+<li><a class="reference internal" href="#module-sonnet.python.modules.relational_memory">sonnet.python.modules.relational_memory module</a></li>
+<li><a class="reference internal" href="#sonnet-python-modules-relational-memory-test-module">sonnet.python.modules.relational_memory_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.residual">sonnet.python.modules.residual module</a></li>
 <li><a class="reference internal" href="#sonnet-python-modules-residual-test-module">sonnet.python.modules.residual_test module</a></li>
 <li><a class="reference internal" href="#module-sonnet.python.modules.rnn_core">sonnet.python.modules.rnn_core module</a></li>

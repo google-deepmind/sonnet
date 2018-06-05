@@ -336,8 +336,9 @@
         <span class="k">if</span> <span class="n">core_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">first_core_list</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The outputs of the provided cores are not able &quot;</span>
                            <span class="s2">&quot;to be concatenated along the first feature &quot;</span>
-                           <span class="s2">&quot;dimension. Core 0 has size </span><span class="si">%s</span><span class="s2">, whereas Core </span><span class="si">%d</span><span class="s2"> &quot;</span>
-                           <span class="s2">&quot;has size </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first_core_list</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">core_list</span><span class="p">))</span>
+                           <span class="s2">&quot;dimension. Core 0 has shape </span><span class="si">%s</span><span class="s2">, whereas Core </span><span class="si">%d</span><span class="s2"> &quot;</span>
+                           <span class="s2">&quot;has shape </span><span class="si">%s</span><span class="s2"> - these must only differ in the first &quot;</span>
+                           <span class="s2">&quot;dimension&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">core_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">core_list</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connects the DeepRNN module into the graph.</span>

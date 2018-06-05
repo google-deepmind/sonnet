@@ -259,6 +259,22 @@ sonnet.python.modules.pondering\_rnn\_test module
     :undoc-members:
     :show-inheritance:
 
+sonnet.python.modules.relational\_memory module
+-----------------------------------------------
+
+.. automodule:: sonnet.python.modules.relational_memory
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet.python.modules.relational\_memory\_test module
+-----------------------------------------------------
+
+.. automodule:: sonnet.python.modules.relational_memory_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 sonnet.python.modules.residual module
 -------------------------------------
 

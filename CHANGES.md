@@ -1,5 +1,11 @@
 # Sonnet Changelog
 
+## Version 1.23 - Tuesday, 05. June 2018
+
+* Add `snt.RelationalMemory`, implementation of "Relational Recurrent Neural
+  Networks", Santoro et al., 2018.
+* Fix error message in `snt.DeepRNN`.
+
 ## Version 1.22 - Friday, 01. June 2018
 
 * Fix Python 3 compatibility issues in VQVAE notebook.

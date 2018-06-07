@@ -30,6 +30,7 @@ import time
 # Dependency imports
 
 from absl import flags
+import six
 
 import sonnet as snt
 from sonnet.examples import dataset_nth_farthest
@@ -187,7 +188,7 @@ def build_and_train(iterations, log_stride, test=False):
     test_accs = []
     tf.logging.info("Starting training ({:3f})".format(time.time() - t0))
     with tf.train.SingularMonitoredSession() as sess:
-      for it in xrange(iterations):
+      for it in six.moves.range(iterations):
         sess.run([step_op, learning_rate_op])
         if it % log_stride == 0:
           loss_v, acc_v = sess.run([train_loss, test_acc])

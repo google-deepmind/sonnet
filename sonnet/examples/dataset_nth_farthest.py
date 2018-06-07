@@ -36,6 +36,7 @@ from __future__ import print_function
 
 import numpy as np
 from scipy.spatial import distance as spdistance
+import six
 import tensorflow as tf
 
 
@@ -110,7 +111,7 @@ class NthFarthest(object):
     """
     all_inputs = []
     all_labels = []
-    for _ in xrange(batch_size):
+    for _ in six.moves.range(batch_size):
       inputs, labels = self._get_single_set(num_objects, num_features)
       all_inputs += [inputs]
       all_labels += [labels]

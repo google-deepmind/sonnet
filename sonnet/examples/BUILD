@@ -16,6 +16,7 @@ py_library(
     deps = [
         ":brnn_ptb",
         ":module_with_build_args",
+        ":rmc_nth_farthest",
         ":rnn_shakespeare",
     ],
 )
@@ -65,6 +66,20 @@ py_binary(
     ],
 )
 
+py_binary(
+    name = "rmc_nth_farthest",
+    srcs = [
+        "dataset_nth_farthest.py",
+        "rmc_nth_farthest.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        # absl/flags dep,
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
 py_test(
     name = "rnn_shakespeare_test",
     size = "large",
@@ -84,5 +99,17 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":brnn_ptb",
+    ],
+)
+
+py_test(
+    name = "rmc_nth_farthest_test",
+    size = "large",
+    srcs = [
+        "rmc_nth_farthest_test.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":rmc_nth_farthest",
     ],
 )

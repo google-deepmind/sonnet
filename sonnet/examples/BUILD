@@ -47,6 +47,7 @@ py_binary(
     srcs_version = "PY2AND3",
     deps = [
         # tensorflow IO dep,
+        # numpy dep,
         "//sonnet",
         # tensorflow dep,
     ],
@@ -61,6 +62,7 @@ py_binary(
     srcs_version = "PY2AND3",
     deps = [
         # numpy dep,
+        # six dep,
         "//sonnet",
         # tensorflow dep,
     ],
@@ -75,6 +77,9 @@ py_binary(
     srcs_version = "PY2AND3",
     deps = [
         # absl/flags dep,
+        # numpy dep,
+        # scipy dep,
+        # six dep,
         "//sonnet",
         # tensorflow dep,
     ],
@@ -89,6 +94,7 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":rnn_shakespeare",
+        # tensorflow dep,
     ],
 )
 
@@ -99,6 +105,7 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":brnn_ptb",
+        # tensorflow dep,
     ],
 )
 
@@ -111,5 +118,7 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":rmc_nth_farthest",
+        "//sonnet",
+        # tensorflow dep,
     ],
 )

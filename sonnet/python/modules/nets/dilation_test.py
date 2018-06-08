@@ -28,6 +28,7 @@ from sonnet.python.modules.nets import dilation
 import tensorflow as tf
 
 
+@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class IdentityKernelInitializerTest(tf.test.TestCase,
                                     parameterized.TestCase):
 
@@ -40,23 +41,23 @@ class IdentityKernelInitializerTest(tf.test.TestCase,
       snt.nets.identity_kernel_initializer(shape)
 
   def testComputation(self):
-    with self.test_session() as sess:
-      x = sess.run(snt.nets.identity_kernel_initializer([3, 3, 5, 5]))
+    x = snt.nets.identity_kernel_initializer([3, 3, 5, 5])
 
-      # Iterate over elements. Assert that only the middle pixel is on when in
-      # and out channels are same.
-      it = np.nditer(x, flags=["multi_index"])
-      while not it.finished:
-        value, idx = it[0], it.multi_index
-        (filter_height, filter_width, in_channel, out_channel) = idx
-        if (filter_height == 1 and filter_width == 1 and
-            in_channel == out_channel):
-          self.assertEqual(value, 1)
-        else:
-          self.assertEqual(value, 0)
-        it.iternext()
+    # Iterate over elements. Assert that only the middle pixel is on when in
+    # and out channels are same.
+    it = np.nditer(x, flags=["multi_index"])
+    while not it.finished:
+      value, idx = it[0], it.multi_index
+      (filter_height, filter_width, in_channel, out_channel) = idx
+      if (filter_height == 1 and filter_width == 1 and
+          in_channel == out_channel):
+        self.assertEqual(value, 1)
+      else:
+        self.assertEqual(value, 0)
+      it.iternext()
 
 
+@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
                                          parameterized.TestCase):
 
@@ -72,25 +73,25 @@ class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
 
   def testComputation(self):
     tf.set_random_seed(0)
-    with self.test_session() as sess:
-      initializer = snt.nets.noisy_identity_kernel_initializer(2, stddev=1e-20)
-      x = initializer([3, 3, 4, 8])
-      x = tf.reduce_sum(x, axis=[3])
-      x_ = sess.run(x)
+    initializer = snt.nets.noisy_identity_kernel_initializer(2, stddev=1e-20)
+    x = initializer([3, 3, 4, 8])
+    x = tf.reduce_sum(x, axis=[3])
+    x_ = self.evaluate(x)
 
-      # Iterate over elements. After summing over depth, assert that only the
-      # middle pixel is on.
-      it = np.nditer(x_, flags=["multi_index"])
-      while not it.finished:
-        value, idx = it[0], it.multi_index
-        (filter_height, filter_width, _) = idx
-        if filter_height == 1 and filter_width == 1:
-          self.assertAllClose(value, 1)
-        else:
-          self.assertAllClose(value, 0)
-        it.iternext()
+    # Iterate over elements. After summing over depth, assert that only the
+    # middle pixel is on.
+    it = np.nditer(x_, flags=["multi_index"])
+    while not it.finished:
+      value, idx = it[0], it.multi_index
+      (filter_height, filter_width, _) = idx
+      if filter_height == 1 and filter_width == 1:
+        self.assertAllClose(value, 1)
+      else:
+        self.assertAllClose(value, 0)
+      it.iternext()
 
 
+@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class DilationTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUpWithNumOutputClasses(self, num_output_classes, depth=None):
@@ -133,12 +134,10 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
     self.setUpWithNumOutputClasses(num_output_classes)
     x = self._module(tf.convert_to_tensor(self._images))
 
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      x_ = sess.run(x)
-
-      # Default initialization produces an identity operator.
-      self.assertAllClose(x_, self._images)
+    # Default initialization produces an identity operator.
+    self.evaluate(tf.global_variables_initializer())
+    x_ = self.evaluate(x)
+    self.assertAllClose(x_, self._images)
 
   @parameterized.parameters(1, 3)
   def testLargeComputation(self, num_output_classes):
@@ -149,15 +148,14 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
         num_output_classes=num_output_classes, model_size="large")
     x = module(tf.convert_to_tensor(self._images))
 
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      x_ = sess.run(x)
+    self.evaluate(tf.global_variables_initializer())
+    x_ = self.evaluate(x)
 
-      # Default initialization produces something like an operator, but the
-      # number of channels differs. However, summing across channels should
-      # recover a near-identical magnitude per-pixel.
-      self.assertAllClose(
-          np.sum(x_, axis=3), np.sum(self._images, axis=3), atol=1e-3)
+    # Default initialization produces something like an operator, but the
+    # number of channels differs. However, summing across channels should
+    # recover a near-identical magnitude per-pixel.
+    self.assertAllClose(
+        np.sum(x_, axis=3), np.sum(self._images, axis=3), atol=1e-3)
 
   def testInvalidShape(self):
     self.setUpWithNumOutputClasses(1)
@@ -217,9 +215,11 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
 
     # There are two regularizers per level
     layers_number = 8
-    for i in range(0, 2 * layers_number, 2):
-      self.assertRegexpMatches(regularizers[i].name, ".*l1_regularizer.*")
-      self.assertRegexpMatches(regularizers[i + 1].name, ".*l2_regularizer.*")
+    self.assertEqual(len(regularizers), 2 * layers_number)
+    if not tf.executing_eagerly():
+      for i in range(0, 2 * layers_number, 2):
+        self.assertRegexpMatches(regularizers[i].name, ".*l1_regularizer.*")
+        self.assertRegexpMatches(regularizers[i + 1].name, ".*l2_regularizer.*")
 
   def testUtilities(self):
     err = "Cannot calculate range along non-existent index."

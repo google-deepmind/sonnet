@@ -25,6 +25,7 @@ import sonnet as snt
 import tensorflow as tf
 
 
+@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class MLPTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
@@ -124,16 +125,17 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                        activate_final=activate_final,
                        use_bias=use_bias)
 
-    inputs = tf.placeholder(tf.float32,
-                            shape=[self.batch_size, self.input_size])
+    inputs = tf.random_normal(
+        dtype=tf.float32, shape=[self.batch_size, self.input_size])
     net = mlp(inputs)
 
-    if activate_final:
-      self.assertEqual(net.op.type, "Relu")
-    elif use_bias:
-      self.assertEqual(net.op.type, "Add")
-    else:
-      self.assertEqual(net.op.type, "MatMul")
+    if not tf.executing_eagerly():
+      if activate_final:
+        self.assertEqual(net.op.type, "Relu")
+      elif use_bias:
+        self.assertEqual(net.op.type, "Add")
+      else:
+        self.assertEqual(net.op.type, "MatMul")
 
     variables = mlp.get_variables()
 
@@ -143,8 +145,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(len(variables), len(self.output_sizes))
 
   def testShape(self):
-    inputs = tf.placeholder(tf.float32,
-                            shape=[self.batch_size, self.input_size])
+    inputs = tf.random_normal(
+        dtype=tf.float32, shape=[self.batch_size, self.input_size])
     mlp = snt.nets.MLP(name=self.module_name, output_sizes=self.output_sizes)
     output = mlp(inputs)
     self.assertTrue(output.get_shape().is_compatible_with(
@@ -165,16 +167,19 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     else:
       regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5)}
 
-    inputs = tf.placeholder(tf.float32,
-                            shape=[self.batch_size, self.input_size])
+    inputs = tf.random_normal(
+        dtype=tf.float32, shape=[self.batch_size, self.input_size])
     mlp = snt.nets.MLP(name=self.module_name, output_sizes=self.output_sizes,
                        regularizers=regularizers)
     mlp(inputs)
 
     graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
-    if use_bias:
-      self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
+    self.assertEqual(len(graph_regularizers), 3 * (2 if use_bias else 1))
+    if not tf.executing_eagerly():
+      self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
+      if use_bias:
+        self.assertRegexpMatches(graph_regularizers[1].name,
+                                 ".*l2_regularizer.*")
 
   @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
@@ -198,8 +203,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(self.module_name + "_transpose",
                      mlp_transpose.module_name)
 
-    input_to_mlp = tf.placeholder(tf.float32,
-                                  shape=[self.batch_size, self.input_size])
+    input_to_mlp = tf.random_normal(
+        dtype=tf.float32, shape=[self.batch_size, self.input_size])
 
     with self.assertRaisesRegexp(snt.Error,
                                  "Variables in {} not instantiated yet, "
@@ -216,22 +221,20 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(mlp_transpose.use_bias, mlp.use_bias)
     self.assertEqual(mlp_transpose.activate_final, mlp.activate_final)
 
-    if activate_final:
-      self.assertEqual(mlp_transposed_output.op.type, "Relu")
-    elif use_bias:
-      self.assertEqual(mlp_transposed_output.op.type, "Add")
-    else:
-      self.assertEqual(mlp_transposed_output.op.type, "MatMul")
+    if not tf.executing_eagerly():
+      if activate_final:
+        self.assertEqual(mlp_transposed_output.op.type, "Relu")
+      elif use_bias:
+        self.assertEqual(mlp_transposed_output.op.type, "Add")
+      else:
+        self.assertEqual(mlp_transposed_output.op.type, "MatMul")
 
     for i in range(0, len(mlp.layers)):
       self.assertEqual(mlp_transpose.layers[i].output_size,
                        mlp.layers[-1 - i].input_shape[1])
 
-    data = np.random.rand(self.batch_size, self.input_size)
-    init = tf.global_variables_initializer()
-    with self.test_session() as sess:
-      sess.run(init)
-      sess.run(mlp_transposed_output, feed_dict={input_to_mlp: data})
+    self.evaluate(tf.global_variables_initializer())
+    self.evaluate(mlp_transposed_output)
 
     variables = mlp_transpose.get_variables()
 
@@ -271,7 +274,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                        use_bias=use_bias)
 
     input_shape = [10, 100]
-    input_to_net = tf.placeholder(tf.float32, shape=input_shape)
+    input_to_net = tf.random_normal(dtype=tf.float32, shape=input_shape)
 
     _ = mlp(input_to_net)
 
@@ -291,10 +294,9 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     mlpi(tf.zeros(shape=(2, 1)))
     mlp_variables = [mlpi.layers[0].w, mlpi.layers[0].b]
 
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      for var_value in sess.run(mlp_variables):
-        self.assertAllClose(var_value, np.zeros_like(var_value)+pi)
+    self.evaluate(tf.global_variables_initializer())
+    for var_value in self.evaluate(mlp_variables):
+      self.assertAllClose(var_value, np.zeros_like(var_value) + pi)
 
 
 if __name__ == "__main__":

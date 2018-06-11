@@ -104,13 +104,14 @@ class LayerNorm(base.AbstractModule):
       normalized: layer normalized outputs with same shape as inputs.
 
     Raises:
-      base.NotSupportedError: If `inputs` has data type of `tf.float16`.
+      base.NotSupportedError: If `inputs` has data type of `tf.float16` or
+          `tf.bfloat16`.
     """
 
-    if inputs.dtype == tf.float16:
+    if inputs.dtype in [tf.float16, tf.bfloat16]:
       raise base.NotSupportedError(
-          "LayerNorm does not support `tf.float16`, insufficient "
-          "precision for calculating sufficient statistics.")
+          "LayerNorm does not support `tf.float16` or `tf.bfloat16`, "
+          "insufficient precision for calculating sufficient statistics.")
 
     if inputs.get_shape().ndims != 2:
       raise base.NotSupportedError(

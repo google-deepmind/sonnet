@@ -980,7 +980,7 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       snt.Conv2D(output_channels=4, kernel_shape=(4, 4), mask=mask)(x)
     self.assertTrue(str(cm.exception).startswith(
-        "Mask needs to have dtype float16, float32 or float64"))
+        "Mask needs to have dtype float16, bfloat16, float32 or float64"))
 
   def testDataFormatNotSupported(self):
     """Errors are thrown when an unsupported data_format is used."""
@@ -1692,7 +1692,7 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       snt.Conv1D(output_channels=4, kernel_shape=4, mask=mask)(x)
     self.assertTrue(str(cm.exception).startswith(
-        "Mask needs to have dtype float16, float32 or float64"))
+        "Mask needs to have dtype float16, bfloat16, float32 or float64"))
 
   def testClone(self):
     net = snt.Conv1D(name="conv1d",
@@ -3930,7 +3930,7 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaises(TypeError) as cm:
       snt.Conv3D(output_channels=4, kernel_shape=(4, 4, 4), mask=mask)(x)
     self.assertTrue(str(cm.exception).startswith(
-        "Mask needs to have dtype float16, float32 or float64"))
+        "Mask needs to have dtype float16, bfloat16, float32 or float64"))
 
   def testClone(self):
     net = snt.Conv3D(name="conv3d",

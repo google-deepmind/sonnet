@@ -192,7 +192,7 @@ def _verify_inputs(inputs, channel_index, data_format):
     base.UnderspecifiedError: If the channel dimension of `inputs` isn't
       defined.
     TypeError: If input Tensor dtype is not compatible with either
-      `tf.float16` or `tf.float32`.
+      `tf.float16`, `tf.bfloat16` or `tf.float32`.
   """
   # Check shape.
   input_shape = tuple(inputs.get_shape().as_list())
@@ -204,10 +204,11 @@ def _verify_inputs(inputs, channel_index, data_format):
 
   # Check type.
   if not (tf.float16.is_compatible_with(inputs.dtype) or
+          tf.bfloat16.is_compatible_with(inputs.dtype) or
           tf.float32.is_compatible_with(inputs.dtype)):
     raise TypeError(
-        "Input must have dtype tf.float16 or tf.float32, but dtype was {}"
-        .format(inputs.dtype))
+        "Input must have dtype tf.float16, tf.bfloat16 or tf.float32, "
+        "but dtype was {}".format(inputs.dtype))
 
   # Check channel dim.
   input_channels = input_shape[channel_index]
@@ -408,10 +409,11 @@ class _ConvND(base.AbstractModule):
       if isinstance(mask, (tf.Tensor, list, tuple, np.ndarray)):
         self._mask = tf.convert_to_tensor(mask)
         if not (tf.float16.is_compatible_with(self._mask.dtype) or
+                tf.bfloat16.is_compatible_with(self._mask.dtype) or
                 tf.float32.is_compatible_with(self._mask.dtype) or
                 tf.float64.is_compatible_with(self._mask.dtype)):
           raise TypeError(
-              "Mask needs to have dtype float16, float32 or float64")
+              "Mask needs to have dtype float16, bfloat16, float32 or float64")
         if not self._mask.shape.is_fully_defined():
           base.IncompatibleShapeError(
               "Mask needs to have a statically defined shape")
@@ -436,7 +438,7 @@ class _ConvND(base.AbstractModule):
 
     Args:
       inputs: A ND Tensor of the same rank as `data_format`, and either of types
-      `tf.float16` or `tf.float32`.
+      `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
     Returns:
       A ND Tensor of shape [batch_size, output_dim_1, output_dim_2, ...,
@@ -453,7 +455,7 @@ class _ConvND(base.AbstractModule):
       base.IncompatibleShapeError: If a mask is present and its shape is
           incompatible with the shape of the weights.
       TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
+          `tf.float16`, `tf.bfloat16` or `tf.float32`.
     """
     _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -480,8 +482,8 @@ class _ConvND(base.AbstractModule):
     """Apply a convolution operation on `inputs` using variable `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A weight matrix of the same type as `inputs`.
 
     Returns:
@@ -498,8 +500,8 @@ class _ConvND(base.AbstractModule):
     Figures out the shape of the weight matrix, initialize it, and return it.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       w: A weight matrix of the same type as `inputs`.
@@ -821,10 +823,11 @@ class _ConvNDTranspose(base.AbstractModule):
 
     Args:
       inputs: A Tensor of shape `data_format` and of type
-          `tf.float16` or `tf.float32`.
+          `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
     Returns:
-      A Tensor of shape `data_format` and of type `tf.float16` or `tf.float32`.
+      A Tensor of shape `data_format` and of type `tf.float16`, `tf.bfloat16`
+          or `tf.float32`.
 
     Raises:
       ValueError: If connecting the module into the graph any time after the
@@ -837,7 +840,7 @@ class _ConvNDTranspose(base.AbstractModule):
       base.IncompatibleShapeError: If `output_shape` is an iterable and is not
           in the format `(out_height, out_width)`.
       TypeError: If input Tensor dtype is not compatible with either
-          `tf.float16` or `tf.float32`.
+          `tf.float16`, `tf.bfloat16` or `tf.float32`.
     """
     _verify_inputs(inputs, self._channel_index, self._data_format)
     self._input_shape = tuple(inputs.get_shape().as_list())
@@ -917,8 +920,8 @@ class _ConvNDTranspose(base.AbstractModule):
     Figures out the shape of the weight matrix, initialize it, and return it.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       w: A weight matrix of the same type as `inputs`.
@@ -948,8 +951,8 @@ class _ConvNDTranspose(base.AbstractModule):
     """Calculate the output shape for `inputs` after a deconvolution.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       output_shape: A tensor of shape (`batch_size`, `conv_output_shape`).
@@ -982,10 +985,11 @@ class _ConvNDTranspose(base.AbstractModule):
     what the proper output shape will be for `outputs`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
-      outputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`. The output of `inputs` from a transpose convolution op.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
+      outputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`. The output of `inputs` from a transpose
+          convolution op.
 
     Returns:
       outputs: The passed-in `outputs` with all shape information filled in.
@@ -1436,8 +1440,8 @@ class CausalConv1D(_ConvND):
     """Turn the input causal using padding.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       inputs: The `inputs` argument that has had causal padding added.
@@ -1453,8 +1457,8 @@ class CausalConv1D(_ConvND):
     """Apply a convolution operation on `inputs` using variable `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A weight matrix of the same type as `inputs`.
 
     Returns:
@@ -2027,8 +2031,8 @@ class InPlaneConv2D(_ConvND):
     Figures out the shape of the weight matrix, initialize it, and return it.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       w: A weight matrix of the same type as `inputs` and of shape
@@ -2052,8 +2056,8 @@ class InPlaneConv2D(_ConvND):
     """Apply a depthwise_conv2d operation on `inputs` using variable `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A weight matrix of the same type as `inputs`.
 
     Returns:
@@ -2176,8 +2180,8 @@ class DepthwiseConv2D(_ConvND):
     Figures out the shape of the weight matrix, initializes it, and returns it.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
 
     Returns:
       w: A weight matrix of the same type as `inputs` and of shape
@@ -2207,8 +2211,8 @@ class DepthwiseConv2D(_ConvND):
     """Apply a depthwise_conv2d operation on `inputs` using variable `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A weight matrix of the same type as `inputs`.
 
     Returns:
@@ -2348,7 +2352,7 @@ class SeparableConv2D(_ConvND):
     Args:
       inputs: A 4D Tensor of shape:
           [batch_size, input_height, input_width, input_channels]
-          and of type `tf.float16` or `tf.float32`.
+          and of type `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
     Returns:
       A tuple of two 4D Tensors, each with the same dtype as `inputs`:
@@ -2394,8 +2398,8 @@ class SeparableConv2D(_ConvND):
     """Apply a `separable_conv2d` operation on `inputs` using `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A tuple of weight matrices of the same type as `inputs`, the first
         being the depthwise weight matrix, and the second being the pointwise
         weight matrix.
@@ -2551,7 +2555,7 @@ class SeparableConv1D(_ConvND):
     Args:
       inputs: A 4D Tensor of shape:
           [batch_size, input_height, input_width, input_channels]
-          and of type `tf.float16` or `tf.float32`.
+          and of type `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
     Returns:
       A tuple of two 4D Tensors, each with the same dtype as `inputs`:
@@ -2597,8 +2601,8 @@ class SeparableConv1D(_ConvND):
     """Apply a `separable_conv2d` operation on `inputs` using `w`.
 
     Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16` or
-          `tf.float32`.
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
       w: A tuple of weight matrices of the same type as `inputs`, the first
         being the depthwise weight matrix, and the second being the pointwise
         weight matrix.

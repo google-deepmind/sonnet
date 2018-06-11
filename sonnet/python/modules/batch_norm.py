@@ -495,7 +495,7 @@ class BatchNorm(base.AbstractModule):
     Raises:
       base.IncompatibleShapeError: If `axis` is not valid for the
         input shape or has negative entries.
-      base.NotSupportedError: If `input_batch` has data type of `tf.float16`.
+      base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.
     """
     input_shape = input_batch.get_shape()
 
@@ -521,8 +521,11 @@ class BatchNorm(base.AbstractModule):
       axis = tuple(range(len(input_shape))[:-1])
 
     dtype = input_batch.dtype.base_dtype
+    if self._fused and dtype == tf.bfloat16:
+      raise base.NotSupportedError(
+          "Fused batch norm does not support tf.bfloat16.")
     # Maintain moving averages at a minimum precision of tf.float32.
-    stat_dtype = tf.float32 if dtype == tf.float16 else dtype
+    stat_dtype = tf.float32 if dtype in [tf.float16, tf.bfloat16] else dtype
 
     self._mean_shape = input_batch.get_shape().as_list()
     for index in axis:

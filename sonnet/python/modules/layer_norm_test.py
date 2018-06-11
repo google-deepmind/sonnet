@@ -43,12 +43,16 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
       layer_norm2 = snt.LayerNorm()
       layer_norm2(malformed_inputs)
 
-  def testFloat16Error(self):
-    inputs = tf.placeholder(tf.float16, shape=[None, 64])
+  @parameterized.named_parameters(
+      ("Float16", tf.float16),
+      ("BFloat16", tf.bfloat16),
+  )
+  def test16BitError(self, dtype):
+    inputs = tf.placeholder(dtype, shape=[None, 64])
     layer_norm = snt.LayerNorm()
 
-    err = (r"LayerNorm does not support `tf\.float16`, insufficient precision "
-           "for calculating sufficient statistics.")
+    err = (r"LayerNorm does not support `tf\.float16` or `tf\.bfloat16`, "
+           "insufficient precision for calculating sufficient statistics.")
     with self.assertRaisesRegexp(snt.NotSupportedError, err):
       layer_norm(inputs)
 

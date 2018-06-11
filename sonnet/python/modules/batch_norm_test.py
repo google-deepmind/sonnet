@@ -120,16 +120,20 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(dtype, batch_norm.gamma.dtype.base_dtype)
     self.assertEqual(dtype, batch_norm.beta.dtype.base_dtype)
 
-  def testFloat16(self):
-    inputs = tf.placeholder(tf.float16, shape=[None, 64, 32, 3])
+  @parameterized.named_parameters(
+      ("Float16", tf.float16),
+      ("BFloat16", tf.bfloat16),
+  )
+  def test16Bit(self, dtype):
+    inputs = tf.placeholder(dtype, shape=[None, 64, 32, 3])
     batch_norm = snt.BatchNorm(offset=True, scale=True)
     output = batch_norm(inputs, is_training=True)
 
-    self.assertEqual(tf.float16, output.dtype)
+    self.assertEqual(dtype, output.dtype)
     self.assertEqual(tf.float32, batch_norm.moving_mean.dtype.base_dtype)
     self.assertEqual(tf.float32, batch_norm.moving_variance.dtype.base_dtype)
-    self.assertEqual(tf.float16, batch_norm.gamma.dtype.base_dtype)
-    self.assertEqual(tf.float16, batch_norm.beta.dtype.base_dtype)
+    self.assertEqual(dtype, batch_norm.gamma.dtype.base_dtype)
+    self.assertEqual(dtype, batch_norm.beta.dtype.base_dtype)
 
   def _get_inputs(self, dtype=tf.float32):
     v = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0], dtype=dtype.as_numpy_dtype)

@@ -25,7 +25,9 @@ from __future__ import print_function
 import collections
 
 # Dependency imports
+import six
 
+from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
@@ -308,7 +310,7 @@ class DeepRNN(rnn_core.RNNCore):
                            "dimension" % (core_sizes[0], i + 1, core_list))
 
   def _build(self, inputs, prev_state):
-    """Connects the DeepRNN module into the graph.
+    """Connects the DeepRNN module into the g(256, 256, 256, 256)raph.
 
     If this is not the first time the module has been connected to the graph,
     the Tensors provided as input_ and state must have the same final
@@ -547,3 +549,148 @@ class ModelRNN(rnn_core.RNNCore):
   @property
   def output_size(self):
     return self._output_size
+
+
+class BidirectionalRNN(base.AbstractModule):
+  """Bidirectional RNNCore that processes the sequence forwards and backwards.
+
+    Based upon the encoder implementation in: https://arxiv.org/abs/1409.0473
+
+  This interface of this module is different than the typical ones found in
+  the RNNCore family.  The primary difference is that it is pre-conditioned on
+  the full input sequence in order to produce a full sequence of outputs and
+  states concatenated along the feature dimension among the forward and
+  backward cores.
+  """
+
+  def __init__(self, forward_core, backward_core, name="bidir_rnn"):
+    """Construct a Bidirectional RNN core.
+
+    Args:
+      forward_core: callable RNNCore module that computes forward states.
+      backward_core: callable RNNCore module that computes backward states.
+      name: name of the module.
+
+    Raises:
+      ValueError: if not all the modules are recurrent.
+    """
+    super(BidirectionalRNN, self).__init__(name=name)
+    self._forward_core = forward_core
+    self._backward_core = backward_core
+    def _is_recurrent(core):
+      has_rnn_core_interface = (hasattr(core, "initial_state") and
+                                hasattr(core, "output_size") and
+                                hasattr(core, "state_size"))
+      return isinstance(core, rnn_core.RNNCore) or has_rnn_core_interface
+    if not(_is_recurrent(forward_core) and _is_recurrent(backward_core)):
+      raise ValueError("Forward and backward cores must both be instances of"
+                       "RNNCore.")
+
+  def _build(self, input_sequence, state):
+    """Connects the BidirectionalRNN module into the graph.
+
+    Args:
+      input_sequence: tensor (time, batch, [feature_1, ..]). It must be
+          time_major.
+      state: tuple of states for the forward and backward cores.
+
+    Returns:
+      A dict with forward/backard states and output sequences:
+
+        "outputs":{
+            "forward": ...,
+            "backward": ...},
+        "state": {
+            "forward": ...,
+            "backward": ...}
+
+    Raises:
+      ValueError: in case time dimension is not statically known.
+    """
+    input_shape = input_sequence.get_shape()
+    if input_shape[0] is None:
+      raise ValueError("Time dimension of input (dim 0) must be statically"
+                       "known.")
+    seq_length = int(input_shape[0])
+    forward_state, backward_state = state
+
+    # Lists for the forward backward output and state.
+    output_sequence_f = []
+    output_sequence_b = []
+
+    # Forward pass over the sequence.
+    with tf.name_scope("forward_rnn"):
+      state = forward_state
+      output_sequence_f = [
+          self._forward_core(input_sequence[i, :,], state)
+          for i in six.moves.range(seq_length)]
+      output_sequence_f = nest.map_structure(
+          lambda *vals: tf.stack(vals), *output_sequence_f)
+
+    # Backward pass over the sequence.
+    with tf.name_scope("backward_rnn"):
+      state = backward_state
+      output_sequence_b = [
+          self._backward_core(input_sequence[i, :,], state)
+          for i in six.moves.range(seq_length)]
+      output_sequence_b = nest.map_structure(
+          lambda *vals: tf.stack(vals), *output_sequence_b)
+
+    # Compose the full output and state sequeneces.
+    return {
+        "outputs": {
+            "forward": output_sequence_f[0],
+            "backward": output_sequence_b[0]
+        },
+        "state": {
+            "forward": output_sequence_f[1],
+            "backward": output_sequence_b[1]
+        }
+    }
+
+  def initial_state(self, batch_size, dtype=tf.float32, trainable=False,
+                    trainable_initializers=None, trainable_regularizers=None,
+                    name=None):
+    """Builds the default start state for a BidirectionalRNN.
+
+    The Bidirectional RNN flattens the states of its forward and backward cores
+    and concatentates them.
+
+    Args:
+      batch_size: An int, float or scalar Tensor representing the batch size.
+      dtype: The data type to use for the state.
+      trainable: Boolean that indicates whether to learn the initial state.
+      trainable_initializers: An initializer function or nested structure of
+          functions with same structure as the `state_size` property of the
+          core, to be used as initializers of the initial state variable.
+      trainable_regularizers: Optional regularizer function or nested structure
+        of functions with the same structure as the `state_size` property of the
+        core, to be used as regularizers of the initial state variable. A
+        regularizer should be a function that takes a single `Tensor` as an
+        input and returns a scalar `Tensor` output, e.g. the L1 and L2
+        regularizers in `tf.contrib.layers`.
+      name: Optional string used to prefix the initial state variable names, in
+          the case of a trainable initial state. If not provided, defaults to
+          the name of the module.
+
+    Returns:
+      Tuple of initial states from forward and backward RNNs.
+    """
+    name = "state" if name is None else name
+    forward_initial_state = self._forward_core.initial_state(
+        batch_size, dtype, trainable, trainable_initializers,
+        trainable_regularizers, name=name+"_forward")
+    backward_initial_state = self._backward_core.initial_state(
+        batch_size, dtype, trainable, trainable_initializers,
+        trainable_regularizers, name=name+"_backward")
+    return forward_initial_state, backward_initial_state
+
+  @property
+  def state_size(self):
+    """Flattened state size of cores."""
+    return self._forward_core.state_size, self._backward_core.state_size
+
+  @property
+  def output_size(self):
+    """Flattened output size of cores."""
+    return self._forward_core.output_size, self._backward_core.output_size

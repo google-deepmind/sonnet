@@ -66,6 +66,7 @@ from sonnet.python.modules.basic import SliceByDim
 from sonnet.python.modules.basic import split_leading_dim
 from sonnet.python.modules.basic import TileByDim
 from sonnet.python.modules.basic import TrainableVariable
+from sonnet.python.modules.basic_rnn import BidirectionalRNN
 from sonnet.python.modules.basic_rnn import DeepRNN
 from sonnet.python.modules.basic_rnn import ModelRNN
 from sonnet.python.modules.basic_rnn import VanillaRNN

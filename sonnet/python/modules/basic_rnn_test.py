@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
 import itertools
 
 # Dependency imports
@@ -615,8 +616,8 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
       unused_output_size = rnn.output_size
       self.assertTrue(mocked_logging_warning.called)
       first_call_args = mocked_logging_warning.call_args[0]
-      self.assertTrue("final core %s does not have the "
-                      ".output_size field" in first_call_args[0])
+      self.assertIn("final core %s does not have the "
+                    ".output_size field", first_call_args[0])
       self.assertEqual(first_call_args[2], 42)
 
   def testNoSizeButAlreadyConnected(self):
@@ -632,8 +633,8 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
       self.assertEqual(output_size, tf.TensorShape([42]))
       self.assertTrue(mocked_logging_warning.called)
       first_call_args = mocked_logging_warning.call_args[0]
-      self.assertTrue("DeepRNN has been connected into the graph, "
-                      "so inferred output size" in first_call_args[0])
+      self.assertIn("DeepRNN has been connected into the graph, "
+                    "so inferred output size", first_call_args[0])
 
 
 class ModelRNNTest(tf.test.TestCase):
@@ -683,6 +684,74 @@ class ModelRNNTest(tf.test.TestCase):
       snt.ModelRNN(tf.identity)
     with self.assertRaises(TypeError):
       snt.ModelRNN(np.array([42]))
+
+
+class BidirectionalRNNTest(tf.test.TestCase):
+
+  toy_out = collections.namedtuple("toy_out", ("out_one", "out_two"))
+
+  class ToyRNN(snt.RNNCore):
+    """Basic fully connected vanilla RNN core."""
+
+    def __init__(self, hidden_size, name="toy_rnn"):
+      """Construct a Toy RNN core to generate Multimodal output/state."""
+      super(BidirectionalRNNTest.ToyRNN, self).__init__(name=name)
+      with self._enter_variable_scope():
+        self._wrapped_lstm = snt.LSTM(hidden_size)
+
+    def _build(self, input_, prev_state):
+      """Connects the ToyRNN module into the graph."""
+      output, state = self._wrapped_lstm(input_, prev_state)
+      return BidirectionalRNNTest.toy_out(output, output), state
+
+    def initial_state(self, batch_size, dtype=tf.float32, trainable=False,
+                      trainable_initializers=None, trainable_regularizers=None,
+                      name=None):
+      return self._wrapped_lstm.initial_state(batch_size)
+
+    @property
+    def state_size(self):
+      return self._wrapped_lstm.state_size
+
+    @property
+    def output_size(self):
+      return BidirectionalRNNTest.toy_out(self._wrapped_lstm.output_size,
+                                          self._wrapped_lstm.output_size)
+
+  def setUp(self):
+    self.seq_len = 8
+    self.feature_size = 12
+    self.batch_size = 5
+    self.hidden_size_forward = 10
+    self.hidden_size_backward = 20
+    self.forward_core = BidirectionalRNNTest.ToyRNN(
+        hidden_size=self.hidden_size_forward, name="forward_model")
+    self.backward_core = snt.LSTM(
+        hidden_size=self.hidden_size_backward, name="backward_model")
+
+  def testShape(self):
+    """Test forward backward models with multi-modal output/state."""
+    bidir_rnn = snt.BidirectionalRNN(
+        self.forward_core, self.backward_core)
+    seq = tf.zeros([self.seq_len, self.batch_size, self.feature_size])
+    state = bidir_rnn.initial_state(self.batch_size)
+    output = bidir_rnn(seq, state)
+    shape_forward = (self.seq_len, self.batch_size, self.hidden_size_forward)
+    shape_backward = (self.seq_len, self.batch_size, self.hidden_size_backward)
+    self.assertAllEqual(output["outputs"]["forward"].out_one.get_shape(),
+                        shape_forward)
+    self.assertAllEqual(output["outputs"]["forward"].out_two.get_shape(),
+                        shape_forward)
+    self.assertAllEqual(output["outputs"]["backward"].get_shape(),
+                        shape_backward)
+    self.assertAllEqual(output["state"]["forward"].cell.get_shape(),
+                        shape_forward)
+    self.assertAllEqual(output["state"]["forward"].hidden.get_shape(),
+                        shape_forward)
+    self.assertAllEqual(output["state"]["backward"].cell.get_shape(),
+                        shape_backward)
+    self.assertAllEqual(output["state"]["backward"].hidden.get_shape(),
+                        shape_backward)
 
 
 if __name__ == "__main__":

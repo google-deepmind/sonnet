@@ -25,7 +25,6 @@ import sonnet as snt
 import tensorflow as tf
 
 
-@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class MLPTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):

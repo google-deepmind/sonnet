@@ -30,7 +30,6 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
 
   def testCalcMinSize(self):
@@ -120,10 +119,9 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
     input_shape = [net._min_size, net._min_size, 3]
     inputs = tf.ones(dtype=tf.float32, shape=[1] + input_shape)
 
-    self.evaluate(tf.global_variables_initializer())
-
     with self.assertRaisesRegexp(tf.errors.InvalidArgumentError, "keep_prob"):
       output = net(inputs, keep_prob=0.7, is_training=False)
+      self.evaluate(tf.global_variables_initializer())
       self.evaluate(output)
 
     # No exception if keep_prob=1

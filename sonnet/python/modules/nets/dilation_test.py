@@ -28,7 +28,6 @@ from sonnet.python.modules.nets import dilation
 import tensorflow as tf
 
 
-@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class IdentityKernelInitializerTest(tf.test.TestCase,
                                     parameterized.TestCase):
 
@@ -41,7 +40,7 @@ class IdentityKernelInitializerTest(tf.test.TestCase,
       snt.nets.identity_kernel_initializer(shape)
 
   def testComputation(self):
-    x = snt.nets.identity_kernel_initializer([3, 3, 5, 5])
+    x = self.evaluate(snt.nets.identity_kernel_initializer([3, 3, 5, 5]))
 
     # Iterate over elements. Assert that only the middle pixel is on when in
     # and out channels are same.
@@ -57,7 +56,6 @@ class IdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
-@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
                                          parameterized.TestCase):
 
@@ -91,7 +89,6 @@ class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
-@tf.contrib.eager.run_test_in_graph_and_eager_modes()
 class DilationTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUpWithNumOutputClasses(self, num_output_classes, depth=None):

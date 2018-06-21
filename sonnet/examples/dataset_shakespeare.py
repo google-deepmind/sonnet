@@ -50,7 +50,7 @@ class TokenDataSource(object):
         the vocabulary.
     """
     def reading_function(f):
-      return list(f.read().replace("\n", self.CHAR_EOS))
+      return list(f.read().decode().replace("\n", self.CHAR_EOS))
 
     self._vocab_dict = {}
     self._inv_vocab_dict = {}

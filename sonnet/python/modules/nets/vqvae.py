@@ -79,6 +79,8 @@ class VectorQuantizer(base.AbstractModule):
         perplexity: Tensor containing the perplexity of the encodings.
         encodings: Tensor containing the discrete encodings, ie which element
           of the quantized space each input element was mapped to.
+        encoding_indices: Tensor containing the discrete encoding indices, ie
+          which element of the quantized space each input element was mapped to.
     """
     # Assert last dimension is same as self._embedding_dim
     input_shape = tf.shape(inputs)
@@ -93,8 +95,9 @@ class VectorQuantizer(base.AbstractModule):
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)
-    quantized = tf.reshape(
-        tf.matmul(encodings, self._w, transpose_b=True), tf.shape(inputs))
+    encoding_indices = tf.reshape(encoding_indices, inputs.shape.as_list()[:-1])
+    quantized = self.quantize(encoding_indices)
+
     e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
     q_latent_loss = tf.reduce_mean((quantized - tf.stop_gradient(inputs)) ** 2)
     loss = q_latent_loss + self._commitment_cost * e_latent_loss
@@ -106,11 +109,17 @@ class VectorQuantizer(base.AbstractModule):
     return {'quantize': quantized,
             'loss': loss,
             'perplexity': perplexity,
-            'encodings': encodings}
+            'encodings': encodings,
+            'encoding_indices': encoding_indices,}
 
   @property
   def embeddings(self):
     return self._w
+
+  def quantize(self, encoding_indices):
+    with tf.control_dependencies([encoding_indices]):
+      w = tf.transpose(self.embeddings.read_value(), [1, 0])
+    return tf.nn.embedding_lookup(w, encoding_indices, validate_indices=False)
 
 
 class VectorQuantizerEMA(base.AbstractModule):
@@ -187,6 +196,8 @@ class VectorQuantizerEMA(base.AbstractModule):
         perplexity: Tensor containing the perplexity of the encodings.
         encodings: Tensor containing the discrete encodings, ie which element
           of the quantized space each input element was mapped to.
+        encoding_indices: Tensor containing the discrete encoding indices, ie
+          which element of the quantized space each input element was mapped to.
     """
     # Ensure that the weights are read fresh for each timestep, which otherwise
     # would not be guaranteed in an RNN setup. Note that this relies on inputs
@@ -207,8 +218,8 @@ class VectorQuantizerEMA(base.AbstractModule):
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)
-    quantized = tf.reshape(
-        tf.matmul(encodings, w, transpose_b=True), tf.shape(inputs))
+    encoding_indices = tf.reshape(encoding_indices, inputs.shape.as_list()[:-1])
+    quantized = self.quantize(encoding_indices)
     e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
 
     if is_training:
@@ -238,8 +249,14 @@ class VectorQuantizerEMA(base.AbstractModule):
     return {'quantize': quantized,
             'loss': loss,
             'perplexity': perplexity,
-            'encodings': encodings}
+            'encodings': encodings,
+            'encoding_indices': encoding_indices,}
 
   @property
   def embeddings(self):
     return self._w
+
+  def quantize(self, encoding_indices):
+    with tf.control_dependencies([encoding_indices]):
+      w = tf.transpose(self.embeddings.read_value(), [1, 0])
+    return tf.nn.embedding_lookup(w, encoding_indices, validate_indices=False)

@@ -76,20 +76,10 @@ class VqvaeTest(parameterized.TestCase, tf.test.TestCase):
   )
   def testShapeChecking(self, constructor, kwargs):
     vqvae = constructor(**kwargs)
-    # Make input that is not the right size, but the entire shape is still
-    # divisible by embedding_dim. This will not cause an error on graph
-    # construction, but will trigger the assertion at session.run time.
     wrong_shape_input = np.random.randn(100, kwargs['embedding_dim'] * 2)
-
-    output = vqvae(tf.constant(wrong_shape_input.astype(np.float32)),
-                   is_training=False)
-
-    init_op = tf.global_variables_initializer()
-    with self.test_session() as session:
-      session.run(init_op)
-      with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
-                                   'assertion failed'):
-        session.run(output)
+    with self.assertRaisesRegexp(ValueError, 'Cannot reshape a tensor'):
+      vqvae(tf.constant(wrong_shape_input.astype(np.float32)),
+            is_training=False)
 
   def testEmaUpdating(self):
     embedding_dim = 6

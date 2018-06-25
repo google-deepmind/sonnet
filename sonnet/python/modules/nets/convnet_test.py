@@ -32,6 +32,7 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
@@ -514,6 +515,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(output.get_shape().as_list(), expected_output_shape)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class ConvNet2DTest(tf.test.TestCase):
 
   def setUp(self):
@@ -698,6 +700,7 @@ class ConvNet2DTest(tf.test.TestCase):
                              paddings=self.paddings)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class ConvNet2DTransposeTest(tf.test.TestCase):
 
   def setUp(self):

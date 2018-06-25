@@ -28,6 +28,7 @@ from sonnet.python.modules.nets import dilation
 import tensorflow as tf
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class IdentityKernelInitializerTest(tf.test.TestCase,
                                     parameterized.TestCase):
 
@@ -56,6 +57,7 @@ class IdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
                                          parameterized.TestCase):
 
@@ -89,6 +91,7 @@ class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class DilationTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUpWithNumOutputClasses(self, num_output_classes, depth=None):

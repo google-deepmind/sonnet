@@ -30,6 +30,7 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
 
   def testCalcMinSize(self):

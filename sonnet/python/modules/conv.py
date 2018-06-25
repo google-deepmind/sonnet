@@ -414,7 +414,7 @@ class _ConvND(base.AbstractModule):
                 tf.float64.is_compatible_with(self._mask.dtype)):
           raise TypeError(
               "Mask needs to have dtype float16, bfloat16, float32 or float64")
-        if not self._mask.shape.is_fully_defined():
+        if not self._mask.get_shape().is_fully_defined():
           base.IncompatibleShapeError(
               "Mask needs to have a statically defined shape")
       else:
@@ -535,23 +535,25 @@ class _ConvND(base.AbstractModule):
           match on shape.
     """
     w = self._w
+    w_shape = w.get_shape()
+    mask_shape = self._mask.get_shape()
 
-    if self._mask.shape.ndims > w.shape.ndims:
+    if mask_shape.ndims > w_shape.ndims:
       raise base.IncompatibleShapeError(
           "Invalid mask shape: {}. Max shape: {}".format(
-              self._mask.shape.ndims, len(self._data_format)
+              mask_shape.ndims, len(self._data_format)
           )
       )
-    if self._mask.shape != w.shape[:self._mask.shape.ndims]:
+    if mask_shape != w_shape[:mask_shape.ndims]:
       raise base.IncompatibleShapeError(
           "Invalid mask shape: {}. Weight shape: {}".format(
-              self._mask.shape, w.shape
+              mask_shape, w_shape
           )
       )
     # TF broadcasting is a bit fragile.
     # Expand the shape of self._mask by one dim at a time to the right
     # until the rank matches `weight_shape`.
-    while self._mask.shape.ndims < w.shape.ndims:
+    while self._mask.get_shape().ndims < w_shape.ndims:
       self._mask = tf.expand_dims(self._mask, -1)
 
     # tf.Variable & tf.ResourceVariable don't support *=.

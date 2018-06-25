@@ -186,6 +186,11 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       "output_channels": 1,
       "kernel_shape": 3,
   }
+  CONV_1D_MASKED_KWARGS = {
+      "output_channels": 1,
+      "kernel_shape": 3,
+      "mask": np.zeros((3, 10, 1), dtype=np.float64),
+  }
   SEPARABLE_CONV_1D_KWARGS = {
       "output_channels": 10,
       "channel_multiplier": 1,
@@ -223,6 +228,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
 
   modules = [
       (snt.Conv1D, 1, CONV_1D_KWARGS),
+      (snt.Conv1D, 1, CONV_1D_MASKED_KWARGS),
       (snt.Conv2D, 2, CONV_2D_KWARGS),
       (snt.Conv3D, 3, CONV_3D_KWARGS),
       (snt.Conv1DTranspose, 1, CONV_1D_TRANSPOSE_KWARGS),
@@ -242,6 +248,11 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
     partitioners = {
         key: tf.variable_axis_size_partitioner(10) for key in keys
     }
+
+    if "mask" in module_kwargs:
+      np_dtype = inputs.dtype.as_numpy_dtype()
+      module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
+
     convolution = module(partitioners=partitioners, **module_kwargs)
     convolution(inputs)
 
@@ -264,6 +275,10 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
 
     input_shape = (10,) * (num_input_dims + 2)
     inputs = tf.placeholder(dtype, input_shape)
+
+    if "mask" in module_kwargs:
+      np_dtype = dtype.as_numpy_dtype()
+      module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
 
     with tf.variable_scope("scope"):
       conv_mod = module(name=mod_name, use_bias=use_bias, **module_kwargs)
@@ -343,6 +358,10 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       return tf.stop_gradient(getter(*args, **kwargs))
 
     inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 2))
+
+    if "mask" in module_kwargs:
+      np_dtype = inputs.dtype.as_numpy_dtype()
+      module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
 
     conv_mod1 = module(**module_kwargs)
     out1 = conv_mod1(inputs)

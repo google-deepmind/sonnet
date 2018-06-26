@@ -27,6 +27,7 @@ import weakref
 # Dependency imports
 import six
 import tensorflow as tf
+import wrapt
 
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
@@ -656,8 +657,8 @@ def reuse_variables(method):
   if not is_method:
     raise TypeError("reuse_variables can only be used with methods.")
 
-  @functools.wraps(method)
-  def wrapper(obj, *args, **kwargs):
+  @wrapt.decorator
+  def wrapper(method, obj, args, kwargs):
     """Calls `method` with a variable scope whose reuse flag is set correctly.
 
     The first time the wrapper is called it creates a
@@ -714,9 +715,10 @@ def reuse_variables(method):
       ```
 
     Args:
+      method: The method to wrap.
       obj: The object instance passed to the wrapped method.
-      *args: The positional arguments (Tensors) passed to the wrapped method.
-      **kwargs: The keyword arguments passed to the wrapped method.
+      args: The positional arguments (Tensors) passed to the wrapped method.
+      kwargs: The keyword arguments passed to the wrapped method.
 
     Returns:
       Output of the wrapped method.
@@ -725,6 +727,11 @@ def reuse_variables(method):
       ValueError: If no variable scope is provided or if `method` is a method
                   and a variable_scope keyword argument is also provided.
     """
+
+    # If @reuse_variables is combined with @property, obj is passed in args
+    # and method is still unbound at this stage.
+    if obj is None:
+      obj = args[0]
 
     def default_context_manager(reuse=None):
       variable_scope = obj.variable_scope
@@ -759,21 +766,20 @@ def reuse_variables(method):
         with tf.name_scope(method_name_scope) as scope:
           if hasattr(obj, "_capture_variables"):
             with obj._capture_variables():  # pylint: disable=protected-access
-              out_ops = method(obj, *args, **kwargs)
+              out_ops = method(*args, **kwargs)
           else:
-            out_ops = method(obj, *args, **kwargs)
+            out_ops = method(*args, **kwargs)
       initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
       try:
         # If `obj` is a Sonnet module, let it know it's been connected
         # to the TF graph
-        method_positional_args = [obj] + list(args)
         obj._add_connected_subgraph(  # pylint: disable=protected-access
-            method, out_ops, scope, *method_positional_args, **kwargs)
+            method, out_ops, scope, *args, **kwargs)
       except AttributeError:
         pass
     return out_ops
 
-  return wrapper
+  return wrapper(method)  # pylint: disable=no-value-for-parameter
 
 
 def name_for_callable(func):

@@ -94,7 +94,9 @@ py_library(
     srcs = ["modules/util.py"],
     srcs_version = "PY2AND3",
     deps = [
+        # six dep,
         # tensorflow dep,
+        # wrapt dep,
     ],
 )
 

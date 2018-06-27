@@ -41,6 +41,7 @@ py_library(
         "custom_getters/bayes_by_backprop.py",
         "custom_getters/context.py",
         "custom_getters/non_trainable.py",
+        "custom_getters/override_args.py",
         "custom_getters/restore_initializer.py",
         "custom_getters/stop_gradient.py",
     ],
@@ -229,6 +230,11 @@ custom_getters_tests = [
     ),
     (
         "non_trainable_test",
+        "small",
+        [],
+    ),
+    (
+        "override_args_test",
         "small",
         [],
     ),

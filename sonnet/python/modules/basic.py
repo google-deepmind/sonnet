@@ -576,7 +576,7 @@ class AddBias(base.AbstractModule, base.Transposable):
 
     bias = self._b
     if multiplier != 1:
-      bias *= multiplier
+      bias = bias * multiplier  # pylint: disable=g-no-augmented-assignment
     outputs = inputs + bias
     return outputs
 

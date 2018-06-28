@@ -482,7 +482,7 @@ class ZoneoutWrapper(rnn_core.RNNCore):
   def _build(self, inputs, prev_state):
     output, next_state = self._core(inputs, prev_state)
 
-    def apply_zoneout(keep_prob, next_s, prev_s):
+    def apply_zoneout(keep_prob, next_s, prev_s):  # pylint: disable=missing-docstring
       if keep_prob is None:
         return next_s
       if self._is_training:
@@ -1240,6 +1240,7 @@ class ConvLSTM(rnn_core.RNNCore):
                initializers=None,
                partitioners=None,
                regularizers=None,
+               use_layer_norm=False,
                custom_getter=None,
                name="conv_lstm"):
     """Construct ConvLSTM.
@@ -1248,10 +1249,10 @@ class ConvLSTM(rnn_core.RNNCore):
       conv_ndims: Convolution dimensionality (1, 2 or 3).
       input_shape: Shape of the input as an iterable, excluding the batch size.
       output_channels: Number of output channels of the conv LSTM.
-      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is
-          used to define kernel size in all dimensions.
-      stride: Sequence of kernel strides (of size 2), or integer that is used to
-          define stride in all dimensions.
+      kernel_shape: Sequence of kernel sizes (of size conv_ndims), or integer
+          that is used to define kernel size in all dimensions.
+      stride: Sequence of kernel strides (of size conv_ndims), or integer that
+          is used to define stride in all dimensions.
       rate: Sequence of dilation rates (of size conv_ndims), or integer that is
           used to define dilation rate in all dimensions. 1 corresponds to a
           standard convolution, while rate > 1 corresponds to a dilated
@@ -1265,6 +1266,9 @@ class ConvLSTM(rnn_core.RNNCore):
         used.
       regularizers: Optional dict containing regularizers for the convolutional
         weights and biases. As a default, no regularizers are used.
+      use_layer_norm: Boolean that indicates whether to apply layer
+        normalization. This is applied across the entire layer, normalizing
+        over all non-batch dimensions.
       custom_getter: Callable that takes as a first argument the true getter,
         and allows overwriting the internal get_variable method. See the
         `tf.get_variable` documentation for more details.
@@ -1294,6 +1298,7 @@ class ConvLSTM(rnn_core.RNNCore):
     self._initializers = initializers
     self._partitioners = partitioners
     self._regularizers = regularizers
+    self._use_layer_norm = use_layer_norm
 
     self._total_output_channels = output_channels
     if self._stride != 1:
@@ -1336,6 +1341,16 @@ class ConvLSTM(rnn_core.RNNCore):
     input_conv = self._convolutions["input"]
     hidden_conv = self._convolutions["hidden"]
     next_hidden = input_conv(inputs) + hidden_conv(hidden)
+
+    if self._use_layer_norm:
+      # Normalize over all non-batch dimensions.
+      # Temporarily flatten the spatial and channel dimensions together.
+      flatten = basic.BatchFlatten()
+      unflatten = basic.BatchReshape(next_hidden.get_shape().as_list()[1:])
+      next_hidden = flatten(next_hidden)
+      next_hidden = layer_norm.LayerNorm()(next_hidden)
+      next_hidden = unflatten(next_hidden)
+
     gates = tf.split(value=next_hidden, num_or_size_splits=4,
                      axis=self._conv_ndims+1)
 
@@ -1344,6 +1359,11 @@ class ConvLSTM(rnn_core.RNNCore):
     next_cell += tf.sigmoid(input_gate) * tf.tanh(next_input)
     output = tf.tanh(next_cell) * tf.sigmoid(output_gate)
     return output, (output, next_cell)
+
+  @property
+  def use_layer_norm(self):
+    """Boolean indicating whether layer norm is enabled."""
+    return self._use_layer_norm
 
 
 class Conv1DLSTM(ConvLSTM):

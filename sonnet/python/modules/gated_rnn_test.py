@@ -1050,6 +1050,82 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
       sess.run(init)
       sess.run(train_op)
 
+  @parameterized.parameters(
+      (snt.Conv1DLSTM, 1, False, False, 2),
+      (snt.Conv1DLSTM, 1, False, True, 4),
+      (snt.Conv1DLSTM, 1, True, False, 4),
+      (snt.Conv1DLSTM, 1, True, True, 6),
+      (snt.Conv2DLSTM, 2, False, False, 2),
+      (snt.Conv2DLSTM, 2, False, True, 4),
+      (snt.Conv2DLSTM, 2, True, False, 4),
+      (snt.Conv2DLSTM, 2, True, True, 6),
+  )
+  def testLayerNormVariables(self, lstm_class, dim, use_bias, use_layer_norm,
+                             expected_num_variables):
+    batch_size = 2
+    input_shape = (8,) * dim + (3,)
+
+    lstm = lstm_class(
+        input_shape=input_shape,
+        output_channels=5,
+        kernel_shape=3,
+        use_bias=use_bias,
+        use_layer_norm=use_layer_norm)
+    inputs = tf.placeholder(tf.float32, shape=((1, batch_size) + input_shape))
+    initial_state = lstm.initial_state(batch_size, tf.float32)
+    tf.nn.dynamic_rnn(lstm,
+                      inputs,
+                      time_major=True,
+                      initial_state=initial_state,
+                      dtype=tf.float32)
+
+    self.assertEqual(use_layer_norm, lstm.use_layer_norm)
+
+    # Expect the following variables:
+    # Weight, and bias if present, to apply to input
+    # Weight, and bias if present, to apply to hidden state
+    # LayerNorm's gamma and beta, if present
+    self.assertEqual(len(lstm.get_variables()), expected_num_variables)
+
+  @parameterized.parameters(
+      (snt.Conv1DLSTM, 1, False),
+      (snt.Conv1DLSTM, 1, True),
+      (snt.Conv2DLSTM, 2, False),
+      (snt.Conv2DLSTM, 2, True),
+  )
+  def testLayerNorm(self, lstm_class, dim, use_bias):
+    """Test that training works, with or without dilated convolutions."""
+    time_steps = 3
+    batch_size = 2
+    input_shape = (8,) * dim
+    input_channels = 3
+    output_channels = 5
+    kernel_shape = 3
+
+    input_shape = (batch_size,) + input_shape + (input_channels,)
+
+    lstm = lstm_class(
+        input_shape=input_shape[1:],
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        use_bias=use_bias,
+        use_layer_norm=True)
+    inputs = tf.random_normal((time_steps,) + input_shape, dtype=tf.float32)
+    initial_state = lstm.initial_state(batch_size, tf.float32)
+
+    output, _ = tf.nn.dynamic_rnn(lstm,
+                                  inputs,
+                                  time_major=True,
+                                  initial_state=initial_state,
+                                  dtype=tf.float32)
+
+    loss = tf.reduce_mean(tf.square(output))
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+    init = tf.global_variables_initializer()
+    with self.test_session() as sess:
+      sess.run(init)
+      sess.run(train_op)
+
 
 class GRUTest(tf.test.TestCase):
 

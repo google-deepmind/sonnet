@@ -1392,5 +1392,49 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     self.assertAllClose(state_data, state_ex)
 
 
+class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
+
+  def testShape(self):
+    batch_size = 2
+    hidden_size = 5
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    lstm = snt.LSTMBlockCell(hidden_size)
+    output, next_state = lstm(inputs, (prev_hidden, prev_cell))
+
+    shape = np.ndarray((batch_size, hidden_size))
+
+    self.assertShapeEqual(shape, next_state[0])
+    self.assertShapeEqual(shape, next_state[1])
+    self.assertShapeEqual(shape, output)
+
+    self.assertEqual(hidden_size, lstm.output_size)
+    self.assertEqual((hidden_size, hidden_size), lstm.state_size)
+
+  def testVariables(self):
+    batch_size = 5
+    hidden_size = 20
+    mod_name = "lstm_block"
+    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    lstm = snt.LSTMBlockCell(hidden_size, name=mod_name)
+    self.assertEqual(lstm.scope_name, mod_name)
+    with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
+      lstm.get_variables()
+    lstm(inputs, (prev_hidden, prev_cell))
+
+    lstm_variables = lstm.get_variables()
+    self.assertEqual(len(lstm_variables), 2, "LSTM should have 2 variables")
+    param_map = {param.name.split("/")[-1].split(":")[0]:
+                 param for param in lstm_variables}
+
+    self.assertShapeEqual(np.ndarray(4 * hidden_size),
+                          param_map["bias"].initial_value)
+    self.assertShapeEqual(np.ndarray((2 * hidden_size, 4 * hidden_size)),
+                          param_map["kernel"].initial_value)
+
+
 if __name__ == "__main__":
   tf.test.main()

@@ -1769,3 +1769,6 @@ def highway_core_with_recurrent_dropout(
 
   core = HighwayCore(hidden_size, num_layers, **kwargs)
   return RecurrentDropoutWrapper(core, keep_prob), core
+
+
+LSTMBlockCell = rnn_core.wrap_rnn_cell_class(tf.contrib.rnn.LSTMBlockCell)  # pylint: disable=invalid-name

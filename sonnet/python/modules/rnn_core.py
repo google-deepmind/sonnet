@@ -33,6 +33,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 import tensorflow as tf
+import wrapt
 
 from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.util import nest
@@ -345,3 +346,82 @@ class TrainableInitialState(base.AbstractModule):
 
     return nest.pack_sequence_as(structure=self._initial_state,
                                  flat_sequence=flat_learnable_state)
+
+
+class RNNCellWrapper(RNNCore):
+  """RNN core that delegates to a `tf.contrib.rnn.RNNCell`."""
+
+  def __init__(self, cell_ctor, *args, **kwargs):
+    """Constructs the cell, within this module's variable scope.
+
+    Args:
+      cell_ctor: Callable that instantiates a `tf.contrib.rnn.RNNCell`.
+      *args: Arguments to pass to `cell_ctor`.
+      **kwargs: Keyword arguments to pass to `cell_ctor`.
+        If `name` is provided, it is passed to `RNNCore.__init__` as well.
+        If `custom_getter` is provided, it is passed to `RNNCore.__init__`
+        but not to `cell_ctor`.
+    """
+    super(RNNCellWrapper, self).__init__(
+        name=kwargs.get("name"),
+        custom_getter=kwargs.pop("custom_getter", None))
+
+    with self._enter_variable_scope():
+      self._cell = cell_ctor(*args, **kwargs)
+
+  def _build(self, inputs, prev_state):
+    return self._cell(inputs, prev_state)
+
+  @property
+  def output_size(self):
+    return self._cell.output_size
+
+  @property
+  def state_size(self):
+    return self._cell.state_size
+
+
+def wrap_rnn_cell_class(wrapped_class):
+  """Wraps an RNN cell class with a sub-class of `RNNCellWrapper`.
+
+  The returned wrapper class will contain an `__init__` method whose
+  docstring, *args, and **kwargs are based on `wrapped_class.__init__`.
+
+  Args:
+    wrapped_class: A sub-class (NOT an instance) of `tf.contrib.rnn.RNNCell`.
+
+  Returns:
+    A sub-class (NOT an instance) of `RNNCellWrapper`, with an `__init__`
+    method that delegates to that of `wrapped_class`.
+  """
+
+  def with_doc(wrapper_init):
+    """Decorator to copy documentation from target class's __init__ method.
+
+    Docstring is copied, including *args and **kwargs documentation.
+
+    Args:
+      wrapper_init: Wrapper class's __init__ method to wrap with new
+        documentation.
+
+    Returns:
+      Decorated version of `wrapper_init` with documentation copied from
+      `wrapped_class.__init__`.
+    """
+
+    # Wrap the target class's constructor (to assume its docstring),
+    # but invoke the wrapper class's constructor.
+    @wrapt.decorator
+    def wrapping_fn(unused_wrapped, instance, args, kwargs):
+      wrapper_init(instance, *args, **kwargs)
+    return wrapping_fn(wrapped_class.__init__)  # pylint: disable=no-value-for-parameter
+
+  class Wrapper(RNNCellWrapper):
+
+    @with_doc
+    def __init__(self, *args, **kwargs):
+      super(Wrapper, self).__init__(wrapped_class, *args, **kwargs)
+
+  return Wrapper
+
+

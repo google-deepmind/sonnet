@@ -85,8 +85,12 @@ py_library(
     deps = [
         ":base",
         ":basic",
+        ":nest",
         ":util",
+        # numpy dep,
+        # six dep,
         # tensorflow dep,
+        # wrapt dep,
     ],
 )
 

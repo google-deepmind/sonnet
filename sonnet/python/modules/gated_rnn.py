@@ -1236,6 +1236,7 @@ class ConvLSTM(rnn_core.RNNCore):
                rate=1,
                padding=conv.SAME,
                use_bias=True,
+               legacy_bias_behaviour=True,
                forget_bias=1.0,
                initializers=None,
                partitioners=None,
@@ -1259,6 +1260,9 @@ class ConvLSTM(rnn_core.RNNCore):
           convolution. Cannot be > 1 if any of stride is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
       use_bias: Use bias in convolutions.
+      legacy_bias_behaviour: If True, bias is applied to both input and hidden
+        convolutions, creating a redundant bias variable. If False, bias is only
+        applied to input convolution, removing the redundancy.
       forget_bias: Forget bias.
       initializers: Dict containing ops to initialize the convolutional weights.
       partitioners: Optional dict containing partitioners to partition
@@ -1294,6 +1298,7 @@ class ConvLSTM(rnn_core.RNNCore):
     self._rate = rate
     self._padding = padding
     self._use_bias = use_bias
+    self._legacy_bias_behaviour = legacy_bias_behaviour
     self._forget_bias = forget_bias
     self._initializers = initializers
     self._partitioners = partitioners
@@ -1304,19 +1309,39 @@ class ConvLSTM(rnn_core.RNNCore):
     if self._stride != 1:
       self._total_output_channels //= self._stride * self._stride
 
-    self._convolutions = collections.defaultdict(self._new_convolution)
+    self._convolutions = dict()
 
-  def _new_convolution(self):
+
+    if self._use_bias and self._legacy_bias_behaviour:
+      tf.logging.warning(
+          "ConvLSTM will create redundant bias variables for input and hidden "
+          "convolutions. To avoid this, invoke the constructor with option "
+          "`legacy_bias_behaviour=False`. In future, this will be the default.")
+
+  def _new_convolution(self, use_bias):
+    """Returns new convolution.
+
+    Args:
+      use_bias: Use bias in convolutions. If False, clean_dict removes bias
+        entries from initializers, partitioners and regularizers passed to
+        the constructor of the convolution.
+    """
+    def clean_dict(input_dict):
+      if input_dict and not use_bias:
+        cleaned_dict = input_dict.copy()
+        cleaned_dict.pop("b", None)
+        return cleaned_dict
+      return input_dict
     return self._conv_class(
         output_channels=4*self._output_channels,
         kernel_shape=self._kernel_shape,
         stride=self._stride,
         rate=self._rate,
         padding=self._padding,
-        use_bias=self._use_bias,
-        initializers=self._initializers,
-        partitioners=self._partitioners,
-        regularizers=self._regularizers,
+        use_bias=use_bias,
+        initializers=clean_dict(self._initializers),
+        partitioners=clean_dict(self._partitioners),
+        regularizers=clean_dict(self._regularizers),
         name="conv")
 
   @property
@@ -1338,6 +1363,14 @@ class ConvLSTM(rnn_core.RNNCore):
 
   def _build(self, inputs, state):
     hidden, cell = state
+    if "input" not in self._convolutions:
+      self._convolutions["input"] = self._new_convolution(self._use_bias)
+    if "hidden" not in self._convolutions:
+      if self._legacy_bias_behaviour:
+        self._convolutions["hidden"] = self._new_convolution(self._use_bias)
+      else:
+        # Do not apply bias a second time
+        self._convolutions["hidden"] = self._new_convolution(use_bias=False)
     input_conv = self._convolutions["input"]
     hidden_conv = self._convolutions["hidden"]
     next_hidden = input_conv(inputs) + hidden_conv(hidden)

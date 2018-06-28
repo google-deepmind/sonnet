@@ -845,12 +845,16 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertShapeEqual(expected_shape, output)
 
   @parameterized.parameters(
-      (snt.Conv1DLSTM, 1, False),
-      (snt.Conv1DLSTM, 1, True),
-      (snt.Conv2DLSTM, 2, False),
-      (snt.Conv2DLSTM, 2, True),
+      (snt.Conv1DLSTM, 1, False, False),
+      (snt.Conv1DLSTM, 1, True, False),
+      (snt.Conv2DLSTM, 2, False, False),
+      (snt.Conv2DLSTM, 2, True, False),
+      (snt.Conv1DLSTM, 1, False, True),
+      (snt.Conv1DLSTM, 1, True, True),
+      (snt.Conv2DLSTM, 2, False, True),
+      (snt.Conv2DLSTM, 2, True, True),
   )
-  def testInitializers(self, lstm_class, dim, use_bias):
+  def testInitializers(self, lstm_class, dim, use_bias, legacy_bias_behaviour):
     keys = snt.Conv2DLSTM.get_possible_initializer_keys(use_bias)
     initializers = {
         key: tf.constant_initializer(i) for i, key in enumerate(keys)
@@ -874,6 +878,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
         output_channels=output_channels,
         kernel_shape=1,
         use_bias=use_bias,
+        legacy_bias_behaviour=legacy_bias_behaviour,
         initializers=initializers)
     lstm(inputs, (prev_hidden, prev_cell))
 
@@ -882,20 +887,27 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     # Test that the initializers have been applied correctly.
     with self.test_session() as sess:
       sess.run(init)
-      for convolution in lstm.convolutions.values():
+      for conv_key, convolution in lstm.convolutions.items():
         for i, key in enumerate(keys):
+          if not legacy_bias_behaviour and conv_key == "hidden" and key == "b":
+            self.assertFalse(hasattr(convolution, key))
+            continue
           variable = getattr(convolution, key)
           self.assertAllClose(sess.run(variable),
                               np.full(variable.get_shape(),
                                       i, dtype=np.float32))
 
   @parameterized.parameters(
-      (snt.Conv1DLSTM, 1, False),
-      (snt.Conv1DLSTM, 1, True),
-      (snt.Conv2DLSTM, 2, False),
-      (snt.Conv2DLSTM, 2, True),
+      (snt.Conv1DLSTM, 1, False, False),
+      (snt.Conv1DLSTM, 1, True, False),
+      (snt.Conv2DLSTM, 2, False, False),
+      (snt.Conv2DLSTM, 2, True, False),
+      (snt.Conv1DLSTM, 1, False, True),
+      (snt.Conv1DLSTM, 1, True, True),
+      (snt.Conv2DLSTM, 2, False, True),
+      (snt.Conv2DLSTM, 2, True, True),
   )
-  def testPartitioners(self, lstm_class, dim, use_bias):
+  def testPartitioners(self, lstm_class, dim, use_bias, legacy_bias_behaviour):
     keys = snt.Conv2DLSTM.get_possible_initializer_keys(use_bias)
     partitioners = {
         key: tf.variable_axis_size_partitioner(10) for key in keys
@@ -919,22 +931,30 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
         output_channels=output_channels,
         kernel_shape=1,
         use_bias=use_bias,
+        legacy_bias_behaviour=legacy_bias_behaviour,
         partitioners=partitioners)
     lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that the variables are partitioned.
-    for convolution in lstm.convolutions.values():
+    for conv_key, convolution in lstm.convolutions.items():
       for key in keys:
+        if not legacy_bias_behaviour and conv_key == "hidden" and key == "b":
+          self.assertFalse(hasattr(convolution, key))
+          continue
         self.assertEqual(type(getattr(convolution, key)),
                          variables.PartitionedVariable)
 
   @parameterized.parameters(
-      (snt.Conv1DLSTM, 1, False),
-      (snt.Conv1DLSTM, 1, True),
-      (snt.Conv2DLSTM, 2, False),
-      (snt.Conv2DLSTM, 2, True),
+      (snt.Conv1DLSTM, 1, False, False),
+      (snt.Conv1DLSTM, 1, True, False),
+      (snt.Conv2DLSTM, 2, False, False),
+      (snt.Conv2DLSTM, 2, True, False),
+      (snt.Conv1DLSTM, 1, False, True),
+      (snt.Conv1DLSTM, 1, True, True),
+      (snt.Conv2DLSTM, 2, False, True),
+      (snt.Conv2DLSTM, 2, True, True),
   )
-  def testRegularizers(self, lstm_class, dim, use_bias):
+  def testRegularizers(self, lstm_class, dim, use_bias, legacy_bias_behaviour):
     keys = snt.Conv2DLSTM.get_possible_initializer_keys(use_bias)
 
     batch_size = 2
@@ -955,12 +975,17 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
         output_channels=output_channels,
         kernel_shape=1,
         use_bias=use_bias,
+        legacy_bias_behaviour=legacy_bias_behaviour,
         regularizers={key: tf.nn.l2_loss for key in keys})
     lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that we have regularization losses.
     num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
-    self.assertEqual(num_reg_losses, len(lstm.convolutions) * len(keys))
+    num_reg_losses_expected = len(lstm.convolutions) * len(keys)
+    if use_bias and not legacy_bias_behaviour:
+      # Bias is not applied to hidden
+      num_reg_losses_expected -= 1
+    self.assertEqual(num_reg_losses, num_reg_losses_expected)
 
   @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),

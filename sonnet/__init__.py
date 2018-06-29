@@ -104,9 +104,11 @@ from sonnet.python.modules.relational_memory import RelationalMemory
 from sonnet.python.modules.residual import Residual
 from sonnet.python.modules.residual import ResidualCore
 from sonnet.python.modules.residual import SkipConnectionCore
+from sonnet.python.modules.rnn_core import RNNCellWrapper
 from sonnet.python.modules.rnn_core import RNNCore
 from sonnet.python.modules.rnn_core import trainable_initial_state
 from sonnet.python.modules.rnn_core import TrainableInitialState
+from sonnet.python.modules.rnn_core import wrap_rnn_cell_class
 from sonnet.python.modules.scale_gradient import scale_gradient
 from sonnet.python.modules.sequential import Sequential
 from sonnet.python.modules.spatial_transformer import AffineGridWarper

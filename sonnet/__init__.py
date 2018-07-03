@@ -36,6 +36,8 @@ from __future__ import print_function
 
 import sys
 
+import semantic_version
+
 from sonnet.python import custom_getters
 from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
@@ -131,6 +133,22 @@ from sonnet.python.modules.util import summarize_variables
 from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
+
+_min_tensorflow_version = '1.8.0'
+try:
+  import tensorflow as tf  # Check some version of TF is available.
+except ImportError:
+  raise SystemError(
+      'Sonnet requires TensorFlow (minimum version %s) to be installed. '
+      'If using pip, run `pip install tensorflow` or '
+      '`pip install tensorflow-gpu`' % _min_tensorflow_version)
+
+tf_version = semantic_version.Version(tf.__version__)
+version_spec = semantic_version.Spec('>=' + _min_tensorflow_version)
+if not version_spec.match(tf_version):
+  raise SystemError('TensorFlow version %s is installed, but Sonnet '
+                    'requires at least version %s.' %
+                    (tf.__version__, _min_tensorflow_version))
 
 __version__ = '1.23'
 

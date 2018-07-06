@@ -331,7 +331,17 @@ class AbstractModule(object):
     module_stack = _MODULE_STACKS.setdefault(self._graph, [])
     module_stack.append(self)
     try:
-      yield
+      # In eager mode, the template store keeps references to created variables
+      # such that they survive even if there are no references to them in
+      # Python code. Variables added to an eager template store are also added
+      # to TensorFlow global collections (unlike regular variables created in
+      # eager mode).
+      # Ideally move re-entering store into TF's tpl.variable_scope.
+      if tf.executing_eagerly():
+        with self._template._template_store.as_default():  # pylint:disable=protected-access
+          yield
+      else:
+        yield
     finally:
       # Remove `self` from `module_stack`, this happens as part of cleanup
       # even if an error is raised.

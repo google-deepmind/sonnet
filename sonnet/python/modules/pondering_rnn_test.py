@@ -73,11 +73,11 @@ class Output2DCore(rnn_core.RNNCore):
     pass
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def _test_nested(self, tensor, values_expected):
-    with self.test_session() as sess:
-      values_out = sess.run(tensor)
+    values_out = self.evaluate(tensor)
     self.assertEqual(2, len(values_out))
     self.assertEqual(2, len(values_out[1]))
     self.assertEqual(values_expected[0], values_out[0])
@@ -117,9 +117,8 @@ class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
     for tensor in nest.flatten(seq_output):
       self.assertEqual(seq_input.dtype, tensor.dtype)
 
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      output = sess.run(seq_output)
+    self.evaluate(tf.global_variables_initializer())
+    output = self.evaluate(seq_output)
     (final_out, (iteration, r_t)), final_cumul_state = output
     self.assertEqual((seq_len, batch_size, output_size),
                      final_out.shape)

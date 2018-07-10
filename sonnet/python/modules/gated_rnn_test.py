@@ -77,14 +77,15 @@ def _get_possible_initializer_keys(use_peepholes, use_batch_norm_h,
     return snt.LSTM.get_possible_initializer_keys(use_peepholes)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 2
     hidden_size = 4
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTM(hidden_size)
     output, next_state = lstm(inputs, (prev_hidden, prev_cell))
 
@@ -98,9 +99,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     batch_size = 5
     hidden_size = 20
     mod_name = "rnn"
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTM(hidden_size, name=mod_name)
     self.assertEqual(lstm.scope_name, mod_name)
     with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
@@ -112,10 +113,12 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
 
-    self.assertShapeEqual(np.ndarray(4 * hidden_size),
-                          param_map[snt.LSTM.B_GATES].initial_value)
-    self.assertShapeEqual(np.ndarray((2 * hidden_size, 4 * hidden_size)),
-                          param_map[snt.LSTM.W_GATES].initial_value)
+    self.assertShapeEqual(
+        np.ndarray(4 * hidden_size),
+        tf.convert_to_tensor(param_map[snt.LSTM.B_GATES]))
+    self.assertShapeEqual(
+        np.ndarray((2 * hidden_size, 4 * hidden_size)),
+        tf.convert_to_tensor(param_map[snt.LSTM.W_GATES]))
 
   @parameterized.named_parameters(
       [("lstm", None), ("lstm_with_recurrent_projection", 6)])
@@ -123,10 +126,17 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     batch_size = 2
     hidden_size = 4
     hidden_state_size = projection_size or hidden_size
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32,
-                                 shape=[batch_size, hidden_state_size])
+
+    # With random data, check the TF calculation matches the Numpy version.
+    input_data = np.random.randn(batch_size, hidden_size).astype(np.float32)
+    prev_hidden_data = np.random.randn(batch_size,
+                                       hidden_state_size).astype(np.float32)
+    prev_cell_data = np.random.randn(batch_size, hidden_size).astype(np.float32)
+
+    inputs = tf.constant(input_data)
+    prev_cell = tf.constant(prev_cell_data)
+    prev_hidden = tf.constant(prev_hidden_data)
+
     lstm = snt.LSTM(hidden_size, projection_size=projection_size)
     _, next_state = lstm(inputs, (prev_hidden, prev_cell))
     next_hidden, next_cell = next_state
@@ -134,22 +144,12 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
 
-    # With random data, check the TF calculation matches the Numpy version.
-    input_data = np.random.randn(batch_size, hidden_size)
-    prev_hidden_data = np.random.randn(batch_size, hidden_state_size)
-    prev_cell_data = np.random.randn(batch_size, hidden_size)
-
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      fetches = [(next_hidden, next_cell),
-                 param_map[snt.LSTM.W_GATES],
-                 param_map[snt.LSTM.B_GATES]]
-      if projection_size is not None:
-        fetches.append(param_map[snt.LSTM.W_H_PROJECTION])
-      output = session.run(fetches,
-                           {inputs: input_data,
-                            prev_cell: prev_cell_data,
-                            prev_hidden: prev_hidden_data})
+    self.evaluate(tf.global_variables_initializer())
+    fetches = [(next_hidden, next_cell), param_map[snt.LSTM.W_GATES],
+               param_map[snt.LSTM.B_GATES]]
+    if projection_size is not None:
+      fetches.append(param_map[snt.LSTM.W_H_PROJECTION])
+    output = self.evaluate(fetches)
 
     next_state_ex, gate_weights_ex, gate_biases_ex = output[:3]
     in_and_hid = np.concatenate((input_data, prev_hidden_data), axis=1)
@@ -169,10 +169,17 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     batch_size = 5
     hidden_size = 20
 
+    # With random data, check the TF calculation matches the Numpy version.
+    input_data = np.random.randn(batch_size, hidden_size).astype(np.float32)
+    prev_hidden_data = np.random.randn(batch_size,
+                                       hidden_size).astype(np.float32)
+    prev_cell_data = np.random.randn(batch_size, hidden_size).astype(np.float32)
+
     # Initialize the rnn and verify the number of parameter sets.
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.constant(input_data)
+    prev_cell = tf.constant(prev_cell_data)
+    prev_hidden = tf.constant(prev_hidden_data)
+
     lstm = snt.LSTM(hidden_size, use_peepholes=True)
     _, next_state = lstm(inputs, (prev_hidden, prev_cell))
     next_hidden, next_cell = next_state
@@ -182,34 +189,27 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     # Unpack parameters into dict and check their sizes.
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
-    self.assertShapeEqual(np.ndarray(4 * hidden_size),
-                          param_map[snt.LSTM.B_GATES].initial_value)
-    self.assertShapeEqual(np.ndarray((2 * hidden_size, 4 * hidden_size)),
-                          param_map[snt.LSTM.W_GATES].initial_value)
-    self.assertShapeEqual(np.ndarray(hidden_size),
-                          param_map[snt.LSTM.W_F_DIAG].initial_value)
-    self.assertShapeEqual(np.ndarray(hidden_size),
-                          param_map[snt.LSTM.W_I_DIAG].initial_value)
-    self.assertShapeEqual(np.ndarray(hidden_size),
-                          param_map[snt.LSTM.W_O_DIAG].initial_value)
+    self.assertShapeEqual(
+        np.ndarray(4 * hidden_size),
+        tf.convert_to_tensor(param_map[snt.LSTM.B_GATES]))
+    self.assertShapeEqual(
+        np.ndarray((2 * hidden_size, 4 * hidden_size)),
+        tf.convert_to_tensor(param_map[snt.LSTM.W_GATES]))
+    self.assertShapeEqual(
+        np.ndarray(hidden_size),
+        tf.convert_to_tensor(param_map[snt.LSTM.W_F_DIAG]))
+    self.assertShapeEqual(
+        np.ndarray(hidden_size),
+        tf.convert_to_tensor(param_map[snt.LSTM.W_I_DIAG]))
+    self.assertShapeEqual(
+        np.ndarray(hidden_size),
+        tf.convert_to_tensor(param_map[snt.LSTM.W_O_DIAG]))
 
-    # With random data, check the TF calculation matches the Numpy version.
-    input_data = np.random.randn(batch_size, hidden_size)
-    prev_hidden_data = np.random.randn(batch_size, hidden_size)
-    prev_cell_data = np.random.randn(batch_size, hidden_size)
-
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      fetches = [(next_hidden, next_cell),
-                 param_map[snt.LSTM.W_GATES],
-                 param_map[snt.LSTM.B_GATES],
-                 param_map[snt.LSTM.W_F_DIAG],
-                 param_map[snt.LSTM.W_I_DIAG],
-                 param_map[snt.LSTM.W_O_DIAG]]
-      output = session.run(fetches,
-                           {inputs: input_data,
-                            prev_cell: prev_cell_data,
-                            prev_hidden: prev_hidden_data})
+    self.evaluate(tf.global_variables_initializer())
+    fetches = [(next_hidden, next_cell), param_map[snt.LSTM.W_GATES],
+               param_map[snt.LSTM.B_GATES], param_map[snt.LSTM.W_F_DIAG],
+               param_map[snt.LSTM.W_I_DIAG], param_map[snt.LSTM.W_O_DIAG]]
+    output = self.evaluate(fetches)
 
     next_state_ex, w_ex, b_ex, wfd_ex, wid_ex, wod_ex = output
     in_and_hid = np.concatenate((input_data, prev_hidden_data), axis=1)
@@ -250,21 +250,20 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                                          initializers=initializers)
 
     # Test we can build the LSTM.
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     wrapped_lstm(inputs, (prev_hidden, prev_cell))
     init = tf.global_variables_initializer()
 
     # Test that the initializers have been correctly applied.
     lstm_variable_names = _get_lstm_variable_names(lstm)
     lstm_variables = [getattr(lstm, "_" + name) for name in lstm_variable_names]
-    with self.test_session() as sess:
-      sess.run(init)
-      lstm_variables_v = sess.run(lstm_variables)
-      for lstm_variable_v in lstm_variables_v:
-        self.assertAllClose(lstm_variable_v,
-                            1.5 * np.ones(lstm_variable_v.shape))
+
+    self.evaluate(init)
+    lstm_variables_v = self.evaluate(lstm_variables)
+    for lstm_variable_v in lstm_variables_v:
+      self.assertAllClose(lstm_variable_v, 1.5 * np.ones(lstm_variable_v.shape))
 
   def testPeepholeInitializersCheck(self):
     hidden_size = 4
@@ -301,8 +300,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     train_cell, test_cell = snt.lstm_with_recurrent_dropout(
         hidden_size, keep_prob=keep_prob)
-    inputs = tf.placeholder(
-        tf.float32, shape=[batch_size, seq_len, input_size])
+    input_data = np.stack(
+        [np.random.rand(seq_len, input_size)] * batch_size).astype(np.float32)
+    inputs = tf.constant(input_data)
     train_output, ((train_hidden, _), [train_mask]) = tf.nn.dynamic_rnn(
         train_cell,
         inputs,
@@ -314,30 +314,29 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         initial_state=test_cell.initial_state(
             batch_size, tf.float32),
         dtype=tf.float32)
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      # Use the same input data for each row.
-      input_data = np.stack([np.random.rand(seq_len, input_size)] * batch_size)
 
-      train_out, valid_out, hidden, mask = session.run(
-          [train_output, valid_output, train_hidden, train_mask],
-          feed_dict={inputs: input_data})
-      almost_one = abs(1 - keep_prob) < 1e-5
-      if almost_one:
-        self.assertAllClose(train_out, valid_out)
-      else:
-        self.assertGreater(np.max(train_out - valid_out), 0.001)
+    self.evaluate(tf.global_variables_initializer())
+    # Use the same input data for each row.
+    input_data = np.stack([np.random.rand(seq_len, input_size)] * batch_size)
 
-      self.assertAllClose(valid_out[0], valid_out[1])
-      deterministic = almost_one or abs(keep_prob < 1e-5)
-      if deterministic:
-        self.assertAllClose(train_out[0], train_out[1])
-        self.assertEqual(expected_zeros, np.sum(hidden == 0))
-        self.assertEqual(expected_zeros, np.sum(mask == 0))
-      else:
-        self.assertGreater(np.max(train_out[0] - train_out[1]), 0.001)
+    train_out, valid_out, hidden, mask = self.evaluate(
+        [train_output, valid_output, train_hidden, train_mask])
+    almost_one = abs(1 - keep_prob) < 1e-5
+    if almost_one:
+      self.assertAllClose(train_out, valid_out)
+    else:
+      self.assertGreater(np.max(train_out - valid_out), 0.001)
 
-      self.assertAllEqual(mask == 0, hidden == 0)
+    self.assertAllClose(valid_out[0], valid_out[1])
+    deterministic = almost_one or abs(keep_prob < 1e-5)
+    if deterministic:
+      self.assertAllClose(train_out[0], train_out[1])
+      self.assertEqual(expected_zeros, np.sum(hidden == 0))
+      self.assertEqual(expected_zeros, np.sum(mask == 0))
+    else:
+      self.assertGreater(np.max(train_out[0] - train_out[1]), 0.001)
+
+    self.assertAllEqual(mask == 0, hidden == 0)
 
   @parameterized.parameters(
       (1 - 1e-8, 0, 0),
@@ -366,8 +365,10 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     train_cell, test_cell = snt.lstm_with_zoneout(
         hidden_size, keep_prob_c=keep_prob, keep_prob_h=keep_prob)
-    inputs = tf.placeholder(
-        tf.float32, shape=[batch_size, seq_len, input_size])
+    # Use the same input data for each row.
+    input_data = np.stack(
+        [np.random.rand(seq_len, input_size)] * batch_size).astype(np.float32)
+    inputs = tf.constant(input_data)
     train_output, (train_h, train_c) = tf.nn.dynamic_rnn(
         train_cell,
         inputs,
@@ -378,42 +379,35 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         test_cell,
         inputs,
         dtype=tf.float32)
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      # Use the same input data for each row.
-      input_data = np.stack([np.random.rand(seq_len, input_size)] * batch_size)
 
-      outputs = session.run(
-          {
-              "train_out": train_output,
-              "valid_out": valid_output,
-              "train_h": train_h,
-              "train_c": train_c,
-              "next_train_h": next_train_h,
-              "next_train_c": next_train_c,
-          },
-          feed_dict={inputs: input_data})
+    self.evaluate(tf.global_variables_initializer())
 
-      self.assertAllClose(outputs["valid_out"][0], outputs["valid_out"][1])
-      deterministic = abs(1 - keep_prob) < 1e-5 or abs(keep_prob < 1e-5)
-      if deterministic:
-        self.assertAllClose(outputs["train_out"], outputs["valid_out"])
-        self.assertAllClose(outputs["train_out"][0], outputs["train_out"][1])
-        self.assertEqual(
-            expected_frozen_h,
-            np.sum(outputs["train_h"] == outputs["next_train_h"]))
-        self.assertEqual(
-            expected_frozen_c,
-            np.sum(outputs["train_c"] == outputs["next_train_c"]))
-      else:
-        # Ensure that the training and validation outputs are different.
-        self.assertGreater(
-            np.max(np.abs(outputs["train_out"] - outputs["valid_out"])),
-            0.05)
-        # Ensure that the training output is not deterministic.
-        self.assertGreater(
-            np.max(np.abs(outputs["train_out"][0] - outputs["train_out"][1])),
-            0.04)
+    outputs = self.evaluate({
+        "train_out": train_output,
+        "valid_out": valid_output,
+        "train_h": train_h,
+        "train_c": train_c,
+        "next_train_h": next_train_h,
+        "next_train_c": next_train_c,
+    })
+
+    self.assertAllClose(outputs["valid_out"][0], outputs["valid_out"][1])
+    deterministic = abs(1 - keep_prob) < 1e-5 or abs(keep_prob < 1e-5)
+    if deterministic:
+      self.assertAllClose(outputs["train_out"], outputs["valid_out"])
+      self.assertAllClose(outputs["train_out"][0], outputs["train_out"][1])
+      self.assertEqual(expected_frozen_h,
+                       np.sum(outputs["train_h"] == outputs["next_train_h"]))
+      self.assertEqual(expected_frozen_c,
+                       np.sum(outputs["train_c"] == outputs["next_train_c"]))
+    else:
+      # Ensure that the training and validation outputs are different.
+      self.assertGreater(
+          np.max(np.abs(outputs["train_out"] - outputs["valid_out"])), 0.05)
+      # Ensure that the training output is not deterministic.
+      self.assertGreater(
+          np.max(np.abs(outputs["train_out"][0] - outputs["train_out"][1])),
+          0.04)
 
   @parameterized.parameters(
       (True, False, False),
@@ -426,9 +420,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     batch_size = 2
     hidden_size = 4
 
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
 
     err = "is_training flag must be explicitly specified"
     with self.assertRaisesRegexp(ValueError, err):
@@ -464,6 +458,8 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
   )
   def testPartitioners(self, use_peepholes, use_batch_norm_h, use_batch_norm_x,
                        use_batch_norm_c):
+    if tf.executing_eagerly():
+      self.skipTest("Partitioned variables arenot supported in eager mode.")
     batch_size = 2
     hidden_size = 4
 
@@ -482,9 +478,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                                          partitioners=partitioners)
 
     # Test we can build the LSTM
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     wrapped_lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that the variables are partitioned.
@@ -517,9 +513,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                                       regularizers=regularizers)
 
     # Test we can build the LSTM
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     wrapped_lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that we have regularization losses.
@@ -548,9 +544,10 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 3
     input_size = 3
 
-    inputs = tf.placeholder(tf.float32,
-                            shape=[batch_size, seq_len, input_size],
-                            name="inputs")
+    inputs = tf.ones(
+        dtype=tf.float32,
+        shape=[batch_size, seq_len, input_size],
+        name="inputs")
     static_inputs = tf.unstack(inputs, axis=1)
 
     test_local_stats = False
@@ -563,59 +560,40 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         use_batch_norm_x=True,
         use_batch_norm_c=True)
 
-    # Connect static in training and test modes
-    train_static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
-        cell.with_batch_norm_control(is_training=True,
-                                     test_local_stats=test_local_stats),
-        static_inputs,
-        initial_state=cell.initial_state(batch_size, tf.float32))
+    def connect(training):
+      static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
+          cell.with_batch_norm_control(is_training=training,
+                                       test_local_stats=test_local_stats),
+          static_inputs,
+          initial_state=cell.initial_state(batch_size, tf.float32))
 
-    test_static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
-        cell.with_batch_norm_control(is_training=False,
-                                     test_local_stats=test_local_stats),
-        static_inputs,
-        initial_state=cell.initial_state(batch_size, tf.float32))
+      static_output = tf.stack(static_output_unpacked, axis=1)
 
-    # Connect dynamic in training and test modes
-    train_dynamic_output, _ = tf.nn.dynamic_rnn(
-        cell.with_batch_norm_control(is_training=True,
-                                     test_local_stats=test_local_stats),
-        inputs,
-        initial_state=cell.initial_state(batch_size, tf.float32),
-        dtype=tf.float32)
+      dynamic_output, _ = tf.nn.dynamic_rnn(
+          cell.with_batch_norm_control(is_training=training,
+                                       test_local_stats=test_local_stats),
+          inputs,
+          initial_state=cell.initial_state(batch_size, tf.float32),
+          dtype=tf.float32)
 
-    test_dynamic_output, _ = tf.nn.dynamic_rnn(
-        cell.with_batch_norm_control(is_training=False,
-                                     test_local_stats=test_local_stats),
-        inputs,
-        initial_state=cell.initial_state(batch_size, tf.float32),
-        dtype=tf.float32)
+      return static_output, dynamic_output
 
-    train_static_output = tf.stack(train_static_output_unpacked, axis=1)
-    test_static_output = tf.stack(test_static_output_unpacked, axis=1)
+    ops = connect(training=True)
+    self.evaluate(tf.global_variables_initializer())
+    static_out, dynamic_out = self.evaluate(ops)
+    self.assertAllClose(static_out, dynamic_out)
 
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
+    # Do a pass to train the exponential moving statistics.
+    for _ in range(5):
+      if tf.executing_eagerly():
+        ops = connect(training=True)
+      static_out, dynamic_out = self.evaluate(ops)
+      self.assertAllClose(static_out, dynamic_out)
 
-      def check_static_and_dynamic(training):
-        # Check that static and dynamic give the same output
-        input_data = np.random.rand(batch_size, seq_len, input_size)
-
-        if training:
-          ops = [train_static_output, train_dynamic_output]
-        else:
-          ops = [test_static_output, test_dynamic_output]
-
-        static_out, dynamic_out = session.run(ops,
-                                              feed_dict={inputs: input_data})
-        self.assertAllClose(static_out, dynamic_out)
-
-      # Do a pass to train the exponential moving statistics.
-      for _ in range(5):
-        check_static_and_dynamic(True)
-
-      # And check that same when using test statistics.
-      check_static_and_dynamic(False)
+    # And check that same when using test statistics.
+    ops = connect(training=False)
+    static_out, dynamic_out = self.evaluate(ops)
+    self.assertAllClose(static_out, dynamic_out)
 
   def testSameInStaticAndDynamic(self):
     batch_size = 3
@@ -623,9 +601,10 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 3
     input_size = 3
 
-    inputs = tf.placeholder(tf.float32,
-                            shape=[batch_size, seq_len, input_size],
-                            name="inputs")
+    inputs = tf.ones(
+        dtype=tf.float32,
+        shape=[batch_size, seq_len, input_size],
+        name="inputs")
     static_inputs = tf.unstack(inputs, axis=1)
 
     cell = snt.LSTM(hidden_size=hidden_size)
@@ -641,20 +620,17 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     static_output = tf.stack(static_output_unpacked, axis=1)
 
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
+    self.evaluate(tf.global_variables_initializer())
 
-      # Check that static and dynamic give the same output
-      input_data = np.random.rand(batch_size, seq_len, input_size)
-      static_out, dynamic_out = session.run([static_output, dynamic_output],
-                                            feed_dict={inputs: input_data})
-      self.assertAllClose(static_out, dynamic_out)
+    # Check that static and dynamic give the same output
+    static_out, dynamic_out = self.evaluate([static_output, dynamic_output])
+    self.assertAllClose(static_out, dynamic_out)
 
   def testLayerNormVariables(self):
     core = snt.LSTM(hidden_size=3, use_layer_norm=True)
 
     batch_size = 3
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, 3, 3])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, 3, 3])
     tf.nn.dynamic_rnn(core,
                       inputs,
                       initial_state=core.initial_state(batch_size, tf.float32))
@@ -667,41 +643,47 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
   def testHiddenClipping(self):
     core = snt.LSTM(hidden_size=5, hidden_clip_value=1.0)
     obs = tf.constant(np.random.rand(3, 10), dtype=tf.float32)
-    hidden = tf.placeholder(tf.float32, shape=[3, 5])
-    cell = tf.placeholder(tf.float32, shape=[3, 5])
+
+    unclipped = np.random.rand(3, 5) - 0.5
+    unclipped *= 2.0 / unclipped.max()
+    unclipped = unclipped.astype(np.float32)
+    clipped = unclipped.clip(-1., 1.)
+
+    hidden = tf.constant(unclipped)
+    cell = tf.constant(unclipped)
     output = core(obs, [hidden, cell])
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      unclipped = np.random.rand(3, 5) - 0.5
-      unclipped *= 2.0 / unclipped.max()
-      clipped = unclipped.clip(-1., 1.)
-      output1, (hidden1, cell1) = sess.run(output, feed_dict={hidden: unclipped,
-                                                              cell: unclipped})
-      output2, (hidden2, cell2) = sess.run(output, feed_dict={hidden: clipped,
-                                                              cell: unclipped})
-      self.assertAllClose(output1, output2)
-      self.assertAllClose(hidden1, hidden2)
-      self.assertAllClose(cell1, cell2)
+    self.evaluate(tf.global_variables_initializer())
+    output1, (hidden1, cell1) = self.evaluate(output)
+
+    hidden = tf.constant(clipped)
+    output = core(obs, [hidden, cell])
+
+    output2, (hidden2, cell2) = self.evaluate(output)
+    self.assertAllClose(output1, output2)
+    self.assertAllClose(hidden1, hidden2)
+    self.assertAllClose(cell1, cell2)
 
   def testCellClipping(self):
     core = snt.LSTM(hidden_size=5, cell_clip_value=1.0)
     obs = tf.constant(np.random.rand(3, 10), dtype=tf.float32)
-    hidden = tf.placeholder(tf.float32, shape=[3, 5])
-    cell = tf.placeholder(tf.float32, shape=[3, 5])
-    output = core(obs, [hidden, cell])
-    with self.test_session() as sess:
-      sess.run(tf.global_variables_initializer())
-      unclipped = np.random.rand(3, 5) - 0.5
-      unclipped *= 2.0 / unclipped.max()
-      clipped = unclipped.clip(-1., 1.)
 
-      output1, (hidden1, cell1) = sess.run(output, feed_dict={hidden: unclipped,
-                                                              cell: unclipped})
-      output2, (hidden2, cell2) = sess.run(output, feed_dict={hidden: unclipped,
-                                                              cell: clipped})
-      self.assertAllClose(output1, output2)
-      self.assertAllClose(hidden1, hidden2)
-      self.assertAllClose(cell1, cell2)
+    unclipped = np.random.rand(3, 5) - 0.5
+    unclipped *= 2.0 / unclipped.max()
+    unclipped = unclipped.astype(np.float32)
+    clipped = unclipped.clip(-1., 1.)
+
+    hidden = tf.constant(unclipped)
+    cell = tf.constant(unclipped)
+    output = core(obs, [hidden, cell])
+    self.evaluate(tf.global_variables_initializer())
+    output1, (hidden1, cell1) = self.evaluate(output)
+
+    cell = tf.constant(clipped)
+    output = core(obs, [hidden, cell])
+    output2, (hidden2, cell2) = self.evaluate(output)
+    self.assertAllClose(output1, output2)
+    self.assertAllClose(hidden1, hidden2)
+    self.assertAllClose(cell1, cell2)
 
   @parameterized.parameters(
       (False, False, False, False),
@@ -725,7 +707,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     # Need to connect the cell before it has variables
     batch_size = 3
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, 3, 3])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, 3, 3])
     tf.nn.dynamic_rnn(wrapped_cell, inputs,
                       initial_state=cell.initial_state(batch_size, tf.float32))
 
@@ -773,19 +755,22 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                          dtype=tf.float32)
     initial_state = cell.initial_state(
         batch_size, tf.float32, trainable_initial_state)
-    output, _ = tf.nn.dynamic_rnn(
-        cell.with_batch_norm_control(is_training=True),
-        inputs,
-        initial_state=initial_state,
-        dtype=tf.float32)
+    def loss_fn():
+      output, _ = tf.nn.dynamic_rnn(
+          cell.with_batch_norm_control(is_training=True),
+          inputs,
+          initial_state=initial_state,
+          dtype=tf.float32)
 
-    loss = tf.reduce_mean(tf.square(
-        output - np.random.rand(batch_size, time_steps, hidden_size)))
-    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+      return tf.reduce_mean(tf.square(
+          output - np.random.rand(batch_size, time_steps, hidden_size)))
+
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(
+        loss_fn if tf.executing_eagerly() else loss_fn())
+
     init = tf.global_variables_initializer()
-    with self.test_session():
-      init.run()
-      train_op.run()
+    self.evaluate(init)
+    self.evaluate(train_op)
 
   # Regression test.
   def testSideBySide(self):
@@ -800,6 +785,8 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     lstm2.initial_state(batch_size, trainable=True)
 
   def testInitialStateNames(self):
+    if tf.executing_eagerly():
+      self.skipTest("Tensor name is not supported in eager mode.")
     lstm = snt.LSTM(hidden_size=3, name="foo")
     unnamed_init_state = lstm.initial_state(4, trainable=True)
     named_init_state = lstm.initial_state(4, trainable=True, name="bar")
@@ -811,6 +798,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(named_init_state[1].name, "bar/state_cell_tiled:0")
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
@@ -828,9 +816,9 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     input_shape = (batch_size,) + input_shape + (input_channels,)
     output_shape = input_shape[:-1] + (output_channels,)
 
-    inputs = tf.placeholder(tf.float32, shape=input_shape)
-    prev_hidden = tf.placeholder(tf.float32, shape=output_shape)
-    prev_cell = tf.placeholder(tf.float32, shape=output_shape)
+    inputs = tf.ones(dtype=tf.float32, shape=input_shape)
+    prev_hidden = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_cell = tf.ones(dtype=tf.float32, shape=output_shape)
     lstm = lstm_class(
         input_shape=input_shape[1:],
         output_channels=output_channels,
@@ -868,9 +856,9 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     input_shape = (batch_size,) + input_shape + (input_channels,)
     output_shape = input_shape[:-1] + (output_channels,)
 
-    inputs = tf.placeholder(tf.float32, shape=input_shape)
-    prev_hidden = tf.placeholder(tf.float32, shape=output_shape)
-    prev_cell = tf.placeholder(tf.float32, shape=output_shape)
+    inputs = tf.ones(dtype=tf.float32, shape=input_shape)
+    prev_hidden = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_cell = tf.ones(dtype=tf.float32, shape=output_shape)
 
     # Test we can successfully create the LSTM with partitioners.
     lstm = lstm_class(
@@ -885,17 +873,16 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     init = tf.global_variables_initializer()
 
     # Test that the initializers have been applied correctly.
-    with self.test_session() as sess:
-      sess.run(init)
-      for conv_key, convolution in lstm.convolutions.items():
-        for i, key in enumerate(keys):
-          if not legacy_bias_behaviour and conv_key == "hidden" and key == "b":
-            self.assertFalse(hasattr(convolution, key))
-            continue
-          variable = getattr(convolution, key)
-          self.assertAllClose(sess.run(variable),
-                              np.full(variable.get_shape(),
-                                      i, dtype=np.float32))
+    self.evaluate(init)
+    for conv_key, convolution in lstm.convolutions.items():
+      for i, key in enumerate(keys):
+        if not legacy_bias_behaviour and conv_key == "hidden" and key == "b":
+          self.assertFalse(hasattr(convolution, key))
+          continue
+        variable = getattr(convolution, key)
+        self.assertAllClose(self.evaluate(variable),
+                            np.full(variable.get_shape(),
+                                    i, dtype=np.float32))
 
   @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False, False),
@@ -908,6 +895,8 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
       (snt.Conv2DLSTM, 2, True, True),
   )
   def testPartitioners(self, lstm_class, dim, use_bias, legacy_bias_behaviour):
+    if tf.executing_eagerly():
+      self.skipTest("Partitioned variables are not supported in eager.")
     keys = snt.Conv2DLSTM.get_possible_initializer_keys(use_bias)
     partitioners = {
         key: tf.variable_axis_size_partitioner(10) for key in keys
@@ -921,9 +910,9 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     input_shape = (batch_size,) + input_shape + (input_channels,)
     output_shape = input_shape[:-1] + (output_channels,)
 
-    inputs = tf.placeholder(tf.float32, shape=input_shape)
-    prev_hidden = tf.placeholder(tf.float32, shape=output_shape)
-    prev_cell = tf.placeholder(tf.float32, shape=output_shape)
+    inputs = tf.ones(dtype=tf.float32, shape=input_shape)
+    prev_hidden = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_cell = tf.ones(dtype=tf.float32, shape=output_shape)
 
     # Test we can successfully create the LSTM with partitioners.
     lstm = lstm_class(
@@ -965,9 +954,9 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     input_shape = (batch_size,) + input_shape + (input_channels,)
     output_shape = input_shape[:-1] + (output_channels,)
 
-    inputs = tf.placeholder(tf.float32, shape=input_shape)
-    prev_hidden = tf.placeholder(tf.float32, shape=output_shape)
-    prev_cell = tf.placeholder(tf.float32, shape=output_shape)
+    inputs = tf.ones(dtype=tf.float32, shape=input_shape)
+    prev_hidden = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_cell = tf.ones(dtype=tf.float32, shape=output_shape)
 
     # Test we can successfully create the LSTM with partitioners.
     lstm = lstm_class(
@@ -1011,18 +1000,20 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     initial_state = lstm.initial_state(
         batch_size, tf.float32, trainable_initial_state)
 
-    output, _ = tf.nn.dynamic_rnn(lstm,
-                                  inputs,
-                                  time_major=True,
-                                  initial_state=initial_state,
-                                  dtype=tf.float32)
+    def loss_fn():
+      output, _ = tf.nn.dynamic_rnn(lstm,
+                                    inputs,
+                                    time_major=True,
+                                    initial_state=initial_state,
+                                    dtype=tf.float32)
 
-    loss = tf.reduce_mean(tf.square(output))
-    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+      return tf.reduce_mean(tf.square(output))
+
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(
+        loss_fn if tf.executing_eagerly() else loss_fn())
     init = tf.global_variables_initializer()
-    with self.test_session() as sess:
-      sess.run(init)
-      sess.run(train_op)
+    self.evaluate(init)
+    self.evaluate(train_op)
 
   @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False, 1, 1),
@@ -1062,18 +1053,20 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     initial_state = lstm.initial_state(
         batch_size, tf.float32, trainable_initial_state)
 
-    output, _ = tf.nn.dynamic_rnn(lstm,
-                                  inputs,
-                                  time_major=True,
-                                  initial_state=initial_state,
-                                  dtype=tf.float32)
+    def loss_fn():
+      output, _ = tf.nn.dynamic_rnn(lstm,
+                                    inputs,
+                                    time_major=True,
+                                    initial_state=initial_state,
+                                    dtype=tf.float32)
 
-    loss = tf.reduce_mean(tf.square(output))
-    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+      return tf.reduce_mean(tf.square(output))
+
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(
+        loss_fn if tf.executing_eagerly() else loss_fn())
     init = tf.global_variables_initializer()
-    with self.test_session() as sess:
-      sess.run(init)
-      sess.run(train_op)
+    self.evaluate(init)
+    self.evaluate(train_op)
 
   @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False, False, 2),
@@ -1096,7 +1089,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
         kernel_shape=3,
         use_bias=use_bias,
         use_layer_norm=use_layer_norm)
-    inputs = tf.placeholder(tf.float32, shape=((1, batch_size) + input_shape))
+    inputs = tf.ones(dtype=tf.float32, shape=((1, batch_size) + input_shape))
     initial_state = lstm.initial_state(batch_size, tf.float32)
     tf.nn.dynamic_rnn(lstm,
                       inputs,
@@ -1138,27 +1131,30 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     inputs = tf.random_normal((time_steps,) + input_shape, dtype=tf.float32)
     initial_state = lstm.initial_state(batch_size, tf.float32)
 
-    output, _ = tf.nn.dynamic_rnn(lstm,
-                                  inputs,
-                                  time_major=True,
-                                  initial_state=initial_state,
-                                  dtype=tf.float32)
+    def loss_fn():
+      output, _ = tf.nn.dynamic_rnn(lstm,
+                                    inputs,
+                                    time_major=True,
+                                    initial_state=initial_state,
+                                    dtype=tf.float32)
 
-    loss = tf.reduce_mean(tf.square(output))
-    train_op = tf.train.GradientDescentOptimizer(1).minimize(loss)
+      return tf.reduce_mean(tf.square(output))
+
+    train_op = tf.train.GradientDescentOptimizer(1).minimize(
+        loss_fn if tf.executing_eagerly() else loss_fn())
     init = tf.global_variables_initializer()
-    with self.test_session() as sess:
-      sess.run(init)
-      sess.run(train_op)
+    self.evaluate(init)
+    self.evaluate(train_op)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class GRUTest(tf.test.TestCase):
 
   def testShape(self):
     batch_size = 2
     hidden_size = 4
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     gru = snt.GRU(hidden_size, name="rnn")
     output, next_state = gru(inputs, state)
     shape = np.ndarray((batch_size, hidden_size))
@@ -1170,8 +1166,8 @@ class GRUTest(tf.test.TestCase):
     input_size = 10
     hidden_size = 20
     mod_name = "rnn"
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, input_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, input_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     gru = snt.GRU(hidden_size, name=mod_name)
     self.assertEqual(gru.scope_name, mod_name)
     with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
@@ -1183,12 +1179,14 @@ class GRUTest(tf.test.TestCase):
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in gru_variables}
     for part in ["z", "r", "h"]:
-      self.assertShapeEqual(np.ndarray(hidden_size),
-                            param_map["b" + part].initial_value)
-      self.assertShapeEqual(np.ndarray((hidden_size, hidden_size)),
-                            param_map["u" + part].initial_value)
-      self.assertShapeEqual(np.ndarray((input_size, hidden_size)),
-                            param_map["w" + part].initial_value)
+      self.assertShapeEqual(
+          np.ndarray(hidden_size), tf.convert_to_tensor(param_map["b" + part]))
+      self.assertShapeEqual(
+          np.ndarray((hidden_size, hidden_size)),
+          tf.convert_to_tensor(param_map["u" + part]))
+      self.assertShapeEqual(
+          np.ndarray((input_size, hidden_size)),
+          tf.convert_to_tensor(param_map["w" + part]))
 
   def testComputation(self):
 
@@ -1198,24 +1196,26 @@ class GRUTest(tf.test.TestCase):
     batch_size = 2
     input_size = 3
     hidden_size = 5
-    inputs = tf.placeholder(tf.float64, shape=[batch_size, input_size])
-    state_in = tf.placeholder(tf.float64, shape=[batch_size, hidden_size])
+
+    # With random data, check the TF calculation matches the Numpy version.
+    input_data = np.random.randn(batch_size, input_size)
+    state_data = np.random.randn(batch_size, hidden_size)
+    inputs = tf.constant(input_data)
+    state_in = tf.constant(state_data)
+
     gru = snt.GRU(hidden_size, name="rnn")
     _, state = gru(inputs, state_in)
     gru_variables = gru.get_variables()
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in gru_variables}
 
-    # With random data, check the TF calculation matches the Numpy version.
-    input_data = np.random.randn(batch_size, input_size)
-    state_data = np.random.randn(batch_size, hidden_size)
-
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      fetches = [state, param_map["wz"], param_map["uz"], param_map["bz"],
-                 param_map["wr"], param_map["ur"], param_map["br"],
-                 param_map["wh"], param_map["uh"], param_map["bh"]]
-      output = session.run(fetches, {inputs: input_data, state_in: state_data})
+    self.evaluate(tf.global_variables_initializer())
+    fetches = [
+        state, param_map["wz"], param_map["uz"], param_map["bz"],
+        param_map["wr"], param_map["ur"], param_map["br"], param_map["wh"],
+        param_map["uh"], param_map["bh"]
+    ]
+    output = self.evaluate(fetches)
 
     state_ex, wz, uz, bz, wr, ur, br, wh, uh, bh = output
     z = sigmoid(np.dot(input_data, wz) + np.dot(state_data, uz) + bz)
@@ -1239,21 +1239,21 @@ class GRUTest(tf.test.TestCase):
     gru = snt.GRU(hidden_size, initializers=initializers)
 
     # Test we can build the GRU.
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     gru(inputs, state)
     init = tf.global_variables_initializer()
 
     # Test that the initializers have been correctly applied.
     gru_variables = [getattr(gru, "_" + key) for key in keys]
-    with self.test_session() as sess:
-      sess.run(init)
-      gru_variables_v = sess.run(gru_variables)
-      for i, gru_variable_v in enumerate(gru_variables_v):
-        self.assertAllClose(gru_variable_v,
-                            i * np.ones(gru_variable_v.shape))
+    self.evaluate(init)
+    gru_variables_v = self.evaluate(gru_variables)
+    for i, gru_variable_v in enumerate(gru_variables_v):
+      self.assertAllClose(gru_variable_v, i * np.ones(gru_variable_v.shape))
 
   def testPartitioners(self):
+    if tf.executing_eagerly():
+      self.skipTest("Partitioned variables are not supported in eager mode.")
     batch_size = 2
     hidden_size = 4
 
@@ -1265,8 +1265,8 @@ class GRUTest(tf.test.TestCase):
     gru = snt.GRU(hidden_size, partitioners=partitioners)
 
     # Test we can build the GRU.
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     gru(inputs, state)
 
     # Test that the variables are partitioned.
@@ -1286,8 +1286,8 @@ class GRUTest(tf.test.TestCase):
     gru = snt.GRU(hidden_size, regularizers=regularizers)
 
     # Test we can build the GRU.
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     gru(inputs, state)
 
     # Test that we have regularization losses.
@@ -1295,13 +1295,14 @@ class GRUTest(tf.test.TestCase):
                      len(keys))
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 2
     hidden_size = 4
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     core = snt.HighwayCore(hidden_size, num_layers=3)
     output, next_state = core(inputs, state)
     shape = np.ndarray((batch_size, hidden_size))
@@ -1314,8 +1315,8 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 20
     num_layers = 3
     mod_name = "rnn"
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, input_size])
-    state = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, input_size])
+    state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     core = snt.HighwayCore(hidden_size, num_layers, name=mod_name)
     self.assertEqual(core.scope_name, mod_name)
     with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
@@ -1326,20 +1327,26 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(len(core_variables), 2 + 4 * num_layers)
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in core_variables}
-    self.assertShapeEqual(np.ndarray((input_size, hidden_size)),
-                          param_map["wt"].initial_value)
-    self.assertShapeEqual(np.ndarray((input_size, hidden_size)),
-                          param_map["wh"].initial_value)
+    self.assertShapeEqual(
+        np.ndarray((input_size, hidden_size)),
+        tf.convert_to_tensor(param_map["wt"]))
+    self.assertShapeEqual(
+        np.ndarray((input_size, hidden_size)),
+        tf.convert_to_tensor(param_map["wh"]))
     for layer_index in xrange(num_layers):
       layer_str = str(layer_index)
-      self.assertShapeEqual(np.ndarray(hidden_size),
-                            param_map["bt" + layer_str].initial_value)
-      self.assertShapeEqual(np.ndarray(hidden_size),
-                            param_map["bh" + layer_str].initial_value)
-      self.assertShapeEqual(np.ndarray((hidden_size, hidden_size)),
-                            param_map["wt" + layer_str].initial_value)
-      self.assertShapeEqual(np.ndarray((hidden_size, hidden_size)),
-                            param_map["wh" + layer_str].initial_value)
+      self.assertShapeEqual(
+          np.ndarray(hidden_size),
+          tf.convert_to_tensor(param_map["bt" + layer_str]))
+      self.assertShapeEqual(
+          np.ndarray(hidden_size),
+          tf.convert_to_tensor(param_map["bh" + layer_str]))
+      self.assertShapeEqual(
+          np.ndarray((hidden_size, hidden_size)),
+          tf.convert_to_tensor(param_map["wt" + layer_str]))
+      self.assertShapeEqual(
+          np.ndarray((hidden_size, hidden_size)),
+          tf.convert_to_tensor(param_map["wh" + layer_str]))
 
   @parameterized.parameters(True, False)
   def testComputation(self, with_dropout):
@@ -1352,8 +1359,10 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     input_size = 3
     hidden_size = 5
     num_layers = 2
-    inputs = tf.placeholder(tf.float64, shape=[batch_size, input_size])
-    state_in = tf.placeholder(tf.float64, shape=[batch_size, hidden_size])
+    input_data = np.random.randn(batch_size, input_size)
+    state_data = np.random.randn(batch_size, hidden_size)
+    inputs = tf.constant(input_data)
+    state_in = tf.constant(state_data)
     if with_dropout:
       core, test_core = snt.highway_core_with_recurrent_dropout(
           hidden_size, num_layers, keep_prob=1.0)
@@ -1367,15 +1376,12 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in core_variables}
 
-    input_data = np.random.randn(batch_size, input_size)
-    state_data = np.random.randn(batch_size, hidden_size)
-
     param_names = ["wt", "wh"]
     param_names += ["wt0", "bt0", "wh0", "bh0", "wt1", "bt1", "wh1", "bh1"]
-    with self.test_session() as session:
-      tf.global_variables_initializer().run()
-      fetches = [state] + [param_map[name] for name in param_names]
-      output = session.run(fetches, {inputs: input_data, state_in: state_data})
+
+    self.evaluate(tf.global_variables_initializer())
+    fetches = [state] + [param_map[name] for name in param_names]
+    output = self.evaluate(fetches)
 
     state_ex, wt, wh, wt0, bt0, wh0, bh0, wt1, bt1, wh1, bh1 = output
     # Layer 1 computation.
@@ -1392,14 +1398,15 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     self.assertAllClose(state_data, state_ex)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 2
     hidden_size = 5
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTMBlockCell(hidden_size)
     output, next_state = lstm(inputs, (prev_hidden, prev_cell))
 
@@ -1416,9 +1423,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
     batch_size = 5
     hidden_size = 20
     mod_name = "lstm_block"
-    inputs = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_cell = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
-    prev_hidden = tf.placeholder(tf.float32, shape=[batch_size, hidden_size])
+    inputs = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_cell = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
+    prev_hidden = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])
     lstm = snt.LSTMBlockCell(hidden_size, name=mod_name)
     self.assertEqual(lstm.scope_name, mod_name)
     with self.assertRaisesRegexp(snt.Error, "not instantiated yet"):
@@ -1431,9 +1438,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
                  param for param in lstm_variables}
 
     self.assertShapeEqual(np.ndarray(4 * hidden_size),
-                          param_map["bias"].initial_value)
+                          tf.convert_to_tensor(param_map["bias"]))
     self.assertShapeEqual(np.ndarray((2 * hidden_size, 4 * hidden_size)),
-                          param_map["kernel"].initial_value)
+                          tf.convert_to_tensor(param_map["kernel"]))
 
 
 if __name__ == "__main__":

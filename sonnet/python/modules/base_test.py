@@ -159,6 +159,9 @@ class AbstractModuleTest(tf.test.TestCase):
     # pylint: enable=not-callable
 
   def testNameScopeRecording(self):
+    if tf.executing_eagerly():
+      self.skipTest("Name scopes are not recorded in eager mode.")
+
     id_mod = IdentityModule(name="foo")
 
     # Connect inside different name scope contexts, check that each is recorded.
@@ -176,7 +179,20 @@ class AbstractModuleTest(tf.test.TestCase):
                   (("foo", "blah/foo", "baz/foo"),
                    ("foo_1", "blah/foo", "baz/foo")))
 
+  def testNameScopeRecordingNotSupportedEager(self):
+    if not tf.executing_eagerly():
+      self.skipTest("Name scopes are recorded in graph mode.")
+
+    id_mod = IdentityModule(name="foo")
+    id_mod(tf.ones(dtype=tf.float32, shape=[22]))
+    with self.assertRaisesRegexp(base.NotSupportedError,
+                                 "not supported in eager"):
+      id_mod.name_scopes  # pylint: disable=pointless-statement
+
   def testSubgraphsRecording(self):
+    if tf.executing_eagerly():
+      self.skipTest("Subgraphs are not recorded in eager mode.")
+
     id_mod = IdentityModule(name="foo")
 
     with self.assertRaisesRegexp(base.NotConnectedError,
@@ -206,6 +222,31 @@ class AbstractModuleTest(tf.test.TestCase):
     self.assertIs(subgraphs[0].outputs, outputs)
     self.assertIs(subgraphs[1].outputs, blah_outputs)
     self.assertIs(subgraphs[2].outputs, baz_outputs)
+
+  def testSubgraphsNotRecordedEager(self):
+    if not tf.executing_eagerly():
+      self.skipTest("Subgraphs are recorded in graph mode")
+
+    id_mod = IdentityModule(name="foo")
+
+    with self.assertRaisesRegexp(base.NotSupportedError,
+                                 "not tracked in eager mode"):
+      id_mod.last_connected_subgraph()
+
+    # pylint: disable=not-callable
+    inputs = tf.ones(dtype=tf.float32, shape=[21])
+    id_mod(inputs)
+    with tf.name_scope("blah"):
+      blah_inputs = tf.ones(dtype=tf.float32, shape=[22])
+      id_mod(blah_inputs)
+    with tf.name_scope("baz"):
+      baz_inputs = tf.ones(dtype=tf.float32, shape=[23])
+      id_mod(baz_inputs)
+    # pylint: enable=not-callable
+
+    with self.assertRaisesRegexp(base.NotSupportedError,
+                                 "not tracked in eager mode"):
+      id_mod.connected_subgraphs  # pylint: disable=pointless-statement
 
   def testInitNoNamedArgs(self):
     """Tests if calling __init__ without named args raises a ValueError."""

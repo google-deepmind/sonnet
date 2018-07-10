@@ -830,10 +830,11 @@ class ReuseVarsTest(tf.test.TestCase):
     self.assertFalse(obj1.is_connected)
     obj1_a_outputs = obj1.a()
     self.assertTrue(obj1.is_connected)
-    self.assertEqual(obj1.last_connected_subgraph.name_scope, "scope1/a/")
-    self.assertIs(obj1.last_connected_subgraph.module, obj1)
-    self.assertEqual(obj1.last_connected_subgraph.inputs, {})
-    self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
+    if not tf.executing_eagerly():
+      self.assertEqual(obj1.last_connected_subgraph.name_scope, "scope1/a/")
+      self.assertIs(obj1.last_connected_subgraph.module, obj1)
+      self.assertEqual(obj1.last_connected_subgraph.inputs, {})
+      self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
 
 
 class NameFunctionTest(tf.test.TestCase):

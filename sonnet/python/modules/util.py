@@ -772,9 +772,11 @@ def reuse_variables(method):
       initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
       try:
         # If `obj` is a Sonnet module, let it know it's been connected
-        # to the TF graph
-        obj._add_connected_subgraph(  # pylint: disable=protected-access
-            method, out_ops, scope, *args, **kwargs)
+        # to the TF graph.
+        obj._is_connected = True  # pylint: disable=protected-access
+        if not tf.executing_eagerly():
+          obj._add_connected_subgraph(  # pylint: disable=protected-access
+              method, out_ops, scope, *args, **kwargs)
       except AttributeError:
         pass
     return out_ops

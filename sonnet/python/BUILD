@@ -7,6 +7,8 @@ exports_files(["LICENSE"])
 
 package(default_visibility = ["//visibility:public"])
 
+# Placeholder for internal Python version compatibility macro.
+
 py_library(
     name = "base",
     srcs = [

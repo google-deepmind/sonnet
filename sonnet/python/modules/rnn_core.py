@@ -381,6 +381,31 @@ class RNNCellWrapper(RNNCore):
     return self._cell.state_size
 
 
+def with_doc(fn_with_doc_to_copy):
+  """Returns a decorator to copy documentation from the given function.
+
+  Docstring is copied, including *args and **kwargs documentation.
+
+  Args:
+    fn_with_doc_to_copy: Function whose docstring, including *args and
+      **kwargs documentation, is to be copied.
+
+  Returns:
+    Decorated version of `wrapper_init` with documentation copied from
+    `fn_with_doc_to_copy`.
+  """
+
+  def decorator(wrapper_init):
+    # Wrap the target class's constructor (to assume its docstring),
+    # but invoke the wrapper class's constructor.
+    @wrapt.decorator
+    def wrapping_fn(unused_wrapped, instance, args, kwargs):
+      wrapper_init(instance, *args, **kwargs)
+    return wrapping_fn(fn_with_doc_to_copy)  # pylint: disable=no-value-for-parameter
+
+  return decorator
+
+
 def wrap_rnn_cell_class(wrapped_class):
   """Wraps an RNN cell class with a sub-class of `RNNCellWrapper`.
 
@@ -395,30 +420,9 @@ def wrap_rnn_cell_class(wrapped_class):
     method that delegates to that of `wrapped_class`.
   """
 
-  def with_doc(wrapper_init):
-    """Decorator to copy documentation from target class's __init__ method.
-
-    Docstring is copied, including *args and **kwargs documentation.
-
-    Args:
-      wrapper_init: Wrapper class's __init__ method to wrap with new
-        documentation.
-
-    Returns:
-      Decorated version of `wrapper_init` with documentation copied from
-      `wrapped_class.__init__`.
-    """
-
-    # Wrap the target class's constructor (to assume its docstring),
-    # but invoke the wrapper class's constructor.
-    @wrapt.decorator
-    def wrapping_fn(unused_wrapped, instance, args, kwargs):
-      wrapper_init(instance, *args, **kwargs)
-    return wrapping_fn(wrapped_class.__init__)  # pylint: disable=no-value-for-parameter
-
   class Wrapper(RNNCellWrapper):
 
-    @with_doc
+    @with_doc(wrapped_class.__init__)
     def __init__(self, *args, **kwargs):
       super(Wrapper, self).__init__(wrapped_class, *args, **kwargs)
 

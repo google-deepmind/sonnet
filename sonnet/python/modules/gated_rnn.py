@@ -1771,4 +1771,10 @@ def highway_core_with_recurrent_dropout(
   return RecurrentDropoutWrapper(core, keep_prob), core
 
 
-LSTMBlockCell = rnn_core.wrap_rnn_cell_class(tf.contrib.rnn.LSTMBlockCell)  # pylint: disable=invalid-name
+class LSTMBlockCell(rnn_core.RNNCellWrapper):
+  """Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore."""
+
+  @rnn_core.with_doc(tf.contrib.rnn.LSTMBlockCell.__init__)
+  def __init__(self, *args, **kwargs):
+    super(LSTMBlockCell, self).__init__(tf.contrib.rnn.LSTMBlockCell,
+                                        *args, **kwargs)

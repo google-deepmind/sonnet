@@ -56,6 +56,43 @@ from sonnet.python.modules.base_errors import ModuleInfoError
 _MODULE_STACKS = weakref.WeakKeyDictionary()
 
 
+# Maps `tf.Graph` objects to a stack of module connection observers.
+_CONNECTION_OBSERVER_STACKS = weakref.WeakKeyDictionary()
+
+
+@contextlib.contextmanager
+def observe_connections(observer):
+  """Notifies the observer whenever any Sonnet module is connected to the graph.
+
+  If a module contains nested modules, the observer is notified once for each
+  nested module, followed by the containing module.
+
+  For example:
+
+  ```python
+  def logging_observer(connected_subgraph):
+    logging.info(connected_subgraph.module.module_name)
+
+  with snt.observe_connections(logging_observer):
+    output = imagenet_module(input_tensor)
+  ```
+
+  Args:
+    observer: Callable accepting a single argument. Will be called with a
+    `ConnectedSubGraph` each time a module is connected to the graph.
+
+  Yields:
+    None: just yields control to the inner context.
+  """
+  connection_observer_stack = _CONNECTION_OBSERVER_STACKS.setdefault(
+      tf.get_default_graph(), [])
+  connection_observer_stack.append(observer)
+  try:
+    yield
+  finally:
+    connection_observer_stack.pop()
+
+
 
 def _maybe_wrap_custom_getter(custom_getter, old_getter):
   """Wrap a call to a custom_getter to use the old_getter internally.
@@ -379,6 +416,11 @@ class AbstractModule(object):
         inputs=build_inputs,
         outputs=outputs)
     self._connected_subgraphs.append(connected_subgraph)
+
+    connection_observer_stack = _CONNECTION_OBSERVER_STACKS.setdefault(
+        self._graph, [])
+    for observer in connection_observer_stack:
+      observer(connected_subgraph)
 
   def __call__(self, *args, **kwargs):
     """Operator overload for calling.

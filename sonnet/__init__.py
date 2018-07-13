@@ -44,6 +44,7 @@ from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead
 from sonnet.python.modules.base import AbstractModule
 from sonnet.python.modules.base import Module
+from sonnet.python.modules.base import observe_connections
 from sonnet.python.modules.base import Transposable
 from sonnet.python.modules.base_errors import DifferentGraphError
 from sonnet.python.modules.base_errors import Error

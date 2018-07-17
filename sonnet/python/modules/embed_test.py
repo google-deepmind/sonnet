@@ -162,7 +162,7 @@ class EmbedTest(tf.test.TestCase):
     with self.assertRaises(snt.NotConnectedError):
       _ = self._embed_mod.embeddings
     self._embed_mod(tf.convert_to_tensor(self._ids))
-    self.assertEqual(type(self._embed_mod.embeddings), tf.Variable)
+    self.assertTrue(isinstance(self._embed_mod.embeddings, tf.Variable))
 
   def testExistingVocab(self):
     # Check that the module can be initialised with an existing vocabulary.

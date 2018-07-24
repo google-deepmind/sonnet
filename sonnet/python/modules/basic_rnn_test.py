@@ -625,10 +625,6 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
       self.assertEqual(first_call_args[2], 42)
 
   def testNoSizeButAlreadyConnected(self):
-    if tf.executing_eagerly():
-      self.skipTest("Currently this does not work in eager mode, since it "
-                    "relies on the module's connected subgraphs which are not "
-                    "populated when executing eagerly.")
     batch_size = 16
     cores = [snt.LSTM(hidden_size=10), snt.Linear(output_size=42), tf.nn.relu]
     rnn = snt.DeepRNN(cores, skip_connections=False)

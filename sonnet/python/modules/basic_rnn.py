@@ -291,6 +291,7 @@ class DeepRNN(rnn_core.RNNCore):
       self._check_cores_output_sizes()
 
     self._num_recurrent = sum(self._is_recurrent_list)
+    self._last_output_size = None
 
   def _check_cores_output_sizes(self):
     """Checks the output_sizes of the cores of the DeepRNN module.
@@ -369,6 +370,7 @@ class DeepRNN(rnn_core.RNNCore):
     else:
       output = current_input
 
+    self._last_output_size = _get_shape_without_batch_dimension(output)
     return output, tuple(next_states)
 
   def initial_state(self, batch_size, dtype=tf.float32, trainable=False,
@@ -460,17 +462,13 @@ class DeepRNN(rnn_core.RNNCore):
         return final_core.output_size
 
       # If we have connected the module at least once, we can get the output
-      # size of whatever was actually produced. The indexing of [-1] gets us
-      # the most recent connection, and [0] gets us the first element of the
-      # output tuple as opposed to the recurrent state.
-      if self._connected_subgraphs:
-        last_connected_output_size = _get_shape_without_batch_dimension(
-            self._connected_subgraphs[-1].outputs[0])
+      # size of whatever was actually produced.
+      if self._last_output_size is not None:
         tf.logging.warning(
             "Final core does not contain .output_size, but the "
             "DeepRNN has been connected into the graph, so inferred output "
-            "size as %s", last_connected_output_size)
-        return last_connected_output_size
+            "size as %s", self._last_output_size)
+        return self._last_output_size
 
       # If all else fails, iterate backwards through cores and return the
       # first one which has an output_size field. This can be incorrect in

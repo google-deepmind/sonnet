@@ -55,6 +55,7 @@ class Embed(base.AbstractModule):
                vocab_size=None,
                embed_dim=None,
                existing_vocab=None,
+               densify_gradients=False,
                initializers=None,
                partitioners=None,
                regularizers=None,
@@ -74,6 +75,13 @@ class Embed(base.AbstractModule):
       existing_vocab: a [vocab_size, embed_dim] vocabulary matrix. Will be
         converted to a tf.float32 tensor. If provided, neither or vocab_size or
         embed_dim should be provided as they are inferred.
+      densify_gradients: if True, we convert the embedding gradient from an
+        indexed-slices to a regular tensor before sending it back to the
+        parameter server. This avoids excess computation on the parameter
+        server. Use this option for moderately sized embeddings, e.g.,
+        a vocabulary size on the order of up to thousands. For embeddings larger
+        than these, e.g. a vocabulary size on the order of tens or hundreds of
+        thousands, set this to False.
       initializers: Optional dict containing initializers for embeddings (with
         key 'embeddings'). As a default, embeddings are initialized via a
         truncated normal distribution.
@@ -127,6 +135,7 @@ class Embed(base.AbstractModule):
     self._regularizers = util.check_regularizers(
         regularizers, self.POSSIBLE_INITIALIZER_KEYS)
     self._trainable = trainable
+    self._densify_gradients = densify_gradients
 
   def _build(self, ids):
     """Lookup embeddings.
@@ -161,9 +170,18 @@ class Embed(base.AbstractModule):
           regularizer=self._regularizers.get(self.EMBEDDINGS, None),
           trainable=self._trainable)
 
+    if self._densify_gradients:
+      # On the backwards pass, we convert the gradient from indexed-slices to a
+      # regular tensor before sending it back to the parameter server.
+      # This avoids excess computation on the parameter server.
+      # In eager mode we do not need the conversion.
+      # Add a check whether we are in eager mode when it is supported.
+      embeddings = util.convert_gradient_to_tensor(self._embeddings)
+    else:
+      embeddings = self._embeddings
+
     # Lookup embeddings
-    return tf.nn.embedding_lookup(
-        self._embeddings, ids, name="embedding_lookup")
+    return tf.nn.embedding_lookup(embeddings, ids, name="embedding_lookup")
 
   @property
   def vocab_size(self):

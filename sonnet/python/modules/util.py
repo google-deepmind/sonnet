@@ -29,6 +29,7 @@ import six
 import tensorflow as tf
 import wrapt
 
+from tensorflow.python.framework import function
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
 
@@ -813,3 +814,26 @@ def to_snake_case(camel_case):
   underscored = re.sub(r"([a-z])([0-9][^_]*)", r"\1_\2", underscored)
   # Remove any underscores at start or end of name and convert to lowercase.
   return underscored.strip("_").lower()
+
+
+@function.Defun(
+    python_grad_func=lambda x, dy: tf.convert_to_tensor(dy),
+    shape_func=lambda op: [op.inputs[0].get_shape()])
+def convert_gradient_to_tensor(x):
+  """Identity operation whose gradient is converted to a `Tensor`.
+
+  Currently, the gradient to `tf.concat` is particularly expensive to
+  compute if dy is an `IndexedSlices` (a lack of GPU implementation
+  forces the gradient operation onto CPU).  This situation occurs when
+  the output of the `tf.concat` is eventually passed to `tf.gather`.
+  It is sometimes faster to convert the gradient to a `Tensor`, so as
+  to get the cheaper gradient for `tf.concat`.  To do this, replace
+  `tf.concat(x)` with `convert_gradient_to_tensor(tf.concat(x))`.
+
+  Args:
+    x: A `Tensor`.
+
+  Returns:
+    The input `Tensor`.
+  """
+  return x

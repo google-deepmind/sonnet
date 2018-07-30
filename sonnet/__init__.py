@@ -151,5 +151,5 @@ if not version_spec.match(tf_version):
                     'requires at least version %s.' %
                     (tf.__version__, _min_tensorflow_version))
 
-__version__ = '1.23'
+__version__ = '1.24'
 

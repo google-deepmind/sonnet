@@ -1,5 +1,25 @@
 # Sonnet Changelog
 
+## Version 1.24 - Tuesday, 31. July 2018
+
+* Better integration with Tensorflow's Eager Mode.
+* `snt.LSTMBlockCell` is now a class.
+* Added semantic versioning to check compatibility with Tensorflow.
+* `RNNCellWrapper` and `wrap_rnn_cell_class` are now in the public namespace.
+* A TensorFlow RNNCell can now be wrapped as an RNNCore.
+* `ConvLSTM` corrected to apply bias only once.
+* `Conv1DLSTM` and `Conv2DLSTM` now  support Layer Norm.
+* Added `override_args` custom getter.
+* `snt.reuse_variables` now keeps the signature of the original method.
+* `VectorQuantizerEMA` now supports return of `encoding_indices`.
+* Added a bidirectional recurrent core.
+* Added support for `tf.bfloat16`.
+* Added demo for Relational Memory Core for "nth farthest" task from
+  "Relational recurrent neural networks" (Santoro et al., 2018; available
+  in https://arxiv.org/abs/1806.01822).
+* Added option to densify gradients in `snt.Embed`.
+
+
 ## Version 1.23 - Tuesday, 05. June 2018
 
 * Add `snt.RelationalMemory`, implementation of "Relational Recurrent Neural

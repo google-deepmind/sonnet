@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.gated_rnn</h1><div class="highlight"><pre>
@@ -515,7 +517,7 @@
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
     <span class="n">output</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_core</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">apply_zoneout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="n">next_s</span><span class="p">,</span> <span class="n">prev_s</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply_zoneout</span><span class="p">(</span><span class="n">keep_prob</span><span class="p">,</span> <span class="n">next_s</span><span class="p">,</span> <span class="n">prev_s</span><span class="p">):</span>  <span class="c1"># pylint: disable=missing-docstring</span>
       <span class="k">if</span> <span class="n">keep_prob</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">next_s</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span><span class="p">:</span>
@@ -1269,10 +1271,12 @@
                <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                <span class="n">padding</span><span class="o">=</span><span class="n">conv</span><span class="o">.</span><span class="n">SAME</span><span class="p">,</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">legacy_bias_behaviour</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">forget_bias</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">use_layer_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lstm&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Construct ConvLSTM.</span>
@@ -1281,16 +1285,19 @@
 <span class="sd">      conv_ndims: Convolution dimensionality (1, 2 or 3).</span>
 <span class="sd">      input_shape: Shape of the input as an iterable, excluding the batch size.</span>
 <span class="sd">      output_channels: Number of output channels of the conv LSTM.</span>
-<span class="sd">      kernel_shape: Sequence of kernel sizes (of size 2), or integer that is</span>
-<span class="sd">          used to define kernel size in all dimensions.</span>
-<span class="sd">      stride: Sequence of kernel strides (of size 2), or integer that is used to</span>
-<span class="sd">          define stride in all dimensions.</span>
+<span class="sd">      kernel_shape: Sequence of kernel sizes (of size conv_ndims), or integer</span>
+<span class="sd">          that is used to define kernel size in all dimensions.</span>
+<span class="sd">      stride: Sequence of kernel strides (of size conv_ndims), or integer that</span>
+<span class="sd">          is used to define stride in all dimensions.</span>
 <span class="sd">      rate: Sequence of dilation rates (of size conv_ndims), or integer that is</span>
 <span class="sd">          used to define dilation rate in all dimensions. 1 corresponds to a</span>
 <span class="sd">          standard convolution, while rate &gt; 1 corresponds to a dilated</span>
 <span class="sd">          convolution. Cannot be &gt; 1 if any of stride is also &gt; 1.</span>
 <span class="sd">      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.</span>
 <span class="sd">      use_bias: Use bias in convolutions.</span>
+<span class="sd">      legacy_bias_behaviour: If True, bias is applied to both input and hidden</span>
+<span class="sd">        convolutions, creating a redundant bias variable. If False, bias is only</span>
+<span class="sd">        applied to input convolution, removing the redundancy.</span>
 <span class="sd">      forget_bias: Forget bias.</span>
 <span class="sd">      initializers: Dict containing ops to initialize the convolutional weights.</span>
 <span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
@@ -1298,6 +1305,9 @@
 <span class="sd">        used.</span>
 <span class="sd">      regularizers: Optional dict containing regularizers for the convolutional</span>
 <span class="sd">        weights and biases. As a default, no regularizers are used.</span>
+<span class="sd">      use_layer_norm: Boolean that indicates whether to apply layer</span>
+<span class="sd">        normalization. This is applied across the entire layer, normalizing</span>
+<span class="sd">        over all non-batch dimensions.</span>
 <span class="sd">      custom_getter: Callable that takes as a first argument the true getter,</span>
 <span class="sd">        and allows overwriting the internal get_variable method. See the</span>
 <span class="sd">        `tf.get_variable` documentation for more details.</span>
@@ -1323,28 +1333,50 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_padding</span> <span class="o">=</span> <span class="n">padding</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_legacy_bias_behaviour</span> <span class="o">=</span> <span class="n">legacy_bias_behaviour</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span> <span class="o">=</span> <span class="n">forget_bias</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span> <span class="o">=</span> <span class="n">initializers</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span> <span class="o">=</span> <span class="n">partitioners</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">regularizers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span> <span class="o">=</span> <span class="n">use_layer_norm</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span> <span class="o">=</span> <span class="n">output_channels</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_channels</span> <span class="o">//=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stride</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_new_convolution</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_new_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_legacy_bias_behaviour</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;ConvLSTM will create redundant bias variables for input and hidden &quot;</span>
+          <span class="s2">&quot;convolutions. To avoid this, invoke the constructor with option &quot;</span>
+          <span class="s2">&quot;`legacy_bias_behaviour=False`. In future, this will be the default.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_new_convolution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_bias</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns new convolution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      use_bias: Use bias in convolutions. If False, clean_dict removes bias</span>
+<span class="sd">        entries from initializers, partitioners and regularizers passed to</span>
+<span class="sd">        the constructor of the convolution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">clean_dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">input_dict</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_bias</span><span class="p">:</span>
+        <span class="n">cleaned_dict</span> <span class="o">=</span> <span class="n">input_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cleaned_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cleaned_dict</span>
+      <span class="k">return</span> <span class="n">input_dict</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conv_class</span><span class="p">(</span>
         <span class="n">output_channels</span><span class="o">=</span><span class="mi">4</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">,</span>
         <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shape</span><span class="p">,</span>
         <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stride</span><span class="p">,</span>
         <span class="n">rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">,</span>
         <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_padding</span><span class="p">,</span>
-        <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">,</span>
-        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
-        <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">,</span>
-        <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">clean_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">),</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">clean_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_partitioners</span><span class="p">),</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">clean_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="p">),</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv&quot;</span><span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -1366,9 +1398,27 @@
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
     <span class="n">hidden</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">state</span>
+    <span class="k">if</span> <span class="s2">&quot;input&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_convolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;hidden&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_legacy_bias_behaviour</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_convolution</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Do not apply bias a second time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_convolution</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">input_conv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">]</span>
     <span class="n">hidden_conv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convolutions</span><span class="p">[</span><span class="s2">&quot;hidden&quot;</span><span class="p">]</span>
     <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">input_conv</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">+</span> <span class="n">hidden_conv</span><span class="p">(</span><span class="n">hidden</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span><span class="p">:</span>
+      <span class="c1"># Normalize over all non-batch dimensions.</span>
+      <span class="c1"># Temporarily flatten the spatial and channel dimensions together.</span>
+      <span class="n">flatten</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">BatchFlatten</span><span class="p">()</span>
+      <span class="n">unflatten</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">BatchReshape</span><span class="p">(</span><span class="n">next_hidden</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])</span>
+      <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">flatten</span><span class="p">(</span><span class="n">next_hidden</span><span class="p">)</span>
+      <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">layer_norm</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">()(</span><span class="n">next_hidden</span><span class="p">)</span>
+      <span class="n">next_hidden</span> <span class="o">=</span> <span class="n">unflatten</span><span class="p">(</span><span class="n">next_hidden</span><span class="p">)</span>
+
     <span class="n">gates</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">next_hidden</span><span class="p">,</span> <span class="n">num_or_size_splits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                      <span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_conv_ndims</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 
@@ -1376,7 +1426,12 @@
     <span class="n">next_cell</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">forget_gate</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forget_bias</span><span class="p">)</span> <span class="o">*</span> <span class="n">cell</span>
     <span class="n">next_cell</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">input_gate</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">next_input</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">next_cell</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">output_gate</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">next_cell</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_layer_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Boolean indicating whether layer norm is enabled.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_layer_norm</span></div>
 
 
 <div class="viewcode-block" id="Conv1DLSTM"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.Conv1DLSTM">[docs]</a><span class="k">class</span> <span class="nc">Conv1DLSTM</span><span class="p">(</span><span class="n">ConvLSTM</span><span class="p">):</span>
@@ -1749,13 +1804,35 @@
 
   <span class="n">core</span> <span class="o">=</span> <span class="n">HighwayCore</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">RecurrentDropoutWrapper</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">keep_prob</span><span class="p">),</span> <span class="n">core</span></div>
+
+
+<div class="viewcode-block" id="LSTMBlockCell"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.LSTMBlockCell">[docs]</a><span class="k">class</span> <span class="nc">LSTMBlockCell</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCellWrapper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.&quot;&quot;&quot;</span>
+
+  <span class="nd">@rnn_core</span><span class="o">.</span><span class="n">with_doc</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMBlockCell</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">LSTMBlockCell</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">rnn</span><span class="o">.</span><span class="n">LSTMBlockCell</span><span class="p">,</span>
+                                        <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -1784,8 +1861,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

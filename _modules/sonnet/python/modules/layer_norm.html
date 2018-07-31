@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.layer_norm</h1><div class="highlight"><pre>
@@ -137,13 +139,14 @@
 <span class="sd">      normalized: layer normalized outputs with same shape as inputs.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">      base.NotSupportedError: If `inputs` has data type of `tf.float16`.</span>
+<span class="sd">      base.NotSupportedError: If `inputs` has data type of `tf.float16` or</span>
+<span class="sd">          `tf.bfloat16`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">]:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
-          <span class="s2">&quot;LayerNorm does not support `tf.float16`, insufficient &quot;</span>
-          <span class="s2">&quot;precision for calculating sufficient statistics.&quot;</span><span class="p">)</span>
+          <span class="s2">&quot;LayerNorm does not support `tf.float16` or `tf.bfloat16`, &quot;</span>
+          <span class="s2">&quot;insufficient precision for calculating sufficient statistics.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
@@ -212,10 +215,23 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -244,8 +260,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="sonnet">
@@ -795,50 +797,22 @@ serialized instances where those members don’t exist.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#"></a><ul>
-<li><a class="reference internal" href="#usage-example">Usage Example</a></li>
-<li><a class="reference internal" href="#general-principles">General Principles</a></li>
-<li><a class="reference internal" href="#importing-sonnet">Importing Sonnet</a></li>
-<li><a class="reference internal" href="#defining-your-own-modules">Defining your own modules</a><ul>
-<li><a class="reference internal" href="#inherit-from-snt-abstractmodule">Inherit from <code class="docutils literal notranslate"><span class="pre">snt.AbstractModule</span></code></a></li>
-<li><a class="reference internal" href="#call-superclass-constructor">Call superclass constructor</a></li>
-<li><a class="reference internal" href="#implement-build-method">Implement <code class="docutils literal notranslate"><span class="pre">_build()</span></code> method</a></li>
-<li><a class="reference internal" href="#where-should-the-submodules-be-declared">Where should the submodules be declared?</a></li>
-<li><a class="reference internal" href="#recurrent-modules">Recurrent Modules</a><ul>
-<li><a class="reference internal" href="#usage">Usage</a></li>
-<li><a class="reference internal" href="#defining-your-own-recurrent-modules">Defining your own recurrent modules</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#the-transposable-interface">The Transposable interface</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#variable-reuse-with-snt-reuse-variables-experimental">Variable reuse with <code class="docutils literal notranslate"><span class="pre">&#64;snt.reuse_variables</span></code> (<strong>experimental</strong>)</a></li>
-<li><a class="reference internal" href="#wrapping-functions-into-sonnet-modules-using-snt-module">Wrapping functions into Sonnet modules using <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code></a></li>
-<li><a class="reference internal" href="#faq">FAQ</a><ul>
-<li><a class="reference internal" href="#q-why-another-tf-library">Q: Why <em>another</em> TF library?</a></li>
-<li><a class="reference internal" href="#q-can-i-access-different-variables-on-subsequent-calls-to-the-same-build">Q: Can I access different variables on subsequent calls to the same build()?</a></li>
-<li><a class="reference internal" href="#q-what-if-i-mistakenly-give-two-modules-the-same-name">Q: What if I mistakenly give two modules the same name?</a></li>
-<li><a class="reference internal" href="#q-do-i-have-to-name-my-modules">Q: Do I <em>have</em> to name my modules?</a></li>
-<li><a class="reference internal" href="#q-how-do-i-find-out-what-variables-are-declared-by-a-module">Q: How do I find out what variables are declared by a module?</a></li>
-<li><a class="reference internal" href="#q-should-i-be-putting-calls-to-variable-scope-in-my-code">Q: Should I be putting calls to <code class="docutils literal notranslate"><span class="pre">variable_scope</span></code> in my code?</a></li>
-<li><a class="reference internal" href="#q-can-i-mix-this-with-raw-tf-ops">Q: Can I mix this with raw TF ops?</a></li>
-<li><a class="reference internal" href="#q-should-everything-in-sonnet-be-implemented-as-a-module">Q: Should everything in Sonnet be implemented as a Module?</a></li>
-<li><a class="reference internal" href="#q-can-i-mix-this-with-other-high-level-tf-apis-eg-tf-slim">Q: Can I mix this with other high level TF APIs, eg TF Slim?</a></li>
-<li><a class="reference internal" href="#q-shouldn-t-i-be-overriding-call-in-modules">Q: Shouldn’t I be overriding __call__ in modules?</a></li>
-<li><a class="reference internal" href="#q-what-is-the-overhead-of-using-sonnet-vs-other-libraries-vs-raw-tf">Q: What is the overhead of using Sonnet vs other libraries vs raw TF?</a></li>
-<li><a class="reference internal" href="#q-how-do-i-list-all-the-variables-which-are-used-in-any-way-in-a-module">Q: How do I list all the variables which are used <em>in any way</em> in a Module?</a></li>
-<li><a class="reference internal" href="#q-how-do-i-serialize-sonnet-module-instances">Q: How do I serialize Sonnet module instances?</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<h1 class="logo"><a href="index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -846,13 +820,6 @@ serialized instances where those members don’t exist.</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/README.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <div class="searchformwrapper">
@@ -873,8 +840,8 @@ serialized instances where those members don’t exist.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
       |
       <a href="_sources/README.rst.txt"

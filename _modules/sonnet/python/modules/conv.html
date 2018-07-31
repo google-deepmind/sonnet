@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.conv</h1><div class="highlight"><pre>
@@ -225,7 +227,7 @@
 <span class="sd">    base.UnderspecifiedError: If the channel dimension of `inputs` isn&#39;t</span>
 <span class="sd">      defined.</span>
 <span class="sd">    TypeError: If input Tensor dtype is not compatible with either</span>
-<span class="sd">      `tf.float16` or `tf.float32`.</span>
+<span class="sd">      `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="c1"># Check shape.</span>
   <span class="n">input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -237,10 +239,11 @@
 
   <span class="c1"># Check type.</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">bfloat16</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
           <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)):</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-        <span class="s2">&quot;Input must have dtype tf.float16 or tf.float32, but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span>
-        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="s2">&quot;Input must have dtype tf.float16, tf.bfloat16 or tf.float32, &quot;</span>
+        <span class="s2">&quot;but dtype was </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
   <span class="c1"># Check channel dim.</span>
   <span class="n">input_channels</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span>
@@ -441,11 +444,12 @@
       <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">bfloat16</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
                 <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">or</span>
                 <span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)):</span>
           <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-              <span class="s2">&quot;Mask needs to have dtype float16, float32 or float64&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_fully_defined</span><span class="p">():</span>
+              <span class="s2">&quot;Mask needs to have dtype float16, bfloat16, float32 or float64&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">is_fully_defined</span><span class="p">():</span>
           <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
               <span class="s2">&quot;Mask needs to have a statically defined shape&quot;</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
@@ -469,7 +473,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A ND Tensor of the same rank as `data_format`, and either of types</span>
-<span class="sd">      `tf.float16` or `tf.float32`.</span>
+<span class="sd">      `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A ND Tensor of shape [batch_size, output_dim_1, output_dim_2, ...,</span>
@@ -486,7 +490,7 @@
 <span class="sd">      base.IncompatibleShapeError: If a mask is present and its shape is</span>
 <span class="sd">          incompatible with the shape of the weights.</span>
 <span class="sd">      TypeError: If input Tensor dtype is not compatible with either</span>
-<span class="sd">          `tf.float16` or `tf.float32`.</span>
+<span class="sd">          `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_verify_inputs</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -513,8 +517,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a convolution operation on `inputs` using variable `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
@@ -531,8 +535,8 @@
 <span class="sd">    Figures out the shape of the weight matrix, initialize it, and return it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
@@ -566,23 +570,25 @@
 <span class="sd">          match on shape.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
+    <span class="n">w_shape</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="n">mask_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&gt;</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mask_shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&gt;</span> <span class="n">w_shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
           <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">. Max shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
+              <span class="n">mask_shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
           <span class="p">)</span>
       <span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">mask_shape</span> <span class="o">!=</span> <span class="n">w_shape</span><span class="p">[:</span><span class="n">mask_shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">]:</span>
       <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">IncompatibleShapeError</span><span class="p">(</span>
           <span class="s2">&quot;Invalid mask shape: </span><span class="si">{}</span><span class="s2">. Weight shape: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-              <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span>
+              <span class="n">mask_shape</span><span class="p">,</span> <span class="n">w_shape</span>
           <span class="p">)</span>
       <span class="p">)</span>
     <span class="c1"># TF broadcasting is a bit fragile.</span>
     <span class="c1"># Expand the shape of self._mask by one dim at a time to the right</span>
     <span class="c1"># until the rank matches `weight_shape`.</span>
-    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&lt;</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
+    <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&lt;</span> <span class="n">w_shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># tf.Variable &amp; tf.ResourceVariable don&#39;t support *=.</span>
@@ -854,10 +860,11 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A Tensor of shape `data_format` and of type</span>
-<span class="sd">          `tf.float16` or `tf.float32`.</span>
+<span class="sd">          `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">      A Tensor of shape `data_format` and of type `tf.float16` or `tf.float32`.</span>
+<span class="sd">      A Tensor of shape `data_format` and of type `tf.float16`, `tf.bfloat16`</span>
+<span class="sd">          or `tf.float32`.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">      ValueError: If connecting the module into the graph any time after the</span>
@@ -870,7 +877,7 @@
 <span class="sd">      base.IncompatibleShapeError: If `output_shape` is an iterable and is not</span>
 <span class="sd">          in the format `(out_height, out_width)`.</span>
 <span class="sd">      TypeError: If input Tensor dtype is not compatible with either</span>
-<span class="sd">          `tf.float16` or `tf.float32`.</span>
+<span class="sd">          `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_verify_inputs</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_input_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
@@ -950,8 +957,8 @@
 <span class="sd">    Figures out the shape of the weight matrix, initialize it, and return it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
@@ -981,8 +988,8 @@
     <span class="sd">&quot;&quot;&quot;Calculate the output shape for `inputs` after a deconvolution.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      output_shape: A tensor of shape (`batch_size`, `conv_output_shape`).</span>
@@ -1015,10 +1022,11 @@
 <span class="sd">    what the proper output shape will be for `outputs`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
-<span class="sd">      outputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`. The output of `inputs` from a transpose convolution op.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
+<span class="sd">      outputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`. The output of `inputs` from a transpose</span>
+<span class="sd">          convolution op.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      outputs: The passed-in `outputs` with all shape information filled in.</span>
@@ -1469,8 +1477,8 @@
     <span class="sd">&quot;&quot;&quot;Turn the input causal using padding.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      inputs: The `inputs` argument that has had causal padding added.</span>
@@ -1486,8 +1494,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a convolution operation on `inputs` using variable `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
@@ -2060,8 +2068,8 @@
 <span class="sd">    Figures out the shape of the weight matrix, initialize it, and return it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs` and of shape</span>
@@ -2085,8 +2093,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a depthwise_conv2d operation on `inputs` using variable `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
@@ -2209,8 +2217,8 @@
 <span class="sd">    Figures out the shape of the weight matrix, initializes it, and returns it.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs` and of shape</span>
@@ -2240,8 +2248,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a depthwise_conv2d operation on `inputs` using variable `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A weight matrix of the same type as `inputs`.</span>
 
 <span class="sd">    Returns:</span>
@@ -2381,7 +2389,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A 4D Tensor of shape:</span>
 <span class="sd">          [batch_size, input_height, input_width, input_channels]</span>
-<span class="sd">          and of type `tf.float16` or `tf.float32`.</span>
+<span class="sd">          and of type `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A tuple of two 4D Tensors, each with the same dtype as `inputs`:</span>
@@ -2427,8 +2435,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a `separable_conv2d` operation on `inputs` using `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A tuple of weight matrices of the same type as `inputs`, the first</span>
 <span class="sd">        being the depthwise weight matrix, and the second being the pointwise</span>
 <span class="sd">        weight matrix.</span>
@@ -2584,7 +2592,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A 4D Tensor of shape:</span>
 <span class="sd">          [batch_size, input_height, input_width, input_channels]</span>
-<span class="sd">          and of type `tf.float16` or `tf.float32`.</span>
+<span class="sd">          and of type `tf.float16`, `tf.bfloat16` or `tf.float32`.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A tuple of two 4D Tensors, each with the same dtype as `inputs`:</span>
@@ -2630,8 +2638,8 @@
     <span class="sd">&quot;&quot;&quot;Apply a `separable_conv2d` operation on `inputs` using `w`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16` or</span>
-<span class="sd">          `tf.float32`.</span>
+<span class="sd">      inputs: A Tensor of shape `data_format` and of type `tf.float16`,</span>
+<span class="sd">          `tf.bfloat16` or `tf.float32`.</span>
 <span class="sd">      w: A tuple of weight matrices of the same type as `inputs`, the first</span>
 <span class="sd">        being the depthwise weight matrix, and the second being the pointwise</span>
 <span class="sd">        weight matrix.</span>
@@ -2678,10 +2686,23 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -2710,8 +2731,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

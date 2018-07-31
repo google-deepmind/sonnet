@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.base</h1><div class="highlight"><pre>
@@ -87,6 +89,43 @@
 
 <span class="c1"># Maps `tf.Graph` objects to a module call stack.</span>
 <span class="n">_MODULE_STACKS</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+
+
+<span class="c1"># Maps `tf.Graph` objects to a stack of module connection observers.</span>
+<span class="n">_CONNECTION_OBSERVER_STACKS</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="observe_connections"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.observe_connections">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">observe_connections</span><span class="p">(</span><span class="n">observer</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Notifies the observer whenever any Sonnet module is connected to the graph.</span>
+
+<span class="sd">  If a module contains nested modules, the observer is notified once for each</span>
+<span class="sd">  nested module, followed by the containing module.</span>
+
+<span class="sd">  For example:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  def logging_observer(connected_subgraph):</span>
+<span class="sd">    logging.info(connected_subgraph.module.module_name)</span>
+
+<span class="sd">  with snt.observe_connections(logging_observer):</span>
+<span class="sd">    output = imagenet_module(input_tensor)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    observer: Callable accepting a single argument. Will be called with a</span>
+<span class="sd">    `ConnectedSubGraph` each time a module is connected to the graph.</span>
+
+<span class="sd">  Yields:</span>
+<span class="sd">    None: just yields control to the inner context.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">connection_observer_stack</span> <span class="o">=</span> <span class="n">_CONNECTION_OBSERVER_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">(),</span> <span class="p">[])</span>
+  <span class="n">connection_observer_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observer</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">yield</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="n">connection_observer_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
 
 
 
@@ -227,6 +266,7 @@
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name must be a string, not </span><span class="si">{}</span><span class="s2"> of type </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
           <span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_connected</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># If the given custom getter is a dictionary with a per-variable custom</span>
@@ -364,7 +404,17 @@
     <span class="n">module_stack</span> <span class="o">=</span> <span class="n">_MODULE_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="p">[])</span>
     <span class="n">module_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="k">yield</span>
+      <span class="c1"># In eager mode, the template store keeps references to created variables</span>
+      <span class="c1"># such that they survive even if there are no references to them in</span>
+      <span class="c1"># Python code. Variables added to an eager template store are also added</span>
+      <span class="c1"># to TensorFlow global collections (unlike regular variables created in</span>
+      <span class="c1"># eager mode).</span>
+      <span class="c1"># Ideally move re-entering store into TF&#39;s tpl.variable_scope.</span>
+      <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">_template_store</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>  <span class="c1"># pylint:disable=protected-access</span>
+          <span class="k">yield</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="c1"># Remove `self` from `module_stack`, this happens as part of cleanup</span>
       <span class="c1"># even if an error is raised.</span>
@@ -402,6 +452,11 @@
         <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="p">)</span>
 
+    <span class="n">connection_observer_stack</span> <span class="o">=</span> <span class="n">_CONNECTION_OBSERVER_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">for</span> <span class="n">observer</span> <span class="ow">in</span> <span class="n">connection_observer_stack</span><span class="p">:</span>
+      <span class="n">observer</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="p">)</span>
+
   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Operator overload for calling.</span>
 
@@ -420,13 +475,21 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_check_same_graph</span><span class="p">()</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_variables</span><span class="p">():</span>
       <span class="n">outputs</span><span class="p">,</span> <span class="n">subgraph_name_scope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">subgraph_name_scope</span><span class="p">,</span>
-                                 <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_connected</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+      <span class="c1"># In eager mode the module is called a lot more frequently than in graph</span>
+      <span class="c1"># mode (for each training step) and so we don&#39;t keep track of connected</span>
+      <span class="c1"># subgraphs (since there will be orders of magnitude more of them).</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">subgraph_name_scope</span><span class="p">,</span>
+                                   <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">outputs</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">name_scopes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a tuple of all name_scopes generated by this module.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+      <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
+          <span class="s2">&quot;The name_scopes property is not supported in eager mode.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subgraph</span><span class="o">.</span><span class="n">name_scope</span> <span class="k">for</span> <span class="n">subgraph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -463,7 +526,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns true iff the Module been connected to the Graph at least once.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_connected</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -473,6 +536,9 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">connected_subgraphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns the subgraphs created by this module so far.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+      <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
+          <span class="s2">&quot;Connected sub-graphs are not tracked in eager mode.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -485,6 +551,9 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+      <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
+          <span class="s2">&quot;Connected sub-graphs are not tracked in eager mode.&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -749,10 +818,23 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -781,8 +863,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.util</h1><div class="highlight"><pre>
@@ -60,7 +62,9 @@
 <span class="c1"># Dependency imports</span>
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">wrapt</span>
 
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">function</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">variable_scope</span> <span class="k">as</span> <span class="n">variable_scope_ops</span>
 
 
@@ -689,8 +693,8 @@
   <span class="k">if</span> <span class="ow">not</span> <span class="n">is_method</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;reuse_variables can only be used with methods.&quot;</span><span class="p">)</span>
 
-  <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="nd">@wrapt</span><span class="o">.</span><span class="n">decorator</span>
+  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calls `method` with a variable scope whose reuse flag is set correctly.</span>
 
 <span class="sd">    The first time the wrapper is called it creates a</span>
@@ -747,9 +751,10 @@
 <span class="sd">      ```</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">      method: The method to wrap.</span>
 <span class="sd">      obj: The object instance passed to the wrapped method.</span>
-<span class="sd">      *args: The positional arguments (Tensors) passed to the wrapped method.</span>
-<span class="sd">      **kwargs: The keyword arguments passed to the wrapped method.</span>
+<span class="sd">      args: The positional arguments (Tensors) passed to the wrapped method.</span>
+<span class="sd">      kwargs: The keyword arguments passed to the wrapped method.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      Output of the wrapped method.</span>
@@ -758,6 +763,11 @@
 <span class="sd">      ValueError: If no variable scope is provided or if `method` is a method</span>
 <span class="sd">                  and a variable_scope keyword argument is also provided.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If @reuse_variables is combined with @property, obj is passed in args</span>
+    <span class="c1"># and method is still unbound at this stage.</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">default_context_manager</span><span class="p">(</span><span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
       <span class="n">variable_scope</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">variable_scope</span>
@@ -792,21 +802,22 @@
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">method_name_scope</span><span class="p">)</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
           <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_capture_variables&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">obj</span><span class="o">.</span><span class="n">_capture_variables</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
-              <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+              <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
       <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
-        <span class="c1"># to the TF graph</span>
-        <span class="n">method_positional_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
-            <span class="n">method</span><span class="p">,</span> <span class="n">out_ops</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="o">*</span><span class="n">method_positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># to the TF graph.</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_is_connected</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># pylint: disable=protected-access</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+          <span class="n">obj</span><span class="o">.</span><span class="n">_add_connected_subgraph</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+              <span class="n">method</span><span class="p">,</span> <span class="n">out_ops</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
       <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">return</span> <span class="n">out_ops</span>
 
-  <span class="k">return</span> <span class="n">wrapper</span></div>
+  <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-value-for-parameter</span></div>
 
 
 <div class="viewcode-block" id="name_for_callable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.name_for_callable">[docs]</a><span class="k">def</span> <span class="nf">name_for_callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -838,13 +849,49 @@
   <span class="n">underscored</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;([a-z])([0-9][^_]*)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1_\2&quot;</span><span class="p">,</span> <span class="n">underscored</span><span class="p">)</span>
   <span class="c1"># Remove any underscores at start or end of name and convert to lowercase.</span>
   <span class="k">return</span> <span class="n">underscored</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+
+
+<span class="nd">@function</span><span class="o">.</span><span class="n">Defun</span><span class="p">(</span>
+    <span class="n">python_grad_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">dy</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">dy</span><span class="p">),</span>
+    <span class="n">shape_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">op</span><span class="p">:</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()])</span>
+<span class="k">def</span> <span class="nf">convert_gradient_to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Identity operation whose gradient is converted to a `Tensor`.</span>
+
+<span class="sd">  Currently, the gradient to `tf.concat` is particularly expensive to</span>
+<span class="sd">  compute if dy is an `IndexedSlices` (a lack of GPU implementation</span>
+<span class="sd">  forces the gradient operation onto CPU).  This situation occurs when</span>
+<span class="sd">  the output of the `tf.concat` is eventually passed to `tf.gather`.</span>
+<span class="sd">  It is sometimes faster to convert the gradient to a `Tensor`, so as</span>
+<span class="sd">  to get the cheaper gradient for `tf.concat`.  To do this, replace</span>
+<span class="sd">  `tf.concat(x)` with `convert_gradient_to_tensor(tf.concat(x))`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    x: A `Tensor`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    The input `Tensor`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">x</span>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -873,8 +920,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

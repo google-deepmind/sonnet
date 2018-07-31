@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.rnn_core</h1><div class="highlight"><pre>
@@ -66,6 +68,7 @@
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">wrapt</span>
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">rnn_cell_impl</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.util</span> <span class="k">import</span> <span class="n">nest</span>
@@ -378,13 +381,109 @@
 
     <span class="k">return</span> <span class="n">nest</span><span class="o">.</span><span class="n">pack_sequence_as</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_state</span><span class="p">,</span>
                                  <span class="n">flat_sequence</span><span class="o">=</span><span class="n">flat_learnable_state</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RNNCellWrapper"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCellWrapper">[docs]</a><span class="k">class</span> <span class="nc">RNNCellWrapper</span><span class="p">(</span><span class="n">RNNCore</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;RNN core that delegates to a `tf.contrib.rnn.RNNCell`.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_ctor</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Constructs the cell, within this module&#39;s variable scope.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      cell_ctor: Callable that instantiates a `tf.contrib.rnn.RNNCell`.</span>
+<span class="sd">      *args: Arguments to pass to `cell_ctor`.</span>
+<span class="sd">      **kwargs: Keyword arguments to pass to `cell_ctor`.</span>
+<span class="sd">        If `name` is provided, it is passed to `RNNCore.__init__` as well.</span>
+<span class="sd">        If `custom_getter` is provided, it is passed to `RNNCore.__init__`</span>
+<span class="sd">        but not to `cell_ctor`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">RNNCellWrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+        <span class="n">custom_getter</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;custom_getter&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span> <span class="o">=</span> <span class="n">cell_ctor</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="o">.</span><span class="n">output_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cell</span><span class="o">.</span><span class="n">state_size</span></div>
+
+
+<div class="viewcode-block" id="with_doc"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.with_doc">[docs]</a><span class="k">def</span> <span class="nf">with_doc</span><span class="p">(</span><span class="n">fn_with_doc_to_copy</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a decorator to copy documentation from the given function.</span>
+
+<span class="sd">  Docstring is copied, including *args and **kwargs documentation.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    fn_with_doc_to_copy: Function whose docstring, including *args and</span>
+<span class="sd">      **kwargs documentation, is to be copied.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Decorated version of `wrapper_init` with documentation copied from</span>
+<span class="sd">    `fn_with_doc_to_copy`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">wrapper_init</span><span class="p">):</span>
+    <span class="c1"># Wrap the target class&#39;s constructor (to assume its docstring),</span>
+    <span class="c1"># but invoke the wrapper class&#39;s constructor.</span>
+    <span class="nd">@wrapt</span><span class="o">.</span><span class="n">decorator</span>
+    <span class="k">def</span> <span class="nf">wrapping_fn</span><span class="p">(</span><span class="n">unused_wrapped</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+      <span class="n">wrapper_init</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapping_fn</span><span class="p">(</span><span class="n">fn_with_doc_to_copy</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-value-for-parameter</span>
+
+  <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<div class="viewcode-block" id="wrap_rnn_cell_class"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.wrap_rnn_cell_class">[docs]</a><span class="k">def</span> <span class="nf">wrap_rnn_cell_class</span><span class="p">(</span><span class="n">wrapped_class</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Wraps an RNN cell class with a sub-class of `RNNCellWrapper`.</span>
+
+<span class="sd">  The returned wrapper class will contain an `__init__` method whose</span>
+<span class="sd">  docstring, *args, and **kwargs are based on `wrapped_class.__init__`.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    wrapped_class: A sub-class (NOT an instance) of `tf.contrib.rnn.RNNCell`.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A sub-class (NOT an instance) of `RNNCellWrapper`, with an `__init__`</span>
+<span class="sd">    method that delegates to that of `wrapped_class`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">class</span> <span class="nc">Wrapper</span><span class="p">(</span><span class="n">RNNCellWrapper</span><span class="p">):</span>
+
+    <span class="nd">@with_doc</span><span class="p">(</span><span class="n">wrapped_class</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+      <span class="nb">super</span><span class="p">(</span><span class="n">Wrapper</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">wrapped_class</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">Wrapper</span></div>
+
+
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -413,8 +512,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.basic_rnn</h1><div class="highlight"><pre>
@@ -58,7 +60,9 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">six</span>
 
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">basic</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">rnn_core</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
@@ -322,6 +326,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_check_cores_output_sizes</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_num_recurrent</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_recurrent_list</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_output_size</span> <span class="o">=</span> <span class="kc">None</span>
 
   <span class="k">def</span> <span class="nf">_check_cores_output_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Checks the output_sizes of the cores of the DeepRNN module.</span>
@@ -341,7 +346,7 @@
                            <span class="s2">&quot;dimension&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">core_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">core_list</span><span class="p">))</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">prev_state</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Connects the DeepRNN module into the graph.</span>
+    <span class="sd">&quot;&quot;&quot;Connects the DeepRNN module into the g(256, 256, 256, 256)raph.</span>
 
 <span class="sd">    If this is not the first time the module has been connected to the graph,</span>
 <span class="sd">    the Tensors provided as input_ and state must have the same final</span>
@@ -400,6 +405,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">output</span> <span class="o">=</span> <span class="n">current_input</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_output_size</span> <span class="o">=</span> <span class="n">_get_shape_without_batch_dimension</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">next_states</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DeepRNN.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.DeepRNN.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -491,17 +497,13 @@
         <span class="k">return</span> <span class="n">final_core</span><span class="o">.</span><span class="n">output_size</span>
 
       <span class="c1"># If we have connected the module at least once, we can get the output</span>
-      <span class="c1"># size of whatever was actually produced. The indexing of [-1] gets us</span>
-      <span class="c1"># the most recent connection, and [0] gets us the first element of the</span>
-      <span class="c1"># output tuple as opposed to the recurrent state.</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">:</span>
-        <span class="n">last_connected_output_size</span> <span class="o">=</span> <span class="n">_get_shape_without_batch_dimension</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="c1"># size of whatever was actually produced.</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_output_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
             <span class="s2">&quot;Final core does not contain .output_size, but the &quot;</span>
             <span class="s2">&quot;DeepRNN has been connected into the graph, so inferred output &quot;</span>
-            <span class="s2">&quot;size as </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">last_connected_output_size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">last_connected_output_size</span>
+            <span class="s2">&quot;size as </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_output_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_output_size</span>
 
       <span class="c1"># If all else fails, iterate backwards through cores and return the</span>
       <span class="c1"># first one which has an output_size field. This can be incorrect in</span>
@@ -580,13 +582,171 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_size</span></div>
+
+
+<div class="viewcode-block" id="BidirectionalRNN"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.BidirectionalRNN">[docs]</a><span class="k">class</span> <span class="nc">BidirectionalRNN</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Bidirectional RNNCore that processes the sequence forwards and backwards.</span>
+
+<span class="sd">    Based upon the encoder implementation in: https://arxiv.org/abs/1409.0473</span>
+
+<span class="sd">  This interface of this module is different than the typical ones found in</span>
+<span class="sd">  the RNNCore family.  The primary difference is that it is pre-conditioned on</span>
+<span class="sd">  the full input sequence in order to produce a full sequence of outputs and</span>
+<span class="sd">  states concatenated along the feature dimension among the forward and</span>
+<span class="sd">  backward cores.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forward_core</span><span class="p">,</span> <span class="n">backward_core</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;bidir_rnn&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a Bidirectional RNN core.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      forward_core: callable RNNCore module that computes forward states.</span>
+<span class="sd">      backward_core: callable RNNCore module that computes backward states.</span>
+<span class="sd">      name: name of the module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if not all the modules are recurrent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BidirectionalRNN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_forward_core</span> <span class="o">=</span> <span class="n">forward_core</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_backward_core</span> <span class="o">=</span> <span class="n">backward_core</span>
+    <span class="k">def</span> <span class="nf">_is_recurrent</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
+      <span class="n">has_rnn_core_interface</span> <span class="o">=</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="s2">&quot;initial_state&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                                <span class="nb">hasattr</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="s2">&quot;output_size&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                                <span class="nb">hasattr</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="s2">&quot;state_size&quot;</span><span class="p">))</span>
+      <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">core</span><span class="p">,</span> <span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_rnn_core_interface</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">_is_recurrent</span><span class="p">(</span><span class="n">forward_core</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_is_recurrent</span><span class="p">(</span><span class="n">backward_core</span><span class="p">)):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Forward and backward cores must both be instances of&quot;</span>
+                       <span class="s2">&quot;RNNCore.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_sequence</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Connects the BidirectionalRNN module into the graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      input_sequence: tensor (time, batch, [feature_1, ..]). It must be</span>
+<span class="sd">          time_major.</span>
+<span class="sd">      state: tuple of states for the forward and backward cores.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A dict with forward/backard states and output sequences:</span>
+
+<span class="sd">        &quot;outputs&quot;:{</span>
+<span class="sd">            &quot;forward&quot;: ...,</span>
+<span class="sd">            &quot;backward&quot;: ...},</span>
+<span class="sd">        &quot;state&quot;: {</span>
+<span class="sd">            &quot;forward&quot;: ...,</span>
+<span class="sd">            &quot;backward&quot;: ...}</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: in case time dimension is not statically known.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_shape</span> <span class="o">=</span> <span class="n">input_sequence</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Time dimension of input (dim 0) must be statically&quot;</span>
+                       <span class="s2">&quot;known.&quot;</span><span class="p">)</span>
+    <span class="n">seq_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">forward_state</span><span class="p">,</span> <span class="n">backward_state</span> <span class="o">=</span> <span class="n">state</span>
+
+    <span class="c1"># Lists for the forward backward output and state.</span>
+    <span class="n">output_sequence_f</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">output_sequence_b</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Forward pass over the sequence.</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s2">&quot;forward_rnn&quot;</span><span class="p">):</span>
+      <span class="n">state</span> <span class="o">=</span> <span class="n">forward_state</span>
+      <span class="n">output_sequence_f</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_forward_core</span><span class="p">(</span><span class="n">input_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,],</span> <span class="n">state</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">moves</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">seq_length</span><span class="p">)]</span>
+      <span class="n">output_sequence_f</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+          <span class="k">lambda</span> <span class="o">*</span><span class="n">vals</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="o">*</span><span class="n">output_sequence_f</span><span class="p">)</span>
+
+    <span class="c1"># Backward pass over the sequence.</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="s2">&quot;backward_rnn&quot;</span><span class="p">):</span>
+      <span class="n">state</span> <span class="o">=</span> <span class="n">backward_state</span>
+      <span class="n">output_sequence_b</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_backward_core</span><span class="p">(</span><span class="n">input_sequence</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,],</span> <span class="n">state</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">moves</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">seq_length</span><span class="p">)]</span>
+      <span class="n">output_sequence_b</span> <span class="o">=</span> <span class="n">nest</span><span class="o">.</span><span class="n">map_structure</span><span class="p">(</span>
+          <span class="k">lambda</span> <span class="o">*</span><span class="n">vals</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="o">*</span><span class="n">output_sequence_b</span><span class="p">)</span>
+
+    <span class="c1"># Compose the full output and state sequeneces.</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;outputs&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;forward&quot;</span><span class="p">:</span> <span class="n">output_sequence_f</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;backward&quot;</span><span class="p">:</span> <span class="n">output_sequence_b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;forward&quot;</span><span class="p">:</span> <span class="n">output_sequence_f</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;backward&quot;</span><span class="p">:</span> <span class="n">output_sequence_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="BidirectionalRNN.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.basic_rnn.BidirectionalRNN.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">trainable_initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trainable_regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds the default start state for a BidirectionalRNN.</span>
+
+<span class="sd">    The Bidirectional RNN flattens the states of its forward and backward cores</span>
+<span class="sd">    and concatentates them.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      batch_size: An int, float or scalar Tensor representing the batch size.</span>
+<span class="sd">      dtype: The data type to use for the state.</span>
+<span class="sd">      trainable: Boolean that indicates whether to learn the initial state.</span>
+<span class="sd">      trainable_initializers: An initializer function or nested structure of</span>
+<span class="sd">          functions with same structure as the `state_size` property of the</span>
+<span class="sd">          core, to be used as initializers of the initial state variable.</span>
+<span class="sd">      trainable_regularizers: Optional regularizer function or nested structure</span>
+<span class="sd">        of functions with the same structure as the `state_size` property of the</span>
+<span class="sd">        core, to be used as regularizers of the initial state variable. A</span>
+<span class="sd">        regularizer should be a function that takes a single `Tensor` as an</span>
+<span class="sd">        input and returns a scalar `Tensor` output, e.g. the L1 and L2</span>
+<span class="sd">        regularizers in `tf.contrib.layers`.</span>
+<span class="sd">      name: Optional string used to prefix the initial state variable names, in</span>
+<span class="sd">          the case of a trainable initial state. If not provided, defaults to</span>
+<span class="sd">          the name of the module.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      Tuple of initial states from forward and backward RNNs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+    <span class="n">forward_initial_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="p">,</span> <span class="n">trainable_initializers</span><span class="p">,</span>
+        <span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_forward&quot;</span><span class="p">)</span>
+    <span class="n">backward_initial_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">trainable</span><span class="p">,</span> <span class="n">trainable_initializers</span><span class="p">,</span>
+        <span class="n">trainable_regularizers</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot;_backward&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">forward_initial_state</span><span class="p">,</span> <span class="n">backward_initial_state</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flattened state size of cores.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_core</span><span class="o">.</span><span class="n">state_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_core</span><span class="o">.</span><span class="n">state_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">output_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flattened output size of cores.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_core</span><span class="o">.</span><span class="n">output_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_core</span><span class="o">.</span><span class="n">output_size</span></div>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -615,8 +775,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

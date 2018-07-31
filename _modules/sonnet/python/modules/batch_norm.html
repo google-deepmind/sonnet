@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.batch_norm</h1><div class="highlight"><pre>
@@ -528,7 +530,7 @@
 <span class="sd">    Raises:</span>
 <span class="sd">      base.IncompatibleShapeError: If `axis` is not valid for the</span>
 <span class="sd">        input shape or has negative entries.</span>
-<span class="sd">      base.NotSupportedError: If `input_batch` has data type of `tf.float16`.</span>
+<span class="sd">      base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">input_shape</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
 
@@ -554,8 +556,11 @@
       <span class="n">axis</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fused</span> <span class="ow">and</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">base</span><span class="o">.</span><span class="n">NotSupportedError</span><span class="p">(</span>
+          <span class="s2">&quot;Fused batch norm does not support tf.bfloat16.&quot;</span><span class="p">)</span>
     <span class="c1"># Maintain moving averages at a minimum precision of tf.float32.</span>
-    <span class="n">stat_dtype</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">float16</span> <span class="k">else</span> <span class="n">dtype</span>
+    <span class="n">stat_dtype</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">]</span> <span class="k">else</span> <span class="n">dtype</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_mean_shape</span> <span class="o">=</span> <span class="n">input_batch</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">axis</span><span class="p">:</span>
@@ -630,10 +635,23 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -662,8 +680,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

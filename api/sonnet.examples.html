@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="sonnet-examples-package">
@@ -244,6 +246,36 @@ representing the posterior distribution over the variable in question.</p>
 <div class="section" id="sonnet-examples-brnn-ptb-test-module">
 <h2>sonnet.examples.brnn_ptb_test module<a class="headerlink" href="#sonnet-examples-brnn-ptb-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-sonnet.examples.dataset_nth_farthest">
+<span id="sonnet-examples-dataset-nth-farthest-module"></span><h2>sonnet.examples.dataset_nth_farthest module<a class="headerlink" href="#module-sonnet.examples.dataset_nth_farthest" title="Permalink to this headline">¶</a></h2>
+<p>Defines the dataset for generating sequences of n-th farthest problem.</p>
+<p>The “N-th Farthest” task is designed to stress a capacity for relational
+reasoning across time. Inputs are a sequence of randomly sampled vectors
+and targets are answers to a question of the form:</p>
+<p>“What is the n-th farthest vector (in Euclidean distance) from vector
+<code class="docutils literal notranslate"><span class="pre">m</span></code>?”</p>
+<p>where the vector values, their IDs, <code class="docutils literal notranslate"><span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">m</span></code> are randomly sampled
+per sequence. The model must compute all pairwise distance relations to
+the reference vector <code class="docutils literal notranslate"><span class="pre">m</span></code> which it eventually sees at some point in the
+sequence. The vector distances must be implicitly sorted to produce an
+answer and the model must sort distance relations between vectors.</p>
+<dl class="class">
+<dt id="sonnet.examples.dataset_nth_farthest.NthFarthest">
+<em class="property">class </em><code class="descclassname">sonnet.examples.dataset_nth_farthest.</code><code class="descname">NthFarthest</code><span class="sig-paren">(</span><em>batch_size</em>, <em>num_objects</em>, <em>num_features</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_nth_farthest.html#NthFarthest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_nth_farthest.NthFarthest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Choose the nth furthest object from the reference.</p>
+<dl class="method">
+<dt id="sonnet.examples.dataset_nth_farthest.NthFarthest.get_batch">
+<code class="descname">get_batch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/dataset_nth_farthest.html#NthFarthest.get_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.dataset_nth_farthest.NthFarthest.get_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns set of nth-farthest input tensors and labels.</p>
+<p>Returns: 1. tf.Tensor (<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="docutils literal notranslate"><span class="pre">num_objects</span></code>,
+(<code class="docutils literal notranslate"><span class="pre">num_features</span></code> + 3 * <code class="docutils literal notranslate"><span class="pre">num_objects</span></code>)). 2. tf.Tensor
+(<code class="docutils literal notranslate"><span class="pre">batch_size</span></code>). Output object reference label.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-sonnet.examples.dataset_shakespeare">
 <span id="sonnet-examples-dataset-shakespeare-module"></span><h2>sonnet.examples.dataset_shakespeare module<a class="headerlink" href="#module-sonnet.examples.dataset_shakespeare" title="Permalink to this headline">¶</a></h2>
 <p>Classes to load textual data from Shakespeare’s plays.</p>
@@ -422,6 +454,12 @@ each of the data objects can be passed to PTBIterator.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="sonnet-examples-rmc-nth-farthest-module">
+<h2>sonnet.examples.rmc_nth_farthest module<a class="headerlink" href="#sonnet-examples-rmc-nth-farthest-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="sonnet-examples-rmc-nth-farthest-test-module">
+<h2>sonnet.examples.rmc_nth_farthest_test module<a class="headerlink" href="#sonnet-examples-rmc-nth-farthest-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="sonnet-examples-rnn-shakespeare-module">
 <h2>sonnet.examples.rnn_shakespeare module<a class="headerlink" href="#sonnet-examples-rnn-shakespeare-module" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -436,25 +474,22 @@ each of the data objects can be passed to PTBIterator.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">sonnet.examples package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples.brnn_ptb">sonnet.examples.brnn_ptb module</a></li>
-<li><a class="reference internal" href="#sonnet-examples-brnn-ptb-test-module">sonnet.examples.brnn_ptb_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples.dataset_shakespeare">sonnet.examples.dataset_shakespeare module</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples.module_with_build_args">sonnet.examples.module_with_build_args module</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples.ptb_reader">sonnet.examples.ptb_reader module</a></li>
-<li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-module">sonnet.examples.rnn_shakespeare module</a></li>
-<li><a class="reference internal" href="#sonnet-examples-rnn-shakespeare-test-module">sonnet.examples.rnn_shakespeare_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.examples">Module contents</a></li>
-</ul>
-</li>
-</ul>
+<h1 class="logo"><a href="../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -462,13 +497,6 @@ each of the data objects can be passed to PTBIterator.</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/api/sonnet.examples.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <div class="searchformwrapper">
@@ -489,8 +517,8 @@ each of the data objects can be passed to PTBIterator.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
       |
       <a href="../_sources/api/sonnet.examples.rst.txt"

@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for sonnet.python.modules.embed</h1><div class="highlight"><pre>
@@ -88,6 +90,7 @@
                <span class="n">vocab_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">embed_dim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">existing_vocab</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">densify_gradients</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -107,6 +110,13 @@
 <span class="sd">      existing_vocab: a [vocab_size, embed_dim] vocabulary matrix. Will be</span>
 <span class="sd">        converted to a tf.float32 tensor. If provided, neither or vocab_size or</span>
 <span class="sd">        embed_dim should be provided as they are inferred.</span>
+<span class="sd">      densify_gradients: if True, we convert the embedding gradient from an</span>
+<span class="sd">        indexed-slices to a regular tensor before sending it back to the</span>
+<span class="sd">        parameter server. This avoids excess computation on the parameter</span>
+<span class="sd">        server. Use this option for moderately sized embeddings, e.g.,</span>
+<span class="sd">        a vocabulary size on the order of up to thousands. For embeddings larger</span>
+<span class="sd">        than these, e.g. a vocabulary size on the order of tens or hundreds of</span>
+<span class="sd">        thousands, set this to False.</span>
 <span class="sd">      initializers: Optional dict containing initializers for embeddings (with</span>
 <span class="sd">        key &#39;embeddings&#39;). As a default, embeddings are initialized via a</span>
 <span class="sd">        truncated normal distribution.</span>
@@ -160,6 +170,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">check_regularizers</span><span class="p">(</span>
         <span class="n">regularizers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">POSSIBLE_INITIALIZER_KEYS</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_trainable</span> <span class="o">=</span> <span class="n">trainable</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_densify_gradients</span> <span class="o">=</span> <span class="n">densify_gradients</span>
 
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Lookup embeddings.</span>
@@ -194,9 +205,18 @@
           <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EMBEDDINGS</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
           <span class="n">trainable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_trainable</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_densify_gradients</span><span class="p">:</span>
+      <span class="c1"># On the backwards pass, we convert the gradient from indexed-slices to a</span>
+      <span class="c1"># regular tensor before sending it back to the parameter server.</span>
+      <span class="c1"># This avoids excess computation on the parameter server.</span>
+      <span class="c1"># In eager mode we do not need the conversion.</span>
+      <span class="c1"># Add a check whether we are in eager mode when it is supported.</span>
+      <span class="n">embeddings</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_gradient_to_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_embeddings</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embeddings</span>
+
     <span class="c1"># Lookup embeddings</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_embeddings</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;embedding_lookup&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;embedding_lookup&quot;</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">vocab_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -225,10 +245,23 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -257,8 +290,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
 

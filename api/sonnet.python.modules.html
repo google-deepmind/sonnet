@@ -28,6 +28,8 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="sonnet-python-modules-package">
@@ -273,6 +275,27 @@ flags controlling transposition.</p>
 <p>Returns: Transposed version of the module.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.base.observe_connections">
+<code class="descclassname">sonnet.python.modules.base.</code><code class="descname">observe_connections</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#observe_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.observe_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notifies the observer whenever any Sonnet module is connected to the
+graph.</p>
+<p>If a module contains nested modules, the observer is notified once for
+each nested module, followed by the containing module.</p>
+<p>For example:</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">logging_observer</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="p">):</span>
+  <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">snt</span><span class="o">.</span><span class="n">observe_connections</span><span class="p">(</span><span class="n">logging_observer</span><span class="p">):</span>
+  <span class="n">output</span> <span class="o">=</span> <span class="n">imagenet_module</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Args: observer: Callable accepting a single argument. Will be called
+with a <code class="docutils literal notranslate"><span class="pre">ConnectedSubGraph</span></code> each time a module is connected to the
+graph.</p>
+<p>Yields: None: just yields control to the inner context.</p>
 </dd></dl>
 
 </div>
@@ -810,6 +833,56 @@ to split.</p>
 <p>Basic RNN Cores for TensorFlow snt.</p>
 <p>This file contains the definitions of the simplest building blocks for
 Recurrent Neural Networks.</p>
+<dl class="class">
+<dt id="sonnet.python.modules.basic_rnn.BidirectionalRNN">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.basic_rnn.</code><code class="descname">BidirectionalRNN</code><span class="sig-paren">(</span><em>forward_core</em>, <em>backward_core</em>, <em>name='bidir_rnn'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic_rnn.html#BidirectionalRNN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic_rnn.BidirectionalRNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
+<p>Bidirectional RNNCore that processes the sequence forwards and
+backwards.</p>
+<p>Based upon the encoder implementation in:
+<a class="reference external" href="https://arxiv.org/abs/1409.0473">https://arxiv.org/abs/1409.0473</a></p>
+<p>This interface of this module is different than the typical ones found
+in the RNNCore family. The primary difference is that it is
+pre-conditioned on the full input sequence in order to produce a full
+sequence of outputs and states concatenated along the feature dimension
+among the forward and backward cores.</p>
+<dl class="method">
+<dt id="sonnet.python.modules.basic_rnn.BidirectionalRNN.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>batch_size</em>, <em>dtype=tf.float32</em>, <em>trainable=False</em>, <em>trainable_initializers=None</em>, <em>trainable_regularizers=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic_rnn.html#BidirectionalRNN.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic_rnn.BidirectionalRNN.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state for a BidirectionalRNN.</p>
+<p>The Bidirectional RNN flattens the states of its forward and backward
+cores and concatentates them.</p>
+<p>Args: batch_size: An int, float or scalar Tensor representing the batch
+size. dtype: The data type to use for the state. trainable: Boolean that
+indicates whether to learn the initial state. trainable_initializers:
+An initializer function or nested structure of functions with same
+structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the core, to be used as
+initializers of the initial state variable. trainable_regularizers:
+Optional regularizer function or nested structure of functions with the
+same structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the core, to be used as
+regularizers of the initial state variable. A regularizer should be a
+function that takes a single <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> as an input and returns a scalar
+<code class="docutils literal notranslate"><span class="pre">Tensor</span></code> output, e.g. the L1 and L2 regularizers in
+<code class="docutils literal notranslate"><span class="pre">tf.contrib.layers</span></code>. name: Optional string used to prefix the initial
+state variable names, in the case of a trainable initial state. If not
+provided, defaults to the name of the module.</p>
+<p>Returns: Tuple of initial states from forward and backward RNNs.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.basic_rnn.BidirectionalRNN.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.basic_rnn.BidirectionalRNN.output_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattened output size of cores.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.basic_rnn.BidirectionalRNN.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.basic_rnn.BidirectionalRNN.state_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattened state size of cores.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="class">
 <dt id="sonnet.python.modules.basic_rnn.DeepRNN">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.basic_rnn.</code><code class="descname">DeepRNN</code><span class="sig-paren">(</span><em>cores</em>, <em>skip_connections=True</em>, <em>concat_final_output_if_skip=True</em>, <em>name='deep_rnn'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/basic_rnn.html#DeepRNN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.basic_rnn.DeepRNN" title="Permalink to this definition">¶</a></dt>
@@ -1706,7 +1779,7 @@ passed to the constructor.</p>
 <p>Modules for embedding integer ids.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.embed.Embed">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.embed.</code><code class="descname">Embed</code><span class="sig-paren">(</span><em>vocab_size=None</em>, <em>embed_dim=None</em>, <em>existing_vocab=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>trainable=True</em>, <em>custom_getter=None</em>, <em>name='embed'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/embed.html#Embed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.embed.Embed" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.embed.</code><code class="descname">Embed</code><span class="sig-paren">(</span><em>vocab_size=None</em>, <em>embed_dim=None</em>, <em>existing_vocab=None</em>, <em>densify_gradients=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>trainable=True</em>, <em>custom_getter=None</em>, <em>name='embed'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/embed.html#Embed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.embed.Embed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Module for embedding tokens in a low-dimensional space.</p>
 <dl class="attribute">
@@ -2081,7 +2154,7 @@ passed to the constructor.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.gated_rnn.ConvLSTM">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">ConvLSTM</code><span class="sig-paren">(</span><em>conv_ndims</em>, <em>input_shape</em>, <em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>legacy_bias_behaviour=True</em>, <em>forget_bias=1.0</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_layer_norm=False</em>, <em>custom_getter=None</em>, <em>name='conv_lstm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#ConvLSTM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>Convolutional LSTM.</p>
 <dl class="attribute">
@@ -2111,6 +2184,12 @@ passed to the constructor.</p>
 <dt id="sonnet.python.modules.gated_rnn.ConvLSTM.state_size">
 <code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM.state_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tuple of <code class="docutils literal notranslate"><span class="pre">tf.TensorShape</span></code>s indicating the size of state tensors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.gated_rnn.ConvLSTM.use_layer_norm">
+<code class="descname">use_layer_norm</code><a class="headerlink" href="#sonnet.python.modules.gated_rnn.ConvLSTM.use_layer_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean indicating whether layer norm is enabled.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2356,6 +2435,13 @@ passed to the constructor.</p>
 <dd><p>Boolean indicating whether peephole connections are used.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="sonnet.python.modules.gated_rnn.LSTMBlockCell">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.gated_rnn.</code><code class="descname">LSTMBlockCell</code><span class="sig-paren">(</span><em>num_units</em>, <em>forget_bias=1.0</em>, <em>cell_clip=None</em>, <em>use_peephole=False</em>, <em>reuse=None</em>, <em>name='lstm_cell'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/gated_rnn.html#LSTMBlockCell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTMBlockCell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCellWrapper" title="sonnet.python.modules.rnn_core.RNNCellWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCellWrapper</span></code></a></p>
+<p>Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.</p>
 </dd></dl>
 
 <dl class="class">
@@ -2739,6 +2825,23 @@ in TensorFlow. A Recurrent Core is an object that holds the properties
 of other <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code>s and also satisfies the interface of any
 RNNCell in tensorflow.</p>
 <dl class="class">
+<dt id="sonnet.python.modules.rnn_core.RNNCellWrapper">
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">RNNCellWrapper</code><span class="sig-paren">(</span><em>cell_ctor</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#RNNCellWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCellWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
+<p>RNN core that delegates to a <code class="docutils literal notranslate"><span class="pre">tf.contrib.rnn.RNNCell</span></code>.</p>
+<dl class="attribute">
+<dt id="sonnet.python.modules.rnn_core.RNNCellWrapper.output_size">
+<code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCellWrapper.output_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.rnn_core.RNNCellWrapper.state_size">
+<code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCellWrapper.state_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="sonnet.python.modules.rnn_core.RNNCore">
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">RNNCore</code><span class="sig-paren">(</span><em>_sentinel=None</em>, <em>custom_getter=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#RNNCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.RNNCore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
@@ -2865,6 +2968,30 @@ trainable <code class="docutils literal notranslate"><span class="pre">Variable<
 <p>Raises: ValueError: if the user passes initializers that are not
 functions. ValueError: if the user passes regularizers that are not
 functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.rnn_core.with_doc">
+<code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">with_doc</code><span class="sig-paren">(</span><em>fn_with_doc_to_copy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#with_doc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.with_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a decorator to copy documentation from the given function.</p>
+<p>Docstring is copied, including *args and **kwargs documentation.</p>
+<p>Args: fn_with_doc_to_copy: Function whose docstring, including
+*args and **kwargs documentation, is to be copied.</p>
+<p>Returns: Decorated version of <code class="docutils literal notranslate"><span class="pre">wrapper_init</span></code> with documentation copied
+from <code class="docutils literal notranslate"><span class="pre">fn_with_doc_to_copy</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.rnn_core.wrap_rnn_cell_class">
+<code class="descclassname">sonnet.python.modules.rnn_core.</code><code class="descname">wrap_rnn_cell_class</code><span class="sig-paren">(</span><em>wrapped_class</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/rnn_core.html#wrap_rnn_cell_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.rnn_core.wrap_rnn_cell_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps an RNN cell class with a sub-class of <code class="docutils literal notranslate"><span class="pre">RNNCellWrapper</span></code>.</p>
+<p>The returned wrapper class will contain an <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method whose
+docstring, *args, and **kwargs are based on
+<code class="docutils literal notranslate"><span class="pre">wrapped_class.__init__</span></code>.</p>
+<p>Args: wrapped_class: A sub-class (NOT an instance) of
+<code class="docutils literal notranslate"><span class="pre">tf.contrib.rnn.RNNCell</span></code>.</p>
+<p>Returns: A sub-class (NOT an instance) of <code class="docutils literal notranslate"><span class="pre">RNNCellWrapper</span></code>, with an
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> method that delegates to that of <code class="docutils literal notranslate"><span class="pre">wrapped_class</span></code>.</p>
 </dd></dl>
 
 </div>
@@ -3377,64 +3504,22 @@ variables).</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">sonnet.python.modules package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.attention">sonnet.python.modules.attention module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-attention-test-module">sonnet.python.modules.attention_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.base">sonnet.python.modules.base module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.base_errors">sonnet.python.modules.base_errors module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.base_info">sonnet.python.modules.base_info module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-base-info-test-module">sonnet.python.modules.base_info_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-base-test-module">sonnet.python.modules.base_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.basic">sonnet.python.modules.basic module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.basic_rnn">sonnet.python.modules.basic_rnn module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-basic-rnn-test-module">sonnet.python.modules.basic_rnn_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-basic-test-module">sonnet.python.modules.basic_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.batch_norm">sonnet.python.modules.batch_norm module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-batch-norm-test-module">sonnet.python.modules.batch_norm_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.batch_norm_v2">sonnet.python.modules.batch_norm_v2 module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-batch-norm-v2-test-module">sonnet.python.modules.batch_norm_v2_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.block_matrix">sonnet.python.modules.block_matrix module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-block-matrix-test-module">sonnet.python.modules.block_matrix_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.clip_gradient">sonnet.python.modules.clip_gradient module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-clip-gradient-test-module">sonnet.python.modules.clip_gradient_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.conv">sonnet.python.modules.conv module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-conv-gpu-test-module">sonnet.python.modules.conv_gpu_test module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-conv-test-module">sonnet.python.modules.conv_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.embed">sonnet.python.modules.embed module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-embed-test-module">sonnet.python.modules.embed_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.experimental">sonnet.python.modules.experimental module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.gated_rnn">sonnet.python.modules.gated_rnn module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-gated-rnn-test-module">sonnet.python.modules.gated_rnn_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.layer_norm">sonnet.python.modules.layer_norm module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-layer-norm-test-module">sonnet.python.modules.layer_norm_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.pondering_rnn">sonnet.python.modules.pondering_rnn module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-pondering-rnn-test-module">sonnet.python.modules.pondering_rnn_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.relational_memory">sonnet.python.modules.relational_memory module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-relational-memory-test-module">sonnet.python.modules.relational_memory_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.residual">sonnet.python.modules.residual module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-residual-test-module">sonnet.python.modules.residual_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.rnn_core">sonnet.python.modules.rnn_core module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-rnn-core-test-module">sonnet.python.modules.rnn_core_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.scale_gradient">sonnet.python.modules.scale_gradient module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-scale-gradient-test-module">sonnet.python.modules.scale_gradient_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.sequential">sonnet.python.modules.sequential module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-sequential-test-module">sonnet.python.modules.sequential_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.spatial_transformer">sonnet.python.modules.spatial_transformer module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-spatial-transformer-test-module">sonnet.python.modules.spatial_transformer_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules.util">sonnet.python.modules.util module</a></li>
-<li><a class="reference internal" href="#sonnet-python-modules-util-test-module">sonnet.python.modules.util_test module</a></li>
-<li><a class="reference internal" href="#module-sonnet.python.modules">Module contents</a></li>
-</ul>
-</li>
-</ul>
+<h1 class="logo"><a href="../index.html">sonnet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -3442,13 +3527,6 @@ variables).</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/api/sonnet.python.modules.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <div class="searchformwrapper">
@@ -3469,8 +3547,8 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
       |
       <a href="../_sources/api/sonnet.python.modules.rst.txt"

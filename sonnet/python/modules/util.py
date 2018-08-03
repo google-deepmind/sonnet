@@ -580,14 +580,40 @@ def summarize_variables(variables=None):
     variables: iterable of variables; if not provided, then all variables
       (in the default graph) are summarized.
   """
-  if variables is None:
-    variables = tf.global_variables() + tf.local_variables()
+
+  variable_counts = count_variables_by_type(variables=variables)
   total_num_scalars = 0
   total_num_bytes = 0
+
   # Sort by string representation of type name, so output is deterministic.
-  unique_types_ordered = sorted(set([v.dtype.base_dtype for v in variables]),
-                                key=lambda dtype: "%r" % dtype)
-  for dtype in unique_types_ordered:
+  for dtype in sorted(variable_counts,
+                      key=lambda dtype: "%r" % dtype):
+    var_info_for_type = variable_counts[dtype]
+    num_bytes = var_info_for_type["num_scalars"] * dtype.size
+    total_num_scalars += var_info_for_type["num_scalars"]
+    total_num_bytes += num_bytes
+    tf.logging.info("%r: %d variables comprising %d scalars, %s",
+                    dtype, var_info_for_type["num_variables"],
+                    var_info_for_type["num_scalars"],
+                    _num_bytes_to_human_readable(num_bytes))
+
+
+def count_variables_by_type(variables=None):
+  """Returns a dict mapping dtypes to number of variables and scalars.
+
+  Args:
+    variables: iterable of `tf.Variable`s, or None. If None is passed, then all
+      global and local variables in the current graph are used.
+
+  Returns:
+    A dict mapping tf.dtype keys to a dict containing the keys 'num_scalars' and
+      'num_variables'.
+  """
+  if variables is None:
+    variables = tf.global_variables() + tf.local_variables()
+  unique_types = set(v.dtype.base_dtype for v in variables)
+  results_dict = {}
+  for dtype in unique_types:
     if dtype == tf.string:
       tf.logging.warning(
           "NB: string Variables present. The memory usage for these  Variables "
@@ -595,15 +621,11 @@ def summarize_variables(variables=None):
           "stored in a particular session.")
     vars_of_type = [v for v in variables if v.dtype.base_dtype == dtype]
     num_scalars = sum(v.shape.num_elements() for v in vars_of_type)
-    num_bytes = num_scalars * dtype.size
-    tf.logging.info("%r: %d variables comprising %d scalars, %s",
-                    dtype, len(vars_of_type), num_scalars,
-                    _num_bytes_to_human_readable(num_bytes))
-    total_num_scalars += num_scalars
-    total_num_bytes += num_bytes
-  tf.logging.info("Total: %d variables comprising %d scalars, %s",
-                  len(variables), total_num_scalars,
-                  _num_bytes_to_human_readable(total_num_bytes))
+    results_dict[dtype] = {
+        "num_variables": len(vars_of_type),
+        "num_scalars": num_scalars
+    }
+  return results_dict
 
 
 def reuse_variables(method):

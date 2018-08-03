@@ -472,6 +472,21 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
                                   mocked_logging_info.call_args_list):
         actual_args = actual[0]  # The rest of this structure is empty kwargs.
         self.assertEqual(expected, actual_args[0] % actual_args[1:])
+
+  @parameterized.parameters(
+      (lambda: tf.get_variable("a", dtype=tf.float32, shape=132),
+       {tf.float32: {"num_scalars": 132, "num_variables": 1}}),
+      (lambda: (tf.get_variable("b", dtype=tf.float64, shape=1024),
+                tf.get_variable("c", dtype=tf.float64, shape=2048)),
+       {tf.float64: {"num_scalars": 3072, "num_variables": 2}}),
+      (lambda: (tf.get_variable("d", dtype=tf.float16, shape=100),
+                tf.get_variable("e", dtype=tf.float32, shape=200)),
+       {tf.float16: {"num_scalars": 100, "num_variables": 1},
+        tf.float32: {"num_scalars": 200, "num_variables": 1}})
+  )
+  def testCountVariablesByType(self, graph_creator_fn, expected_dict):
+    graph_creator_fn()
+    self.assertEqual(snt.count_variables_by_type(), expected_dict)
   # pylint: enable long lambda warning
 
 

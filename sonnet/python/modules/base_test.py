@@ -23,6 +23,7 @@ import functools
 import pickle
 
 # Dependency imports
+from absl.testing import parameterized
 import numpy as np
 import six
 from sonnet.python.modules import base
@@ -127,7 +128,7 @@ class ModuleWithSubmodules(base.AbstractModule):
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
-class AbstractModuleTest(tf.test.TestCase):
+class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
 
   def testInitializerKeys(self):
     keys = ModuleWithClassKeys.get_possible_initializer_keys()
@@ -359,7 +360,12 @@ class AbstractModuleTest(tf.test.TestCase):
       module(inputs)  # pylint: disable=not-callable
       self.assertEqual(12, len(tf.trainable_variables()))  # No variables.
 
-  def testGetAllVariables(self):
+  @parameterized.parameters(
+      [lambda m: m.get_all_variables(),
+       lambda m: m.variables,
+       lambda m: m.trainable_variables]
+  )
+  def testGetAllTrainableVariables(self, all_trainable_variables):
     inputs = tf.ones(dtype=tf.float32, shape=[10, 10])
     submodule_a = SimpleModule(name="simple_submodule")
     submodule_b = ComplexModule(name="complex_submodule")
@@ -367,14 +373,14 @@ class AbstractModuleTest(tf.test.TestCase):
         submodule_a=submodule_a, submodule_b=submodule_b)
     with self.assertRaisesRegexp(base.NotConnectedError,
                                  "not instantiated yet"):
-      module.get_all_variables()
+      all_trainable_variables(module)
     module(inputs)  # pylint: disable=not-callable
 
     # Check correct for SimpleModule.
     submodule_a_variables = submodule_a.get_variables()
     submodule_a_variable_names = sorted(
         [str(v.name) for v in submodule_a_variables])
-    submodule_a_all_variables = submodule_a.get_all_variables()
+    submodule_a_all_variables = all_trainable_variables(submodule_a)
     submodule_a_all_variable_names = sorted(
         [str(v.name) for v in submodule_a_all_variables])
     self.assertEqual(submodule_a_variable_names, submodule_a_all_variable_names)
@@ -384,7 +390,7 @@ class AbstractModuleTest(tf.test.TestCase):
     ], submodule_a_variable_names)
 
     # Check correct for ComplexModule
-    submodule_b_variables = submodule_b.get_all_variables()
+    submodule_b_variables = all_trainable_variables(submodule_b)
     submodule_b_variable_names = sorted(
         [str(v.name) for v in submodule_b_variables])
     self.assertEqual([
@@ -394,7 +400,7 @@ class AbstractModuleTest(tf.test.TestCase):
         "complex_submodule/linear_2/w:0",
     ], submodule_b_variable_names)
 
-    all_variables = module.get_all_variables()
+    all_variables = all_trainable_variables(module)
     all_variable_names = sorted([str(v.name) for v in all_variables])
     self.assertEqual([
         "complex_submodule/linear_1/b:0",
@@ -420,7 +426,7 @@ class AbstractModuleTest(tf.test.TestCase):
         submodule_a=submodule_a, submodule_b=submodule_b)
     module(inputs)  # pylint: disable=not-callable
 
-    all_variables = module.get_all_variables()
+    all_variables = all_trainable_variables(module)
     all_variable_names = sorted([str(v.name) for v in all_variables])
     self.assertEqual([
         "complex_submodule/linear_1/b:0",
@@ -437,7 +443,10 @@ class AbstractModuleTest(tf.test.TestCase):
         "simple_submodule/w:0",
     ], all_variable_names)
 
-  def testGetAllLocalVariables(self):
+  @parameterized.parameters(
+      [lambda m: m.get_all_variables(tf.GraphKeys.LOCAL_VARIABLES),
+       lambda m: m.non_trainable_variables])
+  def testGetAllLocalVariables(self, get_non_trainable_variables):
     def local_custom_getter(getter, *args, **kwargs):
       kwargs["trainable"] = False
       if "collections" in kwargs and kwargs["collections"] is not None:
@@ -461,8 +470,7 @@ class AbstractModuleTest(tf.test.TestCase):
     self.assertEqual(0, len(tf.all_variables()))
     self.assertEqual(12, len(tf.local_variables()))
 
-    all_variables = local_module.get_all_variables(
-        collection=tf.GraphKeys.LOCAL_VARIABLES)
+    all_variables = get_non_trainable_variables(local_module)
     all_variable_names = sorted([str(v.name) for v in all_variables])
     self.assertEqual([
         "complex_submodule/linear_1/b:0",

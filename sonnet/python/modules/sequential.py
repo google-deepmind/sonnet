@@ -41,7 +41,7 @@ class Sequential(base.AbstractModule):
   solution is to use `snt.Module` to wrap a custom function, as shown in the
   following example:
 
-  https://github.com/deepmind/sonnet/examples/module_with_build_args.py
+  https://github.com/deepmind/sonnet/blob/master/sonnet/examples/module_with_build_args.py
   """
 
   def __init__(self, layers, name="sequential"):

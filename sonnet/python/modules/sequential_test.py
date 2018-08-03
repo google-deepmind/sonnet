@@ -124,6 +124,14 @@ class SequentialTest(tf.test.TestCase):
           [identity_output, no_layers_output])
       self.assertAllEqual(identity_output_np, no_layers_output_np)
 
+  def testVariableProperties(self):
+    seq = snt.Sequential([snt.Linear(output_size=23),
+                          snt.Linear(output_size=42)])
+    seq(tf.placeholder(dtype=tf.float32, shape=[2, 3]))
+    self.assertEqual(len(seq.variables), 4)
+    self.assertEqual(len(seq.trainable_variables), 4)
+    self.assertEqual(len(seq.non_trainable_variables), 0)
+
 
 if __name__ == "__main__":
   tf.test.main()

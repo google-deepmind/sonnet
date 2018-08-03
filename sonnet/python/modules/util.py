@@ -837,3 +837,8 @@ def convert_gradient_to_tensor(x):
     The input `Tensor`.
   """
   return x
+
+
+def sort_by_name(variables):
+  """Returns a tuple of `variables` sorted ascending by name."""
+  return tuple(sorted(variables, key=lambda v: v.name))

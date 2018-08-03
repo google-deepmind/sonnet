@@ -374,7 +374,7 @@ class AbstractModule(object):
       # Python code. Variables added to an eager template store are also added
       # to TensorFlow global collections (unlike regular variables created in
       # eager mode).
-      # Ideally move re-entering store into TF's tpl.variable_scope.
+      # Ideally move re-entering store into Template.variable_scope.
       if tf.executing_eagerly():
         with self._template._template_store.as_default():  # pylint:disable=protected-access
           yield
@@ -600,6 +600,61 @@ class AbstractModule(object):
         yield vs
   # pylint: enable=g-doc-return-or-yield
 
+  @property
+  def variables(self):
+    """**All** `tf.Variable`s used when the module is connected.
+
+    This property does not rely on global collections and should generally be
+    preferred vs. `get_variables` and `get_all_variables`.
+
+    See the documentation for `AbstractModule._capture_variables()` for more
+    information about what variables are captured.
+
+    Returns:
+      A sorted (by variable name) tuple of `tf.Variable` objects.
+
+    Raises:
+      NotConnectedError: If the module is not connected to the Graph.
+    """
+    self._ensure_is_connected()
+    return util.sort_by_name(self._all_variables)
+
+  @property
+  def trainable_variables(self):
+    """All **trainable** `tf.Variable`s used when the module is connected.
+
+    This property does not rely on global collections and should generally be
+    preferred vs. `get_variables` and `get_all_variables`.
+
+    See the documentation for `AbstractModule._capture_variables()` for more
+    information about what variables are captured.
+
+    Returns:
+      A sorted (by variable name) tuple of `tf.Variable` objects.
+
+    Raises:
+      NotConnectedError: If the module is not connected to the Graph.
+    """
+    return tuple(v for v in self.variables if v.trainable)
+
+  @property
+  def non_trainable_variables(self):
+    """All **non-trainable** `tf.Variable`s used when the module is connected.
+
+    This property does not rely on global collections and should generally be
+    preferred vs. `get_variables` and `get_all_variables`.
+
+    See the documentation for `AbstractModule._capture_variables()` for more
+    information about what variables are captured.
+
+    Returns:
+      A sorted (by variable name) tuple of `tf.Variable` objects.
+
+    Raises:
+      NotConnectedError: If the module is not connected to the Graph.
+    """
+    return tuple(v for v in self.variables if not v.trainable)
+
   def get_variables(self, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
     """Returns tuple of `tf.Variable`s declared inside this module.
 
@@ -650,9 +705,7 @@ class AbstractModule(object):
     self._ensure_is_connected()
     collection_variables = set(tf.get_collection(collection))
     # Return variables in self._all_variables that are in `collection`
-    return tuple(
-        sorted(
-            self._all_variables & collection_variables, key=lambda v: v.name))
+    return util.sort_by_name(self._all_variables & collection_variables)
 
   def __getstate__(self):
     raise NotSupportedError(

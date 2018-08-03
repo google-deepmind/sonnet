@@ -29,7 +29,6 @@ import collections
 import contextlib
 import functools
 import inspect
-import weakref
 
 # Dependency imports
 import six
@@ -52,12 +51,8 @@ from sonnet.python.modules.base_errors import ModuleInfoError
 # pylint: enable=unused-import
 
 
-# Maps `tf.Graph` objects to a module call stack.
-_MODULE_STACKS = weakref.WeakKeyDictionary()
-
-
-# Maps `tf.Graph` objects to a stack of module connection observers.
-_CONNECTION_OBSERVER_STACKS = weakref.WeakKeyDictionary()
+_MODULE_STACK = []
+_CONNECTION_OBSERVER_STACK = []
 
 
 @contextlib.contextmanager
@@ -84,13 +79,11 @@ def observe_connections(observer):
   Yields:
     None: just yields control to the inner context.
   """
-  connection_observer_stack = _CONNECTION_OBSERVER_STACKS.setdefault(
-      tf.get_default_graph(), [])
-  connection_observer_stack.append(observer)
+  _CONNECTION_OBSERVER_STACK.append(observer)
   try:
     yield
   finally:
-    connection_observer_stack.pop()
+    _CONNECTION_OBSERVER_STACK.pop()
 
 
 
@@ -150,8 +143,7 @@ def _variable_tracking_custom_getter(getter, *args, **kwargs):
     See docstring for `tf.get_variable()`.
   """
   # Get the module that is calling `tf.get_variable()`
-  module_stack = _MODULE_STACKS[tf.get_default_graph()]
-  module = module_stack[-1]
+  module = _MODULE_STACK[-1]
 
   # Get lists of local and global variables. We use `tf.get_collection_ref()`
   # instead of `tf.get_collection()` to avoid copying the collections.
@@ -366,8 +358,7 @@ class AbstractModule(object):
     Yields:
       Nothing, the yield just transfers focus back to the inner context.
     """
-    module_stack = _MODULE_STACKS.setdefault(self._graph, [])
-    module_stack.append(self)
+    _MODULE_STACK.append(self)
     try:
       # In eager mode, the template store keeps references to created variables
       # such that they survive even if there are no references to them in
@@ -383,11 +374,11 @@ class AbstractModule(object):
     finally:
       # Remove `self` from `module_stack`, this happens as part of cleanup
       # even if an error is raised.
-      module_stack.pop()
+      _MODULE_STACK.pop()
 
-    if module_stack:
+    if _MODULE_STACK:
       # Peek into the stack to add created variables to the parent
-      parent_module = module_stack[-1]
+      parent_module = _MODULE_STACK[-1]
       parent_module._all_variables.update(self._all_variables)  # pylint: disable=protected-access
 
   def _add_connected_subgraph(self, call_method, outputs, subgraph_name_scope,
@@ -417,9 +408,7 @@ class AbstractModule(object):
         outputs=outputs)
     self._connected_subgraphs.append(connected_subgraph)
 
-    connection_observer_stack = _CONNECTION_OBSERVER_STACKS.setdefault(
-        self._graph, [])
-    for observer in connection_observer_stack:
+    for observer in _CONNECTION_OBSERVER_STACK:
       observer(connected_subgraph)
 
   def __call__(self, *args, **kwargs):

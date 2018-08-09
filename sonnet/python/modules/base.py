@@ -27,10 +27,10 @@ from __future__ import print_function
 import abc
 import collections
 import contextlib
-import functools
 import inspect
 
 # Dependency imports
+import contextlib2
 import six
 from sonnet.python.modules import base_info
 from sonnet.python.modules import util
@@ -84,84 +84,6 @@ def observe_connections(observer):
     yield
   finally:
     _CONNECTION_OBSERVER_STACK.pop()
-
-
-
-def _maybe_wrap_custom_getter(custom_getter, old_getter):
-  """Wrap a call to a custom_getter to use the old_getter internally.
-
-  Copied from [variable_scope._maybe_wrap_custom_getter](
-  https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/
-  ops/variable_scope.py#L1565)
-
-  Args:
-    custom_getter: The wrapping custom getter.
-    old_getter: The wrapped custom getter.
-
-  Returns:
-    A new custom getter that calls `old_getter` and then `custom_getter`.
-  """
-  if old_getter is None:
-    return custom_getter
-
-  # The new custom_getter should call the old one
-  def wrapped_custom_getter(getter, *args, **kwargs):
-    # Call:
-    #  custom_getter(
-    #    lambda: old_getter(true_getter, ...), *args, **kwargs)
-    # which means custom_getter will call old_getter, which
-    # will call the true_getter, perform any intermediate
-    # processing, and return the results to the current
-    # getter, which will also perform additional processing.
-    return custom_getter(functools.partial(old_getter, getter), *args, **kwargs)
-
-  return wrapped_custom_getter
-
-
-def _variable_tracking_custom_getter(getter, *args, **kwargs):
-  """Custom getter that tracks variables created.
-
-  This custom getter places any variables that `getter` creates into the
-  `_all_variables` attribute of the `AbstractModule` that is on top of the
-  module call stack. The module call stack is a graph-dependent stack that
-  keeps track of the sonnet module call order.
-
-  Note that this assumes that variables added appended to `tf.Graph`
-  collections. This is a safe assumption to make because
-  `tf.add_to_collection()` appends objects to collections, and `tf.Variable`
-  uses `tf.add_to_collections()` to add itself to `tf.Graph` collections.
-
-  Note that this assumes that all variables are added either the
-  `tf.GraphKeys.GLOBAL_VARIABLES` or `tf.GraphKeys.LOCAL_VARIABLES` collection.
-
-  Args:
-    getter: The true getter or another custom getter.
-    *args: See positional arguments for `tf.get_variable()`.
-    **kwargs: See keyword arguments for `tf.get_variable()`.
-
-  Returns:
-    See docstring for `tf.get_variable()`.
-  """
-  # Get the module that is calling `tf.get_variable()`
-  module = _MODULE_STACK[-1]
-
-  # Get lists of local and global variables. We use `tf.get_collection_ref()`
-  # instead of `tf.get_collection()` to avoid copying the collections.
-  local_variables = tf.get_collection_ref(tf.GraphKeys.LOCAL_VARIABLES)
-  global_variables = tf.get_collection_ref(tf.GraphKeys.GLOBAL_VARIABLES)
-
-  num_local_vars_before = len(local_variables)
-  num_global_vars_before = len(global_variables)
-
-  out = getter(*args, **kwargs)
-
-  # Add any local or global variables that have been created to `module`
-  # pylint: disable=protected-access
-  module._all_variables.update(local_variables[num_local_vars_before:])
-  module._all_variables.update(global_variables[num_global_vars_before:])
-  # pylint: enable=protected-access
-
-  return out
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -232,12 +154,10 @@ class AbstractModule(object):
       self._custom_getter = util.custom_getter_router(
           custom_getter_map=custom_getter,
           name_fn=lambda name: name[len(self.scope_name) + 1:])
+    elif custom_getter is not None and not callable(custom_getter):
+      raise TypeError("Given custom_getter is not callable.")
     else:
-      if not (custom_getter is None or callable(custom_getter)):
-        raise TypeError("Given custom_getter is not callable.")
       self._custom_getter = custom_getter
-    self._custom_getter = _maybe_wrap_custom_getter(
-        _variable_tracking_custom_getter, self._custom_getter)
 
     self._template = tf.make_template(name,
                                       self._build_wrapper,
@@ -360,16 +280,19 @@ class AbstractModule(object):
     """
     _MODULE_STACK.append(self)
     try:
-      # In eager mode, the template store keeps references to created variables
-      # such that they survive even if there are no references to them in
-      # Python code. Variables added to an eager template store are also added
-      # to TensorFlow global collections (unlike regular variables created in
-      # eager mode).
-      # Ideally move re-entering store into Template.variable_scope.
-      if tf.executing_eagerly():
-        with self._template._template_store.as_default():  # pylint:disable=protected-access
-          yield
-      else:
+      with contextlib2.ExitStack() as stack:
+        # Ideally move re-entering store into Template.variable_scope.
+        if tf.executing_eagerly():
+          # In eager mode, the template store keeps references to created
+          # variables such that they survive even if there are no references to
+          # them in Python code. Variables added to an eager template store are
+          # also added to TensorFlow global collections (unlike regular
+          # variables created in eager mode).
+          stack.enter_context(self._template._template_store.as_default())  # pylint:disable=protected-access
+
+        stack.enter_context(
+            util.notify_about_variables(self._all_variables.add))
+
         yield
     finally:
       # Remove `self` from `module_stack`, this happens as part of cleanup

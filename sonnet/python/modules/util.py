@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import contextlib
 import functools
 import inspect
 import re
@@ -864,3 +865,32 @@ def convert_gradient_to_tensor(x):
 def sort_by_name(variables):
   """Returns a tuple of `variables` sorted ascending by name."""
   return tuple(sorted(variables, key=lambda v: v.name))
+
+
+@contextlib.contextmanager
+def notify_about_variables(callback):
+  """Calls `callback(var)` for all `tf.{Variable,get_variable}` results.
+
+  Callback should not modify the variable passed in. Use cases that require
+  variables to be modified should use `variable_creator_scope` directly and sit
+  within the variable creator stack.
+
+  >>> variables = []
+  >>> with notify_about_variables(variables.append):
+  ...   v = tf.Variable(1.0, name='v')
+  ...   w = tf.get_variable('w', [])
+  >>> assert variables == [v, w]
+
+  Args:
+    callback: a callable taking a single argument which is a tf.Variable.
+
+  Yields:
+    `None` - used for contextmanager API.
+  """
+  def _tracking_creator(getter, **kwargs):
+    v = getter(**kwargs)
+    callback(v)
+    return v
+
+  with variable_scope_ops.variable_creator_scope(_tracking_creator):
+    yield

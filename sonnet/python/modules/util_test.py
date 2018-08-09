@@ -19,16 +19,20 @@ from __future__ import division
 from __future__ import print_function
 
 import functools
+import itertools
 import os
 import tempfile
 
 # Dependency imports
 from absl.testing import parameterized
+import contextlib2
 import mock
 import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
 import tensorflow as tf
+from tensorflow.python.ops import variable_scope as variable_scope_ops
+
 
 _EXPECTED_FORMATTED_VARIABLE_LIST = (
     "Variable  Shape  Type     Collections                            Device\n"
@@ -903,6 +907,83 @@ class NameFunctionTest(tf.test.TestCase):
     name = util.name_for_callable(func)
     self.assertEqual(name, expected)
 
+
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
+
+  def testNoVariables(self):
+    variables = []
+    with util.notify_about_variables(variables.append):
+      pass
+    self.assertEqual(variables, [])
+
+  def assertVariableType(self, variable, resource):
+    type_name = type(variable).__name__
+
+    if resource:
+      self.assertEqual(type_name, "ResourceVariable")
+    else:
+      # Current stable TF release uses "Variable", head uses "RefVariable".
+      self.assertIn(type_name, ("Variable", "RefVariable"))
+
+  @parameterized.parameters([True, False])
+  def testGetVariable(self, use_resource):
+    if tf.executing_eagerly() and not use_resource:
+      self.skipTest("Ref variables not supported in eager mode.")
+
+    variables = []
+    with util.notify_about_variables(variables.append):
+      with tf.variable_scope("", use_resource=use_resource):
+        x = tf.get_variable("x", [])
+    self.assertVariableType(x, use_resource)
+    self.assertEqual(variables, [x])
+  @parameterized.parameters(
+      itertools.product(
+          ["ResourceVariable", "RefVariable"],
+          [["notify", "custom_getter"],
+           ["custom_getter", "notify"],
+           ["notify", "variable_creator"],
+           ["variable_creator", "notify"],
+          ]))
+  def testVariableCreatingCustomGetter(self, variable_type, stack_entries):
+    use_resource = variable_type == "ResourceVariable"
+
+    if tf.executing_eagerly() and not use_resource:
+      self.skipTest("Ref variables not supported in eager mode.")
+
+    def my_custom_getter(getter, **kwargs):
+      var = getter(**kwargs)
+      # Create an additional variable in the getter which is not returned.
+      kwargs["name"] += "_additional"
+      getter(**kwargs)
+      return var
+
+    variables = []
+
+    with contextlib2.ExitStack() as stack:
+      stack.enter_context(tf.variable_scope("", use_resource=use_resource))
+      for stack_entry in stack_entries:
+        if stack_entry == "notify":
+          stack.enter_context(util.notify_about_variables(variables.append))
+        elif stack_entry == "custom_getter":
+          stack.enter_context(
+              tf.variable_scope("", custom_getter=my_custom_getter))
+        elif stack_entry == "variable_creator":
+          stack.enter_context(
+              variable_scope_ops.variable_creator_scope(my_custom_getter))
+        else:
+          raise AssertionError
+
+      v = tf.get_variable("v", [])
+
+    self.assertVariableType(v, use_resource)
+    if stack_entries == ["variable_creator", "notify"]:
+      # When a variable creator is entered before `notify_about_variables` there
+      # is no way for us to identify what dditional variables that creator
+      # created.
+      self.assertEqual([v.name for v in variables], [u"v:0"])
+    else:
+      self.assertEqual([v.name for v in variables], [u"v:0", u"v_additional:0"])
 
 if __name__ == "__main__":
   tf.test.main()

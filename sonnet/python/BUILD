@@ -101,6 +101,7 @@ py_library(
     srcs = ["modules/util.py"],
     srcs_version = "PY2AND3",
     deps = [
+        # contextlib2 dep,
         # six dep,
         # tensorflow dep,
         # wrapt dep,

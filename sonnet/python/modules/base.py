@@ -467,7 +467,7 @@ class AbstractModule(object):
 
   # pylint: disable=g-doc-return-or-yield
   @contextlib.contextmanager
-  def _enter_variable_scope(self, reuse=None):
+  def _enter_variable_scope(self, reuse=None, check_same_graph=True):
     """Returns a contextlib.contextmanager to enter the internal variable scope.
 
     This is useful for situations where submodules must be declared in the
@@ -501,12 +501,16 @@ class AbstractModule(object):
 
     Args:
       reuse: Boolean passed to `tf.variable_scope`.
+      check_same_graph: Boolean to determine if same graph check should run. If
+        you are only entering the scope to name other variable scopes (e.g. not
+        to create/reuse variables) then it is legitimate to set this to False.
 
     Yields:
       The variable_scope inside the template.
     """
     self._check_init_called()
-    self._check_same_graph()
+    if check_same_graph:
+      self._check_same_graph()
     with self._capture_variables():
       with tf.variable_scope(self._template.variable_scope, reuse=reuse) as vs:
         yield vs

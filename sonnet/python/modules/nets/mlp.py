@@ -118,7 +118,13 @@ class MLP(base.AbstractModule, base.Transposable):
     connected to the graph.
     """
 
-    with self._enter_variable_scope():
+    # Here we are entering the module's variable scope to name our submodules
+    # correctly (not to create variables). As such it's safe to not check
+    # whether we're in the same graph. This is important if we're constructing
+    # the module in one graph and connecting it in another (e.g. with `defun`
+    # the module is created in some default graph, and connected to a capturing
+    # graph in order to turn it into a graph function).
+    with self._enter_variable_scope(check_same_graph=False):
       self._layers = [basic.Linear(self._output_sizes[i],
                                    name="linear_{}".format(i),
                                    initializers=self._initializers,

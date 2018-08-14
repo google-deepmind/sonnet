@@ -298,6 +298,11 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     for var_value in self.evaluate(mlp_variables):
       self.assertAllClose(var_value, np.zeros_like(var_value) + pi)
 
+  def testDefun(self):
+    mlp = snt.nets.MLP([1, 2, 3])
+    mlp = tf.contrib.eager.defun(mlp)
+    y = mlp(tf.ones([1, 1]))
+    self.assertListEqual(y.shape.as_list(), [1, 3])
 
 if __name__ == "__main__":
   tf.test.main()

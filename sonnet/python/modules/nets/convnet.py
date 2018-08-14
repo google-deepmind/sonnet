@@ -217,7 +217,13 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
   def _instantiate_layers(self):
     """Instantiates all the convolutional modules used in the network."""
 
-    with self._enter_variable_scope():
+    # Here we are entering the module's variable scope to name our submodules
+    # correctly (not to create variables). As such it's safe to not check
+    # whether we're in the same graph. This is important if we're constructing
+    # the module in one graph and connecting it in another (e.g. with `defun`
+    # the module is created in some default graph, and connected to a capturing
+    # graph in order to turn it into a graph function).
+    with self._enter_variable_scope(check_same_graph=False):
       self._layers = tuple(conv.Conv2D(name="conv_2d_{}".format(i),
                                        output_channels=self._output_channels[i],
                                        kernel_shape=self._kernel_shapes[i],
@@ -687,7 +693,9 @@ class ConvNet2DTranspose(ConvNet2D):
   def _instantiate_layers(self):
     """Instantiates all the convolutional modules used in the network."""
 
-    with self._enter_variable_scope():
+    # See `ConvNet2D._instantiate_layers` for more information about why we are
+    # using `check_same_graph=False`.
+    with self._enter_variable_scope(check_same_graph=False):
       self._layers = tuple(
           conv.Conv2DTranspose(name="conv_2d_transpose_{}".format(i),
                                output_channels=self._output_channels[i],

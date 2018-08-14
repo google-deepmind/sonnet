@@ -830,5 +830,24 @@ class ConvNet2DTransposeTest(tf.test.TestCase):
       self.assertEqual(type(layer.b), variables.PartitionedVariable)
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+class DefunTest(parameterized.TestCase, tf.test.TestCase):
+
+  @parameterized.named_parameters(
+      ("ConvNet2D", snt.nets.ConvNet2D),
+      ("ConvNet2DTranspose",
+       partial(snt.nets.ConvNet2DTranspose,
+               output_shapes=[[100, 100]])))
+  def testDefun(self, module):
+    model = module(output_channels=[2, 3, 4],
+                   kernel_shapes=[[3, 3]],
+                   strides=[1],
+                   paddings=[snt.SAME])
+
+    model = tf.contrib.eager.defun(model)
+    input_to_net = tf.random_normal([1, 100, 100, 3])
+    output = model(input_to_net)
+    self.assertListEqual(output.shape.as_list(), [1, 100, 100, 4])
+
 if __name__ == "__main__":
   tf.test.main()

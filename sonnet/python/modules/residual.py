@@ -38,8 +38,8 @@ class Residual(base.AbstractModule):
 
     self._base_module = base_module
 
-  def _build(self, inputs):
-    outputs = self._base_module(inputs)
+  def _build(self, inputs, **kwargs):
+    outputs = self._base_module(inputs, **kwargs)
     residual = nest.map_structure(lambda inp, out: inp + out, inputs, outputs)
     return residual
 
@@ -55,8 +55,8 @@ class ResidualCore(rnn_core.RNNCore):
     super(ResidualCore, self).__init__(name=name)
     self._base_core = base_core
 
-  def _build(self, inputs, prev_state):
-    outputs, new_state = self._base_core(inputs, prev_state)
+  def _build(self, inputs, prev_state, **kwargs):
+    outputs, new_state = self._base_core(inputs, prev_state, **kwargs)
     residual = nest.map_structure(lambda inp, out: inp + out, inputs, outputs)
     return residual, new_state
 
@@ -87,10 +87,10 @@ class SkipConnectionCore(rnn_core.RNNCore):
     self._base_core = base_core
     self._input_shape = input_shape
 
-  def _build(self, inputs, prev_state):
+  def _build(self, inputs, prev_state, **kwargs):
     if not self._input_shape:
       self._input_shape = inputs.get_shape()[1:]
-    outputs, new_state = self._base_core(inputs, prev_state)
+    outputs, new_state = self._base_core(inputs, prev_state, **kwargs)
 
     outputs = nest.map_structure(lambda inp, out: tf.concat((inp, out), -1),
                                  inputs, outputs)

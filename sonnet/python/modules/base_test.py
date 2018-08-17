@@ -29,6 +29,7 @@ import six
 from sonnet.python.modules import base
 import tensorflow as tf
 
+tfe = tf.contrib.eager
 logging = tf.logging
 
 
@@ -667,6 +668,42 @@ class ConnectionObserverTest(tf.test.TestCase):
     self.assertIs(complex_module, self._connected_subgraphs[2].module)
     self.assertIs(self._connected_subgraphs[2].outputs, outputs)
 
+
+class MatMulModule(base.AbstractModule):
+
+  call_count = 0
+
+  def _build(self, x):
+    self.call_count += 1
+    w = tf.get_variable("w", [x.shape[1], 32])
+    return x * w
+
+
+class DefunTest(tf.test.TestCase):
+
+  def testCallWithDefun(self):
+    module = MatMulModule()
+    module = tfe.defun(module)
+    batch_size = 10
+    output = module(tf.zeros([batch_size, 1]))
+    self.assertListEqual(output.shape.as_list(), [batch_size, 32])
+
+  def testCallWithDefunTracingTwice(self):
+    raw_module = MatMulModule()
+    module = tfe.defun(raw_module)
+
+    batch_size = 10
+    for _ in range(2):
+      output = module(tf.zeros([batch_size, 1]))
+      self.assertListEqual(output.shape.as_list(), [batch_size, 32])
+    self.assertEqual(raw_module.call_count, 1)
+
+    # Calling with a different batch_size causes `defun` to re-trace our module.
+    batch_size *= 2
+    for _ in range(2):
+      output = module(tf.zeros([batch_size, 1]))
+      self.assertListEqual(output.shape.as_list(), [batch_size, 32])
+    self.assertEqual(raw_module.call_count, 2)
 
 if __name__ == "__main__":
   tf.test.main()

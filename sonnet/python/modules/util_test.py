@@ -494,7 +494,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
   # pylint: enable long lambda warning
 
 
-class ReuseVarsTest(tf.test.TestCase):
+class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
 
   class VariableContainer(object):
 
@@ -855,6 +855,22 @@ class ReuseVarsTest(tf.test.TestCase):
       self.assertEqual(obj1.last_connected_subgraph.inputs, {})
       self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
 
+  @parameterized.parameters([True, False])
+  def test_defun(self, connect_defun_first):
+    raw_module = ReuseVarsTest.ModuleReuse([])
+    defun_module = tf.contrib.eager.defun(raw_module)
+
+    if connect_defun_first:
+      defun_result = defun_module(tf.zeros([]))
+      raw_result = raw_module.add_b(raw_module.a())
+    else:
+      raw_result = raw_module.add_b(raw_module.a())
+      defun_result = defun_module(tf.zeros([]))
+
+    self.evaluate(tf.global_variables_initializer())
+    raw_result, defun_result = self.evaluate([raw_result, defun_result])
+    self.assertEqual(raw_result, defun_result)
+
 
 class NameFunctionTest(tf.test.TestCase):
 
@@ -984,6 +1000,32 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual([v.name for v in variables], [u"v:0"])
     else:
       self.assertEqual([v.name for v in variables], [u"v:0", u"v_additional:0"])
+
+
+class TestSameGraphKey(tf.test.TestCase):
+
+  def testSameGraph(self):
+    graph = tf.get_default_graph()
+    self.assertTrue(util.same_graph_key(graph, graph))
+
+  def testDifferentGraphs(self):
+    self.assertFalse(util.same_graph_key(tf.Graph(), tf.Graph()))
+
+  def testCapturingGraph(self):
+    graph = tf.get_default_graph()
+    defun_graph = []
+    tf.contrib.eager.defun(lambda: defun_graph.append(tf.get_default_graph()))()
+    self.assertTrue(util.same_graph_key(defun_graph[0], graph))
+    self.assertTrue(util.same_graph_key(graph, defun_graph[0]))
+
+  def testCapturingGraphFromDifferentGraph(self):
+    graph = tf.get_default_graph()
+    defun_graph = []
+    with tf.Graph().as_default():
+      tf.contrib.eager.defun(
+          lambda: defun_graph.append(tf.get_default_graph()))()
+    self.assertFalse(util.same_graph_key(defun_graph[0], graph))
+    self.assertFalse(util.same_graph_key(graph, defun_graph[0]))
 
 if __name__ == "__main__":
   tf.test.main()

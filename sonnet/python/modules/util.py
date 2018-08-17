@@ -23,7 +23,6 @@ import contextlib
 import functools
 import inspect
 import re
-import weakref
 
 # Dependency imports
 import six
@@ -671,7 +670,7 @@ def reuse_variables(method):
   Returns:
     The wrapped method.
   """
-  initialized_variable_scopes = weakref.WeakKeyDictionary()
+  initialized_variable_scopes = dict()
 
   # Ensure that the argument passed in is really a method by checking that the
   # first positional argument to it is "self".
@@ -764,7 +763,7 @@ def reuse_variables(method):
     variable_scope_context_manager = getattr(obj, "_enter_variable_scope",
                                              default_context_manager)
 
-    graph = tf.get_default_graph()
+    graph = tf.get_default_graph()._graph_key  # pylint: disable=protected-access
     if graph not in initialized_variable_scopes:
       initialized_variable_scopes[graph] = set()
     initialized_variable_scopes_for_graph = initialized_variable_scopes[graph]
@@ -894,3 +893,29 @@ def notify_about_variables(callback):
 
   with variable_scope_ops.variable_creator_scope(_tracking_creator):
     yield
+
+
+def same_graph_key(a, b):
+  """Tests whether the given graphs `a` and `b` have the same graph key.
+
+  Having the same graph key indicates that it is safe to share variables between
+  the graphs. An example of two different `tf.Graph` instances having the same
+  graph key is comparing the key of the capturing `FuncGraph` used by
+  `tfe.defun` and the parent graph:
+
+  >>> def fn():
+  ...   g = tf.get_default_graph()
+  ...   print id(g), type(g).__name__, g._graph_key
+  >>> fn()
+  140363645438800 Graph grap-key-7/
+  >>> tfe.defun(fn)()
+  140363529667152 FuncGraph grap-key-7/
+
+  Args:
+    a: a `tf.Graph` instance.
+    b: another `tf.Graph` instance.
+
+  Returns:
+    True if `a` is equivalent to `b`.
+  """
+  return a._graph_key == b._graph_key  # pylint: disable=protected-access

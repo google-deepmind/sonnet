@@ -245,7 +245,7 @@ class AbstractModule(object):
     if self._graph is None:
       self._graph = current_graph
       self._set_module_info()
-    elif self._graph != current_graph:
+    elif not util.same_graph_key(self._graph, current_graph):
       raise DifferentGraphError("Cannot connect module to multiple Graphs.")
 
   @abc.abstractmethod

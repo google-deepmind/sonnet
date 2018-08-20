@@ -21,6 +21,8 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.python.framework import function
 
+tfe = tf.contrib.eager
+
 
 def _scale_gradient_op(dtype):
   """Create an op that scales gradients using a Defun.
@@ -72,16 +74,24 @@ def scale_gradient(net, scale, name="scale_gradient"):
   is `1.0`, this op reduces to `tf.identity`.
 
   Args:
-    net: A `tf.Tensor`.
+    net: A `tf.Tensor` or in eager mode a callable that produces a `tf.Tensor`.
     scale: The scale factor for the gradient on the backwards pass.
     name: A name for the operation (optional).
 
   Returns:
-    A `tf.Tensor` with the same type as the input tensor.
+    In graph mode returns a `tf.Tensor` with the same type as the input tensor.
+    In eager mode returns a callable wrapping `net` whose gradients are scaled.
 
   Raises:
     ValueError: If `net` dtype is non-float and `scale` is not zero or one.
   """
+  if tf.executing_eagerly():
+    if not callable(net):
+      raise ValueError(
+          "In eager mode `net` must be a callable (similar to how optimizers "
+          "must be used when executing eagerly).")
+    return tfe.defun(lambda *a, **k: scale_gradient(net(*a, **k), scale, name))
+
   if scale == 0.0:
     return tf.stop_gradient(net, name=name)
   elif scale == 1.0:

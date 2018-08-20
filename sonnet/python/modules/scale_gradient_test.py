@@ -26,6 +26,8 @@ from absl.testing import parameterized
 import sonnet as snt
 import tensorflow as tf
 
+tfe = tf.contrib.eager
+
 
 class ScaleGradientTest(parameterized.TestCase, tf.test.TestCase):
 
@@ -85,7 +87,6 @@ class ScaleGradientTest(parameterized.TestCase, tf.test.TestCase):
     # clip_gradient throws here if the Defun func_name does not use the dtype.
     x_2 = tf.placeholder(tf.float32, shape=())
     snt.scale_gradient(x_2, 0.1)
-
 
 if __name__ == "__main__":
   tf.test.main()

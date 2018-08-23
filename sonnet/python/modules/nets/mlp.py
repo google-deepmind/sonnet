@@ -234,11 +234,35 @@ class MLP(base.AbstractModule, base.Transposable):
       activate_final = self.activate_final
     output_sizes = [lambda l=layer: l.input_shape[1] for layer in self._layers]
     output_sizes.reverse()
-    return MLP(name=name,
-               output_sizes=output_sizes,
-               activation=self.activation,
-               activate_final=activate_final,
-               initializers=self.initializers,
-               partitioners=self.partitioners,
-               regularizers=self.regularizers,
-               use_bias=self.use_bias)
+    return MLP(
+        name=name,
+        output_sizes=output_sizes,
+        activation=self.activation,
+        activate_final=activate_final,
+        initializers=self.initializers,
+        partitioners=self.partitioners,
+        regularizers=self.regularizers,
+        use_bias=self.use_bias)
+
+  def clone(self, name=None):
+    """Creates a new MLP with the same structure.
+
+    Args:
+      name: Optional string specifying the name of the new module. The default
+        name is constructed by appending "_clone" to the original name.
+
+    Returns:
+      A cloned `MLP` module.
+    """
+
+    if name is None:
+      name = self.module_name + "_clone"
+    return MLP(
+        name=name,
+        output_sizes=self.output_sizes,
+        activation=self.activation,
+        activate_final=self.activate_final,
+        initializers=self.initializers,
+        partitioners=self.partitioners,
+        regularizers=self.regularizers,
+        use_bias=self.use_bias)

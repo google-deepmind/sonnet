@@ -181,6 +181,32 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
         self.assertRegexpMatches(graph_regularizers[1].name,
                                  ".*l2_regularizer.*")
 
+  def testClone(self):
+    with tf.variable_scope("scope1"):
+      mlp = snt.nets.MLP(name=self.module_name, output_sizes=self.output_sizes)
+    with tf.variable_scope("scope2"):
+      mlp_clone = mlp.clone()
+
+    self.assertEqual("scope1/" + self.module_name, mlp.scope_name)
+    self.assertEqual(self.module_name, mlp.module_name)
+    self.assertEqual("scope2/" + self.module_name + "_clone",
+                     mlp_clone.scope_name)
+
+    input_to_mlp = tf.random_normal(
+        dtype=tf.float32, shape=[self.batch_size, self.input_size])
+
+    mlp_out = mlp(input_to_mlp)
+    mlp_clone_output = mlp_clone(mlp_out)
+
+    self.assertEqual(mlp_out.get_shape(), mlp_clone_output.get_shape())
+
+    variables = mlp.get_variables()
+    clone_variables = mlp_clone.get_variables()
+    self.assertEqual(len(variables), len(clone_variables))
+    self.assertNotEqual(
+        set(var.name for var in variables),
+        set(var.name for var in clone_variables))
+
   @parameterized.named_parameters(
       ("MLPNoFinalActBias", False, True),
       ("MLPNoFinalActNoBias", False, False),

@@ -137,6 +137,13 @@ class Embed(base.AbstractModule):
     self._trainable = trainable
     self._densify_gradients = densify_gradients
 
+    if self.EMBEDDINGS not in self._initializers:
+      tf.logging.log_first_n(
+          tf.logging.WARN,
+          "Consider using an initializer for snt.Embed with stddev 1. "
+          "This will be the default after November 1 2018.",
+          1)
+
   def _build(self, ids):
     """Lookup embeddings.
 
@@ -152,6 +159,7 @@ class Embed(base.AbstractModule):
     # Construct embeddings.
     if self._existing_vocab is None:
       if self.EMBEDDINGS not in self._initializers:
+
         self._initializers[self.EMBEDDINGS] = basic.create_linear_initializer(
             self._vocab_size)
       self._embeddings = tf.get_variable(

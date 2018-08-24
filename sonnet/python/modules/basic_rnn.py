@@ -311,7 +311,7 @@ class DeepRNN(rnn_core.RNNCore):
                            "dimension" % (core_sizes[0], i + 1, core_list))
 
   def _build(self, inputs, prev_state):
-    """Connects the DeepRNN module into the g(256, 256, 256, 256)raph.
+    """Connects the DeepRNN module into the graph.
 
     If this is not the first time the module has been connected to the graph,
     the Tensors provided as input_ and state must have the same final

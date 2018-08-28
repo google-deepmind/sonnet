@@ -179,6 +179,10 @@ class AbstractModule(object):
     # Container for all variables created in this module and its sub-modules.
     self._all_variables = set([])
 
+    # Calling `.defun()` causes the module's call method to become wrapped as
+    # a graph function.
+    self._defun_wrapped = False
+
   def _build_wrapper(self, *args, **kwargs):
     """Function which will be wrapped in a Template to do variable sharing.
 
@@ -334,12 +338,29 @@ class AbstractModule(object):
     for observer in _CONNECTION_OBSERVER_STACK:
       observer(connected_subgraph)
 
+  @property
+  def defun_wrapped(self):
+    """Returns boolean indicating whether this module is defun wrapped."""
+    return self._defun_wrapped
+
+  def defun(self):
+    """Wraps this modules call method in a callable graph function."""
+    if not self._defun_wrapped:
+      self._defun_wrapped = True
+      self._call = tf.contrib.eager.defun(self._call)
+
   def __call__(self, *args, **kwargs):
-    """Operator overload for calling.
+    return self._call(*args, **kwargs)
+
+  def _call(self, *args, **kwargs):
+    """Entry point when a module is called to connect it to the graph.
 
     This is the entry point when users connect a Module into the Graph. The
     underlying _build method will have been wrapped in a Template by the
     constructor, and we call this template with the provided inputs here.
+
+    Note we use `_call` instead of `__call__` to allow instance level monkey
+    patching (see `defun`).
 
     Args:
       *args: Arguments for underlying _build method.

@@ -681,29 +681,36 @@ class MatMulModule(base.AbstractModule):
 
 class DefunTest(tf.test.TestCase):
 
+  def testDefunWrappedProperty(self):
+    module = MatMulModule()
+    self.assertFalse(module.defun_wrapped)
+    for _ in range(2):
+      module.defun()
+      self.assertTrue(module.defun_wrapped)
+
   def testCallWithDefun(self):
     module = MatMulModule()
-    module = tfe.defun(module)
+    module.defun()
     batch_size = 10
     output = module(tf.zeros([batch_size, 1]))
     self.assertListEqual(output.shape.as_list(), [batch_size, 32])
 
   def testCallWithDefunTracingTwice(self):
-    raw_module = MatMulModule()
-    module = tfe.defun(raw_module)
+    module = MatMulModule()
+    module.defun()
 
     batch_size = 10
     for _ in range(2):
       output = module(tf.zeros([batch_size, 1]))
       self.assertListEqual(output.shape.as_list(), [batch_size, 32])
-    self.assertEqual(raw_module.call_count, 1)
+    self.assertEqual(module.call_count, 1)
 
     # Calling with a different batch_size causes `defun` to re-trace our module.
     batch_size *= 2
     for _ in range(2):
       output = module(tf.zeros([batch_size, 1]))
       self.assertListEqual(output.shape.as_list(), [batch_size, 32])
-    self.assertEqual(raw_module.call_count, 2)
+    self.assertEqual(module.call_count, 2)
 
 if __name__ == "__main__":
   tf.test.main()

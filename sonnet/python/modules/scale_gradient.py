@@ -48,6 +48,8 @@ def _scale_gradient_op(dtype):
     scaled_grad = grad * scale
     return scaled_grad, None
 
+  # Note that if the forward pass implementation involved the creation of ops,
+  # _scale_gradient_op would require some memoization mechanism.
   def scale_gradient_forward(x, scale):
     del scale  # Unused.
     return x

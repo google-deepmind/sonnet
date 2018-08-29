@@ -286,13 +286,14 @@ class AbstractModule(object):
     try:
       with contextlib2.ExitStack() as stack:
         # Ideally move re-entering store into Template.variable_scope.
-        if tf.executing_eagerly():
+        template_store = getattr(self._template, "_template_store", None)
+        if template_store is not None:
           # In eager mode, the template store keeps references to created
           # variables such that they survive even if there are no references to
           # them in Python code. Variables added to an eager template store are
           # also added to TensorFlow global collections (unlike regular
           # variables created in eager mode).
-          stack.enter_context(self._template._template_store.as_default())  # pylint:disable=protected-access
+          stack.enter_context(template_store.as_default())
 
         stack.enter_context(
             util.notify_about_variables(self._all_variables.add))

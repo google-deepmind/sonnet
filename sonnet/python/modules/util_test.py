@@ -855,6 +855,41 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(obj1.last_connected_subgraph.inputs, {})
       self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
 
+  @tf.contrib.eager.run_test_in_graph_and_eager_modes
+  def test_container_not_supported_in_eager(self):
+    if not tf.executing_eagerly():
+      self.skipTest("Skipping test in graph mode.")
+
+    container = ReuseVarsTest.VariableContainer("name")
+    with self.assertRaisesRegexp(ValueError,
+                                 ".* not supported in eager mode .*"):
+      container.method_with_reuse()
+
+  @tf.contrib.eager.run_test_in_graph_and_eager_modes
+  def test_variable_reuse_defun(self):
+    if not tf.executing_eagerly():
+      self.skipTest("Skipping test in graph mode.")
+
+    class AssigningModule(snt.AbstractModule):
+      _build = None
+
+      @util.reuse_variables
+      def assign_a(self):
+        self.a = tf.get_variable("a", [])
+
+    module = AssigningModule()
+
+    # Uses `get_variable` to create a and keep a reference.
+    module.assign_a()
+    a, module.a = module.a, None
+
+    # Now do the same but inside a defun.
+    tf.contrib.eager.defun(module.assign_a)()
+    defun_a = module.a
+
+    # In and out of the `defun` we should get literally the same object for `a`.
+    self.assertIs(a, defun_a)
+
   @parameterized.parameters([True, False])
   def test_defun(self, connect_defun_first):
     raw_module = ReuseVarsTest.ModuleReuse([])

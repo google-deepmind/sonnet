@@ -664,6 +664,23 @@ def reuse_variables(method):
   output = module.add_x(input_tensor)
   ```
 
+  For performance when executing eagerly it may be desirable to additionally
+  annotate these methods using `defun`, such that they are encapsulated as
+  graph functions. This is not recommended if your method returns a variable
+  since the output of `defun` would be an op that returned the variable's value
+  when evaluated (rather than the variable instance).
+
+  ```python
+  class FooModule(snt.AbstractModule):
+    def _build(self, inputs):
+      return complex_math(inputs)
+
+    @tfe.defun
+    @snt.reuse_variables
+    def more_complex_stuff(self, inputs):
+      return more_complex_math(inputs)
+  ```
+
   Args:
     method: The method to wrap.
 
@@ -681,7 +698,22 @@ def reuse_variables(method):
     raise TypeError("reuse_variables can only be used with methods.")
 
   @wrapt.decorator
-  def wrapper(method, obj, args, kwargs):
+  def eager_test(method, obj, args, kwargs):
+    """Validates runtime state in eager mode."""
+    # If @reuse_variables is combined with @property, obj is passed in args
+    # and method is still unbound at this stage.
+    if obj is None:
+      obj = args[0]
+
+    if tf.executing_eagerly() and not hasattr(obj, "_template"):
+      raise ValueError(
+          "reuse_variables is not supported in eager mode except in Sonnet "
+          "modules.")
+
+    return method(*args, **kwargs)
+
+  @wrapt.decorator
+  def call_method(method, obj, args, kwargs):
     """Calls `method` with a variable scope whose reuse flag is set correctly.
 
     The first time the wrapper is called it creates a
@@ -804,7 +836,7 @@ def reuse_variables(method):
         pass
     return out_ops
 
-  return wrapper(method)  # pylint: disable=no-value-for-parameter
+  return eager_test(call_method(method))  # pylint: disable=no-value-for-parameter
 
 
 def name_for_callable(func):

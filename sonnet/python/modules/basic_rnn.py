@@ -280,8 +280,7 @@ class DeepRNN(rnn_core.RNNCore):
     if self._skip_connections:
       tf.logging.log_first_n(
           tf.logging.WARN,
-          "The `skip_connections` argument will be deprecated. Please use "
-          "snt.SkipConnectionCore instead.",
+          "The `skip_connections` argument will be deprecated.",
           1
       )
       if not all(self._is_recurrent_list):

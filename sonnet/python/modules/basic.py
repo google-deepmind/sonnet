@@ -437,7 +437,7 @@ class AddBias(base.AbstractModule, base.Transposable):
           over (given size of 1), and leading dimensions will be removed
           completely. For example, for an input of [batch_size, dim1_size,
           dim2_size, dim3_size] and `bias_dims=[1, 3]`, the resulting
-          bias will have shape [dim1_size, 1, dim2_size]. The default is to
+          bias will have shape [dim1_size, 1, dim3_size]. The default is to
           retain all dimensions apart from the minibatch dimension. Trying to
           retain the bias shape over the minibatch dimension, e.g.
           `bias_dims=[0]`, will result in an error at build time. See the

@@ -28,7 +28,7 @@ import tensorflow as tf
 class TinyShakespeareTest(tf.test.TestCase):
 
   def testRun(self):
-    rnn_shakespeare.train(10, 10, 9)
+    rnn_shakespeare.train(5, 5, 4)
 
 
 if __name__ == "__main__":

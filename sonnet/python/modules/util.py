@@ -23,6 +23,7 @@ import contextlib
 import functools
 import inspect
 import re
+import weakref
 
 # Dependency imports
 import six
@@ -30,6 +31,7 @@ import tensorflow as tf
 import wrapt
 
 from tensorflow.python.framework import function
+from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
 
@@ -687,7 +689,8 @@ def reuse_variables(method):
   Returns:
     The wrapped method.
   """
-  initialized_variable_scopes = dict()
+  initialized_variable_scopes_eager = set()
+  initialized_variable_scopes_graph = weakref.WeakKeyDictionary()
 
   # Ensure that the argument passed in is really a method by checking that the
   # first positional argument to it is "self".
@@ -795,16 +798,25 @@ def reuse_variables(method):
     variable_scope_context_manager = getattr(obj, "_enter_variable_scope",
                                              default_context_manager)
 
-    graph = tf.get_default_graph()._graph_key  # pylint: disable=protected-access
-    if graph not in initialized_variable_scopes:
-      initialized_variable_scopes[graph] = set()
-    initialized_variable_scopes_for_graph = initialized_variable_scopes[graph]
+    with ops.init_scope():
+      # We need `init_scope` incase we're running inside a defun. In that case
+      # what we want is information about where the function will be called not
+      # where the function is being built.
+      graph = tf.get_default_graph()
+      will_call_in_eager_context = tf.executing_eagerly()
+
+    if will_call_in_eager_context:
+      initialized_variable_scopes = initialized_variable_scopes_eager
+    else:
+      if graph not in initialized_variable_scopes_graph:
+        initialized_variable_scopes_graph[graph] = set()
+      initialized_variable_scopes = initialized_variable_scopes_graph[graph]
 
     # Temporarily enter the variable scope to capture it
     with variable_scope_context_manager() as tmp_variable_scope:
       variable_scope = tmp_variable_scope
 
-    reuse = variable_scope.name in initialized_variable_scopes_for_graph
+    reuse = variable_scope.name in initialized_variable_scopes
 
     # Enter the pure variable scope with reuse correctly set
     with variable_scope_ops._pure_variable_scope(  # pylint:disable=protected-access
@@ -824,7 +836,7 @@ def reuse_variables(method):
               out_ops = method(*args, **kwargs)
           else:
             out_ops = method(*args, **kwargs)
-      initialized_variable_scopes_for_graph.add(pure_variable_scope.name)
+      initialized_variable_scopes.add(pure_variable_scope.name)
       try:
         # If `obj` is a Sonnet module, let it know it's been connected
         # to the TF graph.
@@ -925,29 +937,3 @@ def notify_about_variables(callback):
 
   with variable_scope_ops.variable_creator_scope(_tracking_creator):
     yield
-
-
-def same_graph_key(a, b):
-  """Tests whether the given graphs `a` and `b` have the same graph key.
-
-  Having the same graph key indicates that it is safe to share variables between
-  the graphs. An example of two different `tf.Graph` instances having the same
-  graph key is comparing the key of the capturing `FuncGraph` used by
-  `tfe.defun` and the parent graph:
-
-  >>> def fn():
-  ...   g = tf.get_default_graph()
-  ...   print id(g), type(g).__name__, g._graph_key
-  >>> fn()
-  140363645438800 Graph grap-key-7/
-  >>> tfe.defun(fn)()
-  140363529667152 FuncGraph grap-key-7/
-
-  Args:
-    a: a `tf.Graph` instance.
-    b: another `tf.Graph` instance.
-
-  Returns:
-    True if `a` is equivalent to `b`.
-  """
-  return a._graph_key == b._graph_key  # pylint: disable=protected-access

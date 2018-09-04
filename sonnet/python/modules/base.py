@@ -50,6 +50,8 @@ from sonnet.python.modules.base_errors import ModuleInfoError
 # pylint: enable=g-bad-import-order
 # pylint: enable=unused-import
 
+from tensorflow.python.framework import ops
+
 
 _MODULE_STACK = []
 _CONNECTION_OBSERVER_STACK = []
@@ -245,12 +247,23 @@ class AbstractModule(object):
       DifferentGraphError: if the module is connected to a different Graph than
         it was previously used in.
     """
-    current_graph = tf.get_default_graph()
+    with ops.init_scope():
+      # We need `init_scope` incase we're running inside a defun. In that case
+      # what we want is information about where the function will be called not
+      # where the function is being built.
+      current_graph = tf.get_default_graph()
+      will_call_in_eager_context = tf.executing_eagerly()
+
     if self._graph is None:
       self._graph = current_graph
       self._set_module_info()
-    elif not util.same_graph_key(self._graph, current_graph):
-      raise DifferentGraphError("Cannot connect module to multiple Graphs.")
+
+    if not will_call_in_eager_context:
+      # Same graph checks only make sense when calling from graph mode (in eager
+      # mode there is a single process level context where all modules are
+      # created).
+      if self._graph != current_graph:
+        raise DifferentGraphError("Cannot connect module to multiple Graphs.")
 
   @abc.abstractmethod
   def _build(self, *args, **kwargs):

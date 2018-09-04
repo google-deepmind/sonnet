@@ -1036,31 +1036,5 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
     else:
       self.assertEqual([v.name for v in variables], [u"v:0", u"v_additional:0"])
 
-
-class TestSameGraphKey(tf.test.TestCase):
-
-  def testSameGraph(self):
-    graph = tf.get_default_graph()
-    self.assertTrue(util.same_graph_key(graph, graph))
-
-  def testDifferentGraphs(self):
-    self.assertFalse(util.same_graph_key(tf.Graph(), tf.Graph()))
-
-  def testCapturingGraph(self):
-    graph = tf.get_default_graph()
-    defun_graph = []
-    tf.contrib.eager.defun(lambda: defun_graph.append(tf.get_default_graph()))()
-    self.assertTrue(util.same_graph_key(defun_graph[0], graph))
-    self.assertTrue(util.same_graph_key(graph, defun_graph[0]))
-
-  def testCapturingGraphFromDifferentGraph(self):
-    graph = tf.get_default_graph()
-    defun_graph = []
-    with tf.Graph().as_default():
-      tf.contrib.eager.defun(
-          lambda: defun_graph.append(tf.get_default_graph()))()
-    self.assertFalse(util.same_graph_key(defun_graph[0], graph))
-    self.assertFalse(util.same_graph_key(graph, defun_graph[0]))
-
 if __name__ == "__main__":
   tf.test.main()

@@ -75,7 +75,7 @@ class NthFarthest(object):
     nth = np.random.randint(0, num_objects)
 
     # Pick out the nth furthest for each object
-    nth_furthest = np.where(distance_idx == nth)[1]
+    nth_furthest = distance_idx[:, nth]
 
     # Choose random reference object
     reference = np.random.randint(0, num_objects)

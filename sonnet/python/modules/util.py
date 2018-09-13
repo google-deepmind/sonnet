@@ -379,8 +379,8 @@ def get_normalized_variable_map(scope_or_module,
   Args:
     scope_or_module: Scope or module to build map from.
     collection: Collection to restrict query to. By default this is
-        `tf.Graphkeys.VARIABLES`, which includes non-trainable variables such
-        as moving averages.
+        `tf.Graphkeys.GLOBAL_VARIABLES`, which includes non-trainable variables
+        such as moving averages.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix. By default `None`, which means
         `context=scope`.

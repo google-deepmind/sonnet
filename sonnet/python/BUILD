@@ -159,7 +159,7 @@ module_tests = [
     ("gated_rnn_test", "", "medium"),
     ("mlp_test", "nets/", "small"),
     ("pondering_rnn_test", "", "small"),
-    ("relational_memory_test", "", "small"),
+    ("relational_memory_test", "", "medium"),
     ("rnn_core_test", "", "small"),
     ("residual_test", "", "small"),
     ("scale_gradient_test", "", "small"),

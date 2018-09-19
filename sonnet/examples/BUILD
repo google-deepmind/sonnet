@@ -94,6 +94,7 @@ py_test(
         "rnn_shakespeare_test.py",
     ],
     srcs_version = "PY2AND3",
+    tags = ["notsan"],  # takes too long with TSAN
     deps = [
         ":rnn_shakespeare",
         # tensorflow dep,

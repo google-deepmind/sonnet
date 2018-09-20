@@ -11,9 +11,7 @@ package(default_visibility = ["//visibility:public"])
 
 py_library(
     name = "examples",
-    srcs = [
-        "__init__.py",
-    ],
+    srcs = ["__init__.py"],
     srcs_version = "PY2AND3",
     deps = [
         ":brnn_ptb",
@@ -25,9 +23,7 @@ py_library(
 
 py_binary(
     name = "module_with_build_args",
-    srcs = [
-        "module_with_build_args.py",
-    ],
+    srcs = ["module_with_build_args.py"],
     srcs_version = "PY2AND3",
     deps = [
         "//sonnet",
@@ -90,11 +86,12 @@ py_binary(
 py_test(
     name = "rnn_shakespeare_test",
     size = "large",
-    srcs = [
-        "rnn_shakespeare_test.py",
-    ],
+    srcs = ["rnn_shakespeare_test.py"],
     srcs_version = "PY2AND3",
-    tags = ["notsan"],  # takes too long with TSAN
+    tags = [
+        "nomsan",  # takes too long with MSAN
+        "notsan",  # takes too long with TSAN
+    ],
     deps = [
         ":rnn_shakespeare",
         # tensorflow dep,
@@ -115,9 +112,7 @@ py_test(
 py_test(
     name = "rmc_nth_farthest_test",
     size = "large",
-    srcs = [
-        "rmc_nth_farthest_test.py",
-    ],
+    srcs = ["rmc_nth_farthest_test.py"],
     srcs_version = "PY2AND3",
     deps = [
         ":rmc_nth_farthest",

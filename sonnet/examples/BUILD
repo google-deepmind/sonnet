@@ -67,6 +67,23 @@ py_binary(
 )
 
 py_binary(
+    name = "rmc_learn_to_execute",
+    srcs = [
+        "learn_to_execute.py",
+        "rmc_learn_to_execute.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        # absl/flags dep,
+        # numpy dep,
+        # scipy dep,
+        # six dep,
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
+py_binary(
     name = "rmc_nth_farthest",
     srcs = [
         "dataset_nth_farthest.py",
@@ -116,6 +133,20 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":rmc_nth_farthest",
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
+py_test(
+    name = "rmc_learn_to_execute_test",
+    size = "large",
+    srcs = [
+        "rmc_learn_to_execute_test.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":rmc_learn_to_execute",
         "//sonnet",
         # tensorflow dep,
     ],

@@ -26,6 +26,7 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import util
 
 import tensorflow as tf
+from tensorflow.python.layers import utils
 
 
 class MLP(base.AbstractModule, base.Transposable):
@@ -39,6 +40,7 @@ class MLP(base.AbstractModule, base.Transposable):
                partitioners=None,
                regularizers=None,
                use_bias=True,
+               use_dropout=False,
                custom_getter=None,
                name="mlp"):
     """Constructs an MLP module.
@@ -65,6 +67,8 @@ class MLP(base.AbstractModule, base.Transposable):
         the L1 and L2 regularizers in `tf.contrib.layers`.
       use_bias: Whether to include bias parameters in the linear layers.
         Default `True`.
+      use_dropout: Whether to perform dropout on the linear layers.
+        Default `False`.
       custom_getter: Callable or dictionary of callables to use as
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
@@ -102,6 +106,7 @@ class MLP(base.AbstractModule, base.Transposable):
     self._activate_final = activate_final
 
     self._use_bias = use_bias
+    self._use_dropout = use_dropout
     self._instantiate_layers()
 
   def _instantiate_layers(self):
@@ -137,12 +142,15 @@ class MLP(base.AbstractModule, base.Transposable):
   def get_possible_initializer_keys(cls, use_bias=True):
     return basic.Linear.get_possible_initializer_keys(use_bias=use_bias)
 
-  def _build(self, inputs):
+  def _build(self, inputs, is_training=True, dropout_keep_prob=0.5):
     """Assembles the `MLP` and connects it to the graph.
 
     Args:
       inputs: A 2D Tensor of size `[batch_size, input_size]`.
-
+      is_training: A bool or tf.Bool Tensor. Indicates whether we are
+        currently training. Defaults to `True`.
+      dropout_keep_prob: The probability that each element is kept when
+        both `use_dropout` and `is_training` are True. Defaults to 0.5.
     Returns:
       A 2D Tensor of size `[batch_size, output_sizes[-1]]`.
     """
@@ -154,6 +162,13 @@ class MLP(base.AbstractModule, base.Transposable):
       net = self._layers[layer_id](net)
 
       if final_index != layer_id or self._activate_final:
+        # Only perform dropout whenever we are activating the layer's outputs.
+        if self._use_dropout:
+          keep_prob = utils.smart_cond(
+              is_training, true_fn=lambda: dropout_keep_prob,
+              false_fn=lambda: tf.constant(1.0)
+          )
+          net = tf.nn.dropout(net, keep_prob=keep_prob)
         net = self._activation(net)
 
     return net
@@ -183,6 +198,10 @@ class MLP(base.AbstractModule, base.Transposable):
   @property
   def use_bias(self):
     return self._use_bias
+
+  @property
+  def use_dropout(self):
+    return self._use_dropout
 
   @property
   def initializers(self):
@@ -242,7 +261,8 @@ class MLP(base.AbstractModule, base.Transposable):
         initializers=self.initializers,
         partitioners=self.partitioners,
         regularizers=self.regularizers,
-        use_bias=self.use_bias)
+        use_bias=self.use_bias,
+        use_dropout=self.use_dropout)
 
   def clone(self, name=None):
     """Creates a new MLP with the same structure.
@@ -265,4 +285,5 @@ class MLP(base.AbstractModule, base.Transposable):
         initializers=self.initializers,
         partitioners=self.partitioners,
         regularizers=self.regularizers,
-        use_bias=self.use_bias)
+        use_bias=self.use_bias,
+        use_dropout=self.use_dropout)

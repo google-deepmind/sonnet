@@ -54,17 +54,22 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(mlp.module_name, unique_name)
 
   @parameterized.named_parameters(
-      ("MLPNoFinalActBias", False, True),
-      ("MLPNoFinalActNoBias", False, False),
-      ("MLPFinalActBias", True, True),
-      ("MLPFinalActNoBias", True, False),
+      ("MLPNoFinalActBiasDropout", False, True, True),
+      ("MLPNoFinalActBiasNoDropout", False, True, False),
+      ("MLPNoFinalActNoBiasDropout", False, False, True),
+      ("MLPNoFinalActNoBiasNoDropout", False, False, False),
+      ("MLPFinalActBiasDropout", True, True, True),
+      ("MLPFinalActBiasNoDropout", True, True, False),
+      ("MLPFinalActNoBiasDropout", True, False, True),
+      ("MLPFinalActNoBiasNoDropout", True, False, False),
   )
-  def testConstructor(self, activate_final, use_bias):
+  def testConstructor(self, activate_final, use_bias, use_dropout):
     with self.assertRaisesRegexp(ValueError, "output_sizes must not be empty"):
       mlp = snt.nets.MLP(name=self.module_name,
                          output_sizes=[],
                          activate_final=activate_final,
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         use_dropout=use_dropout)
 
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
       mlp = snt.nets.MLP(
@@ -72,7 +77,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
           output_sizes=self.output_sizes,
           initializers={"not_w": tf.truncated_normal_initializer(stddev=1.0)},
           activate_final=activate_final,
-          use_bias=use_bias)
+          use_bias=use_bias,
+          use_dropout=use_dropout)
 
     with self.assertRaisesRegexp(TypeError,
                                  "Initializer for 'w' is not a callable "
@@ -81,7 +87,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                          output_sizes=self.output_sizes,
                          initializers={"w": tf.zeros([1, 2, 3])},
                          activate_final=activate_final,
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         use_dropout=use_dropout)
 
     with self.assertRaisesRegexp(TypeError,
                                  "Input 'activation' must be callable"):
@@ -89,14 +96,16 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                          output_sizes=self.output_sizes,
                          activation="not_a_function",
                          activate_final=activate_final,
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         use_dropout=use_dropout)
 
     with self.assertRaisesRegexp(TypeError,
                                  "output_sizes must be iterable"):
       mlp = snt.nets.MLP(name=self.module_name,
                          output_sizes=None,
                          activate_final=activate_final,
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         use_dropout=use_dropout)
 
     mlp = snt.nets.MLP(name=self.module_name,
                        output_sizes=self.output_sizes,
@@ -104,7 +113,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                        partitioners=self.partitioners,
                        regularizers=self.regularizers,
                        activate_final=activate_final,
-                       use_bias=use_bias)
+                       use_bias=use_bias,
+                       use_dropout=use_dropout)
     self.assertEqual(self.initializers, mlp.initializers)
     self.assertEqual(self.regularizers, mlp.regularizers)
     self.assertEqual(self.partitioners, mlp.partitioners)
@@ -114,16 +124,21 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(mlp.layers[i].output_size, self.output_sizes[i])
 
   @parameterized.named_parameters(
-      ("MLPNoFinalActBias", False, True),
-      ("MLPNoFinalActNoBias", False, False),
-      ("MLPFinalActBias", True, True),
-      ("MLPFinalActNoBias", True, False),
+      ("MLPNoFinalActBiasDropout", False, True, True),
+      ("MLPNoFinalActBiasNoDropout", False, True, False),
+      ("MLPNoFinalActNoBiasDropout", False, False, True),
+      ("MLPNoFinalActNoBiasNoDropout", False, False, False),
+      ("MLPFinalActBiasDropout", True, True, True),
+      ("MLPFinalActBiasNoDropout", True, True, False),
+      ("MLPFinalActNoBiasDropout", True, False, True),
+      ("MLPFinalActNoBiasNoDropout", True, False, False),
   )
-  def testActivateBiasFlags(self, activate_final, use_bias):
+  def testActivateBiasFlags(self, activate_final, use_bias, use_dropout):
     mlp = snt.nets.MLP(name=self.module_name,
                        output_sizes=self.output_sizes,
                        activate_final=activate_final,
-                       use_bias=use_bias)
+                       use_bias=use_bias,
+                       use_dropout=use_dropout)
 
     inputs = tf.random_normal(
         dtype=tf.float32, shape=[self.batch_size, self.input_size])
@@ -155,12 +170,17 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(self.output_sizes, list(mlp.output_sizes))
 
   @parameterized.named_parameters(
-      ("MLPNoFinalActBias", False, True),
-      ("MLPNoFinalActNoBias", False, False),
-      ("MLPFinalActBias", True, True),
-      ("MLPFinalActNoBias", True, False),
+      ("MLPNoFinalActBiasDropout", False, True, True),
+      ("MLPNoFinalActBiasNoDropout", False, True, False),
+      ("MLPNoFinalActNoBiasDropout", False, False, True),
+      ("MLPNoFinalActNoBiasNoDropout", False, False, False),
+      ("MLPFinalActBiasDropout", True, True, True),
+      ("MLPFinalActBiasNoDropout", True, True, False),
+      ("MLPFinalActNoBiasDropout", True, False, True),
+      ("MLPFinalActNoBiasNoDropout", True, False, False),
   )
-  def testRegularizersInRegularizationLosses(self, active_final, use_bias):
+  def testRegularizersInRegularizationLosses(self, active_final, use_bias,
+                                             use_dropout):
     if use_bias:
       regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5),
                       "b": tf.contrib.layers.l2_regularizer(scale=0.5)}
@@ -170,7 +190,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     inputs = tf.random_normal(
         dtype=tf.float32, shape=[self.batch_size, self.input_size])
     mlp = snt.nets.MLP(name=self.module_name, output_sizes=self.output_sizes,
-                       regularizers=regularizers)
+                       regularizers=regularizers, use_dropout=use_dropout)
     mlp(inputs)
 
     graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
@@ -208,17 +228,22 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
         set(var.name for var in clone_variables))
 
   @parameterized.named_parameters(
-      ("MLPNoFinalActBias", False, True),
-      ("MLPNoFinalActNoBias", False, False),
-      ("MLPFinalActBias", True, True),
-      ("MLPFinalActNoBias", True, False),
+      ("MLPNoFinalActBiasDropout", False, True, True),
+      ("MLPNoFinalActBiasNoDropout", False, True, False),
+      ("MLPNoFinalActNoBiasDropout", False, False, True),
+      ("MLPNoFinalActNoBiasNoDropout", False, False, False),
+      ("MLPFinalActBiasDropout", True, True, True),
+      ("MLPFinalActBiasNoDropout", True, True, False),
+      ("MLPFinalActNoBiasDropout", True, False, True),
+      ("MLPFinalActNoBiasNoDropout", True, False, False),
   )
-  def testTranspose(self, activate_final, use_bias):
+  def testTranspose(self, activate_final, use_bias, use_dropout):
     with tf.variable_scope("scope1"):
       mlp = snt.nets.MLP(name=self.module_name,
                          output_sizes=self.output_sizes,
                          activate_final=activate_final,
-                         use_bias=use_bias)
+                         use_bias=use_bias,
+                         use_dropout=use_dropout)
     with tf.variable_scope("scope2"):
       mlp_transpose = mlp.transpose()
 
@@ -282,6 +307,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     """Tests for regressions in variable names."""
 
     use_bias = True
+    use_dropout = True
     var_names_w = [
         u"mlp/linear_0/w:0",
         u"mlp/linear_1/w:0",
@@ -297,7 +323,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     mlp = snt.nets.MLP(name=self.module_name,
                        output_sizes=self.output_sizes,
                        activate_final=False,
-                       use_bias=use_bias)
+                       use_bias=use_bias,
+                       use_dropout=use_dropout)
 
     input_shape = [10, 100]
     input_to_net = tf.random_normal(dtype=tf.float32, shape=input_shape)
@@ -329,6 +356,44 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     mlp = tf.contrib.eager.defun(mlp)
     y = mlp(tf.ones([1, 1]))
     self.assertListEqual(y.shape.as_list(), [1, 3])
+
+  def testDropoutOff(self):
+    """Make sure dropout layers aren't added to the computation graph."""
+    if tf.executing_eagerly():
+      self.skipTest("Test not supported when executing eagerly")
+    mlp_name = "test_dropout_on_mlp"
+    mlp = snt.nets.MLP([1], use_dropout=False, use_bias=False,
+                       activate_final=True, name=mlp_name)
+    _ = mlp(tf.ones([1, 1]), is_training=True,
+            dropout_keep_prob=0.5)
+    op_names = [op.name for op in tf.get_default_graph().get_operations()]
+    op_to_look_for = "{}_1/dropout/Shape".format(mlp_name)
+    self.assertNotIn(op_to_look_for, op_names)
+
+  def testDropout(self):
+    if tf.executing_eagerly():
+      self.skipTest("Test not supported when executing eagerly")
+    mlp_name = "test_dropout_on_mlp"
+    mlp = snt.nets.MLP([1], use_dropout=True, use_bias=False,
+                       activate_final=True, name=mlp_name)
+    _ = mlp(tf.ones([1, 1]), is_training=True,
+            dropout_keep_prob=0.5)
+    op_names = [op.name for op in tf.get_default_graph().get_operations()]
+    op_to_look_for = "{}_1/dropout/Shape".format(mlp_name)
+    self.assertIn(op_to_look_for, op_names)
+
+  def testDropoutTensor(self):
+    """Checks support for tf.Bool Tensors."""
+    if tf.executing_eagerly():
+      self.skipTest("Test not supported when executing eagerly")
+    mlp_name = "test_dropout_on_mlp"
+    mlp = snt.nets.MLP([1], use_dropout=True, use_bias=False,
+                       activate_final=True, name=mlp_name)
+    _ = mlp(tf.ones([1, 1]), is_training=tf.convert_to_tensor(True, tf.bool),
+            dropout_keep_prob=0.5)
+    op_names = [op.name for op in tf.get_default_graph().get_operations()]
+    op_to_look_for = "{}_1/dropout/Shape".format(mlp_name)
+    self.assertIn(op_to_look_for, op_names)
 
 if __name__ == "__main__":
   tf.test.main()

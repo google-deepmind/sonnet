@@ -80,4 +80,3 @@ class DifferentGraphError(Error):
 
 class ModuleInfoError(Error):
   """Error raised when Sonnet `ModuleInfo` cannot be serialized."""
-

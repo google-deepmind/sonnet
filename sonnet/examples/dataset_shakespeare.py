@@ -235,4 +235,3 @@ class TinyShakespeareDataset(snt.AbstractModule):
       prefix = "b_{}: ".format(b) if label_batch_entries else ""
       result.append(prefix + self._data_source.decode(index_seq))
     return sep.join(result)
-

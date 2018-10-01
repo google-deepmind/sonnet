@@ -1,4 +1,3 @@
-# pylint: disable=g-bad-file-header
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 # Copyright 2017 The Sonnet Authors. All Rights Reserved.
 #

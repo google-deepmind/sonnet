@@ -384,7 +384,7 @@ class AffineGridWarper(GridWarper):
     def _affine_grid_warper_inverse(inputs):
       """Assembles network to compute inverse affine transformation.
 
-      Each `inputs` row potentailly contains [a, b, tx, c, d, ty]
+      Each `inputs` row potentially contains [a, b, tx, c, d, ty]
       corresponding to an affine matrix:
 
         A = [a, b, tx],

@@ -73,4 +73,3 @@ def restore_initializer(filename, name_fn=None,
     return getter(name, *args, **kwargs)
 
   return _restore_initializer
-

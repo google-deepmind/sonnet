@@ -143,6 +143,7 @@ _VariableMetadata = collections.namedtuple(
      "posterior_estimate", "prior", "kl_cost", "prior_vars", "posterior_vars"])
 
 
+# pylint: disable=keyword-arg-before-vararg
 def diagonal_gaussian_posterior_builder(
     getter, name, shape=None, *args, **kwargs):
   """A pre-canned builder for diagonal gaussian posterior distributions.
@@ -179,8 +180,10 @@ def diagonal_gaussian_posterior_builder(
       scale=tf.nn.softplus(scale_var),
       name="{}_posterior_dist".format(name))
   return posterior
+# pylint: enable=keyword-arg-before-vararg
 
 
+# pylint: disable=keyword-arg-before-vararg
 def fixed_gaussian_prior_builder(
     getter, name, dtype=None, *args, **kwargs):
   """A pre-canned builder for fixed gaussian prior distributions.
@@ -208,6 +211,7 @@ def fixed_gaussian_prior_builder(
   scale = tf.constant(0.01, shape=(), dtype=dtype)
   return tf.distributions.Normal(
       loc=loc, scale=scale, name="{}_prior_dist".format(name))
+# pylint: enable=keyword-arg-before-vararg
 
 
 def adaptive_gaussian_prior_builder(

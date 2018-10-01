@@ -427,5 +427,3 @@ def wrap_rnn_cell_class(wrapped_class):
       super(Wrapper, self).__init__(wrapped_class, *args, **kwargs)
 
   return Wrapper
-
-

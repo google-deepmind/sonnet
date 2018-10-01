@@ -48,5 +48,3 @@ def override_args(**kwargs):
     return getter(*args, **kwargs)
 
   return custom_getter
-
-

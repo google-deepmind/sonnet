@@ -87,6 +87,7 @@ def _run_session_with_no_hooks(sess, *args, **kwargs):
 
 
 def _get_raw_data(subset):
+  """Loads the data or reads it from cache."""
   raw_data = _LOADED.get(subset)
   if raw_data is not None:
     return raw_data, _LOADED["vocab"]
@@ -161,6 +162,7 @@ class GlobalNormClippingOptimizer(tf.train.Optimizer):
 
 
 class CustomScaleMixture(object):
+  """A convenience class for the scale mixture."""
 
   def __init__(self, pi, sigma1, sigma2):
     self.mu, self.pi, self.sigma1, self.sigma2 = map(

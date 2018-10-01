@@ -181,4 +181,3 @@ class AttentiveRead(base.AbstractModule):
         read=attended_memory,
         weights=tf.squeeze(attention_weight, [2]),
         weight_logits=attention_weight_logits)
-

@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import six
+
 
 def override_args(**kwargs):
   """Creates a custom getter that applies specified named arguments.
@@ -46,5 +48,42 @@ def override_args(**kwargs):
     """
     kwargs.update(override_kwargs)
     return getter(*args, **kwargs)
+
+  return custom_getter
+
+
+def override_default_args(**kwargs):
+  """Creates a custom getter that applies specified named arguments.
+
+  The returned custom getter treats the specified named arguments as revised
+  defaults, and does not override any non-`None` argument values supplied by
+  the original get_variable call (or by a nested scope's custom getter).
+
+  Args:
+    **kwargs: Overriding arguments for the custom getter to use in preference
+      the named arguments it's called with.
+
+  Returns:
+    Custom getter.
+  """
+
+  override_default_kwargs = kwargs
+
+  def custom_getter(getter, *args, **kwargs):
+    """Custom getter with certain named arguments overridden.
+
+    Args:
+      getter: Underlying variable getter to invoke.
+      *args: Arguments, compatible with those of tf.get_variable.
+      **kwargs: Keyword arguments, compatible with those of tf.get_variable.
+
+    Returns:
+      The result of invoking `getter(*args, **kwargs)` except that certain
+      kwargs entries may have been overridden.
+    """
+    updated_kwargs = override_default_kwargs.copy()
+    updated_kwargs.update({kw: value for kw, value in six.iteritems(kwargs)
+                           if value is not None})
+    return getter(*args, **updated_kwargs)
 
   return custom_getter

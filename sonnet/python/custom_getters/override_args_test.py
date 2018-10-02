@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 # Dependency imports
+from absl.testing import parameterized
 import sonnet as snt
 import tensorflow as tf
 
@@ -27,14 +28,18 @@ def _suffix_custom_getter(getter, name, *args, **kwargs):
   return getter(name + "_test", *args, **kwargs)
 
 
-class OverrideArgsTest(tf.test.TestCase):
+class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
 
-  def testUsage(self):
+  @parameterized.named_parameters(
+      ("override_args", snt.custom_getters.override_args),
+      ("override_default_args", snt.custom_getters.override_default_args),
+  )
+  def testUsage(self, custom_getter_fn):
     # Create a module with no custom getters.
     linear = snt.Linear(10)
 
     # Create a module within the scope of an 'override args' custom getter.
-    local_custom_getter = snt.custom_getters.override_args(
+    local_custom_getter = custom_getter_fn(
         collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       local_linear = snt.Linear(10)
@@ -49,10 +54,14 @@ class OverrideArgsTest(tf.test.TestCase):
     self.assertIn(local_linear.w, tf.local_variables())
     self.assertNotIn(local_linear.w, tf.global_variables())
 
-  def testNestedWithin(self):
+  @parameterized.named_parameters(
+      ("override_args", snt.custom_getters.override_args),
+      ("override_default_args", snt.custom_getters.override_default_args),
+  )
+  def testNestedWithin(self, custom_getter_fn):
     # Create a module with an 'override args' custom getter, within the scope
     # of another custom getter.
-    local_custom_getter = snt.custom_getters.override_args(
+    local_custom_getter = custom_getter_fn(
         collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=_suffix_custom_getter):
       local_linear = snt.Linear(10, custom_getter=local_custom_getter)
@@ -66,10 +75,14 @@ class OverrideArgsTest(tf.test.TestCase):
     self.assertNotIn(local_linear.w, tf.global_variables())
     self.assertEqual("linear/w_test", local_linear.w.op.name)
 
-  def testWithNested(self):
+  @parameterized.named_parameters(
+      ("override_args", snt.custom_getters.override_args),
+      ("override_default_args", snt.custom_getters.override_default_args),
+  )
+  def testWithNested(self, custom_getter_fn):
     # Create a module with a custom getter, within the scope of an
     # 'override args' custom getter.
-    local_custom_getter = snt.custom_getters.override_args(
+    local_custom_getter = custom_getter_fn(
         collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       local_linear = snt.Linear(10, custom_getter=_suffix_custom_getter)
@@ -82,6 +95,30 @@ class OverrideArgsTest(tf.test.TestCase):
     self.assertIn(local_linear.w, tf.local_variables())
     self.assertNotIn(local_linear.w, tf.global_variables())
     self.assertEqual("linear/w_test", local_linear.w.op.name)
+
+  def testExplicitArgOverridden(self):
+    # Create a variable within the scope of an 'override args' custom getter.
+    local_custom_getter = snt.custom_getters.override_args(
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
+    with tf.variable_scope("", custom_getter=local_custom_getter):
+      # Explicitly specify an arg that disagrees with the custom getter.
+      v = tf.get_variable("v", (), collections=[tf.GraphKeys.GLOBAL_VARIABLES])
+
+    # The custom getter should win.
+    self.assertIn(v, tf.local_variables())
+    self.assertNotIn(v, tf.global_variables())
+
+  def testExplicitArgNotOverridden(self):
+    # Create a variable within an 'override default args' custom getter.
+    local_custom_getter = snt.custom_getters.override_default_args(
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
+    with tf.variable_scope("", custom_getter=local_custom_getter):
+      # Explicitly specify an arg that disagrees with the custom getter.
+      v = tf.get_variable("v", (), collections=[tf.GraphKeys.GLOBAL_VARIABLES])
+
+    # The custom getter should honour the explicitly specified arg.
+    self.assertIn(v, tf.global_variables())
+    self.assertNotIn(v, tf.local_variables())
 
 
 if __name__ == "__main__":

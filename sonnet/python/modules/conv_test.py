@@ -195,6 +195,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       "output_channels": 10,
       "channel_multiplier": 1,
       "kernel_shape": 3,
+      "rate": (2,),
   }
   CONV_2D_KWARGS = CONV_1D_KWARGS
   CONV_3D_KWARGS = CONV_1D_KWARGS
@@ -206,6 +207,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
       "output_channels": 10,
       "channel_multiplier": 1,
       "kernel_shape": 3,
+      "rate": (2, 1),
   }
   IN_PLANE_CONV_2D_KWARGS = {
       "kernel_shape": 3,
@@ -2922,6 +2924,39 @@ class SeparableConv2DTest(parameterized.TestCase, tf.test.TestCase):
   @parameterized.named_parameters(
       ("WithBias", True),
       ("WithoutBias", False))
+  def testComputationSameNon1Rate(self, use_bias):
+    """Same as `testComputationSame`, but have a non-default rate."""
+
+    conv1 = snt.SeparableConv2D(
+        output_channels=1,
+        channel_multiplier=1,
+        kernel_shape=[3, 3],
+        padding=snt.SAME,
+        name="conv1",
+        rate=(2, 3),
+        use_bias=use_bias,
+        initializers=create_separable_constant_initializers(
+            1.0, 1.0, 1.0, use_bias))
+
+    out = conv1(tf.constant(np.ones([1, 5, 5, 1], dtype=np.float32)))
+    expected_out = np.array([[5, 5, 3, 5, 5],
+                             [5, 5, 3, 5, 5],
+                             [7, 7, 4, 7, 7],
+                             [5, 5, 3, 5, 5],
+                             [5, 5, 3, 5, 5]])
+    if not use_bias:
+      expected_out -= 1
+
+    with self.test_session():
+      tf.variables_initializer(
+          [conv1.w_dw, conv1.w_pw, conv1.b] if use_bias else
+          [conv1.w_dw, conv1.w_pw]).run()
+
+      self.assertAllClose(np.reshape(out.eval(), [5, 5]), expected_out)
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
   def testComputationValid(self, use_bias):
     """Run through for something with a known answer using snt.VALID padding."""
 
@@ -3303,6 +3338,39 @@ class SeparableConv1DTest(parameterized.TestCase, tf.test.TestCase):
 
     output = conv1(tf.constant(np.ones([1, 5, 1], dtype=np.float32)))
     expected_out = np.array([[[3], [4], [4], [4], [3]]])
+    if not use_bias:
+      expected_out -= 1
+
+    with self.test_session() as session:
+      tf.variables_initializer(
+          [conv1.w_dw, conv1.w_pw, conv1.b] if use_bias else
+          [conv1.w_dw, conv1.w_pw]).run()
+      output = session.run(output)
+      self.assertAllClose(output, expected_out)
+
+  @parameterized.named_parameters(
+      ("WithBiasRateInt", True, 2),
+      ("WithBiasRateSeq", True, [2]),
+      ("WithoutBiasRateInt", False, 2),
+      ("WithoutBiasRateSeq", False, [2]))
+  def testComputationSameNon1Rate(self, use_bias, rate):
+    """Same as `testComputationSame`, but have a non-default rate."""
+
+    conv1 = snt.SeparableConv1D(
+        output_channels=1,
+        channel_multiplier=1,
+        kernel_shape=[3],
+        padding=snt.SAME,
+        name="conv1",
+        rate=rate,
+        use_bias=use_bias,
+        initializers=create_separable_constant_initializers(
+            1.0, 1.0, 1.0, use_bias))
+
+    output = conv1(tf.constant(np.ones([3, 5, 2], dtype=np.float32)))
+    expected_out = np.array([[[5], [5], [7], [5], [5]],
+                             [[5], [5], [7], [5], [5]],
+                             [[5], [5], [7], [5], [5]]])
     if not use_bias:
       expected_out -= 1
 

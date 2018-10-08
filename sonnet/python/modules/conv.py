@@ -1748,7 +1748,7 @@ class Conv3D(_ConvND, base.Transposable):
       stride: Sequence of kernel strides (of size 3), or integer that is used to
           define stride in all dimensions.
       rate: Sequence of dilation rates (of size 3), or integer that is used to
-          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          define dilation rate in all dimensions. 1 corresponds to standard 3D
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
@@ -2246,6 +2246,7 @@ class SeparableConv2D(_ConvND):
                channel_multiplier,
                kernel_shape,
                stride=1,
+               rate=1,
                padding=SAME,
                use_bias=True,
                initializers=None,
@@ -2274,6 +2275,10 @@ class SeparableConv2D(_ConvND):
       stride: List with 4 elements of kernel strides, or integer that is used to
           define stride in all dimensions. Layout of list:
           [1, stride_y, stride_x, 1].
+      rate: Sequence of dilation rates (of size 2), or integer that is used to
+          define dilation rate in all dimensions. 1 corresponds to standard 2D
+          convolution, `rate > 1` corresponds to dilated convolution. Cannot be
+          > 1 if any of `stride` is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
@@ -2340,7 +2345,8 @@ class SeparableConv2D(_ConvND):
     super(SeparableConv2D, self).__init__(
         output_channels=output_channels,
         kernel_shape=kernel_shape,
-        stride=stride, padding=padding, use_bias=use_bias,
+        stride=stride, padding=padding, rate=rate,
+        use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
         regularizers=regularizers, data_format=data_format,
         custom_getter=custom_getter, name=name)
@@ -2414,6 +2420,7 @@ class SeparableConv2D(_ConvND):
     outputs = tf.nn.separable_conv2d(inputs,
                                      w_dw,
                                      w_pw,
+                                     rate=self._rate,
                                      strides=self.stride,
                                      padding=self._padding,
                                      data_format=self._data_format)
@@ -2449,6 +2456,7 @@ class SeparableConv1D(_ConvND):
                channel_multiplier,
                kernel_shape,
                stride=1,
+               rate=1,
                padding=SAME,
                use_bias=True,
                initializers=None,
@@ -2477,6 +2485,10 @@ class SeparableConv1D(_ConvND):
       stride: List with 4 elements of kernel strides, or integer that is used to
           define stride in all dimensions. Layout of list:
           [1, stride_y, stride_x, 1].
+      rate: Sequence of dilation rates (of size 1), or integer that is used to
+          define dilation rate in all dimensions. 1 corresponds to standard 1D
+          convolution, `rate > 1` corresponds to dilated convolution. Cannot be
+          > 1 if any of `stride` is also > 1.
       padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
@@ -2543,7 +2555,7 @@ class SeparableConv1D(_ConvND):
     super(SeparableConv1D, self).__init__(
         output_channels=output_channels,
         kernel_shape=kernel_shape,
-        stride=stride, padding=padding, use_bias=use_bias,
+        stride=stride, rate=rate, padding=padding, use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
         regularizers=regularizers, data_format=data_format,
         custom_getter=custom_getter, name=name)
@@ -2623,11 +2635,15 @@ class SeparableConv1D(_ConvND):
     inputs = tf.expand_dims(inputs, axis=h_dim)
     two_dim_conv_stride = self.stride[:h_dim] + (1,) + self.stride[h_dim:]
 
+    # Height always precedes width.
+    two_dim_conv_rate = (1,) + self._rate
+
     w_dw, w_pw = w
     outputs = tf.nn.separable_conv2d(inputs,
                                      w_dw,
                                      w_pw,
                                      strides=two_dim_conv_stride,
+                                     rate=two_dim_conv_rate,
                                      padding=self._padding,
                                      data_format=two_dim_conv_data_format)
     outputs = tf.squeeze(outputs, [h_dim])

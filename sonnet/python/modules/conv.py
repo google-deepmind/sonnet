@@ -432,9 +432,10 @@ class _ConvND(base.AbstractModule):
     """Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
     If this is not the first time the module has been connected to the graph,
-    the input Tensor provided here must have the same final N-1 dimensions, in
+    the input Tensor provided here must have the same number of channels, in
     order for the existing variables to be the correct size for the
-    multiplication; the batch size may differ for each connection.
+    multiplication; the batch size and input spatial dimensions may differ for
+    each connection.
 
     Args:
       inputs: A ND Tensor of the same rank as `data_format`, and either of types

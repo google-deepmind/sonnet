@@ -252,9 +252,9 @@ class DeepRNN(rnn_core.RNNCore):
       cores: iterable of modules or ops.
       skip_connections: a boolean that indicates whether to use skip
         connections. This means that the input is fed to all the layers, after
-        being concatenated with the output of the previous layer. The output
-        of the module will be the concatenation of all the outputs of the
-        internal modules.
+        being concatenated on the last dimension with the output of the previous
+        layer. The output of the module will be the concatenation of all the
+        outputs of the internal modules.
       concat_final_output_if_skip: A boolean that indicates whether the outputs
         of intermediate layers should be concatenated into the timestep-wise
         output of the core. By default this is True. If this is set to False,
@@ -341,12 +341,10 @@ class DeepRNN(rnn_core.RNNCore):
     next_states = []
     outputs = []
     recurrent_idx = 0
+    concatenate = lambda *args: tf.concat(args, axis=-1)
     for i, core in enumerate(self._cores):
       if self._skip_connections and i > 0:
-        flat_input = (nest.flatten(inputs), nest.flatten(current_input))
-        flat_input = [tf.concat(input_, 1) for input_ in zip(*flat_input)]
-        current_input = nest.pack_sequence_as(structure=inputs,
-                                              flat_sequence=flat_input)
+        current_input = nest.map_structure(concatenate, inputs, current_input)
 
       # Determine if this core in the stack is recurrent or not and call
       # accordingly.
@@ -362,10 +360,7 @@ class DeepRNN(rnn_core.RNNCore):
         outputs.append(current_input)
 
     if self._skip_connections and self._concat_final_output_if_skip:
-      flat_outputs = tuple(nest.flatten(output) for output in outputs)
-      flat_outputs = [tf.concat(output, 1) for output in zip(*flat_outputs)]
-      output = nest.pack_sequence_as(structure=outputs[0],
-                                     flat_sequence=flat_outputs)
+      output = nest.map_structure(concatenate, *outputs)
     else:
       output = current_input
 
@@ -442,7 +437,7 @@ class DeepRNN(rnn_core.RNNCore):
       output_size = []
       for core_sizes in zip(*tuple(_get_flat_core_sizes(self._cores))):
         added_core_size = core_sizes[0]
-        added_core_size[0] = sum([size[0] for size in core_sizes])
+        added_core_size[-1] = sum([size[-1] for size in core_sizes])
         output_size.append(tf.TensorShape(added_core_size))
       return nest.pack_sequence_as(structure=self._cores[0].output_size,
                                    flat_sequence=output_size)

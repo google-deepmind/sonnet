@@ -297,6 +297,42 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
     self.assertShapeEqual(np.ndarray((batch_size, hidden2_size)),
                           initial_state[2])
 
+  def testMultiDimShape(self):
+    batch_size = 3
+    num_layers = 2
+    input_shape = (8, 8)
+    input_channels = 4
+    output_channels = 5
+
+    input_shape = (batch_size,) + input_shape + (input_channels,)
+    output_shape = input_shape[:-1] + (output_channels,)
+
+    inputs = tf.ones(dtype=tf.float32, shape=input_shape)
+    prev_hidden = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_cell = tf.ones(dtype=tf.float32, shape=output_shape)
+    prev_state = [(prev_hidden, prev_cell) for _ in range(num_layers)]
+    def _create_lstm():
+      return snt.Conv2DLSTM(
+          input_shape=input_shape[1:], output_channels=output_channels,
+          kernel_shape=1)
+    deep_rnn = snt.DeepRNN([_create_lstm() for _ in range(num_layers)],
+                           name="deep_rnn", skip_connections=True)
+    output, next_state = deep_rnn(inputs, prev_state)
+
+    expected_output_shape = list(output_shape)
+    expected_output_shape[-1] *= num_layers
+
+    self.assertAllEqual(output.get_shape().as_list(), expected_output_shape)
+    self.assertAllEqual(deep_rnn.output_size.as_list(),
+                        expected_output_shape[1:])
+
+    next_state_shape = [
+        [state[0].get_shape().as_list(), state[1].get_shape().as_list()]
+        for state in next_state]
+    expected_next_state_shape = (
+        [[list(output_shape) for _ in range(2)]] * num_layers)
+    self.assertAllEqual(next_state_shape, expected_next_state_shape)
+
   def testIncompatibleOptions(self):
     in_size = 2
     hidden1_size = 4
@@ -532,7 +568,7 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
 
   def testInitialStateNames(self):
     if tf.executing_eagerly():
-      self.skipTest("Tensor.name is meaningless in eager mode.")
+      return self.skipTest("Tensor.name is meaningless in eager mode.")
 
     hidden_size_a = 3
     hidden_size_b = 4

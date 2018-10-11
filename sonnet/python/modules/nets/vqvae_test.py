@@ -80,6 +80,20 @@ class VqvaeTest(parameterized.TestCase, tf.test.TestCase):
       vqvae(tf.constant(wrong_shape_input.astype(np.float32)),
             is_training=False)
 
+  @parameterized.parameters(
+      (snt.nets.VectorQuantizer,
+       {'embedding_dim': 4, 'num_embeddings': 8,
+        'commitment_cost': 0.25}),
+      (snt.nets.VectorQuantizerEMA,
+       {'embedding_dim': 6, 'num_embeddings': 13,
+        'commitment_cost': 0.5, 'decay': 0.1})
+  )
+  def testNoneBatch(self, constructor, kwargs):
+    """Check that vqvae can be built on input with a None batch dimension."""
+    vqvae = constructor(**kwargs)
+    inputs = tf.placeholder(tf.float32, (None, 5, 5, kwargs['embedding_dim']))
+    vqvae(inputs, is_training=False)
+
   def testEmaUpdating(self):
     embedding_dim = 6
     vqvae = snt.nets.VectorQuantizerEMA(

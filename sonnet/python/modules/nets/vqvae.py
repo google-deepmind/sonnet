@@ -94,7 +94,7 @@ class VectorQuantizer(base.AbstractModule):
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)
-    encoding_indices = tf.reshape(encoding_indices, inputs.shape.as_list()[:-1])
+    encoding_indices = tf.reshape(encoding_indices, tf.shape(inputs)[:-1])
     quantized = self.quantize(encoding_indices)
 
     e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
@@ -217,7 +217,7 @@ class VectorQuantizerEMA(base.AbstractModule):
 
     encoding_indices = tf.argmax(- distances, 1)
     encodings = tf.one_hot(encoding_indices, self._num_embeddings)
-    encoding_indices = tf.reshape(encoding_indices, inputs.shape.as_list()[:-1])
+    encoding_indices = tf.reshape(encoding_indices, tf.shape(inputs)[:-1])
     quantized = self.quantize(encoding_indices)
     e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
 

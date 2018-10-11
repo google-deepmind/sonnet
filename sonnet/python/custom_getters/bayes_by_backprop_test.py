@@ -24,6 +24,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 
 def softplus(x):
@@ -31,7 +32,7 @@ def softplus(x):
 
 
 def test_diag_gaussian_builder_builder(
-    init_loc=0.0, init_scale=0.01, dist_cls=tf.distributions.Normal,
+    init_loc=0.0, init_scale=0.01, dist_cls=tfp.distributions.Normal,
     name_append="posterior"):
 
   def diagonal_gaussian_posterior_builder(getter, name, *args, **kwargs):
@@ -63,11 +64,11 @@ def uniform_builder(
     getter, name, *args, **kwargs):
   del kwargs["initializer"]
   shape = kwargs.pop("shape")
-  parameter_shapes = tf.distributions.Uniform.param_static_shapes(shape)
+  parameter_shapes = tfp.distributions.Uniform.param_static_shapes(shape)
   low_var = getter(
       name + "/low", shape=parameter_shapes["low"], *args, **kwargs)
   hi_var = getter(name + "/hi", shape=parameter_shapes["high"], *args, **kwargs)
-  uniform_dist = tf.distributions.Uniform(low=low_var, high=hi_var)
+  uniform_dist = tfp.distributions.Uniform(low=low_var, high=hi_var)
   return uniform_dist
 
 
@@ -264,7 +265,7 @@ class BBBTest(tf.test.TestCase):
   def testLastSampleMode(self):
     """Tests that the 'last sample' estimator mode uses the last sample."""
 
-    class CustomNormal(tf.distributions.Normal):
+    class CustomNormal(tfp.distributions.Normal):
       """A custom normal distribution which implements `self.last_sample()`."""
 
       def __init__(self, *args, **kwargs):

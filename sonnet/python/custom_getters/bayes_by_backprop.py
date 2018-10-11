@@ -32,7 +32,7 @@ import tensorflow as tf
 
 # Use a custom prior builder.
 def custom_prior_builder(getter, name, *args, **kwargs):
-  return tf.distributions.Normal(0.0, 0.01)
+  return tfp.distributions.Normal(0.0, 0.01)
 
 # Use pre-canned builders for diagonal gaussian posterior and stochastic KL.
 get_bbb_variable_fn = bbb.bayes_by_backprop_getter(
@@ -91,10 +91,11 @@ import math
 import weakref
 
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 _DEFAULT_SCALE_TRANSFORM = tf.nn.softplus
 _OK_DTYPES_FOR_BBB = (tf.float16, tf.float32, tf.float64, tf.bfloat16)
-_OK_PZATION_TYPE = tf.contrib.distributions.FULLY_REPARAMETERIZED
+_OK_PZATION_TYPE = tfp.distributions.FULLY_REPARAMETERIZED
 
 
 class _WeakRegistry(weakref.WeakKeyDictionary):
@@ -161,12 +162,12 @@ def diagonal_gaussian_posterior_builder(
     **kwargs: See keyword arguments passed to `tf.get_variable`.
 
   Returns:
-    An instance of `tf.distributions.Normal` representing the posterior
+    An instance of `tfp.distributions.Normal` representing the posterior
     distribution over the variable in question.
   """
   # Please see the documentation for
-  # `tf.contrib.distributions.param_static_shapes`.
-  parameter_shapes = tf.distributions.Normal.param_static_shapes(shape)
+  # `tfp.distributions.param_static_shapes`.
+  parameter_shapes = tfp.distributions.Normal.param_static_shapes(shape)
 
   loc_var = getter(
       name + "/posterior_loc", shape=parameter_shapes["loc"], *args, **kwargs)
@@ -175,7 +176,7 @@ def diagonal_gaussian_posterior_builder(
       shape=parameter_shapes["scale"],
       *args,
       **kwargs)
-  posterior = tf.distributions.Normal(
+  posterior = tfp.distributions.Normal(
       loc=loc_var,
       scale=tf.nn.softplus(scale_var),
       name="{}_posterior_dist".format(name))
@@ -201,7 +202,7 @@ def fixed_gaussian_prior_builder(
     **kwargs: See keyword arguments passed to `tf.get_variable`.
 
   Returns:
-    An instance of `tf.distributions.Normal` representing the prior
+    An instance of `tfp.distributions.Normal` representing the prior
     distribution over the variable in question.
   """
   del getter  # Unused.
@@ -209,7 +210,7 @@ def fixed_gaussian_prior_builder(
   del kwargs  # Unused.
   loc = tf.constant(0.0, shape=(), dtype=dtype)
   scale = tf.constant(0.01, shape=(), dtype=dtype)
-  return tf.distributions.Normal(
+  return tfp.distributions.Normal(
       loc=loc, scale=scale, name="{}_prior_dist".format(name))
 # pylint: enable=keyword-arg-before-vararg
 
@@ -233,14 +234,14 @@ def adaptive_gaussian_prior_builder(
     **kwargs: See keyword arguments passed to `tf.get_variable`.
 
   Returns:
-    An instance of `tf.distributions.Normal` representing the prior
+    An instance of `tfp.distributions.Normal` representing the prior
     distribution over the variable in question.
   """
   kwargs["shape"] = ()
   loc_var = getter(name + "_prior_loc", *args, **kwargs)
   kwargs["initializer"] = scale_variable_initializer(0.01)
   scale_var = getter(name + "_prior_scale", *args, **kwargs)
-  prior = tf.distributions.Normal(
+  prior = tfp.distributions.Normal(
       loc=loc_var, scale=tf.nn.softplus(scale_var),
       name="{}_prior_dist".format(name))
   return prior
@@ -256,7 +257,7 @@ def stochastic_kl_builder(posterior, prior, sample):
 def analytic_kl_builder(posterior, prior, sample):
   """A pre-canned builder for the analytic kl divergence."""
   del sample
-  return tf.reduce_sum(tf.contrib.distributions.kl_divergence(posterior, prior))
+  return tf.reduce_sum(tfp.distributions.kl_divergence(posterior, prior))
 
 
 def bayes_by_backprop_getter(
@@ -277,7 +278,7 @@ def bayes_by_backprop_getter(
 
   Args:
     posterior_builder: A builder function which constructs an instance of
-      `tf.distributions.Distribution` which shall serve as the posterior over
+      `tfp.distributions.Distribution` which shall serve as the posterior over
       the `tf.Variable` of interest. The builder receives the `getter` and the
       arguments forwarded from `tf.get_variable`. Suppose one wrote
 
@@ -289,13 +290,13 @@ def bayes_by_backprop_getter(
 
       then the `posterior_builder` argument would receive the `name`, `shape`,
       `initializer`, and `dtype` arguments passed above. The builder must return
-      a `tf.distributions.Distribution` object.
+      a `tfp.distributions.Distribution` object.
 
       Please see the `tf.get_variable` for documentation on `custom_getter` and
       `getter`, and see `bbb.diagonal_gaussian_posterior_builder`
       (the default) for an example of using this builder API.
     prior_builder: A builder function which constructs an instance of
-      `tf.distributions.Distribution` which shall serve as the prior over the
+      `tfp.distributions.Distribution` which shall serve as the prior over the
       `tf.Variable` of interest. Identical API to `posterior_builder`. See
       `bbb.fixed_gaussian_prior_builder` (the default) for an example.
     kl_builder: A builder function which receives the posterior distribution,
@@ -456,7 +457,7 @@ def _produce_posterior_estimate(posterior_dist, posterior_estimate_mode,
   """Create tensor representing estimate of posterior.
 
   Args:
-    posterior_dist: An instance of `tf.distributions.Distribution`.
+    posterior_dist: An instance of `tfp.distributions.Distribution`.
         The variational posterior from which to produce an estimate of the
         variable in question.
     posterior_estimate_mode: A `Tensor` of dtype `tf.string`, which

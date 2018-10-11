@@ -62,7 +62,9 @@ py_binary(
         # numpy dep,
         # six dep,
         "//sonnet",
+        "//sonnet/python:custom_getters",
         # tensorflow dep,
+        # tensorflow_probability dep,
     ],
 )
 

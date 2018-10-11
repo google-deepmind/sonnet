@@ -40,6 +40,7 @@ import sonnet as snt
 from sonnet.examples import ptb_reader
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 nest = tf.contrib.framework.nest
 FLAGS = tf.flags.FLAGS
@@ -169,8 +170,8 @@ class CustomScaleMixture(object):
         np.float32, (0.0, pi, sigma1, sigma2))
 
   def log_prob(self, x):
-    n1 = tf.contrib.distributions.Normal(self.mu, self.sigma1)
-    n2 = tf.contrib.distributions.Normal(self.mu, self.sigma2)
+    n1 = tfp.distributions.Normal(self.mu, self.sigma1)
+    n2 = tfp.distributions.Normal(self.mu, self.sigma2)
     mix1 = tf.reduce_sum(n1.log_prob(x), -1) + tf.log(self.pi)
     mix2 = tf.reduce_sum(n2.log_prob(x), -1) + tf.log(np.float32(1.0 - self.pi))
     prior_mix = tf.stack([mix1, mix2])
@@ -191,7 +192,7 @@ def custom_scale_mixture_prior_builder(getter, name, *args, **kwargs):
     **kwargs: Keyword arguments forwarded by `tf.get_variable`.
 
   Returns:
-    An instance of `tf.contrib.distributions.Distribution` representing the
+    An instance of `tfp.distributions.Distribution` representing the
     prior distribution over the variable in question.
   """
   # This specific prior formulation doesn't need any of the arguments forwarded
@@ -215,11 +216,11 @@ def lstm_posterior_builder(getter, name, *args, **kwargs):
     **kwargs: Keyword arguments forwarded by `tf.get_variable`.
 
   Returns:
-    An instance of `tf.contrib.distributions.Distribution` representing the
+    An instance of `tfp.distributions.Distribution` representing the
     posterior distribution over the variable in question.
   """
   del args
-  parameter_shapes = tf.contrib.distributions.Normal.param_static_shapes(
+  parameter_shapes = tfp.distributions.Normal.param_static_shapes(
       kwargs["shape"])
 
   # The standard deviation of the scale mixture prior.
@@ -239,7 +240,7 @@ def lstm_posterior_builder(getter, name, *args, **kwargs):
           maxval=np.log(np.exp(prior_stddev / 2.0) - 1.0),
           dtype=tf.float32,
           shape=parameter_shapes["scale"]))
-  return tf.contrib.distributions.Normal(
+  return tfp.distributions.Normal(
       loc=loc_var,
       scale=tf.nn.softplus(scale_var) + 1e-5,
       name="{}/posterior_dist".format(name))
@@ -256,11 +257,11 @@ def non_lstm_posterior_builder(getter, name, *args, **kwargs):
     **kwargs: Keyword arguments forwarded by `tf.get_variable`.
 
   Returns:
-    An instance of `tf.contrib.distributions.Distribution` representing the
+    An instance of `tfp.distributions.Distribution` representing the
     posterior distribution over the variable in question.
   """
   del args
-  parameter_shapes = tf.contrib.distributions.Normal.param_static_shapes(
+  parameter_shapes = tfp.distributions.Normal.param_static_shapes(
       kwargs["shape"])
 
   # The standard deviation of the scale mixture prior.
@@ -280,7 +281,7 @@ def non_lstm_posterior_builder(getter, name, *args, **kwargs):
           maxval=np.log(np.exp(prior_stddev / 1.0) - 1.0),
           dtype=tf.float32,
           shape=parameter_shapes["scale"]))
-  return tf.contrib.distributions.Normal(
+  return tfp.distributions.Normal(
       loc=loc_var,
       scale=tf.nn.softplus(scale_var) + 1e-5,
       name="{}/posterior_dist".format(name))

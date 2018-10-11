@@ -51,6 +51,7 @@ py_library(
     deps = [
         # six dep,
         # tensorflow dep,
+        # tensorflow_probability dep,
     ],
 )
 

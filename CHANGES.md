@@ -1,5 +1,19 @@
 # Sonnet Changelog
 
+## Version 1.25 - Tuesday, 16. October 2018
+
+* Improve Eager support.
+* Allow Sonnet modules to defun wrap their reuse_variables methods.
+* Depend on tensorflow_probability rather than `tf.contrib.distributions`.
+* VQ-VAE: allow unknown batch dimension.
+* Change axis to -1 in concat in `DeepRNN` when using skip_connections.
+* Add `rate` argument to the `SeparableConv[1,2]D` classes.
+* Add argument-overriding custom getter that only updates defaults.
+* Add dropout & clone() to `MLP`.
+* Add Learn to Execute example for Relational Memory Core to examples.
+* Add `snt.count_variables_by_type()`.
+* Documentation fixes.
+
 ## Version 1.24 - Tuesday, 31. July 2018
 
 * Better integration with Tensorflow's Eager Mode.

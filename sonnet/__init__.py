@@ -162,5 +162,5 @@ _ensure_dependency_available_at_version('tensorflow', '1.8.0')
 _ensure_dependency_available_at_version('tensorflow_probability', '0.4.0')
 
 
-__version__ = '1.24'
+__version__ = '1.25'
 

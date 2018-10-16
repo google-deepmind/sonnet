@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -133,6 +133,18 @@ variable sharing will not work.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sonnet.python.modules.base.AbstractModule.defun">
+<code class="descname">defun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#AbstractModule.defun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.defun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps this modules call method in a callable graph function.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base.AbstractModule.defun_wrapped">
+<code class="descname">defun_wrapped</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.defun_wrapped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns boolean indicating whether this module is defun wrapped.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sonnet.python.modules.base.AbstractModule.get_all_variables">
 <code class="descname">get_all_variables</code><span class="sig-paren">(</span><em>collection='trainable_variables'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/base.html#AbstractModule.get_all_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.get_all_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s used when the module is connected.</p>
@@ -206,9 +218,34 @@ non-trainable variables such as moving averages.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="sonnet.python.modules.base.AbstractModule.non_trainable_variables">
+<code class="descname">non_trainable_variables</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.non_trainable_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>All <strong>non-trainable</strong> <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s used when the module is
+connected.</p>
+<p>This property does not rely on global collections and should generally
+be preferred vs. <code class="docutils literal notranslate"><span class="pre">get_variables</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all_variables</span></code>.</p>
+<p>See the documentation for <code class="docutils literal notranslate"><span class="pre">AbstractModule._capture_variables()</span></code> for
+more information about what variables are captured.</p>
+<p>Returns: A sorted (by variable name) tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> objects.</p>
+<p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="sonnet.python.modules.base.AbstractModule.scope_name">
 <code class="descname">scope_name</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.scope_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the full name of the Module’s variable scope.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base.AbstractModule.trainable_variables">
+<code class="descname">trainable_variables</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.trainable_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>All <strong>trainable</strong> <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s used when the module is connected.</p>
+<p>This property does not rely on global collections and should generally
+be preferred vs. <code class="docutils literal notranslate"><span class="pre">get_variables</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all_variables</span></code>.</p>
+<p>See the documentation for <code class="docutils literal notranslate"><span class="pre">AbstractModule._capture_variables()</span></code> for
+more information about what variables are captured.</p>
+<p>Returns: A sorted (by variable name) tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> objects.</p>
+<p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -224,6 +261,18 @@ before connection is to get the post-uniquification name, which we
 support using the separate .scope_name property.</p>
 <p>Returns: variable_scope: <code class="docutils literal notranslate"><span class="pre">tf.VariableScope</span></code> instance of the internal
 <code class="docutils literal notranslate"><span class="pre">tf.Template</span></code>.</p>
+<p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.base.AbstractModule.variables">
+<code class="descname">variables</code><a class="headerlink" href="#sonnet.python.modules.base.AbstractModule.variables" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>All</strong> <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s used when the module is connected.</p>
+<p>This property does not rely on global collections and should generally
+be preferred vs. <code class="docutils literal notranslate"><span class="pre">get_variables</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all_variables</span></code>.</p>
+<p>See the documentation for <code class="docutils literal notranslate"><span class="pre">AbstractModule._capture_variables()</span></code> for
+more information about what variables are captured.</p>
+<p>Returns: A sorted (by variable name) tuple of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code> objects.</p>
 <p>Raises: NotConnectedError: If the module is not connected to the Graph.</p>
 </dd></dl>
 
@@ -1012,7 +1061,7 @@ as the number of recurrent cores.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.basic_rnn.VanillaRNN.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['in_to_hidden', 'hidden_to_hidden'])</em><a class="headerlink" href="#sonnet.python.modules.basic_rnn.VanillaRNN.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['hidden_to_hidden', 'in_to_hidden'])</em><a class="headerlink" href="#sonnet.python.modules.basic_rnn.VanillaRNN.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1155,7 +1204,7 @@ with <code class="docutils literal notranslate"><span class="pre">test_local_sta
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.batch_norm.BatchNorm.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['moving_mean', 'beta', 'moving_variance', 'gamma'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm.BatchNorm.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['beta', 'gamma', 'moving_mean', 'moving_variance'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm.BatchNorm.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1334,7 +1383,7 @@ with <code class="docutils literal notranslate"><span class="pre">test_local_sta
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['moving_mean', 'beta', 'moving_variance', 'gamma'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['beta', 'gamma', 'moving_mean', 'moving_variance'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1349,7 +1398,7 @@ with <code class="docutils literal notranslate"><span class="pre">test_local_sta
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.batch_norm_v2.BatchNormV2.SUPPORTED_DATA_FORMATS">
-<code class="descname">SUPPORTED_DATA_FORMATS</code><em class="property"> = set(['NHWC', 'NDHWC', 'NWC', 'NCHW', 'NC', 'NCDHW', 'NCW'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.SUPPORTED_DATA_FORMATS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SUPPORTED_DATA_FORMATS</code><em class="property"> = set(['NC', 'NCDHW', 'NCHW', 'NCW', 'NDHWC', 'NHWC', 'NWC'])</em><a class="headerlink" href="#sonnet.python.modules.batch_norm_v2.BatchNormV2.SUPPORTED_DATA_FORMATS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1677,7 +1726,7 @@ channel pairs.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.SeparableConv1D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Performs an in-plane convolution to each channel independently.</p>
 <p>This acts as a light wrapper around the TensorFlow op
@@ -1717,7 +1766,7 @@ passed to the constructor.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.conv.SeparableConv2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">SeparableConv2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>channel_multiplier</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>padding='SAME'</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='separable_conv2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#SeparableConv2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.SeparableConv2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>Performs an in-plane convolution to each channel independently.</p>
 <p>This acts as a light wrapper around the TensorFlow op
@@ -1982,12 +2031,12 @@ test_local_stats.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'w_gates', 'gamma_x'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b_gates', 'beta_c', 'gamma_c', 'gamma_h', 'gamma_x', 'w_f_diag', 'w_gates', 'w_i_diag', 'w_o_diag'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS">
-<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['w_f_diag', 'gamma_h', 'b_gates', 'gamma_c', 'w_o_diag', 'beta_c', 'w_i_diag', 'w_gates', 'gamma_x'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['b_gates', 'beta_c', 'gamma_c', 'gamma_h', 'gamma_x', 'w_f_diag', 'w_gates', 'w_i_diag', 'w_o_diag'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.BatchNormLSTM.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2219,12 +2268,12 @@ output_size: Integer indicating the size of the core output.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.GRU.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['uz', 'bh', 'ur', 'wr', 'br', 'wh', 'wz', 'bz', 'uh'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['bh', 'br', 'bz', 'uh', 'ur', 'uz', 'wh', 'wr', 'wz'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.GRU.POSSIBLE_KEYS">
-<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['uz', 'bh', 'ur', 'wr', 'br', 'wh', 'wz', 'bz', 'uh'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_KEYS</code><em class="property"> = set(['bh', 'br', 'bz', 'uh', 'ur', 'uz', 'wh', 'wr', 'wz'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.GRU.POSSIBLE_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -2368,7 +2417,7 @@ peephole connections are used.</p>
 
 <dl class="attribute">
 <dt id="sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS">
-<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['w_f_diag', 'b_gates', 'w_o_diag', 'w_i_diag', 'w_gates', 'w_h_projection'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">POSSIBLE_INITIALIZER_KEYS</code><em class="property"> = set(['b_gates', 'w_f_diag', 'w_gates', 'w_h_projection', 'w_i_diag', 'w_o_diag'])</em><a class="headerlink" href="#sonnet.python.modules.gated_rnn.LSTM.POSSIBLE_INITIALIZER_KEYS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -3013,9 +3062,12 @@ additional epsilon) towards unity. This means <code class="docutils literal notr
 have the effect of lowering the learning rate.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">scale</span></code> is <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, this op reduces to <code class="docutils literal notranslate"><span class="pre">tf.stop_gradient</span></code>. If
 <code class="docutils literal notranslate"><span class="pre">scale</span></code> is <code class="docutils literal notranslate"><span class="pre">1.0</span></code>, this op reduces to <code class="docutils literal notranslate"><span class="pre">tf.identity</span></code>.</p>
-<p>Args: net: A <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code>. scale: The scale factor for the gradient on
-the backwards pass. name: A name for the operation (optional).</p>
-<p>Returns: A <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code> with the same type as the input tensor.</p>
+<p>Args: net: A <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code> or in eager mode a callable that produces a
+<code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code>. scale: The scale factor for the gradient on the backwards
+pass. name: A name for the operation (optional).</p>
+<p>Returns: In graph mode returns a <code class="docutils literal notranslate"><span class="pre">tf.Tensor</span></code> with the same type as the
+input tensor. In eager mode returns a callable wrapping <code class="docutils literal notranslate"><span class="pre">net</span></code> whose
+gradients are scaled.</p>
 <p>Raises: ValueError: If <code class="docutils literal notranslate"><span class="pre">net</span></code> dtype is non-float and <code class="docutils literal notranslate"><span class="pre">scale</span></code> is not
 zero or one.</p>
 </dd></dl>
@@ -3045,7 +3097,7 @@ passed to the constituents of the module - for example, if there is a
 <code class="docutils literal notranslate"><span class="pre">is_training</span></code> flag. If this is the desired use case, the recommended
 solution is to use <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code> to wrap a custom function, as shown in
 the following example:</p>
-<p><a class="reference external" href="https://github.com/deepmind/sonnet/examples/module_with_build_args.py">https://github.com/deepmind/sonnet/examples/module_with_build_args.py</a></p>
+<p><a class="reference external" href="https://github.com/deepmind/sonnet/blob/master/sonnet/examples/module_with_build_args.py">https://github.com/deepmind/sonnet/blob/master/sonnet/examples/module_with_build_args.py</a></p>
 <dl class="method">
 <dt id="sonnet.python.modules.sequential.Sequential.get_variables">
 <code class="descname">get_variables</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/sequential.html#Sequential.get_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.sequential.Sequential.get_variables" title="Permalink to this definition">¶</a></dt>
@@ -3282,6 +3334,17 @@ function, or <code class="docutils literal notranslate"><span class="pre">regula
 </dd></dl>
 
 <dl class="function">
+<dt id="sonnet.python.modules.util.count_variables_by_type">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">count_variables_by_type</code><span class="sig-paren">(</span><em>variables=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#count_variables_by_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.count_variables_by_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict mapping dtypes to number of variables and scalars.</p>
+<p>Args: variables: iterable of <code class="docutils literal notranslate"><span class="pre">tf.Variable</span></code>s, or None. If None is
+passed, then all global and local variables in the current graph are
+used.</p>
+<p>Returns: A dict mapping tf.dtype keys to a dict containing the keys
+‘num_scalars’ and ‘num_variables’.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="sonnet.python.modules.util.custom_getter_router">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">custom_getter_router</code><span class="sig-paren">(</span><em>custom_getter_map</em>, <em>name_fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#custom_getter_router"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.custom_getter_router" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a custom getter than matches requests to dict of custom getters.</p>
@@ -3327,10 +3390,10 @@ names.</p>
 <p>The names of the variables are normalized to remove the scope prefix.</p>
 <p>Args: scope_or_module: Scope or module to build map from. collection:
 Collection to restrict query to. By default this is
-<code class="docutils literal notranslate"><span class="pre">tf.Graphkeys.VARIABLES</span></code>, which includes non-trainable variables such
-as moving averages. context: Scope or module, identical to or parent of
-<code class="docutils literal notranslate"><span class="pre">scope</span></code>. If given, this will be used as the stripped prefix. By
-default <code class="docutils literal notranslate"><span class="pre">None</span></code>, which means <code class="docutils literal notranslate"><span class="pre">context=scope</span></code>.
+<code class="docutils literal notranslate"><span class="pre">tf.Graphkeys.GLOBAL_VARIABLES</span></code>, which includes non-trainable
+variables such as moving averages. context: Scope or module, identical
+to or parent of <code class="docutils literal notranslate"><span class="pre">scope</span></code>. If given, this will be used as the stripped
+prefix. By default <code class="docutils literal notranslate"><span class="pre">None</span></code>, which means <code class="docutils literal notranslate"><span class="pre">context=scope</span></code>.
 group_sliced_variables: Boolean, if set to True, sliced variables are
 grouped together in the returned map; if set to False, each partition of
 a sliced variable is a separate (key, value) pair.</p>
@@ -3421,6 +3484,23 @@ found.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="sonnet.python.modules.util.notify_about_variables">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">notify_about_variables</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#notify_about_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.notify_about_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <code class="docutils literal notranslate"><span class="pre">callback(var)</span></code> for all <code class="docutils literal notranslate"><span class="pre">tf.{Variable,get_variable}</span></code> results.</p>
+<p>Callback should not modify the variable passed in. Use cases that
+require variables to be modified should use <code class="docutils literal notranslate"><span class="pre">variable_creator_scope</span></code>
+directly and sit within the variable creator stack.</p>
+<blockquote>
+<div>variables = [] with
+notify_about_variables(variables.append): … v =
+tf.Variable(1.0, name=’v’) … w = tf.get_variable(‘w’, [])
+assert variables == [v, w]</div></blockquote>
+<p>Args: callback: a callable taking a single argument which is a
+tf.Variable.</p>
+<p>Yields: <code class="docutils literal notranslate"><span class="pre">None</span></code> - used for contextmanager API.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="sonnet.python.modules.util.reuse_variables">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">reuse_variables</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#reuse_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.reuse_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wraps an arbitrary method so it does variable sharing.</p>
@@ -3455,8 +3535,30 @@ example:</p>
 <span class="n">output</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">add_x</span><span class="p">(</span><span class="n">input_tensor</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>For performance when executing eagerly it may be desirable to
+additionally annotate these methods using <code class="docutils literal notranslate"><span class="pre">defun</span></code>, such that they are
+encapsulated as graph functions. This is not recommended if your method
+returns a variable since the output of <code class="docutils literal notranslate"><span class="pre">defun</span></code> would be an op that
+returned the variable’s value when evaluated (rather than the variable
+instance).</p>
+<div class="code python highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FooModule</span><span class="p">(</span><span class="n">snt</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">complex_math</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+  <span class="nd">@tfe</span><span class="o">.</span><span class="n">defun</span>
+  <span class="nd">@snt</span><span class="o">.</span><span class="n">reuse_variables</span>
+  <span class="k">def</span> <span class="nf">more_complex_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">more_complex_math</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Args: method: The method to wrap.</p>
 <p>Returns: The wrapped method.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.util.sort_by_name">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">sort_by_name</code><span class="sig-paren">(</span><em>variables</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#sort_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.sort_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple of <code class="docutils literal notranslate"><span class="pre">variables</span></code> sorted ascending by name.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3539,6 +3641,14 @@ variables).</p>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -3547,8 +3657,8 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/api/sonnet.python.modules.rst.txt"

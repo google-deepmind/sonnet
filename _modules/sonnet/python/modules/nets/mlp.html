@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -61,6 +61,7 @@
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.layers</span> <span class="k">import</span> <span class="n">utils</span>
 
 
 <div class="viewcode-block" id="MLP"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP">[docs]</a><span class="k">class</span> <span class="nc">MLP</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">AbstractModule</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">Transposable</span><span class="p">):</span>
@@ -74,6 +75,7 @@
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mlp&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Constructs an MLP module.</span>
@@ -100,6 +102,8 @@
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
 <span class="sd">      use_bias: Whether to include bias parameters in the linear layers.</span>
 <span class="sd">        Default `True`.</span>
+<span class="sd">      use_dropout: Whether to perform dropout on the linear layers.</span>
+<span class="sd">        Default `False`.</span>
 <span class="sd">      custom_getter: Callable or dictionary of callables to use as</span>
 <span class="sd">        custom getters inside the module. If a dictionary, the keys</span>
 <span class="sd">        correspond to regexes to match variable names. See the `tf.get_variable`</span>
@@ -137,6 +141,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span> <span class="o">=</span> <span class="n">activate_final</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span> <span class="o">=</span> <span class="n">use_dropout</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_layers</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -153,7 +158,13 @@
 <span class="sd">    connected to the graph.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+    <span class="c1"># Here we are entering the module&#39;s variable scope to name our submodules</span>
+    <span class="c1"># correctly (not to create variables). As such it&#39;s safe to not check</span>
+    <span class="c1"># whether we&#39;re in the same graph. This is important if we&#39;re constructing</span>
+    <span class="c1"># the module in one graph and connecting it in another (e.g. with `defun`</span>
+    <span class="c1"># the module is created in some default graph, and connected to a capturing</span>
+    <span class="c1"># graph in order to turn it into a graph function).</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">(</span><span class="n">check_same_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_sizes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linear_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                                    <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">,</span>
@@ -166,12 +177,15 @@
   <span class="k">def</span> <span class="nf">get_possible_initializer_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">basic</span><span class="o">.</span><span class="n">Linear</span><span class="o">.</span><span class="n">get_possible_initializer_keys</span><span class="p">(</span><span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">)</span></div>
 
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dropout_keep_prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assembles the `MLP` and connects it to the graph.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A 2D Tensor of size `[batch_size, input_size]`.</span>
-
+<span class="sd">      is_training: A bool or tf.Bool Tensor. Indicates whether we are</span>
+<span class="sd">        currently training. Defaults to `True`.</span>
+<span class="sd">      dropout_keep_prob: The probability that each element is kept when</span>
+<span class="sd">        both `use_dropout` and `is_training` are True. Defaults to 0.5.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">      A 2D Tensor of size `[batch_size, output_sizes[-1]]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -183,6 +197,13 @@
       <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">[</span><span class="n">layer_id</span><span class="p">](</span><span class="n">net</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">final_index</span> <span class="o">!=</span> <span class="n">layer_id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span><span class="p">:</span>
+        <span class="c1"># Only perform dropout whenever we are activating the layer&#39;s outputs.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span><span class="p">:</span>
+          <span class="n">keep_prob</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">smart_cond</span><span class="p">(</span>
+              <span class="n">is_training</span><span class="p">,</span> <span class="n">true_fn</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">dropout_keep_prob</span><span class="p">,</span>
+              <span class="n">false_fn</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+          <span class="p">)</span>
+          <span class="n">net</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">keep_prob</span><span class="o">=</span><span class="n">keep_prob</span><span class="p">)</span>
         <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">net</span>
@@ -212,6 +233,10 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">use_bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">use_dropout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">initializers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -263,14 +288,40 @@
       <span class="n">activate_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span>
     <span class="n">output_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">l</span><span class="o">=</span><span class="n">layer</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">]</span>
     <span class="n">output_sizes</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">MLP</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-               <span class="n">output_sizes</span><span class="o">=</span><span class="n">output_sizes</span><span class="p">,</span>
-               <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
-               <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
-               <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
-               <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
-               <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
-               <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">)</span></div></div>
+    <span class="k">return</span> <span class="n">MLP</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">output_sizes</span><span class="o">=</span><span class="n">output_sizes</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">use_dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_dropout</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLP.clone"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.clone">[docs]</a>  <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a new MLP with the same structure.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      name: Optional string specifying the name of the new module. The default</span>
+<span class="sd">        name is constructed by appending &quot;_clone&quot; to the original name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A cloned `MLP` module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_clone&quot;</span>
+    <span class="k">return</span> <span class="n">MLP</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">output_sizes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_sizes</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">use_dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_dropout</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -311,6 +362,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -319,8 +378,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

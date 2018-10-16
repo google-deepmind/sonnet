@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -413,7 +413,7 @@ noise added to off-entries to break ties.</p>
 <p>A minimal interface mlp module.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.nets.mlp.MLP">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.mlp.</code><code class="descname">MLP</code><span class="sig-paren">(</span><em>output_sizes</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_bias=True</em>, <em>custom_getter=None</em>, <em>name='mlp'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.mlp.</code><code class="descname">MLP</code><span class="sig-paren">(</span><em>output_sizes</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_bias=True</em>, <em>use_dropout=False</em>, <em>custom_getter=None</em>, <em>name='mlp'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>A Multi-Layer perceptron module.</p>
 <dl class="attribute">
@@ -425,6 +425,15 @@ noise added to off-entries to break ties.</p>
 <dt id="sonnet.python.modules.nets.mlp.MLP.activation">
 <code class="descname">activation</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.activation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.nets.mlp.MLP.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/mlp.html#MLP.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new MLP with the same structure.</p>
+<p>Args: name: Optional string specifying the name of the new module. The
+default name is constructed by appending “_clone” to the original name.</p>
+<p>Returns: A cloned <code class="docutils literal notranslate"><span class="pre">MLP</span></code> module.</p>
+</dd></dl>
 
 <dl class="classmethod">
 <dt id="sonnet.python.modules.nets.mlp.MLP.get_possible_initializer_keys">
@@ -498,6 +507,11 @@ final layer.</p>
 <dl class="attribute">
 <dt id="sonnet.python.modules.nets.mlp.MLP.use_bias">
 <code class="descname">use_bias</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.use_bias" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.mlp.MLP.use_dropout">
+<code class="descname">use_dropout</code><a class="headerlink" href="#sonnet.python.modules.nets.mlp.MLP.use_dropout" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -628,6 +642,14 @@ instability.</p>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -636,8 +658,8 @@ instability.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/api/sonnet.python.modules.nets.rst.txt"

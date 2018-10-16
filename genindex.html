@@ -14,7 +14,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -230,7 +230,11 @@
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.clip_gradient.clip_gradient">clip_gradient() (in module sonnet.python.modules.clip_gradient)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.clone">clone() (sonnet.python.modules.basic.Linear method)</a>
+
+      <ul>
+        <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.clone">(sonnet.python.modules.nets.mlp.MLP method)</a>
 </li>
+      </ul></li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.combine_with">combine_with() (sonnet.python.modules.spatial_transformer.AffineWarpConstraints method)</a>
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer.compute_gradients">compute_gradients() (sonnet.examples.brnn_ptb.GlobalNormClippingOptimizer method)</a>
@@ -284,6 +288,8 @@
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ConvLSTM.convolutions">convolutions (sonnet.python.modules.gated_rnn.ConvLSTM attribute)</a>
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.dataset_shakespeare.TinyShakespeareDataset.cost">cost() (sonnet.examples.dataset_shakespeare.TinyShakespeareDataset method)</a>
+</li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.count_variables_by_type">count_variables_by_type() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.batch_norm.create_beta_initializer">create_beta_initializer() (in module sonnet.python.modules.batch_norm)</a>
 
@@ -345,8 +351,12 @@
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.dataset_shakespeare.TokenDataSource.DEFAULT_START_TOKENS">DEFAULT_START_TOKENS (sonnet.examples.dataset_shakespeare.TokenDataSource attribute)</a>
 </li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun">defun() (sonnet.python.modules.base.AbstractModule method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun_wrapped">defun_wrapped (sonnet.python.modules.base.AbstractModule attribute)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D">DepthwiseConv2D (class in sonnet.python.modules.conv)</a>
 </li>
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.bayes_by_backprop.diagonal_gaussian_posterior_builder">diagonal_gaussian_posterior_builder() (in module sonnet.python.custom_getters.bayes_by_backprop)</a>
@@ -743,11 +753,15 @@
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.brnn_ptb.non_lstm_posterior_builder">non_lstm_posterior_builder() (in module sonnet.examples.brnn_ptb)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.non_trainable.non_trainable">non_trainable() (in module sonnet.python.custom_getters.non_trainable)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.non_trainable_variables">non_trainable_variables (sonnet.python.modules.base.AbstractModule attribute)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_errors.NotConnectedError">NotConnectedError</a>
+</li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.notify_about_variables">notify_about_variables() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_errors.NotInitializedError">NotInitializedError</a>
 </li>
@@ -834,6 +848,8 @@
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_info.ConnectedSubGraph.outputs">outputs (sonnet.python.modules.base_info.ConnectedSubGraph attribute)</a>
 </li>
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.override_args.override_args">override_args() (in module sonnet.python.custom_getters.override_args)</a>
+</li>
+      <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.override_args.override_default_args">override_default_args() (in module sonnet.python.custom_getters.override_args)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1121,6 +1137,8 @@
 </li>
       <li><a href="api/sonnet.python.ops.html#module-sonnet.python.ops.nest">sonnet.python.ops.nest (module)</a>
 </li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.sort_by_name">sort_by_name() (in module sonnet.python.modules.util)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.GridWarper.source_shape">source_shape (sonnet.python.modules.spatial_transformer.GridWarper attribute)</a>
 </li>
       <li><a href="api/sonnet.examples.html#sonnet.examples.brnn_ptb.DataOps.sparse_obs">sparse_obs (sonnet.examples.brnn_ptb.DataOps attribute)</a>
@@ -1211,12 +1229,14 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.trainable_initial_state">trainable_initial_state() (in module sonnet.python.modules.rnn_core)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.TrainableInitialState">TrainableInitialState (class in sonnet.python.modules.rnn_core)</a>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.trainable_variables">trainable_variables (sonnet.python.modules.base.AbstractModule attribute)</a>
 </li>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.TrainableVariable">TrainableVariable (class in sonnet.python.modules.basic)</a>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.TrainableInitialState">TrainableInitialState (class in sonnet.python.modules.rnn_core)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.TrainableVariable">TrainableVariable (class in sonnet.python.modules.basic)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_2d">translation_2d() (sonnet.python.modules.spatial_transformer.AffineWarpConstraints class method)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.spatial_transformer.AffineWarpConstraints.translation_3d">translation_3d() (sonnet.python.modules.spatial_transformer.AffineWarpConstraints class method)</a>
@@ -1271,16 +1291,18 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_h">use_batch_norm_h (sonnet.python.modules.gated_rnn.BatchNormLSTM attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.BatchNormLSTM.use_batch_norm_x">use_batch_norm_x (sonnet.python.modules.gated_rnn.BatchNormLSTM attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.use_bias">use_bias (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 
       <ul>
         <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.use_bias">(sonnet.python.modules.nets.mlp.MLP attribute)</a>
 </li>
       </ul></li>
+      <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.mlp.MLP.use_dropout">use_dropout (sonnet.python.modules.nets.mlp.MLP attribute)</a>
+</li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ConvLSTM.use_layer_norm">use_layer_norm (sonnet.python.modules.gated_rnn.ConvLSTM attribute)</a>
 
       <ul>
@@ -1308,6 +1330,8 @@
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.variable_map_items">variable_map_items() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.variable_scope">variable_scope (sonnet.python.modules.base.AbstractModule attribute)</a>
+</li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.variables">variables (sonnet.python.modules.base.AbstractModule attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -1456,6 +1480,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -1464,8 +1496,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

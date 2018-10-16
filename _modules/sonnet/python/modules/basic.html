@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -472,7 +472,7 @@
 <span class="sd">          over (given size of 1), and leading dimensions will be removed</span>
 <span class="sd">          completely. For example, for an input of [batch_size, dim1_size,</span>
 <span class="sd">          dim2_size, dim3_size] and `bias_dims=[1, 3]`, the resulting</span>
-<span class="sd">          bias will have shape [dim1_size, 1, dim2_size]. The default is to</span>
+<span class="sd">          bias will have shape [dim1_size, 1, dim3_size]. The default is to</span>
 <span class="sd">          retain all dimensions apart from the minibatch dimension. Trying to</span>
 <span class="sd">          retain the bias shape over the minibatch dimension, e.g.</span>
 <span class="sd">          `bias_dims=[0]`, will result in an error at build time. See the</span>
@@ -1442,6 +1442,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -1450,8 +1458,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -54,6 +54,7 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -65,6 +66,7 @@
 <span class="kn">import</span> <span class="nn">wrapt</span>
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">function</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">variable_scope</span> <span class="k">as</span> <span class="n">variable_scope_ops</span>
 
 
@@ -412,8 +414,8 @@
 <span class="sd">  Args:</span>
 <span class="sd">    scope_or_module: Scope or module to build map from.</span>
 <span class="sd">    collection: Collection to restrict query to. By default this is</span>
-<span class="sd">        `tf.Graphkeys.VARIABLES`, which includes non-trainable variables such</span>
-<span class="sd">        as moving averages.</span>
+<span class="sd">        `tf.Graphkeys.GLOBAL_VARIABLES`, which includes non-trainable variables</span>
+<span class="sd">        such as moving averages.</span>
 <span class="sd">    context: Scope or module, identical to or parent of `scope`. If given, this</span>
 <span class="sd">        will be used as the stripped prefix. By default `None`, which means</span>
 <span class="sd">        `context=scope`.</span>
@@ -615,14 +617,40 @@
 <span class="sd">    variables: iterable of variables; if not provided, then all variables</span>
 <span class="sd">      (in the default graph) are summarized.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables</span><span class="p">()</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables</span><span class="p">()</span>
+
+  <span class="n">variable_counts</span> <span class="o">=</span> <span class="n">count_variables_by_type</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
   <span class="n">total_num_scalars</span> <span class="o">=</span> <span class="mi">0</span>
   <span class="n">total_num_bytes</span> <span class="o">=</span> <span class="mi">0</span>
+
   <span class="c1"># Sort by string representation of type name, so output is deterministic.</span>
-  <span class="n">unique_types_ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]),</span>
-                                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">dtype</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dtype</span><span class="p">)</span>
-  <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">unique_types_ordered</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">variable_counts</span><span class="p">,</span>
+                      <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">dtype</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dtype</span><span class="p">):</span>
+    <span class="n">var_info_for_type</span> <span class="o">=</span> <span class="n">variable_counts</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span>
+    <span class="n">num_bytes</span> <span class="o">=</span> <span class="n">var_info_for_type</span><span class="p">[</span><span class="s2">&quot;num_scalars&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dtype</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">total_num_scalars</span> <span class="o">+=</span> <span class="n">var_info_for_type</span><span class="p">[</span><span class="s2">&quot;num_scalars&quot;</span><span class="p">]</span>
+    <span class="n">total_num_bytes</span> <span class="o">+=</span> <span class="n">num_bytes</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%r</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> variables comprising </span><span class="si">%d</span><span class="s2"> scalars, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">dtype</span><span class="p">,</span> <span class="n">var_info_for_type</span><span class="p">[</span><span class="s2">&quot;num_variables&quot;</span><span class="p">],</span>
+                    <span class="n">var_info_for_type</span><span class="p">[</span><span class="s2">&quot;num_scalars&quot;</span><span class="p">],</span>
+                    <span class="n">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="count_variables_by_type"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.count_variables_by_type">[docs]</a><span class="k">def</span> <span class="nf">count_variables_by_type</span><span class="p">(</span><span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a dict mapping dtypes to number of variables and scalars.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    variables: iterable of `tf.Variable`s, or None. If None is passed, then all</span>
+<span class="sd">      global and local variables in the current graph are used.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A dict mapping tf.dtype keys to a dict containing the keys &#39;num_scalars&#39; and</span>
+<span class="sd">      &#39;num_variables&#39;.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">global_variables</span><span class="p">()</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">local_variables</span><span class="p">()</span>
+  <span class="n">unique_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">)</span>
+  <span class="n">results_dict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">unique_types</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">string</span><span class="p">:</span>
       <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
           <span class="s2">&quot;NB: string Variables present. The memory usage for these  Variables &quot;</span>
@@ -630,15 +658,11 @@
           <span class="s2">&quot;stored in a particular session.&quot;</span><span class="p">)</span>
     <span class="n">vars_of_type</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span> <span class="o">==</span> <span class="n">dtype</span><span class="p">]</span>
     <span class="n">num_scalars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">num_elements</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vars_of_type</span><span class="p">)</span>
-    <span class="n">num_bytes</span> <span class="o">=</span> <span class="n">num_scalars</span> <span class="o">*</span> <span class="n">dtype</span><span class="o">.</span><span class="n">size</span>
-    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%r</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> variables comprising </span><span class="si">%d</span><span class="s2"> scalars, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">dtype</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vars_of_type</span><span class="p">),</span> <span class="n">num_scalars</span><span class="p">,</span>
-                    <span class="n">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">))</span>
-    <span class="n">total_num_scalars</span> <span class="o">+=</span> <span class="n">num_scalars</span>
-    <span class="n">total_num_bytes</span> <span class="o">+=</span> <span class="n">num_bytes</span>
-  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Total: </span><span class="si">%d</span><span class="s2"> variables comprising </span><span class="si">%d</span><span class="s2"> scalars, </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
-                  <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">),</span> <span class="n">total_num_scalars</span><span class="p">,</span>
-                  <span class="n">_num_bytes_to_human_readable</span><span class="p">(</span><span class="n">total_num_bytes</span><span class="p">))</span></div>
+    <span class="n">results_dict</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;num_variables&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">vars_of_type</span><span class="p">),</span>
+        <span class="s2">&quot;num_scalars&quot;</span><span class="p">:</span> <span class="n">num_scalars</span>
+    <span class="p">}</span>
+  <span class="k">return</span> <span class="n">results_dict</span></div>
 
 
 <div class="viewcode-block" id="reuse_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.reuse_variables">[docs]</a><span class="k">def</span> <span class="nf">reuse_variables</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
@@ -677,13 +701,31 @@
 <span class="sd">  output = module.add_x(input_tensor)</span>
 <span class="sd">  ```</span>
 
+<span class="sd">  For performance when executing eagerly it may be desirable to additionally</span>
+<span class="sd">  annotate these methods using `defun`, such that they are encapsulated as</span>
+<span class="sd">  graph functions. This is not recommended if your method returns a variable</span>
+<span class="sd">  since the output of `defun` would be an op that returned the variable&#39;s value</span>
+<span class="sd">  when evaluated (rather than the variable instance).</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  class FooModule(snt.AbstractModule):</span>
+<span class="sd">    def _build(self, inputs):</span>
+<span class="sd">      return complex_math(inputs)</span>
+
+<span class="sd">    @tfe.defun</span>
+<span class="sd">    @snt.reuse_variables</span>
+<span class="sd">    def more_complex_stuff(self, inputs):</span>
+<span class="sd">      return more_complex_math(inputs)</span>
+<span class="sd">  ```</span>
+
 <span class="sd">  Args:</span>
 <span class="sd">    method: The method to wrap.</span>
 
 <span class="sd">  Returns:</span>
 <span class="sd">    The wrapped method.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">initialized_variable_scopes</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+  <span class="n">initialized_variable_scopes_eager</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="n">initialized_variable_scopes_graph</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
 
   <span class="c1"># Ensure that the argument passed in is really a method by checking that the</span>
   <span class="c1"># first positional argument to it is &quot;self&quot;.</span>
@@ -694,7 +736,22 @@
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;reuse_variables can only be used with methods.&quot;</span><span class="p">)</span>
 
   <span class="nd">@wrapt</span><span class="o">.</span><span class="n">decorator</span>
-  <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">eager_test</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validates runtime state in eager mode.&quot;&quot;&quot;</span>
+    <span class="c1"># If @reuse_variables is combined with @property, obj is passed in args</span>
+    <span class="c1"># and method is still unbound at this stage.</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_template&quot;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;reuse_variables is not supported in eager mode except in Sonnet &quot;</span>
+          <span class="s2">&quot;modules.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="nd">@wrapt</span><span class="o">.</span><span class="n">decorator</span>
+  <span class="k">def</span> <span class="nf">call_method</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calls `method` with a variable scope whose reuse flag is set correctly.</span>
 
 <span class="sd">    The first time the wrapper is called it creates a</span>
@@ -776,16 +833,25 @@
     <span class="n">variable_scope_context_manager</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;_enter_variable_scope&quot;</span><span class="p">,</span>
                                              <span class="n">default_context_manager</span><span class="p">)</span>
 
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">graph</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes</span><span class="p">:</span>
-      <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="n">initialized_variable_scopes_for_graph</span> <span class="o">=</span> <span class="n">initialized_variable_scopes</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">init_scope</span><span class="p">():</span>
+      <span class="c1"># We need `init_scope` incase we&#39;re running inside a defun. In that case</span>
+      <span class="c1"># what we want is information about where the function will be called not</span>
+      <span class="c1"># where the function is being built.</span>
+      <span class="n">graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+      <span class="n">will_call_in_eager_context</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">will_call_in_eager_context</span><span class="p">:</span>
+      <span class="n">initialized_variable_scopes</span> <span class="o">=</span> <span class="n">initialized_variable_scopes_eager</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">graph</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes_graph</span><span class="p">:</span>
+        <span class="n">initialized_variable_scopes_graph</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+      <span class="n">initialized_variable_scopes</span> <span class="o">=</span> <span class="n">initialized_variable_scopes_graph</span><span class="p">[</span><span class="n">graph</span><span class="p">]</span>
 
     <span class="c1"># Temporarily enter the variable scope to capture it</span>
     <span class="k">with</span> <span class="n">variable_scope_context_manager</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp_variable_scope</span><span class="p">:</span>
       <span class="n">variable_scope</span> <span class="o">=</span> <span class="n">tmp_variable_scope</span>
 
-    <span class="n">reuse</span> <span class="o">=</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes_for_graph</span>
+    <span class="n">reuse</span> <span class="o">=</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">initialized_variable_scopes</span>
 
     <span class="c1"># Enter the pure variable scope with reuse correctly set</span>
     <span class="k">with</span> <span class="n">variable_scope_ops</span><span class="o">.</span><span class="n">_pure_variable_scope</span><span class="p">(</span>  <span class="c1"># pylint:disable=protected-access</span>
@@ -805,7 +871,7 @@
               <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
           <span class="k">else</span><span class="p">:</span>
             <span class="n">out_ops</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-      <span class="n">initialized_variable_scopes_for_graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+      <span class="n">initialized_variable_scopes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pure_variable_scope</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="c1"># If `obj` is a Sonnet module, let it know it&#39;s been connected</span>
         <span class="c1"># to the TF graph.</span>
@@ -817,7 +883,7 @@
         <span class="k">pass</span>
     <span class="k">return</span> <span class="n">out_ops</span>
 
-  <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-value-for-parameter</span></div>
+  <span class="k">return</span> <span class="n">eager_test</span><span class="p">(</span><span class="n">call_method</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>  <span class="c1"># pylint: disable=no-value-for-parameter</span></div>
 
 
 <div class="viewcode-block" id="name_for_callable"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.name_for_callable">[docs]</a><span class="k">def</span> <span class="nf">name_for_callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -872,6 +938,40 @@
 <span class="sd">    The input `Tensor`.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="n">x</span>
+
+
+<div class="viewcode-block" id="sort_by_name"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.sort_by_name">[docs]</a><span class="k">def</span> <span class="nf">sort_by_name</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a tuple of `variables` sorted ascending by name.&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="notify_about_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.notify_about_variables">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">notify_about_variables</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calls `callback(var)` for all `tf.{Variable,get_variable}` results.</span>
+
+<span class="sd">  Callback should not modify the variable passed in. Use cases that require</span>
+<span class="sd">  variables to be modified should use `variable_creator_scope` directly and sit</span>
+<span class="sd">  within the variable creator stack.</span>
+
+<span class="sd">  &gt;&gt;&gt; variables = []</span>
+<span class="sd">  &gt;&gt;&gt; with notify_about_variables(variables.append):</span>
+<span class="sd">  ...   v = tf.Variable(1.0, name=&#39;v&#39;)</span>
+<span class="sd">  ...   w = tf.get_variable(&#39;w&#39;, [])</span>
+<span class="sd">  &gt;&gt;&gt; assert variables == [v, w]</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    callback: a callable taking a single argument which is a tf.Variable.</span>
+
+<span class="sd">  Yields:</span>
+<span class="sd">    `None` - used for contextmanager API.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_tracking_creator</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">callback</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">v</span>
+
+  <span class="k">with</span> <span class="n">variable_scope_ops</span><span class="o">.</span><span class="n">variable_creator_scope</span><span class="p">(</span><span class="n">_tracking_creator</span><span class="p">):</span>
+    <span class="k">yield</span></div>
 </pre></div>
 
           </div>
@@ -912,6 +1012,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -920,8 +1028,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

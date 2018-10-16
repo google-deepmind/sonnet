@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -172,6 +172,13 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_trainable</span> <span class="o">=</span> <span class="n">trainable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_densify_gradients</span> <span class="o">=</span> <span class="n">densify_gradients</span>
 
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">EMBEDDINGS</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">log_first_n</span><span class="p">(</span>
+          <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
+          <span class="s2">&quot;Consider using an initializer for snt.Embed with stddev 1. &quot;</span>
+          <span class="s2">&quot;This will be the default after November 1 2018.&quot;</span><span class="p">,</span>
+          <span class="mi">1</span><span class="p">)</span>
+
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Lookup embeddings.</span>
 
@@ -187,6 +194,7 @@
     <span class="c1"># Construct embeddings.</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_existing_vocab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">EMBEDDINGS</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">:</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_initializers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">EMBEDDINGS</span><span class="p">]</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">create_linear_initializer</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_vocab_size</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span>
@@ -282,6 +290,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -290,8 +306,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

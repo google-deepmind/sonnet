@@ -36,6 +36,14 @@ sonnet.examples.dataset\_shakespeare module
     :undoc-members:
     :show-inheritance:
 
+sonnet.examples.learn\_to\_execute module
+-----------------------------------------
+
+.. automodule:: sonnet.examples.learn_to_execute
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 sonnet.examples.module\_with\_build\_args module
 ------------------------------------------------
 
@@ -48,6 +56,22 @@ sonnet.examples.ptb\_reader module
 ----------------------------------
 
 .. automodule:: sonnet.examples.ptb_reader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet.examples.rmc\_learn\_to\_execute module
+----------------------------------------------
+
+.. automodule:: sonnet.examples.rmc_learn_to_execute
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+sonnet.examples.rmc\_learn\_to\_execute\_test module
+----------------------------------------------------
+
+.. automodule:: sonnet.examples.rmc_learn_to_execute_test
     :members:
     :undoc-members:
     :show-inheritance:

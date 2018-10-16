@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -62,11 +62,10 @@
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">weakref</span>
 
 <span class="c1"># Dependency imports</span>
+<span class="kn">import</span> <span class="nn">contextlib2</span>
 <span class="kn">import</span> <span class="nn">six</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base_info</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
@@ -86,13 +85,11 @@
 <span class="c1"># pylint: enable=g-bad-import-order</span>
 <span class="c1"># pylint: enable=unused-import</span>
 
-
-<span class="c1"># Maps `tf.Graph` objects to a module call stack.</span>
-<span class="n">_MODULE_STACKS</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
 
 
-<span class="c1"># Maps `tf.Graph` objects to a stack of module connection observers.</span>
-<span class="n">_CONNECTION_OBSERVER_STACKS</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">WeakKeyDictionary</span><span class="p">()</span>
+<span class="n">_MODULE_STACK</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">_CONNECTION_OBSERVER_STACK</span> <span class="o">=</span> <span class="p">[]</span>
 
 
 <div class="viewcode-block" id="observe_connections"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.observe_connections">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
@@ -119,92 +116,11 @@
 <span class="sd">  Yields:</span>
 <span class="sd">    None: just yields control to the inner context.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">connection_observer_stack</span> <span class="o">=</span> <span class="n">_CONNECTION_OBSERVER_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-      <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">(),</span> <span class="p">[])</span>
-  <span class="n">connection_observer_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observer</span><span class="p">)</span>
+  <span class="n">_CONNECTION_OBSERVER_STACK</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">observer</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">yield</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="n">connection_observer_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
-
-
-
-<span class="k">def</span> <span class="nf">_maybe_wrap_custom_getter</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">,</span> <span class="n">old_getter</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Wrap a call to a custom_getter to use the old_getter internally.</span>
-
-<span class="sd">  Copied from [variable_scope._maybe_wrap_custom_getter](</span>
-<span class="sd">  https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/</span>
-<span class="sd">  ops/variable_scope.py#L1565)</span>
-
-<span class="sd">  Args:</span>
-<span class="sd">    custom_getter: The wrapping custom getter.</span>
-<span class="sd">    old_getter: The wrapped custom getter.</span>
-
-<span class="sd">  Returns:</span>
-<span class="sd">    A new custom getter that calls `old_getter` and then `custom_getter`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="n">old_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">custom_getter</span>
-
-  <span class="c1"># The new custom_getter should call the old one</span>
-  <span class="k">def</span> <span class="nf">wrapped_custom_getter</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="c1"># Call:</span>
-    <span class="c1">#  custom_getter(</span>
-    <span class="c1">#    lambda: old_getter(true_getter, ...), *args, **kwargs)</span>
-    <span class="c1"># which means custom_getter will call old_getter, which</span>
-    <span class="c1"># will call the true_getter, perform any intermediate</span>
-    <span class="c1"># processing, and return the results to the current</span>
-    <span class="c1"># getter, which will also perform additional processing.</span>
-    <span class="k">return</span> <span class="n">custom_getter</span><span class="p">(</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">old_getter</span><span class="p">,</span> <span class="n">getter</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-  <span class="k">return</span> <span class="n">wrapped_custom_getter</span>
-
-
-<span class="k">def</span> <span class="nf">_variable_tracking_custom_getter</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Custom getter that tracks variables created.</span>
-
-<span class="sd">  This custom getter places any variables that `getter` creates into the</span>
-<span class="sd">  `_all_variables` attribute of the `AbstractModule` that is on top of the</span>
-<span class="sd">  module call stack. The module call stack is a graph-dependent stack that</span>
-<span class="sd">  keeps track of the sonnet module call order.</span>
-
-<span class="sd">  Note that this assumes that variables added appended to `tf.Graph`</span>
-<span class="sd">  collections. This is a safe assumption to make because</span>
-<span class="sd">  `tf.add_to_collection()` appends objects to collections, and `tf.Variable`</span>
-<span class="sd">  uses `tf.add_to_collections()` to add itself to `tf.Graph` collections.</span>
-
-<span class="sd">  Note that this assumes that all variables are added either the</span>
-<span class="sd">  `tf.GraphKeys.GLOBAL_VARIABLES` or `tf.GraphKeys.LOCAL_VARIABLES` collection.</span>
-
-<span class="sd">  Args:</span>
-<span class="sd">    getter: The true getter or another custom getter.</span>
-<span class="sd">    *args: See positional arguments for `tf.get_variable()`.</span>
-<span class="sd">    **kwargs: See keyword arguments for `tf.get_variable()`.</span>
-
-<span class="sd">  Returns:</span>
-<span class="sd">    See docstring for `tf.get_variable()`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="c1"># Get the module that is calling `tf.get_variable()`</span>
-  <span class="n">module_stack</span> <span class="o">=</span> <span class="n">_MODULE_STACKS</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()]</span>
-  <span class="n">module</span> <span class="o">=</span> <span class="n">module_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-  <span class="c1"># Get lists of local and global variables. We use `tf.get_collection_ref()`</span>
-  <span class="c1"># instead of `tf.get_collection()` to avoid copying the collections.</span>
-  <span class="n">local_variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection_ref</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">LOCAL_VARIABLES</span><span class="p">)</span>
-  <span class="n">global_variables</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_collection_ref</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">GLOBAL_VARIABLES</span><span class="p">)</span>
-
-  <span class="n">num_local_vars_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_variables</span><span class="p">)</span>
-  <span class="n">num_global_vars_before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_variables</span><span class="p">)</span>
-
-  <span class="n">out</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-  <span class="c1"># Add any local or global variables that have been created to `module`</span>
-  <span class="c1"># pylint: disable=protected-access</span>
-  <span class="n">module</span><span class="o">.</span><span class="n">_all_variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">local_variables</span><span class="p">[</span><span class="n">num_local_vars_before</span><span class="p">:])</span>
-  <span class="n">module</span><span class="o">.</span><span class="n">_all_variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">global_variables</span><span class="p">[</span><span class="n">num_global_vars_before</span><span class="p">:])</span>
-  <span class="c1"># pylint: enable=protected-access</span>
-
-  <span class="k">return</span> <span class="n">out</span>
+    <span class="n">_CONNECTION_OBSERVER_STACK</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="AbstractModule"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule">[docs]</a><span class="nd">@six</span><span class="o">.</span><span class="n">add_metaclass</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">)</span>
@@ -275,12 +191,10 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">custom_getter_router</span><span class="p">(</span>
           <span class="n">custom_getter_map</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">,</span>
           <span class="n">name_fn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">name</span><span class="p">:</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scope_name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+    <span class="k">elif</span> <span class="n">custom_getter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Given custom_getter is not callable.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">custom_getter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">callable</span><span class="p">(</span><span class="n">custom_getter</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Given custom_getter is not callable.&quot;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">custom_getter</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span> <span class="o">=</span> <span class="n">_maybe_wrap_custom_getter</span><span class="p">(</span>
-        <span class="n">_variable_tracking_custom_getter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_custom_getter</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">make_template</span><span class="p">(</span><span class="n">name</span><span class="p">,</span>
                                       <span class="bp">self</span><span class="o">.</span><span class="n">_build_wrapper</span><span class="p">,</span>
@@ -301,6 +215,10 @@
 
     <span class="c1"># Container for all variables created in this module and its sub-modules.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+
+    <span class="c1"># Calling `.defun()` causes the module&#39;s call method to become wrapped as</span>
+    <span class="c1"># a graph function.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_defun_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
 
   <span class="k">def</span> <span class="nf">_build_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function which will be wrapped in a Template to do variable sharing.</span>
@@ -364,12 +282,23 @@
 <span class="sd">      DifferentGraphError: if the module is connected to a different Graph than</span>
 <span class="sd">        it was previously used in.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">current_graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">init_scope</span><span class="p">():</span>
+      <span class="c1"># We need `init_scope` incase we&#39;re running inside a defun. In that case</span>
+      <span class="c1"># what we want is information about where the function will be called not</span>
+      <span class="c1"># where the function is being built.</span>
+      <span class="n">current_graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span>
+      <span class="n">will_call_in_eager_context</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">current_graph</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_set_module_info</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">!=</span> <span class="n">current_graph</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="n">DifferentGraphError</span><span class="p">(</span><span class="s2">&quot;Cannot connect module to multiple Graphs.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">will_call_in_eager_context</span><span class="p">:</span>
+      <span class="c1"># Same graph checks only make sense when calling from graph mode (in eager</span>
+      <span class="c1"># mode there is a single process level context where all modules are</span>
+      <span class="c1"># created).</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">!=</span> <span class="n">current_graph</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DifferentGraphError</span><span class="p">(</span><span class="s2">&quot;Cannot connect module to multiple Graphs.&quot;</span><span class="p">)</span>
 
   <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
   <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -401,28 +330,31 @@
 <span class="sd">    Yields:</span>
 <span class="sd">      Nothing, the yield just transfers focus back to the inner context.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">module_stack</span> <span class="o">=</span> <span class="n">_MODULE_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="n">module_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">_MODULE_STACK</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="c1"># In eager mode, the template store keeps references to created variables</span>
-      <span class="c1"># such that they survive even if there are no references to them in</span>
-      <span class="c1"># Python code. Variables added to an eager template store are also added</span>
-      <span class="c1"># to TensorFlow global collections (unlike regular variables created in</span>
-      <span class="c1"># eager mode).</span>
-      <span class="c1"># Ideally move re-entering store into TF&#39;s tpl.variable_scope.</span>
-      <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">_template_store</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>  <span class="c1"># pylint:disable=protected-access</span>
-          <span class="k">yield</span>
-      <span class="k">else</span><span class="p">:</span>
+      <span class="k">with</span> <span class="n">contextlib2</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="c1"># Ideally move re-entering store into Template.variable_scope.</span>
+        <span class="n">template_store</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="p">,</span> <span class="s2">&quot;_template_store&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">template_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="c1"># In eager mode, the template store keeps references to created</span>
+          <span class="c1"># variables such that they survive even if there are no references to</span>
+          <span class="c1"># them in Python code. Variables added to an eager template store are</span>
+          <span class="c1"># also added to TensorFlow global collections (unlike regular</span>
+          <span class="c1"># variables created in eager mode).</span>
+          <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">template_store</span><span class="o">.</span><span class="n">as_default</span><span class="p">())</span>
+
+        <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span>
+            <span class="n">util</span><span class="o">.</span><span class="n">notify_about_variables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span><span class="o">.</span><span class="n">add</span><span class="p">))</span>
+
         <span class="k">yield</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="c1"># Remove `self` from `module_stack`, this happens as part of cleanup</span>
       <span class="c1"># even if an error is raised.</span>
-      <span class="n">module_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+      <span class="n">_MODULE_STACK</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">module_stack</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_MODULE_STACK</span><span class="p">:</span>
       <span class="c1"># Peek into the stack to add created variables to the parent</span>
-      <span class="n">parent_module</span> <span class="o">=</span> <span class="n">module_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">parent_module</span> <span class="o">=</span> <span class="n">_MODULE_STACK</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
       <span class="n">parent_module</span><span class="o">.</span><span class="n">_all_variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
 
   <span class="k">def</span> <span class="nf">_add_connected_subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_method</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">subgraph_name_scope</span><span class="p">,</span>
@@ -452,17 +384,32 @@
         <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_connected_subgraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="p">)</span>
 
-    <span class="n">connection_observer_stack</span> <span class="o">=</span> <span class="n">_CONNECTION_OBSERVER_STACKS</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="k">for</span> <span class="n">observer</span> <span class="ow">in</span> <span class="n">connection_observer_stack</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">observer</span> <span class="ow">in</span> <span class="n">_CONNECTION_OBSERVER_STACK</span><span class="p">:</span>
       <span class="n">observer</span><span class="p">(</span><span class="n">connected_subgraph</span><span class="p">)</span>
 
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">defun_wrapped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns boolean indicating whether this module is defun wrapped.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defun_wrapped</span>
+
+<div class="viewcode-block" id="AbstractModule.defun"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun">[docs]</a>  <span class="k">def</span> <span class="nf">defun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps this modules call method in a callable graph function.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defun_wrapped</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_defun_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_call</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">eager</span><span class="o">.</span><span class="n">defun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">)</span></div>
+
   <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Operator overload for calling.</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Entry point when a module is called to connect it to the graph.</span>
 
 <span class="sd">    This is the entry point when users connect a Module into the Graph. The</span>
 <span class="sd">    underlying _build method will have been wrapped in a Template by the</span>
 <span class="sd">    constructor, and we call this template with the provided inputs here.</span>
+
+<span class="sd">    Note we use `_call` instead of `__call__` to allow instance level monkey</span>
+<span class="sd">    patching (see `defun`).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      *args: Arguments for underlying _build method.</span>
@@ -590,7 +537,7 @@
 
   <span class="c1"># pylint: disable=g-doc-return-or-yield</span>
   <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-  <span class="k">def</span> <span class="nf">_enter_variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_enter_variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_same_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns a contextlib.contextmanager to enter the internal variable scope.</span>
 
 <span class="sd">    This is useful for situations where submodules must be declared in the</span>
@@ -624,16 +571,75 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">      reuse: Boolean passed to `tf.variable_scope`.</span>
+<span class="sd">      check_same_graph: Boolean to determine if same graph check should run. If</span>
+<span class="sd">        you are only entering the scope to name other variable scopes (e.g. not</span>
+<span class="sd">        to create/reuse variables) then it is legitimate to set this to False.</span>
 
 <span class="sd">    Yields:</span>
 <span class="sd">      The variable_scope inside the template.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_check_init_called</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_same_graph</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">check_same_graph</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_check_same_graph</span><span class="p">()</span>
     <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capture_variables</span><span class="p">():</span>
       <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span> <span class="k">as</span> <span class="n">vs</span><span class="p">:</span>
         <span class="k">yield</span> <span class="n">vs</span>
   <span class="c1"># pylint: enable=g-doc-return-or-yield</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;**All** `tf.Variable`s used when the module is connected.</span>
+
+<span class="sd">    This property does not rely on global collections and should generally be</span>
+<span class="sd">    preferred vs. `get_variables` and `get_all_variables`.</span>
+
+<span class="sd">    See the documentation for `AbstractModule._capture_variables()` for more</span>
+<span class="sd">    information about what variables are captured.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A sorted (by variable name) tuple of `tf.Variable` objects.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">sort_by_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">trainable_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All **trainable** `tf.Variable`s used when the module is connected.</span>
+
+<span class="sd">    This property does not rely on global collections and should generally be</span>
+<span class="sd">    preferred vs. `get_variables` and `get_all_variables`.</span>
+
+<span class="sd">    See the documentation for `AbstractModule._capture_variables()` for more</span>
+<span class="sd">    information about what variables are captured.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A sorted (by variable name) tuple of `tf.Variable` objects.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">trainable</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">non_trainable_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;All **non-trainable** `tf.Variable`s used when the module is connected.</span>
+
+<span class="sd">    This property does not rely on global collections and should generally be</span>
+<span class="sd">    preferred vs. `get_variables` and `get_all_variables`.</span>
+
+<span class="sd">    See the documentation for `AbstractModule._capture_variables()` for more</span>
+<span class="sd">    information about what variables are captured.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A sorted (by variable name) tuple of `tf.Variable` objects.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      NotConnectedError: If the module is not connected to the Graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">trainable</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AbstractModule.get_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.get_variables">[docs]</a>  <span class="k">def</span> <span class="nf">get_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns tuple of `tf.Variable`s declared inside this module.</span>
@@ -685,9 +691,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_is_connected</span><span class="p">()</span>
     <span class="n">collection_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection</span><span class="p">))</span>
     <span class="c1"># Return variables in self._all_variables that are in `collection`</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="nb">sorted</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">sort_by_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_all_variables</span> <span class="o">&amp;</span> <span class="n">collection_variables</span><span class="p">)</span></div>
 
   <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">raise</span> <span class="n">NotSupportedError</span><span class="p">(</span>
@@ -855,6 +859,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -863,8 +875,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

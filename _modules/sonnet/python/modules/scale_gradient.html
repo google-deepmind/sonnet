@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -56,6 +56,8 @@
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">function</span>
 
+<span class="n">tfe</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">eager</span>
+
 
 <span class="k">def</span> <span class="nf">_scale_gradient_op</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Create an op that scales gradients using a Defun.</span>
@@ -81,6 +83,8 @@
     <span class="n">scaled_grad</span> <span class="o">=</span> <span class="n">grad</span> <span class="o">*</span> <span class="n">scale</span>
     <span class="k">return</span> <span class="n">scaled_grad</span><span class="p">,</span> <span class="kc">None</span>
 
+  <span class="c1"># Note that if the forward pass implementation involved the creation of ops,</span>
+  <span class="c1"># _scale_gradient_op would require some memoization mechanism.</span>
   <span class="k">def</span> <span class="nf">scale_gradient_forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
     <span class="k">del</span> <span class="n">scale</span>  <span class="c1"># Unused.</span>
     <span class="k">return</span> <span class="n">x</span>
@@ -107,16 +111,24 @@
 <span class="sd">  is `1.0`, this op reduces to `tf.identity`.</span>
 
 <span class="sd">  Args:</span>
-<span class="sd">    net: A `tf.Tensor`.</span>
+<span class="sd">    net: A `tf.Tensor` or in eager mode a callable that produces a `tf.Tensor`.</span>
 <span class="sd">    scale: The scale factor for the gradient on the backwards pass.</span>
 <span class="sd">    name: A name for the operation (optional).</span>
 
 <span class="sd">  Returns:</span>
-<span class="sd">    A `tf.Tensor` with the same type as the input tensor.</span>
+<span class="sd">    In graph mode returns a `tf.Tensor` with the same type as the input tensor.</span>
+<span class="sd">    In eager mode returns a callable wrapping `net` whose gradients are scaled.</span>
 
 <span class="sd">  Raises:</span>
 <span class="sd">    ValueError: If `net` dtype is non-float and `scale` is not zero or one.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;In eager mode `net` must be a callable (similar to how optimizers &quot;</span>
+          <span class="s2">&quot;must be used when executing eagerly).&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tfe</span><span class="o">.</span><span class="n">defun</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">k</span><span class="p">:</span> <span class="n">scale_gradient</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">k</span><span class="p">),</span> <span class="n">scale</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
   <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">stop_gradient</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
   <span class="k">elif</span> <span class="n">scale</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
@@ -174,6 +186,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -182,8 +202,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

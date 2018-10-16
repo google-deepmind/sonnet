@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -252,7 +252,13 @@
   <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Instantiates all the convolutional modules used in the network.&quot;&quot;&quot;</span>
 
-    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+    <span class="c1"># Here we are entering the module&#39;s variable scope to name our submodules</span>
+    <span class="c1"># correctly (not to create variables). As such it&#39;s safe to not check</span>
+    <span class="c1"># whether we&#39;re in the same graph. This is important if we&#39;re constructing</span>
+    <span class="c1"># the module in one graph and connecting it in another (e.g. with `defun`</span>
+    <span class="c1"># the module is created in some default graph, and connected to a capturing</span>
+    <span class="c1"># graph in order to turn it into a graph function).</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">(</span><span class="n">check_same_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                                        <span class="n">output_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                        <span class="n">kernel_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_kernel_shapes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
@@ -722,7 +728,9 @@
   <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Instantiates all the convolutional modules used in the network.&quot;&quot;&quot;</span>
 
-    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">():</span>
+    <span class="c1"># See `ConvNet2D._instantiate_layers` for more information about why we are</span>
+    <span class="c1"># using `check_same_graph=False`.</span>
+    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enter_variable_scope</span><span class="p">(</span><span class="n">check_same_graph</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_layers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
           <span class="n">conv</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_2d_transpose_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                                <span class="n">output_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_channels</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
@@ -856,6 +864,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -864,8 +880,8 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

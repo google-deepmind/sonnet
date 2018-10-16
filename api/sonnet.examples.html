@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -50,6 +50,7 @@ resulting from unpacking the .tgz file whose link is given above.</p>
 <dt id="sonnet.examples.brnn_ptb.CustomScaleMixture">
 <em class="property">class </em><code class="descclassname">sonnet.examples.brnn_ptb.</code><code class="descname">CustomScaleMixture</code><span class="sig-paren">(</span><em>pi</em>, <em>sigma1</em>, <em>sigma2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#CustomScaleMixture"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.CustomScaleMixture" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A convenience class for the scale mixture.</p>
 <dl class="method">
 <dt id="sonnet.examples.brnn_ptb.CustomScaleMixture.log_prob">
 <code class="descname">log_prob</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/examples/brnn_ptb.html#CustomScaleMixture.log_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.examples.brnn_ptb.CustomScaleMixture.log_prob" title="Permalink to this definition">¶</a></dt>
@@ -195,8 +196,8 @@ the documentation for <code class="docutils literal notranslate"><span class="pr
 passed to <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>.</p>
-<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tf.contrib.distributions.Distribution</span></code>
-representing the prior distribution over the variable in question.</p>
+<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tfp.distributions.Distribution</span></code> representing
+the prior distribution over the variable in question.</p>
 </dd></dl>
 
 <dl class="function">
@@ -208,8 +209,8 @@ the documentation for <code class="docutils literal notranslate"><span class="pr
 passed to <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>.</p>
-<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tf.contrib.distributions.Distribution</span></code>
-representing the posterior distribution over the variable in question.</p>
+<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tfp.distributions.Distribution</span></code> representing
+the posterior distribution over the variable in question.</p>
 </dd></dl>
 
 <dl class="function">
@@ -226,8 +227,8 @@ the documentation for <code class="docutils literal notranslate"><span class="pr
 passed to <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. *args: Positional arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>. **kwargs: Keyword arguments forwarded by
 <code class="docutils literal notranslate"><span class="pre">tf.get_variable</span></code>.</p>
-<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tf.contrib.distributions.Distribution</span></code>
-representing the posterior distribution over the variable in question.</p>
+<p>Returns: An instance of <code class="docutils literal notranslate"><span class="pre">tfp.distributions.Distribution</span></code> representing
+the posterior distribution over the variable in question.</p>
 </dd></dl>
 
 <dl class="function">
@@ -392,6 +393,9 @@ separates the output for each batch. Defaults to the newline character.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="sonnet-examples-learn-to-execute-module">
+<h2>sonnet.examples.learn_to_execute module<a class="headerlink" href="#sonnet-examples-learn-to-execute-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="module-sonnet.examples.module_with_build_args">
 <span id="sonnet-examples-module-with-build-args-module"></span><h2>sonnet.examples.module_with_build_args module<a class="headerlink" href="#module-sonnet.examples.module_with_build_args" title="Permalink to this headline">¶</a></h2>
 <p>Example script using <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code> to make a module with build method
@@ -454,6 +458,12 @@ each of the data objects can be passed to PTBIterator.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="sonnet-examples-rmc-learn-to-execute-module">
+<h2>sonnet.examples.rmc_learn_to_execute module<a class="headerlink" href="#sonnet-examples-rmc-learn-to-execute-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="sonnet-examples-rmc-learn-to-execute-test-module">
+<h2>sonnet.examples.rmc_learn_to_execute_test module<a class="headerlink" href="#sonnet-examples-rmc-learn-to-execute-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="sonnet-examples-rmc-nth-farthest-module">
 <h2>sonnet.examples.rmc_nth_farthest module<a class="headerlink" href="#sonnet-examples-rmc-nth-farthest-module" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -509,6 +519,14 @@ each of the data objects can be passed to PTBIterator.</p>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -517,8 +535,8 @@ each of the data objects can be passed to PTBIterator.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/api/sonnet.examples.rst.txt"

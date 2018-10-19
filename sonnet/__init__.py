@@ -39,6 +39,31 @@ import sys
 
 import semantic_version
 
+
+def _ensure_dependency_available_at_version(package_name, min_version):
+  """Throw helpful error if required dependencies not available."""
+
+  try:
+    pkg = importlib.import_module(package_name)
+  except ImportError:
+    pip_name = package_name.replace('_', '-')
+    raise SystemError(
+        'Sonnet requires %s (minimum version %s) to be installed. '
+        'If using pip, run `pip install %s` or '
+        '`pip install %s-gpu`' % (
+            package_name, min_version, pip_name, pip_name))
+
+  installed_version = semantic_version.Version(pkg.__version__)
+  version_spec = semantic_version.Spec('>=' + min_version)
+  if not version_spec.match(installed_version):
+    raise SystemError(
+        '%s version %s is installed, but Sonnet requires at least version %s.' %
+        (package_name, pkg.__version__, min_version))
+
+_ensure_dependency_available_at_version('tensorflow', '1.8.0')
+_ensure_dependency_available_at_version('tensorflow_probability', '0.4.0')
+
+# Check some version of TF is available.
 from sonnet.python import custom_getters
 from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
@@ -136,30 +161,6 @@ from sonnet.python.modules.util import summarize_variables
 from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
-
-
-def _ensure_dependency_available_at_version(package_name, min_version):
-  """Throw helpful error if required dependencies not available."""
-
-  try:
-    pkg = importlib.import_module(package_name)
-  except ImportError:
-    pip_name = package_name.replace('_', '-')
-    raise SystemError(
-        'Sonnet requires %s (minimum version %s) to be installed. '
-        'If using pip, run `pip install %s` or '
-        '`pip install %s-gpu`' % (
-            package_name, min_version, pip_name, pip_name))
-
-  installed_version = semantic_version.Version(pkg.__version__)
-  version_spec = semantic_version.Spec('>=' + min_version)
-  if not version_spec.match(installed_version):
-    raise SystemError(
-        '%s version %s is installed, but Sonnet requires at least version %s.' %
-        (package_name, pkg.__version__, min_version))
-
-_ensure_dependency_available_at_version('tensorflow', '1.8.0')
-_ensure_dependency_available_at_version('tensorflow_probability', '0.4.0')
 
 
 __version__ = '1.25'

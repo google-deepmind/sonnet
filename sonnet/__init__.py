@@ -163,5 +163,5 @@ from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
 
 
-__version__ = '1.25'
+__version__ = '1.26'
 

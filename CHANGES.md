@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.26 - Monday, 22. October 2018
+
+* Ensure that dependency version checks are made before libraries are imported.
+
+
 ## Version 1.25 - Tuesday, 16. October 2018
 
 * Improve Eager support.

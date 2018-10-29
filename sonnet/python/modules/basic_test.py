@@ -455,7 +455,8 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.named_parameters(
       ("float16", tf.float16),
-      ("bfloat16", tf.bfloat16),
+      # re-enable once bug is fixed..
+      # ("bfloat16", tf.bfloat16),
       ("float32", tf.float32),
       ("float64", tf.float64))
   def testFloatDataTypeConsistent(self, dtype):

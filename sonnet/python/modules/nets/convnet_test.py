@@ -192,6 +192,14 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
              paddings=self.paddings,
              use_bias=2)
 
+    err = "use_batch_norm must be a boolean"
+    with self.assertRaisesRegexp(TypeError, err):
+      module(output_channels=self.output_channels,
+             kernel_shapes=self.kernel_shapes,
+             strides=self.strides,
+             paddings=self.paddings,
+             use_batch_norm=[True])
+
     err = "Invalid data_format"
     # Also checks that the error works with non-string types
     for data_format in ["NHCW", 3]:
@@ -421,7 +429,6 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
                    kernel_shapes=[[3, 3], [5, 5], [7, 7]],
                    strides=[[1, 1], [2, 2], [3, 3]],
                    paddings=[snt.SAME, snt.SAME, snt.VALID],
-                   use_batch_norm=[True, True, False],
                    use_bias=[True, True, False])
 
     # We don't pass the parameter on to .transpose, None should be the default
@@ -461,7 +468,6 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
                    kernel_shapes=[[3, 3], [5, 5], [7, 7]],
                    strides=[[1, 1], [2, 2], [3, 3]],
                    paddings=[snt.SAME, snt.SAME, snt.VALID],
-                   use_batch_norm=[True, True, False],
                    use_bias=[True, True, False])
 
     transpose_model = model.transpose(**{param_name: param_value})

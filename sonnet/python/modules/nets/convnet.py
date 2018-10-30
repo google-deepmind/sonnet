@@ -154,6 +154,12 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       raise TypeError("rates must be iterable")
     rates = tuple(rates)
 
+    if isinstance(use_batch_norm, collections.Iterable):
+      raise TypeError("use_batch_norm must be a boolean. Per-layer use of "
+                      "batch normalization is not supported. Previously, a "
+                      "test erroneously suggested use_batch_norm can be an "
+                      "iterable of booleans.")
+
     super(ConvNet2D, self).__init__(name=name, custom_getter=custom_getter)
 
     if not output_channels:

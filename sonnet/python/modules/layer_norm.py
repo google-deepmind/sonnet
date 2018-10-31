@@ -15,8 +15,8 @@
 
 """Layer normalization module for Sonnet.
 
-This contains the module LayerNorm, which performs layer normalization on
-its inputs.
+This contains the module LayerNorm, which performs layer normalization over
+configurable axes of its inputs.
 
 Original paper: https://arxiv.org/abs/1607.06450.
 
@@ -26,6 +26,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
 
 from sonnet.python.modules import base
 from sonnet.python.modules import util
@@ -46,6 +47,9 @@ class LayerNorm(base.AbstractModule):
   where mu and sigma are respectively the mean and standard deviation of x.
   Gamma and beta are trainable parameters for scaling and shifting respectively.
 
+  Since the axes over which normalization is perfomed is configurable, this also
+  subsumes instance normalization.
+
   """
 
   GAMMA = "gamma"  # Layer norm scaling.
@@ -56,15 +60,22 @@ class LayerNorm(base.AbstractModule):
 
   POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
-  def __init__(self,
-               eps=1e-5,
-               initializers=None,
-               partitioners=None,
-               regularizers=None,
+  def __init__(self, axes=None, offset=True, scale=True, eps=1e-5,
+               initializers=None, partitioners=None, regularizers=None,
                name="layer_norm"):
     """Constructs a LayerNorm module.
 
     Args:
+      axes: Optional iterable of indices of dimensions to reduce over. By
+        default `None` and all dimensions except the first / batch dimension
+        are reduced over. If the input tensor represents an image, summing
+        over all except the batch and channel dimensions (e.g. for image format
+        NHWC, axes=[1,2]), then this module corresponds to Instance
+        Normalization (https://arxiv.org/abs/1607.08022).
+      offset: Optional boolean to specify whether or not to apply a trained
+        component-wise bias after the layer normalization and scaling.
+      scale: Optional boolean to specify whether or not to apply a trained
+        component-wise scale after the layer normalization.
       eps: small epsilon to avoid division by zero variance. Defaults to
         1e-5 as used in the paper.
       initializers: Dict containing ops to initialize the scale
@@ -85,6 +96,13 @@ class LayerNorm(base.AbstractModule):
     """
     super(LayerNorm, self).__init__(name=name)
 
+    if axes is not None:
+      if (not isinstance(axes, collections.Iterable) or
+          not all(isinstance(ax, int) for ax in axes)):
+        raise ValueError("axes should be an iterable of ints")
+    self._axes = axes
+    self._offset = offset
+    self._scale = scale
     self._eps = eps
 
     self._initializers = util.check_initializers(initializers,
@@ -98,7 +116,7 @@ class LayerNorm(base.AbstractModule):
     """Connects the LayerNorm module into the graph.
 
     Args:
-      inputs: a Tensor of shape `[batch_size, layer_dim]`.
+      inputs: a Tensor of dimensionality >= 2.
 
     Returns:
       normalized: layer normalized outputs with same shape as inputs.
@@ -108,39 +126,52 @@ class LayerNorm(base.AbstractModule):
           `tf.bfloat16`.
     """
 
+    if self._axes is None:
+      axes = list(range(1, inputs.shape.ndims))
+    else:
+      axes = self._axes
+
     if inputs.dtype in [tf.float16, tf.bfloat16]:
       raise base.NotSupportedError(
           "LayerNorm does not support `tf.float16` or `tf.bfloat16`, "
           "insufficient precision for calculating sufficient statistics.")
 
-    if inputs.get_shape().ndims != 2:
+    if inputs.get_shape().ndims < 2:
       raise base.NotSupportedError(
-          "Layer normalization expects inputs of rank 2."
+          "Layer normalization expects inputs of at least rank 2."
           " Got inputs of rank {}.".format(inputs.get_shape().ndims))
 
-    hidden_size = inputs.get_shape()[1].value
+    # Shape for the learnable scale and offset is the number of channels. See
+    # https://arxiv.org/pdf/1803.08494.pdf around equation 6.
+    params_shape = inputs.get_shape()[-1:]
 
-    if self.GAMMA not in self._initializers:
-      self._initializers[self.GAMMA] = create_gamma_initializer()
-    self._gamma = tf.get_variable(
-        self.GAMMA,
-        shape=[hidden_size],
-        dtype=inputs.dtype,
-        initializer=self._initializers[self.GAMMA],
-        partitioner=self._partitioners.get(self.GAMMA),
-        regularizer=self._regularizers.get(self.GAMMA))
+    if self._scale:
+      if self.GAMMA not in self._initializers:
+        self._initializers[self.GAMMA] = create_gamma_initializer()
+      self._gamma = tf.get_variable(
+          self.GAMMA,
+          shape=params_shape,
+          dtype=inputs.dtype,
+          initializer=self._initializers[self.GAMMA],
+          partitioner=self._partitioners.get(self.GAMMA),
+          regularizer=self._regularizers.get(self.GAMMA))
+    else:
+      self._gamma = None
 
-    if self.BETA not in self._initializers:
-      self._initializers[self.BETA] = create_beta_initializer()
-    self._beta = tf.get_variable(
-        self.BETA,
-        shape=[hidden_size],
-        dtype=inputs.dtype,
-        initializer=self._initializers[self.BETA],
-        partitioner=self._partitioners.get(self.BETA),
-        regularizer=self._regularizers.get(self.BETA))
+    if self._offset:
+      if self.BETA not in self._initializers:
+        self._initializers[self.BETA] = create_beta_initializer()
+      self._beta = tf.get_variable(
+          self.BETA,
+          shape=params_shape,
+          dtype=inputs.dtype,
+          initializer=self._initializers[self.BETA],
+          partitioner=self._partitioners.get(self.BETA),
+          regularizer=self._regularizers.get(self.BETA))
+    else:
+      self._beta = None
 
-    mean, var = tf.nn.moments(inputs, [1], keep_dims=True)
+    mean, var = tf.nn.moments(inputs, axes, keep_dims=True)
 
     normalized = tf.nn.batch_normalization(inputs, mean, var, self._beta,
                                            self._gamma, self._eps)

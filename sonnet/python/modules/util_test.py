@@ -493,6 +493,23 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(snt.count_variables_by_type(), expected_dict)
   # pylint: enable long lambda warning
 
+  @parameterized.parameters(
+      ("LayerNorm", snt.LayerNorm),
+      ("snt.LayerNorm", snt.LayerNorm),
+      ("sonnet.LayerNorm", snt.LayerNorm),
+      ("snt.nets.ConvNet2D", snt.nets.ConvNet2D),
+      ("sonnet.python.modules.nets.ConvNet2D", snt.nets.ConvNet2D))
+  def testParseStringToConstructor(self, constructor_string, expected_result):
+    self.assertEqual(snt.parse_string_to_constructor(constructor_string),
+                     expected_result)
+
+  @parameterized.parameters(
+      ("non_existent_thing",),
+      ("snt.asdfadsf",))
+  def testParseStringToConstructorErrors(self, erroneous_string):
+    with self.assertRaisesRegexp(ValueError, "could not find"):
+      snt.parse_string_to_constructor(erroneous_string)
+
 
 class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
 

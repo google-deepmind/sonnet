@@ -20,10 +20,12 @@ from __future__ import print_function
 
 import collections
 import functools
+import six
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import batch_norm
+from sonnet.python.modules import batch_norm_v2
 from sonnet.python.modules import conv
 from sonnet.python.modules import util
 
@@ -57,12 +59,15 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                rates=(1,),
                activation=tf.nn.relu,
                activate_final=False,
+               normalization_ctor=None,
+               normalization_kwargs=None,
+               normalize_final=None,
                initializers=None,
                partitioners=None,
                regularizers=None,
-               use_batch_norm=False,
+               use_batch_norm=None,  # Deprecated.
                use_bias=True,
-               batch_norm_config=None,
+               batch_norm_config=None,  # Deprecated.
                data_format=DATA_FORMAT_NHWC,
                custom_getter=None,
                name="conv_net_2d"):
@@ -93,6 +98,16 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       activation: An activation op.
       activate_final: Boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      normalization_ctor: Constructor to return a callable which will perform
+        normalization at each layer. Defaults to None / no normalization.
+        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If
+        a string is provided, importlib is used to convert the string to a
+        callable, so either `snt.LayerNorm` or `"snt.LayerNorm"` can be
+        provided.
+      normalization_kwargs: kwargs to be provided to `normalization_ctor` when
+        it is called.
+      normalize_final: Whether to apply normalization after the final conv
+        layer. Default is to take the value of activate_final.
       initializers: Optional dict containing ops to initialize the filters of
         the whole network (with key 'w') or biases (with key 'b').
       partitioners: Optional dict containing partitioners to partition
@@ -104,11 +119,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
         the L1 and L2 regularizers in `tf.contrib.layers`.
       use_batch_norm: Boolean determining if batch normalization is applied
-        after convolution.
+        after convolution. Deprecated, use `normalization_ctor` instead.
       use_bias: Boolean or iterable of booleans determining whether to include
         bias parameters in the convolutional layers. Default `True`.
       batch_norm_config: Optional mapping of additional configuration for the
-        `snt.BatchNorm` modules.
+        `snt.BatchNorm` modules. Deprecated, use `normalization_kwargs` instead.
       data_format: A string, one of "NCHW" or "NHWC". Specifies whether the
         channel dimension of the input and output is the last dimension
         (default, "NHWC"), or the second dimension ("NCHW").
@@ -128,7 +143,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         length 1 or `len(output_channels)`; or if `paddings` has not
         length 1 or `len(output_channels)`; or if `rates` has not
         length 1 or `len(output_channels)`; or if the given data_format is not a
-        supported format ("NHWC" or "NCHW").
+        supported format ("NHWC" or "NCHW"); or if `normalization_ctor` is
+        provided but cannot be mapped to a callable.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -206,9 +222,20 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       raise ValueError(
           """rates must be of length 1 or len(output_channels)""")
 
-    self._use_batch_norm = use_batch_norm
+    self._parse_normalization_kwargs(
+        use_batch_norm, batch_norm_config,
+        normalization_ctor, normalization_kwargs)
 
-    self._batch_norm_config = batch_norm_config or {}
+    if normalize_final is None:
+      util.deprecation_warning(
+          "normalize_final is not specified, so using the value of "
+          "activate_final = {}. Change your code to set this kwarg explicitly. "
+          "In the future, normalize_final will default to True.".format(
+              activate_final))
+      self._normalize_final = activate_final
+    else:
+      # User has provided an override, so don't link to activate_final.
+      self._normalize_final = normalize_final
 
     if isinstance(use_bias, bool):
       use_bias = (use_bias,)
@@ -219,6 +246,42 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     self._use_bias = _replicate_elements(use_bias, self._num_layers)
 
     self._instantiate_layers()
+
+  def _check_and_assign_normalization_members(self, normalization_ctor,
+                                              normalization_kwargs):
+    """Checks that the normalization constructor is callable."""
+    if isinstance(normalization_ctor, six.string_types):
+      normalization_ctor = util.parse_string_to_constructor(normalization_ctor)
+    if normalization_ctor is not None and not callable(normalization_ctor):
+      raise ValueError(
+          "normalization_ctor must be a callable or a string that specifies "
+          "a callable, got {}.".format(normalization_ctor))
+    self._normalization_ctor = normalization_ctor
+    self._normalization_kwargs = normalization_kwargs
+
+  def _parse_normalization_kwargs(self, use_batch_norm, batch_norm_config,
+                                  normalization_ctor, normalization_kwargs):
+    """Sets up normalization, checking old and new flags."""
+    if use_batch_norm is not None:
+      # Delete this whole block when deprecation is done.
+      util.deprecation_warning(
+          "`use_batch_norm` kwarg is deprecated. Change your code to instead "
+          "specify `normalization_ctor` and `normalization_kwargs`.")
+      if not use_batch_norm:
+        # Explicitly set to False - normalization_{ctor,kwargs} has precedence.
+        self._check_and_assign_normalization_members(normalization_ctor,
+                                                     normalization_kwargs or {})
+      else:  # Explicitly set to true - new kwargs must not be used.
+        if normalization_ctor is not None or normalization_kwargs is not None:
+          raise ValueError(
+              "if use_batch_norm is specified, normalization_ctor and "
+              "normalization_kwargs must not be.")
+        self._check_and_assign_normalization_members(batch_norm.BatchNorm,
+                                                     batch_norm_config or {})
+    else:
+      # Old kwargs not set, this block will remain after removing old kwarg.
+      self._check_and_assign_normalization_members(normalization_ctor,
+                                                   normalization_kwargs or {})
 
   def _instantiate_layers(self):
     """Instantiates all the convolutional modules used in the network."""
@@ -243,18 +306,14 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                                        data_format=self._data_format)
                            for i in xrange(self._num_layers))
 
-  def _build(self, inputs, is_training=None, test_local_stats=True):
+  def _build(self, inputs, **normalization_build_kwargs):
     """Assembles the `ConvNet2D` and connects it to the graph.
 
     Args:
       inputs: A 4D Tensor of shape `[batch_size, input_height, input_width,
         input_channels]`.
-      is_training: Boolean to indicate to `snt.BatchNorm` if we are
-        currently training. Must be specified explicitly if `use_batchnorm` is
-        `True`.
-      test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
-        normalization should  use local batch statistics at test time.
-        By default `True`.
+      **normalization_build_kwargs: kwargs passed to the normalization module
+        at _build time.
 
     Returns:
       A 4D Tensor of shape `[batch_size, output_height, output_width,
@@ -264,7 +323,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       ValueError: If `is_training` is not explicitly specified when using
         batch normalization.
     """
-    if self._use_batch_norm and is_training is None:
+    if (self._normalization_ctor in {batch_norm.BatchNorm,
+                                     batch_norm_v2.BatchNormV2} and
+        "is_training" not in normalization_build_kwargs):
       raise ValueError("Boolean is_training flag must be explicitly specified "
                        "when using batch normalization.")
 
@@ -275,14 +336,21 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     for i, layer in enumerate(self._layers):
       net = layer(net)
 
-      if i != final_index or self._activate_final:
-        if self._use_batch_norm:
-          bn = batch_norm.BatchNorm(name="batch_norm_{}".format(i),
-                                    **self._batch_norm_config)
-          net = bn(net,
-                   is_training=is_training,
-                   test_local_stats=test_local_stats)
+      if i != final_index or self._normalize_final:
+        if self._normalization_ctor is not None:
+          # The name 'batch_norm' is used even if something else like
+          # LayerNorm is being used. This is to avoid breaking old checkpoints.
+          normalizer = self._normalization_ctor(
+              name="batch_norm_{}".format(i),
+              **self._normalization_kwargs)
+          net = normalizer(net, **normalization_build_kwargs)
+        else:
+          if normalization_build_kwargs:
+            tf.logging.warning(
+                "No normalization configured, but extra kwargs "
+                "provided: {}".format(normalization_build_kwargs))
 
+      if i != final_index or self._activate_final:
         net = self._activation(net)
 
     return net
@@ -330,11 +398,29 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
 
   @property
   def use_batch_norm(self):
-    return self._use_batch_norm
+    util.deprecation_warning(
+        "The `.use_batch_norm` property is deprecated. Check "
+        "`.normalization_ctor` instead.")
+    return self._normalization_ctor == batch_norm.BatchNorm
 
   @property
   def batch_norm_config(self):
-    return self._batch_norm_config
+    util.deprecation_warning(
+        "The `.batch_norm_config` property is deprecated. Check "
+        "`.normalization_kwargs` instead.")
+    return self._normalization_kwargs
+
+  @property
+  def normalization_ctor(self):
+    return self._normalization_ctor
+
+  @property
+  def normalization_kwargs(self):
+    return self._normalization_kwargs
+
+  @property
+  def normalize_final(self):
+    return self._normalize_final
 
   @property
   def activation(self):
@@ -360,12 +446,13 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                  paddings=None,
                  activation=None,
                  activate_final=None,
+                 normalization_ctor=None,
+                 normalization_kwargs=None,
+                 normalize_final=None,
                  initializers=None,
                  partitioners=None,
                  regularizers=None,
-                 use_batch_norm=None,
                  use_bias=None,
-                 batch_norm_config=None,
                  data_format=None,):
     """Returns transposed version of this network.
 
@@ -387,6 +474,16 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       activation: Optional activation op. Default value is `self.activation`.
       activate_final: Optional boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      normalization_ctor: Constructor to return a callable which will perform
+        normalization at each layer. Defaults to None / no normalization.
+        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If
+        a string is provided, importlib is used to convert the string to a
+        callable, so either `snt.LayerNorm` or `"snt.LayerNorm"` can be
+        provided.
+      normalization_kwargs: kwargs to be provided to `normalization_ctor` when
+        it is called.
+      normalize_final: Whether to apply normalization after the final conv
+        layer. Default is to take the value of activate_final.
       initializers: Optional dict containing ops to initialize the filters of
         the whole network (with key 'w') or biases (with key 'b'). The default
         value is `self.initializers`.
@@ -396,13 +493,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       regularizers: Optional dict containing regularizers for the filters of the
         whole network (with key 'w') or biases (with key 'b'). The default is
         `self.regularizers`.
-      use_batch_norm: Optional boolean determining if batch normalization is
-        applied after convolution. The default value is `self.use_batch_norm`.
       use_bias: Optional boolean or iterable of booleans determining whether to
         include bias parameters in the convolutional layers. Default
         is constructed by reversing `self.use_bias`.
-      batch_norm_config: Optional mapping of additional configuration for the
-        `snt.BatchNorm` modules. Default is `self.batch_norm_config`.
       data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
         the channel dimension of the input and output is the last dimension.
         Default is `self._data_format`.
@@ -445,6 +538,15 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     if activate_final is None:
       activate_final = self.activate_final
 
+    if normalization_ctor is None:
+      normalization_ctor = self.normalization_ctor
+
+    if normalization_kwargs is None:
+      normalization_kwargs = self.normalization_kwargs
+
+    if normalize_final is None:
+      normalize_final = self.normalize_final
+
     if initializers is None:
       initializers = self.initializers
 
@@ -454,32 +556,28 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     if regularizers is None:
       regularizers = self.regularizers
 
-    if use_batch_norm is None:
-      use_batch_norm = self.use_batch_norm
-
     if use_bias is None:
       use_bias = reversed(self.use_bias)
-
-    if batch_norm_config is None:
-      batch_norm_config = self.batch_norm_config
 
     if name is None:
       name = self.module_name + "_transpose"
 
-    return transpose_constructor(output_channels=output_channels,
-                                 kernel_shapes=kernel_shapes,
-                                 strides=strides,
-                                 paddings=paddings,
-                                 activation=activation,
-                                 activate_final=activate_final,
-                                 initializers=initializers,
-                                 partitioners=partitioners,
-                                 regularizers=regularizers,
-                                 use_batch_norm=use_batch_norm,
-                                 use_bias=use_bias,
-                                 batch_norm_config=batch_norm_config,
-                                 data_format=data_format,
-                                 name=name)
+    return transpose_constructor(
+        output_channels=output_channels,
+        kernel_shapes=kernel_shapes,
+        strides=strides,
+        paddings=paddings,
+        activation=activation,
+        activate_final=activate_final,
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs,
+        normalize_final=normalize_final,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        use_bias=use_bias,
+        data_format=data_format,
+        name=name)
 
   # Implements Transposable interface.
   def transpose(self,
@@ -490,6 +588,9 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                 paddings=None,
                 activation=None,
                 activate_final=None,
+                normalization_ctor=None,
+                normalization_kwargs=None,
+                normalize_final=None,
                 initializers=None,
                 partitioners=None,
                 regularizers=None,
@@ -514,6 +615,16 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       activation: Optional activation op. Default value is `self.activation`.
       activate_final: Optional boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      normalization_ctor: Constructor to return a callable which will perform
+        normalization at each layer. Defaults to None / no normalization.
+        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If
+        a string is provided, importlib is used to convert the string to a
+        callable, so either `snt.LayerNorm` or `"snt.LayerNorm"` can be
+        provided.
+      normalization_kwargs: kwargs to be provided to `normalization_ctor` when
+        it is called.
+      normalize_final: Whether to apply normalization after the final conv
+        layer. Default is to take the value of activate_final.
       initializers: Optional dict containing ops to initialize the filters of
         the whole network (with key 'w') or biases (with key 'b'). The default
         value is `self.initializers`.
@@ -564,21 +675,23 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     transpose_constructor = functools.partial(ConvNet2DTranspose,
                                               output_shapes=output_shapes)
 
-    return self._transpose(transpose_constructor=transpose_constructor,
-                           name=name,
-                           output_channels=output_channels,
-                           kernel_shapes=kernel_shapes,
-                           strides=strides,
-                           paddings=paddings,
-                           activation=activation,
-                           activate_final=activate_final,
-                           initializers=initializers,
-                           partitioners=partitioners,
-                           regularizers=regularizers,
-                           use_batch_norm=use_batch_norm,
-                           use_bias=use_bias,
-                           batch_norm_config=batch_norm_config,
-                           data_format=data_format)
+    return self._transpose(
+        transpose_constructor=transpose_constructor,
+        name=name,
+        output_channels=output_channels,
+        kernel_shapes=kernel_shapes,
+        strides=strides,
+        paddings=paddings,
+        activation=activation,
+        activate_final=activate_final,
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs,
+        normalize_final=normalize_final,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        use_bias=use_bias,
+        data_format=data_format)
 
 
 class ConvNet2DTranspose(ConvNet2D):
@@ -592,6 +705,9 @@ class ConvNet2DTranspose(ConvNet2D):
                paddings,
                activation=tf.nn.relu,
                activate_final=False,
+               normalization_ctor=None,
+               normalization_kwargs=None,
+               normalize_final=None,
                initializers=None,
                partitioners=None,
                regularizers=None,
@@ -629,6 +745,16 @@ class ConvNet2DTranspose(ConvNet2D):
       activation: An activation op.
       activate_final: Boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      normalization_ctor: Constructor to return a callable which will perform
+        normalization at each layer. Defaults to None / no normalization.
+        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If
+        a string is provided, importlib is used to convert the string to a
+        callable, so either `snt.LayerNorm` or `"snt.LayerNorm"` can be
+        provided.
+      normalization_kwargs: kwargs to be provided to `normalization_ctor` when
+        it is called.
+      normalize_final: Whether to apply normalization after the final conv
+        layer. Default is to take the value of activate_final.
       initializers: Optional dict containing ops to initialize the filters of
         the whole network (with key 'w') or biases (with key 'b').
       partitioners: Optional dict containing partitioners to partition
@@ -661,6 +787,8 @@ class ConvNet2DTranspose(ConvNet2D):
         length 1 or `len(output_channels)`.
       ValueError: If the given data_format is not a supported format ("NHWC" or
         "NCHW").
+      ValueError: If `normalization_ctor` is provided but cannot be converted
+        to a callable.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
         keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -687,6 +815,9 @@ class ConvNet2DTranspose(ConvNet2D):
         paddings,
         activation=activation,
         activate_final=activate_final,
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs,
+        normalize_final=normalize_final,
         initializers=initializers,
         partitioners=partitioners,
         regularizers=regularizers,
@@ -729,6 +860,9 @@ class ConvNet2DTranspose(ConvNet2D):
                 paddings=None,
                 activation=None,
                 activate_final=None,
+                normalization_ctor=None,
+                normalization_kwargs=None,
+                normalize_final=None,
                 initializers=None,
                 partitioners=None,
                 regularizers=None,
@@ -753,6 +887,16 @@ class ConvNet2DTranspose(ConvNet2D):
       activation: Optional activation op. Default value is `self.activation`.
       activate_final: Optional boolean determining if the activation and batch
         normalization, if turned on, are applied to the final layer.
+      normalization_ctor: Constructor to return a callable which will perform
+        normalization at each layer. Defaults to None / no normalization.
+        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If
+        a string is provided, importlib is used to convert the string to a
+        callable, so either `snt.LayerNorm` or `"snt.LayerNorm"` can be
+        provided.
+      normalization_kwargs: kwargs to be provided to `normalization_ctor` when
+        it is called.
+      normalize_final: Whether to apply normalization after the final conv
+        layer. Default is to take the value of activate_final.
       initializers: Optional dict containing ops to initialize the filters of
         the whole network (with key 'w') or biases (with key 'b'). The default
         value is `self.initializers`.
@@ -780,18 +924,31 @@ class ConvNet2DTranspose(ConvNet2D):
       ValueError: If output_channels is specified and its length does not match
         the number of layers.
     """
-    return self._transpose(transpose_constructor=ConvNet2D,
-                           name=name,
-                           output_channels=output_channels,
-                           kernel_shapes=kernel_shapes,
-                           strides=strides,
-                           paddings=paddings,
-                           activation=activation,
-                           activate_final=activate_final,
-                           initializers=initializers,
-                           partitioners=partitioners,
-                           regularizers=regularizers,
-                           use_batch_norm=use_batch_norm,
-                           use_bias=use_bias,
-                           batch_norm_config=batch_norm_config,
-                           data_format=data_format)
+    if use_batch_norm is not None:
+      if normalization_ctor is not None or normalization_kwargs is not None:
+        raise ValueError(
+            "If use_batch_norm is specified, normalization_ctor and "
+            "normalization_kwargs must not be.")
+      if use_batch_norm:
+        normalization_ctor = batch_norm.BatchNorm
+      else:
+        normalization_ctor = None
+      normalization_kwargs = batch_norm_config
+
+    return self._transpose(
+        transpose_constructor=ConvNet2D,
+        name=name,
+        output_channels=output_channels,
+        kernel_shapes=kernel_shapes,
+        strides=strides,
+        paddings=paddings,
+        activation=activation,
+        activate_final=activate_final,
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs,
+        normalize_final=normalize_final,
+        initializers=initializers,
+        partitioners=partitioners,
+        regularizers=regularizers,
+        use_bias=use_bias,
+        data_format=data_format)

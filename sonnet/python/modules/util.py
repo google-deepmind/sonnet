@@ -21,6 +21,7 @@ from __future__ import print_function
 import collections
 import contextlib
 import functools
+import importlib
 import inspect
 import re
 import weakref
@@ -937,3 +938,61 @@ def notify_about_variables(callback):
 
   with variable_scope_ops.variable_creator_scope(_tracking_creator):
     yield
+
+
+def deprecation_warning(deprecation_message):
+  """Log a warning message the user is using deprecated functionality."""
+
+  tf.logging.log_first_n(tf.logging.WARN, deprecation_message, 1)
+
+
+def _recursive_getattr(module, path):
+  """Recursively gets attributes inside `module` as specified by `path`."""
+  if "." not in path:
+    return getattr(module, path)
+  else:
+    first, rest = path.split(".", 1)
+    return _recursive_getattr(getattr(module, first), rest)
+
+
+def parse_string_to_constructor(ctor_string):
+  """Returns a callable which corresponds to the constructor string.
+
+  Various modules (eg, ConvNet2D) take constructor arguments which are
+  callables, indicating a submodule to build. These can be passed as
+  actual constructors, eg `snt.LayerNorm`, however that makes the config
+  for that module not trivially serializable. This function tries to map
+  a string representation to the underlying callable, allowing configs to
+  remain serializable where necessary.
+
+  Args:
+    ctor_string: string representing some module in Sonnet. If the string is
+      provided with no dots, we assume it is a member of Sonnet available at
+      top level, i.e. "LayerNorm" maps to `snt.LayerNorm`.
+
+  Raises:
+    ValueError: if no matching constructor can be found.
+
+  Returns:
+    Callable constructor which corresponds to `ctor_string`.
+  """
+  orig_ctor_string = ctor_string
+  if "." not in ctor_string:
+    # No module specified - assume part of Sonnet
+    ctor_string = "sonnet." + ctor_string
+
+  if ctor_string.startswith("snt."):
+    # Replace common short name with full name
+    ctor_string = "sonnet." + ctor_string[len("snt."):]
+
+  # Cannot just use importlib directly because of the way we alias subpackages,
+  # i.e. 'sonnet.nets.ConvNet2D' does not work because 'sonnet.nets' is actually
+  # stored as 'sonnet.python.modules.nets'. To support these aliases we use
+  # importlib only for the top level package, and then recursive getattr.
+  package_name, rest = ctor_string.split(".", 1)
+  package = importlib.import_module(package_name)
+  try:
+    return _recursive_getattr(package, rest)
+  except AttributeError:
+    raise ValueError("could not find `{}`, after normalizing to `{}`".format(
+        orig_ctor_string, ctor_string))

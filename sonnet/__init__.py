@@ -148,6 +148,7 @@ from sonnet.python.modules.util import check_partitioners
 from sonnet.python.modules.util import check_regularizers
 from sonnet.python.modules.util import count_variables_by_type
 from sonnet.python.modules.util import custom_getter_router
+from sonnet.python.modules.util import deprecation_warning
 from sonnet.python.modules.util import format_variable_map
 from sonnet.python.modules.util import format_variables
 from sonnet.python.modules.util import get_normalized_variable_map
@@ -156,6 +157,7 @@ from sonnet.python.modules.util import get_variables_in_module
 from sonnet.python.modules.util import get_variables_in_scope
 from sonnet.python.modules.util import has_variable_scope
 from sonnet.python.modules.util import log_variables
+from sonnet.python.modules.util import parse_string_to_constructor
 from sonnet.python.modules.util import reuse_variables
 from sonnet.python.modules.util import summarize_variables
 from sonnet.python.modules.util import variable_map_items

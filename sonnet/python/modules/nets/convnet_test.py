@@ -25,6 +25,7 @@ import itertools
 # Dependency imports
 
 from absl.testing import parameterized
+import numpy as np
 import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
 
@@ -452,7 +453,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
            ("partitioners", {}),
            ("regularizers", {}),
            ("use_bias", [True, True, True]),
-           ("batch_norm_config", {"scale": True})]))
+           ("normalization_ctor", snt.BatchNorm)]))
   def testTransposePassThroughParameter(self, module, param_name_and_value):
     """Tests if .transpose correctly passes through the given parameters.
 
@@ -519,6 +520,74 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     else:
       output = net(input_to_net)
       self.assertEqual(output.get_shape().as_list(), expected_output_shape)
+
+  @parameterized.parameters(
+      # Regular Layer Normalization
+      {"conv_ctor": snt.nets.ConvNet2D,
+       "norm_ctor": "snt.LayerNorm",
+       "norm_kwargs": {"scale": False, "offset": False}},
+      {"conv_ctor": partial(
+          snt.nets.ConvNet2DTranspose, output_shapes=[[48, 64]]),
+       "norm_ctor": snt.LayerNorm,
+       "norm_kwargs": {"scale": False, "offset": False}},
+      # Instance normalization: sum over spatial dimensions but not channels.
+      {"conv_ctor": snt.nets.ConvNet2D,
+       "norm_ctor": "LayerNorm",
+       "norm_kwargs": {"scale": False, "offset": False, "axes": [1, 2]}},
+      {"conv_ctor": partial(
+          snt.nets.ConvNet2DTranspose, output_shapes=[[48, 64]]),
+       "norm_ctor": snt.LayerNorm,
+       "norm_kwargs": {"scale": False, "offset": False, "axes": [1, 2]}},
+      )
+  def testNormalizations(self, conv_ctor, norm_ctor, norm_kwargs):
+    if tf.executing_eagerly():
+      self.skipTest("Cannot test normalization correctness in Eager.")
+    module = conv_ctor(
+        output_channels=[16, 16],
+        kernel_shapes=(3,),
+        strides=(1,),
+        paddings=("SAME",),
+        normalization_ctor=norm_ctor,
+        normalization_kwargs=norm_kwargs,
+        normalize_final=True,
+        activate_final=False)  # No final activation, that would un-normalize.
+    inputs = tf.random_uniform([16, 48, 64, 3])
+    output = module(inputs)
+    with tf.train.SingularMonitoredSession() as session:
+      output_np = session.run(output)
+
+    # Convert the output into something where all the dimensions that should be
+    # jointly normalized are combined to be on axis=1.
+    if "axes" in norm_kwargs and norm_kwargs["axes"] == [1, 2]:
+      # Check for instance normalization - combine spatial dimensions.
+      output_np = np.reshape(output_np, [16, -1, 3])
+    else:
+      # Check for layer normalization - combine all non-batch dimensions.
+      output_np = np.reshape(output_np, [16, -1])
+    mean = np.mean(output_np, axis=1)
+    std_dev = np.std(output_np, axis=1)
+    # High tolerance - summing across big images, this normalization is fairly
+    # approximate.
+    self.assertAllClose(mean, np.zeros_like(mean), atol=2e-2)
+    self.assertAllClose(std_dev, np.ones_like(std_dev), atol=2e-2)
+
+  @parameterized.parameters(
+      (snt.nets.ConvNet2D,
+       {"use_batch_norm": True, "normalization_ctor": snt.LayerNorm},
+       ValueError, "if use_batch_norm is specified"),
+      (partial(snt.nets.ConvNet2DTranspose, output_shapes=[[48, 64]]),
+       {"use_batch_norm": True, "normalization_ctor": "LayerNorm"},
+       ValueError, "if use_batch_norm is specified"),)
+  def testNormalizationBadConfig(self, conv_ctor, conv_kwargs,
+                                 error_type, error_message):
+    """Old and new normalization flags should not be combined."""
+    with self.assertRaisesRegexp(error_type, error_message):
+      conv_ctor(
+          output_channels=[16, 16],
+          kernel_shapes=(3,),
+          strides=(1,),
+          paddings=("SAME",),
+          **conv_kwargs)
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes

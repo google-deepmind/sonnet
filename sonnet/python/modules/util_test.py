@@ -61,8 +61,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     # Compare to the desired result set, after connection.
     input_ = tf.placeholder(tf.float32, shape=[3, 4])
     _ = module(input_)
-    self.assertEqual(set(module.get_variables()),
-                     {module.w, module.b})
+    self.assertEqual(set(module.get_variables()), {module.w, module.b})
     self.assertEqual(set(snt.get_variables_in_module(module)),
                      {module.w, module.b})
 
@@ -173,8 +172,8 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     variable_map = snt.get_normalized_variable_map(conv,
                                                    group_sliced_variables=False)
     self.assertEqual(variable_map["b"], conv.b)
-    self.assertEqual(set(variable_map), set(["b", "w/part_0", "w/part_1",
-                                             "w/part_2"]))
+    self.assertEqual(
+        set(variable_map), set(["b", "w/part_0", "w/part_1", "w/part_2"]))
 
   def testVariableMapItems(self):
     hidden = tf.ones(shape=(1, 16, 16, 3))
@@ -188,10 +187,10 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     items = snt.variable_map_items(variable_map)
 
     items_str = sorted((key, var.op.name) for key, var in items)
-    self.assertEqual(
-        items_str,
-        [(u"b", u"conv_2d/b"), ("w", u"conv_2d/w/part_0"),
-         ("w", u"conv_2d/w/part_1"), ("w", u"conv_2d/w/part_2")])
+    self.assertEqual(items_str, [(u"b", u"conv_2d/b"),
+                                 ("w", u"conv_2d/w/part_0"),
+                                 ("w", u"conv_2d/w/part_1"),
+                                 ("w", u"conv_2d/w/part_2")])
 
   def testGetSaverScope(self):
     with tf.variable_scope("prefix") as s1:
@@ -282,10 +281,10 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertNotIn("batch_norm/moving_variance", saver2._var_list)
 
   def testCheckInitializers(self):
-    initializers = {"key_a": tf.truncated_normal_initializer(mean=0,
-                                                             stddev=1),
-                    "key_c": tf.truncated_normal_initializer(mean=0,
-                                                             stddev=1)}
+    initializers = {
+        "key_a": tf.truncated_normal_initializer(mean=0, stddev=1),
+        "key_c": tf.truncated_normal_initializer(mean=0, stddev=1),
+    }
     keys = ["key_a", "key_b"]
     self.assertRaisesRegexp(KeyError,
                             "Invalid initializer keys.*",
@@ -308,10 +307,10 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
                             initializers=initializers,
                             keys=keys)
 
-    initializers["key_b"] = {"key_c": tf.truncated_normal_initializer(mean=0,
-                                                                      stddev=1),
-                             "key_d": tf.truncated_normal_initializer(mean=0,
-                                                                      stddev=1)}
+    initializers["key_b"] = {
+        "key_c": tf.truncated_normal_initializer(mean=0, stddev=1),
+        "key_d": tf.truncated_normal_initializer(mean=0, stddev=1),
+    }
     snt.check_initializers(initializers=initializers, keys=keys)
 
   def testCheckPartitioners(self):
@@ -339,13 +338,17 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
                             partitioners=partitioners,
                             keys=keys)
 
-    partitioners["key_b"] = {"key_c": tf.variable_axis_size_partitioner(10),
-                             "key_d": tf.variable_axis_size_partitioner(10)}
+    partitioners["key_b"] = {
+        "key_c": tf.variable_axis_size_partitioner(10),
+        "key_d": tf.variable_axis_size_partitioner(10),
+    }
     snt.check_partitioners(partitioners=partitioners, keys=keys)
 
   def testCheckRegularizers(self):
-    regularizers = {"key_a": tf.contrib.layers.l1_regularizer(scale=0.5),
-                    "key_c": tf.contrib.layers.l2_regularizer(scale=0.5)}
+    regularizers = {
+        "key_a": tf.contrib.layers.l1_regularizer(scale=0.5),
+        "key_c": tf.contrib.layers.l2_regularizer(scale=0.5),
+    }
     keys = ["key_a", "key_b"]
     self.assertRaisesRegexp(KeyError,
                             "Invalid regularizer keys.*",
@@ -370,7 +373,8 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
     regularizers["key_b"] = {
         "key_c": tf.contrib.layers.l1_regularizer(scale=0.5),
-        "key_d": tf.contrib.layers.l2_regularizer(scale=0.5)}
+        "key_d": tf.contrib.layers.l2_regularizer(scale=0.5),
+    }
     snt.check_regularizers(regularizers=regularizers, keys=keys)
 
   def testInvalidDicts(self):
@@ -441,13 +445,14 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
       (1023, "1023 B"),
       (1024, "1.000 KB"),
       (1536, "1.500 KB"),
-      (2 ** 20, "1.000 MB"),
-      (2 ** 21, "2.000 MB"),
-      (2 ** 30, "1.000 GB"),
-      (2 ** 31, "2.000 GB"))
+      (2**20, "1.000 MB"),
+      (2**21, "2.000 MB"),
+      (2**30, "1.000 GB"),
+      (2**31, "2.000 GB"),
+  )
   def testNumBytesToHumanReadable(self, num_bytes, expected_string):
-    self.assertEqual(util._num_bytes_to_human_readable(num_bytes),
-                     expected_string)
+    self.assertEqual(
+        util._num_bytes_to_human_readable(num_bytes), expected_string)
 
   # pylint: disable long lambda warning
   @parameterized.parameters(
@@ -498,14 +503,16 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
       ("snt.LayerNorm", snt.LayerNorm),
       ("sonnet.LayerNorm", snt.LayerNorm),
       ("snt.nets.ConvNet2D", snt.nets.ConvNet2D),
-      ("sonnet.python.modules.nets.ConvNet2D", snt.nets.ConvNet2D))
+      ("sonnet.python.modules.nets.ConvNet2D", snt.nets.ConvNet2D),
+  )
   def testParseStringToConstructor(self, constructor_string, expected_result):
     self.assertEqual(snt.parse_string_to_constructor(constructor_string),
                      expected_result)
 
   @parameterized.parameters(
       ("non_existent_thing",),
-      ("snt.asdfadsf",))
+      ("snt.asdfadsf",),
+  )
   def testParseStringToConstructorErrors(self, erroneous_string):
     with self.assertRaisesRegexp(ValueError, "could not find"):
       snt.parse_string_to_constructor(erroneous_string)
@@ -579,9 +586,12 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
     seq(inputs)
     all_variable_names = sorted([v.name for v in seq.get_all_variables()])
     self.assertEqual([
-        "multi_template_test_1/a:0", "multi_template_test_1/b:0",
-        "multi_template_test_2/a:0", "multi_template_test_2/b:0",
-        "multi_template_test_3/a:0", "multi_template_test_3/b:0",
+        "multi_template_test_1/a:0",
+        "multi_template_test_1/b:0",
+        "multi_template_test_2/a:0",
+        "multi_template_test_2/b:0",
+        "multi_template_test_3/a:0",
+        "multi_template_test_3/b:0",
     ], all_variable_names)
 
   def test_reuse_method(self):
@@ -677,6 +687,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
       self.assertAllEqual(out[0], out[1])
 
   def test_variable_scope_call_order(self):
+
     class TestModule(snt.AbstractModule):
 
       def __init__(self, name="test_module"):
@@ -826,7 +837,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
           u"scope2/nested_add_1/ones/Const:0",
           u"scope2/nested_add_1/ones:0",
           u"scope2/nested_add_1/scope2/add_a/add:0",
-          u"scope2/nested_add_1/add:0"
+          u"scope2/nested_add_1/add:0",
       ]
     else:
       expected_tensor_names = [
@@ -857,7 +868,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
           u"scope2/nested_add/add:0",
           u"scope2/nested_add_1/ones:0",
           u"scope2/nested_add_1/scope2/add_a/add:0",
-          u"scope2/nested_add_1/add:0"
+          u"scope2/nested_add_1/add:0",
       ]
     self.assertEqual(expected_tensor_names, observed_tensor_names)
 
@@ -947,6 +958,7 @@ class NameFunctionTest(tf.test.TestCase):
                        (camel_case, actual, snake_case))
 
   def testNameForCallable_Function(self):
+
     def test():
       pass
 
@@ -957,6 +969,7 @@ class NameFunctionTest(tf.test.TestCase):
     self.assertName(test, None)
 
   def testNameForCallable_Partial(self):
+
     def test(*unused_args):
       pass
 
@@ -964,6 +977,7 @@ class NameFunctionTest(tf.test.TestCase):
     self.assertName(test, "test")
 
   def testNameForCallable_Instance(self):
+
     class Test(object):
 
       def __call__(self):

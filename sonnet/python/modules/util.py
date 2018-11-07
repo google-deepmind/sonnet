@@ -33,6 +33,7 @@ import wrapt
 
 from tensorflow.python.framework import function
 from tensorflow.python.framework import ops
+from tensorflow.python.ops import resource_variable_ops
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
 
@@ -507,6 +508,31 @@ def _get_vars_to_collections(variables):
   return var_to_collections
 
 
+def _format_device(var):
+  """Returns the device with an annotation specifying `ResourceVariable`.
+
+  "legacy" means a normal tf.Variable while "resource" means a ResourceVariable.
+
+  For example:
+  `(legacy)`
+  `(resource)`
+  `/job:learner/task:0/device:CPU:* (legacy)`
+  `/job:learner/task:0/device:CPU:* (resource)`
+
+  Args:
+    var: The Tensorflow Variable or `ResourceVariable` to print.
+  """
+  if resource_variable_ops.is_resource_variable(var):
+    resource_var_annotation = "(resource)"
+  else:
+    resource_var_annotation = "(legacy)"
+
+  if var.device:
+    return "{} {}".format(var.device, resource_var_annotation)
+  else:
+    return resource_var_annotation
+
+
 def format_variables(variables, join_lines=True):
   """Takes a collection of variables and formats it as a table."""
   rows = []
@@ -519,7 +545,7 @@ def format_variables(variables, join_lines=True):
       shape = "undefined"
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))
-    rows.append((var.op.name, shape, dtype, coll, var.device))
+    rows.append((var.op.name, shape, dtype, coll, _format_device(var)))
   return _format_table(rows, join_lines)
 
 
@@ -534,7 +560,7 @@ def format_variable_map(variable_map, join_lines=True):
     shape = "x".join(str(dim) for dim in var.get_shape().as_list())
     dtype = repr(var.dtype.base_dtype).replace("tf.", "")
     coll = ", ".join(sorted(var_to_collections[var]))
-    rows.append((key, var.op.name, shape, dtype, coll, var.device))
+    rows.append((key, var.op.name, shape, dtype, coll, _format_device(var)))
   return _format_table(rows, join_lines)
 
 
@@ -542,7 +568,9 @@ def log_variables(variables=None):
   """Logs variable information.
 
   This function logs the name, shape, type, collections, and device for either
-  all variables or a given iterable of variables.
+  all variables or a given iterable of variables. In the "Device" columns,
+  the nature of the variable (legacy or resource (for ResourceVariables)) is
+  also specified in parenthesis.
 
   Args:
     variables: iterable of variables; if not provided, then all variables

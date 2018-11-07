@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.python.modules.util."""
 from __future__ import absolute_import
 from __future__ import division
@@ -33,21 +32,19 @@ import sonnet.python.modules.util as util
 import tensorflow as tf
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
+# We have a first "\" for the new line and one at the end. The rest is a direct
+# copy-paste of the ground truth output, with the {type} formatting placeholder.
+_EXPECTED_FORMATTED_VARIABLE_LIST = ("""\
+Variable  Shape  Type     Collections                            Device
+m1/v1     3x4    float32  global_variables, trainable_variables  ({type})
+m2/v2     5x6    float32  local_variables                        /device:GPU:* ({type})\
+""")
 
-_EXPECTED_FORMATTED_VARIABLE_LIST = (
-    "Variable  Shape  Type     Collections                            Device\n"
-    "m1/v1     3x4    float32  global_variables, trainable_variables\n"
-    "m2/v2     5x6    float32  local_variables                        "
-    "/device:GPU:*"
-)
-
-_EXPECTED_FORMATTED_VARIABLE_MAP = (
-    "Key  Variable  Shape  Type     Collections                            "
-    "Device\n"
-    "vv1  m1/v1     3x4    float32  global_variables, trainable_variables\n"
-    "vv2  m2/v2     5x6    float32  local_variables                        "
-    "/device:GPU:*"
-)
+_EXPECTED_FORMATTED_VARIABLE_MAP = ("""\
+Key  Variable  Shape  Type     Collections                            Device
+vv1  m1/v1     3x4    float32  global_variables, trainable_variables  ({type})
+vv2  m2/v2     5x6    float32  local_variables                        /device:GPU:* ({type})\
+""")
 
 
 class UtilTest(parameterized.TestCase, tf.test.TestCase):
@@ -403,24 +400,32 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     linear(tf.ones((10, 10)))
     self.assertTrue(snt.has_variable_scope(linear))
 
-  def testFormatVariables(self):
+  @parameterized.parameters(
+      (False, _EXPECTED_FORMATTED_VARIABLE_LIST.format(type="legacy")),
+      (True, _EXPECTED_FORMATTED_VARIABLE_LIST.format(type="resource")),
+  )
+  def testFormatVariables(self, use_resource, expected):
     with tf.variable_scope("m1"):
-      v1 = tf.get_variable("v1", shape=[3, 4])
+      v1 = tf.get_variable("v1", shape=[3, 4], use_resource=use_resource)
     with tf.device("/gpu"):
       with tf.variable_scope("m2"):
-        v2 = tf.get_local_variable("v2", shape=[5, 6])
-    self.assertEqual(snt.format_variables([v2, v1]),
-                     _EXPECTED_FORMATTED_VARIABLE_LIST)
+        v2 = tf.get_local_variable(
+            "v2", shape=[5, 6], use_resource=use_resource)
+    self.assertEqual(snt.format_variables([v2, v1]), expected)
 
-  def testFormatVariableMap(self):
+  @parameterized.parameters(
+      (False, _EXPECTED_FORMATTED_VARIABLE_MAP.format(type="legacy")),
+      (True, _EXPECTED_FORMATTED_VARIABLE_MAP.format(type="resource")),
+  )
+  def testFormatVariableMap(self, use_resource, expected):
     with tf.variable_scope("m1"):
-      v1 = tf.get_variable("v1", shape=[3, 4])
+      v1 = tf.get_variable("v1", shape=[3, 4], use_resource=use_resource)
     with tf.device("/gpu"):
       with tf.variable_scope("m2"):
-        v2 = tf.get_local_variable("v2", shape=[5, 6])
+        v2 = tf.get_local_variable(
+            "v2", shape=[5, 6], use_resource=use_resource)
     var_map = {"vv1": v1, "vv2": v2}
-    self.assertEqual(snt.format_variable_map(var_map),
-                     _EXPECTED_FORMATTED_VARIABLE_MAP)
+    self.assertEqual(snt.format_variable_map(var_map), expected)
 
   def testLogVariables(self):
     tf.get_default_graph().add_to_collection("config", {"version": 1})

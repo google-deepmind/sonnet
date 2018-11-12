@@ -40,7 +40,11 @@ import tensorflow as tf
 # https://www.tensorflow.org/api_guides/python/nn#Convolution
 SAME = "SAME"
 VALID = "VALID"
-ALLOWED_PADDINGS = {SAME, VALID}
+FULL = "FULL"
+CAUSAL = "CAUSAL"
+REVERSE_CAUSAL = "REVERSE_CAUSAL"
+CONV_OP_ALLOWED_PADDINGS = {SAME, VALID}
+ALLOWED_PADDINGS = {SAME, VALID, FULL, CAUSAL, REVERSE_CAUSAL}
 
 DATA_FORMAT_NCW = "NCW"
 DATA_FORMAT_NWC = "NWC"
@@ -90,7 +94,7 @@ def _default_transpose_size(input_shape, stride, kernel_shape=None,
                     "have connected the module to inputs?")
   input_length = len(input_shape)
   stride = _fill_and_verify_parameter_shape(stride, input_length, "stride")
-  padding = _verify_padding(padding)
+  padding = _verify_conv_op_supported_padding(padding)
 
   output_shape = tuple(x * y for x, y in zip(input_shape, stride))
 
@@ -149,13 +153,83 @@ def _fill_and_verify_parameter_shape(x, n, parameter_label):
                                       "{}".format(e))
 
 
-def _verify_padding(padding):
-  """Verifies that the provided padding is supported. Returns padding."""
-  if padding not in ALLOWED_PADDINGS:
+def _verify_conv_op_supported_padding(padding):
+  """Verifies that the given padding type is supported for conv ops.
+
+  Args:
+    padding: One of CONV_OP_ALLOWED_PADDINGS.
+
+  Returns:
+    padding.
+
+  Raises:
+    ValueError: If padding is not one of CONV_OP_ALLOWED_PADDINGS.
+  """
+  if padding not in CONV_OP_ALLOWED_PADDINGS:
     raise ValueError(
         "Padding must be member of '{}', not {}".format(
-            ALLOWED_PADDINGS, padding))
+            CONV_OP_ALLOWED_PADDINGS, padding))
   return padding
+
+
+def _fill_and_verify_padding(padding, n):
+  """Verifies that the provided padding is supported and expands to size n.
+
+  Args:
+    padding: One of ALLOWED_PADDINGS, or an iterable of them.
+    n: An integer, the size of the desired output list.
+
+  Returns:
+    If `padding` is one of ALLOWED_PADDINGS, a tuple of size `n` containing `n`
+    copies of `padding`.
+    If `padding` is an iterable of ALLOWED_PADDINGS of size `n`, it returns
+    `padding(x)`.
+
+  Raises:
+    TypeError: If n is not a positive integer; if padding is neither one of
+      ALLOWED_PADDINGS nor an iterable of ALLOWED_PADDINGS of size n.
+  """
+  if not isinstance(n, numbers.Integral) or n < 1:
+    raise TypeError("n must be a positive integer")
+
+  if isinstance(padding, str) and padding in ALLOWED_PADDINGS:
+    return (padding,) * n
+
+  try:
+    if len(padding) == n and all(p in ALLOWED_PADDINGS for p in padding):
+      return tuple(padding)
+  except TypeError:
+    pass
+
+  raise TypeError("padding is {}, must be member of '{}' or an iterable of "
+                  "these of size {}".format(padding, ALLOWED_PADDINGS, n))
+
+
+def _padding_to_conv_op_padding(padding):
+  """Whether to use SAME or VALID for the underlying convolution op.
+
+  Args:
+    padding: A tuple of members of ALLOWED_PADDINGS, e.g. as returned from
+      `_fill_and_verify_padding`.
+
+  Returns:
+    One of CONV_OP_ALLOWED_PADDINGS, the padding method to use for the
+    underlying convolution op.
+
+  Raises:
+    ValueError: If padding is not a tuple.
+  """
+  if not isinstance(padding, tuple):
+    raise ValueError("padding should be a tuple.")
+  if all(p == SAME for p in padding):
+    # If we want SAME padding for all dimensions then we can use SAME for the
+    # conv and avoid doing any extra padding.
+    return SAME
+  else:
+    # Otherwise we prefer to use VALID, since we can implement all the other
+    # padding types just by adding some extra padding before doing a VALID conv.
+    # (We could use SAME but then we'd also have to crop outputs in some cases).
+    return VALID
 
 
 def _fill_and_one_pad_stride(stride, n, data_format=DATA_FORMAT_NHWC):
@@ -308,10 +382,6 @@ class _ConvND(base.AbstractModule):
                custom_getter=None, name="conv_nd"):
     """Constructs a _ConvND module.
 
-    See the following documentation for an explanation of VALID versus SAME
-    padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
-
     Args:
       output_channels: Number of output channels. `output_channels` can be
           either a number or a callable. In the latter case, since the function
@@ -327,7 +397,23 @@ class _ConvND(base.AbstractModule):
           define dilation rate in all dimensions. 1 corresponds to standard ND
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          (up to size N).
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b'). The default initializer for the
@@ -364,7 +450,8 @@ class _ConvND(base.AbstractModule):
           a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -394,7 +481,8 @@ class _ConvND(base.AbstractModule):
     if any(x > 1 for x in self._stride) and any(x > 1 for x in self._rate):
       raise base.NotSupportedError("Cannot have stride > 1 with rate > 1")
 
-    self._padding = _verify_padding(padding)
+    self._padding = _fill_and_verify_padding(padding, self._n)
+    self._conv_op_padding = _padding_to_conv_op_padding(self._padding)
 
     self._use_bias = use_bias
     self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
@@ -469,6 +557,7 @@ class _ConvND(base.AbstractModule):
     else:
       w = self._w
 
+    inputs = self._pad_input(inputs)
     outputs = self._apply_conv(inputs, w)
 
     if self._use_bias:
@@ -478,6 +567,62 @@ class _ConvND(base.AbstractModule):
           self._regularizers)
 
     return outputs
+
+  def _pad_input(self, inputs):
+    """Pad input in case the desired padding type requires it.
+
+    VALID and SAME padding types are directly supported by tensorflow
+    convolution ops, so don't require us to pad input ourselves, at least
+    in cases where the same method is used for all dimensions.
+
+    Other padding types (FULL, CAUSAL, REVERSE_CAUSAL) aren't directly supported
+    by conv ops but can be implemented by using VALID and padding the input
+    appropriately ourselves.
+
+    If different padding types are used for different dimensions, we use VALID
+    but pad the input ourselves along any dimensions that require other padding
+    types.
+
+    Args:
+      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
+          `tf.bfloat16` or `tf.float32`.
+
+    Returns:
+      inputs: The `inputs` argument that has had any required padding added.
+    """
+    if all(p == self._conv_op_padding for p in self._padding):
+      # All axes require the same padding type that we're going to use for the
+      # underlying convolution op, so nothing needs to be done:
+      return inputs
+
+    # In all other cases we use VALID as the underlying padding type, and for
+    # the axes which require something other than VALID, we pad inputs ourselves
+    # before the convolution.
+    assert self._conv_op_padding == VALID
+
+    def pad_amount(kernel_size, rate, padding):
+      """Pre- and post-padding required for a particular axis before conv op."""
+      # The effective kernel size includes any holes/gaps introduced by the
+      # dilation rate. It's equal to kernel_size when rate == 1.
+      effective_kernel_size = int((kernel_size - 1) * rate + 1)
+      if padding == FULL:
+        return [effective_kernel_size - 1, effective_kernel_size - 1]
+      if padding == CAUSAL:
+        return [effective_kernel_size - 1, 0]
+      if padding == REVERSE_CAUSAL:
+        return [0, effective_kernel_size - 1]
+      if padding == SAME:
+        return [(effective_kernel_size - 1) // 2, effective_kernel_size // 2]
+      # padding == VALID
+      return [0, 0]
+
+    paddings = map(pad_amount, self._kernel_shape, self._rate, self._padding)
+    if self._data_format.startswith("NC"):  # N, C, ...
+      paddings = [[0, 0], [0, 0]] + list(paddings)
+    else:  # N, ..., C
+      paddings = [[0, 0]] + list(paddings) + [[0, 0]]
+
+    return tf.pad(inputs, paddings)
 
   def _apply_conv(self, inputs, w):
     """Apply a convolution operation on `inputs` using variable `w`.
@@ -491,7 +636,8 @@ class _ConvND(base.AbstractModule):
       outputs: The result of the convolution operation on `inputs`.
     """
     outputs = tf.nn.convolution(inputs, w, strides=self._stride,
-                                padding=self._padding, dilation_rate=self._rate,
+                                padding=self._conv_op_padding,
+                                dilation_rate=self._rate,
                                 data_format=self._data_format)
     return outputs
 
@@ -592,6 +738,11 @@ class _ConvND(base.AbstractModule):
   def padding(self):
     """Returns the padding algorithm."""
     return self._padding
+
+  @property
+  def conv_op_padding(self):
+    """Returns the padding algorithm used for the underlying convolution op."""
+    return self._conv_op_padding
 
   @property
   def w(self):
@@ -800,7 +951,7 @@ class _ConvNDTranspose(base.AbstractModule):
       self._stride = _fill_and_one_pad_stride(stride, self._n,
                                               self._data_format)
 
-    self._padding = _verify_padding(padding)
+    self._padding = _verify_conv_op_supported_padding(padding)
     self._use_bias = use_bias
     self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
     self._initializers = util.check_initializers(
@@ -1041,6 +1192,11 @@ class _ConvNDTranspose(base.AbstractModule):
     return self._padding
 
   @property
+  def conv_op_padding(self):
+    """Returns the padding algorithm used for the underlying convolution op."""
+    return self._padding
+
+  @property
   def w(self):
     """Returns the Variable containing the weight matrix."""
     self._ensure_is_connected()
@@ -1128,7 +1284,23 @@ class Conv1D(_ConvND, base.Transposable):
           define dilation rate in all dimensions. 1 corresponds to standard
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 1.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b'). The default initializer for the
@@ -1205,6 +1377,11 @@ class Conv1D(_ConvND, base.Transposable):
       raise base.NotSupportedError(
           "Cannot transpose a dilated convolution module.")
 
+    if any(p != self._conv_op_padding for p in self._padding):
+      raise base.NotSupportedError(
+          "Cannot tranpose a convolution using mixed paddings or paddings "
+          "other than SAME or VALID.")
+
     def output_shape():
       if self._data_format == DATA_FORMAT_NCW:
         return (self._input_shape[2],)
@@ -1217,7 +1394,7 @@ class Conv1D(_ConvND, base.Transposable):
                            output_shape=output_shape,
                            kernel_shape=self._kernel_shape,
                            stride=self._stride,
-                           padding=self._padding,
+                           padding=self._conv_op_padding,
                            use_bias=self._use_bias,
                            initializers=self._initializers,
                            partitioners=self._partitioners,
@@ -1347,6 +1524,8 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
 class CausalConv1D(_ConvND):
   """1D convolution module, including optional bias.
 
+  This is deprecated, please use the padding=CAUSAL argument to Conv1D.
+
   This acts as a light wrapper around _ConvND ensuring that the outputs at index
   `i` only depend on indices smaller than `i` (also known as a causal
   convolution). For further details on the theoretical background, refer to:
@@ -1357,9 +1536,11 @@ class CausalConv1D(_ConvND):
   def __init__(self, output_channels, kernel_shape,
                stride=1, rate=1, use_bias=True, initializers=None,
                partitioners=None, regularizers=None, mask=None,
-               padding=VALID, data_format=DATA_FORMAT_NWC,
+               padding=CAUSAL, data_format=DATA_FORMAT_NWC,
                custom_getter=None, name="causal_conv_1d"):
     """Constructs a CausalConv1D module.
+
+    This is deprecated, please use the padding=CAUSAL argument to Conv1D.
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -1392,7 +1573,7 @@ class CausalConv1D(_ConvND):
           e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
       mask: A convertible to a 3D tensor which is multiplied
           component-wise with the weights (Optional).
-      padding: Padding algorithm. Must be `snt.VALID`.
+      padding: Padding algorithm. Should be `snt.CAUSAL`.
       data_format: A string. Specifies whether the channel dimension
           of the input and output is the last dimension (default, NWC), or the
           second dimension (NCW).
@@ -1414,7 +1595,6 @@ class CausalConv1D(_ConvND):
           a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID`.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1424,51 +1604,25 @@ class CausalConv1D(_ConvND):
       ValueError: If the given data_format is not a supported format (see
           `SUPPORTED_1D_DATA_FORMATS`).
     """
+    util.deprecation_warning(
+        "CausalConv1D is deprecated, please use Conv1D with padding=CAUSAL.")
     if data_format not in SUPPORTED_1D_DATA_FORMATS:
       raise ValueError("Invalid data_format {:s}. Allowed formats "
                        "{}".format(data_format, SUPPORTED_1D_DATA_FORMATS))
-    if padding != VALID:
-      raise base.NotSupportedError(
-          "Causal padding requires padding argument to be VALID."
-          "Got: {}".format(padding))
+    if padding != CAUSAL:
+      # This used to be required to be VALID, which is now rather ambiguous.
+      # Supporting VALID for now but with a warning:
+      util.deprecation_warning(
+          "You specified a non-casual padding type for CausalConv1D, this has "
+          "been ignored and you will get CAUSAL padding. Note CausalConv1D is "
+          "deprecated, please switch to Conv1D with padding=CAUSAL.")
     super(CausalConv1D, self).__init__(
         output_channels=output_channels, kernel_shape=kernel_shape,
-        stride=stride, rate=rate, padding=padding, use_bias=use_bias,
+        stride=stride, rate=rate, padding=CAUSAL, use_bias=use_bias,
         initializers=initializers, partitioners=partitioners,
         regularizers=regularizers, mask=mask,
         data_format=data_format,
         custom_getter=custom_getter, name=name)
-
-  def _construct_causal_input(self, inputs):
-    """Turn the input causal using padding.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
-          `tf.bfloat16` or `tf.float32`.
-
-    Returns:
-      inputs: The `inputs` argument that has had causal padding added.
-    """
-    pad_amount = int((self._kernel_shape[0] - 1) * self._rate[0])
-    if self._data_format == DATA_FORMAT_NCW:
-      inputs = tf.pad(inputs, paddings=[[0, 0], [0, 0], [pad_amount, 0]])
-    else:  # self._data_format == DATA_FORMAT_NWC
-      inputs = tf.pad(inputs, paddings=[[0, 0], [pad_amount, 0], [0, 0]])
-    return inputs
-
-  def _apply_conv(self, inputs, w):
-    """Apply a convolution operation on `inputs` using variable `w`.
-
-    Args:
-      inputs: A Tensor of shape `data_format` and of type `tf.float16`,
-          `tf.bfloat16` or `tf.float32`.
-      w: A weight matrix of the same type as `inputs`.
-
-    Returns:
-      outputs: The result of the convolution operation on `inputs`.
-    """
-    inputs = self._construct_causal_input(inputs)
-    return super(CausalConv1D, self)._apply_conv(inputs, w)
 
 
 class Conv2D(_ConvND, base.Transposable):
@@ -1502,7 +1656,23 @@ class Conv2D(_ConvND, base.Transposable):
           define dilation rate in all dimensions. 1 corresponds to standard 2D
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 2.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b'). The default initializer for the
@@ -1541,7 +1711,8 @@ class Conv2D(_ConvND, base.Transposable):
           nor 4, or if it is a TensorFlow Tensor with a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1579,6 +1750,11 @@ class Conv2D(_ConvND, base.Transposable):
       raise base.NotSupportedError(
           "Cannot transpose a dilated convolution module.")
 
+    if any(p != self._conv_op_padding for p in self._padding):
+      raise base.NotSupportedError(
+          "Cannot tranpose a convolution using mixed paddings or paddings "
+          "other than SAME or VALID.")
+
     if name is None:
       name = self.module_name + "_transpose"
 
@@ -1592,7 +1768,7 @@ class Conv2D(_ConvND, base.Transposable):
                            output_shape=output_shape,
                            kernel_shape=self._kernel_shape,
                            stride=self._stride,
-                           padding=self._padding,
+                           padding=self._conv_op_padding,
                            use_bias=self._use_bias,
                            initializers=self._initializers,
                            partitioners=self._partitioners,
@@ -1751,7 +1927,23 @@ class Conv3D(_ConvND, base.Transposable):
           define dilation rate in all dimensions. 1 corresponds to standard 3D
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 3.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b'). The default initializer for the
@@ -1788,7 +1980,8 @@ class Conv3D(_ConvND, base.Transposable):
           the given rate is not a sequence of two integers.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -1825,6 +2018,11 @@ class Conv3D(_ConvND, base.Transposable):
       raise base.NotSupportedError(
           "Cannot transpose a dilated convolution module.")
 
+    if any(p != self._conv_op_padding for p in self._padding):
+      raise base.NotSupportedError(
+          "Cannot tranpose a convolution using mixed paddings or paddings "
+          "other than SAME or VALID.")
+
     def output_shape():
       if self._data_format == DATA_FORMAT_NCDHW:
         return self.input_shape[2:]
@@ -1837,7 +2035,7 @@ class Conv3D(_ConvND, base.Transposable):
                            output_shape=output_shape,
                            kernel_shape=self._kernel_shape,
                            stride=self._stride,
-                           padding=self._padding,
+                           padding=self._conv_op_padding,
                            use_bias=self._use_bias,
                            initializers=self._initializers,
                            partitioners=self._partitioners,
@@ -1981,7 +2179,23 @@ class InPlaneConv2D(_ConvND):
           dimensions.
       stride: Iterable with 2 or 4 elements of kernel strides, or integer that
           is used to define stride in all dimensions.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 2.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b').
@@ -2010,7 +2224,8 @@ class InPlaneConv2D(_ConvND):
           or if the given kernel shape is not a sequence of two integers.
       base.IncompatibleShapeError: If the given stride is not an integer; or if
           the given stride is not a sequence of two integers.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2070,7 +2285,7 @@ class InPlaneConv2D(_ConvND):
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      tiled_weights,
                                      strides=self.stride,
-                                     padding=self._padding,
+                                     padding=self._conv_op_padding,
                                      data_format=self._data_format)
     return outputs
 
@@ -2115,7 +2330,23 @@ class DepthwiseConv2D(_ConvND):
           is used to define stride in all dimensions. Layout of list:
           In case of 4 elements: `[1, stride_height, stride_widith, 1]`
           In case of 2 elements: `[stride_height, stride_width]`.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 2.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           key 'w') or biases (with key 'b').
@@ -2147,7 +2378,8 @@ class DepthwiseConv2D(_ConvND):
           or if the given kernel shape is not a sequence of two integers.
       base.IncompatibleShapeError: If the given stride is not an integer; or if
           the given stride is not a sequence of two integers.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2224,7 +2456,7 @@ class DepthwiseConv2D(_ConvND):
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      w,
                                      strides=self.stride,
-                                     padding=self._padding,
+                                     padding=self._conv_op_padding,
                                      data_format=self._data_format)
     return outputs
 
@@ -2279,7 +2511,23 @@ class SeparableConv2D(_ConvND):
           define dilation rate in all dimensions. 1 corresponds to standard 2D
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 2.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           keys 'w_dw' for depthwise and 'w_pw' for pointwise) or biases
@@ -2319,7 +2567,8 @@ class SeparableConv2D(_ConvND):
           a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2422,7 +2671,7 @@ class SeparableConv2D(_ConvND):
                                      w_pw,
                                      rate=self._rate,
                                      strides=self.stride,
-                                     padding=self._padding,
+                                     padding=self._conv_op_padding,
                                      data_format=self._data_format)
     return outputs
 
@@ -2489,7 +2738,23 @@ class SeparableConv1D(_ConvND):
           define dilation rate in all dimensions. 1 corresponds to standard 1D
           convolution, `rate > 1` corresponds to dilated convolution. Cannot be
           > 1 if any of `stride` is also > 1.
-      padding: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+      padding: Padding algorithm. Either `snt.SAME`, `snt.VALID`, `snt.FULL`,
+          `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
+          of length 1.
+          * snt.SAME and snt.VALID are explained in the Tensorflow docs at
+            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+          * snt.FULL pre- and post-pads with the maximum padding which does not
+            result in a convolution over just padded elements.
+          * snt.CAUSAL pre-pads to ensure that each output value only depends on
+            input values at the same or preceding indices ("no dependence on the
+            future").
+          * snt.REVERSE_CAUSAL post-pads to ensure that each output value only
+            depends on input values at the same or *greater* indices ("no
+            dependence on the past").
+          If you use the same padding for all dimensions, and it is one of SAME
+          or VALID, then this is supported directly by the underlying
+          convolution op. In all other cases, the input data will be padded
+          using tf.pad before calling the convolution op.
       use_bias: Whether to include bias parameters. Default `True`.
       initializers: Optional dict containing ops to initialize the filters (with
           keys 'w_dw' for depthwise and 'w_pw' for pointwise) or biases
@@ -2529,7 +2794,8 @@ class SeparableConv1D(_ConvND):
           a not fully defined shape.
       base.NotSupportedError: If rate in any dimension and the stride in any
           dimension are simultaneously > 1.
-      ValueError: If the given padding is not `snt.VALID` or `snt.SAME`.
+      ValueError: If the given padding is not `snt.VALID`, `snt.SAME`,
+          `snt.FULL`, `snt.CAUSAL`, `snt.REVERSE_CAUSAL` or a sequence of these.
       KeyError: If `initializers`, `partitioners` or `regularizers` contain any
           keys other than 'w_dw', 'w_pw' or 'b'.
       TypeError: If any of the given initializers, partitioners or regularizers
@@ -2644,7 +2910,7 @@ class SeparableConv1D(_ConvND):
                                      w_pw,
                                      strides=two_dim_conv_stride,
                                      rate=two_dim_conv_rate,
-                                     padding=self._padding,
+                                     padding=self._conv_op_padding,
                                      data_format=two_dim_conv_data_format)
     outputs = tf.squeeze(outputs, [h_dim])
     return outputs

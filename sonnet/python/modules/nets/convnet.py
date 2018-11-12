@@ -89,9 +89,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       strides: Iterable of kernel strides as defined in `conv.Conv2D`; if the
         list contains one element only, the same stride is used in each layer of
         the network.
-      paddings: Iterable of padding options, either `snt.SAME` or
-        `snt.VALID`; if the Iterable contains one element only, the same padding
-        is used in each layer of the network.
+      paddings: Iterable of padding options as defined in `conv.Conv2D`. Each
+        can be `snt.SAME`, `snt.VALID`, `snt.FULL`, `snt.CAUSAL`,
+        `snt.REVERSE_CAUSAL` or a pair of these to use for height and width.
+        If the Iterable contains one element only, the same padding is used in
+        each layer of the network.
       rates: Iterable of dilation rates as defined in `conv.Conv2D`; if the
         list contains one element only, the same rate is used in each layer of
         the network.

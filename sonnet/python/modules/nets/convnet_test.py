@@ -27,6 +27,7 @@ import itertools
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
+from sonnet.python.modules.conv import _fill_and_verify_padding as fill_and_verify_padding
 from sonnet.python.modules.conv import _fill_shape as fill_shape
 
 import tensorflow as tf
@@ -614,13 +615,15 @@ class ConvNet2DTest(tf.test.TestCase):
       self.assertEqual(layer.stride,
                        (1,) + fill_shape(self.strides[0], 2) + (1,))
       self.assertEqual(layer.kernel_shape, fill_shape(self.kernel_shapes[0], 2))
-      self.assertEqual(layer.padding, self.paddings[0])
+      self.assertEqual(layer.padding,
+                       fill_and_verify_padding(self.paddings[0], 2))
       self.assertEqual(layer.rate, (self.rates[0], self.rates[0]))
       self.assertEqual(layer.output_channels, net.output_channels[i])
       self.assertEqual(layer.stride,
                        (1,) + fill_shape(net.strides[i], 2) + (1,))
       self.assertEqual(layer.kernel_shape, fill_shape(net.kernel_shapes[i], 2))
-      self.assertEqual(layer.padding, net.paddings[i])
+      self.assertEqual(layer.padding,
+                       fill_and_verify_padding(net.paddings[i], 2))
 
   def testTranspose(self):
     with tf.variable_scope("scope1"):

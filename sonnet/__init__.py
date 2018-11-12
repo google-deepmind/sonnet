@@ -102,6 +102,7 @@ from sonnet.python.modules.basic_rnn import VanillaRNN
 from sonnet.python.modules.batch_norm import BatchNorm
 from sonnet.python.modules.batch_norm_v2 import BatchNormV2
 from sonnet.python.modules.clip_gradient import clip_gradient
+from sonnet.python.modules.conv import CAUSAL
 from sonnet.python.modules.conv import CausalConv1D
 from sonnet.python.modules.conv import Conv1D
 from sonnet.python.modules.conv import Conv1DTranspose
@@ -110,7 +111,9 @@ from sonnet.python.modules.conv import Conv2DTranspose
 from sonnet.python.modules.conv import Conv3D
 from sonnet.python.modules.conv import Conv3DTranspose
 from sonnet.python.modules.conv import DepthwiseConv2D
+from sonnet.python.modules.conv import FULL
 from sonnet.python.modules.conv import InPlaneConv2D
+from sonnet.python.modules.conv import REVERSE_CAUSAL
 from sonnet.python.modules.conv import SAME
 from sonnet.python.modules.conv import SeparableConv1D
 from sonnet.python.modules.conv import SeparableConv2D

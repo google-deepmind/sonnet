@@ -736,7 +736,30 @@ class _ConvND(base.AbstractModule):
 
   @property
   def padding(self):
-    """Returns the padding algorithm."""
+    """Returns the padding algorithm used, if this is the same for all dims.
+
+    Use `.paddings` if you want a tuple with the padding algorithm used for each
+    dimension.
+
+    Returns:
+      The padding algorithm used, if this is the same for all dimensions.
+
+    Raises:
+      ValueError: If different padding algorithms are used for different
+        dimensions.
+    """
+    # This is for backwards compatibility -- previously only a single
+    # padding setting was supported across all dimensions.
+    if all(p == self._padding[0] for p in self._padding):
+      return self._padding[0]
+    else:
+      raise ValueError("This layer uses different paddings for different "
+                       "dimensions. Use .paddings if you want a tuple of "
+                       "per-dimension padding settings.")
+
+  @property
+  def paddings(self):
+    """Returns a tuple with the padding algorithm used for each dimension."""
     return self._padding
 
   @property

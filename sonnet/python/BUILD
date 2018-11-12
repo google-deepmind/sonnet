@@ -21,6 +21,7 @@ py_library(
     deps = [
         ":util",
         # tensorflow dep,
+        # wrapt dep,
     ],
 )
 

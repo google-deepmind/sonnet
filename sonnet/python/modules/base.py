@@ -28,6 +28,7 @@ import abc
 import collections
 import contextlib
 import inspect
+import types
 
 # Dependency imports
 import contextlib2
@@ -35,6 +36,7 @@ import six
 from sonnet.python.modules import base_info
 from sonnet.python.modules import util
 import tensorflow as tf
+import wrapt
 
 # Import error class from base_errors for backward compatibility.
 
@@ -168,6 +170,17 @@ class AbstractModule(object):
 
     self._original_name = name
     self._unique_name = self._template.variable_scope.name.split("/")[-1]
+
+    # Copy signature of _build to __call__.
+    adapter_fn = getattr(self._build, "__func__", self._build)
+    @wrapt.decorator(adapter=adapter_fn)
+    def copy_signature(method, unused_instance, args, kwargs):
+      return method(*args, **kwargs)
+    @copy_signature
+    def __call__(instance, *args, **kwargs):  # pylint: disable=invalid-name
+      return AbstractModule.__call__(instance, *args, **kwargs)
+    # use __dict__ instead of setting directly to avoid a Callable pytype error
+    self.__dict__["__call__"] = types.MethodType(__call__, self)
 
     # Update __call__ and the object docstrings to enable better introspection.
     self.__doc__ = self._build.__doc__

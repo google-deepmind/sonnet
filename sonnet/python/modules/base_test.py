@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import functools
+import inspect
 import pickle
 
 # Dependency imports
@@ -87,6 +88,7 @@ class SimpleModule(base.AbstractModule):
       self._b = tf.get_variable("b", dtype=tf.float32, shape=[10, 10])
 
   def _build(self, inputs):
+    """Connect a simple module to the graph."""
     self._w = tf.get_variable("w", dtype=tf.float32, shape=[10, 10])
 
     return self._w * inputs + self._b
@@ -332,34 +334,34 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     with tf.variable_scope("scope"):
       module = ComplexModule(name="mod1")
       module(inputs)  # pylint: disable=not-callable
-      self.assertEqual(4, len(tf.trainable_variables()))
+      self.assertLen(tf.trainable_variables(), 4)
 
       module = ComplexModule(custom_getter=custom_getter, name="mod2")
       module(inputs)  # pylint: disable=not-callable
-      self.assertEqual(4, len(tf.trainable_variables()))  # All variables.
+      self.assertLen(tf.trainable_variables(), 4)  # All variables.
 
       module = ComplexModule(custom_getter={".*/w": custom_getter},
                              name="mod3")
       module(inputs)  # pylint: disable=not-callable
       trainable_names = [v.name for v in tf.trainable_variables()]
-      self.assertEqual(6, len(trainable_names))  # linear_1/w and linear_2/w.
+      self.assertLen(trainable_names, 6)  # linear_1/w and linear_2/w.
       self.assertIn("scope/mod3/linear_1/b:0", trainable_names)
       self.assertIn("scope/mod3/linear_2/b:0", trainable_names)
 
       module = ComplexModule(custom_getter={".*/b": custom_getter}, name="mod4")
       module(inputs)  # pylint: disable=not-callable
       trainable_names = [v.name for v in tf.trainable_variables()]
-      self.assertEqual(8, len(trainable_names))  # linear_1/b and linear_2/b.
+      self.assertLen(trainable_names, 8)  # linear_1/b and linear_2/b.
       self.assertIn("scope/mod4/linear_1/w:0", trainable_names)
       self.assertIn("scope/mod4/linear_2/w:0", trainable_names)
 
       module = ComplexModule(custom_getter={".*": custom_getter}, name="mod5")
       module(inputs)  # pylint: disable=not-callable
-      self.assertEqual(8, len(tf.trainable_variables()))  # All variables.
+      self.assertLen(tf.trainable_variables(), 8)  # All variables.
 
       module = ComplexModule(custom_getter={"w": custom_getter}, name="mod6")
       module(inputs)  # pylint: disable=not-callable
-      self.assertEqual(12, len(tf.trainable_variables()))  # No variables.
+      self.assertLen(tf.trainable_variables(), 12)  # No variables.
 
   @parameterized.parameters(
       [lambda m: m.get_all_variables(),
@@ -418,9 +420,8 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
         "simple_submodule/w:0",
     ], all_variable_names)
 
-    self.assertEqual(
-        0,
-        len(module.get_all_variables(collection=tf.GraphKeys.LOCAL_VARIABLES)))
+    self.assertEmpty(
+        module.get_all_variables(collection=tf.GraphKeys.LOCAL_VARIABLES))
 
     # Create another ModuleWithSubmodules with the same submodules
     module = ModuleWithSubmodules(
@@ -465,11 +466,9 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
           submodule_a=submodule_a, submodule_b=submodule_b)
     local_module(inputs)  # pylint: disable=not-callable
 
-    self.assertEqual(
-        0,
-        len(local_module.get_all_variables()))
-    self.assertEqual(0, len(tf.all_variables()))
-    self.assertEqual(12, len(tf.local_variables()))
+    self.assertEmpty(local_module.get_all_variables())
+    self.assertEmpty(tf.all_variables())
+    self.assertLen(tf.local_variables(), 12)
 
     all_variables = get_non_trainable_variables(local_module)
     all_variable_names = sorted([str(v.name) for v in all_variables])
@@ -511,6 +510,13 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     all_variables = module_b.get_all_variables()
     all_variable_names = sorted([str(v.name) for v in all_variables])
     self.assertEqual(["module_b/b:0", "module_b/w:0"], all_variable_names)
+
+  def testCallSignatureAndDocstring(self):
+    my_module = SimpleModule()
+    self.assertEqual(
+        inspect.getargspec(my_module.__call__),
+        inspect.getargspec(my_module._build))
+    self.assertEqual(my_module.__call__.__doc__, my_module._build.__doc__)
 
 
 def _make_model_with_params(inputs, output_size):

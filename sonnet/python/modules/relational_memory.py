@@ -147,7 +147,7 @@ class RelationalMemory(rnn_core.RNNCore):
     qkv_transpose = tf.transpose(qkv_reshape, [0, 2, 1, 3])
     q, k, v = tf.split(qkv_transpose, [key_size, key_size, value_size], -1)
 
-    q *= qkv_size ** -0.5
+    q *= key_size ** -0.5
     dot_product = tf.matmul(q, k, transpose_b=True)  # [B, H, N, N]
     weights = tf.nn.softmax(dot_product)
 

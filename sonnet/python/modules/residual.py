@@ -68,11 +68,19 @@ class ResidualCore(rnn_core.RNNCore):
   def state_size(self):
     return self._base_core.state_size
 
+  def initial_state(self, *args, **kwargs):
+    return self._base_core.initial_state(*args, **kwargs)
+
+  def zero_state(self, *args, **kwargs):
+    return self._base_core.zero_state(*args, **kwargs)
+
 
 class SkipConnectionCore(rnn_core.RNNCore):
   """Adds a skip connection to the base RNN core.
 
-  This concatenates the input to the output of the base core.
+  The output of the wrapped core is the concatenation of the output of the base
+  core with its input. The state of the wrapped core is the state of the base
+  core.
   """
 
   def __init__(self, base_core, input_shape=None, name="skip_connection_core"):
@@ -114,3 +122,9 @@ class SkipConnectionCore(rnn_core.RNNCore):
   @property
   def state_size(self):
     return self._base_core.state_size
+
+  def initial_state(self, *args, **kwargs):
+    return self._base_core.initial_state(*args, **kwargs)
+
+  def zero_state(self, *args, **kwargs):
+    return self._base_core.zero_state(*args, **kwargs)

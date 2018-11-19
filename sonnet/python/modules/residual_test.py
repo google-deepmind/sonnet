@@ -24,6 +24,31 @@ import sonnet as snt
 import tensorflow as tf
 
 
+class HeterogeneousStateCore(snt.RNNCore):
+  """Dummy core with heterogeneous state."""
+
+  def __init__(self, hidden_size, name=None, custom_getter=None):
+    super(HeterogeneousStateCore, self).__init__(
+        name=name, custom_getter=custom_getter)
+    self._hidden_size = hidden_size
+
+  def _build(self, inputs, prev_state):
+    return (inputs, prev_state)
+
+  @property
+  def output_size(self):
+    return self._hidden_size
+
+  @property
+  def state_size(self):
+    return (tf.TensorShape([self._hidden_size]),
+            tf.TensorShape([self._hidden_size]))
+
+  def initial_state(self, batch_size):
+    return (tf.zeros([batch_size, self._hidden_size], dtype=tf.float32),
+            tf.zeros([batch_size, self._hidden_size], dtype=tf.int32))
+
+
 class ResidualTest(tf.test.TestCase):
 
   def setUp(self):
@@ -115,6 +140,24 @@ class ResidualCoreTest(tf.test.TestCase):
     self.assertAllClose(residual_output, output_v)
     self.assertAllClose(vanilla_output, new_state_v)
 
+  def testHeterogeneousState(self):
+    """Checks that the shape and type of the initial state are preserved."""
+
+    core = HeterogeneousStateCore(name="rnn", hidden_size=self.in_size)
+    residual = snt.ResidualCore(core, name="residual")
+
+    core_state = core.initial_state(self.batch_size)
+    residual_state = residual.initial_state(self.batch_size)
+
+    self.assertEqual(core_state[0].shape.as_list(),
+                     residual_state[0].shape.as_list())
+    self.assertEqual(core_state[1].shape.as_list(),
+                     residual_state[1].shape.as_list())
+    self.assertEqual(core_state[0].dtype,
+                     residual_state[0].dtype)
+    self.assertEqual(core_state[1].dtype,
+                     residual_state[1].dtype)
+
 
 class SkipConnectionCoreTest(tf.test.TestCase):
 
@@ -188,6 +231,24 @@ class SkipConnectionCoreTest(tf.test.TestCase):
 
     self.assertAllClose(skip_output, output_v)
     self.assertAllClose(vanilla_output, new_state_v)
+
+  def testHeterogeneousState(self):
+    """Checks that the shape and type of the initial state are preserved."""
+
+    core = HeterogeneousStateCore(name="rnn", hidden_size=self.hidden_size)
+    skip_wrapper = snt.SkipConnectionCore(core, name="skip")
+
+    core_state = core.initial_state(self.batch_size)
+    skip_state = skip_wrapper.initial_state(self.batch_size)
+
+    self.assertEqual(core_state[0].shape.as_list(),
+                     skip_state[0].shape.as_list())
+    self.assertEqual(core_state[1].shape.as_list(),
+                     skip_state[1].shape.as_list())
+    self.assertEqual(core_state[0].dtype,
+                     skip_state[0].dtype)
+    self.assertEqual(core_state[1].dtype,
+                     skip_state[1].dtype)
 
 
 if __name__ == "__main__":

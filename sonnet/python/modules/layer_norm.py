@@ -60,18 +60,18 @@ class LayerNorm(base.AbstractModule):
 
   POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
-  def __init__(self, axes=None, offset=True, scale=True, eps=1e-5,
+  def __init__(self, axis=None, offset=True, scale=True, eps=1e-5,
                initializers=None, partitioners=None, regularizers=None,
                name="layer_norm"):
     """Constructs a LayerNorm module.
 
     Args:
-      axes: Optional iterable of indices of dimensions to reduce over. By
-        default `None` and all dimensions except the first / batch dimension
-        are reduced over. If the input tensor represents an image, summing
-        over all except the batch and channel dimensions (e.g. for image format
-        NHWC, axes=[1,2]), then this module corresponds to Instance
-        Normalization (https://arxiv.org/abs/1607.08022).
+      axis: Optional dimension or iterable of indices of dimensions to normalize
+        and reduce over. By default `None` and all dimensions except the
+        first/batch dimension are reduced over. If the input tensor represents
+        an image, summing over all except the batch and channel dimensions (e.g.
+        for image format NHWC, axes=[1,2]), then this module corresponds to
+        Instance Normalization (https://arxiv.org/abs/1607.08022).
       offset: Optional boolean to specify whether or not to apply a trained
         component-wise bias after the layer normalization and scaling.
       scale: Optional boolean to specify whether or not to apply a trained
@@ -96,11 +96,14 @@ class LayerNorm(base.AbstractModule):
     """
     super(LayerNorm, self).__init__(name=name)
 
-    if axes is not None:
-      if (not isinstance(axes, collections.Iterable) or
-          not all(isinstance(ax, int) for ax in axes)):
-        raise ValueError("axes should be an iterable of ints")
-    self._axes = axes
+    if axis is not None:
+      if isinstance(axis, int):
+        axis = [axis]
+      int_not_bool = lambda x: isinstance(x, int) and not isinstance(x, bool)
+      if (not isinstance(axis, collections.Iterable) or
+          not all(int_not_bool(ax) for ax in axis)):
+        raise ValueError("axis should be an int or an iterable of ints")
+    self._axis = axis
     self._offset = offset
     self._scale = scale
     self._eps = eps
@@ -126,10 +129,10 @@ class LayerNorm(base.AbstractModule):
           `tf.bfloat16`.
     """
 
-    if self._axes is None:
-      axes = list(range(1, inputs.shape.ndims))
+    if self._axis is None:
+      axis = list(range(1, inputs.shape.ndims))
     else:
-      axes = self._axes
+      axis = self._axis
 
     if inputs.dtype in [tf.float16, tf.bfloat16]:
       raise base.NotSupportedError(
@@ -171,7 +174,7 @@ class LayerNorm(base.AbstractModule):
     else:
       self._beta = None
 
-    mean, var = tf.nn.moments(inputs, axes, keep_dims=True)
+    mean, var = tf.nn.moments(inputs, axis, keep_dims=True)
 
     normalized = tf.nn.batch_normalization(inputs, mean, var, self._beta,
                                            self._gamma, self._eps)

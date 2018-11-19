@@ -31,23 +31,27 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 
 
-def _get_layer_norm_stats(data, axes):
+def _get_layer_norm_stats(data, axis):
   """Returns mean and variances calculated over the given axes of the data."""
 
-  if axes is None:
-    axes = list(range(1, data.ndim))
+  if axis is None:
+    axis = list(range(1, data.ndim))
+
+  # convert a scalar axis into a singleton list so code below can assume a list
+  if isinstance(axis, int):
+    axis = [axis]
 
   # Transpose to put all the normalized dimensions at the end. Well done tharley
-  # for the one-liner. For 5D data, and example axes [1, 3] produces transpose
-  # arg of [0, 2, 4, 1, 3] which puts all the normalization axes at the end,
+  # for the one-liner. For 5D data, and example axis [1, 3] produces transpose
+  # arg of [0, 2, 4, 1, 3] which puts all the normalization axis at the end,
   # suitable for flattening down to calculate statistics.
   transposed_data = np.transpose(
       data,
-      sorted(set(range(data.ndim)) - set(axes)) + axes)
+      sorted(set(range(data.ndim)) - set(axis)) + axis)
 
   # Combine the sizes of all the (now trailing) normalized_dimensions
   normalized_dims_total_size = functools.reduce(
-      operator.mul, (data.shape[ax] for ax in axes))
+      operator.mul, (data.shape[ax] for ax in axis))
 
   # Do the reshape - all the non-normalized dimensions are combined by "-1"
   reshaped = np.reshape(transposed_data, [-1, normalized_dims_total_size])
@@ -113,7 +117,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
     ln(inputs1)
     ln(inputs2)
 
-    self.assertEqual(len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)), 2)
+    self.assertLen(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES), 2)
 
   def testInvalidInitializerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
@@ -192,20 +196,21 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.parameters(
       # Default, sums over all dimensions except batch:
-      {"axes": None, "input_shape": [2, 3]},
-      {"axes": None, "input_shape": [4, 5, 6]},
-      {"axes": None, "input_shape": [12, 13, 14, 15]},
-      # Specify a single axes to sum over:
-      {"axes": [1], "input_shape": [5, 6, 7]},
+      {"axis": None, "input_shape": [2, 3]},
+      {"axis": None, "input_shape": [4, 5, 6]},
+      {"axis": None, "input_shape": [12, 13, 14, 15]},
+      # Specify a single axis to sum over:
+      {"axis": [1], "input_shape": [5, 6, 7]},
+      {"axis": 1, "input_shape": [5, 6, 7]},
       # Sum over all except final dimension - i.e. Instance Norm.
-      {"axes": [1, 2], "input_shape": [10, 11, 12, 14]},
+      {"axis": [1, 2], "input_shape": [10, 11, 12, 14]},
       # Sum over non-contiguous dimensions.
-      {"axes": [1, 3], "input_shape": [3, 4, 5, 6, 7]},
+      {"axis": [1, 3], "input_shape": [3, 4, 5, 6, 7]},
       )
-  def testAxesDefault(self, axes, input_shape):
+  def testAxesDefault(self, axis, input_shape):
 
     inputs = tf.constant(np.random.rand(*input_shape))
-    ln = snt.LayerNorm(axes=axes, offset=False, scale=False)
+    ln = snt.LayerNorm(axis=axis, offset=False, scale=False)
     output = ln(inputs)
 
     init = tf.global_variables_initializer()
@@ -213,7 +218,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
       session.run(init)
       output_np = session.run(output)
 
-    statistics = _get_layer_norm_stats(output_np, axes=axes)
+    statistics = _get_layer_norm_stats(output_np, axis=axis)
     self.assertAllClose(statistics["mean"],
                         np.zeros_like(statistics["mean"]),
                         atol=2e-3)
@@ -222,14 +227,14 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
                         atol=2e-3)
 
   @parameterized.parameters(
-      {"axes": True},
-      {"axes": False},
-      {"axes": 4},
-      {"axes": [2, "invalid"]})
-  def testInvalidAxes(self, axes):
-    msg = "axes should be an iterable of ints"
+      {"axis": True},
+      {"axis": False},
+      {"axis": 4.0},
+      {"axis": [2, "invalid"]})
+  def testInvalidAxes(self, axis):
+    msg = "axis should be an int or an iterable of ints"
     with self.assertRaisesRegexp(ValueError, msg):
-      snt.LayerNorm(axes=axes)
+      snt.LayerNorm(axis=axis)
 
   @parameterized.parameters(
       {"scale": True, "offset": True},

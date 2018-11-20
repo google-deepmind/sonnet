@@ -1,5 +1,18 @@
 # Sonnet Changelog
 
+## Version 1.27 - Tuesday, 20. November 2018
+
+* **Backwards Incompatible change**: Change `Embed` to use standard deviation
+  of 1 to initialize embedding variables.
+* Allow normalization scheme to be customised in `ConvNet2D`.
+* Print type of variables (legacy/resource) in `log_variables()`.
+* Support more padding options in `_ConvND`.
+* Allow `LayerNorm` to use >2 dimensional input.
+* Make `SkipConnectionCore` and `ResidualCore` explicitly call the initial state
+  and zero state methods of the wrapped cores.
+* Fix key scaling in `RelationalMemory`.
+
+
 ## Version 1.26 - Monday, 22. October 2018
 
 * Ensure that dependency version checks are made before libraries are imported.

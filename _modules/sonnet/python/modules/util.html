@@ -13,7 +13,6 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -56,6 +55,7 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">weakref</span>
@@ -67,6 +67,7 @@
 
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">function</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="k">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">resource_variable_ops</span>
 <span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="k">import</span> <span class="n">variable_scope</span> <span class="k">as</span> <span class="n">variable_scope_ops</span>
 
 
@@ -541,6 +542,31 @@
   <span class="k">return</span> <span class="n">var_to_collections</span>
 
 
+<span class="k">def</span> <span class="nf">_format_device</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns the device with an annotation specifying `ResourceVariable`.</span>
+
+<span class="sd">  &quot;legacy&quot; means a normal tf.Variable while &quot;resource&quot; means a ResourceVariable.</span>
+
+<span class="sd">  For example:</span>
+<span class="sd">  `(legacy)`</span>
+<span class="sd">  `(resource)`</span>
+<span class="sd">  `/job:learner/task:0/device:CPU:* (legacy)`</span>
+<span class="sd">  `/job:learner/task:0/device:CPU:* (resource)`</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    var: The Tensorflow Variable or `ResourceVariable` to print.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">resource_variable_ops</span><span class="o">.</span><span class="n">is_resource_variable</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+    <span class="n">resource_var_annotation</span> <span class="o">=</span> <span class="s2">&quot;(resource)&quot;</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">resource_var_annotation</span> <span class="o">=</span> <span class="s2">&quot;(legacy)&quot;</span>
+
+  <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">resource_var_annotation</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">resource_var_annotation</span>
+
+
 <div class="viewcode-block" id="format_variables"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.format_variables">[docs]</a><span class="k">def</span> <span class="nf">format_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">join_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Takes a collection of variables and formats it as a table.&quot;&quot;&quot;</span>
   <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
@@ -553,7 +579,7 @@
       <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;undefined&quot;</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">_format_device</span><span class="p">(</span><span class="n">var</span><span class="p">)))</span>
   <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
 
 
@@ -568,7 +594,7 @@
     <span class="n">shape</span> <span class="o">=</span> <span class="s2">&quot;x&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">var</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span>
     <span class="n">dtype</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">coll</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">var_to_collections</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
-    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">coll</span><span class="p">,</span> <span class="n">_format_device</span><span class="p">(</span><span class="n">var</span><span class="p">)))</span>
   <span class="k">return</span> <span class="n">_format_table</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">join_lines</span><span class="p">)</span></div>
 
 
@@ -576,7 +602,9 @@
   <span class="sd">&quot;&quot;&quot;Logs variable information.</span>
 
 <span class="sd">  This function logs the name, shape, type, collections, and device for either</span>
-<span class="sd">  all variables or a given iterable of variables.</span>
+<span class="sd">  all variables or a given iterable of variables. In the &quot;Device&quot; columns,</span>
+<span class="sd">  the nature of the variable (legacy or resource (for ResourceVariables)) is</span>
+<span class="sd">  also specified in parenthesis.</span>
 
 <span class="sd">  Args:</span>
 <span class="sd">    variables: iterable of variables; if not provided, then all variables</span>
@@ -972,6 +1000,64 @@
 
   <span class="k">with</span> <span class="n">variable_scope_ops</span><span class="o">.</span><span class="n">variable_creator_scope</span><span class="p">(</span><span class="n">_tracking_creator</span><span class="p">):</span>
     <span class="k">yield</span></div>
+
+
+<div class="viewcode-block" id="deprecation_warning"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.deprecation_warning">[docs]</a><span class="k">def</span> <span class="nf">deprecation_warning</span><span class="p">(</span><span class="n">deprecation_message</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Log a warning message the user is using deprecated functionality.&quot;&quot;&quot;</span>
+
+  <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">log_first_n</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span> <span class="n">deprecation_message</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_recursive_getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Recursively gets attributes inside `module` as specified by `path`.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">first</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_recursive_getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">first</span><span class="p">),</span> <span class="n">rest</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_string_to_constructor"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.util.parse_string_to_constructor">[docs]</a><span class="k">def</span> <span class="nf">parse_string_to_constructor</span><span class="p">(</span><span class="n">ctor_string</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Returns a callable which corresponds to the constructor string.</span>
+
+<span class="sd">  Various modules (eg, ConvNet2D) take constructor arguments which are</span>
+<span class="sd">  callables, indicating a submodule to build. These can be passed as</span>
+<span class="sd">  actual constructors, eg `snt.LayerNorm`, however that makes the config</span>
+<span class="sd">  for that module not trivially serializable. This function tries to map</span>
+<span class="sd">  a string representation to the underlying callable, allowing configs to</span>
+<span class="sd">  remain serializable where necessary.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    ctor_string: string representing some module in Sonnet. If the string is</span>
+<span class="sd">      provided with no dots, we assume it is a member of Sonnet available at</span>
+<span class="sd">      top level, i.e. &quot;LayerNorm&quot; maps to `snt.LayerNorm`.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: if no matching constructor can be found.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Callable constructor which corresponds to `ctor_string`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">orig_ctor_string</span> <span class="o">=</span> <span class="n">ctor_string</span>
+  <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ctor_string</span><span class="p">:</span>
+    <span class="c1"># No module specified - assume part of Sonnet</span>
+    <span class="n">ctor_string</span> <span class="o">=</span> <span class="s2">&quot;sonnet.&quot;</span> <span class="o">+</span> <span class="n">ctor_string</span>
+
+  <span class="k">if</span> <span class="n">ctor_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;snt.&quot;</span><span class="p">):</span>
+    <span class="c1"># Replace common short name with full name</span>
+    <span class="n">ctor_string</span> <span class="o">=</span> <span class="s2">&quot;sonnet.&quot;</span> <span class="o">+</span> <span class="n">ctor_string</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;snt.&quot;</span><span class="p">):]</span>
+
+  <span class="c1"># Cannot just use importlib directly because of the way we alias subpackages,</span>
+  <span class="c1"># i.e. &#39;sonnet.nets.ConvNet2D&#39; does not work because &#39;sonnet.nets&#39; is actually</span>
+  <span class="c1"># stored as &#39;sonnet.python.modules.nets&#39;. To support these aliases we use</span>
+  <span class="c1"># importlib only for the top level package, and then recursive getattr.</span>
+  <span class="n">package_name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">ctor_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="n">package</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_recursive_getattr</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;could not find `</span><span class="si">{}</span><span class="s2">`, after normalizing to `</span><span class="si">{}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">orig_ctor_string</span><span class="p">,</span> <span class="n">ctor_string</span><span class="p">))</span></div>
 </pre></div>
 
           </div>
@@ -1028,7 +1114,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

@@ -13,7 +13,6 @@
     <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
    
@@ -55,10 +54,12 @@
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">six</span>
 
 <span class="kn">from</span> <span class="nn">six.moves</span> <span class="k">import</span> <span class="n">xrange</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">base</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">batch_norm</span>
+<span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">batch_norm_v2</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">conv</span>
 <span class="kn">from</span> <span class="nn">sonnet.python.modules</span> <span class="k">import</span> <span class="n">util</span>
 
@@ -92,12 +93,15 @@
                <span class="n">rates</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
                <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
                <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">normalization_ctor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">normalization_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">normalize_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated.</span>
                <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated.</span>
                <span class="n">data_format</span><span class="o">=</span><span class="n">DATA_FORMAT_NHWC</span><span class="p">,</span>
                <span class="n">custom_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_net_2d&quot;</span><span class="p">):</span>
@@ -119,15 +123,27 @@
 <span class="sd">      strides: Iterable of kernel strides as defined in `conv.Conv2D`; if the</span>
 <span class="sd">        list contains one element only, the same stride is used in each layer of</span>
 <span class="sd">        the network.</span>
-<span class="sd">      paddings: Iterable of padding options, either `snt.SAME` or</span>
-<span class="sd">        `snt.VALID`; if the Iterable contains one element only, the same padding</span>
-<span class="sd">        is used in each layer of the network.</span>
+<span class="sd">      paddings: Iterable of padding options as defined in `conv.Conv2D`. Each</span>
+<span class="sd">        can be `snt.SAME`, `snt.VALID`, `snt.FULL`, `snt.CAUSAL`,</span>
+<span class="sd">        `snt.REVERSE_CAUSAL` or a pair of these to use for height and width.</span>
+<span class="sd">        If the Iterable contains one element only, the same padding is used in</span>
+<span class="sd">        each layer of the network.</span>
 <span class="sd">      rates: Iterable of dilation rates as defined in `conv.Conv2D`; if the</span>
 <span class="sd">        list contains one element only, the same rate is used in each layer of</span>
 <span class="sd">        the network.</span>
 <span class="sd">      activation: An activation op.</span>
 <span class="sd">      activate_final: Boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      normalization_ctor: Constructor to return a callable which will perform</span>
+<span class="sd">        normalization at each layer. Defaults to None / no normalization.</span>
+<span class="sd">        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If</span>
+<span class="sd">        a string is provided, importlib is used to convert the string to a</span>
+<span class="sd">        callable, so either `snt.LayerNorm` or `&quot;snt.LayerNorm&quot;` can be</span>
+<span class="sd">        provided.</span>
+<span class="sd">      normalization_kwargs: kwargs to be provided to `normalization_ctor` when</span>
+<span class="sd">        it is called.</span>
+<span class="sd">      normalize_final: Whether to apply normalization after the final conv</span>
+<span class="sd">        layer. Default is to take the value of activate_final.</span>
 <span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
 <span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
 <span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
@@ -139,11 +155,11 @@
 <span class="sd">        single `Tensor` as an input and returns a scalar `Tensor` output, e.g.</span>
 <span class="sd">        the L1 and L2 regularizers in `tf.contrib.layers`.</span>
 <span class="sd">      use_batch_norm: Boolean determining if batch normalization is applied</span>
-<span class="sd">        after convolution.</span>
+<span class="sd">        after convolution. Deprecated, use `normalization_ctor` instead.</span>
 <span class="sd">      use_bias: Boolean or iterable of booleans determining whether to include</span>
 <span class="sd">        bias parameters in the convolutional layers. Default `True`.</span>
 <span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
-<span class="sd">        `snt.BatchNorm` modules.</span>
+<span class="sd">        `snt.BatchNorm` modules. Deprecated, use `normalization_kwargs` instead.</span>
 <span class="sd">      data_format: A string, one of &quot;NCHW&quot; or &quot;NHWC&quot;. Specifies whether the</span>
 <span class="sd">        channel dimension of the input and output is the last dimension</span>
 <span class="sd">        (default, &quot;NHWC&quot;), or the second dimension (&quot;NCHW&quot;).</span>
@@ -163,7 +179,8 @@
 <span class="sd">        length 1 or `len(output_channels)`; or if `paddings` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if `rates` has not</span>
 <span class="sd">        length 1 or `len(output_channels)`; or if the given data_format is not a</span>
-<span class="sd">        supported format (&quot;NHWC&quot; or &quot;NCHW&quot;).</span>
+<span class="sd">        supported format (&quot;NHWC&quot; or &quot;NCHW&quot;); or if `normalization_ctor` is</span>
+<span class="sd">        provided but cannot be mapped to a callable.</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
@@ -188,6 +205,12 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rates</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;rates must be iterable&quot;</span><span class="p">)</span>
     <span class="n">rates</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_batch_norm</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;use_batch_norm must be a boolean. Per-layer use of &quot;</span>
+                      <span class="s2">&quot;batch normalization is not supported. Previously, a &quot;</span>
+                      <span class="s2">&quot;test erroneously suggested use_batch_norm can be an &quot;</span>
+                      <span class="s2">&quot;iterable of booleans.&quot;</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">(</span><span class="n">ConvNet2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">custom_getter</span><span class="o">=</span><span class="n">custom_getter</span><span class="p">)</span>
 
@@ -235,9 +258,20 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
           <span class="sd">&quot;&quot;&quot;rates must be of length 1 or len(output_channels)&quot;&quot;&quot;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="o">=</span> <span class="n">use_batch_norm</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parse_normalization_kwargs</span><span class="p">(</span>
+        <span class="n">use_batch_norm</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="p">,</span>
+        <span class="n">normalization_ctor</span><span class="p">,</span> <span class="n">normalization_kwargs</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span> <span class="o">=</span> <span class="n">batch_norm_config</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">normalize_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">util</span><span class="o">.</span><span class="n">deprecation_warning</span><span class="p">(</span>
+          <span class="s2">&quot;normalize_final is not specified, so using the value of &quot;</span>
+          <span class="s2">&quot;activate_final = </span><span class="si">{}</span><span class="s2">. Change your code to set this kwarg explicitly. &quot;</span>
+          <span class="s2">&quot;In the future, normalize_final will default to True.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+              <span class="n">activate_final</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_final</span> <span class="o">=</span> <span class="n">activate_final</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># User has provided an override, so don&#39;t link to activate_final.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_final</span> <span class="o">=</span> <span class="n">normalize_final</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
       <span class="n">use_bias</span> <span class="o">=</span> <span class="p">(</span><span class="n">use_bias</span><span class="p">,)</span>
@@ -248,6 +282,42 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_use_bias</span> <span class="o">=</span> <span class="n">_replicate_elements</span><span class="p">(</span><span class="n">use_bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_layers</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_check_and_assign_normalization_members</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalization_ctor</span><span class="p">,</span>
+                                              <span class="n">normalization_kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Checks that the normalization constructor is callable.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+      <span class="n">normalization_ctor</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">parse_string_to_constructor</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">normalization_ctor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="s2">&quot;normalization_ctor must be a callable or a string that specifies &quot;</span>
+          <span class="s2">&quot;a callable, got </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span> <span class="o">=</span> <span class="n">normalization_ctor</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_kwargs</span> <span class="o">=</span> <span class="n">normalization_kwargs</span>
+
+  <span class="k">def</span> <span class="nf">_parse_normalization_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_batch_norm</span><span class="p">,</span> <span class="n">batch_norm_config</span><span class="p">,</span>
+                                  <span class="n">normalization_ctor</span><span class="p">,</span> <span class="n">normalization_kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets up normalization, checking old and new flags.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">use_batch_norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="c1"># Delete this whole block when deprecation is done.</span>
+      <span class="n">util</span><span class="o">.</span><span class="n">deprecation_warning</span><span class="p">(</span>
+          <span class="s2">&quot;`use_batch_norm` kwarg is deprecated. Change your code to instead &quot;</span>
+          <span class="s2">&quot;specify `normalization_ctor` and `normalization_kwargs`.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">use_batch_norm</span><span class="p">:</span>
+        <span class="c1"># Explicitly set to False - normalization_{ctor,kwargs} has precedence.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_assign_normalization_members</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">,</span>
+                                                     <span class="n">normalization_kwargs</span> <span class="ow">or</span> <span class="p">{})</span>
+      <span class="k">else</span><span class="p">:</span>  <span class="c1"># Explicitly set to true - new kwargs must not be used.</span>
+        <span class="k">if</span> <span class="n">normalization_ctor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">normalization_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+              <span class="s2">&quot;if use_batch_norm is specified, normalization_ctor and &quot;</span>
+              <span class="s2">&quot;normalization_kwargs must not be.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_assign_normalization_members</span><span class="p">(</span><span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span><span class="p">,</span>
+                                                     <span class="n">batch_norm_config</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Old kwargs not set, this block will remain after removing old kwarg.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_assign_normalization_members</span><span class="p">(</span><span class="n">normalization_ctor</span><span class="p">,</span>
+                                                   <span class="n">normalization_kwargs</span> <span class="ow">or</span> <span class="p">{})</span>
 
   <span class="k">def</span> <span class="nf">_instantiate_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Instantiates all the convolutional modules used in the network.&quot;&quot;&quot;</span>
@@ -272,18 +342,14 @@
                                        <span class="n">data_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_format</span><span class="p">)</span>
                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_layers</span><span class="p">))</span>
 
-  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test_local_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">normalization_build_kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Assembles the `ConvNet2D` and connects it to the graph.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      inputs: A 4D Tensor of shape `[batch_size, input_height, input_width,</span>
 <span class="sd">        input_channels]`.</span>
-<span class="sd">      is_training: Boolean to indicate to `snt.BatchNorm` if we are</span>
-<span class="sd">        currently training. Must be specified explicitly if `use_batchnorm` is</span>
-<span class="sd">        `True`.</span>
-<span class="sd">      test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch</span>
-<span class="sd">        normalization should  use local batch statistics at test time.</span>
-<span class="sd">        By default `True`.</span>
+<span class="sd">      **normalization_build_kwargs: kwargs passed to the normalization module</span>
+<span class="sd">        at _build time.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">      A 4D Tensor of shape `[batch_size, output_height, output_width,</span>
@@ -293,7 +359,9 @@
 <span class="sd">      ValueError: If `is_training` is not explicitly specified when using</span>
 <span class="sd">        batch normalization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span> <span class="ow">and</span> <span class="n">is_training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span> <span class="ow">in</span> <span class="p">{</span><span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span><span class="p">,</span>
+                                     <span class="n">batch_norm_v2</span><span class="o">.</span><span class="n">BatchNormV2</span><span class="p">}</span> <span class="ow">and</span>
+        <span class="s2">&quot;is_training&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">normalization_build_kwargs</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Boolean is_training flag must be explicitly specified &quot;</span>
                        <span class="s2">&quot;when using batch normalization.&quot;</span><span class="p">)</span>
 
@@ -304,14 +372,21 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layers</span><span class="p">):</span>
       <span class="n">net</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
 
-      <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">final_index</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span><span class="p">:</span>
-          <span class="n">bn</span> <span class="o">=</span> <span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
-                                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span><span class="p">)</span>
-          <span class="n">net</span> <span class="o">=</span> <span class="n">bn</span><span class="p">(</span><span class="n">net</span><span class="p">,</span>
-                   <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span>
-                   <span class="n">test_local_stats</span><span class="o">=</span><span class="n">test_local_stats</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">final_index</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_final</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="c1"># The name &#39;batch_norm&#39; is used even if something else like</span>
+          <span class="c1"># LayerNorm is being used. This is to avoid breaking old checkpoints.</span>
+          <span class="n">normalizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span><span class="p">(</span>
+              <span class="n">name</span><span class="o">=</span><span class="s2">&quot;batch_norm_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+              <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalization_kwargs</span><span class="p">)</span>
+          <span class="n">net</span> <span class="o">=</span> <span class="n">normalizer</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="o">**</span><span class="n">normalization_build_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">normalization_build_kwargs</span><span class="p">:</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No normalization configured, but extra kwargs &quot;</span>
+                <span class="s2">&quot;provided: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">normalization_build_kwargs</span><span class="p">))</span>
 
+      <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">final_index</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activate_final</span><span class="p">:</span>
         <span class="n">net</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_activation</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">net</span>
@@ -359,11 +434,29 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">use_batch_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_batch_norm</span>
+    <span class="n">util</span><span class="o">.</span><span class="n">deprecation_warning</span><span class="p">(</span>
+        <span class="s2">&quot;The `.use_batch_norm` property is deprecated. Check &quot;</span>
+        <span class="s2">&quot;`.normalization_ctor` instead.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span> <span class="o">==</span> <span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">batch_norm_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_norm_config</span>
+    <span class="n">util</span><span class="o">.</span><span class="n">deprecation_warning</span><span class="p">(</span>
+        <span class="s2">&quot;The `.batch_norm_config` property is deprecated. Check &quot;</span>
+        <span class="s2">&quot;`.normalization_kwargs` instead.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_kwargs</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">normalization_ctor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_ctor</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">normalization_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalization_kwargs</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">normalize_final</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_final</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">activation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -389,12 +482,13 @@
                  <span class="n">paddings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">normalization_ctor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">normalization_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">normalize_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">use_batch_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">use_bias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">batch_norm_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">data_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
     <span class="sd">&quot;&quot;&quot;Returns transposed version of this network.</span>
 
@@ -416,6 +510,16 @@
 <span class="sd">      activation: Optional activation op. Default value is `self.activation`.</span>
 <span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      normalization_ctor: Constructor to return a callable which will perform</span>
+<span class="sd">        normalization at each layer. Defaults to None / no normalization.</span>
+<span class="sd">        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If</span>
+<span class="sd">        a string is provided, importlib is used to convert the string to a</span>
+<span class="sd">        callable, so either `snt.LayerNorm` or `&quot;snt.LayerNorm&quot;` can be</span>
+<span class="sd">        provided.</span>
+<span class="sd">      normalization_kwargs: kwargs to be provided to `normalization_ctor` when</span>
+<span class="sd">        it is called.</span>
+<span class="sd">      normalize_final: Whether to apply normalization after the final conv</span>
+<span class="sd">        layer. Default is to take the value of activate_final.</span>
 <span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
 <span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). The default</span>
 <span class="sd">        value is `self.initializers`.</span>
@@ -425,13 +529,9 @@
 <span class="sd">      regularizers: Optional dict containing regularizers for the filters of the</span>
 <span class="sd">        whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). The default is</span>
 <span class="sd">        `self.regularizers`.</span>
-<span class="sd">      use_batch_norm: Optional boolean determining if batch normalization is</span>
-<span class="sd">        applied after convolution. The default value is `self.use_batch_norm`.</span>
 <span class="sd">      use_bias: Optional boolean or iterable of booleans determining whether to</span>
 <span class="sd">        include bias parameters in the convolutional layers. Default</span>
 <span class="sd">        is constructed by reversing `self.use_bias`.</span>
-<span class="sd">      batch_norm_config: Optional mapping of additional configuration for the</span>
-<span class="sd">        `snt.BatchNorm` modules. Default is `self.batch_norm_config`.</span>
 <span class="sd">      data_format: Optional string, one of &quot;NCHW&quot; or &quot;NHWC&quot;. Specifies whether</span>
 <span class="sd">        the channel dimension of the input and output is the last dimension.</span>
 <span class="sd">        Default is `self._data_format`.</span>
@@ -474,6 +574,15 @@
     <span class="k">if</span> <span class="n">activate_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">activate_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activate_final</span>
 
+    <span class="k">if</span> <span class="n">normalization_ctor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">normalization_ctor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_ctor</span>
+
+    <span class="k">if</span> <span class="n">normalization_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">normalization_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization_kwargs</span>
+
+    <span class="k">if</span> <span class="n">normalize_final</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">normalize_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_final</span>
+
     <span class="k">if</span> <span class="n">initializers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">initializers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span>
 
@@ -483,32 +592,28 @@
     <span class="k">if</span> <span class="n">regularizers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">regularizers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span>
 
-    <span class="k">if</span> <span class="n">use_batch_norm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">use_batch_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_batch_norm</span>
-
     <span class="k">if</span> <span class="n">use_bias</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">use_bias</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">batch_norm_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">batch_norm_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm_config</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span> <span class="o">+</span> <span class="s2">&quot;_transpose&quot;</span>
 
-    <span class="k">return</span> <span class="n">transpose_constructor</span><span class="p">(</span><span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
-                                 <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
-                                 <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
-                                 <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
-                                 <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
-                                 <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
-                                 <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
-                                 <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
-                                 <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
-                                 <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
-                                 <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
-                                 <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
-                                 <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
-                                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">transpose_constructor</span><span class="p">(</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+        <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+        <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">normalization_ctor</span><span class="o">=</span><span class="n">normalization_ctor</span><span class="p">,</span>
+        <span class="n">normalization_kwargs</span><span class="o">=</span><span class="n">normalization_kwargs</span><span class="p">,</span>
+        <span class="n">normalize_final</span><span class="o">=</span><span class="n">normalize_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
   <span class="c1"># Implements Transposable interface.</span>
 <div class="viewcode-block" id="ConvNet2D.transpose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.transpose">[docs]</a>  <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -519,6 +624,9 @@
                 <span class="n">paddings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalization_ctor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalization_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalize_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -543,6 +651,16 @@
 <span class="sd">      activation: Optional activation op. Default value is `self.activation`.</span>
 <span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      normalization_ctor: Constructor to return a callable which will perform</span>
+<span class="sd">        normalization at each layer. Defaults to None / no normalization.</span>
+<span class="sd">        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If</span>
+<span class="sd">        a string is provided, importlib is used to convert the string to a</span>
+<span class="sd">        callable, so either `snt.LayerNorm` or `&quot;snt.LayerNorm&quot;` can be</span>
+<span class="sd">        provided.</span>
+<span class="sd">      normalization_kwargs: kwargs to be provided to `normalization_ctor` when</span>
+<span class="sd">        it is called.</span>
+<span class="sd">      normalize_final: Whether to apply normalization after the final conv</span>
+<span class="sd">        layer. Default is to take the value of activate_final.</span>
 <span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
 <span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). The default</span>
 <span class="sd">        value is `self.initializers`.</span>
@@ -593,21 +711,23 @@
     <span class="n">transpose_constructor</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">ConvNet2DTranspose</span><span class="p">,</span>
                                               <span class="n">output_shapes</span><span class="o">=</span><span class="n">output_shapes</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">(</span><span class="n">transpose_constructor</span><span class="o">=</span><span class="n">transpose_constructor</span><span class="p">,</span>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                           <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
-                           <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
-                           <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
-                           <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
-                           <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
-                           <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
-                           <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
-                           <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
-                           <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
-                           <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
-                           <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
-                           <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
-                           <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span></div></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">(</span>
+        <span class="n">transpose_constructor</span><span class="o">=</span><span class="n">transpose_constructor</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+        <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+        <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">normalization_ctor</span><span class="o">=</span><span class="n">normalization_ctor</span><span class="p">,</span>
+        <span class="n">normalization_kwargs</span><span class="o">=</span><span class="n">normalization_kwargs</span><span class="p">,</span>
+        <span class="n">normalize_final</span><span class="o">=</span><span class="n">normalize_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ConvNet2DTranspose"><a class="viewcode-back" href="../../../../../api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2DTranspose">[docs]</a><span class="k">class</span> <span class="nc">ConvNet2DTranspose</span><span class="p">(</span><span class="n">ConvNet2D</span><span class="p">):</span>
@@ -621,6 +741,9 @@
                <span class="n">paddings</span><span class="p">,</span>
                <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
                <span class="n">activate_final</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+               <span class="n">normalization_ctor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">normalization_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">normalize_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -658,6 +781,16 @@
 <span class="sd">      activation: An activation op.</span>
 <span class="sd">      activate_final: Boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      normalization_ctor: Constructor to return a callable which will perform</span>
+<span class="sd">        normalization at each layer. Defaults to None / no normalization.</span>
+<span class="sd">        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If</span>
+<span class="sd">        a string is provided, importlib is used to convert the string to a</span>
+<span class="sd">        callable, so either `snt.LayerNorm` or `&quot;snt.LayerNorm&quot;` can be</span>
+<span class="sd">        provided.</span>
+<span class="sd">      normalization_kwargs: kwargs to be provided to `normalization_ctor` when</span>
+<span class="sd">        it is called.</span>
+<span class="sd">      normalize_final: Whether to apply normalization after the final conv</span>
+<span class="sd">        layer. Default is to take the value of activate_final.</span>
 <span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
 <span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;).</span>
 <span class="sd">      partitioners: Optional dict containing partitioners to partition</span>
@@ -690,6 +823,8 @@
 <span class="sd">        length 1 or `len(output_channels)`.</span>
 <span class="sd">      ValueError: If the given data_format is not a supported format (&quot;NHWC&quot; or</span>
 <span class="sd">        &quot;NCHW&quot;).</span>
+<span class="sd">      ValueError: If `normalization_ctor` is provided but cannot be converted</span>
+<span class="sd">        to a callable.</span>
 <span class="sd">      KeyError: If `initializers`, `partitioners` or `regularizers` contain any</span>
 <span class="sd">        keys other than &#39;w&#39; or &#39;b&#39;.</span>
 <span class="sd">      TypeError: If any of the given initializers, partitioners or regularizers</span>
@@ -716,6 +851,9 @@
         <span class="n">paddings</span><span class="p">,</span>
         <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
         <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">normalization_ctor</span><span class="o">=</span><span class="n">normalization_ctor</span><span class="p">,</span>
+        <span class="n">normalization_kwargs</span><span class="o">=</span><span class="n">normalization_kwargs</span><span class="p">,</span>
+        <span class="n">normalize_final</span><span class="o">=</span><span class="n">normalize_final</span><span class="p">,</span>
         <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
         <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
         <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
@@ -758,6 +896,9 @@
                 <span class="n">paddings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">activate_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalization_ctor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalization_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalize_final</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">initializers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">partitioners</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">regularizers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -782,6 +923,16 @@
 <span class="sd">      activation: Optional activation op. Default value is `self.activation`.</span>
 <span class="sd">      activate_final: Optional boolean determining if the activation and batch</span>
 <span class="sd">        normalization, if turned on, are applied to the final layer.</span>
+<span class="sd">      normalization_ctor: Constructor to return a callable which will perform</span>
+<span class="sd">        normalization at each layer. Defaults to None / no normalization.</span>
+<span class="sd">        Examples of what could go here: `snt.BatchNormV2`, `snt.LayerNorm`. If</span>
+<span class="sd">        a string is provided, importlib is used to convert the string to a</span>
+<span class="sd">        callable, so either `snt.LayerNorm` or `&quot;snt.LayerNorm&quot;` can be</span>
+<span class="sd">        provided.</span>
+<span class="sd">      normalization_kwargs: kwargs to be provided to `normalization_ctor` when</span>
+<span class="sd">        it is called.</span>
+<span class="sd">      normalize_final: Whether to apply normalization after the final conv</span>
+<span class="sd">        layer. Default is to take the value of activate_final.</span>
 <span class="sd">      initializers: Optional dict containing ops to initialize the filters of</span>
 <span class="sd">        the whole network (with key &#39;w&#39;) or biases (with key &#39;b&#39;). The default</span>
 <span class="sd">        value is `self.initializers`.</span>
@@ -809,21 +960,34 @@
 <span class="sd">      ValueError: If output_channels is specified and its length does not match</span>
 <span class="sd">        the number of layers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">(</span><span class="n">transpose_constructor</span><span class="o">=</span><span class="n">ConvNet2D</span><span class="p">,</span>
-                           <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                           <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
-                           <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
-                           <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
-                           <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
-                           <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
-                           <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
-                           <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
-                           <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
-                           <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
-                           <span class="n">use_batch_norm</span><span class="o">=</span><span class="n">use_batch_norm</span><span class="p">,</span>
-                           <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
-                           <span class="n">batch_norm_config</span><span class="o">=</span><span class="n">batch_norm_config</span><span class="p">,</span>
-                           <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span></div></div>
+    <span class="k">if</span> <span class="n">use_batch_norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">normalization_ctor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">normalization_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;If use_batch_norm is specified, normalization_ctor and &quot;</span>
+            <span class="s2">&quot;normalization_kwargs must not be.&quot;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">use_batch_norm</span><span class="p">:</span>
+        <span class="n">normalization_ctor</span> <span class="o">=</span> <span class="n">batch_norm</span><span class="o">.</span><span class="n">BatchNorm</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">normalization_ctor</span> <span class="o">=</span> <span class="kc">None</span>
+      <span class="n">normalization_kwargs</span> <span class="o">=</span> <span class="n">batch_norm_config</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span><span class="p">(</span>
+        <span class="n">transpose_constructor</span><span class="o">=</span><span class="n">ConvNet2D</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">output_channels</span><span class="o">=</span><span class="n">output_channels</span><span class="p">,</span>
+        <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+        <span class="n">paddings</span><span class="o">=</span><span class="n">paddings</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
+        <span class="n">activate_final</span><span class="o">=</span><span class="n">activate_final</span><span class="p">,</span>
+        <span class="n">normalization_ctor</span><span class="o">=</span><span class="n">normalization_ctor</span><span class="p">,</span>
+        <span class="n">normalization_kwargs</span><span class="o">=</span><span class="n">normalization_kwargs</span><span class="p">,</span>
+        <span class="n">normalize_final</span><span class="o">=</span><span class="n">normalize_final</span><span class="p">,</span>
+        <span class="n">initializers</span><span class="o">=</span><span class="n">initializers</span><span class="p">,</span>
+        <span class="n">partitioners</span><span class="o">=</span><span class="n">partitioners</span><span class="p">,</span>
+        <span class="n">regularizers</span><span class="o">=</span><span class="n">regularizers</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -880,7 +1044,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

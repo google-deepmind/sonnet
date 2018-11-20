@@ -13,7 +13,6 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -101,13 +100,21 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span>
+
+<div class="viewcode-block" id="ResidualCore.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.ResidualCore.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResidualCore.zero_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.ResidualCore.zero_state">[docs]</a>  <span class="k">def</span> <span class="nf">zero_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">zero_state</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SkipConnectionCore"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore">[docs]</a><span class="k">class</span> <span class="nc">SkipConnectionCore</span><span class="p">(</span><span class="n">rnn_core</span><span class="o">.</span><span class="n">RNNCore</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Adds a skip connection to the base RNN core.</span>
 
-<span class="sd">  This concatenates the input to the output of the base core.</span>
+<span class="sd">  The output of the wrapped core is the concatenation of the output of the base</span>
+<span class="sd">  core with its input. The state of the wrapped core is the state of the base</span>
+<span class="sd">  core.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_core</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;skip_connection_core&quot;</span><span class="p">):</span>
@@ -148,7 +155,13 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">state_size</span>
+
+<div class="viewcode-block" id="SkipConnectionCore.initial_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore.initial_state">[docs]</a>  <span class="k">def</span> <span class="nf">initial_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">initial_state</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SkipConnectionCore.zero_state"><a class="viewcode-back" href="../../../../api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore.zero_state">[docs]</a>  <span class="k">def</span> <span class="nf">zero_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_core</span><span class="o">.</span><span class="n">zero_state</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -205,7 +218,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

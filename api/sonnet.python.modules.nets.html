@@ -13,7 +13,6 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -134,7 +133,7 @@ must be &gt;= this number in size.</p>
 <p>A minimal interface convolutional networks module.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>rates=(1</em>, <em>)</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>rates=(1</em>, <em>)</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>normalization_ctor=None</em>, <em>normalization_kwargs=None</em>, <em>normalize_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>custom_getter=None</em>, <em>name='conv_net_2d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a>, <a class="reference internal" href="sonnet.python.modules.html#sonnet.python.modules.base.Transposable" title="sonnet.python.modules.base.Transposable"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.Transposable</span></code></a></p>
 <p>A 2D Convolutional Network module.</p>
 <dl class="attribute">
@@ -185,6 +184,21 @@ must be &gt;= this number in size.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.normalization_ctor">
+<code class="descname">normalization_ctor</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.normalization_ctor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.normalization_kwargs">
+<code class="descname">normalization_kwargs</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.normalization_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sonnet.python.modules.nets.convnet.ConvNet2D.normalize_final">
+<code class="descname">normalize_final</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.normalize_final" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D.output_channels">
 <code class="descname">output_channels</code><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.output_channels" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -216,7 +230,7 @@ must be &gt;= this number in size.</p>
 
 <dl class="method">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2D.transpose">
-<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.transpose" title="Permalink to this definition">¶</a></dt>
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>normalization_ctor=None</em>, <em>normalization_kwargs=None</em>, <em>normalize_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2D.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2D.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed version of this network.</p>
 <p>Args: name: Optional string specifying the name of the transposed
 module. The default name is constructed by appending “_transpose” to
@@ -230,13 +244,22 @@ value is constructed by reversing <code class="docutils literal notranslate"><sp
 Optional activation op. Default value is <code class="docutils literal notranslate"><span class="pre">self.activation</span></code>.
 activate_final: Optional boolean determining if the activation and
 batch normalization, if turned on, are applied to the final layer.
-initializers: Optional dict containing ops to initialize the filters of
-the whole network (with key ‘w’) or biases (with key ‘b’). The default
-value is <code class="docutils literal notranslate"><span class="pre">self.initializers</span></code>. partitioners: Optional dict containing
-partitioners to partition weights (with key ‘w’) or biases (with key
-‘b’). The default value is <code class="docutils literal notranslate"><span class="pre">self.partitioners</span></code>. regularizers: Optional
-dict containing regularizers for the filters of the whole network (with
-key ‘w’) or biases (with key ‘b’). The default is <code class="docutils literal notranslate"><span class="pre">self.regularizers</span></code>.
+normalization_ctor: Constructor to return a callable which will perform
+normalization at each layer. Defaults to None / no normalization.
+Examples of what could go here: <code class="docutils literal notranslate"><span class="pre">snt.BatchNormV2</span></code>, <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code>.
+If a string is provided, importlib is used to convert the string to a
+callable, so either <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;snt.LayerNorm&quot;</span></code> can be
+provided. normalization_kwargs: kwargs to be provided to
+<code class="docutils literal notranslate"><span class="pre">normalization_ctor</span></code> when it is called. normalize_final: Whether to
+apply normalization after the final conv layer. Default is to take the
+value of activate_final. initializers: Optional dict containing ops to
+initialize the filters of the whole network (with key ‘w’) or biases
+(with key ‘b’). The default value is <code class="docutils literal notranslate"><span class="pre">self.initializers</span></code>.
+partitioners: Optional dict containing partitioners to partition weights
+(with key ‘w’) or biases (with key ‘b’). The default value is
+<code class="docutils literal notranslate"><span class="pre">self.partitioners</span></code>. regularizers: Optional dict containing
+regularizers for the filters of the whole network (with key ‘w’) or
+biases (with key ‘b’). The default is <code class="docutils literal notranslate"><span class="pre">self.regularizers</span></code>.
 use_batch_norm: Optional boolean determining if batch normalization is
 applied after convolution. The default value is <code class="docutils literal notranslate"><span class="pre">self.use_batch_norm</span></code>.
 use_bias: Optional boolean or iterable of booleans determining whether
@@ -268,7 +291,7 @@ convolutions are dilated.</p>
 
 <dl class="class">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2DTranspose">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shapes</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>name='conv_net_2d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.nets.convnet.</code><code class="descname">ConvNet2DTranspose</code><span class="sig-paren">(</span><em>output_channels</em>, <em>output_shapes</em>, <em>kernel_shapes</em>, <em>strides</em>, <em>paddings</em>, <em>activation=&lt;function relu&gt;</em>, <em>activate_final=False</em>, <em>normalization_ctor=None</em>, <em>normalization_kwargs=None</em>, <em>normalize_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=False</em>, <em>use_bias=True</em>, <em>batch_norm_config=None</em>, <em>data_format='NHWC'</em>, <em>name='conv_net_2d_transpose'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.nets.convnet.ConvNet2D" title="sonnet.python.modules.nets.convnet.ConvNet2D"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.nets.convnet.ConvNet2D</span></code></a></p>
 <p>A 2D Transpose-Convolutional Network module.</p>
 <dl class="attribute">
@@ -278,7 +301,7 @@ convolutions are dilated.</p>
 
 <dl class="method">
 <dt id="sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose">
-<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
+<code class="descname">transpose</code><span class="sig-paren">(</span><em>name=None</em>, <em>output_channels=None</em>, <em>kernel_shapes=None</em>, <em>strides=None</em>, <em>paddings=None</em>, <em>activation=None</em>, <em>activate_final=None</em>, <em>normalization_ctor=None</em>, <em>normalization_kwargs=None</em>, <em>normalize_final=None</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>use_batch_norm=None</em>, <em>use_bias=None</em>, <em>batch_norm_config=None</em>, <em>data_format=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/nets/convnet.html#ConvNet2DTranspose.transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.nets.convnet.ConvNet2DTranspose.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns transposed version of this network.</p>
 <p>Args: name: Optional string specifying the name of the transposed
 module. The default name is constructed by appending “_transpose” to
@@ -292,13 +315,22 @@ value is constructed by reversing <code class="docutils literal notranslate"><sp
 Optional activation op. Default value is <code class="docutils literal notranslate"><span class="pre">self.activation</span></code>.
 activate_final: Optional boolean determining if the activation and
 batch normalization, if turned on, are applied to the final layer.
-initializers: Optional dict containing ops to initialize the filters of
-the whole network (with key ‘w’) or biases (with key ‘b’). The default
-value is <code class="docutils literal notranslate"><span class="pre">self.initializers</span></code>. partitioners: Optional dict containing
-partitioners to partition weights (with key ‘w’) or biases (with key
-‘b’). The default value is <code class="docutils literal notranslate"><span class="pre">self.partitioners</span></code>. regularizers: Optional
-dict containing regularizers for the filters of the whole network (with
-key ‘w’) or biases (with key ‘b’). The default is <code class="docutils literal notranslate"><span class="pre">self.regularizers</span></code>.
+normalization_ctor: Constructor to return a callable which will perform
+normalization at each layer. Defaults to None / no normalization.
+Examples of what could go here: <code class="docutils literal notranslate"><span class="pre">snt.BatchNormV2</span></code>, <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code>.
+If a string is provided, importlib is used to convert the string to a
+callable, so either <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;snt.LayerNorm&quot;</span></code> can be
+provided. normalization_kwargs: kwargs to be provided to
+<code class="docutils literal notranslate"><span class="pre">normalization_ctor</span></code> when it is called. normalize_final: Whether to
+apply normalization after the final conv layer. Default is to take the
+value of activate_final. initializers: Optional dict containing ops to
+initialize the filters of the whole network (with key ‘w’) or biases
+(with key ‘b’). The default value is <code class="docutils literal notranslate"><span class="pre">self.initializers</span></code>.
+partitioners: Optional dict containing partitioners to partition weights
+(with key ‘w’) or biases (with key ‘b’). The default value is
+<code class="docutils literal notranslate"><span class="pre">self.partitioners</span></code>. regularizers: Optional dict containing
+regularizers for the filters of the whole network (with key ‘w’) or
+biases (with key ‘b’). The default is <code class="docutils literal notranslate"><span class="pre">self.regularizers</span></code>.
 use_batch_norm: Optional boolean determining if batch normalization is
 applied after convolution. The default value is <code class="docutils literal notranslate"><span class="pre">self.use_batch_norm</span></code>.
 use_bias: Optional boolean or iterable of booleans determining whether
@@ -658,7 +690,7 @@ instability.</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -13,7 +13,6 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -1577,9 +1576,10 @@ default ‘clip_gradient’).</p>
 <code class="docutils literal notranslate"><span class="pre">snt.Module</span></code>, with easy weight sharing.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.conv.CausalConv1D">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">CausalConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>padding='VALID'</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='causal_conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#CausalConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.CausalConv1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.conv.</code><code class="descname">CausalConv1D</code><span class="sig-paren">(</span><em>output_channels</em>, <em>kernel_shape</em>, <em>stride=1</em>, <em>rate=1</em>, <em>use_bias=True</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>mask=None</em>, <em>padding='CAUSAL'</em>, <em>data_format='NWC'</em>, <em>custom_getter=None</em>, <em>name='causal_conv_1d'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/conv.html#CausalConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.conv.CausalConv1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.conv._ConvND</span></code></p>
 <p>1D convolution module, including optional bias.</p>
+<p>This is deprecated, please use the padding=CAUSAL argument to Conv1D.</p>
 <p>This acts as a light wrapper around _ConvND ensuring that the outputs
 at index <code class="docutils literal notranslate"><span class="pre">i</span></code> only depend on indices smaller than <code class="docutils literal notranslate"><span class="pre">i</span></code> (also known as
 a causal convolution). For further details on the theoretical
@@ -2607,11 +2607,11 @@ the same LSTM without zoneout.</p>
 <span id="sonnet-python-modules-layer-norm-module"></span><h2>sonnet.python.modules.layer_norm module<a class="headerlink" href="#module-sonnet.python.modules.layer_norm" title="Permalink to this headline">¶</a></h2>
 <p>Layer normalization module for Sonnet.</p>
 <p>This contains the module LayerNorm, which performs layer normalization
-on its inputs.</p>
+over configurable axes of its inputs.</p>
 <p>Original paper: <a class="reference external" href="https://arxiv.org/abs/1607.06450">https://arxiv.org/abs/1607.06450</a>.</p>
 <dl class="class">
 <dt id="sonnet.python.modules.layer_norm.LayerNorm">
-<em class="property">class </em><code class="descclassname">sonnet.python.modules.layer_norm.</code><code class="descname">LayerNorm</code><span class="sig-paren">(</span><em>eps=1e-05</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='layer_norm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/layer_norm.html#LayerNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.layer_norm.LayerNorm" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">sonnet.python.modules.layer_norm.</code><code class="descname">LayerNorm</code><span class="sig-paren">(</span><em>axis=None</em>, <em>offset=True</em>, <em>scale=True</em>, <em>eps=1e-05</em>, <em>initializers=None</em>, <em>partitioners=None</em>, <em>regularizers=None</em>, <em>name='layer_norm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/layer_norm.html#LayerNorm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.layer_norm.LayerNorm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.base.AbstractModule" title="sonnet.python.modules.base.AbstractModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.base.AbstractModule</span></code></a></p>
 <p>Layer normalization module.</p>
 <p>Implementation based on: <a class="reference external" href="https://arxiv.org/abs/1607.06450">https://arxiv.org/abs/1607.06450</a></p>
@@ -2620,6 +2620,8 @@ on its inputs.</p>
 <p>where mu and sigma are respectively the mean and standard deviation of
 x. Gamma and beta are trainable parameters for scaling and shifting
 respectively.</p>
+<p>Since the axes over which normalization is perfomed is configurable,
+this also subsumes instance normalization.</p>
 <dl class="attribute">
 <dt id="sonnet.python.modules.layer_norm.LayerNorm.BETA">
 <code class="descname">BETA</code><em class="property"> = 'beta'</em><a class="headerlink" href="#sonnet.python.modules.layer_norm.LayerNorm.BETA" title="Permalink to this definition">¶</a></dt>
@@ -2832,6 +2834,33 @@ Residual(M)(x) = M(x) + x.</p>
 <p>Adds a residual connection to a base RNN core.</p>
 <p>This module wraps a module M, where if M with traditionally output M(X),
 Residual(M)(x) = M(x) + x.</p>
+<dl class="method">
+<dt id="sonnet.python.modules.residual.ResidualCore.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/residual.html#ResidualCore.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.residual.ResidualCore.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state for an RNNCore.</p>
+<p>Args: batch_size: An int, or scalar int32 Tensor representing the batch
+size. dtype: The data type to use for the state. trainable: Boolean that
+indicates whether to learn the initial state. Note that intializers and
+regularizers will be ignored if <code class="docutils literal notranslate"><span class="pre">trainable=False</span></code>.
+trainable_initializers: An initializer function or nested structure of
+functions with same structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the
+core, to be used as initializers of the initial state variable.
+trainable_regularizers: Optional regularizer function or nested
+structure of functions with the same structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code>
+property of the core, to be used as regularizers of the initial state
+variable. As a default, no regularizers are used. A regularizer should
+be a function that takes a single <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> as an input and returns a
+scalar <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> output, e.g. the L1 and L2 regularizers in
+<code class="docutils literal notranslate"><span class="pre">tf.contrib.layers</span></code>. name: Optional string used to prefix the initial
+state variable names, in the case of a trainable initial state. If not
+provided, defaults to the name of the module.</p>
+<p>Returns: A tensor or nested tuple of tensors with same structure and
+shape as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the core.</p>
+<p>Raises: ValueError: if the user passes initializers that are not
+functions. ValueError: if the user passes regularizers that are not
+functions.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="sonnet.python.modules.residual.ResidualCore.output_size">
 <code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.residual.ResidualCore.output_size" title="Permalink to this definition">¶</a></dt>
@@ -2842,6 +2871,20 @@ Residual(M)(x) = M(x) + x.</p>
 <code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.residual.ResidualCore.state_size" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="sonnet.python.modules.residual.ResidualCore.zero_state">
+<code class="descname">zero_state</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/residual.html#ResidualCore.zero_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.residual.ResidualCore.zero_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return zero-filled state tensor(s).</p>
+<p>Args: batch_size: int, float, or unit Tensor representing the batch
+size. dtype: the data type to use for the state.</p>
+<p>Returns: If <code class="docutils literal notranslate"><span class="pre">state_size</span></code> is an int or TensorShape, then the return
+value is a <code class="docutils literal notranslate"><span class="pre">N-D</span></code> tensor of shape <code class="docutils literal notranslate"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">state_size]</span></code> filled
+with zeros.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">state_size</span></code> is a nested list or tuple, then the return value is a
+nested list or tuple (of the same structure) of <code class="docutils literal notranslate"><span class="pre">2-D</span></code> tensors with the
+shapes <code class="docutils literal notranslate"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">s]</span></code> for each s in <code class="docutils literal notranslate"><span class="pre">state_size</span></code>.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -2849,7 +2892,36 @@ Residual(M)(x) = M(x) + x.</p>
 <em class="property">class </em><code class="descclassname">sonnet.python.modules.residual.</code><code class="descname">SkipConnectionCore</code><span class="sig-paren">(</span><em>base_core</em>, <em>input_shape=None</em>, <em>name='skip_connection_core'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/residual.html#SkipConnectionCore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.residual.SkipConnectionCore" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sonnet.python.modules.rnn_core.RNNCore" title="sonnet.python.modules.rnn_core.RNNCore"><code class="xref py py-class docutils literal notranslate"><span class="pre">sonnet.python.modules.rnn_core.RNNCore</span></code></a></p>
 <p>Adds a skip connection to the base RNN core.</p>
-<p>This concatenates the input to the output of the base core.</p>
+<p>The output of the wrapped core is the concatenation of the output of the
+base core with its input. The state of the wrapped core is the state of
+the base core.</p>
+<dl class="method">
+<dt id="sonnet.python.modules.residual.SkipConnectionCore.initial_state">
+<code class="descname">initial_state</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/residual.html#SkipConnectionCore.initial_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.residual.SkipConnectionCore.initial_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the default start state for an RNNCore.</p>
+<p>Args: batch_size: An int, or scalar int32 Tensor representing the batch
+size. dtype: The data type to use for the state. trainable: Boolean that
+indicates whether to learn the initial state. Note that intializers and
+regularizers will be ignored if <code class="docutils literal notranslate"><span class="pre">trainable=False</span></code>.
+trainable_initializers: An initializer function or nested structure of
+functions with same structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the
+core, to be used as initializers of the initial state variable.
+trainable_regularizers: Optional regularizer function or nested
+structure of functions with the same structure as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code>
+property of the core, to be used as regularizers of the initial state
+variable. As a default, no regularizers are used. A regularizer should
+be a function that takes a single <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> as an input and returns a
+scalar <code class="docutils literal notranslate"><span class="pre">Tensor</span></code> output, e.g. the L1 and L2 regularizers in
+<code class="docutils literal notranslate"><span class="pre">tf.contrib.layers</span></code>. name: Optional string used to prefix the initial
+state variable names, in the case of a trainable initial state. If not
+provided, defaults to the name of the module.</p>
+<p>Returns: A tensor or nested tuple of tensors with same structure and
+shape as the <code class="docutils literal notranslate"><span class="pre">state_size</span></code> property of the core.</p>
+<p>Raises: ValueError: if the user passes initializers that are not
+functions. ValueError: if the user passes regularizers that are not
+functions.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="sonnet.python.modules.residual.SkipConnectionCore.output_size">
 <code class="descname">output_size</code><a class="headerlink" href="#sonnet.python.modules.residual.SkipConnectionCore.output_size" title="Permalink to this definition">¶</a></dt>
@@ -2859,6 +2931,20 @@ Residual(M)(x) = M(x) + x.</p>
 <dt id="sonnet.python.modules.residual.SkipConnectionCore.state_size">
 <code class="descname">state_size</code><a class="headerlink" href="#sonnet.python.modules.residual.SkipConnectionCore.state_size" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="sonnet.python.modules.residual.SkipConnectionCore.zero_state">
+<code class="descname">zero_state</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/residual.html#SkipConnectionCore.zero_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.residual.SkipConnectionCore.zero_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return zero-filled state tensor(s).</p>
+<p>Args: batch_size: int, float, or unit Tensor representing the batch
+size. dtype: the data type to use for the state.</p>
+<p>Returns: If <code class="docutils literal notranslate"><span class="pre">state_size</span></code> is an int or TensorShape, then the return
+value is a <code class="docutils literal notranslate"><span class="pre">N-D</span></code> tensor of shape <code class="docutils literal notranslate"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">state_size]</span></code> filled
+with zeros.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">state_size</span></code> is a nested list or tuple, then the return value is a
+nested list or tuple (of the same structure) of <code class="docutils literal notranslate"><span class="pre">2-D</span></code> tensors with the
+shapes <code class="docutils literal notranslate"><span class="pre">[batch_size</span> <span class="pre">x</span> <span class="pre">s]</span></code> for each s in <code class="docutils literal notranslate"><span class="pre">state_size</span></code>.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -3371,6 +3457,12 @@ callable function.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="sonnet.python.modules.util.deprecation_warning">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">deprecation_warning</code><span class="sig-paren">(</span><em>deprecation_message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#deprecation_warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.deprecation_warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log a warning message the user is using deprecated functionality.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="sonnet.python.modules.util.format_variable_map">
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">format_variable_map</code><span class="sig-paren">(</span><em>variable_map</em>, <em>join_lines=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#format_variable_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.format_variable_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a key-to-variable map and formats it as a table.</p>
@@ -3471,7 +3563,9 @@ non-trainable variables such as moving averages.</p>
 <code class="descclassname">sonnet.python.modules.util.</code><code class="descname">log_variables</code><span class="sig-paren">(</span><em>variables=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#log_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.log_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs variable information.</p>
 <p>This function logs the name, shape, type, collections, and device for
-either all variables or a given iterable of variables.</p>
+either all variables or a given iterable of variables. In the “Device”
+columns, the nature of the variable (legacy or resource (for
+ResourceVariables)) is also specified in parenthesis.</p>
 <p>Args: variables: iterable of variables; if not provided, then all
 variables (in the default graph) are logged.</p>
 </dd></dl>
@@ -3498,6 +3592,23 @@ assert variables == [v, w]</div></blockquote>
 <p>Args: callback: a callable taking a single argument which is a
 tf.Variable.</p>
 <p>Yields: <code class="docutils literal notranslate"><span class="pre">None</span></code> - used for contextmanager API.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sonnet.python.modules.util.parse_string_to_constructor">
+<code class="descclassname">sonnet.python.modules.util.</code><code class="descname">parse_string_to_constructor</code><span class="sig-paren">(</span><em>ctor_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sonnet/python/modules/util.html#parse_string_to_constructor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sonnet.python.modules.util.parse_string_to_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a callable which corresponds to the constructor string.</p>
+<p>Various modules (eg, ConvNet2D) take constructor arguments which are
+callables, indicating a submodule to build. These can be passed as
+actual constructors, eg <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code>, however that makes the config
+for that module not trivially serializable. This function tries to map a
+string representation to the underlying callable, allowing configs to
+remain serializable where necessary.</p>
+<p>Args: ctor_string: string representing some module in Sonnet. If the
+string is provided with no dots, we assume it is a member of Sonnet
+available at top level, i.e. “LayerNorm” maps to <code class="docutils literal notranslate"><span class="pre">snt.LayerNorm</span></code>.</p>
+<p>Raises: ValueError: if no matching constructor can be found.</p>
+<p>Returns: Callable constructor which corresponds to <code class="docutils literal notranslate"><span class="pre">ctor_string</span></code>.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3657,7 +3768,7 @@ variables).</p>
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

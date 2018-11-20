@@ -14,7 +14,6 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -353,9 +352,11 @@
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun">defun() (sonnet.python.modules.base.AbstractModule method)</a>
 </li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun_wrapped">defun_wrapped (sonnet.python.modules.base.AbstractModule attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.defun_wrapped">defun_wrapped (sonnet.python.modules.base.AbstractModule attribute)</a>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.deprecation_warning">deprecation_warning() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.conv.DepthwiseConv2D">DepthwiseConv2D (class in sonnet.python.modules.conv)</a>
 </li>
@@ -560,6 +561,10 @@
 </li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.relational_memory.RelationalMemory.initial_state">(sonnet.python.modules.relational_memory.RelationalMemory method)</a>
 </li>
+        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.residual.ResidualCore.initial_state">(sonnet.python.modules.residual.ResidualCore method)</a>
+</li>
+        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore.initial_state">(sonnet.python.modules.residual.SkipConnectionCore method)</a>
+</li>
         <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore.initial_state">(sonnet.python.modules.rnn_core.RNNCore method)</a>
 </li>
       </ul></li>
@@ -755,9 +760,15 @@
 </li>
       <li><a href="api/sonnet.python.custom_getters.html#sonnet.python.custom_getters.non_trainable.non_trainable">non_trainable() (in module sonnet.python.custom_getters.non_trainable)</a>
 </li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.non_trainable_variables">non_trainable_variables (sonnet.python.modules.base.AbstractModule attribute)</a>
+</li>
+      <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.normalization_ctor">normalization_ctor (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base.AbstractModule.non_trainable_variables">non_trainable_variables (sonnet.python.modules.base.AbstractModule attribute)</a>
+      <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.normalization_kwargs">normalization_kwargs (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
+</li>
+      <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.normalize_final">normalize_final (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_errors.NotConnectedError">NotConnectedError</a>
 </li>
@@ -864,6 +875,8 @@
       <li><a href="api/sonnet.python.modules.nets.html#sonnet.python.modules.nets.convnet.ConvNet2D.paddings">paddings (sonnet.python.modules.nets.convnet.ConvNet2D attribute)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.base_errors.ParentNotBuiltError">ParentNotBuiltError</a>
+</li>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.util.parse_string_to_constructor">parse_string_to_constructor() (in module sonnet.python.modules.util)</a>
 </li>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.basic.Linear.partitioners">partitioners (sonnet.python.modules.basic.Linear attribute)</a>
 
@@ -1433,8 +1446,14 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore.zero_state">zero_state() (sonnet.python.modules.rnn_core.RNNCore method)</a>
+      <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.residual.ResidualCore.zero_state">zero_state() (sonnet.python.modules.residual.ResidualCore method)</a>
+
+      <ul>
+        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.residual.SkipConnectionCore.zero_state">(sonnet.python.modules.residual.SkipConnectionCore method)</a>
 </li>
+        <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.rnn_core.RNNCore.zero_state">(sonnet.python.modules.rnn_core.RNNCore method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/sonnet.python.modules.html#sonnet.python.modules.gated_rnn.ZoneoutWrapper">ZoneoutWrapper (class in sonnet.python.modules.gated_rnn)</a>
@@ -1496,7 +1515,7 @@
       &copy;2017, Sonnet Authors.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

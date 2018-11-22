@@ -192,8 +192,12 @@ class RestoreInitializerTest(tf.test.TestCase):
         _ = partition_info  # Not used for creation.
         return tf.constant(True, dtype, shape)
 
-      partitioned_var1 = tf.create_partitioned_variables(
-          [1 << 3, 10], [4, 1], initializer1, dtype=tf.bool, name=var_name)
+      partitioned_var1 = list(tf.get_variable(
+          var_name,
+          shape=[1 << 3, 10],
+          partitioner=tf.fixed_size_partitioner(4),
+          initializer=initializer1,
+          dtype=tf.bool))
 
       with self.test_session(graph=g1) as session:
         with tf.device('/cpu:0'):
@@ -205,8 +209,12 @@ class RestoreInitializerTest(tf.test.TestCase):
     g2 = tf.Graph()
     with g2.as_default():
       initializer2 = initializers.restore_initializer(save_path, var_name, '')
-      partitioned_var2 = tf.create_partitioned_variables(
-          [1 << 3, 10], [4, 1], initializer2, dtype=tf.bool, name=var_name)
+      partitioned_var2 = list(tf.get_variable(
+          var_name,
+          shape=[1 << 3, 10],
+          partitioner=tf.fixed_size_partitioner(4),
+          initializer=initializer2,
+          dtype=tf.bool))
       with self.test_session(graph=g2) as session:
         tf.global_variables_initializer().run()
         pv2 = session.run(partitioned_var2)

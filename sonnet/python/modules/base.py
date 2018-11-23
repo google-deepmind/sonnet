@@ -641,6 +641,13 @@ class AbstractModule(object):
       NotConnectedError: If the module is not connected to the Graph.
     """
     self._ensure_is_connected()
+
+    if self._defun_wrapped and tf.executing_eagerly():
+      raise NotSupportedError(
+          "`module.get_variables()` relies on TensorFlow collections which are "
+          "not supported when your module is wrapped with defun. Instead use "
+          "`module.trainable_variables` or `module.variables`.")
+
     # Explicitly re-enter Graph, in case the module is being queried with a
     # different default Graph from the one it was connected to. If this was not
     # here then querying the variables from a different graph scope would

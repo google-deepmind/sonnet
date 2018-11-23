@@ -28,6 +28,7 @@ from absl.testing import parameterized
 import numpy as np
 import six
 from sonnet.python.modules import base
+from sonnet.python.modules.base_errors import NotSupportedError
 import tensorflow as tf
 
 tfe = tf.contrib.eager
@@ -681,10 +682,11 @@ class MatMulModule(base.AbstractModule):
 
   def _build(self, x):
     self.call_count += 1
-    w = tf.get_variable("w", [x.shape[1], 32])
-    return x * w
+    self.w = tf.get_variable("w", [x.shape[1], 32])
+    return x * self.w
 
 
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class DefunTest(tf.test.TestCase):
 
   def testDefunWrappedProperty(self):
@@ -717,6 +719,17 @@ class DefunTest(tf.test.TestCase):
       output = module(tf.zeros([batch_size, 1]))
       self.assertListEqual(output.shape.as_list(), [batch_size, 32])
     self.assertEqual(module.call_count, 2)
+
+  def testGetVariablesDisabledWhenUsingDefun(self):
+    module = MatMulModule()
+    module.defun()
+    module(tf.zeros([1, 1]))
+    if tf.executing_eagerly():
+      msg = ".*get_variables.*not supported .* wrapped with defun"
+      with self.assertRaisesRegexp(NotSupportedError, msg):
+        module.get_variables()
+    else:
+      self.assertEqual(module.get_variables(), (module.w,))
 
 if __name__ == "__main__":
   tf.test.main()

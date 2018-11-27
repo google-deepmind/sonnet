@@ -109,7 +109,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     lstm(inputs, (prev_hidden, prev_cell))
 
     lstm_variables = lstm.get_variables()
-    self.assertEqual(len(lstm_variables), 2, "LSTM should have 2 variables")
+    self.assertLen(lstm_variables, 2, "LSTM should have 2 variables")
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
 
@@ -184,7 +184,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     _, next_state = lstm(inputs, (prev_hidden, prev_cell))
     next_hidden, next_cell = next_state
     lstm_variables = lstm.get_variables()
-    self.assertEqual(len(lstm_variables), 5, "LSTM should have 5 variables")
+    self.assertLen(lstm_variables, 5, "LSTM should have 5 variables")
 
     # Unpack parameters into dict and check their sizes.
     param_map = {param.name.split("/")[-1].split(":")[0]:
@@ -276,9 +276,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
                  initializers={key: tf.constant_initializer(0)})
 
   @parameterized.parameters(
-      (1e-8, 14),
+      (1e-6, 14),
       (0.5, None),
-      (1 - 1e-8, 0)
+      (1 - 1e-6, 0)
   )
   def testRecurrentDropout(self, keep_prob, expected_zeros):
     """Performs various recurrent dropout checks.
@@ -339,9 +339,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertAllEqual(mask == 0, hidden == 0)
 
   @parameterized.parameters(
-      (1 - 1e-8, 0, 0),
+      (1 - 1e-6, 0, 0),
       (0.5, None, None),
-      (1e-8, 14, 14)
+      (1e-6, 14, 14)
   )
   def testZoneout(self, keep_prob, expected_frozen_h, expected_frozen_c):
     """Performs various zoneout checks.
@@ -523,7 +523,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     if use_batch_norm_h or use_batch_norm_x:
       self.assertEqual(num_reg_losses, len(keys) + 1)
     else:
-      self.assertEqual(num_reg_losses, len(keys))
+      self.assertLen(keys, num_reg_losses)
 
   # Pick some hopefully representative combination of parameter values
   # (want to test with seq_len < max_unique_stats and seq_len >
@@ -638,7 +638,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertTrue(core.use_layer_norm)
 
     expected = 4  # gate bias and one weight, plus LayerNorm's gamma, beta.
-    self.assertEqual(len(core.get_variables()), expected)
+    self.assertLen(core.get_variables(), expected)
 
   def testHiddenClipping(self):
     core = snt.LSTM(hidden_size=5, hidden_clip_value=1.0)
@@ -730,7 +730,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     if use_batch_norm_c:
       expected += 2  # gamma_c, beta_c
 
-    self.assertEqual(len(cell.get_variables()), expected)
+    self.assertLen(cell.get_variables(), expected)
 
   def testCheckMaxUniqueStats(self):
     self.assertRaisesRegexp(ValueError,
@@ -1103,7 +1103,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     # Weight, and bias if present, to apply to input
     # Weight, and bias if present, to apply to hidden state
     # LayerNorm's gamma and beta, if present
-    self.assertEqual(len(lstm.get_variables()), expected_num_variables)
+    self.assertLen(lstm.get_variables(), expected_num_variables)
 
   @parameterized.parameters(
       (snt.Conv1DLSTM, 1, False),
@@ -1175,7 +1175,7 @@ class GRUTest(tf.test.TestCase):
     gru(inputs, state)
 
     gru_variables = gru.get_variables()
-    self.assertEqual(len(gru_variables), 9, "GRU should have 9 variables")
+    self.assertLen(gru_variables, 9, "GRU should have 9 variables")
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in gru_variables}
     for part in ["z", "r", "h"]:
@@ -1291,8 +1291,8 @@ class GRUTest(tf.test.TestCase):
     gru(inputs, state)
 
     # Test that we have regularization losses.
-    self.assertEqual(len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)),
-                     len(keys))
+    self.assertLen(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES),
+                   len(keys))
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
@@ -1324,7 +1324,7 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     core(inputs, state)
 
     core_variables = core.get_variables()
-    self.assertEqual(len(core_variables), 2 + 4 * num_layers)
+    self.assertLen(core_variables, 2 + 4 * num_layers)
     param_map = {param.name.split("/")[-1].split(":")[0]: param
                  for param in core_variables}
     self.assertShapeEqual(
@@ -1433,7 +1433,7 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
     lstm(inputs, (prev_hidden, prev_cell))
 
     lstm_variables = lstm.get_variables()
-    self.assertEqual(len(lstm_variables), 2, "LSTM should have 2 variables")
+    self.assertLen(lstm_variables, 2, "LSTM should have 2 variables")
     param_map = {param.name.split("/")[-1].split(":")[0]:
                  param for param in lstm_variables}
 

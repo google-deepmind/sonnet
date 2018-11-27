@@ -93,7 +93,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
     variable_map = snt.get_normalized_variable_map(s1)
 
-    self.assertEqual(len(variable_map), 2)
+    self.assertLen(variable_map, 2)
     self.assertIn("a", variable_map)
     self.assertIn("b", variable_map)
     self.assertIs(variable_map["a"], v1)
@@ -118,7 +118,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s1.name),
                      variable_map)
 
-    self.assertEqual(len(variable_map), 2)
+    self.assertLen(variable_map, 2)
     self.assertIn("prefix2/a", variable_map)
     self.assertIn("prefix2/b", variable_map)
     self.assertIs(variable_map["prefix2/a"], v1)
@@ -133,7 +133,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(snt.get_normalized_variable_map(s2.name, context=s4.name),
                      variable_map)
 
-    self.assertEqual(len(variable_map), 2)
+    self.assertLen(variable_map, 2)
     self.assertIn("prefix1/prefix2/a", variable_map)
     self.assertIn("prefix1/prefix2/b", variable_map)
     self.assertIs(variable_map["prefix1/prefix2/a"], v1)
@@ -146,7 +146,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
     variable_map = snt.get_normalized_variable_map(conv)
 
-    self.assertEqual(len(variable_map), 2)
+    self.assertLen(variable_map, 2)
     self.assertIn("w", variable_map)
     self.assertIn("b", variable_map)
     self.assertIs(variable_map["w"], conv.w)
@@ -162,9 +162,9 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     conv(hidden)
     variable_map = snt.get_normalized_variable_map(conv,
                                                    group_sliced_variables=True)
-    self.assertEqual(len(variable_map), 2)
+    self.assertLen(variable_map, 2)
     self.assertEqual(variable_map["b"], conv.b)
-    self.assertEqual(len(variable_map["w"]), 3)
+    self.assertLen(variable_map["w"], 3)
 
     variable_map = snt.get_normalized_variable_map(conv,
                                                    group_sliced_variables=False)
@@ -247,9 +247,9 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     with tf.variable_scope("prefix") as s1:
       tf.get_variable("a", shape=[1], collections=["test"], trainable=False)
 
-    self.assertEqual(len(snt.get_variables_in_scope(s1)), 0)
-    self.assertEqual(len(snt.get_variables_in_scope(s1, collection="test2")), 0)
-    self.assertEqual(len(snt.get_variables_in_scope(s1, collection="test")), 1)
+    self.assertEmpty(snt.get_variables_in_scope(s1))
+    self.assertEmpty(snt.get_variables_in_scope(s1, collection="test2"))
+    self.assertLen(snt.get_variables_in_scope(s1, collection="test"), 1)
 
   def testCollectionGetSaver(self):
     with tf.variable_scope("prefix") as s1:
@@ -263,14 +263,14 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     self.assertIsInstance(saver1, tf.train.Saver)
     self.assertIsInstance(saver2, tf.train.Saver)
 
-    self.assertEqual(len(saver1._var_list), 5)
+    self.assertLen(saver1._var_list, 5)
     self.assertIn("linear/w", saver1._var_list)
     self.assertIn("linear/b", saver1._var_list)
     self.assertIn("batch_norm/beta", saver1._var_list)
     self.assertIn("batch_norm/moving_mean", saver1._var_list)
     self.assertIn("batch_norm/moving_variance", saver1._var_list)
 
-    self.assertEqual(len(saver2._var_list), 3)
+    self.assertLen(saver2._var_list, 3)
     self.assertIn("linear/w", saver2._var_list)
     self.assertIn("linear/b", saver2._var_list)
     self.assertIn("batch_norm/beta", saver2._var_list)
@@ -586,7 +586,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
 
     for layer in seq.layers:
       layer.add_b(inputs)
-    self.assertEqual(0, len(seq._all_variables))
+    self.assertEmpty(seq._all_variables)
 
     seq(inputs)
     all_variable_names = sorted([v.name for v in seq.get_all_variables()])

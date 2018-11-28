@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import functools
+import inspect
 import itertools
 import os
 import tempfile
@@ -521,6 +522,67 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
   def testParseStringToConstructorErrors(self, erroneous_string):
     with self.assertRaisesRegexp(ValueError, "could not find"):
       snt.parse_string_to_constructor(erroneous_string)
+
+  @parameterized.parameters(
+      (lambda: snt.Linear(42), [], True),
+      (snt.LayerNorm, "is_training", False),
+      (snt.BatchNorm, "is_training", True),
+      (snt.BatchNorm, ["is_training"], True),
+      (snt.BatchNorm, ["is_training", "test_local_stats"], True),
+      (snt.BatchNorm, ["is_training", "test_local_stoats"], False),
+      )
+  def testModuleSupportsKwargs(self, module_builder, kwargs_list, expected):
+    mod = module_builder()
+    self.assertEqual(snt.supports_kwargs(mod, kwargs_list), expected)
+
+  def testModuleSupportsKwargsReuseVariables(self):
+    # Test whether reuse_variables wrapping preserves the signature so that
+    # we can query for supported kwargs. Also check whether inheritance breaks
+    # things.
+
+    class ParentModule(snt.AbstractModule):
+
+      def _build(self):
+        raise ValueError("call reuse_variables methods instead")
+
+      @snt.reuse_variables
+      def a(self, inputs, flag_a=False):
+        return inputs + 1
+
+      @snt.reuse_variables
+      def b(self, inputs, flag_b=False):
+        return inputs + 2
+
+    pm = ParentModule()
+    self.assertTrue(snt.supports_kwargs(pm.a, "flag_a"))
+    self.assertTrue(snt.supports_kwargs(pm.b, "flag_b"))
+    self.assertFalse(snt.supports_kwargs(pm.a, ["flag_a", "nonexistent_flag"]))
+    self.assertFalse(snt.supports_kwargs(pm.b, "flag_a"))
+
+    class ChildModule(ParentModule):
+
+      # Override parent implementation of a()
+      @snt.reuse_variables
+      def a(self, inputs, new_flag_a=True, another_new_flag_a=False):
+        return inputs + 3
+
+      @snt.reuse_variables
+      def c(self, inputs, flag_c=42):
+        return inputs + 4
+
+    cm = ChildModule()
+    self.assertTrue(snt.supports_kwargs(cm.a, ["new_flag_a",
+                                               "another_new_flag_a"]))
+    self.assertFalse(snt.supports_kwargs(cm.a, "flag_a"))
+    self.assertTrue(snt.supports_kwargs(cm.b, "flag_b"))
+    self.assertTrue(snt.supports_kwargs(cm.c, "flag_c"))
+
+  @parameterized.parameters(
+      (tf.zeros, False),
+      (tf.reduce_sum, True))
+  def testArgSpecIsGeneric(self, func, expected_result):
+    arg_spec = inspect.getargspec(func)
+    self.assertEqual(util._arg_spec_is_generic(arg_spec), expected_result)
 
 
 class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):

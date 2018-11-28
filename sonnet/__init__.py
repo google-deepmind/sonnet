@@ -163,6 +163,7 @@ from sonnet.python.modules.util import log_variables
 from sonnet.python.modules.util import parse_string_to_constructor
 from sonnet.python.modules.util import reuse_variables
 from sonnet.python.modules.util import summarize_variables
+from sonnet.python.modules.util import supports_kwargs
 from sonnet.python.modules.util import variable_map_items
 from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer

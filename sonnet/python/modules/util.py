@@ -1024,3 +1024,70 @@ def parse_string_to_constructor(ctor_string):
   except AttributeError:
     raise ValueError("could not find `{}`, after normalizing to `{}`".format(
         orig_ctor_string, ctor_string))
+
+
+def _arg_spec_is_generic(arg_spec):
+  """Returns True iff arg_spec is a generic *args, **kwargs signature.
+
+  This is generally the result of a function being wrapped with decorators which
+  do not preserve the signature.
+
+  Args:
+    arg_spec: An Argspec namedtuple as returned by `inpect.getargspec`.
+
+  Returns a boolean indicating if the arg_spec looks generic.
+  """
+  generic_arg_spec = inspect.ArgSpec(
+      args=[], varargs="args", keywords="kwargs", defaults=None)
+  return arg_spec == generic_arg_spec
+
+
+def supports_kwargs(module_or_fn, kwargs_list):
+  """Returns True iff the provided callable definitely supports all the kwargs.
+
+  This is useful when you have a module that might or might not support a
+  kwarg such as `is_training`. Rather than calling the module and catching the
+  error, risking the potential modification of underlying state, this function
+  introspects the module to see what kwargs are actually supported, using
+  the python `inspect` module.
+
+  Note that many TF functions do not export a valid argspec object, rather they
+  have a generic *args, **kwargs signature due to various layers of wrapping
+  (deprecation decorators, etc). In those cases this function may return
+  false negatives. The solution would be to ensure the proper signature is
+  available. A potential workaround is try calling the function yourself to
+  verify that it _really_ doesn't support the kwargs, although that requires
+  that you actually want to call the function at that point anyway.
+
+  Args:
+    module_or_fn: some callable, generally an object or a method of some object.
+      If an object is provided, we check wither `module_or_fn.__call__` supports
+      the provided kwargs, which for a Sonnet module will automatically check
+      the signature of _build. If `module_or_fn` is a function/method, then
+      we check its signature directly, so non-Sonnet functions can be used.
+    kwargs_list: string or iterable of strings of keyword arg names to test for.
+      If an empty iterable is provided this function will always return True.
+
+  Returns True iff all kwargs in `kwargs_list` can be passed to `module_or_fn`.
+  """
+  if isinstance(kwargs_list, six.string_types):
+    kwargs_list = [kwargs_list]
+
+  # If it's not a function or method, then assume it's a module, so introspect
+  # the __call__ method. wrapt ensures that for Sonnet modules the _build
+  # signature is available here.
+  if not (inspect.isfunction(module_or_fn) or inspect.ismethod(module_or_fn)):
+    module_or_fn = module_or_fn.__call__
+
+  arg_spec = inspect.getargspec(module_or_fn)
+  # See if this looks like a generic signature.
+  if _arg_spec_is_generic(arg_spec):
+    tf.logging.warning(
+        "Testing whether function {} with generic arg_spec {} supports kwargs "
+        "{} - this function may return False negatives. See `supports_kwargs` "
+        "docstring".format(module_or_fn, arg_spec, kwargs_list))
+  for kwarg in kwargs_list:
+    if kwarg not in arg_spec.args:
+      return False
+  return True
+

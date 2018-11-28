@@ -1148,7 +1148,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
-class GRUTest(tf.test.TestCase):
+class GRUTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
     batch_size = 2
@@ -1161,10 +1161,11 @@ class GRUTest(tf.test.TestCase):
     self.assertShapeEqual(shape, next_state)
     self.assertShapeEqual(shape, output)
 
-  def testVariables(self):
+  @parameterized.parameters(
+      {"input_size": 4, "hidden_size": 5},
+      {"input_size": 16, "hidden_size": 128})
+  def testVariables(self, input_size, hidden_size):
     batch_size = 5
-    input_size = 10
-    hidden_size = 20
     mod_name = "rnn"
     inputs = tf.ones(dtype=tf.float32, shape=[batch_size, input_size])
     state = tf.ones(dtype=tf.float32, shape=[batch_size, hidden_size])

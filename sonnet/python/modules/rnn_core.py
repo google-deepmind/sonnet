@@ -172,8 +172,7 @@ class RNNCore(base.AbstractModule):
   This class defines the basic functionality that every core should implement,
   mainly the `initial_state` method which will return an example of their
   initial state.
-  It also inherits from the two interfaces it should be compatible with, which
-  are `snt.Module` and `tf.contrib.rnn.RNNCell`.
+  It also inherits from the interface `snt.AbstractModule`.
 
   As with any other `snt.Module` any subclass must implement a `_build` method
   that constructs the graph that corresponds to a core. Such a `_build` method
@@ -188,10 +187,10 @@ class RNNCore(base.AbstractModule):
       element = tuple(element*) | list(element*) | tf.Tensor
 
   This class is to be used with tensorflow containers such as `rnn` in
-  tensorflow.python.ops.rnn. These containers only accept
-  `tf.contrib.rnn.RNNCell` objects, hence the need to comply with its interface.
-  This way, all the RNNCores should expose a `state_size` and `output_size`
-  properties.
+  tensorflow.python.ops.rnn.
+  These containers only accept inputs which are compatible with the
+  `tf.contrib.rnn.RNNCell` API, so that all the RNNCores should expose
+  `state_size` and `output_size` properties.
   """
   __metaclass__ = abc.ABCMeta
 

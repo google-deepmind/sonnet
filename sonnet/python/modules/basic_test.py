@@ -99,12 +99,12 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
     variables_ = lin.get_variables()
     if use_bias:
-      self.assertEqual(len(variables_), 2, "Linear should have 2 variables.")
+      self.assertLen(variables_, 2, "Linear should have 2 variables.")
     else:
       err = "No bias Variable in Linear Module when `use_bias=False`."
       with self.assertRaisesRegexp(AttributeError, err):
         _ = lin.b
-      self.assertEqual(len(variables_), 1, "Linear should have 1 variable.")
+      self.assertLen(variables_, 1, "Linear should have 1 variable.")
 
     for v in variables_:
       self.assertRegexpMatches(v.name,
@@ -128,15 +128,15 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
     lin1 = snt.Linear(output_size=self.out_size,
                       custom_getter=custom_getter)
     lin1(inputs)
-    self.assertEqual(0, len(tf.trainable_variables()))
-    self.assertEqual(2, len(tf.global_variables()))
+    self.assertEmpty(tf.trainable_variables())
+    self.assertLen(tf.global_variables(), 2)
 
     # Make w non-trainable.
     lin2 = snt.Linear(output_size=self.out_size,
                       custom_getter={"w": custom_getter})
     lin2(inputs)
-    self.assertEqual(1, len(tf.trainable_variables()))
-    self.assertEqual(4, len(tf.global_variables()))
+    self.assertLen(tf.trainable_variables(), 1)
+    self.assertLen(tf.global_variables(), 4)
 
   @parameterized.named_parameters(
       ("WithBias", True),
@@ -312,7 +312,7 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
     lin(inputs)
 
     regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    self.assertEqual(len(regularizers), 2)
+    self.assertLen(regularizers, 2)
     if not tf.executing_eagerly():
       self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
       self.assertRegexpMatches(regularizers[1].name, ".*l2_regularizer.*")
@@ -341,9 +341,9 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(linear.output_size, clone1.output_size)
     self.assertEqual(linear.module_name + "_clone", clone1.module_name)
     self.assertEqual("clone2", clone2.module_name)
-    self.assertEqual(len(all_vars), 3*len(linear_vars))
-    self.assertEqual(len(linear_vars), len(clone1_vars))
-    self.assertEqual(len(linear_vars), len(clone2_vars))
+    self.assertLen(all_vars, 3*len(linear_vars))
+    self.assertLen(linear_vars, len(clone1_vars))
+    self.assertLen(linear_vars, len(clone2_vars))
 
   @parameterized.named_parameters(
       ("WithBias", True),
@@ -455,7 +455,7 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.named_parameters(
       ("float16", tf.float16),
-
+      ("bfloat16", tf.bfloat16),
       ("float32", tf.float32),
       ("float64", tf.float64))
   def testFloatDataTypeConsistent(self, dtype):
@@ -541,7 +541,7 @@ class AddBiasTest(tf.test.TestCase, parameterized.TestCase):
     add(inputs)  # Connect the module, but ignore the return value.
 
     variables_ = add.get_variables()
-    self.assertEqual(len(variables_), 1, "Add should have 1 variable.")
+    self.assertLen(variables_, 1, "Add should have 1 variable.")
 
     for v in variables_:
       if not tf.executing_eagerly():
@@ -827,7 +827,7 @@ class TrainableVariableTest(tf.test.TestCase, parameterized.TestCase):
     regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     if tf.executing_eagerly():
       # Tensor name is not supported in eager mode.
-      self.assertEqual(len(regularizers), 1)
+      self.assertLen(regularizers, 1)
     else:
       self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
 

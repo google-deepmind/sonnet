@@ -684,6 +684,15 @@ class AbstractModule(object):
         "instead serialize all necessary configuration which will allow "
         "modules to be rebuilt.")
 
+  def _maybe_log(self, fstr, *args, **kwargs):
+    """Logs a message to tf.logging.info, if the `verbose` kwarg is true."""
+    # If verbose is not set, we don't do any logging. This allows users to
+    # put logging throughout their code, and enable or disable it with one
+    # variable, rather than needing lots of if statements.
+    if "verbose" in kwargs and kwargs["verbose"]:
+      del kwargs["verbose"]
+      tf.logging.info("%s: " + fstr, self.scope_name, *args, **kwargs)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Transposable(object):

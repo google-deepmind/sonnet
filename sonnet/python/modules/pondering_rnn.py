@@ -37,7 +37,14 @@ def _nested_add(nested_a, nested_b):
 
 def _nested_unary_mul(nested_a, p):
   """Multiply `Tensors` in arbitrarily nested `Tensor` `nested_a` with `p`."""
-  return nest.map(lambda a: p * a, nested_a)
+  def mul_with_broadcast(tensor):
+    ndims = tensor.shape.ndims
+    if ndims != 2:
+      p_reshaped = tf.reshape(p, [-1] + [1] * (ndims - 1))
+      return p_reshaped * tensor
+    else:
+      return p * tensor
+  return nest.map(mul_with_broadcast, nested_a)
 
 
 def _nested_zeros_like(nested_a):

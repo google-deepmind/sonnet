@@ -78,8 +78,8 @@ class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def _test_nested(self, tensor, values_expected):
     values_out = self.evaluate(tensor)
-    self.assertEqual(2, len(values_out))
-    self.assertEqual(2, len(values_out[1]))
+    self.assertLen(values_out, 2)
+    self.assertLen(values_out[1], 2)
     self.assertEqual(values_expected[0], values_out[0])
     self.assertTrue(np.all(np.equal(values_expected[1], values_out[1][0])))
     self.assertTrue(np.all(np.equal(values_expected[2], values_out[1][1])))
@@ -98,6 +98,13 @@ class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
     tf_mul = pondering_rnn._nested_unary_mul(
         tf_a, tf.constant(mul_constant, dtype=tf.float32))
     self._test_nested(tf_mul, values_mul)
+
+  def testNestedUnaryMul_multiDim(self):
+    """Tests _nested_unary_mul broadcasts dimensions correctly."""
+    nested_a = tf.ones([2, 3, 4])
+    p = tf.ones([2, 1])
+    output = pondering_rnn._nested_unary_mul(nested_a, p)
+    self.assertEqual(output.shape.as_list(), [2, 3, 4])
 
   def testNestedZerosLike(self):
     zeros = [0., np.array([0., 0.]), np.array([[0., 0.], [0., 0.]])]

@@ -18,7 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import functools
-import inspect
 import itertools
 import os
 import tempfile
@@ -524,12 +523,12 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
       snt.parse_string_to_constructor(erroneous_string)
 
   @parameterized.parameters(
-      (lambda: snt.Linear(42), [], True),
-      (snt.LayerNorm, "is_training", False),
-      (snt.BatchNorm, "is_training", True),
-      (snt.BatchNorm, ["is_training"], True),
-      (snt.BatchNorm, ["is_training", "test_local_stats"], True),
-      (snt.BatchNorm, ["is_training", "test_local_stoats"], False),
+      (lambda: snt.Linear(42), [], util.SUPPORTED),
+      (snt.LayerNorm, "is_training", util.NOT_SUPPORTED),
+      (snt.BatchNorm, "is_training", util.SUPPORTED),
+      (snt.BatchNorm, ["is_training"], util.SUPPORTED),
+      (snt.BatchNorm, ["is_training", "test_local_stats"], util.SUPPORTED),
+      (snt.BatchNorm, ["is_training", "test_local_stoats"], util.NOT_SUPPORTED),
       )
   def testModuleSupportsKwargs(self, module_builder, kwargs_list, expected):
     mod = module_builder()
@@ -554,10 +553,15 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
         return inputs + 2
 
     pm = ParentModule()
-    self.assertTrue(snt.supports_kwargs(pm.a, "flag_a"))
-    self.assertTrue(snt.supports_kwargs(pm.b, "flag_b"))
-    self.assertFalse(snt.supports_kwargs(pm.a, ["flag_a", "nonexistent_flag"]))
-    self.assertFalse(snt.supports_kwargs(pm.b, "flag_a"))
+    self.assertEqual(
+        snt.supports_kwargs(pm.a, "flag_a"), util.SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(pm.b, "flag_b"), util.SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(pm.a, ["flag_a", "nonexistent_flag"]),
+        util.NOT_SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(pm.b, "flag_a"), util.NOT_SUPPORTED)
 
     class ChildModule(ParentModule):
 
@@ -571,18 +575,59 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
         return inputs + 4
 
     cm = ChildModule()
-    self.assertTrue(snt.supports_kwargs(cm.a, ["new_flag_a",
-                                               "another_new_flag_a"]))
-    self.assertFalse(snt.supports_kwargs(cm.a, "flag_a"))
-    self.assertTrue(snt.supports_kwargs(cm.b, "flag_b"))
-    self.assertTrue(snt.supports_kwargs(cm.c, "flag_c"))
+    self.assertEqual(
+        snt.supports_kwargs(cm.a, ["new_flag_a", "another_new_flag_a"]),
+        util.SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(cm.a, "flag_a"), util.NOT_SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(cm.b, "flag_b"), util.SUPPORTED)
+    self.assertEqual(
+        snt.supports_kwargs(cm.c, "flag_c"), util.SUPPORTED)
+
+  def testModuleSupportsKwargsMaybe(self):
+    def foo(x, y, z):
+      return x + y + z
+    self.assertEqual(snt.supports_kwargs(foo, ["x", "y"]),
+                     util.SUPPORTED)
+    self.assertEqual(snt.supports_kwargs(foo, ["x", "y", "is_training"]),
+                     util.NOT_SUPPORTED)
+
+    def bar(x, y, **kwargs):
+      return x + y + sum(kwargs)
+    self.assertEqual(snt.supports_kwargs(bar, ["x", "y"]),
+                     util.SUPPORTED)
+    self.assertEqual(snt.supports_kwargs(bar, ["x", "y", "is_training"]),
+                     util.MAYBE_SUPPORTED)
 
   @parameterized.parameters(
-      (tf.zeros, False),
-      (tf.reduce_sum, True))
-  def testArgSpecIsGeneric(self, func, expected_result):
-    arg_spec = inspect.getargspec(func)
-    self.assertEqual(util._arg_spec_is_generic(arg_spec), expected_result)
+      (lambda: snt.Linear(106), None, {}),
+      (snt.BatchNorm, {"is_training": 42}, {"is_training": 42}),
+      (snt.BatchNorm, {"non_existent_flag": False}, {}),
+      (lambda: snt.nets.MLP([23, 42]),
+       {"dropout_keep_prob": 0.4, "is_training": True, "blah": True},
+       {"dropout_keep_prob": 0.4, "is_training": True}))
+  def testRemoveUnsupportedKwargs(self, module_builder, in_kwargs,
+                                  expected_kwargs):
+    mod = module_builder()
+    self.assertEqual(snt.remove_unsupported_kwargs(mod, in_kwargs),
+                     expected_kwargs)
+
+  def testRemoveUnsupportedKwargsWithMaybe(self):
+    def foo(x, y):
+      return x + y
+    # z is definitely not supported
+    self.assertEqual(
+        snt.remove_unsupported_kwargs(foo, {"x": 1, "y": 2, "z": 3}),
+        {"x": 1, "y": 2})
+
+    def bar(x, y, **kwargs):
+      return x + y + sum(kwargs)
+    # **kwargs means that potentially anything is supported. We can't remove
+    # anything from the kwargs.
+    self.assertEqual(
+        snt.remove_unsupported_kwargs(bar, {"x": 4, "y": 5, "z": 6}),
+        {"x": 4, "y": 5, "z": 6})
 
 
 class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):

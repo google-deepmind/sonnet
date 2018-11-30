@@ -1026,24 +1026,20 @@ def parse_string_to_constructor(ctor_string):
         orig_ctor_string, ctor_string))
 
 
-def _arg_spec_is_generic(arg_spec):
-  """Returns True iff arg_spec is a generic *args, **kwargs signature.
+# Pseudo-enum for the return valeus from supports_kwargs.
+ # The kwargs in quesion are definitely accepted by the module / function.
+SUPPORTED = "supported"
 
-  This is generally the result of a function being wrapped with decorators which
-  do not preserve the signature.
+# The kwargs in question are definitely not suppored by the module / function.
+NOT_SUPPORTED = "not_supported"
 
-  Args:
-    arg_spec: An Argspec namedtuple as returned by `inpect.getargspec`.
-
-  Returns a boolean indicating if the arg_spec looks generic.
-  """
-  generic_arg_spec = inspect.ArgSpec(
-      args=[], varargs="args", keywords="kwargs", defaults=None)
-  return arg_spec == generic_arg_spec
+# The kwargs in question may be supported by the module / function, but we
+# cannot say for sure because the function takes **kwargs.
+MAYBE_SUPPORTED = "maybe_supported"
 
 
 def supports_kwargs(module_or_fn, kwargs_list):
-  """Returns True iff the provided callable definitely supports all the kwargs.
+  """Determines whether the provided callable supports all the kwargs.
 
   This is useful when you have a module that might or might not support a
   kwarg such as `is_training`. Rather than calling the module and catching the
@@ -1053,11 +1049,9 @@ def supports_kwargs(module_or_fn, kwargs_list):
 
   Note that many TF functions do not export a valid argspec object, rather they
   have a generic *args, **kwargs signature due to various layers of wrapping
-  (deprecation decorators, etc). In those cases this function may return
-  false negatives. The solution would be to ensure the proper signature is
-  available. A potential workaround is try calling the function yourself to
-  verify that it _really_ doesn't support the kwargs, although that requires
-  that you actually want to call the function at that point anyway.
+  (deprecation decorators, etc). In those circumstances we return
+  MAYBE_SUPPORTED, and users will have to use another method to tell whether
+  the kwargs are supported (e.g. by just calling the function).
 
   Args:
     module_or_fn: some callable, generally an object or a method of some object.
@@ -1068,7 +1062,11 @@ def supports_kwargs(module_or_fn, kwargs_list):
     kwargs_list: string or iterable of strings of keyword arg names to test for.
       If an empty iterable is provided this function will always return True.
 
-  Returns True iff all kwargs in `kwargs_list` can be passed to `module_or_fn`.
+  Raises:
+    ValueError: if a non-string is provided in `kwargs_list`.
+
+  Returns:
+    a string, one of 'supported', 'not_supported' or 'maybe_supported'.
   """
   if isinstance(kwargs_list, six.string_types):
     kwargs_list = [kwargs_list]
@@ -1080,14 +1078,63 @@ def supports_kwargs(module_or_fn, kwargs_list):
     module_or_fn = module_or_fn.__call__
 
   arg_spec = inspect.getargspec(module_or_fn)
-  # See if this looks like a generic signature.
-  if _arg_spec_is_generic(arg_spec):
-    tf.logging.warning(
-        "Testing whether function {} with generic arg_spec {} supports kwargs "
-        "{} - this function may return False negatives. See `supports_kwargs` "
-        "docstring".format(module_or_fn, arg_spec, kwargs_list))
+
+  # If there is a keywords element, then an arbitrary kwargs will work, as far
+  # as we can tell from here.
+  takes_arbitrary_kwargs = (arg_spec.keywords is not None)
+
   for kwarg in kwargs_list:
+    if not isinstance(kwarg, six.string_types):
+      raise ValueError("kwargs should be strings, instead got {}".format(
+          kwarg))
     if kwarg not in arg_spec.args:
-      return False
-  return True
+      if not takes_arbitrary_kwargs:
+        # The function doesn't take **kwargs, and this name is not in the
+        # regular args, so it would definitely cause an error to call this.
+        return NOT_SUPPORTED
+      else:
+        # The function may accept the kwarg, but we can't say for sure. Even
+        # though this is only one kwarg, we can't be certain about the whole
+        # lot, so the combined answer is now "maybe".
+        return MAYBE_SUPPORTED
+  # All the kwargs must actually be present in the specific args list
+  return SUPPORTED
+
+
+def remove_unsupported_kwargs(module_or_fn, all_kwargs_dict):
+  """Removes any kwargs not supported by `module_or_fn` from `all_kwargs_dict`.
+
+  A new dict is return with shallow copies of keys & values from
+  `all_kwargs_dict`, as long as the key is accepted by module_or_fn. The
+  returned dict can then be used to connect `module_or_fn` (along with some
+  other inputs, ie non-keyword arguments, in general).
+
+  `snt.supports_kwargs` is used to tell whether a given kwarg is supported. Note
+  that this method may give false negatives, which would lead to extraneous
+  removals in the result of this function. Please read the docstring for
+  `snt.supports_kwargs` for details, and manually inspect the results from this
+  function if in doubt.
+
+  Args:
+    module_or_fn: some callable which can be interrogated by
+      `snt.supports_kwargs`. Generally a Sonnet module or a method (wrapped in
+      `@reuse_variables`) of a Sonnet module.
+    all_kwargs_dict: a dict containing strings as keys, or None.
+
+  Raises:
+    ValueError: if `all_kwargs_dict` is not a dict.
+
+  Returns:
+    A dict containing some subset of the keys and values in `all_kwargs_dict`.
+    This subset may be empty. If `all_kwargs_dict` is None, this will be an
+    empty dict.
+  """
+  if all_kwargs_dict is None:
+    all_kwargs_dict = {}
+  if not isinstance(all_kwargs_dict, dict):
+    raise ValueError("all_kwargs_dict must be a dict with string keys.")
+  return {
+      kwarg: value for kwarg, value in all_kwargs_dict.items()
+      if supports_kwargs(module_or_fn, kwarg) != NOT_SUPPORTED
+  }
 

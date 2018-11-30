@@ -161,6 +161,7 @@ from sonnet.python.modules.util import get_variables_in_scope
 from sonnet.python.modules.util import has_variable_scope
 from sonnet.python.modules.util import log_variables
 from sonnet.python.modules.util import parse_string_to_constructor
+from sonnet.python.modules.util import remove_unsupported_kwargs
 from sonnet.python.modules.util import reuse_variables
 from sonnet.python.modules.util import summarize_variables
 from sonnet.python.modules.util import supports_kwargs

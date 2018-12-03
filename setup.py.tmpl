@@ -43,11 +43,18 @@ project_name = '%%%PROJECT_NAME%%%'
 if project_name not in (_PROJECT_NAME_CPU, _PROJECT_NAME_GPU):
   raise ValueError('Invalid project name {}.'.format(project_name))
 
+_packages = {
+    'tensorflow': 'tensorflow>=1.8.0',
+    'tensorflow-gpu': 'tensorflow-gpu>=1.8.0',
+    'tensorflow-probability': 'tensorflow-probability>=0.4.0',
+    'tensorflow-probability-gpu': 'tensorflow-probability-gpu>=0.4.0'
+}
+
 EXTRA_PACKAGES = {
-    'tensorflow': ['tensorflow>=1.8.0'],
-    'tensorflow with gpu': ['tensorflow-gpu>=1.8.0'],
-    'tensorflow probability': ['tensorflow-probability>=0.4.0'],
-    'tensorflow probability with gpu': ['tensorflow-probability-gpu>=0.4.0'],
+    'tensorflow': [_packages['tensorflow']],
+    'tensorflow with gpu': [_packages['tensorflow-gpu']],
+    'tensorflow probability': [_packages['tensorflow-probability']],
+    'tensorflow probability with gpu': [_packages['tensorflow-probability-gpu']],
 }
 
 REQUIRED_PACKAGES = ['six', 'absl-py', 'semantic_version', 'contextlib2']
@@ -55,8 +62,8 @@ REQUIRED_PACKAGES = ['six', 'absl-py', 'semantic_version', 'contextlib2']
 # If this is the GPU build of sonnet, tensorflow-gpu is a hard requirement.
 # The CPU only version works well with both versions of tensorflow.
 if project_name == _PROJECT_NAME_GPU:
-  REQUIRED_PACKAGES.append('tensorflow-gpu >= 1.8.0')
-  REQUIRED_PACKAGES.append('tensor-probability-gpu >= 0.4.0')
+  REQUIRED_PACKAGES.append(_packages['tensorflow-gpu'])
+  REQUIRED_PACKAGES.append(_packages['tensorflow-probability-gpu'])
 
 
 setup(

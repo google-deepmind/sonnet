@@ -612,19 +612,25 @@ class BidirectionalRNN(base.AbstractModule):
 
     # Forward pass over the sequence.
     with tf.name_scope("forward_rnn"):
-      state = forward_state
-      output_sequence_f = [
-          self._forward_core(input_sequence[i, :,], state)
-          for i in six.moves.range(seq_length)]
+      core_state = forward_state
+      for i in six.moves.range(seq_length):
+        core_output, core_state = self._forward_core(
+            input_sequence[i, :,], core_state)
+
+        output_sequence_f.append((core_output, core_state))
+
       output_sequence_f = nest.map_structure(
           lambda *vals: tf.stack(vals), *output_sequence_f)
 
     # Backward pass over the sequence.
     with tf.name_scope("backward_rnn"):
-      state = backward_state
-      output_sequence_b = [
-          self._backward_core(input_sequence[i, :,], state)
-          for i in six.moves.range(seq_length)]
+      core_state = backward_state
+      for i in six.moves.range(seq_length - 1, -1, -1):
+        core_output, core_state = self._backward_core(
+            input_sequence[i, :,], core_state)
+
+        output_sequence_b.append((core_output, core_state))
+
       output_sequence_b = nest.map_structure(
           lambda *vals: tf.stack(vals), *output_sequence_b)
 

@@ -433,8 +433,8 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     # We don't pass the parameter on to .transpose, None should be the default
     transpose_model = model.transpose()
     if param_name in expected_reversed:
-      self.assertItemsEqual(reversed(getattr(model, param_name)),
-                            getattr(transpose_model, param_name))
+      self.assertEqual(tuple(reversed(getattr(model, param_name))),
+                       getattr(transpose_model, param_name))
     else:
       self.assertEqual(getattr(model, param_name),
                        getattr(transpose_model, param_name))
@@ -474,7 +474,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     if isinstance(param_value, collections.Mapping):
       self.assertDictEqual(param_value, getattr(transpose_model, param_name))
     elif isinstance(param_value, collections.Iterable):
-      self.assertItemsEqual(param_value, getattr(transpose_model, param_name))
+      self.assertCountEqual(param_value, getattr(transpose_model, param_name))
     else:
       self.assertEqual(param_value, getattr(transpose_model, param_name))
 
@@ -510,9 +510,10 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     input_to_net = tf.random_normal(dtype=tf.float32, shape=input_shape)
 
     if tf.executing_eagerly() and data_format == "NCHW":
-      expected_exception = (
-          tf.errors.UnimplementedError
-          if module == snt.nets.ConvNet2D else tf.errors.InvalidArgumentError)
+      if module == snt.nets.ConvNet2D:
+        expected_exception = tf.errors.UnimplementedError
+      else:
+        expected_exception = tf.errors.InvalidArgumentError
       with self.assertRaisesRegexp(expected_exception, "only supports NHWC"):
         output = net(input_to_net)
 
@@ -590,7 +591,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
-class ConvNet2DTest(tf.test.TestCase):
+class ConvNet2DTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
     super(ConvNet2DTest, self).setUp()
@@ -606,7 +607,7 @@ class ConvNet2DTest(tf.test.TestCase):
                              rates=self.rates,
                              strides=self.strides,
                              paddings=self.paddings)
-    self.assertEqual(len(net.layers), len(self.output_channels))
+    self.assertLen(net.layers, len(self.output_channels))
 
     for i, layer in enumerate(net.layers):
       self.assertEqual(layer.output_channels, self.output_channels[i])
@@ -773,9 +774,32 @@ class ConvNet2DTest(tf.test.TestCase):
                              strides=self.strides,
                              paddings=self.paddings)
 
+  @parameterized.parameters(
+      {"normalization_ctor": None,
+       "normalization_kwargs": {}},
+      {"normalization_ctor": snt.LayerNorm,
+       "normalization_kwargs": {}},
+      {"normalization_ctor": snt.LayerNorm,
+       "normalization_kwargs": {"axis": [1, 2]}},  # Instance Norm.
+      {"normalization_ctor": snt.BatchNorm,
+       "normalization_kwargs": {}})
+  def testAlwaysProvideIsTraining(self, normalization_ctor,
+                                  normalization_kwargs):
+    # Test whether we can always provide is_training=True, even when it is
+    # not supported by the underlying normalization constructor.
+    mod = snt.nets.ConvNet2D(
+        output_channels=[32, 32],
+        kernel_shapes=(3,),
+        strides=(1,),
+        paddings=("SAME",),
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs)
+    input_ = tf.random_uniform([16, 48, 48, 3])
+    _ = mod(input_, is_training=True)
+
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
-class ConvNet2DTransposeTest(tf.test.TestCase):
+class ConvNet2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
     super(ConvNet2DTransposeTest, self).setUp()
@@ -820,7 +844,7 @@ class ConvNet2DTransposeTest(tf.test.TestCase):
                                       paddings=self.paddings)
     self.assertEqual(net.output_shapes,
                      tuple(self.output_shapes) * len(self.output_channels))
-    self.assertEqual(len(net.layers), len(self.output_channels))
+    self.assertLen(net.layers, len(self.output_channels))
 
     for i, layer in enumerate(net.layers):
       self.assertEqual(layer.output_channels, self.output_channels[i])
@@ -902,6 +926,30 @@ class ConvNet2DTransposeTest(tf.test.TestCase):
     for layer in module._layers:
       self.assertEqual(type(layer.w), variables.PartitionedVariable)
       self.assertEqual(type(layer.b), variables.PartitionedVariable)
+
+  @parameterized.parameters(
+      {"normalization_ctor": None,
+       "normalization_kwargs": {}},
+      {"normalization_ctor": snt.LayerNorm,
+       "normalization_kwargs": {}},
+      {"normalization_ctor": snt.LayerNorm,
+       "normalization_kwargs": {"axis": [1, 2]}},  # Instance Norm.
+      {"normalization_ctor": snt.BatchNorm,
+       "normalization_kwargs": {}})
+  def testAlwaysProvideIsTraining(self, normalization_ctor,
+                                  normalization_kwargs):
+    # Test whether we can always provide is_training=True, even when it is
+    # not supported by the underlying normalization constructor.
+    mod = snt.nets.ConvNet2DTranspose(
+        output_shapes=self.output_shapes,
+        output_channels=self.output_channels,
+        kernel_shapes=self.kernel_shapes,
+        strides=self.strides,
+        paddings=self.paddings,
+        normalization_ctor=normalization_ctor,
+        normalization_kwargs=normalization_kwargs)
+    input_ = tf.random_uniform([16, 100, 100, 3])
+    _ = mod(input_, is_training=True)
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes

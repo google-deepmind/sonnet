@@ -345,7 +345,10 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
           normalizer = self._normalization_ctor(
               name="batch_norm_{}".format(i),
               **self._normalization_kwargs)
-          net = normalizer(net, **normalization_build_kwargs)
+
+          net = normalizer(
+              net, **util.remove_unsupported_kwargs(
+                  normalizer, normalization_build_kwargs))
         else:
           if normalization_build_kwargs:
             tf.logging.warning(

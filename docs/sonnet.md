@@ -38,7 +38,7 @@ where
   * `act_out` is the weighted average output of all pondering steps (see ACT
   paper for more info).
 
-#### [`ACTCore.__init__(core, output_size, threshold, get_state_for_halting, name='act_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=66)<a id="ACTCore.__init__" />
+#### [`ACTCore.__init__(core, output_size, threshold, get_state_for_halting, name='act_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=73)<a id="ACTCore.__init__" />
 
 Constructor.
 
@@ -62,7 +62,7 @@ Constructor.
       one dimensional.
 
 
-#### [`ACTCore.__call__(x, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=153)<a id="ACTCore.__call__" />
+#### [`ACTCore.__call__(x, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=160)<a id="ACTCore.__call__" />
 
 Connects the core to the graph.
 
@@ -83,7 +83,7 @@ Connects the core to the graph.
 * `ValueError`: if the `Tensor` `x` does not have rank 2.
 
 
-#### [`ACTCore.batch_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=112)<a id="ACTCore.batch_size" />
+#### [`ACTCore.batch_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=119)<a id="ACTCore.batch_size" />
 
 
 
@@ -103,12 +103,12 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ACTCore.dtype`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=117)<a id="ACTCore.dtype" />
+#### [`ACTCore.dtype`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=124)<a id="ACTCore.dtype" />
 
 
 
 
-#### [`ACTCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="ACTCore.get_all_variables" />
+#### [`ACTCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="ACTCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -180,7 +180,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`ACTCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=100)<a id="ACTCore.initial_state" />
+#### [`ACTCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=107)<a id="ACTCore.initial_state" />
 
 
 
@@ -234,7 +234,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`ACTCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=103)<a id="ACTCore.output_size" />
+#### [`ACTCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=110)<a id="ACTCore.output_size" />
 
 
 
@@ -244,7 +244,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`ACTCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=108)<a id="ACTCore.state_size" />
+#### [`ACTCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=115)<a id="ACTCore.state_size" />
 
 
 
@@ -312,7 +312,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`ACTCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="ACTCore.zero_state" />
+#### [`ACTCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="ACTCore.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -418,7 +418,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AbstractModule.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="AbstractModule.get_all_variables" />
+#### [`AbstractModule.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="AbstractModule.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -752,7 +752,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AddBias.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="AddBias.get_all_variables" />
+#### [`AddBias.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="AddBias.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1047,7 +1047,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AffineGridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="AffineGridWarper.get_all_variables" />
+#### [`AffineGridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="AffineGridWarper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1455,7 +1455,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AttentiveRead.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="AttentiveRead.get_all_variables" />
+#### [`AttentiveRead.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="AttentiveRead.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1722,7 +1722,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchApply.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchApply.get_all_variables" />
+#### [`BatchApply.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchApply.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1978,7 +1978,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchFlatten.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchFlatten.get_all_variables" />
+#### [`BatchFlatten.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchFlatten.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -2356,7 +2356,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`BatchNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchNorm.get_all_variables" />
+#### [`BatchNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchNorm.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -2762,7 +2762,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchNormLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchNormLSTM.get_all_variables" />
+#### [`BatchNormLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchNormLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3062,7 +3062,7 @@ Example usage:
   snt.RNNCore wrapping this class with the extra input(s) added.
 
 
-#### [`BatchNormLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="BatchNormLSTM.zero_state" />
+#### [`BatchNormLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="BatchNormLSTM.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -3259,7 +3259,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`BatchNormV2.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchNormV2.get_all_variables" />
+#### [`BatchNormV2.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchNormV2.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3555,7 +3555,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchReshape.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BatchReshape.get_all_variables" />
+#### [`BatchReshape.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BatchReshape.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3827,7 +3827,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BidirectionalRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="BidirectionalRNN.get_all_variables" />
+#### [`BidirectionalRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="BidirectionalRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3899,7 +3899,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BidirectionalRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=643)<a id="BidirectionalRNN.initial_state" />
+#### [`BidirectionalRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=649)<a id="BidirectionalRNN.initial_state" />
 
 Builds the default start state for a BidirectionalRNN.
 
@@ -3979,7 +3979,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BidirectionalRNN.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=685)<a id="BidirectionalRNN.output_size" />
+#### [`BidirectionalRNN.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=691)<a id="BidirectionalRNN.output_size" />
 
 Flattened output size of cores.
 
@@ -3989,7 +3989,7 @@ Flattened output size of cores.
 Returns the full name of the Module's variable scope.
 
 
-#### [`BidirectionalRNN.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=680)<a id="BidirectionalRNN.state_size" />
+#### [`BidirectionalRNN.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=686)<a id="BidirectionalRNN.state_size" />
 
 Flattened state size of cores.
 
@@ -4237,7 +4237,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`CausalConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="CausalConv1D.get_all_variables" />
+#### [`CausalConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="CausalConv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -4692,7 +4692,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv1D.get_all_variables" />
+#### [`Conv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5008,7 +5008,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv1DLSTM.get_all_variables" />
+#### [`Conv1DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv1DLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5070,7 +5070,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv1DLSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="Conv1DLSTM.initial_state" />
+#### [`Conv1DLSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="Conv1DLSTM.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -5239,7 +5239,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="Conv1DLSTM.zero_state" />
+#### [`Conv1DLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="Conv1DLSTM.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -5408,7 +5408,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv1DTranspose.get_all_variables" />
+#### [`Conv1DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv1DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5856,7 +5856,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv2D.get_all_variables" />
+#### [`Conv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -6172,7 +6172,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv2DLSTM.get_all_variables" />
+#### [`Conv2DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv2DLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -6234,7 +6234,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv2DLSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="Conv2DLSTM.initial_state" />
+#### [`Conv2DLSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="Conv2DLSTM.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -6403,7 +6403,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="Conv2DLSTM.zero_state" />
+#### [`Conv2DLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="Conv2DLSTM.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -6573,7 +6573,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv2DTranspose.get_all_variables" />
+#### [`Conv2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv2DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -7018,7 +7018,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv3D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv3D.get_all_variables" />
+#### [`Conv3D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv3D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -7449,7 +7449,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv3DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Conv3DTranspose.get_all_variables" />
+#### [`Conv3DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Conv3DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -7838,7 +7838,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`DeepRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="DeepRNN.get_all_variables" />
+#### [`DeepRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="DeepRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -8072,7 +8072,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`DeepRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="DeepRNN.zero_state" />
+#### [`DeepRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="DeepRNN.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -8284,7 +8284,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`DepthwiseConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="DepthwiseConv2D.get_all_variables" />
+#### [`DepthwiseConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="DepthwiseConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -8660,7 +8660,7 @@ Returns the Variable containing embeddings.
       graph yet, meaning the variables do not exist.
 
 
-#### [`Embed.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Embed.get_all_variables" />
+#### [`Embed.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Embed.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -8937,7 +8937,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`FlattenTrailingDimensions.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="FlattenTrailingDimensions.get_all_variables" />
+#### [`FlattenTrailingDimensions.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="FlattenTrailingDimensions.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9227,7 +9227,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`GRU.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="GRU.get_all_variables" />
+#### [`GRU.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="GRU.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9307,7 +9307,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`GRU.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="GRU.initial_state" />
+#### [`GRU.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="GRU.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -9471,7 +9471,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`GRU.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="GRU.zero_state" />
+#### [`GRU.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="GRU.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -9566,7 +9566,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`GridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="GridWarper.get_all_variables" />
+#### [`GridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="GridWarper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9863,7 +9863,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`HighwayCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="HighwayCore.get_all_variables" />
+#### [`HighwayCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="HighwayCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9945,7 +9945,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`HighwayCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="HighwayCore.initial_state" />
+#### [`HighwayCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="HighwayCore.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -10109,7 +10109,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`HighwayCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="HighwayCore.zero_state" />
+#### [`HighwayCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="HighwayCore.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -10305,7 +10305,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`InPlaneConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="InPlaneConv2D.get_all_variables" />
+#### [`InPlaneConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="InPlaneConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -10700,7 +10700,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="LSTM.get_all_variables" />
+#### [`LSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="LSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -10785,7 +10785,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`LSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="LSTM.initial_state" />
+#### [`LSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="LSTM.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -10959,7 +10959,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`LSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="LSTM.zero_state" />
+#### [`LSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="LSTM.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -10984,7 +10984,7 @@ Return zero-filled state tensor(s).
 
 Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.
 
-#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowcontrib/rnn/python/ops/lstm_ops.py?l=348)<a id="LSTMBlockCell.__init__" />
+#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowcontrib/rnn/python/ops/lstm_ops.py?l=349)<a id="LSTMBlockCell.__init__" />
 
 Initialize the basic LSTM cell.
 
@@ -11008,7 +11008,7 @@ Initialize the basic LSTM cell.
   CudnnCompatibleLSTMBlockCell instead.
 
 
-#### [`LSTMBlockCell.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=372)<a id="LSTMBlockCell.__call__" />
+#### [`LSTMBlockCell.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=371)<a id="LSTMBlockCell.__call__" />
 
 
 
@@ -11028,7 +11028,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LSTMBlockCell.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="LSTMBlockCell.get_all_variables" />
+#### [`LSTMBlockCell.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="LSTMBlockCell.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -11100,7 +11100,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`LSTMBlockCell.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="LSTMBlockCell.initial_state" />
+#### [`LSTMBlockCell.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="LSTMBlockCell.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -11186,7 +11186,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`LSTMBlockCell.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=375)<a id="LSTMBlockCell.output_size" />
+#### [`LSTMBlockCell.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=374)<a id="LSTMBlockCell.output_size" />
 
 
 
@@ -11196,7 +11196,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`LSTMBlockCell.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=379)<a id="LSTMBlockCell.state_size" />
+#### [`LSTMBlockCell.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=378)<a id="LSTMBlockCell.state_size" />
 
 
 
@@ -11264,7 +11264,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`LSTMBlockCell.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="LSTMBlockCell.zero_state" />
+#### [`LSTMBlockCell.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="LSTMBlockCell.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -11317,19 +11317,19 @@ Gamma and beta are trainable parameters for scaling and shifting respectively.
 Since the axes over which normalization is perfomed is configurable, this also
 subsumes instance normalization.
 
-#### [`LayerNorm.__init__(axes=None, offset=True, scale=True, eps=1e-05, initializers=None, partitioners=None, regularizers=None, name='layer_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=63)<a id="LayerNorm.__init__" />
+#### [`LayerNorm.__init__(axis=None, offset=True, scale=True, eps=1e-05, initializers=None, partitioners=None, regularizers=None, name='layer_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=63)<a id="LayerNorm.__init__" />
 
 Constructs a LayerNorm module.
 
 ##### Args:
 
 
-* `axes`: Optional iterable of indices of dimensions to reduce over. By
-    default `None` and all dimensions except the first / batch dimension
-    are reduced over. If the input tensor represents an image, summing
-    over all except the batch and channel dimensions (e.g. for image format
-    NHWC, axes=[1,2]), then this module corresponds to Instance
-    Normalization (https://arxiv.org/abs/1607.08022).
+* `axis`: Optional dimension or iterable of indices of dimensions to normalize
+    and reduce over. By default `None` and all dimensions except the
+    first/batch dimension are reduced over. If the input tensor represents
+    an image, summing over all except the batch and channel dimensions (e.g.
+    for image format NHWC, axes=[1,2]), then this module corresponds to
+    Instance Normalization (https://arxiv.org/abs/1607.08022).
 * `offset`: Optional boolean to specify whether or not to apply a trained
     component-wise bias after the layer normalization and scaling.
 * `scale`: Optional boolean to specify whether or not to apply a trained
@@ -11355,7 +11355,7 @@ Constructs a LayerNorm module.
     are not callable.
 
 
-#### [`LayerNorm.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=115)<a id="LayerNorm.__call__" />
+#### [`LayerNorm.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=118)<a id="LayerNorm.__call__" />
 
 Connects the LayerNorm module into the graph.
 
@@ -11375,7 +11375,7 @@ Connects the LayerNorm module into the graph.
       `tf.bfloat16`.
 
 
-#### [`LayerNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=192)<a id="LayerNorm.beta" />
+#### [`LayerNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=195)<a id="LayerNorm.beta" />
 
 
 
@@ -11395,12 +11395,12 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LayerNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=197)<a id="LayerNorm.gamma" />
+#### [`LayerNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=200)<a id="LayerNorm.gamma" />
 
 
 
 
-#### [`LayerNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="LayerNorm.get_all_variables" />
+#### [`LayerNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="LayerNorm.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -11472,7 +11472,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`LayerNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=180)<a id="LayerNorm.initializers" />
+#### [`LayerNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=183)<a id="LayerNorm.initializers" />
 
 
 
@@ -11526,12 +11526,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`LayerNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=184)<a id="LayerNorm.partitioners" />
+#### [`LayerNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=187)<a id="LayerNorm.partitioners" />
 
 
 
 
-#### [`LayerNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=188)<a id="LayerNorm.regularizers" />
+#### [`LayerNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=191)<a id="LayerNorm.regularizers" />
 
 
 
@@ -11723,7 +11723,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Linear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Linear.get_all_variables" />
+#### [`Linear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Linear.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12036,7 +12036,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`MergeDims.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="MergeDims.get_all_variables" />
+#### [`MergeDims.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="MergeDims.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12285,7 +12285,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ModelRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="ModelRNN.get_all_variables" />
+#### [`ModelRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="ModelRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12357,7 +12357,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`ModelRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="ModelRNN.initial_state" />
+#### [`ModelRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="ModelRNN.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -12521,7 +12521,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`ModelRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="ModelRNN.zero_state" />
+#### [`ModelRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="ModelRNN.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -12546,7 +12546,7 @@ Return zero-filled state tensor(s).
 
 Module wrapping a function provided by the user.
 
-#### [`Module.__init__(build, custom_getter=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=732)<a id="Module.__init__" />
+#### [`Module.__init__(build, custom_getter=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=748)<a id="Module.__init__" />
 
 Constructs a module with a given build function.
 
@@ -12612,7 +12612,7 @@ outputs = model(inputs)
 * `TypeError`: If a given `custom_getter` is not callable.
 
 
-#### [`Module.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=799)<a id="Module.__call__" />
+#### [`Module.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=815)<a id="Module.__call__" />
 
 Forwards call to the passed-in build function.
 
@@ -12632,7 +12632,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Module.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Module.get_all_variables" />
+#### [`Module.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Module.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12864,7 +12864,7 @@ child transpose to ensure that shape inference has already occurred.
 
 RNN core that delegates to a `tf.contrib.rnn.RNNCell`.
 
-#### [`RNNCellWrapper.__init__(cell_ctor, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=354)<a id="RNNCellWrapper.__init__" />
+#### [`RNNCellWrapper.__init__(cell_ctor, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=353)<a id="RNNCellWrapper.__init__" />
 
 Constructs the cell, within this module's variable scope.
 
@@ -12879,7 +12879,7 @@ Constructs the cell, within this module's variable scope.
     but not to `cell_ctor`.
 
 
-#### [`RNNCellWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=372)<a id="RNNCellWrapper.__call__" />
+#### [`RNNCellWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=371)<a id="RNNCellWrapper.__call__" />
 
 
 
@@ -12899,7 +12899,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`RNNCellWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="RNNCellWrapper.get_all_variables" />
+#### [`RNNCellWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="RNNCellWrapper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12971,7 +12971,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`RNNCellWrapper.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="RNNCellWrapper.initial_state" />
+#### [`RNNCellWrapper.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="RNNCellWrapper.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -13057,7 +13057,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`RNNCellWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=375)<a id="RNNCellWrapper.output_size" />
+#### [`RNNCellWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=374)<a id="RNNCellWrapper.output_size" />
 
 
 
@@ -13067,7 +13067,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`RNNCellWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=379)<a id="RNNCellWrapper.state_size" />
+#### [`RNNCellWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=378)<a id="RNNCellWrapper.state_size" />
 
 
 
@@ -13135,7 +13135,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`RNNCellWrapper.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="RNNCellWrapper.zero_state" />
+#### [`RNNCellWrapper.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="RNNCellWrapper.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -13163,8 +13163,7 @@ Superclass for Recurrent Neural Network Cores.
 This class defines the basic functionality that every core should implement,
 mainly the `initial_state` method which will return an example of their
 initial state.
-It also inherits from the two interfaces it should be compatible with, which
-are `snt.Module` and `tf.contrib.rnn.RNNCell`.
+It also inherits from the interface `snt.AbstractModule`.
 
 As with any other `snt.Module` any subclass must implement a `_build` method
 that constructs the graph that corresponds to a core. Such a `_build` method
@@ -13179,10 +13178,10 @@ grammar:
     element = tuple(element*) | list(element*) | tf.Tensor
 
 This class is to be used with tensorflow containers such as `rnn` in
-tensorflow.python.ops.rnn. These containers only accept
-`tf.contrib.rnn.RNNCell` objects, hence the need to comply with its interface.
-This way, all the RNNCores should expose a `state_size` and `output_size`
-properties.
+tensorflow.python.ops.rnn.
+These containers only accept inputs which are compatible with the
+`tf.contrib.rnn.RNNCell` API, so that all the RNNCores should expose
+`state_size` and `output_size` properties.
 
 #### [`RNNCore.__init__(_sentinel=None, custom_getter=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=115)<a id="RNNCore.__init__" />
 
@@ -13250,7 +13249,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`RNNCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="RNNCore.get_all_variables" />
+#### [`RNNCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="RNNCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -13322,7 +13321,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`RNNCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="RNNCore.initial_state" />
+#### [`RNNCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="RNNCore.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -13408,7 +13407,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`RNNCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=253)<a id="RNNCore.output_size" />
+#### [`RNNCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=252)<a id="RNNCore.output_size" />
 
 Integer or TensorShape: size of outputs produced by this cell.
 
@@ -13418,7 +13417,7 @@ Integer or TensorShape: size of outputs produced by this cell.
 Returns the full name of the Module's variable scope.
 
 
-#### [`RNNCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=244)<a id="RNNCore.state_size" />
+#### [`RNNCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=243)<a id="RNNCore.state_size" />
 
 size(s) of state(s) used by this cell.
 
@@ -13489,7 +13488,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`RNNCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="RNNCore.zero_state" />
+#### [`RNNCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="RNNCore.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -13587,7 +13586,7 @@ Returns boolean indicating whether this module is defun wrapped.
 Returns the forget gate Tensor.
 
 
-#### [`RelationalMemory.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="RelationalMemory.get_all_variables" />
+#### [`RelationalMemory.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="RelationalMemory.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -13813,7 +13812,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`RelationalMemory.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="RelationalMemory.zero_state" />
+#### [`RelationalMemory.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="RelationalMemory.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -13866,7 +13865,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Residual.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Residual.get_all_variables" />
+#### [`Residual.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Residual.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14088,7 +14087,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ResidualCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="ResidualCore.get_all_variables" />
+#### [`ResidualCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="ResidualCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14160,41 +14159,9 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`ResidualCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="ResidualCore.initial_state" />
-
-Builds the default start state for an RNNCore.
-
-##### Args:
+#### [`ResidualCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=71)<a id="ResidualCore.initial_state" />
 
 
-* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
-* `dtype`: The data type to use for the state.
-* `trainable`: Boolean that indicates whether to learn the initial state.
-    Note that intializers and regularizers will be ignored if
-    `trainable=False`.
-* `trainable_initializers`: An initializer function or nested structure of
-      functions with same structure as the `state_size` property of the
-      core, to be used as initializers of the initial state variable.
-* `trainable_regularizers`: Optional regularizer function or nested structure
-    of functions with the same structure as the `state_size` property of the
-    core, to be used as regularizers of the initial state variable. As a
-    default, no regularizers are used. A regularizer should be a function
-    that takes a single `Tensor` as an input and returns a scalar `Tensor`
-    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
-* `name`: Optional string used to prefix the initial state variable names, in
-      the case of a trainable initial state. If not provided, defaults to
-      the name of the module.
-
-##### Returns:
-
-  A tensor or nested tuple of tensors with same structure and shape as the
-  `state_size` property of the core.
-
-##### Raises:
-
-
-* `ValueError`: if the user passes initializers that are not functions.
-* `ValueError`: if the user passes regularizers that are not functions.
 
 
 #### [`ResidualCore.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=453)<a id="ResidualCore.is_connected" />
@@ -14324,24 +14291,9 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`ResidualCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="ResidualCore.zero_state" />
-
-Return zero-filled state tensor(s).
-
-##### Args:
+#### [`ResidualCore.zero_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=74)<a id="ResidualCore.zero_state" />
 
 
-* `batch_size`: int, float, or unit Tensor representing the batch size.
-* `dtype`: the data type to use for the state.
-
-##### Returns:
-
-  If `state_size` is an int or TensorShape, then the return value is a
-  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
-
-  If `state_size` is a nested list or tuple, then the return value is
-  a nested list or tuple (of the same structure) of `2-D` tensors with
-  the shapes `[batch_size x s]` for each s in `state_size`.
 
 
 
@@ -14436,7 +14388,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SelectInput.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="SelectInput.get_all_variables" />
+#### [`SelectInput.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="SelectInput.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14829,7 +14781,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SeparableConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="SeparableConv1D.get_all_variables" />
+#### [`SeparableConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="SeparableConv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15305,7 +15257,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SeparableConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="SeparableConv2D.get_all_variables" />
+#### [`SeparableConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="SeparableConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15649,7 +15601,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Sequential.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="Sequential.get_all_variables" />
+#### [`Sequential.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="Sequential.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15825,9 +15777,11 @@ information about what variables are captured.
 
 Adds a skip connection to the base RNN core.
 
-This concatenates the input to the output of the base core.
+The output of the wrapped core is the concatenation of the output of the base
+core with its input. The state of the wrapped core is the state of the base
+core.
 
-#### [`SkipConnectionCore.__init__(base_core, input_shape=None, name='skip_connection_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=78)<a id="SkipConnectionCore.__init__" />
+#### [`SkipConnectionCore.__init__(base_core, input_shape=None, name='skip_connection_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=86)<a id="SkipConnectionCore.__init__" />
 
 Construct a SkipConnectionCore.
 
@@ -15839,7 +15793,7 @@ Construct a SkipConnectionCore.
 * `name`: Name of the module.
 
 
-#### [`SkipConnectionCore.__call__(inputs, prev_state, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=90)<a id="SkipConnectionCore.__call__" />
+#### [`SkipConnectionCore.__call__(inputs, prev_state, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=98)<a id="SkipConnectionCore.__call__" />
 
 
 
@@ -15859,7 +15813,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SkipConnectionCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="SkipConnectionCore.get_all_variables" />
+#### [`SkipConnectionCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="SkipConnectionCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15931,41 +15885,9 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`SkipConnectionCore.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="SkipConnectionCore.initial_state" />
-
-Builds the default start state for an RNNCore.
-
-##### Args:
+#### [`SkipConnectionCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=126)<a id="SkipConnectionCore.initial_state" />
 
 
-* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
-* `dtype`: The data type to use for the state.
-* `trainable`: Boolean that indicates whether to learn the initial state.
-    Note that intializers and regularizers will be ignored if
-    `trainable=False`.
-* `trainable_initializers`: An initializer function or nested structure of
-      functions with same structure as the `state_size` property of the
-      core, to be used as initializers of the initial state variable.
-* `trainable_regularizers`: Optional regularizer function or nested structure
-    of functions with the same structure as the `state_size` property of the
-    core, to be used as regularizers of the initial state variable. As a
-    default, no regularizers are used. A regularizer should be a function
-    that takes a single `Tensor` as an input and returns a scalar `Tensor`
-    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
-* `name`: Optional string used to prefix the initial state variable names, in
-      the case of a trainable initial state. If not provided, defaults to
-      the name of the module.
-
-##### Returns:
-
-  A tensor or nested tuple of tensors with same structure and shape as the
-  `state_size` property of the core.
-
-##### Raises:
-
-
-* `ValueError`: if the user passes initializers that are not functions.
-* `ValueError`: if the user passes regularizers that are not functions.
 
 
 #### [`SkipConnectionCore.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=453)<a id="SkipConnectionCore.is_connected" />
@@ -16017,7 +15939,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SkipConnectionCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=100)<a id="SkipConnectionCore.output_size" />
+#### [`SkipConnectionCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=108)<a id="SkipConnectionCore.output_size" />
 
 
 
@@ -16027,7 +15949,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`SkipConnectionCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=114)<a id="SkipConnectionCore.state_size" />
+#### [`SkipConnectionCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=122)<a id="SkipConnectionCore.state_size" />
 
 
 
@@ -16095,24 +16017,9 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SkipConnectionCore.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="SkipConnectionCore.zero_state" />
-
-Return zero-filled state tensor(s).
-
-##### Args:
+#### [`SkipConnectionCore.zero_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=129)<a id="SkipConnectionCore.zero_state" />
 
 
-* `batch_size`: int, float, or unit Tensor representing the batch size.
-* `dtype`: the data type to use for the state.
-
-##### Returns:
-
-  If `state_size` is an int or TensorShape, then the return value is a
-  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
-
-  If `state_size` is a nested list or tuple, then the return value is
-  a nested list or tuple (of the same structure) of `2-D` tensors with
-  the shapes `[batch_size x s]` for each s in `state_size`.
 
 
 
@@ -16208,7 +16115,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SliceByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="SliceByDim.get_all_variables" />
+#### [`SliceByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="SliceByDim.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16476,7 +16383,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TileByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="TileByDim.get_all_variables" />
+#### [`TileByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="TileByDim.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16684,7 +16591,7 @@ in the following way:
     output, final_state = tf.nn.dynamic_rnn(
         core, input_sequence, initial_state=trainable_initial_state)
 
-#### [`TrainableInitialState.__init__(initial_state, mask=None, name='trainable_initial_state')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=297)<a id="TrainableInitialState.__init__" />
+#### [`TrainableInitialState.__init__(initial_state, mask=None, name='trainable_initial_state')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=296)<a id="TrainableInitialState.__init__" />
 
 Constructs the Module that introduces a trainable state in the graph.
 
@@ -16706,7 +16613,7 @@ indicates the parts of the initial state that should be learnable.
 * `TypeError`: if mask is not a list of booleans or None.
 
 
-#### [`TrainableInitialState.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=330)<a id="TrainableInitialState.__call__" />
+#### [`TrainableInitialState.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=329)<a id="TrainableInitialState.__call__" />
 
 Connects the module to the graph.
 
@@ -16731,7 +16638,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TrainableInitialState.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="TrainableInitialState.get_all_variables" />
+#### [`TrainableInitialState.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="TrainableInitialState.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16982,7 +16889,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TrainableVariable.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="TrainableVariable.get_all_variables" />
+#### [`TrainableVariable.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="TrainableVariable.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -17214,12 +17121,12 @@ the correct value once linear is given an input.
 Notice that linear_transpose's output_size value does not need to be defined
 until the module is connected to the graph.
 
-#### [`Transposable.input_shape()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=724)<a id="Transposable.input_shape" />
+#### [`Transposable.input_shape()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=740)<a id="Transposable.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
 
-#### [`Transposable.transpose(name=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=712)<a id="Transposable.transpose" />
+#### [`Transposable.transpose(name=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=728)<a id="Transposable.transpose" />
 
 Builds and returns transposed version of module.
 
@@ -17327,7 +17234,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`VanillaRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="VanillaRNN.get_all_variables" />
+#### [`VanillaRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="VanillaRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -17419,7 +17326,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 
 
-#### [`VanillaRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=202)<a id="VanillaRNN.initial_state" />
+#### [`VanillaRNN.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="VanillaRNN.initial_state" />
 
 Builds the default start state for an RNNCore.
 
@@ -17583,7 +17490,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`VanillaRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=258)<a id="VanillaRNN.zero_state" />
+#### [`VanillaRNN.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="VanillaRNN.zero_state" />
 
 Return zero-filled state tensor(s).
 
@@ -18044,6 +17951,41 @@ remain serializable where necessary.
   Callable constructor which corresponds to `ctor_string`.
 
 
+### [`remove_unsupported_kwargs(module_or_fn, all_kwargs_dict)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1104)<a id="remove_unsupported_kwargs" />
+
+Removes any kwargs not supported by `module_or_fn` from `all_kwargs_dict`.
+
+A new dict is return with shallow copies of keys & values from
+`all_kwargs_dict`, as long as the key is accepted by module_or_fn. The
+returned dict can then be used to connect `module_or_fn` (along with some
+other inputs, ie non-keyword arguments, in general).
+
+`snt.supports_kwargs` is used to tell whether a given kwarg is supported. Note
+that this method may give false negatives, which would lead to extraneous
+removals in the result of this function. Please read the docstring for
+`snt.supports_kwargs` for details, and manually inspect the results from this
+function if in doubt.
+
+##### Args:
+
+
+* `module_or_fn`: some callable which can be interrogated by
+    `snt.supports_kwargs`. Generally a Sonnet module or a method (wrapped in
+    `@reuse_variables`) of a Sonnet module.
+* `all_kwargs_dict`: a dict containing strings as keys, or None.
+
+##### Raises:
+
+
+* `ValueError`: if `all_kwargs_dict` is not a dict.
+
+##### Returns:
+
+  A dict containing some subset of the keys and values in `all_kwargs_dict`.
+  This subset may be empty. If `all_kwargs_dict` is None, this will be an
+  empty dict.
+
+
 ### [`reuse_variables(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=662)<a id="reuse_variables" />
 
 Wraps an arbitrary method so it does variable sharing.
@@ -18178,6 +18120,43 @@ is logged, along with a warning.
     (in the default graph) are summarized.
 
 
+### [`supports_kwargs(module_or_fn, kwargs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1041)<a id="supports_kwargs" />
+
+Determines whether the provided callable supports all the kwargs.
+
+This is useful when you have a module that might or might not support a
+kwarg such as `is_training`. Rather than calling the module and catching the
+error, risking the potential modification of underlying state, this function
+introspects the module to see what kwargs are actually supported, using
+the python `inspect` module.
+
+Note that many TF functions do not export a valid argspec object, rather they
+have a generic *args, **kwargs signature due to various layers of wrapping
+(deprecation decorators, etc). In those circumstances we return
+MAYBE_SUPPORTED, and users will have to use another method to tell whether
+the kwargs are supported (e.g. by just calling the function).
+
+##### Args:
+
+
+* `module_or_fn`: some callable, generally an object or a method of some object.
+    If an object is provided, we check wither `module_or_fn.__call__` supports
+    the provided kwargs, which for a Sonnet module will automatically check
+    the signature of _build. If `module_or_fn` is a function/method, then
+    we check its signature directly, so non-Sonnet functions can be used.
+* `kwargs_list`: string or iterable of strings of keyword arg names to test for.
+    If an empty iterable is provided this function will always return True.
+
+##### Raises:
+
+
+* `ValueError`: if a non-string is provided in `kwargs_list`.
+
+##### Returns:
+
+  a string, one of 'supported', 'not_supported' or 'maybe_supported'.
+
+
 ### [`trainable_initial_state(batch_size, state_size, dtype, initializers=None, regularizers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=90)<a id="trainable_initial_state" />
 
 Creates an initial state consisting of trainable variables.
@@ -18227,7 +18206,7 @@ list of `tf.Variable`s (in case of sliced variables).
   (string, tf.Variable) pairs.
 
 
-### [`wrap_rnn_cell_class(wrapped_class)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=409)<a id="wrap_rnn_cell_class" />
+### [`wrap_rnn_cell_class(wrapped_class)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=408)<a id="wrap_rnn_cell_class" />
 
 Wraps an RNN cell class with a sub-class of `RNNCellWrapper`.
 
@@ -18704,7 +18683,7 @@ unconstrained neural network activation to parameterize a variance.
 A pre-canned builder for a ubiquitous stochastic KL estimator.
 
 
-### [`experimental.reuse_vars(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/experimental.py?l=316)<a id="experimental.reuse_vars" />
+### [`experimental.reuse_vars(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/experimental.py?l=305)<a id="experimental.reuse_vars" />
 
 DEPRECATED FUNCTION
 
@@ -18889,7 +18868,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNet.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.AlexNet.get_all_variables" />
+#### [`nets.AlexNet.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.AlexNet.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -19216,7 +19195,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNetFull.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.AlexNetFull.get_all_variables" />
+#### [`nets.AlexNetFull.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.AlexNetFull.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -19543,7 +19522,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNetMini.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.AlexNetMini.get_all_variables" />
+#### [`nets.AlexNetMini.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.AlexNetMini.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -19915,7 +19894,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.ConvNet2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.ConvNet2D.get_all_variables" />
+#### [`nets.ConvNet2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.ConvNet2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -20388,7 +20367,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.ConvNet2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.ConvNet2DTranspose.get_all_variables" />
+#### [`nets.ConvNet2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.ConvNet2DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -20807,7 +20786,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.Dilation.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.Dilation.get_all_variables" />
+#### [`nets.Dilation.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.Dilation.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -21105,7 +21084,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.MLP.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.MLP.get_all_variables" />
+#### [`nets.MLP.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.MLP.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -21428,7 +21407,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`nets.VectorQuantizer.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.VectorQuantizer.get_all_variables" />
+#### [`nets.VectorQuantizer.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.VectorQuantizer.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -21708,7 +21687,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`nets.VectorQuantizerEMA.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=654)<a id="nets.VectorQuantizerEMA.get_all_variables" />
+#### [`nets.VectorQuantizerEMA.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=661)<a id="nets.VectorQuantizerEMA.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 

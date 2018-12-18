@@ -1,5 +1,19 @@
 # Sonnet Changelog
 
+## Version 1.28 - Tuesday, 18. December 2018
+
+* Fix incorrect package name in `setup.py.tmpl`.
+* kwargs are forwarded to submodules in `DeepRNN`.
+* Add `supports_kwargs` function to reflect on whether a module can support
+  a certain kwarg.
+* Filter kwargs passed to the normalizer in `ConvNet2D` / `ConvNet2dTranspose`.
+  Any kwargs definitely not supported by the lower level function will be
+  removed. If the normalizer has a generic argspec (e.g. if it has `**kwargs`
+  in the signature) then nothing will be removed.
+* Support non-2D recurrent state in pondering RNN.
+* Logging utility function.
+* Various doc & typo fixes.
+
 ## Version 1.27 - Tuesday, 20. November 2018
 
 * **Backwards Incompatible change**: Change `Embed` to use standard deviation

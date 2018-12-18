@@ -309,7 +309,7 @@ class DeepRNN(rnn_core.RNNCore):
                            "has shape %s - these must only differ in the first "
                            "dimension" % (core_sizes[0], i + 1, core_list))
 
-  def _build(self, inputs, prev_state):
+  def _build(self, inputs, prev_state, **kwargs):
     """Connects the DeepRNN module into the graph.
 
     If this is not the first time the module has been connected to the graph,
@@ -323,6 +323,8 @@ class DeepRNN(rnn_core.RNNCore):
         least an initial batch dimension.
       prev_state: a tuple of `prev_state`s that corresponds to the state
         of each one of the cores of the `DeepCore`.
+      **kwargs: optional kwargs to be passed to the `_build` of all sub-modules.
+        E.g. is_training=True. Note all sub-modules must accept the given kwarg.
 
     Returns:
       output: a nested tuple of Tensors of arbitrary dimensionality, with at
@@ -350,11 +352,12 @@ class DeepRNN(rnn_core.RNNCore):
       # accordingly.
       if self._is_recurrent_list[i]:
         current_input, next_state = core(current_input,
-                                         prev_state[recurrent_idx])
+                                         prev_state[recurrent_idx],
+                                         **kwargs)
         next_states.append(next_state)
         recurrent_idx += 1
       else:
-        current_input = core(current_input)
+        current_input = core(current_input, **kwargs)
 
       if self._skip_connections:
         outputs.append(current_input)

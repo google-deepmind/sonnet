@@ -19864,17 +19864,17 @@ Assembles the `ConvNet2D` and connects it to the graph.
     batch normalization.
 
 
-#### [`nets.ConvNet2D.activate_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=431)<a id="nets.ConvNet2D.activate_final" />
+#### [`nets.ConvNet2D.activate_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=434)<a id="nets.ConvNet2D.activate_final" />
 
 
 
 
-#### [`nets.ConvNet2D.activation`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=427)<a id="nets.ConvNet2D.activation" />
+#### [`nets.ConvNet2D.activation`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=430)<a id="nets.ConvNet2D.activation" />
 
 
 
 
-#### [`nets.ConvNet2D.batch_norm_config`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=408)<a id="nets.ConvNet2D.batch_norm_config" />
+#### [`nets.ConvNet2D.batch_norm_config`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=411)<a id="nets.ConvNet2D.batch_norm_config" />
 
 
 
@@ -19966,12 +19966,12 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`nets.ConvNet2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=365)<a id="nets.ConvNet2D.initializers" />
+#### [`nets.ConvNet2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=368)<a id="nets.ConvNet2D.initializers" />
 
 
 
 
-#### [`nets.ConvNet2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=436)<a id="nets.ConvNet2D.input_shape" />
+#### [`nets.ConvNet2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=439)<a id="nets.ConvNet2D.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -19981,7 +19981,7 @@ Returns shape of input `Tensor` passed at last call to `build`.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`nets.ConvNet2D.kernel_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=389)<a id="nets.ConvNet2D.kernel_shapes" />
+#### [`nets.ConvNet2D.kernel_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=392)<a id="nets.ConvNet2D.kernel_shapes" />
 
 
 
@@ -20000,7 +20000,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2D.layers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=360)<a id="nets.ConvNet2D.layers" />
+#### [`nets.ConvNet2D.layers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=363)<a id="nets.ConvNet2D.layers" />
 
 Returns a tuple containing the convolutional layers of the network.
 
@@ -20035,42 +20035,42 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2D.normalization_ctor`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=415)<a id="nets.ConvNet2D.normalization_ctor" />
+#### [`nets.ConvNet2D.normalization_ctor`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=418)<a id="nets.ConvNet2D.normalization_ctor" />
 
 
 
 
-#### [`nets.ConvNet2D.normalization_kwargs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=419)<a id="nets.ConvNet2D.normalization_kwargs" />
+#### [`nets.ConvNet2D.normalization_kwargs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=422)<a id="nets.ConvNet2D.normalization_kwargs" />
 
 
 
 
-#### [`nets.ConvNet2D.normalize_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=423)<a id="nets.ConvNet2D.normalize_final" />
+#### [`nets.ConvNet2D.normalize_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=426)<a id="nets.ConvNet2D.normalize_final" />
 
 
 
 
-#### [`nets.ConvNet2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=393)<a id="nets.ConvNet2D.output_channels" />
+#### [`nets.ConvNet2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=396)<a id="nets.ConvNet2D.output_channels" />
 
 
 
 
-#### [`nets.ConvNet2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=381)<a id="nets.ConvNet2D.paddings" />
+#### [`nets.ConvNet2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=384)<a id="nets.ConvNet2D.paddings" />
 
 
 
 
-#### [`nets.ConvNet2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=369)<a id="nets.ConvNet2D.partitioners" />
+#### [`nets.ConvNet2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=372)<a id="nets.ConvNet2D.partitioners" />
 
 
 
 
-#### [`nets.ConvNet2D.rates`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=385)<a id="nets.ConvNet2D.rates" />
+#### [`nets.ConvNet2D.rates`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=388)<a id="nets.ConvNet2D.rates" />
 
 
 
 
-#### [`nets.ConvNet2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=373)<a id="nets.ConvNet2D.regularizers" />
+#### [`nets.ConvNet2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=376)<a id="nets.ConvNet2D.regularizers" />
 
 
 
@@ -20080,7 +20080,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`nets.ConvNet2D.strides`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=377)<a id="nets.ConvNet2D.strides" />
+#### [`nets.ConvNet2D.strides`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=380)<a id="nets.ConvNet2D.strides" />
 
 
 
@@ -20105,7 +20105,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2D.transpose(name=None, output_channels=None, kernel_shapes=None, strides=None, paddings=None, activation=None, activate_final=None, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=None, batch_norm_config=None, data_format=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=585)<a id="nets.ConvNet2D.transpose" />
+#### [`nets.ConvNet2D.transpose(name=None, output_channels=None, kernel_shapes=None, strides=None, paddings=None, activation=None, activate_final=None, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=None, batch_norm_config=None, data_format=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=588)<a id="nets.ConvNet2D.transpose" />
 
 Returns transposed version of this network.
 
@@ -20170,12 +20170,12 @@ Returns transposed version of this network.
 * `NotImplementedError`: If the convolutions are dilated.
 
 
-#### [`nets.ConvNet2D.use_batch_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=401)<a id="nets.ConvNet2D.use_batch_norm" />
+#### [`nets.ConvNet2D.use_batch_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=404)<a id="nets.ConvNet2D.use_batch_norm" />
 
 
 
 
-#### [`nets.ConvNet2D.use_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=397)<a id="nets.ConvNet2D.use_bias" />
+#### [`nets.ConvNet2D.use_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=400)<a id="nets.ConvNet2D.use_bias" />
 
 
 
@@ -20228,7 +20228,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=relu, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=702)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=relu, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=705)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -20337,17 +20337,17 @@ Assembles the `ConvNet2D` and connects it to the graph.
     batch normalization.
 
 
-#### [`nets.ConvNet2DTranspose.activate_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=431)<a id="nets.ConvNet2DTranspose.activate_final" />
+#### [`nets.ConvNet2DTranspose.activate_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=434)<a id="nets.ConvNet2DTranspose.activate_final" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.activation`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=427)<a id="nets.ConvNet2DTranspose.activation" />
+#### [`nets.ConvNet2DTranspose.activation`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=430)<a id="nets.ConvNet2DTranspose.activation" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.batch_norm_config`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=408)<a id="nets.ConvNet2DTranspose.batch_norm_config" />
+#### [`nets.ConvNet2DTranspose.batch_norm_config`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=411)<a id="nets.ConvNet2DTranspose.batch_norm_config" />
 
 
 
@@ -20439,12 +20439,12 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`nets.ConvNet2DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=365)<a id="nets.ConvNet2DTranspose.initializers" />
+#### [`nets.ConvNet2DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=368)<a id="nets.ConvNet2DTranspose.initializers" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=436)<a id="nets.ConvNet2DTranspose.input_shape" />
+#### [`nets.ConvNet2DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=439)<a id="nets.ConvNet2DTranspose.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -20454,7 +20454,7 @@ Returns shape of input `Tensor` passed at last call to `build`.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`nets.ConvNet2DTranspose.kernel_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=389)<a id="nets.ConvNet2DTranspose.kernel_shapes" />
+#### [`nets.ConvNet2DTranspose.kernel_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=392)<a id="nets.ConvNet2DTranspose.kernel_shapes" />
 
 
 
@@ -20473,7 +20473,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2DTranspose.layers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=360)<a id="nets.ConvNet2DTranspose.layers" />
+#### [`nets.ConvNet2DTranspose.layers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=363)<a id="nets.ConvNet2DTranspose.layers" />
 
 Returns a tuple containing the convolutional layers of the network.
 
@@ -20508,47 +20508,47 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2DTranspose.normalization_ctor`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=415)<a id="nets.ConvNet2DTranspose.normalization_ctor" />
+#### [`nets.ConvNet2DTranspose.normalization_ctor`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=418)<a id="nets.ConvNet2DTranspose.normalization_ctor" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.normalization_kwargs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=419)<a id="nets.ConvNet2DTranspose.normalization_kwargs" />
+#### [`nets.ConvNet2DTranspose.normalization_kwargs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=422)<a id="nets.ConvNet2DTranspose.normalization_kwargs" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.normalize_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=423)<a id="nets.ConvNet2DTranspose.normalize_final" />
+#### [`nets.ConvNet2DTranspose.normalize_final`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=426)<a id="nets.ConvNet2DTranspose.normalize_final" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=393)<a id="nets.ConvNet2DTranspose.output_channels" />
+#### [`nets.ConvNet2DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=396)<a id="nets.ConvNet2DTranspose.output_channels" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.output_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=852)<a id="nets.ConvNet2DTranspose.output_shapes" />
+#### [`nets.ConvNet2DTranspose.output_shapes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=855)<a id="nets.ConvNet2DTranspose.output_shapes" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=381)<a id="nets.ConvNet2DTranspose.paddings" />
+#### [`nets.ConvNet2DTranspose.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=384)<a id="nets.ConvNet2DTranspose.paddings" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=369)<a id="nets.ConvNet2DTranspose.partitioners" />
+#### [`nets.ConvNet2DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=372)<a id="nets.ConvNet2DTranspose.partitioners" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.rates`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=385)<a id="nets.ConvNet2DTranspose.rates" />
+#### [`nets.ConvNet2DTranspose.rates`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=388)<a id="nets.ConvNet2DTranspose.rates" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=373)<a id="nets.ConvNet2DTranspose.regularizers" />
+#### [`nets.ConvNet2DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=376)<a id="nets.ConvNet2DTranspose.regularizers" />
 
 
 
@@ -20558,7 +20558,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`nets.ConvNet2DTranspose.strides`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=377)<a id="nets.ConvNet2DTranspose.strides" />
+#### [`nets.ConvNet2DTranspose.strides`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=380)<a id="nets.ConvNet2DTranspose.strides" />
 
 
 
@@ -20583,7 +20583,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.ConvNet2DTranspose.transpose(name=None, output_channels=None, kernel_shapes=None, strides=None, paddings=None, activation=None, activate_final=None, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=None, batch_norm_config=None, data_format=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=857)<a id="nets.ConvNet2DTranspose.transpose" />
+#### [`nets.ConvNet2DTranspose.transpose(name=None, output_channels=None, kernel_shapes=None, strides=None, paddings=None, activation=None, activate_final=None, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=None, batch_norm_config=None, data_format=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=860)<a id="nets.ConvNet2DTranspose.transpose" />
 
 Returns transposed version of this network.
 
@@ -20645,12 +20645,12 @@ Returns transposed version of this network.
     the number of layers.
 
 
-#### [`nets.ConvNet2DTranspose.use_batch_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=401)<a id="nets.ConvNet2DTranspose.use_batch_norm" />
+#### [`nets.ConvNet2DTranspose.use_batch_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=404)<a id="nets.ConvNet2DTranspose.use_batch_norm" />
 
 
 
 
-#### [`nets.ConvNet2DTranspose.use_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=397)<a id="nets.ConvNet2DTranspose.use_bias" />
+#### [`nets.ConvNet2DTranspose.use_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=400)<a id="nets.ConvNet2DTranspose.use_bias" />
 
 
 

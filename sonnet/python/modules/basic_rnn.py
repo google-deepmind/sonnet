@@ -33,8 +33,7 @@ from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
 
-from tensorflow.python.framework import tensor_shape
-from tensorflow.python.util import nest
+nest = tf.contrib.framework.nest
 
 
 def _get_flat_core_sizes(cores):
@@ -50,8 +49,8 @@ def _get_flat_core_sizes(cores):
   core_sizes_lists = []
   for core in cores:
     flat_output_size = nest.flatten(core.output_size)
-    core_sizes_lists.append([tensor_shape.as_shape(size).as_list()
-                             for size in flat_output_size])
+    core_sizes_lists.append(
+        [tf.TensorShape(size).as_list() for size in flat_output_size])
   return core_sizes_lists
 
 

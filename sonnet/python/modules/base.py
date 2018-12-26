@@ -52,8 +52,6 @@ from sonnet.python.modules.base_errors import ModuleInfoError
 # pylint: enable=g-bad-import-order
 # pylint: enable=unused-import
 
-from tensorflow.python.framework import ops
-
 
 _MODULE_STACK = []
 _CONNECTION_OBSERVER_STACK = []
@@ -260,7 +258,7 @@ class AbstractModule(object):
       DifferentGraphError: if the module is connected to a different Graph than
         it was previously used in.
     """
-    with ops.init_scope():
+    with tf.init_scope():
       # We need `init_scope` incase we're running inside a defun. In that case
       # what we want is information about where the function will be called not
       # where the function is being built.

@@ -29,7 +29,7 @@ from sonnet.python.modules import rnn_core
 
 import tensorflow as tf
 
-from tensorflow.python.util import nest
+nest = tf.contrib.framework.nest
 
 
 _VALUES_A = [1., np.array([2, 3.5]), np.array([[-1., -1.], [0., 2.]])]

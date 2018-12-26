@@ -23,7 +23,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import rnn_core
 import tensorflow as tf
 
-from tensorflow.python.util import nest
+nest = tf.contrib.framework.nest
 
 
 class Residual(base.AbstractModule):

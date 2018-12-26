@@ -51,8 +51,6 @@ from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
 
-from tensorflow.python.ops import array_ops
-
 
 LSTMState = collections.namedtuple("LSTMState", ("hidden", "cell"))
 
@@ -258,7 +256,7 @@ class LSTM(rnn_core.RNNCore):
     gates += self._b
 
     # i = input_gate, j = next_input, f = forget_gate, o = output_gate
-    i, j, f, o = array_ops.split(value=gates, num_or_size_splits=4, axis=1)
+    i, j, f, o = tf.split(value=gates, num_or_size_splits=4, axis=1)
 
     if self._use_peepholes:  # diagonal connections
       self._create_peephole_variables(inputs.dtype)
@@ -899,7 +897,7 @@ class BatchNormLSTM(rnn_core.RNNCore):
     gates += self._b
 
     # i = input_gate, j = next_input, f = forget_gate, o = output_gate
-    i, j, f, o = array_ops.split(value=gates, num_or_size_splits=4, axis=1)
+    i, j, f, o = tf.split(value=gates, num_or_size_splits=4, axis=1)
 
     if self._use_peepholes:  # diagonal connections
       self._create_peephole_variables(inputs.dtype)

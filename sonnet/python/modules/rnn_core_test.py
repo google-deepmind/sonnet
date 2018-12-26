@@ -26,7 +26,7 @@ import numpy as np
 import sonnet as snt
 import tensorflow as tf
 
-from tensorflow.python.util import nest
+nest = tf.contrib.framework.nest
 
 BATCH_SIZE = 5
 MASK_TUPLE = (True, (False, True))

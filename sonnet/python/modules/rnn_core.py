@@ -36,7 +36,7 @@ import tensorflow as tf
 import wrapt
 
 from tensorflow.python.ops import rnn_cell_impl
-from tensorflow.python.util import nest
+nest = tf.contrib.framework.nest
 
 
 def _single_learnable_state(state, state_id=0, learnable=True):

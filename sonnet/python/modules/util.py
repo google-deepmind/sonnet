@@ -32,8 +32,6 @@ import tensorflow as tf
 import wrapt
 
 from tensorflow.python.framework import function
-from tensorflow.python.framework import ops
-from tensorflow.python.ops import resource_variable_ops
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
 
@@ -520,12 +518,12 @@ def _format_device(var):
   `/job:learner/task:0/device:CPU:* (resource)`
 
   Args:
-    var: The Tensorflow Variable or `ResourceVariable` to print.
+    var: The Tensorflow Variable to print.
   """
-  if resource_variable_ops.is_resource_variable(var):
-    resource_var_annotation = "(resource)"
-  else:
+  if var.dtype.name.endswith("_ref"):
     resource_var_annotation = "(legacy)"
+  else:
+    resource_var_annotation = "(resource)"
 
   if var.device:
     return "{} {}".format(var.device, resource_var_annotation)
@@ -827,7 +825,7 @@ def reuse_variables(method):
     variable_scope_context_manager = getattr(obj, "_enter_variable_scope",
                                              default_context_manager)
 
-    with ops.init_scope():
+    with tf.init_scope():
       # We need `init_scope` incase we're running inside a defun. In that case
       # what we want is information about where the function will be called not
       # where the function is being built.
@@ -964,7 +962,7 @@ def notify_about_variables(callback):
     callback(v)
     return v
 
-  with variable_scope_ops.variable_creator_scope(_tracking_creator):
+  with tf.variable_creator_scope(_tracking_creator):
     yield
 
 

@@ -24,6 +24,7 @@ py_library(
 py_binary(
     name = "module_with_build_args",
     srcs = ["module_with_build_args.py"],
+    default_python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [
         "//sonnet",

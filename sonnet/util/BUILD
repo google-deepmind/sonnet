@@ -10,6 +10,8 @@ exports_files(["LICENSE"])
 py_binary(
     name = "migrate_checkpoint",
     srcs = ["migrate_checkpoint.py"],
+    default_python_version = "PY3",
+    srcs_version = "PY2AND3",
     deps = [
         "//sonnet",  # build_cleaner:keep
         # tensorflow dep,

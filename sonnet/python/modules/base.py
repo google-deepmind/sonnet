@@ -320,9 +320,13 @@ class AbstractModule(object):
           stack.enter_context(template_store.as_default())
 
         stack.enter_context(
-            util.notify_about_variables(self._all_variables.add))
+            util.notify_about_new_variables(self._all_variables.add))
 
         yield
+
+        if self._original_name:
+          self._all_variables.update(self._template.variables)
+
     finally:
       # Remove `self` from `module_stack`, this happens as part of cleanup
       # even if an error is raised.

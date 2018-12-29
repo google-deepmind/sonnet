@@ -1107,7 +1107,7 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
 
   def testNoVariables(self):
     variables = []
-    with util.notify_about_variables(variables.append):
+    with util.notify_about_new_variables(variables.append):
       pass
     self.assertEqual(variables, [])
 
@@ -1126,7 +1126,7 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
       self.skipTest("Ref variables not supported in eager mode.")
 
     variables = []
-    with util.notify_about_variables(variables.append):
+    with util.notify_about_new_variables(variables.append):
       with tf.variable_scope("", use_resource=use_resource):
         x = tf.get_variable("x", [])
     self.assertVariableType(x, use_resource)
@@ -1158,7 +1158,7 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
       stack.enter_context(tf.variable_scope("", use_resource=use_resource))
       for stack_entry in stack_entries:
         if stack_entry == "notify":
-          stack.enter_context(util.notify_about_variables(variables.append))
+          stack.enter_context(util.notify_about_new_variables(variables.append))
         elif stack_entry == "custom_getter":
           stack.enter_context(
               tf.variable_scope("", custom_getter=my_custom_getter))
@@ -1172,9 +1172,9 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
 
     self.assertVariableType(v, use_resource)
     if stack_entries == ["variable_creator", "notify"]:
-      # When a variable creator is entered before `notify_about_variables` there
-      # is no way for us to identify what dditional variables that creator
-      # created.
+      # When a variable creator is entered before `notify_about_new_variables`
+      # there is no way for us to identify what additional variables that
+      # creator created.
       self.assertEqual([v.name for v in variables], [u"v:0"])
     else:
       self.assertEqual([v.name for v in variables], [u"v:0", u"v_additional:0"])

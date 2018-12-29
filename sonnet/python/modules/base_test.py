@@ -139,8 +139,10 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(keys, {"foo", "bar"})
     keys = ModuleWithNoInitializerKeys.get_possible_initializer_keys()
     self.assertEqual(keys, set())
-    msg = ("missing 1 required positional argument" if six.PY3
-           else "takes exactly 2 arguments")
+    if six.PY2:
+      msg = "takes exactly 2 arguments"
+    else:
+      msg = "missing 1 required positional argument"
     self.assertRaisesRegexp(
         TypeError, msg,
         ModuleWithCustomInitializerKeys.get_possible_initializer_keys)
@@ -511,6 +513,22 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     all_variables = module_b.get_all_variables()
     all_variable_names = sorted([str(v.name) for v in all_variables])
     self.assertEqual(["module_b/b:0", "module_b/w:0"], all_variable_names)
+
+  @parameterized.parameters(None, "", "complex_module")
+  def testVariablesFromNestedModule(self, name):
+    outer = ComplexModule(name=name)
+    outer(tf.zeros([10, 10]))
+    inner1 = outer._b
+    outer(tf.zeros([10, 10]))
+    inner2 = outer._b
+
+    # Calling the outer module triggers the inner module to re-constructed. The
+    # new inner module should have literally the same variables as the old one.
+    self.assertIsNot(inner1, inner2)
+    self.assertNotEmpty(inner1.variables)
+    self.assertLen(inner2.variables, len(inner1.variables))
+    for v1, v2 in zip(inner1.variables, inner2.variables):
+      self.assertIs(v1, v2)
 
   def testCallSignatureAndDocstring(self):
     my_module = SimpleModule()

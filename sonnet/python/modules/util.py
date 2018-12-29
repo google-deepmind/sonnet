@@ -938,8 +938,8 @@ def sort_by_name(variables):
 
 
 @contextlib.contextmanager
-def notify_about_variables(callback):
-  """Calls `callback(var)` for all `tf.{Variable,get_variable}` results.
+def notify_about_new_variables(callback):
+  """Calls `callback(var)` for all newly created variables.
 
   Callback should not modify the variable passed in. Use cases that require
   variables to be modified should use `variable_creator_scope` directly and sit

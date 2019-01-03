@@ -1,13 +1,13 @@
 # Description:
 #   Examples for the Sonnet library.
 
-licenses(["notice"])  # Apache 2.0 License
+# Placeholder for internal Python version compatibility macro.
 
-exports_files(["LICENSE"])
+licenses(["notice"])  # Apache 2.0 License
 
 package(default_visibility = ["//visibility:public"])
 
-# Placeholder for internal Python version compatibility macro.
+exports_files(["LICENSE"])
 
 py_library(
     name = "examples",
@@ -15,6 +15,7 @@ py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":brnn_ptb",
+        ":mnist_mlp",
         ":module_with_build_args",
         ":rmc_nth_farthest",
         ":rnn_shakespeare",
@@ -27,6 +28,20 @@ py_binary(
     default_python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
+py_binary(
+    name = "mnist_mlp",
+    srcs = [
+        "dataset_mnist_cifar10.py",
+        "mnist_mlp.py",
+    ],
+    srcs_version = "PY2AND3",
+    deps = [
+        # numpy dep,
         "//sonnet",
         # tensorflow dep,
     ],

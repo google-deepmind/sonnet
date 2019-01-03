@@ -30,6 +30,7 @@ import numbers
 # Dependency imports
 
 import numpy as np
+import six
 from sonnet.python.modules import base
 from sonnet.python.modules import util
 import tensorflow as tf
@@ -192,7 +193,7 @@ def _fill_and_verify_padding(padding, n):
   if not isinstance(n, numbers.Integral) or n < 1:
     raise TypeError("n must be a positive integer")
 
-  if isinstance(padding, str) and padding in ALLOWED_PADDINGS:
+  if isinstance(padding, six.string_types) and padding in ALLOWED_PADDINGS:
     return (padding,) * n
 
   try:

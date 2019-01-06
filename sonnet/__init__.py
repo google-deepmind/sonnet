@@ -65,7 +65,6 @@ _ensure_dependency_available_at_version('tensorflow_probability', '0.4.0')
 
 # Check some version of TF is available.
 from sonnet.python import custom_getters
-from sonnet.python.modules import experimental
 from sonnet.python.modules import nets
 from sonnet.python.modules.attention import AttentiveRead
 from sonnet.python.modules.base import AbstractModule

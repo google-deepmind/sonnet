@@ -69,7 +69,6 @@ py_library(
         "modules/clip_gradient.py",
         "modules/conv.py",
         "modules/embed.py",
-        "modules/experimental.py",
         "modules/gated_rnn.py",
         "modules/layer_norm.py",
         "modules/nets/__init__.py",

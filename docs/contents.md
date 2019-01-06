@@ -56,7 +56,6 @@
   * [`DifferentGraphError`](sonnet.md#DifferentGraphError)
   * [`Embed`](sonnet.md#Embed)
   * [`Error`](sonnet.md#Error)
-  * [`experimental.reuse_vars`](sonnet.md#experimental.reuse_vars)
   * [`FlattenTrailingDimensions`](sonnet.md#FlattenTrailingDimensions)
   * [`format_variable_map`](sonnet.md#format_variable_map)
   * [`format_variables`](sonnet.md#format_variables)

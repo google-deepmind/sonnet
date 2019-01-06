@@ -429,7 +429,7 @@ upon evaluation `input_shape` will raise an error unless the module has not been
 connected to the graph, but this is not an issue since the `lambda` is not
 called until the transposed module is connected to the graph.
 
-## Variable reuse with `@snt.reuse_variables` (**experimental**)
+## Variable reuse with `@snt.reuse_variables`
 
 Some use cases require a `tf.VariableScope` to be shared across multiple
 methods, which isn't possible with `snt.AbstractModule`.

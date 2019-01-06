@@ -18686,15 +18686,6 @@ unconstrained neural network activation to parameterize a variance.
 A pre-canned builder for a ubiquitous stochastic KL estimator.
 
 
-### [`experimental.reuse_vars(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/experimental.py?l=305)<a id="experimental.reuse_vars" />
-
-DEPRECATED FUNCTION
-
-Warning: THIS FUNCTION IS DEPRECATED. It will be removed after 2017-08-01.
-Instructions for updating:
-The @snt.experimental.reuse_vars decorator has been moved to @snt.reuse_variables. Please change to use the new location.
-
-
 ### [`nest.assert_same_structure(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/ops/nest.py?l=35)<a id="nest.assert_same_structure" />
 
 

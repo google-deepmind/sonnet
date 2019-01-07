@@ -149,7 +149,7 @@ module_tests = [
     ("base_info_test", "", "small"),
     ("basic_test", "", "small"),
     ("basic_rnn_test", "", "medium"),
-    ("batch_norm_test", "", "small"),
+    ("batch_norm_test", "", "medium"),
     ("batch_norm_v2_test", "", "small"),
     ("layer_norm_test", "", "small"),
     ("block_matrix_test", "", "small"),

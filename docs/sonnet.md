@@ -4071,7 +4071,7 @@ convolution). For further details on the theoretical background, refer to:
 
 https://arxiv.org/abs/1610.10099
 
-#### [`CausalConv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, padding='CAUSAL', data_format='NWC', custom_getter=None, name='causal_conv_1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1559)<a id="CausalConv1D.__init__" />
+#### [`CausalConv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, padding='CAUSAL', data_format='NWC', custom_getter=None, name='causal_conv_1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1560)<a id="CausalConv1D.__init__" />
 
 Constructs a CausalConv1D module.
 
@@ -4144,7 +4144,7 @@ This is deprecated, please use the padding=CAUSAL argument to Conv1D.
       `SUPPORTED_1D_DATA_FORMATS`).
 
 
-#### [`CausalConv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="CausalConv1D.__call__" />
+#### [`CausalConv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="CausalConv1D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -4182,7 +4182,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`CausalConv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="CausalConv1D.b" />
+#### [`CausalConv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="CausalConv1D.b" />
 
 Returns the Variable containing the bias.
 
@@ -4198,7 +4198,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`CausalConv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="CausalConv1D.clone" />
+#### [`CausalConv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="CausalConv1D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -4218,12 +4218,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`CausalConv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="CausalConv1D.conv_op_padding" />
+#### [`CausalConv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="CausalConv1D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`CausalConv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="CausalConv1D.data_format" />
+#### [`CausalConv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="CausalConv1D.data_format" />
 
 Returns the data format.
 
@@ -4262,7 +4262,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`CausalConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="CausalConv1D.get_possible_initializer_keys" />
+#### [`CausalConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="CausalConv1D.get_possible_initializer_keys" />
 
 
 
@@ -4300,22 +4300,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`CausalConv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="CausalConv1D.has_bias" />
+#### [`CausalConv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="CausalConv1D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`CausalConv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="CausalConv1D.initializers" />
+#### [`CausalConv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="CausalConv1D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`CausalConv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="CausalConv1D.input_channels" />
+#### [`CausalConv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="CausalConv1D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`CausalConv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="CausalConv1D.input_shape" />
+#### [`CausalConv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="CausalConv1D.input_shape" />
 
 Returns the input shape.
 
@@ -4325,7 +4325,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`CausalConv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="CausalConv1D.kernel_shape" />
+#### [`CausalConv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="CausalConv1D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -4344,7 +4344,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`CausalConv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="CausalConv1D.mask" />
+#### [`CausalConv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="CausalConv1D.mask" />
 
 Returns the mask.
 
@@ -4379,12 +4379,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`CausalConv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="CausalConv1D.output_channels" />
+#### [`CausalConv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="CausalConv1D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`CausalConv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="CausalConv1D.padding" />
+#### [`CausalConv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="CausalConv1D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -4402,22 +4402,22 @@ dimension.
     dimensions.
 
 
-#### [`CausalConv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="CausalConv1D.paddings" />
+#### [`CausalConv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="CausalConv1D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`CausalConv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="CausalConv1D.partitioners" />
+#### [`CausalConv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="CausalConv1D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`CausalConv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="CausalConv1D.rate" />
+#### [`CausalConv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="CausalConv1D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`CausalConv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="CausalConv1D.regularizers" />
+#### [`CausalConv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="CausalConv1D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -4427,7 +4427,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`CausalConv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="CausalConv1D.stride" />
+#### [`CausalConv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="CausalConv1D.stride" />
 
 Returns the stride.
 
@@ -4495,7 +4495,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`CausalConv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="CausalConv1D.w" />
+#### [`CausalConv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="CausalConv1D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -4507,7 +4507,7 @@ Returns the Variable containing the weight matrix.
 
 This acts as a light wrapper around the class `_ConvND`.
 
-#### [`Conv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NWC', custom_getter=None, name='conv_1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1285)<a id="Conv1D.__init__" />
+#### [`Conv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NWC', custom_getter=None, name='conv_1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1286)<a id="Conv1D.__init__" />
 
 Constructs a Conv1D module.
 
@@ -4599,7 +4599,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `SUPPORTED_1D_DATA_FORMATS`).
 
 
-#### [`Conv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="Conv1D.__call__" />
+#### [`Conv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="Conv1D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -4637,7 +4637,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="Conv1D.b" />
+#### [`Conv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="Conv1D.b" />
 
 Returns the Variable containing the bias.
 
@@ -4653,7 +4653,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`Conv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="Conv1D.clone" />
+#### [`Conv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="Conv1D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -4673,12 +4673,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="Conv1D.conv_op_padding" />
+#### [`Conv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="Conv1D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`Conv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="Conv1D.data_format" />
+#### [`Conv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="Conv1D.data_format" />
 
 Returns the data format.
 
@@ -4717,7 +4717,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="Conv1D.get_possible_initializer_keys" />
+#### [`Conv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="Conv1D.get_possible_initializer_keys" />
 
 
 
@@ -4755,22 +4755,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="Conv1D.has_bias" />
+#### [`Conv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="Conv1D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="Conv1D.initializers" />
+#### [`Conv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="Conv1D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="Conv1D.input_channels" />
+#### [`Conv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="Conv1D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="Conv1D.input_shape" />
+#### [`Conv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="Conv1D.input_shape" />
 
 Returns the input shape.
 
@@ -4780,7 +4780,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="Conv1D.kernel_shape" />
+#### [`Conv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="Conv1D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -4799,7 +4799,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="Conv1D.mask" />
+#### [`Conv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="Conv1D.mask" />
 
 Returns the mask.
 
@@ -4834,12 +4834,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="Conv1D.output_channels" />
+#### [`Conv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="Conv1D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="Conv1D.padding" />
+#### [`Conv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="Conv1D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -4857,22 +4857,22 @@ dimension.
     dimensions.
 
 
-#### [`Conv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="Conv1D.paddings" />
+#### [`Conv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="Conv1D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`Conv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="Conv1D.partitioners" />
+#### [`Conv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="Conv1D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="Conv1D.rate" />
+#### [`Conv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="Conv1D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`Conv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="Conv1D.regularizers" />
+#### [`Conv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="Conv1D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -4882,7 +4882,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="Conv1D.stride" />
+#### [`Conv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="Conv1D.stride" />
 
 Returns the stride.
 
@@ -4907,7 +4907,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1386)<a id="Conv1D.transpose" />
+#### [`Conv1D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1387)<a id="Conv1D.transpose" />
 
 Returns matching `Conv1DTranspose` module.
 
@@ -4969,7 +4969,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="Conv1D.w" />
+#### [`Conv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="Conv1D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -5269,7 +5269,7 @@ This performs a 1D transpose convolution by lightly wrapping the TensorFlow op
 `tf.nn.conv2d_transpose`, setting the size of the height dimension of the
 image to 1.
 
-#### [`Conv1DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NWC', custom_getter=None, name='conv_1d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1438)<a id="Conv1DTranspose.__init__" />
+#### [`Conv1DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NWC', custom_getter=None, name='conv_1d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1439)<a id="Conv1DTranspose.__init__" />
 
 Constructs a Conv1DTranspose module.
 
@@ -5336,7 +5336,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `SUPPORTED_1D_DATA_FORMATS`).
 
 
-#### [`Conv1DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=993)<a id="Conv1DTranspose.__call__" />
+#### [`Conv1DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=994)<a id="Conv1DTranspose.__call__" />
 
 Connects the _ConvNDTranspose module into the graph.
 
@@ -5373,7 +5373,7 @@ multiplication. The batch size may differ for each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv1DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1228)<a id="Conv1DTranspose.b" />
+#### [`Conv1DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1229)<a id="Conv1DTranspose.b" />
 
 Returns the Variable containing the bias.
 
@@ -5394,7 +5394,7 @@ Returns the Variable containing the bias.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv1DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1217)<a id="Conv1DTranspose.conv_op_padding" />
+#### [`Conv1DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1218)<a id="Conv1DTranspose.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
@@ -5433,7 +5433,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=989)<a id="Conv1DTranspose.get_possible_initializer_keys" />
+#### [`Conv1DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=990)<a id="Conv1DTranspose.get_possible_initializer_keys" />
 
 
 
@@ -5471,22 +5471,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv1DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1246)<a id="Conv1DTranspose.has_bias" />
+#### [`Conv1DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1247)<a id="Conv1DTranspose.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv1DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1251)<a id="Conv1DTranspose.initializers" />
+#### [`Conv1DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1252)<a id="Conv1DTranspose.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv1DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1272)<a id="Conv1DTranspose.input_channels" />
+#### [`Conv1DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1273)<a id="Conv1DTranspose.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv1DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1266)<a id="Conv1DTranspose.input_shape" />
+#### [`Conv1DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1267)<a id="Conv1DTranspose.input_shape" />
 
 Returns the input shape.
 
@@ -5496,7 +5496,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv1DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1193)<a id="Conv1DTranspose.kernel_shape" />
+#### [`Conv1DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1194)<a id="Conv1DTranspose.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -5545,27 +5545,27 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1184)<a id="Conv1DTranspose.output_channels" />
+#### [`Conv1DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1185)<a id="Conv1DTranspose.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv1DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1203)<a id="Conv1DTranspose.output_shape" />
+#### [`Conv1DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1204)<a id="Conv1DTranspose.output_shape" />
 
 Returns the output shape.
 
 
-#### [`Conv1DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1212)<a id="Conv1DTranspose.padding" />
+#### [`Conv1DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1213)<a id="Conv1DTranspose.padding" />
 
 Returns the padding algorithm.
 
 
-#### [`Conv1DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1256)<a id="Conv1DTranspose.partitioners" />
+#### [`Conv1DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1257)<a id="Conv1DTranspose.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv1DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1261)<a id="Conv1DTranspose.regularizers" />
+#### [`Conv1DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1262)<a id="Conv1DTranspose.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -5575,7 +5575,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv1DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1198)<a id="Conv1DTranspose.stride" />
+#### [`Conv1DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1199)<a id="Conv1DTranspose.stride" />
 
 Returns the stride.
 
@@ -5600,7 +5600,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1516)<a id="Conv1DTranspose.transpose" />
+#### [`Conv1DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1517)<a id="Conv1DTranspose.transpose" />
 
 Returns matching `Conv1D` module.
 
@@ -5658,7 +5658,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1222)<a id="Conv1DTranspose.w" />
+#### [`Conv1DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1223)<a id="Conv1DTranspose.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -5670,7 +5670,7 @@ Spatial convolution and dilated convolution module, including bias.
 
 This acts as a light wrapper around the class `_ConvND`.
 
-#### [`Conv2D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NHWC', custom_getter=None, name='conv_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1657)<a id="Conv2D.__init__" />
+#### [`Conv2D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NHWC', custom_getter=None, name='conv_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1658)<a id="Conv2D.__init__" />
 
 Constructs a Conv2D module.
 
@@ -5763,7 +5763,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
     `SUPPORTED_2D_DATA_FORMATS`).
 
 
-#### [`Conv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="Conv2D.__call__" />
+#### [`Conv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="Conv2D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -5801,7 +5801,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="Conv2D.b" />
+#### [`Conv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="Conv2D.b" />
 
 Returns the Variable containing the bias.
 
@@ -5817,7 +5817,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`Conv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="Conv2D.clone" />
+#### [`Conv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="Conv2D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -5837,12 +5837,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="Conv2D.conv_op_padding" />
+#### [`Conv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="Conv2D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`Conv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="Conv2D.data_format" />
+#### [`Conv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="Conv2D.data_format" />
 
 Returns the data format.
 
@@ -5881,7 +5881,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="Conv2D.get_possible_initializer_keys" />
+#### [`Conv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="Conv2D.get_possible_initializer_keys" />
 
 
 
@@ -5919,22 +5919,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="Conv2D.has_bias" />
+#### [`Conv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="Conv2D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="Conv2D.initializers" />
+#### [`Conv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="Conv2D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="Conv2D.input_channels" />
+#### [`Conv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="Conv2D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="Conv2D.input_shape" />
+#### [`Conv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="Conv2D.input_shape" />
 
 Returns the input shape.
 
@@ -5944,7 +5944,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="Conv2D.kernel_shape" />
+#### [`Conv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="Conv2D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -5963,7 +5963,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="Conv2D.mask" />
+#### [`Conv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="Conv2D.mask" />
 
 Returns the mask.
 
@@ -5998,12 +5998,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="Conv2D.output_channels" />
+#### [`Conv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="Conv2D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="Conv2D.padding" />
+#### [`Conv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="Conv2D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -6021,22 +6021,22 @@ dimension.
     dimensions.
 
 
-#### [`Conv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="Conv2D.paddings" />
+#### [`Conv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="Conv2D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`Conv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="Conv2D.partitioners" />
+#### [`Conv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="Conv2D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="Conv2D.rate" />
+#### [`Conv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="Conv2D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`Conv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="Conv2D.regularizers" />
+#### [`Conv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="Conv2D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -6046,7 +6046,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="Conv2D.stride" />
+#### [`Conv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="Conv2D.stride" />
 
 Returns the stride.
 
@@ -6071,7 +6071,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1759)<a id="Conv2D.transpose" />
+#### [`Conv2D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1760)<a id="Conv2D.transpose" />
 
 Returns matching `Conv2DTranspose` module.
 
@@ -6133,7 +6133,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="Conv2D.w" />
+#### [`Conv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="Conv2D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -6432,7 +6432,7 @@ Spatial transposed / reverse / up 2D convolution module, including bias.
 This acts as a light wrapper around the TensorFlow op `tf.nn.conv2d_transpose`
 abstracting away variable creation and sharing.
 
-#### [`Conv2DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='conv_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1811)<a id="Conv2DTranspose.__init__" />
+#### [`Conv2DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='conv_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1812)<a id="Conv2DTranspose.__init__" />
 
 Constructs a `Conv2DTranspose module`.
 
@@ -6501,7 +6501,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `SUPPORTED_2D_DATA_FORMATS`).
 
 
-#### [`Conv2DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=993)<a id="Conv2DTranspose.__call__" />
+#### [`Conv2DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=994)<a id="Conv2DTranspose.__call__" />
 
 Connects the _ConvNDTranspose module into the graph.
 
@@ -6538,7 +6538,7 @@ multiplication. The batch size may differ for each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv2DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1228)<a id="Conv2DTranspose.b" />
+#### [`Conv2DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1229)<a id="Conv2DTranspose.b" />
 
 Returns the Variable containing the bias.
 
@@ -6559,7 +6559,7 @@ Returns the Variable containing the bias.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv2DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1217)<a id="Conv2DTranspose.conv_op_padding" />
+#### [`Conv2DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1218)<a id="Conv2DTranspose.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
@@ -6598,7 +6598,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=989)<a id="Conv2DTranspose.get_possible_initializer_keys" />
+#### [`Conv2DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=990)<a id="Conv2DTranspose.get_possible_initializer_keys" />
 
 
 
@@ -6636,22 +6636,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv2DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1246)<a id="Conv2DTranspose.has_bias" />
+#### [`Conv2DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1247)<a id="Conv2DTranspose.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv2DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1251)<a id="Conv2DTranspose.initializers" />
+#### [`Conv2DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1252)<a id="Conv2DTranspose.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv2DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1272)<a id="Conv2DTranspose.input_channels" />
+#### [`Conv2DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1273)<a id="Conv2DTranspose.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv2DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1266)<a id="Conv2DTranspose.input_shape" />
+#### [`Conv2DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1267)<a id="Conv2DTranspose.input_shape" />
 
 Returns the input shape.
 
@@ -6661,7 +6661,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv2DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1193)<a id="Conv2DTranspose.kernel_shape" />
+#### [`Conv2DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1194)<a id="Conv2DTranspose.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -6710,27 +6710,27 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1184)<a id="Conv2DTranspose.output_channels" />
+#### [`Conv2DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1185)<a id="Conv2DTranspose.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv2DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1203)<a id="Conv2DTranspose.output_shape" />
+#### [`Conv2DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1204)<a id="Conv2DTranspose.output_shape" />
 
 Returns the output shape.
 
 
-#### [`Conv2DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1212)<a id="Conv2DTranspose.padding" />
+#### [`Conv2DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1213)<a id="Conv2DTranspose.padding" />
 
 Returns the padding algorithm.
 
 
-#### [`Conv2DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1256)<a id="Conv2DTranspose.partitioners" />
+#### [`Conv2DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1257)<a id="Conv2DTranspose.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv2DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1261)<a id="Conv2DTranspose.regularizers" />
+#### [`Conv2DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1262)<a id="Conv2DTranspose.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -6740,7 +6740,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv2DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1198)<a id="Conv2DTranspose.stride" />
+#### [`Conv2DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1199)<a id="Conv2DTranspose.stride" />
 
 Returns the stride.
 
@@ -6765,7 +6765,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1891)<a id="Conv2DTranspose.transpose" />
+#### [`Conv2DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1892)<a id="Conv2DTranspose.transpose" />
 
 Returns matching `Conv2D` module.
 
@@ -6823,7 +6823,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1222)<a id="Conv2DTranspose.w" />
+#### [`Conv2DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1223)<a id="Conv2DTranspose.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -6835,7 +6835,7 @@ Volumetric convolution module, including optional bias.
 
 This acts as a light wrapper around the class `_ConvND`.
 
-#### [`Conv3D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NDHWC', custom_getter=None, name='conv_3d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1928)<a id="Conv3D.__init__" />
+#### [`Conv3D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, mask=None, data_format='NDHWC', custom_getter=None, name='conv_3d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1929)<a id="Conv3D.__init__" />
 
 Constructs a Conv3D module.
 
@@ -6925,7 +6925,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `SUPPORTED_3D_DATA_FORMATS`).
 
 
-#### [`Conv3D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="Conv3D.__call__" />
+#### [`Conv3D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="Conv3D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -6963,7 +6963,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv3D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="Conv3D.b" />
+#### [`Conv3D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="Conv3D.b" />
 
 Returns the Variable containing the bias.
 
@@ -6979,7 +6979,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`Conv3D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="Conv3D.clone" />
+#### [`Conv3D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="Conv3D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -6999,12 +6999,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv3D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="Conv3D.conv_op_padding" />
+#### [`Conv3D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="Conv3D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`Conv3D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="Conv3D.data_format" />
+#### [`Conv3D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="Conv3D.data_format" />
 
 Returns the data format.
 
@@ -7043,7 +7043,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="Conv3D.get_possible_initializer_keys" />
+#### [`Conv3D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="Conv3D.get_possible_initializer_keys" />
 
 
 
@@ -7081,22 +7081,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv3D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="Conv3D.has_bias" />
+#### [`Conv3D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="Conv3D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv3D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="Conv3D.initializers" />
+#### [`Conv3D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="Conv3D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv3D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="Conv3D.input_channels" />
+#### [`Conv3D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="Conv3D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv3D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="Conv3D.input_shape" />
+#### [`Conv3D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="Conv3D.input_shape" />
 
 Returns the input shape.
 
@@ -7106,7 +7106,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv3D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="Conv3D.kernel_shape" />
+#### [`Conv3D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="Conv3D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -7125,7 +7125,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="Conv3D.mask" />
+#### [`Conv3D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="Conv3D.mask" />
 
 Returns the mask.
 
@@ -7160,12 +7160,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="Conv3D.output_channels" />
+#### [`Conv3D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="Conv3D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv3D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="Conv3D.padding" />
+#### [`Conv3D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="Conv3D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -7183,22 +7183,22 @@ dimension.
     dimensions.
 
 
-#### [`Conv3D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="Conv3D.paddings" />
+#### [`Conv3D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="Conv3D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`Conv3D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="Conv3D.partitioners" />
+#### [`Conv3D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="Conv3D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv3D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="Conv3D.rate" />
+#### [`Conv3D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="Conv3D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`Conv3D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="Conv3D.regularizers" />
+#### [`Conv3D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="Conv3D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -7208,7 +7208,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv3D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="Conv3D.stride" />
+#### [`Conv3D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="Conv3D.stride" />
 
 Returns the stride.
 
@@ -7233,7 +7233,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2027)<a id="Conv3D.transpose" />
+#### [`Conv3D.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2028)<a id="Conv3D.transpose" />
 
 Returns matching `Conv3DTranspose` module.
 
@@ -7295,7 +7295,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="Conv3D.w" />
+#### [`Conv3D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="Conv3D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -7308,7 +7308,7 @@ Volumetric transposed / reverse / up 3D convolution module, including bias.
 This acts as a light wrapper around the TensorFlow op `tf.nn.conv3d_transpose`
 abstracting away variable creation and sharing.
 
-#### [`Conv3DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NDHWC', custom_getter=None, name='conv_3d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2078)<a id="Conv3DTranspose.__init__" />
+#### [`Conv3DTranspose.__init__(output_channels, output_shape=None, kernel_shape=None, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NDHWC', custom_getter=None, name='conv_3d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2079)<a id="Conv3DTranspose.__init__" />
 
 Constructs a `Conv3DTranspose` module.
 
@@ -7377,7 +7377,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `SUPPORTED_3D_DATA_FORMATS`).
 
 
-#### [`Conv3DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=993)<a id="Conv3DTranspose.__call__" />
+#### [`Conv3DTranspose.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=994)<a id="Conv3DTranspose.__call__" />
 
 Connects the _ConvNDTranspose module into the graph.
 
@@ -7414,7 +7414,7 @@ multiplication. The batch size may differ for each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`Conv3DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1228)<a id="Conv3DTranspose.b" />
+#### [`Conv3DTranspose.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1229)<a id="Conv3DTranspose.b" />
 
 Returns the Variable containing the bias.
 
@@ -7435,7 +7435,7 @@ Returns the Variable containing the bias.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv3DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1217)<a id="Conv3DTranspose.conv_op_padding" />
+#### [`Conv3DTranspose.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1218)<a id="Conv3DTranspose.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
@@ -7474,7 +7474,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=989)<a id="Conv3DTranspose.get_possible_initializer_keys" />
+#### [`Conv3DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=990)<a id="Conv3DTranspose.get_possible_initializer_keys" />
 
 
 
@@ -7512,22 +7512,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Conv3DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1246)<a id="Conv3DTranspose.has_bias" />
+#### [`Conv3DTranspose.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1247)<a id="Conv3DTranspose.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Conv3DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1251)<a id="Conv3DTranspose.initializers" />
+#### [`Conv3DTranspose.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1252)<a id="Conv3DTranspose.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Conv3DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1272)<a id="Conv3DTranspose.input_channels" />
+#### [`Conv3DTranspose.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1273)<a id="Conv3DTranspose.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`Conv3DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1266)<a id="Conv3DTranspose.input_shape" />
+#### [`Conv3DTranspose.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1267)<a id="Conv3DTranspose.input_shape" />
 
 Returns the input shape.
 
@@ -7537,7 +7537,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`Conv3DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1193)<a id="Conv3DTranspose.kernel_shape" />
+#### [`Conv3DTranspose.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1194)<a id="Conv3DTranspose.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -7586,27 +7586,27 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1184)<a id="Conv3DTranspose.output_channels" />
+#### [`Conv3DTranspose.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1185)<a id="Conv3DTranspose.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`Conv3DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1203)<a id="Conv3DTranspose.output_shape" />
+#### [`Conv3DTranspose.output_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1204)<a id="Conv3DTranspose.output_shape" />
 
 Returns the output shape.
 
 
-#### [`Conv3DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1212)<a id="Conv3DTranspose.padding" />
+#### [`Conv3DTranspose.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1213)<a id="Conv3DTranspose.padding" />
 
 Returns the padding algorithm.
 
 
-#### [`Conv3DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1256)<a id="Conv3DTranspose.partitioners" />
+#### [`Conv3DTranspose.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1257)<a id="Conv3DTranspose.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Conv3DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1261)<a id="Conv3DTranspose.regularizers" />
+#### [`Conv3DTranspose.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1262)<a id="Conv3DTranspose.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -7616,7 +7616,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv3DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1198)<a id="Conv3DTranspose.stride" />
+#### [`Conv3DTranspose.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1199)<a id="Conv3DTranspose.stride" />
 
 Returns the stride.
 
@@ -7641,7 +7641,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2158)<a id="Conv3DTranspose.transpose" />
+#### [`Conv3DTranspose.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2159)<a id="Conv3DTranspose.transpose" />
 
 Returns transposed Conv3DTranspose module, i.e. a Conv3D module.
 
@@ -7689,7 +7689,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv3DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1222)<a id="Conv3DTranspose.w" />
+#### [`Conv3DTranspose.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=1223)<a id="Conv3DTranspose.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -8103,7 +8103,7 @@ Spatial depthwise 2D convolution module, including bias.
 This acts as a light wrapper around the TensorFlow ops
 `tf.nn.depthwise_conv2d`, abstracting away variable creation and sharing.
 
-#### [`DepthwiseConv2D.__init__(channel_multiplier, kernel_shape, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='conv_2d_depthwise')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2323)<a id="DepthwiseConv2D.__init__" />
+#### [`DepthwiseConv2D.__init__(channel_multiplier, kernel_shape, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='conv_2d_depthwise')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2324)<a id="DepthwiseConv2D.__init__" />
 
 Constructs a DepthwiseConv2D module.
 
@@ -8188,7 +8188,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
 * `ValueError`: If the passed-in data_format doesn't have a channel dimension.
 
 
-#### [`DepthwiseConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="DepthwiseConv2D.__call__" />
+#### [`DepthwiseConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="DepthwiseConv2D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -8226,7 +8226,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`DepthwiseConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="DepthwiseConv2D.b" />
+#### [`DepthwiseConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="DepthwiseConv2D.b" />
 
 Returns the Variable containing the bias.
 
@@ -8242,12 +8242,12 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`DepthwiseConv2D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2486)<a id="DepthwiseConv2D.channel_multiplier" />
+#### [`DepthwiseConv2D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2487)<a id="DepthwiseConv2D.channel_multiplier" />
 
 Returns the channel multiplier argument.
 
 
-#### [`DepthwiseConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="DepthwiseConv2D.clone" />
+#### [`DepthwiseConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="DepthwiseConv2D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -8267,12 +8267,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`DepthwiseConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="DepthwiseConv2D.conv_op_padding" />
+#### [`DepthwiseConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="DepthwiseConv2D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`DepthwiseConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="DepthwiseConv2D.data_format" />
+#### [`DepthwiseConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="DepthwiseConv2D.data_format" />
 
 Returns the data format.
 
@@ -8311,7 +8311,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`DepthwiseConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="DepthwiseConv2D.get_possible_initializer_keys" />
+#### [`DepthwiseConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="DepthwiseConv2D.get_possible_initializer_keys" />
 
 
 
@@ -8349,22 +8349,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`DepthwiseConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="DepthwiseConv2D.has_bias" />
+#### [`DepthwiseConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="DepthwiseConv2D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`DepthwiseConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="DepthwiseConv2D.initializers" />
+#### [`DepthwiseConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="DepthwiseConv2D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`DepthwiseConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="DepthwiseConv2D.input_channels" />
+#### [`DepthwiseConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="DepthwiseConv2D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`DepthwiseConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="DepthwiseConv2D.input_shape" />
+#### [`DepthwiseConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="DepthwiseConv2D.input_shape" />
 
 Returns the input shape.
 
@@ -8374,7 +8374,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`DepthwiseConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="DepthwiseConv2D.kernel_shape" />
+#### [`DepthwiseConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="DepthwiseConv2D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -8393,7 +8393,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`DepthwiseConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="DepthwiseConv2D.mask" />
+#### [`DepthwiseConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="DepthwiseConv2D.mask" />
 
 Returns the mask.
 
@@ -8428,12 +8428,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`DepthwiseConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="DepthwiseConv2D.output_channels" />
+#### [`DepthwiseConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="DepthwiseConv2D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`DepthwiseConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="DepthwiseConv2D.padding" />
+#### [`DepthwiseConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="DepthwiseConv2D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -8451,22 +8451,22 @@ dimension.
     dimensions.
 
 
-#### [`DepthwiseConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="DepthwiseConv2D.paddings" />
+#### [`DepthwiseConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="DepthwiseConv2D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`DepthwiseConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="DepthwiseConv2D.partitioners" />
+#### [`DepthwiseConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="DepthwiseConv2D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`DepthwiseConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="DepthwiseConv2D.rate" />
+#### [`DepthwiseConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="DepthwiseConv2D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`DepthwiseConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="DepthwiseConv2D.regularizers" />
+#### [`DepthwiseConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="DepthwiseConv2D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -8476,7 +8476,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`DepthwiseConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="DepthwiseConv2D.stride" />
+#### [`DepthwiseConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="DepthwiseConv2D.stride" />
 
 Returns the stride.
 
@@ -8544,7 +8544,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`DepthwiseConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="DepthwiseConv2D.w" />
+#### [`DepthwiseConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="DepthwiseConv2D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -10141,7 +10141,7 @@ This acts as a light wrapper around the TensorFlow op
 `tf.nn.depthwise_conv2d`; it differs from the DepthWiseConv2D module in that
 it has tied weights (i.e. the same filter) for all the in-out channel pairs.
 
-#### [`InPlaneConv2D.__init__(kernel_shape, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='in_plane_conv2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2189)<a id="InPlaneConv2D.__init__" />
+#### [`InPlaneConv2D.__init__(kernel_shape, stride=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='in_plane_conv2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2190)<a id="InPlaneConv2D.__init__" />
 
 Constructs an InPlaneConv2D module.
 
@@ -10214,7 +10214,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
 * `ValueError`: If the passed-in data_format doesn't have a channel dimension.
 
 
-#### [`InPlaneConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="InPlaneConv2D.__call__" />
+#### [`InPlaneConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="InPlaneConv2D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -10252,7 +10252,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`InPlaneConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="InPlaneConv2D.b" />
+#### [`InPlaneConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="InPlaneConv2D.b" />
 
 Returns the Variable containing the bias.
 
@@ -10268,7 +10268,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`InPlaneConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="InPlaneConv2D.clone" />
+#### [`InPlaneConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="InPlaneConv2D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -10288,12 +10288,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`InPlaneConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="InPlaneConv2D.conv_op_padding" />
+#### [`InPlaneConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="InPlaneConv2D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`InPlaneConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="InPlaneConv2D.data_format" />
+#### [`InPlaneConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="InPlaneConv2D.data_format" />
 
 Returns the data format.
 
@@ -10332,7 +10332,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`InPlaneConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=515)<a id="InPlaneConv2D.get_possible_initializer_keys" />
+#### [`InPlaneConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=516)<a id="InPlaneConv2D.get_possible_initializer_keys" />
 
 
 
@@ -10370,22 +10370,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`InPlaneConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="InPlaneConv2D.has_bias" />
+#### [`InPlaneConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="InPlaneConv2D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`InPlaneConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="InPlaneConv2D.initializers" />
+#### [`InPlaneConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="InPlaneConv2D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`InPlaneConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="InPlaneConv2D.input_channels" />
+#### [`InPlaneConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="InPlaneConv2D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`InPlaneConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="InPlaneConv2D.input_shape" />
+#### [`InPlaneConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="InPlaneConv2D.input_shape" />
 
 Returns the input shape.
 
@@ -10395,7 +10395,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`InPlaneConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="InPlaneConv2D.kernel_shape" />
+#### [`InPlaneConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="InPlaneConv2D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -10414,7 +10414,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`InPlaneConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="InPlaneConv2D.mask" />
+#### [`InPlaneConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="InPlaneConv2D.mask" />
 
 Returns the mask.
 
@@ -10449,12 +10449,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`InPlaneConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="InPlaneConv2D.output_channels" />
+#### [`InPlaneConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="InPlaneConv2D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`InPlaneConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="InPlaneConv2D.padding" />
+#### [`InPlaneConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="InPlaneConv2D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -10472,22 +10472,22 @@ dimension.
     dimensions.
 
 
-#### [`InPlaneConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="InPlaneConv2D.paddings" />
+#### [`InPlaneConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="InPlaneConv2D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`InPlaneConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="InPlaneConv2D.partitioners" />
+#### [`InPlaneConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="InPlaneConv2D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`InPlaneConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="InPlaneConv2D.rate" />
+#### [`InPlaneConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="InPlaneConv2D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`InPlaneConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="InPlaneConv2D.regularizers" />
+#### [`InPlaneConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="InPlaneConv2D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -10497,7 +10497,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`InPlaneConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="InPlaneConv2D.stride" />
+#### [`InPlaneConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="InPlaneConv2D.stride" />
 
 Returns the stride.
 
@@ -10565,7 +10565,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`InPlaneConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="InPlaneConv2D.w" />
+#### [`InPlaneConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="InPlaneConv2D.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -14588,7 +14588,7 @@ Performs an in-plane convolution to each channel independently.
 This acts as a light wrapper around the TensorFlow op
 `tf.nn.separable_conv2d`, abstracting away variable creation and sharing.
 
-#### [`SeparableConv1D.__init__(output_channels, channel_multiplier, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NWC', custom_getter=None, name='separable_conv1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2726)<a id="SeparableConv1D.__init__" />
+#### [`SeparableConv1D.__init__(output_channels, channel_multiplier, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NWC', custom_getter=None, name='separable_conv1d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2727)<a id="SeparableConv1D.__init__" />
 
 Constructs a SeparableConv1D module.
 
@@ -14685,7 +14685,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
 * `ValueError`: If the passed-in data_format doesn't have a channel dimension.
 
 
-#### [`SeparableConv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="SeparableConv1D.__call__" />
+#### [`SeparableConv1D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="SeparableConv1D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -14723,7 +14723,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`SeparableConv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="SeparableConv1D.b" />
+#### [`SeparableConv1D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="SeparableConv1D.b" />
 
 Returns the Variable containing the bias.
 
@@ -14739,12 +14739,12 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`SeparableConv1D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2941)<a id="SeparableConv1D.channel_multiplier" />
+#### [`SeparableConv1D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2942)<a id="SeparableConv1D.channel_multiplier" />
 
 Returns the channel multiplier argument.
 
 
-#### [`SeparableConv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="SeparableConv1D.clone" />
+#### [`SeparableConv1D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="SeparableConv1D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -14764,12 +14764,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`SeparableConv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="SeparableConv1D.conv_op_padding" />
+#### [`SeparableConv1D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="SeparableConv1D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`SeparableConv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="SeparableConv1D.data_format" />
+#### [`SeparableConv1D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="SeparableConv1D.data_format" />
 
 Returns the data format.
 
@@ -14808,7 +14808,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2852)<a id="SeparableConv1D.get_possible_initializer_keys" />
+#### [`SeparableConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2853)<a id="SeparableConv1D.get_possible_initializer_keys" />
 
 
 
@@ -14846,22 +14846,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`SeparableConv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="SeparableConv1D.has_bias" />
+#### [`SeparableConv1D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="SeparableConv1D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`SeparableConv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="SeparableConv1D.initializers" />
+#### [`SeparableConv1D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="SeparableConv1D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`SeparableConv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="SeparableConv1D.input_channels" />
+#### [`SeparableConv1D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="SeparableConv1D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`SeparableConv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="SeparableConv1D.input_shape" />
+#### [`SeparableConv1D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="SeparableConv1D.input_shape" />
 
 Returns the input shape.
 
@@ -14871,7 +14871,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`SeparableConv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="SeparableConv1D.kernel_shape" />
+#### [`SeparableConv1D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="SeparableConv1D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -14890,7 +14890,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="SeparableConv1D.mask" />
+#### [`SeparableConv1D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="SeparableConv1D.mask" />
 
 Returns the mask.
 
@@ -14925,12 +14925,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="SeparableConv1D.output_channels" />
+#### [`SeparableConv1D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="SeparableConv1D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`SeparableConv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="SeparableConv1D.padding" />
+#### [`SeparableConv1D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="SeparableConv1D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -14948,22 +14948,22 @@ dimension.
     dimensions.
 
 
-#### [`SeparableConv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="SeparableConv1D.paddings" />
+#### [`SeparableConv1D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="SeparableConv1D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`SeparableConv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="SeparableConv1D.partitioners" />
+#### [`SeparableConv1D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="SeparableConv1D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`SeparableConv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="SeparableConv1D.rate" />
+#### [`SeparableConv1D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="SeparableConv1D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`SeparableConv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="SeparableConv1D.regularizers" />
+#### [`SeparableConv1D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="SeparableConv1D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -14973,7 +14973,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`SeparableConv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="SeparableConv1D.stride" />
+#### [`SeparableConv1D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="SeparableConv1D.stride" />
 
 Returns the stride.
 
@@ -15041,17 +15041,17 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="SeparableConv1D.w" />
+#### [`SeparableConv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="SeparableConv1D.w" />
 
 Returns the Variable containing the weight matrix.
 
 
-#### [`SeparableConv1D.w_dw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2946)<a id="SeparableConv1D.w_dw" />
+#### [`SeparableConv1D.w_dw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2947)<a id="SeparableConv1D.w_dw" />
 
 Returns the Variable containing the depthwise weight matrix.
 
 
-#### [`SeparableConv1D.w_pw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2952)<a id="SeparableConv1D.w_pw" />
+#### [`SeparableConv1D.w_pw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2953)<a id="SeparableConv1D.w_pw" />
 
 Returns the Variable containing the pointwise weight matrix.
 
@@ -15064,7 +15064,7 @@ Performs an in-plane convolution to each channel independently.
 This acts as a light wrapper around the TensorFlow op
 `tf.nn.separable_conv2d`, abstracting away variable creation and sharing.
 
-#### [`SeparableConv2D.__init__(output_channels, channel_multiplier, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='separable_conv2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2499)<a id="SeparableConv2D.__init__" />
+#### [`SeparableConv2D.__init__(output_channels, channel_multiplier, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, initializers=None, partitioners=None, regularizers=None, data_format='NHWC', custom_getter=None, name='separable_conv2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2500)<a id="SeparableConv2D.__init__" />
 
 Constructs a SeparableConv2D module.
 
@@ -15161,7 +15161,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
 * `ValueError`: If the passed-in data_format doesn't have a channel dimension.
 
 
-#### [`SeparableConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=519)<a id="SeparableConv2D.__call__" />
+#### [`SeparableConv2D.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=520)<a id="SeparableConv2D.__call__" />
 
 Connects the _ConvND module into the graph, with input Tensor `inputs`.
 
@@ -15199,7 +15199,7 @@ each connection.
       `tf.float16`, `tf.bfloat16` or `tf.float32`.
 
 
-#### [`SeparableConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=776)<a id="SeparableConv2D.b" />
+#### [`SeparableConv2D.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=777)<a id="SeparableConv2D.b" />
 
 Returns the Variable containing the bias.
 
@@ -15215,12 +15215,12 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`SeparableConv2D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2701)<a id="SeparableConv2D.channel_multiplier" />
+#### [`SeparableConv2D.channel_multiplier`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2702)<a id="SeparableConv2D.channel_multiplier" />
 
 Returns the channel multiplier argument.
 
 
-#### [`SeparableConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=838)<a id="SeparableConv2D.clone" />
+#### [`SeparableConv2D.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=839)<a id="SeparableConv2D.clone" />
 
 Returns a cloned `_ConvND` module.
 
@@ -15240,12 +15240,12 @@ Returns a cloned `_ConvND` module.
 Returns the subgraphs created by this module so far.
 
 
-#### [`SeparableConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=765)<a id="SeparableConv2D.conv_op_padding" />
+#### [`SeparableConv2D.conv_op_padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=766)<a id="SeparableConv2D.conv_op_padding" />
 
 Returns the padding algorithm used for the underlying convolution op.
 
 
-#### [`SeparableConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=819)<a id="SeparableConv2D.data_format" />
+#### [`SeparableConv2D.data_format`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=820)<a id="SeparableConv2D.data_format" />
 
 Returns the data format.
 
@@ -15284,7 +15284,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2626)<a id="SeparableConv2D.get_possible_initializer_keys" />
+#### [`SeparableConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2627)<a id="SeparableConv2D.get_possible_initializer_keys" />
 
 
 
@@ -15322,22 +15322,22 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`SeparableConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=794)<a id="SeparableConv2D.has_bias" />
+#### [`SeparableConv2D.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=795)<a id="SeparableConv2D.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`SeparableConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=799)<a id="SeparableConv2D.initializers" />
+#### [`SeparableConv2D.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=800)<a id="SeparableConv2D.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`SeparableConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=831)<a id="SeparableConv2D.input_channels" />
+#### [`SeparableConv2D.input_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=832)<a id="SeparableConv2D.input_channels" />
 
 Returns the number of input channels.
 
 
-#### [`SeparableConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=825)<a id="SeparableConv2D.input_shape" />
+#### [`SeparableConv2D.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=826)<a id="SeparableConv2D.input_shape" />
 
 Returns the input shape.
 
@@ -15347,7 +15347,7 @@ Returns the input shape.
 Returns true iff the Module been connected to the Graph at least once.
 
 
-#### [`SeparableConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=720)<a id="SeparableConv2D.kernel_shape" />
+#### [`SeparableConv2D.kernel_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=721)<a id="SeparableConv2D.kernel_shape" />
 
 Returns the kernel shape.
 
@@ -15366,7 +15366,7 @@ Returns the last subgraph created by this module.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=814)<a id="SeparableConv2D.mask" />
+#### [`SeparableConv2D.mask`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=815)<a id="SeparableConv2D.mask" />
 
 Returns the mask.
 
@@ -15401,12 +15401,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=711)<a id="SeparableConv2D.output_channels" />
+#### [`SeparableConv2D.output_channels`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=712)<a id="SeparableConv2D.output_channels" />
 
 Returns the number of output channels.
 
 
-#### [`SeparableConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=737)<a id="SeparableConv2D.padding" />
+#### [`SeparableConv2D.padding`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=738)<a id="SeparableConv2D.padding" />
 
 Returns the padding algorithm used, if this is the same for all dims.
 
@@ -15424,22 +15424,22 @@ dimension.
     dimensions.
 
 
-#### [`SeparableConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=760)<a id="SeparableConv2D.paddings" />
+#### [`SeparableConv2D.paddings`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=761)<a id="SeparableConv2D.paddings" />
 
 Returns a tuple with the padding algorithm used for each dimension.
 
 
-#### [`SeparableConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=804)<a id="SeparableConv2D.partitioners" />
+#### [`SeparableConv2D.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=805)<a id="SeparableConv2D.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`SeparableConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=732)<a id="SeparableConv2D.rate" />
+#### [`SeparableConv2D.rate`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=733)<a id="SeparableConv2D.rate" />
 
 Returns the dilation rate.
 
 
-#### [`SeparableConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=809)<a id="SeparableConv2D.regularizers" />
+#### [`SeparableConv2D.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=810)<a id="SeparableConv2D.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -15449,7 +15449,7 @@ Returns the regularizers dictionary.
 Returns the full name of the Module's variable scope.
 
 
-#### [`SeparableConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=725)<a id="SeparableConv2D.stride" />
+#### [`SeparableConv2D.stride`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=726)<a id="SeparableConv2D.stride" />
 
 Returns the stride.
 
@@ -15517,17 +15517,17 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`SeparableConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=770)<a id="SeparableConv2D.w" />
+#### [`SeparableConv2D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="SeparableConv2D.w" />
 
 Returns the Variable containing the weight matrix.
 
 
-#### [`SeparableConv2D.w_dw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2706)<a id="SeparableConv2D.w_dw" />
+#### [`SeparableConv2D.w_dw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2707)<a id="SeparableConv2D.w_dw" />
 
 Returns the Variable containing the depthwise weight matrix.
 
 
-#### [`SeparableConv2D.w_pw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2712)<a id="SeparableConv2D.w_pw" />
+#### [`SeparableConv2D.w_pw`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2713)<a id="SeparableConv2D.w_pw" />
 
 Returns the Variable containing the pointwise weight matrix.
 

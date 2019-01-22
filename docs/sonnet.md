@@ -21928,3 +21928,1108 @@ is "spread out" across multiple copies of the input.
   Initializer function for building a noisy identity kernel.
 
 
+### [`protos.module_pb2._b(x)`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?l=6)<a id="protos.module_pb2._b" />
+
+
+
+
+### [`class python.modules.attention.AttentionOutput`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/attention.py?q=class:AttentionOutput)<a id="python.modules.attention.AttentionOutput" />
+
+AttentionOutput(read, weights, weight_logits)
+
+#### `python.modules.attention.AttentionOutput.read`<a id="python.modules.attention.AttentionOutput.read" />
+
+Alias for field number 0
+
+
+#### `python.modules.attention.AttentionOutput.weight_logits`<a id="python.modules.attention.AttentionOutput.weight_logits" />
+
+Alias for field number 2
+
+
+#### `python.modules.attention.AttentionOutput.weights`<a id="python.modules.attention.AttentionOutput.weights" />
+
+Alias for field number 1
+
+
+
+### [`class python.modules.base_info.ConnectedSubGraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base_info.py?q=class:ConnectedSubGraph)<a id="python.modules.base_info.ConnectedSubGraph" />
+
+ConnectedSubGraph(module, name_scope, inputs, outputs)
+
+#### `python.modules.base_info.ConnectedSubGraph.inputs`<a id="python.modules.base_info.ConnectedSubGraph.inputs" />
+
+Alias for field number 2
+
+
+#### `python.modules.base_info.ConnectedSubGraph.module`<a id="python.modules.base_info.ConnectedSubGraph.module" />
+
+Alias for field number 0
+
+
+#### `python.modules.base_info.ConnectedSubGraph.name_scope`<a id="python.modules.base_info.ConnectedSubGraph.name_scope" />
+
+Alias for field number 1
+
+
+#### `python.modules.base_info.ConnectedSubGraph.outputs`<a id="python.modules.base_info.ConnectedSubGraph.outputs" />
+
+Alias for field number 3
+
+
+
+### [`class python.modules.base_info.ModuleInfo`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base_info.py?q=class:ModuleInfo)<a id="python.modules.base_info.ModuleInfo" />
+
+ModuleInfo(module_name, scope_name, class_name, connected_subgraphs)
+
+#### `python.modules.base_info.ModuleInfo.class_name`<a id="python.modules.base_info.ModuleInfo.class_name" />
+
+Alias for field number 2
+
+
+#### `python.modules.base_info.ModuleInfo.connected_subgraphs`<a id="python.modules.base_info.ModuleInfo.connected_subgraphs" />
+
+Alias for field number 3
+
+
+#### `python.modules.base_info.ModuleInfo.module_name`<a id="python.modules.base_info.ModuleInfo.module_name" />
+
+Alias for field number 0
+
+
+#### `python.modules.base_info.ModuleInfo.scope_name`<a id="python.modules.base_info.ModuleInfo.scope_name" />
+
+Alias for field number 1
+
+
+
+### [`python.modules.basic.calculate_bias_shape(input_shape, bias_dims)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=373)<a id="python.modules.basic.calculate_bias_shape" />
+
+Calculate `bias_shape` based on the `input_shape` and `bias_dims`.
+
+##### Args:
+
+
+* `input_shape`: Shape of the input being passed into the module. The leading
+      dimension is the minibatch size.
+* `bias_dims`: The dimensions that bias should be applied over. The remaining
+      dimensions will get broadcasted over.
+
+##### Returns:
+
+
+* `bias_shape`: Tuple corresponding to the shape of bias Variable to create.
+
+##### Raises:
+
+
+* `ValueError`: If the user attempts to add bias over the minibatch dimension,
+      e.g. `bias_dims=[0]`.
+
+
+### [`python.modules.basic.create_bias_initializer(unused_bias_shape, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=129)<a id="python.modules.basic.create_bias_initializer" />
+
+Returns a default initializer for the biases of a linear/AddBias module.
+
+
+### [`python.modules.basic.create_linear_initializer(input_size, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=123)<a id="python.modules.basic.create_linear_initializer" />
+
+Returns a default initializer for weights of a linear module.
+
+
+### [`python.modules.batch_norm.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=35)<a id="python.modules.batch_norm.create_beta_initializer" />
+
+Returns a default initializer for the `beta` in batch norm.
+
+
+### [`python.modules.batch_norm.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=40)<a id="python.modules.batch_norm.create_gamma_initializer" />
+
+Returns a default initializer for the `gamma` in batch norm.
+
+
+### [`python.modules.batch_norm.create_mean_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=45)<a id="python.modules.batch_norm.create_mean_initializer" />
+
+Returns a default initializer for the `moving_mean` in batch norm.
+
+
+### [`python.modules.batch_norm.create_variance_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=50)<a id="python.modules.batch_norm.create_variance_initializer" />
+
+Returns a default initializer for the `moving_variance` in batch norm.
+
+
+### [`python.modules.batch_norm_v2.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=40)<a id="python.modules.batch_norm_v2.create_beta_initializer" />
+
+Returns a default initializer for the `beta` in batch norm.
+
+
+### [`python.modules.batch_norm_v2.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=45)<a id="python.modules.batch_norm_v2.create_gamma_initializer" />
+
+Returns a default initializer for the `gamma` in batch norm.
+
+
+### [`python.modules.batch_norm_v2.create_mean_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=50)<a id="python.modules.batch_norm_v2.create_mean_initializer" />
+
+Returns a default initializer for the `moving_mean` in batch norm.
+
+
+### [`python.modules.batch_norm_v2.create_variance_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=55)<a id="python.modules.batch_norm_v2.create_variance_initializer" />
+
+Returns a default initializer for the `moving_variance` in batch norm.
+
+
+### [`python.modules.conv.create_bias_initializer(unused_bias_shape, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=301)<a id="python.modules.conv.create_bias_initializer" />
+
+Returns a default initializer for the biases of a convolutional module.
+
+
+### [`python.modules.conv.create_weight_initializer(fan_in_shape, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=295)<a id="python.modules.conv.create_weight_initializer" />
+
+Returns a default initializer for the weights of a convolutional module.
+
+
+### [`class python.modules.gated_rnn.ConvLSTM`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?q=class:ConvLSTM)<a id="python.modules.gated_rnn.ConvLSTM" />
+
+Convolutional LSTM.
+
+#### [`python.modules.gated_rnn.ConvLSTM.__init__(conv_ndims, input_shape, output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, legacy_bias_behaviour=True, forget_bias=1.0, initializers=None, partitioners=None, regularizers=None, use_layer_norm=False, custom_getter=None, name='conv_lstm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1228)<a id="python.modules.gated_rnn.ConvLSTM.__init__" />
+
+Construct ConvLSTM.
+
+##### Args:
+
+
+* `conv_ndims`: Convolution dimensionality (1, 2 or 3).
+* `input_shape`: Shape of the input as an iterable, excluding the batch size.
+* `output_channels`: Number of output channels of the conv LSTM.
+* `kernel_shape`: Sequence of kernel sizes (of size conv_ndims), or integer
+      that is used to define kernel size in all dimensions.
+* `stride`: Sequence of kernel strides (of size conv_ndims), or integer that
+      is used to define stride in all dimensions.
+* `rate`: Sequence of dilation rates (of size conv_ndims), or integer that is
+      used to define dilation rate in all dimensions. 1 corresponds to a
+      standard convolution, while rate > 1 corresponds to a dilated
+      convolution. Cannot be > 1 if any of stride is also > 1.
+* `padding`: Padding algorithm, either `snt.SAME` or `snt.VALID`.
+* `use_bias`: Use bias in convolutions.
+* `legacy_bias_behaviour`: If True, bias is applied to both input and hidden
+    convolutions, creating a redundant bias variable. If False, bias is only
+    applied to input convolution, removing the redundancy.
+* `forget_bias`: Forget bias.
+* `initializers`: Dict containing ops to initialize the convolutional weights.
+* `partitioners`: Optional dict containing partitioners to partition
+    the convolutional weights and biases. As a default, no partitioners are
+    used.
+* `regularizers`: Optional dict containing regularizers for the convolutional
+    weights and biases. As a default, no regularizers are used.
+* `use_layer_norm`: Boolean that indicates whether to apply layer
+    normalization. This is applied across the entire layer, normalizing
+    over all non-batch dimensions.
+* `custom_getter`: Callable that takes as a first argument the true getter,
+    and allows overwriting the internal get_variable method. See the
+    `tf.get_variable` documentation for more details.
+* `name`: Name of the module.
+
+##### Raises:
+
+
+* `ValueError`: If `skip_connection` is `True` and stride is different from 1
+    or if `input_shape` is incompatible with `conv_ndims`.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1362)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
+
+
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=465)<a id="python.modules.gated_rnn.ConvLSTM.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1345)<a id="python.modules.gated_rnn.ConvLSTM.convolutions" />
+
+
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=377)<a id="python.modules.gated_rnn.ConvLSTM.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=372)<a id="python.modules.gated_rnn.ConvLSTM.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=663)<a id="python.modules.gated_rnn.ConvLSTM.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys(cls, conv_ndims, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1212)<a id="python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys" />
+
+
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=626)<a id="python.modules.gated_rnn.ConvLSTM.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=460)<a id="python.modules.gated_rnn.ConvLSTM.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=201)<a id="python.modules.gated_rnn.ConvLSTM.initial_state" />
+
+Builds the default start state for an RNNCore.
+
+##### Args:
+
+
+* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
+* `dtype`: The data type to use for the state.
+* `trainable`: Boolean that indicates whether to learn the initial state.
+    Note that intializers and regularizers will be ignored if
+    `trainable=False`.
+* `trainable_initializers`: An initializer function or nested structure of
+      functions with same structure as the `state_size` property of the
+      core, to be used as initializers of the initial state variable.
+* `trainable_regularizers`: Optional regularizer function or nested structure
+    of functions with the same structure as the `state_size` property of the
+    core, to be used as regularizers of the initial state variable. As a
+    default, no regularizers are used. A regularizer should be a function
+    that takes a single `Tensor` as an input and returns a scalar `Tensor`
+    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
+* `name`: Optional string used to prefix the initial state variable names, in
+      the case of a trainable initial state. If not provided, defaults to
+      the name of the module.
+
+##### Returns:
+
+  A tensor or nested tuple of tensors with same structure and shape as the
+  `state_size` property of the core.
+
+##### Raises:
+
+
+* `ValueError`: if the user passes initializers that are not functions.
+* `ValueError`: if the user passes regularizers that are not functions.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=455)<a id="python.modules.gated_rnn.ConvLSTM.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=473)<a id="python.modules.gated_rnn.ConvLSTM.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=450)<a id="python.modules.gated_rnn.ConvLSTM.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=416)<a id="python.modules.gated_rnn.ConvLSTM.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=608)<a id="python.modules.gated_rnn.ConvLSTM.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1356)<a id="python.modules.gated_rnn.ConvLSTM.output_size" />
+
+`tf.TensorShape` indicating the size of the core output.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=445)<a id="python.modules.gated_rnn.ConvLSTM.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1349)<a id="python.modules.gated_rnn.ConvLSTM.state_size" />
+
+Tuple of `tf.TensorShape`s indicating the size of state tensors.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=590)<a id="python.modules.gated_rnn.ConvLSTM.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1394)<a id="python.modules.gated_rnn.ConvLSTM.use_layer_norm" />
+
+Boolean indicating whether layer norm is enabled.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=424)<a id="python.modules.gated_rnn.ConvLSTM.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=571)<a id="python.modules.gated_rnn.ConvLSTM.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ConvLSTM.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="python.modules.gated_rnn.ConvLSTM.zero_state" />
+
+Return zero-filled state tensor(s).
+
+##### Args:
+
+
+* `batch_size`: int, float, or unit Tensor representing the batch size.
+* `dtype`: the data type to use for the state.
+
+##### Returns:
+
+  If `state_size` is an int or TensorShape, then the return value is a
+  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
+
+  If `state_size` is a nested list or tuple, then the return value is
+  a nested list or tuple (of the same structure) of `2-D` tensors with
+  the shapes `[batch_size x s]` for each s in `state_size`.
+
+
+
+### [`class python.modules.gated_rnn.RecurrentDropoutWrapper`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?q=class:RecurrentDropoutWrapper)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper" />
+
+Wraps an RNNCore so that recurrent dropout can be applied.
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.__init__(core, keep_probs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=361)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.__init__" />
+
+Builds a new wrapper around a given core.
+
+##### Args:
+
+
+* `core`: the RNN core to be wrapped.
+* `keep_probs`: the recurrent dropout keep probabilities to apply.
+    This should have the same structure has core.init_state. No dropout is
+    applied for leafs set to None.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=392)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.__call__" />
+
+
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=465)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=377)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=372)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=663)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=626)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=460)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=404)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.initial_state" />
+
+Builds the default start state tensor of zeros.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=455)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=473)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=450)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=416)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=608)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=428)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.output_size" />
+
+
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=445)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=424)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.state_size" />
+
+
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=590)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=424)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=571)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.zero_state" />
+
+Return zero-filled state tensor(s).
+
+##### Args:
+
+
+* `batch_size`: int, float, or unit Tensor representing the batch size.
+* `dtype`: the data type to use for the state.
+
+##### Returns:
+
+  If `state_size` is an int or TensorShape, then the return value is a
+  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
+
+  If `state_size` is a nested list or tuple, then the return value is
+  a nested list or tuple (of the same structure) of `2-D` tensors with
+  the shapes `[batch_size x s]` for each s in `state_size`.
+
+
+
+### [`class python.modules.gated_rnn.ZoneoutWrapper`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?q=class:ZoneoutWrapper)<a id="python.modules.gated_rnn.ZoneoutWrapper" />
+
+Wraps an RNNCore so that zoneout can be applied.
+
+Zoneout was introduced in https://arxiv.org/abs/1606.01305
+It consists of randomly freezing some RNN state in the same way recurrent
+dropout would replace this state with zero.
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.__init__(core, keep_probs, is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=459)<a id="python.modules.gated_rnn.ZoneoutWrapper.__init__" />
+
+Builds a new wrapper around a given core.
+
+##### Args:
+
+
+* `core`: the RNN core to be wrapped.
+* `keep_probs`: the probabilities to use the updated states rather than
+    keeping the old state values. This is one minus the probability
+    that zoneout gets applied.
+    This should have the same structure has core.init_state. No zoneout is
+    applied for leafs set to None.
+* `is_training`: when set, apply some stochastic zoneout. Otherwise perform
+    a linear combination of the previous state and the current state based
+    on the zoneout probability.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=480)<a id="python.modules.gated_rnn.ZoneoutWrapper.__call__" />
+
+
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=465)<a id="python.modules.gated_rnn.ZoneoutWrapper.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=377)<a id="python.modules.gated_rnn.ZoneoutWrapper.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=372)<a id="python.modules.gated_rnn.ZoneoutWrapper.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=663)<a id="python.modules.gated_rnn.ZoneoutWrapper.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="python.modules.gated_rnn.ZoneoutWrapper.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=626)<a id="python.modules.gated_rnn.ZoneoutWrapper.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=460)<a id="python.modules.gated_rnn.ZoneoutWrapper.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=501)<a id="python.modules.gated_rnn.ZoneoutWrapper.initial_state" />
+
+Builds the default start state tensor of zeros.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=455)<a id="python.modules.gated_rnn.ZoneoutWrapper.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=473)<a id="python.modules.gated_rnn.ZoneoutWrapper.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=450)<a id="python.modules.gated_rnn.ZoneoutWrapper.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=416)<a id="python.modules.gated_rnn.ZoneoutWrapper.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=608)<a id="python.modules.gated_rnn.ZoneoutWrapper.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=514)<a id="python.modules.gated_rnn.ZoneoutWrapper.output_size" />
+
+
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=445)<a id="python.modules.gated_rnn.ZoneoutWrapper.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=510)<a id="python.modules.gated_rnn.ZoneoutWrapper.state_size" />
+
+
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=590)<a id="python.modules.gated_rnn.ZoneoutWrapper.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=424)<a id="python.modules.gated_rnn.ZoneoutWrapper.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=571)<a id="python.modules.gated_rnn.ZoneoutWrapper.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.gated_rnn.ZoneoutWrapper.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=257)<a id="python.modules.gated_rnn.ZoneoutWrapper.zero_state" />
+
+Return zero-filled state tensor(s).
+
+##### Args:
+
+
+* `batch_size`: int, float, or unit Tensor representing the batch size.
+* `dtype`: the data type to use for the state.
+
+##### Returns:
+
+  If `state_size` is an int or TensorShape, then the return value is a
+  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
+
+  If `state_size` is a nested list or tuple, then the return value is
+  a nested list or tuple (of the same structure) of `2-D` tensors with
+  the shapes `[batch_size x s]` for each s in `state_size`.
+
+
+
+### [`python.modules.layer_norm.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=206)<a id="python.modules.layer_norm.create_beta_initializer" />
+
+Returns a default initializer for the `beta` in layer norm.
+
+
+### [`python.modules.layer_norm.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=211)<a id="python.modules.layer_norm.create_gamma_initializer" />
+
+Returns a default initializer for the `gamma` in layer norm.
+
+
+### [`python.modules.rnn_core.with_doc(fn_with_doc_to_copy)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=383)<a id="python.modules.rnn_core.with_doc" />
+
+Returns a decorator to copy documentation from the given function.
+
+Docstring is copied, including *args and **kwargs documentation.
+
+##### Args:
+
+
+* `fn_with_doc_to_copy`: Function whose docstring, including *args and
+    **kwargs documentation, is to be copied.
+
+##### Returns:
+
+  Decorated version of `wrapper_init` with documentation copied from
+  `fn_with_doc_to_copy`.
+
+
+### [`python.modules.util.get_variable_scope_name(value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=38)<a id="python.modules.util.get_variable_scope_name" />
+
+Returns the name of the variable scope indicated by the given value.
+
+##### Args:
+
+
+* `value`: String, variable scope, or object with `variable_scope` attribute
+  (e.g., Sonnet module).
+
+##### Returns:
+
+  The name (a string) of the corresponding variable scope.
+
+##### Raises:
+
+
+* `ValueError`: If `value` does not identify a variable scope.
+
+
+### [`python.modules.util.name_for_callable(func)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=881)<a id="python.modules.util.name_for_callable" />
+
+Returns a module name for a callable or `None` if no name can be found.
+
+
+### [`python.modules.util.notify_about_new_variables(callback)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=82)<a id="python.modules.util.notify_about_new_variables" />
+
+Calls `callback(var)` for all newly created variables.
+
+Callback should not modify the variable passed in. Use cases that require
+variables to be modified should use `variable_creator_scope` directly and sit
+within the variable creator stack.
+
+>>> variables = []
+>>> with notify_about_variables(variables.append):
+...   v = tf.Variable(1.0, name='v')
+...   w = tf.get_variable('w', [])
+>>> assert variables == [v, w]
+
+##### Args:
+
+
+* `callback`: a callable taking a single argument which is a tf.Variable.
+
+##### Yields:
+
+  `None` - used for contextmanager API.
+
+
+### [`python.modules.util.sort_by_name(variables)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=935)<a id="python.modules.util.sort_by_name" />
+
+Returns a tuple of `variables` sorted ascending by name.
+
+
+### [`python.modules.util.to_snake_case(camel_case)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=897)<a id="python.modules.util.to_snake_case" />
+
+Returns a CamelCase string as a snake_case string.
+
+

@@ -113,10 +113,11 @@ class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
     self._test_nested(tf_zeros, zeros)
 
   def _testACT(self, input_size, hidden_size, output_size, seq_len, batch_size,
-               core, get_state_for_halting):
+               core, get_state_for_halting, max_steps=0):
     threshold = 0.99
     act = pondering_rnn.ACTCore(
-        core, output_size, threshold, get_state_for_halting)
+        core, output_size, threshold, get_state_for_halting,
+        max_steps=max_steps)
     seq_input = tf.random_uniform(shape=(seq_len, batch_size, input_size))
     initial_state = core.initial_state(batch_size)
     seq_output = tf.nn.dynamic_rnn(
@@ -152,17 +153,19 @@ class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
     self._testACT(input_size, hidden_size, output_size, seq_len, batch_size,
                   lstm, get_hidden_state)
 
-  @parameterized.parameters((13, 11, 7, 3, 5),
-                            (3, 3, 3, 1, 5),
-                            (1, 1, 1, 1, 1))
+  @parameterized.parameters((13, 11, 7, 3, 5, 0),
+                            (3, 3, 3, 1, 5, 0),
+                            (1, 1, 1, 1, 1, 0),
+                            (1, 1, 1, 1, 1, 10))
   def testACTVanilla(
-      self, input_size, hidden_size, output_size, seq_len, batch_size):
+      self, input_size, hidden_size, output_size, seq_len, batch_size,
+      max_steps):
     """Tests ACT using an LSTM for the core."""
     vanilla = basic_rnn.VanillaRNN(hidden_size)
     def get_state(state):
       return state
     self._testACT(input_size, hidden_size, output_size, seq_len, batch_size,
-                  vanilla, get_state)
+                  vanilla, get_state, max_steps)
 
   def testOutputTuple(self):
     core = OutputTupleCore(name="output_tuple_core")

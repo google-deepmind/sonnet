@@ -9,7 +9,7 @@ instructions](https://www.tensorflow.org/install/).
 Ensure you have a recent version of bazel (>= 0.4.5) and JDK (>= 1.8). If not,
 follow [these directions](https://bazel.build/versions/master/docs/install.html).
 
-### (virtualenv TensorFlow installation) Activate virtualenv
+## (virtualenv TensorFlow installation) Activate virtualenv
 
 If using virtualenv, activate your virtualenv for the rest of the installation,
 otherwise skip this step:
@@ -19,7 +19,7 @@ $ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
 $ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
 ```
 
-### Build and run the installer
+## Build and run the installer
 
 First clone the Sonnet source code:
 

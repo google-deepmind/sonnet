@@ -16,7 +16,7 @@ py_library(
     deps = [
         ":brnn_ptb",
         ":mnist_mlp",
-        ":module_with_build_args",
+        ":module_with_build_args_lib",
         ":rmc_nth_farthest",
         ":rnn_shakespeare",
     ],
@@ -26,6 +26,13 @@ py_binary(
     name = "module_with_build_args",
     srcs = ["module_with_build_args.py"],
     default_python_version = "PY3",
+    srcs_version = "PY2AND3",
+    deps = [":module_with_build_args_lib"],
+)
+
+py_library(
+    name = "module_with_build_args_lib",
+    srcs = ["module_with_build_args.py"],
     srcs_version = "PY2AND3",
     deps = [
         "//sonnet",

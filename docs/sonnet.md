@@ -39,7 +39,7 @@ where
   * `act_out` is the weighted average output of all pondering steps (see ACT
   paper for more info).
 
-#### [`ACTCore.__init__(core, output_size, threshold, get_state_for_halting, name='act_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=73)<a id="ACTCore.__init__" />
+#### [`ACTCore.__init__(core, output_size, threshold, get_state_for_halting, max_steps=0, name='act_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=73)<a id="ACTCore.__init__" />
 
 Constructor.
 
@@ -53,6 +53,8 @@ Constructor.
       pondering.
 * `get_state_for_halting`: A callable that can take the `core` state and
       return the input to the halting function.
+* `max_steps`: Integer >= 0, that controls the maximum number of ponder steps.
+      If equal to 0, then this disables control.
 * `name`: A string. The name of this module.
 
 ##### Raises:
@@ -63,7 +65,7 @@ Constructor.
       one dimensional.
 
 
-#### [`ACTCore.__call__(x, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=160)<a id="ACTCore.__call__" />
+#### [`ACTCore.__call__(x, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=166)<a id="ACTCore.__call__" />
 
 Connects the core to the graph.
 
@@ -84,7 +86,7 @@ Connects the core to the graph.
 * `ValueError`: if the `Tensor` `x` does not have rank 2.
 
 
-#### [`ACTCore.batch_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=119)<a id="ACTCore.batch_size" />
+#### [`ACTCore.batch_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=122)<a id="ACTCore.batch_size" />
 
 
 
@@ -104,7 +106,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ACTCore.dtype`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=124)<a id="ACTCore.dtype" />
+#### [`ACTCore.dtype`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=127)<a id="ACTCore.dtype" />
 
 
 
@@ -181,7 +183,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`ACTCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=107)<a id="ACTCore.initial_state" />
+#### [`ACTCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=110)<a id="ACTCore.initial_state" />
 
 
 
@@ -235,7 +237,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`ACTCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=110)<a id="ACTCore.output_size" />
+#### [`ACTCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=113)<a id="ACTCore.output_size" />
 
 
 
@@ -245,7 +247,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`ACTCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=115)<a id="ACTCore.state_size" />
+#### [`ACTCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=118)<a id="ACTCore.state_size" />
 
 
 

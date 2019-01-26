@@ -28,6 +28,7 @@ import abc
 import collections
 import contextlib
 import inspect
+import threading
 import types
 
 # Dependency imports
@@ -53,8 +54,19 @@ from sonnet.python.modules.base_errors import ModuleInfoError
 # pylint: enable=unused-import
 
 
-_MODULE_STACK = []
-_CONNECTION_OBSERVER_STACK = []
+_LOCAL_STACKS = threading.local()
+
+
+def _get_or_create_stack(name):
+  """Returns a thread local stack uniquified by the given name."""
+  stack = getattr(_LOCAL_STACKS, name, None)
+  if stack is None:
+    stack = []
+    setattr(_LOCAL_STACKS, name, stack)
+  return stack
+
+get_module_stack = lambda: _get_or_create_stack("modules")
+get_connection_stack = lambda: _get_or_create_stack("connections")
 
 
 @contextlib.contextmanager
@@ -81,11 +93,12 @@ def observe_connections(observer):
   Yields:
     None: just yields control to the inner context.
   """
-  _CONNECTION_OBSERVER_STACK.append(observer)
+  connection_stack = get_connection_stack()
+  connection_stack.append(observer)
   try:
     yield
   finally:
-    _CONNECTION_OBSERVER_STACK.pop()
+    connection_stack.pop()
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -306,7 +319,8 @@ class AbstractModule(object):
     Yields:
       Nothing, the yield just transfers focus back to the inner context.
     """
-    _MODULE_STACK.append(self)
+    module_stack = get_module_stack()
+    module_stack.append(self)
     try:
       with contextlib2.ExitStack() as stack:
         # Ideally move re-entering store into Template.variable_scope.
@@ -330,11 +344,11 @@ class AbstractModule(object):
     finally:
       # Remove `self` from `module_stack`, this happens as part of cleanup
       # even if an error is raised.
-      _MODULE_STACK.pop()
+      module_stack.pop()
 
-    if _MODULE_STACK:
+    if module_stack:
       # Peek into the stack to add created variables to the parent
-      parent_module = _MODULE_STACK[-1]
+      parent_module = module_stack[-1]
       parent_module._all_variables.update(self._all_variables)  # pylint: disable=protected-access
 
   def _add_connected_subgraph(self, call_method, outputs, subgraph_name_scope,
@@ -364,7 +378,7 @@ class AbstractModule(object):
         outputs=outputs)
     self._connected_subgraphs.append(connected_subgraph)
 
-    for observer in _CONNECTION_OBSERVER_STACK:
+    for observer in get_connection_stack():
       observer(connected_subgraph)
 
   @property

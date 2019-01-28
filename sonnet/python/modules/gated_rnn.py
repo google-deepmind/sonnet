@@ -626,9 +626,6 @@ class BatchNormLSTM(rnn_core.RNNCore):
   BETA_C = "beta_c"  # (batch norm) bias for cell -> output
   POSSIBLE_INITIALIZER_KEYS = {W_GATES, B_GATES, W_F_DIAG, W_I_DIAG, W_O_DIAG,
                                GAMMA_H, GAMMA_X, GAMMA_C, BETA_C}
-  # Keep old name for backwards compatibility
-
-  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self,
                hidden_size,
@@ -1443,9 +1440,6 @@ class GRU(rnn_core.RNNCore):
   UH = "uh"  # weight for prev_state -> candidate activation
   BH = "bh"  # bias for candidate activation
   POSSIBLE_INITIALIZER_KEYS = {WZ, UZ, BZ, WR, UR, BR, WH, UH, BH}
-  # Keep old name for backwards compatibility
-
-  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self, hidden_size, initializers=None, partitioners=None,
                regularizers=None, custom_getter=None, name="gru"):

@@ -56,9 +56,6 @@ class LayerNorm(base.AbstractModule):
   BETA = "beta"  # Layer norm bias.
 
   POSSIBLE_INITIALIZER_KEYS = {GAMMA, BETA}
-  # Keep old name for backwards compatibility
-
-  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self, axis=None, offset=True, scale=True, eps=1e-5,
                initializers=None, partitioners=None, regularizers=None,

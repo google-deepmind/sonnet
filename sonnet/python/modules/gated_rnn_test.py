@@ -28,7 +28,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import tensorflow as tf
 
-from tensorflow.python.ops import variables
+from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
 # Some helpers used for generic tests which cover both LSTM and BatchNormLSTM:
@@ -1233,7 +1233,7 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 4
 
     # Test we can successfully create the GRU with initializers.
-    keys = snt.GRU.POSSIBLE_KEYS
+    keys = snt.GRU.POSSIBLE_INITIALIZER_KEYS
     initializers = {
         key: tf.constant_initializer(i) for i, key in enumerate(keys)
     }
@@ -1259,7 +1259,7 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 4
 
     # Test we can successfully create the GRU with partitioners.
-    keys = snt.GRU.POSSIBLE_KEYS
+    keys = snt.GRU.POSSIBLE_INITIALIZER_KEYS
     partitioners = {
         key: tf.variable_axis_size_partitioner(10) for key in keys
     }
@@ -1280,7 +1280,7 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
     hidden_size = 4
 
     # Test we can successfully create the GRU with regularizers.
-    keys = snt.GRU.POSSIBLE_KEYS
+    keys = snt.GRU.POSSIBLE_INITIALIZER_KEYS
     regularizers = {
         key: tf.nn.l2_loss for key in keys
     }

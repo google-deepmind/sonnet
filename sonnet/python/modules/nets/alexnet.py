@@ -144,10 +144,6 @@ class AlexNet(base.AbstractModule):
     self._conv_modules = []
     self._linear_modules = []
 
-    # Keep old name for backwards compatibility
-
-    self.possible_keys = self.POSSIBLE_INITIALIZER_KEYS
-
     self._initializers = util.check_initializers(
         initializers, self.POSSIBLE_INITIALIZER_KEYS)
     self._partitioners = util.check_partitioners(

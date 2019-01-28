@@ -47,9 +47,6 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
   """A 2D Convolutional Network module."""
 
   POSSIBLE_INITIALIZER_KEYS = {"w", "b"}
-  # Keep old name for backwards compatibility
-
-  POSSIBLE_KEYS = POSSIBLE_INITIALIZER_KEYS
 
   def __init__(self,
                output_channels,
@@ -295,7 +292,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
     # the module is created in some default graph, and connected to a capturing
     # graph in order to turn it into a graph function).
     with self._enter_variable_scope(check_same_graph=False):
-      self._layers = tuple(conv.Conv2D(name="conv_2d_{}".format(i),
+      self._layers = tuple(conv.Conv2D(name="conv_2d_{}".format(i),  # pylint: disable=g-complex-comprehension
                                        output_channels=self._output_channels[i],
                                        kernel_shape=self._kernel_shapes[i],
                                        stride=self._strides[i],
@@ -839,7 +836,7 @@ class ConvNet2DTranspose(ConvNet2D):
     # using `check_same_graph=False`.
     with self._enter_variable_scope(check_same_graph=False):
       self._layers = tuple(
-          conv.Conv2DTranspose(name="conv_2d_transpose_{}".format(i),
+          conv.Conv2DTranspose(name="conv_2d_transpose_{}".format(i),  # pylint: disable=g-complex-comprehension
                                output_channels=self._output_channels[i],
                                output_shape=self._output_shapes[i],
                                kernel_shape=self._kernel_shapes[i],

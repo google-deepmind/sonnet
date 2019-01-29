@@ -1,5 +1,18 @@
 # Sonnet Changelog
 
+## Version 1.29 - Tuesday, 29. January 2019
+
+* Increased Python 3 support.
+* Fixed dependency issues in setup.py
+* Module connection stacks are now thread local.
+* Nested modules now register reused variables in `_all_variables`.
+* `snt.ACTCore` now allows the user to specify a maximum number of pondering steps.
+* Added an end-to-end example of how to train an MLP with Sonnet.
+* `reuse_vars` is not an experimental decorator anymore. Change `snt.experimental.reuse_vars` to `@snt.reuse_variables`.
+* Change how documentation is being handled. We are not using Sphinx to render the page anymore, and using MkDocs instead. The markdown files used to generate it are now in the `docs` directory and available to read in GitHub.
+* Change documentation template.
+
+
 ## Version 1.28 - Tuesday, 18. December 2018
 
 * Fix incorrect package name in `setup.py.tmpl`.

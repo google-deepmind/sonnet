@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Installing from source - Sonnet Docs</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Installing from source";
+    var mkdocs_page_input_path = "INSTALL.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Sonnet Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Sonnet</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Installing from source</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#installing-from-source">Installing from source</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#install-bazel">Install bazel</a></li>
+        
+            <li><a class="toctree-l3" href="#virtualenv-tensorflow-installation-activate-virtualenv">(virtualenv TensorFlow installation) Activate virtualenv</a></li>
+        
+            <li><a class="toctree-l3" href="#build-and-run-the-installer">Build and run the installer</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contents/">Contents</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../sonnet/">Module Reference</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Sonnet Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Installing from source</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/deepmind/sonnet/edit/master/docs/INSTALL.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="installing-from-source">Installing from source</h1>
+<p>To install Sonnet from source, you will need to compile the library using bazel.
+You should have installed TensorFlow by following the <a href="https://www.tensorflow.org/install/">TensorFlow installation
+instructions</a>.</p>
+<h2 id="install-bazel">Install bazel</h2>
+<p>Ensure you have a recent version of bazel (&gt;= 0.4.5) and JDK (&gt;= 1.8). If not,
+follow <a href="https://bazel.build/versions/master/docs/install.html">these directions</a>.</p>
+<h2 id="virtualenv-tensorflow-installation-activate-virtualenv">(virtualenv TensorFlow installation) Activate virtualenv</h2>
+<p>If using virtualenv, activate your virtualenv for the rest of the installation,
+otherwise skip this step:</p>
+<pre><code class="shell">$ source $VIRTUALENV_PATH/bin/activate # bash, sh, ksh, or zsh
+$ source $VIRTUALENV_PATH/bin/activate.csh  # csh or tcsh
+</code></pre>
+
+<h2 id="build-and-run-the-installer">Build and run the installer</h2>
+<p>First clone the Sonnet source code:</p>
+<pre><code class="shell">$ git clone https://github.com/deepmind/sonnet
+</code></pre>
+
+<p>Then run the install script to create a wheel file in a temporary directory:</p>
+<pre><code class="shell">$ mkdir /tmp/sonnet
+$ bazel build :install
+$ ./bazel-bin/install /tmp/sonnet
+</code></pre>
+
+<p>To build the GPU version instead, add a flag to the <code>bazel build :install</code>
+command above: <code>bazel build :install --define gpu=true</code>.</p>
+<p>By default, the wheel file is built using <code>python</code>. You can optionally specify
+another python binary in the previous command to build the wheel file, such as
+<code>python3</code>:</p>
+<pre><code>$ ./bazel-bin/install /tmp/sonnet python3
+</code></pre>
+
+<p><code>pip install</code> the generated wheel file:</p>
+<pre><code class="shell">$ pip install /tmp/sonnet/*.whl
+</code></pre>
+
+<p>If Sonnet was already installed, uninstall prior to calling <code>pip install</code> on
+the wheel file:</p>
+<pre><code class="shell">$ pip uninstall dm-sonnet  # or dm-sonnet-gpu
+</code></pre>
+
+<p>You can verify that Sonnet has been successfully installed by, for example,
+trying to instantiate and connect a Linear module:</p>
+<pre><code class="shell">$ cd ~/
+$ python
+&gt;&gt;&gt; import sonnet as snt
+&gt;&gt;&gt; input_ = tf.zeros(3, 5)
+&gt;&gt;&gt; output = snt.Linear(10)(input_)
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../contents/" class="btn btn-neutral float-right" title="Contents">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Sonnet"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/deepmind/sonnet/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../contents/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

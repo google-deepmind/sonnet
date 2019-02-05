@@ -46,6 +46,35 @@ def _test_initializer(mu=0.0, sigma=1.0, dtype=tf.float32):
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+class ConcatLinearTest(tf.test.TestCase, parameterized.TestCase):
+
+  def setUp(self):
+    super(ConcatLinearTest, self).setUp()
+
+    self.batch_size = 11
+    self.in_sizes = [5, 19]
+    self.out_size = 17
+    self.seed = 42
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testShape(self, use_bias):
+    inputs = [tf.ones(shape=[self.batch_size, size]) for size in self.in_sizes]
+    lin = snt.ConcatLinear(output_size=self.out_size, use_bias=use_bias)
+    output = lin(inputs)
+    self.assertTrue(
+        output.get_shape().is_compatible_with([self.batch_size, self.out_size]))
+
+  def testName(self):
+    mod_name = "unique_name"
+    with tf.variable_scope("scope"):
+      lin = snt.ConcatLinear(name=mod_name, output_size=self.out_size)
+    self.assertEqual(lin.scope_name, "scope/" + mod_name)
+    self.assertEqual(lin.module_name, mod_name)
+
+
+# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
 class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUp(self):

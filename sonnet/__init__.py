@@ -86,6 +86,7 @@ from sonnet.python.modules.basic import AddBias
 from sonnet.python.modules.basic import BatchApply
 from sonnet.python.modules.basic import BatchFlatten
 from sonnet.python.modules.basic import BatchReshape
+from sonnet.python.modules.basic import ConcatLinear
 from sonnet.python.modules.basic import FlattenTrailingDimensions
 from sonnet.python.modules.basic import Linear
 from sonnet.python.modules.basic import merge_leading_dims

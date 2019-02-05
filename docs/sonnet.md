@@ -10989,7 +10989,7 @@ Return zero-filled state tensor(s).
 
 Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.
 
-#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowcontrib/rnn/python/ops/lstm_ops.py?l=349)<a id="LSTMBlockCell.__init__" />
+#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/python/ops/lstm_ops.py?l=349)<a id="LSTMBlockCell.__init__" />
 
 Initialize the basic LSTM cell.
 
@@ -18705,12 +18705,12 @@ apply operations combining user input and module parameters. For example:
 >>> mod(1.)
 <tf.Tensor: ... numpy=2.0>
 
-#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=167)<a id="experimental.v2.Module.__init__" />
+#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=167)<a id="experimental.v2.Module.__init__" />
 
 
 
 
-#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.name" />
+#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -18718,12 +18718,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=195)<a id="experimental.v2.Module.name_scope" />
+#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Module.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=300)<a id="experimental.v2.Module.no_name_scope" />
+#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=353)<a id="experimental.v2.Module.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -18747,7 +18747,7 @@ changed here corresponding changes will be needed there.
   The method, with a flag indicating no name scope wrapping should occur.
 
 
-#### [`experimental.v2.Module.owned_submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.owned_submodules" />
+#### [`experimental.v2.Module.owned_submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_submodules" />
 
 Collection of immediate child modules.
 
@@ -18768,7 +18768,7 @@ module.
   A collection of all child modules.
 
 
-#### [`experimental.v2.Module.owned_trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.owned_trainable_variables" />
+#### [`experimental.v2.Module.owned_trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_trainable_variables" />
 
 Collection of variables that are attributes of the current module.
 
@@ -18782,7 +18782,7 @@ module and all it's submodules recursively.
   modules.
 
 
-#### [`experimental.v2.Module.owned_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.owned_variables" />
+#### [`experimental.v2.Module.owned_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_variables" />
 
 Collection of variables that are attributes of the current module.
 
@@ -18796,7 +18796,7 @@ module and all it's submodules recursively.
   modules.
 
 
-#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.submodules" />
+#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.submodules" />
 
 Collection of all sub-modules.
 
@@ -18817,7 +18817,7 @@ properties of modules which are properties of this module (and so on).
   A collection of all submodules.
 
 
-#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.trainable_variables" />
+#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.trainable_variables" />
 
 Collection of variables owned by this module and it's submodules.
 
@@ -18831,7 +18831,7 @@ of calling this method if you don't expect the return value to change.
   name) followed by variables from all submodules recursively (depth first).
 
 
-#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/module/module.py?l=97)<a id="experimental.v2.Module.variables" />
+#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.variables" />
 
 Collection of variables owned by this module and it's submodules.
 
@@ -18844,6 +18844,183 @@ of calling this method if you don't expect the return value to change.
   A collection of variables for the current module (sorted by attribute
   name) followed by variables from all submodules recursively (depth first).
 
+
+
+### [`class experimental.v2.initializers.Constant`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Constant)<a id="experimental.v2.initializers.Constant" />
+
+Initializer that generates tensors initialized to the given value.
+
+#### [`experimental.v2.initializers.Constant.__init__(value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=43)<a id="experimental.v2.initializers.Constant.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.Identity`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Identity)<a id="experimental.v2.initializers.Identity" />
+
+Initializer that generates the identity matrix.
+
+Constructs a 2D identity matrix or batches of these.
+
+Args:
+  gain: Multiplicative factor to apply to the identity matrix.
+
+#### [`experimental.v2.initializers.Identity.__init__(gain=1.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=149)<a id="experimental.v2.initializers.Identity.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.Initializer`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Initializer)<a id="experimental.v2.initializers.Initializer" />
+
+Initializer base class, all initializers must implement a call method.
+
+
+### [`class experimental.v2.initializers.Ones`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Ones)<a id="experimental.v2.initializers.Ones" />
+
+Initializer that generates tensors initialized to 1.
+
+
+### [`class experimental.v2.initializers.Orthogonal`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Orthogonal)<a id="experimental.v2.initializers.Orthogonal" />
+
+Initializer that generates an orthogonal matrix.
+
+Doesn't work for 1D tensors.
+
+If the shape of the tensor to initialize is two-dimensional, it is initialized
+with an orthogonal matrix obtained from the QR decomposition of a matrix of
+random numbers drawn from a normal distribution.
+If the matrix has fewer rows than columns then the output will have orthogonal
+rows. Otherwise, the output will have orthogonal columns.
+
+If the shape of the tensor to initialize is more than two-dimensional,
+a matrix of shape `(shape[0] * ... * shape[n - 2], shape[n - 1])`
+is initialized, where `n` is the length of the shape vector.
+The matrix is subsequently reshaped to give a tensor of the desired shape.
+
+Args:
+  gain: Multiplicative factor to apply to the orthogonal matrix
+  seed: An integer. Seed used in the generation of random numbers.
+
+References:
+    [Saxe et al., 2014](https://openreview.net/forum?id=_wzZwKpTDF_9C)
+    ([pdf](https://arxiv.org/pdf/1312.6120.pdf))
+
+#### [`experimental.v2.initializers.Orthogonal.__init__(gain=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=190)<a id="experimental.v2.initializers.Orthogonal.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.RandomNormal`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:RandomNormal)<a id="experimental.v2.initializers.RandomNormal" />
+
+Initializer that generates tensors with a normal distribution.
+
+Args:
+  mean: A python scalar or a scalar tensor. Mean of the random values
+    to generate.
+  stddev: A python scalar or a scalar tensor. Standard deviation of the
+    random values to generate.
+  seed: An integer. Seed used in the generation of random numbers.
+
+#### [`experimental.v2.initializers.RandomNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=95)<a id="experimental.v2.initializers.RandomNormal.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.RandomUniform`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:RandomUniform)<a id="experimental.v2.initializers.RandomUniform" />
+
+Initializer that generates tensors with a uniform distribution.
+
+The generated values follow a uniform distribution in the range [minval,
+maxval).
+
+Args:
+  minval: A scalar. Lower bound of the range of random values to generate.
+    Defaults to 0.
+  maxval: A scalar. Upper bound of the range of random values to generate.
+    Defaults to 1 for float types.
+  seed: An integer. Seed used in the generation of random numbers.
+
+#### [`experimental.v2.initializers.RandomUniform.__init__(minval=0, maxval=1, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=69)<a id="experimental.v2.initializers.RandomUniform.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.TruncatedNormal`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:TruncatedNormal)<a id="experimental.v2.initializers.TruncatedNormal" />
+
+Initializer that generates a truncated normal distribution.
+
+These values follow a normal distribution except that values more than two
+standard deviations from the mean are discarded and re-drawn. This is the
+recommended initializer for neural network weights and filters.
+
+Args:
+  mean: A python scalar or a scalar tensor. Mean of the random values
+    to generate.
+  stddev: A python scalar or a scalar tensor. Standard deviation of the
+    random values to generate.
+  seed: An integer. Seed used in the generation of random numbers.
+
+#### [`experimental.v2.initializers.TruncatedNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=125)<a id="experimental.v2.initializers.TruncatedNormal.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.VarianceScaling`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:VarianceScaling)<a id="experimental.v2.initializers.VarianceScaling" />
+
+Initializer capable of adapting its scale to the shape of weights tensors.
+
+With `distribution="truncated_normal" or "normal"`,
+samples are drawn from a distribution with a mean of zero and a standard
+deviation (after truncation, if used) `stddev = sqrt(scale / n)`
+where n is:
+
+  - number of input units in the weight tensor, if mode = "fan_in"
+  - number of output units, if mode = "fan_out"
+  - average of the numbers of input and output units, if mode = "fan_avg"
+
+With `distribution="uniform"`, samples are drawn from a uniform distribution
+within [-limit, limit], with `limit = sqrt(3 * scale / n)`.
+
+The variance scaling initializer can be configured to generate other standard
+initializers using the scale, mode and distribution arguments. Here are some
+example configurations:
+
++----------------+-----------------------------------------------------------+
+| name           | parameters                                                |
++----------------+-----------------------------------------------------------+
+| glorot_uniform | scale=1.0, mode='fan_avg', distribution='uniform'         |
+| glorot_normal  | scale=1.0, mode='fan_avg', distribution='truncated_normal'|
+| lecun_uniform  | scale=1.0, mode='fan_in',  distribution='uniform'         |
+| lecun_normal   | scale=1.0, mode='fan_in',  distribution='truncated_normal'|
+| he_uniform     | scale=2.0, mode='fan_in',  distribution='uniform'         |
+| he_normal      | scale=2.0, mode='fan_in',  distribution='truncated_normal'|
++----------------+-----------------------------------------------------------+
+
+Args:
+  scale: Scaling factor (positive float).
+  mode: One of "fan_in", "fan_out", "fan_avg".
+  distribution: Random distribution to use. One of "truncated_normal",
+    "untruncated_normal" and  "uniform".
+  seed: An integer. Seed used in the generation of random numbers.
+
+Raises:
+  ValueError: In case of an invalid value for the "scale", mode" or
+    "distribution" arguments.
+
+#### [`experimental.v2.initializers.VarianceScaling.__init__(scale=1.0, mode='fan_in', distribution='truncated_normal', seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=261)<a id="experimental.v2.initializers.VarianceScaling.__init__" />
+
+
+
+
+
+### [`class experimental.v2.initializers.Zeros`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Zeros)<a id="experimental.v2.initializers.Zeros" />
+
+Initializer that generates tensors initialized to 0.
 
 
 ### [`nest.assert_same_structure(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/ops/nest.py?l=35)<a id="nest.assert_same_structure" />

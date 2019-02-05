@@ -214,7 +214,7 @@ different, unshared variables. This is not the case - only 4 variables (2 for
 each `Linear`) will be created, no matter how many times the MLP instance is
 connected into the graph. How this is works is a low level TF detail, and
 subject to change - see
-[tf.variable_op_scope](https://github.com/tensorflow/tensorflow/blob/master/tensorflowpython/ops/variable_scope.py)
+[tf.variable_op_scope](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/variable_scope.py)
 for details.
 
 ### Where should the submodules be declared?

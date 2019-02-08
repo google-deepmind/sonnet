@@ -615,7 +615,7 @@ information about what variables are captured.
 
 AddBias module.
 
-#### [`AddBias.__init__(output_shape=None, bias_dims=None, initializers=None, partitioners=None, regularizers=None, name='add')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=419)<a id="AddBias.__init__" />
+#### [`AddBias.__init__(output_shape=None, bias_dims=None, initializers=None, partitioners=None, regularizers=None, name='add')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=510)<a id="AddBias.__init__" />
 
 Constructs an AddBias module that supports broadcasting.
 
@@ -696,7 +696,7 @@ reconstructed_input = bias(hidden4)
 * `TypeError`: If any of the given regularizers are not callable.
 
 
-#### [`AddBias.__call__(inputs, multiplier=1)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=512)<a id="AddBias.__call__" />
+#### [`AddBias.__call__(inputs, multiplier=1)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=603)<a id="AddBias.__call__" />
 
 Connects the Add module into the graph, with input Tensor `inputs`.
 
@@ -726,7 +726,7 @@ Connects the Add module into the graph, with input Tensor `inputs`.
       untransposed module has not been built.
 
 
-#### [`AddBias.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=583)<a id="AddBias.b" />
+#### [`AddBias.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=674)<a id="AddBias.b" />
 
 Returns the Variable containing the bias.
 
@@ -827,7 +827,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`AddBias.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=598)<a id="AddBias.input_shape" />
+#### [`AddBias.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=689)<a id="AddBias.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -906,7 +906,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`AddBias.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=605)<a id="AddBias.transpose" />
+#### [`AddBias.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=696)<a id="AddBias.transpose" />
 
 Returns transposed `AddBias` module.
 
@@ -1668,7 +1668,7 @@ and then the internal module can be applied. The result of that operation is
 reshaped such that its first dimensions are split to match the leading
 dimensions of the input.
 
-#### [`BatchApply.__init__(module_or_op, n_dims=2, input_example_index=0, name='batch_apply')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=945)<a id="BatchApply.__init__" />
+#### [`BatchApply.__init__(module_or_op, n_dims=2, input_example_index=0, name='batch_apply')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1036)<a id="BatchApply.__init__" />
 
 Constructor of the module.
 
@@ -1690,7 +1690,7 @@ Constructor of the module.
 * `ValueError`: If n_dims is not greater than zero.
 
 
-#### [`BatchApply.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=972)<a id="BatchApply.__call__" />
+#### [`BatchApply.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1063)<a id="BatchApply.__call__" />
 
 Connects the BatchApply module into the graph.
 
@@ -1919,7 +1919,7 @@ information about what variables are captured.
 
 Flattens the input Tensor, preserving the batch dimension(s).
 
-#### [`BatchFlatten.__init__(preserve_dims=1, name='batch_flatten')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=789)<a id="BatchFlatten.__init__" />
+#### [`BatchFlatten.__init__(preserve_dims=1, name='batch_flatten')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=880)<a id="BatchFlatten.__init__" />
 
 Constructs a BatchFlatten module.
 
@@ -1940,7 +1940,7 @@ Constructs a BatchFlatten module.
 * `name`: Name of the module.
 
 
-#### [`BatchFlatten.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=688)<a id="BatchFlatten.__call__" />
+#### [`BatchFlatten.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="BatchFlatten.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -2053,7 +2053,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchFlatten.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=771)<a id="BatchFlatten.input_shape" />
+#### [`BatchFlatten.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchFlatten.input_shape" />
 
 
 
@@ -2132,7 +2132,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchFlatten.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=777)<a id="BatchFlatten.transpose" />
+#### [`BatchFlatten.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="BatchFlatten.transpose" />
 
 Returns transpose batch reshape.
 
@@ -3481,7 +3481,7 @@ information about what variables are captured.
 
 Reshapes input Tensor, preserving the batch dimension.
 
-#### [`BatchReshape.__init__(shape, preserve_dims=1, name='batch_reshape')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=628)<a id="BatchReshape.__init__" />
+#### [`BatchReshape.__init__(shape, preserve_dims=1, name='batch_reshape')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=719)<a id="BatchReshape.__init__" />
 
 Constructs a BatchReshape module.
 
@@ -3517,7 +3517,7 @@ Constructs a BatchReshape module.
 * `ValueError`: If `preserve_dims <= 0`.
 
 
-#### [`BatchReshape.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=688)<a id="BatchReshape.__call__" />
+#### [`BatchReshape.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="BatchReshape.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -3630,7 +3630,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchReshape.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=771)<a id="BatchReshape.input_shape" />
+#### [`BatchReshape.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchReshape.input_shape" />
 
 
 
@@ -3709,7 +3709,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchReshape.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=777)<a id="BatchReshape.transpose" />
+#### [`BatchReshape.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="BatchReshape.transpose" />
 
 Returns transpose batch reshape.
 
@@ -4500,6 +4500,283 @@ information about what variables are captured.
 #### [`CausalConv1D.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=771)<a id="CausalConv1D.w" />
 
 Returns the Variable containing the weight matrix.
+
+
+
+### [`class ConcatLinear`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?q=class:ConcatLinear)<a id="ConcatLinear" />
+
+Linear transformation of a number of concatenated inputs.
+
+This class ensures that at initialisation, the relative importance of all
+inputs are similar even if they have very different sizes. This assumes
+that all inputs have roughly the same range of values.
+
+For example, the following code also concatenates a list of inputs and applies
+a linear transform:
+```
+inp = tf.concat(input_list, axis=-1)
+return snt.Linear(output_size)(inp)
+```
+The issue with the above code is that if `input_list` is made of two Tensors
+of very different shapes such as `[batch_size, 1]` and `[batch_size, 128]`,
+then almost no signal will be received from the first Tensor. This class works
+around this problem by using a weight matrix with relatively larger
+coefficients for the first Tensor than for the second one.
+
+#### [`ConcatLinear.__init__(output_size, use_bias=True, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='concat_linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=393)<a id="ConcatLinear.__init__" />
+
+Constructs a ConcatLinear module.
+
+##### Args:
+
+
+* `output_size`: Output dimensionality. `output_size` can be either an integer
+      or a callable. In the latter case, since the function invocation is
+      deferred to graph construction time, the user must only ensure that
+      output_size can be called, returning an integer, when build is called.
+* `use_bias`: Whether to include bias parameters. Default `True`.
+* `initializers`: Optional dict containing initializers to initialize the
+      weights (with key 'w') or biases (with key 'b'). The default
+      initializer for the weights is a truncated normal initializer, which
+      is commonly used when the inputs are zero centered (see
+      https://arxiv.org/pdf/1502.03167v3.pdf). The default initializer for
+      the bias is a zero initializer.
+* `partitioners`: Optional dict containing partitioners to partition
+      weights (with key 'w') or biases (with key 'b'). As a default, no
+      partitioners are used.
+* `regularizers`: Optional dict containing regularizers for the weights
+    (with key 'w') and the biases (with key 'b'). As a default, no
+    regularizers are used. A regularizer should be a function that takes
+    a single `Tensor` as an input and returns a scalar `Tensor` output, e.g.
+    the L1 and L2 regularizers in `tf.contrib.layers`.
+* `custom_getter`: Callable or dictionary of callables to use as
+    custom getters inside the module. If a dictionary, the keys
+    correspond to regexes to match variable names. See the `tf.get_variable`
+    documentation for information about the custom_getter API.
+* `name`: Name of the module.
+
+
+#### [`ConcatLinear.__call__(inputs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=436)<a id="ConcatLinear.__call__" />
+
+Connects the module into the graph.
+
+If this is not the first time the module has been connected to the graph,
+the Tensors provided here must have the same final dimensions as when called
+the first time, in order for the existing variables to be the correct size
+for the multiplication. The batch size may differ for each connection.
+
+##### Args:
+
+
+* `inputs_list`: A list of 2D Tensors of rank 2, with leading batch dimension.
+
+##### Returns:
+
+  A 2D Tensor of size [batch_size, output_size].
+
+
+#### [`ConcatLinear.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="ConcatLinear.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`ConcatLinear.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=391)<a id="ConcatLinear.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`ConcatLinear.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=386)<a id="ConcatLinear.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`ConcatLinear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="ConcatLinear.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=503)<a id="ConcatLinear.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`ConcatLinear.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="ConcatLinear.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=474)<a id="ConcatLinear.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`ConcatLinear.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="ConcatLinear.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`ConcatLinear.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=487)<a id="ConcatLinear.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=464)<a id="ConcatLinear.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`ConcatLinear.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=430)<a id="ConcatLinear.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`ConcatLinear.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=622)<a id="ConcatLinear.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="ConcatLinear.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`ConcatLinear.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="ConcatLinear.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=438)<a id="ConcatLinear.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`ConcatLinear.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=585)<a id="ConcatLinear.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
 
 
 
@@ -8873,7 +9150,7 @@ tried to wire together incompatible modules, etc.
 
 Flattens trailing dimensions of a Tensor.
 
-#### [`FlattenTrailingDimensions.__init__(dim_from, name='batch_dim_from')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=813)<a id="FlattenTrailingDimensions.__init__" />
+#### [`FlattenTrailingDimensions.__init__(dim_from, name='batch_dim_from')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=904)<a id="FlattenTrailingDimensions.__init__" />
 
 Constructs a FlattenTrailingDimensions module.
 
@@ -8901,7 +9178,7 @@ Equivalent to BatchFlatten(preserve_dims=dim_from, name=name).
 * `ValueError`: If `dim_from <= 0`.
 
 
-#### [`FlattenTrailingDimensions.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=688)<a id="FlattenTrailingDimensions.__call__" />
+#### [`FlattenTrailingDimensions.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="FlattenTrailingDimensions.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -9014,7 +9291,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`FlattenTrailingDimensions.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=771)<a id="FlattenTrailingDimensions.input_shape" />
+#### [`FlattenTrailingDimensions.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="FlattenTrailingDimensions.input_shape" />
 
 
 
@@ -9093,7 +9370,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`FlattenTrailingDimensions.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=777)<a id="FlattenTrailingDimensions.transpose" />
+#### [`FlattenTrailingDimensions.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="FlattenTrailingDimensions.transpose" />
 
 Returns transpose batch reshape.
 
@@ -11989,7 +12266,7 @@ x = [tf.random_uniform(shape=[5, 5]), [tf.random_uniform(shape=[3, 3, 3])]]
 output = MergeDims(start=0, size=2)(x)
 ```
 
-#### [`MergeDims.__init__(start, size, name='merge_dims')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1205)<a id="MergeDims.__init__" />
+#### [`MergeDims.__init__(start, size, name='merge_dims')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1296)<a id="MergeDims.__init__" />
 
 Constructs the MergeDims module.
 
@@ -12006,7 +12283,7 @@ Constructs the MergeDims module.
 * `ValueError`: If `size` is not strictly greater than 1.
 
 
-#### [`MergeDims.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1263)<a id="MergeDims.__call__" />
+#### [`MergeDims.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1354)<a id="MergeDims.__call__" />
 
 Connects the MergeDims module into the graph.
 
@@ -14340,7 +14617,7 @@ output = snt.SelectInput(
 ==> (input0, (input1, (input2,)))
 ```
 
-#### [`SelectInput.__init__(idx, name='select_input')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1322)<a id="SelectInput.__init__" />
+#### [`SelectInput.__init__(idx, name='select_input')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1413)<a id="SelectInput.__init__" />
 
 Module constructor.
 
@@ -14358,7 +14635,7 @@ Module constructor.
 * `TypeError`: If `idx` is not an list, tuple or integer.
 
 
-#### [`SelectInput.__call__(*inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1356)<a id="SelectInput.__call__" />
+#### [`SelectInput.__call__(*inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1447)<a id="SelectInput.__call__" />
 
 Connects the module into the graph.
 
@@ -16061,7 +16338,7 @@ output = SliceByDim(dims=[1], begin=[0], size=[x.get_shape()[1].value//2])(x)
 output = SliceByDim(dims=[1, 3], begin=[0, 0], size=[12, 24])(x)
 ```
 
-#### [`SliceByDim.__init__(dims, begin, size, name='slice_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1045)<a id="SliceByDim.__init__" />
+#### [`SliceByDim.__init__(dims, begin, size, name='slice_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1136)<a id="SliceByDim.__init__" />
 
 Constructs the `SliceByDim` module.
 
@@ -16085,7 +16362,7 @@ Constructs the `SliceByDim` module.
       different from the size of `dims`.
 
 
-#### [`SliceByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1076)<a id="SliceByDim.__call__" />
+#### [`SliceByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1167)<a id="SliceByDim.__call__" />
 
 Connects the SliceByDim module into the graph.
 
@@ -16340,7 +16617,7 @@ output = TileByDim(dims=[1], multiples=[2])(x)
 output = TileByDim(dims=[1, 3], multiples=[2, 4])(x)
 ```
 
-#### [`TileByDim.__init__(dims, multiples, name='tile_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1139)<a id="TileByDim.__init__" />
+#### [`TileByDim.__init__(dims, multiples, name='tile_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1230)<a id="TileByDim.__init__" />
 
 Constructs the `TileByDim` module.
 
@@ -16359,7 +16636,7 @@ Constructs the `TileByDim` module.
       `multiples` is different from the size of `dims`.
 
 
-#### [`TileByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1161)<a id="TileByDim.__call__" />
+#### [`TileByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1252)<a id="TileByDim.__call__" />
 
 Connects the `TileByDim` module into the graph.
 
@@ -16837,7 +17114,7 @@ information about what variables are captured.
 
 Provides learnable parameter Tensor.
 
-#### [`TrainableVariable.__init__(shape, dtype=tf.float32, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='trainable_variable')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=846)<a id="TrainableVariable.__init__" />
+#### [`TrainableVariable.__init__(shape, dtype=tf.float32, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='trainable_variable')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=937)<a id="TrainableVariable.__init__" />
 
 Constructs a TrainableVariable module.
 
@@ -16870,7 +17147,7 @@ Constructs a TrainableVariable module.
 * `TypeError`: If any of the given regularizers are not callable.
 
 
-#### [`TrainableVariable.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=892)<a id="TrainableVariable.__call__" />
+#### [`TrainableVariable.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=983)<a id="TrainableVariable.__call__" />
 
 Connects the TrainableTensor module into the graph.
 
@@ -17083,7 +17360,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`TrainableVariable.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=910)<a id="TrainableVariable.w" />
+#### [`TrainableVariable.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1001)<a id="TrainableVariable.w" />
 
 Returns the Variable containing the weights Tensor.
 
@@ -18688,6 +18965,122 @@ unconstrained neural network activation to parameterize a variance.
 A pre-canned builder for a ubiquitous stochastic KL estimator.
 
 
+### [`class experimental.v2.Linear`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/linear.py?q=class:Linear)<a id="experimental.v2.Linear" />
+
+Linear module, optionally including bias.
+
+#### [`experimental.v2.Linear.__init__(output_size, use_bias=True, initializers=None, name='linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/linear.py?l=17)<a id="experimental.v2.Linear.__init__" />
+
+Constructs a Linear module.
+
+##### Args:
+
+
+* `output_size`: Output dimensionality.
+* `use_bias`: Whether to include bias parameters. Default `True`.
+* `initializers`: Optional dict containing initializers for initialize the
+    weights (with key 'w') or biases (with key 'b'). By default the weights
+    are initialized truncated random normal values with a standard deviation
+    of `1 / sqrt(input_feature_size)`, which is commonly used when the
+    inputs are zero centered (see https://arxiv.org/abs/1502.03167v3). By
+    default the bias is initialized to zero.
+* `name`: Name of the module.
+
+##### Raises:
+
+
+* `KeyError`: If `initializers` contains any keys other than 'w' or 'b'.
+
+
+#### [`experimental.v2.Linear.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.Linear.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Linear.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.Linear.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Linear.no_name_scope" />
+
+Decorator to wrap a method, preventing automatic name scope wrapping.
+
+By default, any method on a module is considered as a forwards function, and
+so any variables / modules created by the method will be scoped as belonging
+to the module. In some cases this is undesirable, for example when
+implementing .clone() / .transpose(), as in those cases we want the new
+module to have the scope of wherever the .transpose() call is made. To
+allow this, decorate any methods with `no_module_name_scope`.
+
+This logic is tied to ModuleMetaclass.__new__, if anything is
+changed here corresponding changes will be needed there.
+
+##### Args:
+
+
+* `method`: the method to wrap.
+
+##### Returns:
+
+  The method, with a flag indicating no name scope wrapping should occur.
+
+
+#### [`experimental.v2.Linear.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.experimental.Module()
+>>> b = tf.experimental.Module()
+>>> c = tf.experimental.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.Linear.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Linear.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+
 ### [`class experimental.v2.Module`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?q=class:Module)<a id="experimental.v2.Module" />
 
 Base class for Sonnet modules.
@@ -18723,7 +19116,7 @@ parent module names.
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=353)<a id="experimental.v2.Module.no_name_scope" />
+#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Module.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -18747,58 +19140,9 @@ changed here corresponding changes will be needed there.
   The method, with a flag indicating no name scope wrapping should occur.
 
 
-#### [`experimental.v2.Module.owned_submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_submodules" />
-
-Collection of immediate child modules.
-
-Child modules are modules which are found as properties of the current
-module.
-
->>> a = tf.experimental.Module()
->>> b = tf.experimental.Module()
->>> c = tf.experimental.Module()
->>> a.b = b
->>> b.c = c
->>> assert list(a.owned_submodules) == [b]
->>> assert list(b.owned_submodules) == [c]
->>> assert list(c.owned_submodules) == []
-
-##### Returns:
-
-  A collection of all child modules.
-
-
-#### [`experimental.v2.Module.owned_trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_trainable_variables" />
-
-Collection of variables that are attributes of the current module.
-
-See `variables` for a property which returns all variables from the current
-module and all it's submodules recursively.
-
-##### Returns:
-
-  A collection of variables which are attributes of the current module. Will
-  yield variables inside nested structures (lists etc) but not in other
-  modules.
-
-
-#### [`experimental.v2.Module.owned_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.owned_variables" />
-
-Collection of variables that are attributes of the current module.
-
-See `variables` for a property which returns all variables from the current
-module and all it's submodules recursively.
-
-##### Returns:
-
-  A collection of variables which are attributes of the current module. Will
-  yield variables inside nested structures (lists etc) but not in other
-  modules.
-
-
 #### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.submodules" />
 
-Collection of all sub-modules.
+Sequence of all sub-modules.
 
 Submodules are modules which are properties of this module, or found as
 properties of modules which are properties of this module (and so on).
@@ -18814,12 +19158,12 @@ properties of modules which are properties of this module (and so on).
 
 ##### Returns:
 
-  A collection of all submodules.
+  A sequence of all submodules.
 
 
 #### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.trainable_variables" />
 
-Collection of variables owned by this module and it's submodules.
+Sequence of variables owned by this module and it's submodules.
 
 Note: this method uses reflection to find variables on the current instance
 and submodules. For performance reasons you may wish to cache the result
@@ -18827,13 +19171,14 @@ of calling this method if you don't expect the return value to change.
 
 ##### Returns:
 
-  A collection of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (depth first).
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
 
 
 #### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.variables" />
 
-Collection of variables owned by this module and it's submodules.
+Sequence of variables owned by this module and it's submodules.
 
 Note: this method uses reflection to find variables on the current instance
 and submodules. For performance reasons you may wish to cache the result
@@ -18841,8 +19186,138 @@ of calling this method if you don't expect the return value to change.
 
 ##### Returns:
 
-  A collection of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (depth first).
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+
+### [`class experimental.v2.Sequential`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/sequential.py?q=class:Sequential)<a id="experimental.v2.Sequential" />
+
+Sequential applies a linear chain of modules / callables.
+
+>>> mlp = snt.Sequential([
+...     snt.Linear(1024),
+...     tf.nn.relu,
+...     snt.Linear(10),
+... ])
+>>> mlp(tf.random.normal([8, 100]))
+<tf.Tensor: ...>
+
+Note that `Sequential` is limited in the range of possible architectures
+it can handle. This is a deliberate design decision; `Sequential` is only
+meant to be used for the simple case of fusing together modules/ops where
+the input of a particular module/op is the output of the previous one.
+
+Another restriction is that it is not possible to have extra arguments in the
+`__call__` method that are passed to the constituents of the module - for
+example, if there is a `BatchNorm` module in `Sequential` and the user wishes
+to switch the `is_training` flag. If this is the desired use case, the
+recommended solution is to subclass `snt.Module` and implement `__call__`:
+
+>>> class CustomModule(snt.Module):
+...   def __init__(self, name=None):
+...     super(CustomModule, self).__init__(name=name)
+...     self.conv2d = snt.Conv2D(output_channels=32, kernel_shape=4, stride=2)
+...     self.bn = snt.BatchNorm()
+...
+...   def __call__(self, inputs, is_training):
+...     outputs = self.conv2d(inputs)
+...     outputs = self.bn(outputs, is_training=is_training)
+...     outputs = tf.nn.relu(outputs)
+...     return outputs
+
+#### [`experimental.v2.Sequential.__init__(layers=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/sequential.py?l=45)<a id="experimental.v2.Sequential.__init__" />
+
+
+
+
+#### [`experimental.v2.Sequential.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.Sequential.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Sequential.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.Sequential.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Sequential.no_name_scope" />
+
+Decorator to wrap a method, preventing automatic name scope wrapping.
+
+By default, any method on a module is considered as a forwards function, and
+so any variables / modules created by the method will be scoped as belonging
+to the module. In some cases this is undesirable, for example when
+implementing .clone() / .transpose(), as in those cases we want the new
+module to have the scope of wherever the .transpose() call is made. To
+allow this, decorate any methods with `no_module_name_scope`.
+
+This logic is tied to ModuleMetaclass.__new__, if anything is
+changed here corresponding changes will be needed there.
+
+##### Args:
+
+
+* `method`: the method to wrap.
+
+##### Returns:
+
+  The method, with a flag indicating no name scope wrapping should occur.
+
+
+#### [`experimental.v2.Sequential.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.experimental.Module()
+>>> b = tf.experimental.Module()
+>>> c = tf.experimental.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.Sequential.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Sequential.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
 
 
 
@@ -19021,6 +19496,58 @@ Raises:
 ### [`class experimental.v2.initializers.Zeros`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Zeros)<a id="experimental.v2.initializers.Zeros" />
 
 Initializer that generates tensors initialized to 0.
+
+
+### [`experimental.v2.pad.causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=25)<a id="experimental.v2.pad.causal" />
+
+"Pre-padding such that output has no dependence on the future.
+
+
+### [`experimental.v2.pad.create(padding, kernel, rate, n, channel_index)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=35)<a id="experimental.v2.pad.create" />
+
+Generates the padding required for a given padding algorithm.
+
+##### Args:
+
+
+* `padding`: callable or list of callables of length n. The callables take an
+    integer representing the effective kernel size (kernel size when the rate
+    is 1) and return a list of two integers representing the padding before
+    and padding after for that dimension.
+* `kernel`: int or list of ints of length n. The size of the kernel for
+    each dimension. If it is an int it will be replicated for the non channel
+    and batch dimensions.
+* `rate`: int or list of ints of length n. The dilation rate for each dimension.
+    If it is an int it will be replicated for the non channel and batch
+    dimensions.
+* `n`: the number of spatial dimensions.
+* `channel_index`: the channel position of the input to which the padding will
+    be applied.
+
+##### Returns:
+
+  A list of length n+2 containing the padding for each element. These are of
+  the form [pad_before, pad_after].
+
+
+### [`experimental.v2.pad.full(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=20)<a id="experimental.v2.pad.full" />
+
+Maximal padding whilst not convolving over just padded elements.
+
+
+### [`experimental.v2.pad.reverse_causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=30)<a id="experimental.v2.pad.reverse_causal" />
+
+Post-padding such that output has no dependence on the past.
+
+
+### [`experimental.v2.pad.same(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=15)<a id="experimental.v2.pad.same" />
+
+"Pads such that the output size matches input size for stride=1.
+
+
+### [`experimental.v2.pad.valid(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=10)<a id="experimental.v2.pad.valid" />
+
+No padding.
 
 
 ### [`nest.assert_same_structure(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/ops/nest.py?l=35)<a id="nest.assert_same_structure" />
@@ -22350,7 +22877,7 @@ Alias for field number 1
 
 
 
-### [`python.modules.basic.calculate_bias_shape(input_shape, bias_dims)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=373)<a id="python.modules.basic.calculate_bias_shape" />
+### [`python.modules.basic.calculate_bias_shape(input_shape, bias_dims)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=464)<a id="python.modules.basic.calculate_bias_shape" />
 
 Calculate `bias_shape` based on the `input_shape` and `bias_dims`.
 

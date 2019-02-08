@@ -66,21 +66,10 @@ def _get_layer_norm_stats(data, axis):
 class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.named_parameters(
-      ("Float16", tf.float16),
-      ("BFloat16", tf.bfloat16),
-  )
-  def test16BitError(self, dtype):
-    inputs = tf.placeholder(dtype, shape=[None, 64])
-    layer_norm = snt.LayerNorm()
-
-    err = (r"LayerNorm does not support `tf\.float16` or `tf\.bfloat16`, "
-           "insufficient precision for calculating sufficient statistics.")
-    with self.assertRaisesRegexp(snt.NotSupportedError, err):
-      layer_norm(inputs)
-
-  @parameterized.named_parameters(
       ("Float32", tf.float32),
       ("Float64", tf.float64),
+      ("Float16", tf.float16),
+      ("BFloat16", tf.bfloat16),
   )
   def testDataType(self, dtype):
     inputs = tf.placeholder(dtype, shape=[None, 64])
@@ -88,8 +77,10 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
     output = layer_norm(inputs)
 
     self.assertEqual(dtype, output.dtype)
-    self.assertEqual(dtype, layer_norm.gamma.dtype.base_dtype)
-    self.assertEqual(dtype, layer_norm.beta.dtype.base_dtype)
+    # Variables are stored in float32 for lower precision activations.
+    expected_dtype = tf.float32 if dtype in [tf.float16, tf.bfloat16] else dtype
+    self.assertEqual(expected_dtype, layer_norm.gamma.dtype.base_dtype)
+    self.assertEqual(expected_dtype, layer_norm.beta.dtype.base_dtype)
 
   def testNormalization(self):
     """Check that inputs are approximately centered and scaled."""

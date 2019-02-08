@@ -122,8 +122,7 @@ class LayerNorm(base.AbstractModule):
       normalized: layer normalized outputs with same shape as inputs.
 
     Raises:
-      base.NotSupportedError: If `inputs` has data type of `tf.float16` or
-          `tf.bfloat16`.
+      base.NotSupportedError: If `inputs` has less than 2 dimensions.
     """
 
     if self._axis is None:
@@ -131,10 +130,9 @@ class LayerNorm(base.AbstractModule):
     else:
       axis = self._axis
 
-    if inputs.dtype in [tf.float16, tf.bfloat16]:
-      raise base.NotSupportedError(
-          "LayerNorm does not support `tf.float16` or `tf.bfloat16`, "
-          "insufficient precision for calculating sufficient statistics.")
+    original_dtype = inputs.dtype
+    if original_dtype in [tf.float16, tf.bfloat16]:
+      inputs = tf.cast(inputs, tf.float32)
 
     if inputs.get_shape().ndims < 2:
       raise base.NotSupportedError(
@@ -175,6 +173,9 @@ class LayerNorm(base.AbstractModule):
 
     normalized = tf.nn.batch_normalization(inputs, mean, var, self._beta,
                                            self._gamma, self._eps)
+
+    if original_dtype in [tf.float16, tf.bfloat16]:
+      normalized = tf.cast(normalized, dtype=original_dtype)
     return normalized
 
   @property

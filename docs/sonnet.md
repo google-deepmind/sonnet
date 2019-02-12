@@ -11653,11 +11653,10 @@ Connects the LayerNorm module into the graph.
 
 ##### Raises:
 
-  base.NotSupportedError: If `inputs` has data type of `tf.float16` or
-      `tf.bfloat16`.
+  base.NotSupportedError: If `inputs` has less than 2 dimensions.
 
 
-#### [`LayerNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=192)<a id="LayerNorm.beta" />
+#### [`LayerNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=193)<a id="LayerNorm.beta" />
 
 
 
@@ -11677,7 +11676,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LayerNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=197)<a id="LayerNorm.gamma" />
+#### [`LayerNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=198)<a id="LayerNorm.gamma" />
 
 
 
@@ -11754,7 +11753,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`LayerNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=180)<a id="LayerNorm.initializers" />
+#### [`LayerNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=181)<a id="LayerNorm.initializers" />
 
 
 
@@ -11808,12 +11807,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`LayerNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=184)<a id="LayerNorm.partitioners" />
+#### [`LayerNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=185)<a id="LayerNorm.partitioners" />
 
 
 
 
-#### [`LayerNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=188)<a id="LayerNorm.regularizers" />
+#### [`LayerNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=189)<a id="LayerNorm.regularizers" />
 
 
 
@@ -18992,7 +18991,7 @@ Constructs a Linear module.
 * `KeyError`: If `initializers` contains any keys other than 'w' or 'b'.
 
 
-#### [`experimental.v2.Linear.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.name" />
+#### [`experimental.v2.Linear.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Linear.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19000,12 +18999,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Linear.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Linear.name_scope" />
+#### [`experimental.v2.Linear.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=217)<a id="experimental.v2.Linear.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Linear.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Linear.no_name_scope" />
+#### [`experimental.v2.Linear.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=336)<a id="experimental.v2.Linear.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -19029,7 +19028,7 @@ changed here corresponding changes will be needed there.
   The method, with a flag indicating no name scope wrapping should occur.
 
 
-#### [`experimental.v2.Linear.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.submodules" />
+#### [`experimental.v2.Linear.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Linear.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19050,7 +19049,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Linear.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.trainable_variables" />
+#### [`experimental.v2.Linear.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Linear.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19065,7 +19064,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Linear.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Linear.variables" />
+#### [`experimental.v2.Linear.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Linear.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19098,12 +19097,12 @@ apply operations combining user input and module parameters. For example:
 >>> mod(1.)
 <tf.Tensor: ... numpy=2.0>
 
-#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=167)<a id="experimental.v2.Module.__init__" />
+#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=189)<a id="experimental.v2.Module.__init__" />
 
 
 
 
-#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.name" />
+#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Module.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19111,12 +19110,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Module.name_scope" />
+#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=217)<a id="experimental.v2.Module.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Module.no_name_scope" />
+#### [`experimental.v2.Module.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=336)<a id="experimental.v2.Module.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -19140,7 +19139,7 @@ changed here corresponding changes will be needed there.
   The method, with a flag indicating no name scope wrapping should occur.
 
 
-#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.submodules" />
+#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Module.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19161,7 +19160,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.trainable_variables" />
+#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Module.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19176,7 +19175,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Module.variables" />
+#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Module.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19232,7 +19231,7 @@ recommended solution is to subclass `snt.Module` and implement `__call__`:
 
 
 
-#### [`experimental.v2.Sequential.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.name" />
+#### [`experimental.v2.Sequential.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Sequential.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19240,12 +19239,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Sequential.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=195)<a id="experimental.v2.Sequential.name_scope" />
+#### [`experimental.v2.Sequential.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=217)<a id="experimental.v2.Sequential.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Sequential.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=314)<a id="experimental.v2.Sequential.no_name_scope" />
+#### [`experimental.v2.Sequential.no_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=336)<a id="experimental.v2.Sequential.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -19269,7 +19268,7 @@ changed here corresponding changes will be needed there.
   The method, with a flag indicating no name scope wrapping should occur.
 
 
-#### [`experimental.v2.Sequential.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.submodules" />
+#### [`experimental.v2.Sequential.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Sequential.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19290,7 +19289,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Sequential.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.trainable_variables" />
+#### [`experimental.v2.Sequential.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Sequential.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19305,7 +19304,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Sequential.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=97)<a id="experimental.v2.Sequential.variables" />
+#### [`experimental.v2.Sequential.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=98)<a id="experimental.v2.Sequential.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19325,7 +19324,7 @@ of calling this method if you don't expect the return value to change.
 
 Initializer that generates tensors initialized to the given value.
 
-#### [`experimental.v2.initializers.Constant.__init__(value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=43)<a id="experimental.v2.initializers.Constant.__init__" />
+#### [`experimental.v2.initializers.Constant.__init__(value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=44)<a id="experimental.v2.initializers.Constant.__init__" />
 
 
 
@@ -19340,7 +19339,7 @@ Constructs a 2D identity matrix or batches of these.
 Args:
   gain: Multiplicative factor to apply to the identity matrix.
 
-#### [`experimental.v2.initializers.Identity.__init__(gain=1.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=149)<a id="experimental.v2.initializers.Identity.__init__" />
+#### [`experimental.v2.initializers.Identity.__init__(gain=1.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=150)<a id="experimental.v2.initializers.Identity.__init__" />
 
 
 
@@ -19381,7 +19380,7 @@ References:
     [Saxe et al., 2014](https://openreview.net/forum?id=_wzZwKpTDF_9C)
     ([pdf](https://arxiv.org/pdf/1312.6120.pdf))
 
-#### [`experimental.v2.initializers.Orthogonal.__init__(gain=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=190)<a id="experimental.v2.initializers.Orthogonal.__init__" />
+#### [`experimental.v2.initializers.Orthogonal.__init__(gain=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=191)<a id="experimental.v2.initializers.Orthogonal.__init__" />
 
 
 
@@ -19398,7 +19397,7 @@ Args:
     random values to generate.
   seed: An integer. Seed used in the generation of random numbers.
 
-#### [`experimental.v2.initializers.RandomNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=95)<a id="experimental.v2.initializers.RandomNormal.__init__" />
+#### [`experimental.v2.initializers.RandomNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=96)<a id="experimental.v2.initializers.RandomNormal.__init__" />
 
 
 
@@ -19418,7 +19417,7 @@ Args:
     Defaults to 1 for float types.
   seed: An integer. Seed used in the generation of random numbers.
 
-#### [`experimental.v2.initializers.RandomUniform.__init__(minval=0, maxval=1, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=69)<a id="experimental.v2.initializers.RandomUniform.__init__" />
+#### [`experimental.v2.initializers.RandomUniform.__init__(minval=0, maxval=1, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=70)<a id="experimental.v2.initializers.RandomUniform.__init__" />
 
 
 
@@ -19439,7 +19438,7 @@ Args:
     random values to generate.
   seed: An integer. Seed used in the generation of random numbers.
 
-#### [`experimental.v2.initializers.TruncatedNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=125)<a id="experimental.v2.initializers.TruncatedNormal.__init__" />
+#### [`experimental.v2.initializers.TruncatedNormal.__init__(mean=0.0, stddev=1.0, seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=126)<a id="experimental.v2.initializers.TruncatedNormal.__init__" />
 
 
 
@@ -19487,7 +19486,7 @@ Raises:
   ValueError: In case of an invalid value for the "scale", mode" or
     "distribution" arguments.
 
-#### [`experimental.v2.initializers.VarianceScaling.__init__(scale=1.0, mode='fan_in', distribution='truncated_normal', seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=261)<a id="experimental.v2.initializers.VarianceScaling.__init__" />
+#### [`experimental.v2.initializers.VarianceScaling.__init__(scale=1.0, mode='fan_in', distribution='truncated_normal', seed=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=262)<a id="experimental.v2.initializers.VarianceScaling.__init__" />
 
 
 
@@ -19496,6 +19495,11 @@ Raises:
 ### [`class experimental.v2.initializers.Zeros`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?q=class:Zeros)<a id="experimental.v2.initializers.Zeros" />
 
 Initializer that generates tensors initialized to 0.
+
+
+### [`experimental.v2.initializers.check_initializers(initializers, expected_keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=318)<a id="experimental.v2.initializers.check_initializers" />
+
+Checks a dictionary of initializers only contains the given keys.
 
 
 ### [`experimental.v2.pad.causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=25)<a id="experimental.v2.pad.causal" />
@@ -19548,6 +19552,11 @@ Post-padding such that output has no dependence on the past.
 ### [`experimental.v2.pad.valid(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=10)<a id="experimental.v2.pad.valid" />
 
 No padding.
+
+
+### [`experimental.v2.utils.replicate(element, num_times, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=10)<a id="experimental.v2.utils.replicate" />
+
+Replicates entry in `element` `num_times` if needed.
 
 
 ### [`nest.assert_same_structure(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/ops/nest.py?l=35)<a id="nest.assert_same_structure" />
@@ -23820,12 +23829,12 @@ Return zero-filled state tensor(s).
 
 
 
-### [`python.modules.layer_norm.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=203)<a id="python.modules.layer_norm.create_beta_initializer" />
+### [`python.modules.layer_norm.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=204)<a id="python.modules.layer_norm.create_beta_initializer" />
 
 Returns a default initializer for the `beta` in layer norm.
 
 
-### [`python.modules.layer_norm.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=208)<a id="python.modules.layer_norm.create_gamma_initializer" />
+### [`python.modules.layer_norm.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/layer_norm.py?l=209)<a id="python.modules.layer_norm.create_gamma_initializer" />
 
 Returns a default initializer for the `gamma` in layer norm.
 

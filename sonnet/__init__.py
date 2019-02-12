@@ -171,5 +171,5 @@ from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
 
 
-__version__ = '1.29'
+__version__ = '1.30'
 

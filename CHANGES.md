@@ -1,5 +1,10 @@
 # Sonnet Changelog
 
+## Version 1.30 - Tuesday, 12. February 2019
+
+* Added a class to linear transform the concatenation of a list of Tensors.
+* Extended support for lower precision inputs in Layer Norm.
+
 ## Version 1.29 - Tuesday, 29. January 2019
 
 * Increased Python 3 support.

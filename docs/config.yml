@@ -1,0 +1,16 @@
+site_name: Sonnet Docs
+repo_url: https://github.com/deepmind/sonnet/
+docs_dir: .
+markdown_extensions:
+  - toc:
+      toc_depth: 5
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+     - python
+nav:
+  - Sonnet: index.md
+  - Installing from source: INSTALL.md
+  - Contents: contents.md
+  - Module Reference: sonnet.md

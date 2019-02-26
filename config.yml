@@ -1,7 +1,6 @@
 site_name: Sonnet Docs
 repo_url: https://github.com/deepmind/sonnet/
 docs_dir: .
-site_dir: ../..
 markdown_extensions:
   - toc:
       toc_depth: 5

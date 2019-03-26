@@ -13,27 +13,12 @@
 # limitations under the License.
 # =============================================================================
 
-config_setting(
-    name = "gpu_build",
-    values = { "define": "gpu=true" }
-)
-
-genrule(
-    name = "setup_py",
-    srcs = ["setup.py.tmpl"],
-    outs = ["setup.py"],
-    cmd = select({
-        ":gpu_build": "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet-gpu/g' > $@",
-        "//conditions:default": "cat $< | sed 's/%%%PROJECT_NAME%%%/dm-sonnet/g' > $@"
-        })
-)
-
 sh_binary(
     name = "install",
     srcs = ["install.sh"],
     data = [
         "MANIFEST.in",
-        ":setup_py",
+        "setup.py",
         "//sonnet",
         "//sonnet/examples",
     ],

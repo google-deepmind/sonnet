@@ -35,7 +35,9 @@ from sonnet.python.modules import basic
 import tensorflow as tf
 import wrapt
 
+# pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.ops import rnn_cell_impl
+# pylint: enable=g-direct-tensorflow-import
 nest = tf.contrib.framework.nest
 
 
@@ -403,26 +405,3 @@ def with_doc(fn_with_doc_to_copy):
     return wrapping_fn(fn_with_doc_to_copy)  # pylint: disable=no-value-for-parameter
 
   return decorator
-
-
-def wrap_rnn_cell_class(wrapped_class):
-  """Wraps an RNN cell class with a sub-class of `RNNCellWrapper`.
-
-  The returned wrapper class will contain an `__init__` method whose
-  docstring, *args, and **kwargs are based on `wrapped_class.__init__`.
-
-  Args:
-    wrapped_class: A sub-class (NOT an instance) of `tf.contrib.rnn.RNNCell`.
-
-  Returns:
-    A sub-class (NOT an instance) of `RNNCellWrapper`, with an `__init__`
-    method that delegates to that of `wrapped_class`.
-  """
-
-  class Wrapper(RNNCellWrapper):
-
-    @with_doc(wrapped_class.__init__)
-    def __init__(self, *args, **kwargs):
-      super(Wrapper, self).__init__(wrapped_class, *args, **kwargs)
-
-  return Wrapper

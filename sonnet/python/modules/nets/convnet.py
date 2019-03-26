@@ -127,10 +127,13 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
         channel dimension of the input and output is the last dimension
         (default, "NHWC"), or the second dimension ("NCHW").
       custom_getter: Callable or dictionary of callables to use as
-          custom getters inside the module. If a dictionary, the keys
-          correspond to regexes to match variable names. See the
-          `tf.get_variable` documentation for information about the
-          custom_getter API.
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the
+        `tf.get_variable` documentation for information about the
+        custom_getter API. Note that this `custom_getter` will not be passed
+        to the `transpose` method. If you want to use a custom getter with
+        the transposed of this convolutional network, you should provide one
+        to the `transpose` method instead.
       name: Name of the module.
 
     Raises:
@@ -455,7 +458,7 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                  partitioners=None,
                  regularizers=None,
                  use_bias=None,
-                 data_format=None,):
+                 data_format=None):
     """Returns transposed version of this network.
 
     Args:
@@ -599,7 +602,8 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
                 use_batch_norm=None,
                 use_bias=None,
                 batch_norm_config=None,
-                data_format=None):
+                data_format=None,
+                custom_getter=None):
     """Returns transposed version of this network.
 
     Args:
@@ -646,6 +650,11 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
         the channel dimension of the input and output is the last dimension.
         Default is `self._data_format`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the
+        `tf.get_variable` documentation for information about the
+        custom_getter API.
 
     Returns:
       Matching `ConvNet2DTranspose` module.
@@ -672,10 +681,17 @@ class ConvNet2D(base.AbstractModule, base.Transposable):
       raise ValueError("Invalid data_format {:s}. Allowed formats "
                        "{}".format(data_format, SUPPORTED_2D_DATA_FORMATS))
 
+    if custom_getter is None and self._custom_getter is not None:
+      tf.logging.warning(
+          "This convnet was constructed with a custom getter, but the "
+          "`transpose` method was not given any. The transposed ConvNet will "
+          "not be using any custom_getter.")
+
     for layer in reversed(self._layers):
       output_shapes.append(lambda l=layer: l.input_shape[start_dim:end_dim])
     transpose_constructor = functools.partial(ConvNet2DTranspose,
-                                              output_shapes=output_shapes)
+                                              output_shapes=output_shapes,
+                                              custom_getter=custom_getter)
 
     return self._transpose(
         transpose_constructor=transpose_constructor,
@@ -717,6 +733,7 @@ class ConvNet2DTranspose(ConvNet2D):
                use_bias=True,
                batch_norm_config=None,
                data_format=DATA_FORMAT_NHWC,
+               custom_getter=None,
                name="conv_net_2d_transpose"):
     """Constructs a `ConvNetTranspose2D` module.
 
@@ -776,6 +793,11 @@ class ConvNet2DTranspose(ConvNet2D):
       data_format: A string, one of "NCHW" or "NHWC". Specifies whether the
         channel dimension of the input and output is the last dimension
         (default, "NHWC"), or the second dimension ("NCHW").
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the
+        `tf.get_variable` documentation for information about the
+        custom_getter API.
       name: Name of the module.
 
     Raises:
@@ -827,6 +849,7 @@ class ConvNet2DTranspose(ConvNet2D):
         use_bias=use_bias,
         batch_norm_config=batch_norm_config,
         data_format=data_format,
+        custom_getter=custom_getter,
         name=name)
 
   def _instantiate_layers(self):
@@ -871,7 +894,8 @@ class ConvNet2DTranspose(ConvNet2D):
                 use_batch_norm=None,
                 use_bias=None,
                 batch_norm_config=None,
-                data_format=None):
+                data_format=None,
+                custom_getter=None):
     """Returns transposed version of this network.
 
     Args:
@@ -918,6 +942,11 @@ class ConvNet2DTranspose(ConvNet2D):
       data_format: Optional string, one of "NCHW" or "NHWC". Specifies whether
         the channel dimension of the input and output is the last dimension.
         Default is `self._data_format`.
+      custom_getter: Callable or dictionary of callables to use as
+        custom getters inside the module. If a dictionary, the keys
+        correspond to regexes to match variable names. See the
+        `tf.get_variable` documentation for information about the
+        custom_getter API.
 
     Returns:
       Matching `ConvNet2D` module.
@@ -937,8 +966,17 @@ class ConvNet2DTranspose(ConvNet2D):
         normalization_ctor = None
       normalization_kwargs = batch_norm_config
 
+    if custom_getter is None and self._custom_getter is not None:
+      tf.logging.warning(
+          "This convnet was constructed with a custom getter, but the "
+          "`transpose` method was not given any. The transposed ConvNet will "
+          "not be using any custom_getter.")
+
+    transpose_constructor = functools.partial(ConvNet2D,
+                                              custom_getter=custom_getter)
+
     return self._transpose(
-        transpose_constructor=ConvNet2D,
+        transpose_constructor=transpose_constructor,
         name=name,
         output_channels=output_channels,
         kernel_shapes=kernel_shapes,

@@ -26,7 +26,6 @@ import os
 import numpy as np
 import sonnet as snt
 import tensorflow as tf
-from tensorflow.python.platform import gfile
 
 
 FLAGS = tf.flags.FLAGS
@@ -38,6 +37,10 @@ SequenceDataOpsNoMask = collections.namedtuple("SequenceDataOpsNoMask",
 class TokenDataSource(object):
   """Encapsulates loading/tokenization logic for disk-based data."""
 
+  ROOTS = [
+      "sonnet/examples/data/",
+      os.path.join(os.path.dirname(os.path.realpath(__file__)), "data"),
+  ]
   DEFAULT_START_TOKENS = ["_unk_", "_null_", "_eos_", "|"]
   UNK, NULL, WORD_EOS, CHAR_EOS = DEFAULT_START_TOKENS
 
@@ -49,8 +52,16 @@ class TokenDataSource(object):
       vocab_data_file: file object containing text data used to initialize
         the vocabulary.
     """
-    def reading_function(f):
-      return list(f.read().decode().replace("\n", self.CHAR_EOS))
+    def reading_function(file_name):
+      for root in self.ROOTS:
+        file_path = os.path.join(root, file_name)
+        if os.path.exists(file_path):
+          break
+        file_path = None
+      assert file_path is not None, ("Couldn't locate %s in %r" %
+                                     (file_name, self.ROOTS))
+      with open(file_path, mode="rb") as fp:
+        return list(fp.read().decode().replace("\n", self.CHAR_EOS))
 
     self._vocab_dict = {}
     self._inv_vocab_dict = {}
@@ -85,8 +96,6 @@ class TinyShakespeareDataset(snt.AbstractModule):
   TRAIN = "train"
   VALID = "valid"
   TEST = "test"
-  _RESOURCE_ROOT = os.path.join(
-      os.path.dirname(os.path.realpath(__file__)), "data")
 
   def __init__(self, num_steps=1, batch_size=1,
                subset="train", random=False, dtype=tf.float32,
@@ -113,12 +122,8 @@ class TinyShakespeareDataset(snt.AbstractModule):
     super(TinyShakespeareDataset, self).__init__(name=name)
 
     # Generate vocab from train set.
-
-    self._vocab_file = gfile.Open(
-        os.path.join(self._RESOURCE_ROOT, "ts.train.txt"), mode="rb")
-    self._data_file = gfile.Open(
-        os.path.join(self._RESOURCE_ROOT, "ts.{}.txt".format(subset)),
-        mode="rb")
+    self._vocab_file = "ts.train.txt"
+    self._data_file = "ts.{}.txt".format(subset)
     self._num_steps = num_steps
     self._batch_size = batch_size
     self._random_sampling = random

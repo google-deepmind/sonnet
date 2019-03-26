@@ -141,7 +141,6 @@ from sonnet.python.modules.rnn_core import RNNCellWrapper
 from sonnet.python.modules.rnn_core import RNNCore
 from sonnet.python.modules.rnn_core import trainable_initial_state
 from sonnet.python.modules.rnn_core import TrainableInitialState
-from sonnet.python.modules.rnn_core import wrap_rnn_cell_class
 from sonnet.python.modules.scale_gradient import scale_gradient
 from sonnet.python.modules.sequential import Sequential
 from sonnet.python.modules.spatial_transformer import AffineGridWarper
@@ -171,5 +170,5 @@ from sonnet.python.ops import nest
 from sonnet.python.ops.initializers import restore_initializer
 
 
-__version__ = '1.30'
+__version__ = '1.31'
 

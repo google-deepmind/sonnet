@@ -14,18 +14,18 @@ py_library(
     srcs = ["__init__.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":brnn_ptb",
-        ":mnist_mlp",
+        ":brnn_ptb_main_lib",
+        ":mnist_mlp_main_lib",
         ":module_with_build_args_lib",
-        ":rmc_nth_farthest",
-        ":rnn_shakespeare",
+        ":rmc_nth_farthest_main_lib",
+        ":rnn_shakespeare_main_lib",
     ],
 )
 
 py_binary(
     name = "module_with_build_args",
     srcs = ["module_with_build_args.py"],
-    default_python_version = "PY3",
+    python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [":module_with_build_args_lib"],
 )
@@ -42,6 +42,13 @@ py_library(
 
 py_binary(
     name = "mnist_mlp",
+    srcs = ["mnist_mlp.py"],
+    srcs_version = "PY2AND3",
+    deps = [":mnist_mlp_main_lib"],
+)
+
+py_library(
+    name = "mnist_mlp_main_lib",
     srcs = [
         "dataset_mnist_cifar10.py",
         "mnist_mlp.py",
@@ -56,18 +63,24 @@ py_binary(
 
 py_binary(
     name = "rnn_shakespeare",
+    srcs = ["rnn_shakespeare.py"],
+    srcs_version = "PY2AND3",
+    deps = [":rnn_shakespeare_main_lib"],
+)
+
+py_library(
+    name = "rnn_shakespeare_main_lib",
     srcs = [
         "dataset_shakespeare.py",
         "rnn_shakespeare.py",
     ],
     data = [
-        "data/ts.test.txt",
-        "data/ts.train.txt",
-        "data/ts.valid.txt",
+        "//sonnet/examples/data:ts.test.txt",
+        "//sonnet/examples/data:ts.train.txt",
+        "//sonnet/examples/data:ts.valid.txt",
     ],
     srcs_version = "PY2AND3",
     deps = [
-        # tensorflow IO dep,
         # numpy dep,
         "//sonnet",
         # tensorflow dep,
@@ -76,6 +89,13 @@ py_binary(
 
 py_binary(
     name = "brnn_ptb",
+    srcs = ["brnn_ptb.py"],
+    srcs_version = "PY2AND3",
+    deps = [":brnn_ptb_main_lib"],
+)
+
+py_library(
+    name = "brnn_ptb_main_lib",
     srcs = [
         "brnn_ptb.py",
         "ptb_reader.py",
@@ -93,6 +113,13 @@ py_binary(
 
 py_binary(
     name = "rmc_learn_to_execute",
+    srcs = ["rmc_learn_to_execute.py"],
+    srcs_version = "PY2AND3",
+    deps = [":rmc_learn_to_execute_main_lib"],
+)
+
+py_library(
+    name = "rmc_learn_to_execute_main_lib",
     srcs = [
         "learn_to_execute.py",
         "rmc_learn_to_execute.py",
@@ -110,6 +137,13 @@ py_binary(
 
 py_binary(
     name = "rmc_nth_farthest",
+    srcs = ["rmc_nth_farthest.py"],
+    srcs_version = "PY2AND3",
+    deps = [":rmc_nth_farthest_main_lib"],
+)
+
+py_library(
+    name = "rmc_nth_farthest_main_lib",
     srcs = [
         "dataset_nth_farthest.py",
         "rmc_nth_farthest.py",
@@ -133,9 +167,10 @@ py_test(
     tags = [
         "nomsan",  # takes too long with MSAN
         "notsan",  # takes too long with TSAN
+        "nozapfhahn",  # Causes coverage timeouts.
     ],
     deps = [
-        ":rnn_shakespeare",
+        ":rnn_shakespeare_main_lib",
         # tensorflow dep,
     ],
 )
@@ -146,7 +181,7 @@ py_test(
     srcs = ["brnn_ptb_test.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":brnn_ptb",
+        ":brnn_ptb_main_lib",
         # tensorflow dep,
     ],
 )
@@ -157,7 +192,7 @@ py_test(
     srcs = ["rmc_nth_farthest_test.py"],
     srcs_version = "PY2AND3",
     deps = [
-        ":rmc_nth_farthest",
+        ":rmc_nth_farthest_main_lib",
         "//sonnet",
         # tensorflow dep,
     ],
@@ -171,7 +206,7 @@ py_test(
     ],
     srcs_version = "PY2AND3",
     deps = [
-        ":rmc_learn_to_execute",
+        ":rmc_learn_to_execute_main_lib",
         "//sonnet",
         # tensorflow dep,
     ],

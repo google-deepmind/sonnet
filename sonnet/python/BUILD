@@ -143,14 +143,13 @@ py_library(
 )
 
 module_tests = [
-    ("alexnet_test", "nets/", "large"),
     ("attention_test", "", "small"),
     ("base_test", "", "small"),
     ("base_info_test", "", "small"),
     ("basic_test", "", "small"),
     ("basic_rnn_test", "", "medium"),
     ("batch_norm_test", "", "medium"),
-    ("batch_norm_v2_test", "", "small"),
+    ("batch_norm_v2_test", "", "medium"),
     ("layer_norm_test", "", "small"),
     ("block_matrix_test", "", "small"),
     ("clip_gradient_test", "", "small"),
@@ -159,7 +158,7 @@ module_tests = [
     ("dilation_test", "nets/", "medium"),
     ("embed_test", "", "small"),
     ("gated_rnn_test", "", "medium"),
-    ("mlp_test", "nets/", "small"),
+    ("mlp_test", "nets/", "medium"),
     ("pondering_rnn_test", "", "small"),
     ("relational_memory_test", "", "medium"),
     ("rnn_core_test", "", "small"),
@@ -194,6 +193,20 @@ py_test(
         "nomsan",  # Relies on the precompiled library libcuda, which is incompatible with MSan.
         "notap",
         "requires-gpu-sm35",
+    ],
+    deps = [
+        # absl/testing:parameterized dep,
+        "//sonnet",
+    ],
+)
+
+py_test(
+    name = "alexnet_test",
+    size = "large",
+    srcs = ["modules/nets/alexnet_test.py"],
+    srcs_version = "PY2AND3",
+    tags = [
+        "notsan",  # OOM on Forge under TSAN
     ],
     deps = [
         # absl/testing:parameterized dep,

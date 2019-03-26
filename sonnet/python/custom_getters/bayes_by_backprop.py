@@ -365,7 +365,7 @@ def bayes_by_backprop_getter(
 
   def custom_getter(getter, name, *args, **kwargs):
     """The custom getter that will be returned."""
-    if kwargs.get("trainable") is False:
+    if not kwargs.get("trainable", True):
       return getter(name, *args, **kwargs)
     if kwargs["dtype"] not in _OK_DTYPES_FOR_BBB:
       raise ValueError("Disallowed data type {}.".format(kwargs["dtype"]))
@@ -401,14 +401,14 @@ def bayes_by_backprop_getter(
 
       # If the user does not return an extra dictionary of prior variables,
       # then fill in an empty dictionary.
-      try:
+      if isinstance(posterior, collections.Sequence):
         posterior_dist, posterior_vars = posterior
-      except TypeError:
+      else:
         posterior_dist, posterior_vars = posterior, {}
 
-      try:
+      if isinstance(prior, collections.Sequence):
         prior_dist, prior_vars = prior
-      except TypeError:
+      else:
         prior_dist, prior_vars = prior, {}
 
       if posterior_dist.reparameterization_type != _OK_PZATION_TYPE:

@@ -794,7 +794,7 @@ class Module(AbstractModule):
       return lin2
 
     model = snt.Module(name='simple_mlp',
-                       build=partial(make_model, output_size=[10, 20])
+                       build=partial(make_model, output_sizes=[10, 20])
     outputs = model(inputs)
     ```
 

@@ -30,7 +30,7 @@ import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
 
 import tensorflow as tf
-from tensorflow.python.ops import variables
+from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
@@ -665,6 +665,75 @@ class ConvNet2DTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(net_transpose.layers[i].output_channels,
                        net.layers[-1 - i].input_shape[-1])
 
+  def testCustomGetterTranspose(self):
+    """Tests passing a custom getter to the transpose method."""
+    conv2d = snt.nets.ConvNet2D(output_channels=self.output_channels,
+                                kernel_shapes=self.kernel_shapes,
+                                strides=self.strides,
+                                paddings=self.paddings)
+    input_shape = [10, 100, 100, 3]
+    output_of_conv2d = conv2d(tf.zeros(dtype=tf.float32, shape=input_shape))
+    # We'll be able to check if the custom_getter was used by checking for
+    # gradients.
+    conv2d_transpose = conv2d.transpose(
+        custom_getter=snt.custom_getters.stop_gradient)
+    if tf.executing_eagerly():
+      with tf.GradientTape() as tape:
+        output_of_transpose = conv2d_transpose(output_of_conv2d)
+      conv2d_transpose_vars = conv2d_transpose.get_variables()
+      self.assertTrue(len(conv2d_transpose_vars))
+      for tensor in tape.gradient(output_of_transpose, conv2d_transpose_vars):
+        self.assertIsNone(tensor)
+
+    else:
+      output_of_transpose = conv2d_transpose(output_of_conv2d)
+      conv2d_transpose_vars = conv2d_transpose.get_variables()
+      self.assertTrue(len(conv2d_transpose_vars))
+      for tensor in tf.gradients(output_of_transpose, conv2d_transpose_vars):
+        self.assertIsNone(tensor)
+
+  def testNoCustomGetterTranspose(self):
+    """Tests not passing a custom getter to the transpose method."""
+    conv2d = snt.nets.ConvNet2D(output_channels=self.output_channels,
+                                kernel_shapes=self.kernel_shapes,
+                                strides=self.strides,
+                                paddings=self.paddings,
+                                custom_getter=snt.custom_getters.stop_gradient)
+    input_shape = [10, 100, 100, 3]
+    input_to_conv2d = tf.zeros(dtype=tf.float32, shape=input_shape)
+    if tf.executing_eagerly():
+      with tf.GradientTape() as tape0:
+        output_of_conv2d = conv2d(input_to_conv2d)
+      # Create a transpose without a custom getter
+      conv2d_transpose = conv2d.transpose()
+      with tf.GradientTape() as tape1:
+        output_of_transpose = conv2d_transpose(output_of_conv2d)
+      conv2d_vars = conv2d.get_variables()
+      conv2d_grads = tape0.gradient(output_of_conv2d, conv2d_vars)
+      conv2d_transpose_vars = conv2d_transpose.get_variables()
+      conv2d_transpose_grads = tape1.gradient(output_of_transpose,
+                                              conv2d_transpose_vars)
+    else:
+      output_of_conv2d = conv2d(input_to_conv2d)
+      conv2d_vars = conv2d.get_variables()
+      conv2d_grads = tf.gradients(output_of_conv2d, conv2d_vars)
+      # Create a transpose without a custom getter
+      conv2d_transpose = conv2d.transpose()
+      output_of_transpose = conv2d_transpose(output_of_conv2d)
+      conv2d_transpose_vars = conv2d_transpose.get_variables()
+      conv2d_transpose_grads = tf.gradients(output_of_transpose,
+                                            conv2d_transpose_vars)
+
+    # Sanity check that the custom getter was indeed used for the conv net.
+    self.assertTrue(len(conv2d_vars))
+    for tensor in conv2d_grads:
+      self.assertIsNone(tensor)
+    # Check the transpose did not use the custom getter that was passed to the
+    # original conv net.
+    self.assertTrue(len(conv2d_transpose_vars))
+    for tensor in conv2d_transpose_grads:
+      self.assertIsNotNone(tensor)
+
   def testVariableMap(self):
     """Tests for regressions in variable names."""
 
@@ -950,6 +1019,111 @@ class ConvNet2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
         normalization_kwargs=normalization_kwargs)
     input_ = tf.random_uniform([16, 100, 100, 3])
     _ = mod(input_, is_training=True)
+
+  def testCustomGetter(self):
+    custom_getter = snt.custom_getters.Context(snt.custom_getters.stop_gradient)
+    module = snt.nets.ConvNet2DTranspose(
+        output_shapes=self.output_shapes,
+        output_channels=self.output_channels,
+        kernel_shapes=self.kernel_shapes,
+        strides=self.strides,
+        paddings=self.paddings,
+        custom_getter=custom_getter)
+
+    input_shape = [10, 100, 100, 3]
+    input_to_net = tf.random_normal(dtype=tf.float32, shape=input_shape)
+
+    if tf.executing_eagerly():
+      with tf.GradientTape() as tape0:
+        out0 = module(input_to_net)
+      with tf.GradientTape() as tape1:
+        with custom_getter:
+          out1 = module(input_to_net)
+      all_vars = tf.trainable_variables()
+      out0_grads = tape0.gradient(out0, all_vars)
+      out1_grads = tape1.gradient(out1, all_vars)
+
+    else:
+      out0 = module(input_to_net)
+      with custom_getter:
+        out1 = module(input_to_net)
+      all_vars = tf.trainable_variables()
+      out0_grads = tf.gradients(out0, all_vars)
+      out1_grads = tf.gradients(out1, all_vars)
+
+    for grad in out0_grads:
+      self.assertIsNotNone(grad)
+    self.assertEqual([None] * len(out1_grads), out1_grads)
+
+  def testCustomGetterTranspose(self):
+    """Tests passing a custom getter to the transpose method."""
+    conv2d_t = snt.nets.ConvNet2DTranspose(
+        output_shapes=self.output_shapes,
+        output_channels=self.output_channels,
+        kernel_shapes=self.kernel_shapes,
+        strides=self.strides,
+        paddings=self.paddings)
+    input_shape = [10, 100, 100, 3]
+    output_of_conv2d_t = conv2d_t(tf.zeros(dtype=tf.float32, shape=input_shape))
+    # We'll be able to check if the custom_getter was used by checking for
+    # gradients.
+    conv2d = conv2d_t.transpose(custom_getter=snt.custom_getters.stop_gradient)
+    if tf.executing_eagerly():
+      with tf.GradientTape() as tape:
+        output_of_conv = conv2d(output_of_conv2d_t)
+      conv2d_vars = conv2d.get_variables()
+      self.assertTrue(len(conv2d_vars))
+      for tensor in tape.gradient(output_of_conv, conv2d_vars):
+        self.assertIsNone(tensor)
+
+    else:
+      output_of_conv = conv2d(output_of_conv2d_t)
+      conv2d_vars = conv2d.get_variables()
+      self.assertTrue(len(conv2d_vars))
+      for tensor in tf.gradients(output_of_conv, conv2d_vars):
+        self.assertIsNone(tensor)
+
+  def testNoCustomGetterTranspose(self):
+    """Tests not passing a custom getter to the transpose method."""
+    conv2d_t = snt.nets.ConvNet2DTranspose(
+        output_shapes=self.output_shapes,
+        output_channels=self.output_channels,
+        kernel_shapes=self.kernel_shapes,
+        strides=self.strides,
+        paddings=self.paddings,
+        custom_getter=snt.custom_getters.stop_gradient)
+    input_shape = [10, 100, 100, 3]
+    input_to_conv2d_t = tf.zeros(dtype=tf.float32, shape=input_shape)
+    if tf.executing_eagerly():
+      with tf.GradientTape() as tape0:
+        output_of_conv2d_t = conv2d_t(input_to_conv2d_t)
+      # Create a transpose without a custom getter
+      conv2d = conv2d_t.transpose()
+      with tf.GradientTape() as tape1:
+        output_of_conv = conv2d(output_of_conv2d_t)
+      conv2d_t_vars = conv2d_t.get_variables()
+      conv2d_t_grads = tape0.gradient(output_of_conv2d_t, conv2d_t_vars)
+      conv2d_vars = conv2d.get_variables()
+      conv2d_grads = tape1.gradient(output_of_conv, conv2d_vars)
+    else:
+      output_of_conv2d_t = conv2d_t(input_to_conv2d_t)
+      conv2d_t_vars = conv2d_t.get_variables()
+      conv2d_t_grads = tf.gradients(output_of_conv2d_t, conv2d_t_vars)
+      # Create a transpose without a custom getter
+      conv2d = conv2d_t.transpose()
+      output_of_conv = conv2d(output_of_conv2d_t)
+      conv2d_vars = conv2d.get_variables()
+      conv2d_grads = tf.gradients(output_of_conv, conv2d_vars)
+
+    # Sanity check that the custom getter was indeed used for the conv net.
+    self.assertTrue(len(conv2d_t_vars))
+    for tensor in conv2d_t_grads:
+      self.assertIsNone(tensor)
+    # Check the transpose did not use the custom getter that was passed to the
+    # original conv net.
+    self.assertTrue(len(conv2d_vars))
+    for tensor in conv2d_grads:
+      self.assertIsNotNone(tensor)
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes

@@ -1,5 +1,12 @@
 # Sonnet Changelog
 
+## Version 1.31 - Tuesday, 12. March 2019
+
+* Added `custom_getter` parameter to `snt.ConvNet2DTranspose`. It now can be used when transposing an existing `ConvNet2D` or `ConvNet2DTranspose`.
+* Fixed a regression in the `bayes_by_backprop_getter` caused by a change in the `tfp.Distribution` API.
+* Changes in test sizes.
+
+
 ## Version 1.30 - Tuesday, 12. February 2019
 
 * Added a class to linear transform the concatenation of a list of Tensors.

@@ -1131,6 +1131,7 @@ class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
         x = tf.get_variable("x", [])
     self.assertVariableType(x, use_resource)
     self.assertEqual(variables, [x])
+
   @parameterized.parameters(
       itertools.product(
           ["ResourceVariable", "RefVariable"],

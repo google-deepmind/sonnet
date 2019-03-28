@@ -1,5 +1,12 @@
 # Sonnet Changelog
 
+## Version 1.32 - Wednesday, 27. March 2019
+* Documentation updates.
+* Tiny shakespeare data is now compressed.
+* `setup.py` now uses environment variables for GPU builds.
+* Removed unused  `wrap_rnn_cell_class` decorator from `rnn_core`.
+
+
 ## Version 1.31 - Tuesday, 12. March 2019
 
 * Added `custom_getter` parameter to `snt.ConvNet2DTranspose`. It now can be used when transposing an existing `ConvNet2D` or `ConvNet2DTranspose`.

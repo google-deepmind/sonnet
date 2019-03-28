@@ -29,7 +29,7 @@ from setuptools.command.install import install as InstallCommandBase
 # This version string is semver compatible, but incompatible with pip.
 # For pip, we will remove all '-' characters from this string, and use the
 # result for pip.
-_VERSION = '1.30'
+_VERSION = '1.31'
 
 # Use the SONNET_GPU env var to configure GPU deps.
 with_gpu = os.environ.get('SONNET_GPU', '0').lower() not in ('0', 'false', 'no')

@@ -20127,7 +20127,7 @@ apply operations combining user input and module parameters. For example:
 >>> mod(1.)
 <tf.Tensor: ... numpy=2.0>
 
-#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=240)<a id="experimental.v2.Module.__init__" />
+#### [`experimental.v2.Module.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=266)<a id="experimental.v2.Module.__init__" />
 
 
 
@@ -20362,7 +20362,7 @@ names included the module name:
 
 
 
-### [`experimental.v2.no_name_scope(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=20)<a id="experimental.v2.no_name_scope" />
+### [`experimental.v2.no_name_scope(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=21)<a id="experimental.v2.no_name_scope" />
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -20396,7 +20396,7 @@ Register a virtual subclass of an ABC.
 
 
 
-### [`experimental.v2.base.auto_repr(cls, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=126)<a id="experimental.v2.base.auto_repr" />
+### [`experimental.v2.base.auto_repr(cls, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=127)<a id="experimental.v2.base.auto_repr" />
 
 Derive a `__repr__` from constructor arguments of a given class.
 
@@ -20422,7 +20422,17 @@ Derive a `__repr__` from constructor arguments of a given class.
   A string representing a call equivalent to `cls(*args, **kwargs)`.
 
 
-### [`experimental.v2.base.with_name_scope(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=207)<a id="experimental.v2.base.with_name_scope" />
+### [`experimental.v2.base.fancy_repr(name, value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=173)<a id="experimental.v2.base.fancy_repr" />
+
+
+
+
+### [`experimental.v2.base.indent(amount, s)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=180)<a id="experimental.v2.base.indent" />
+
+Indents `s` with `amount` spaces.
+
+
+### [`experimental.v2.base.with_name_scope(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=233)<a id="experimental.v2.base.with_name_scope" />
 
 Patches the given method so it enters the modules name scope.
 

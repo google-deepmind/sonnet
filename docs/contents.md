@@ -58,6 +58,8 @@
   * [`Embed`](sonnet.md#Embed)
   * [`Error`](sonnet.md#Error)
   * [`experimental.v2.base.auto_repr`](sonnet.md#experimental.v2.base.auto_repr)
+  * [`experimental.v2.base.fancy_repr`](sonnet.md#experimental.v2.base.fancy_repr)
+  * [`experimental.v2.base.indent`](sonnet.md#experimental.v2.base.indent)
   * [`experimental.v2.base.ModuleMetaclass`](sonnet.md#experimental.v2.base.ModuleMetaclass)
   * [`experimental.v2.base.with_name_scope`](sonnet.md#experimental.v2.base.with_name_scope)
   * [`experimental.v2.base.wrap_with_name_scope`](sonnet.md#experimental.v2.base.wrap_with_name_scope)

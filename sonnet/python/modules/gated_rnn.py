@@ -1298,6 +1298,11 @@ class ConvLSTM(rnn_core.RNNCore):
     self._initializers = initializers
     self._partitioners = partitioners
     self._regularizers = regularizers
+    if use_layer_norm:
+      util.deprecation_warning(
+          "`use_layer_norm` kwarg is being deprecated as the implementation is "
+          "currently incorrect - scale and offset params are created for "
+          "spatial_dims * channels instead of just channels.")
     self._use_layer_norm = use_layer_norm
 
     self._total_output_channels = output_channels

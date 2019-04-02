@@ -5258,12 +5258,12 @@ Returns the Variable containing the weight matrix.
 
 1D convolutional LSTM.
 
-#### [`Conv1DLSTM.__init__(name='conv_1d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1404)<a id="Conv1DLSTM.__init__" />
+#### [`Conv1DLSTM.__init__(name='conv_1d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1409)<a id="Conv1DLSTM.__init__" />
 
 Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.
 
 
-#### [`Conv1DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1359)<a id="Conv1DLSTM.__call__" />
+#### [`Conv1DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv1DLSTM.__call__" />
 
 
 
@@ -5273,7 +5273,7 @@ Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv1DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1342)<a id="Conv1DLSTM.convolutions" />
+#### [`Conv1DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="Conv1DLSTM.convolutions" />
 
 
 
@@ -5312,7 +5312,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1400)<a id="Conv1DLSTM.get_possible_initializer_keys" />
+#### [`Conv1DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1405)<a id="Conv1DLSTM.get_possible_initializer_keys" />
 
 
 
@@ -5436,7 +5436,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1353)<a id="Conv1DLSTM.output_size" />
+#### [`Conv1DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="Conv1DLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -5446,7 +5446,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv1DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1346)<a id="Conv1DLSTM.state_size" />
+#### [`Conv1DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="Conv1DLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -5471,7 +5471,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1391)<a id="Conv1DLSTM.use_layer_norm" />
+#### [`Conv1DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="Conv1DLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 
@@ -6422,12 +6422,12 @@ Returns the Variable containing the weight matrix.
 
 2D convolutional LSTM.
 
-#### [`Conv2DLSTM.__init__(name='conv_2d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1418)<a id="Conv2DLSTM.__init__" />
+#### [`Conv2DLSTM.__init__(name='conv_2d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1423)<a id="Conv2DLSTM.__init__" />
 
 Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.
 
 
-#### [`Conv2DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1359)<a id="Conv2DLSTM.__call__" />
+#### [`Conv2DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv2DLSTM.__call__" />
 
 
 
@@ -6437,7 +6437,7 @@ Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv2DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1342)<a id="Conv2DLSTM.convolutions" />
+#### [`Conv2DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="Conv2DLSTM.convolutions" />
 
 
 
@@ -6476,7 +6476,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1414)<a id="Conv2DLSTM.get_possible_initializer_keys" />
+#### [`Conv2DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1419)<a id="Conv2DLSTM.get_possible_initializer_keys" />
 
 
 
@@ -6600,7 +6600,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1353)<a id="Conv2DLSTM.output_size" />
+#### [`Conv2DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="Conv2DLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -6610,7 +6610,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv2DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1346)<a id="Conv2DLSTM.state_size" />
+#### [`Conv2DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="Conv2DLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -6635,7 +6635,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1391)<a id="Conv2DLSTM.use_layer_norm" />
+#### [`Conv2DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="Conv2DLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 
@@ -9429,7 +9429,7 @@ Attributes:
   state_size: Integer indicating the size of state tensor.
   output_size: Integer indicating the size of the core output.
 
-#### [`GRU.__init__(hidden_size, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='gru')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1445)<a id="GRU.__init__" />
+#### [`GRU.__init__(hidden_size, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='gru')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1450)<a id="GRU.__init__" />
 
 Construct GRU.
 
@@ -9464,7 +9464,7 @@ Construct GRU.
     `GRU.get_possible_initializer_keys`.
 
 
-#### [`GRU.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1505)<a id="GRU.__call__" />
+#### [`GRU.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1510)<a id="GRU.__call__" />
 
 Connects the GRU module into the graph.
 
@@ -9533,7 +9533,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`GRU.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1484)<a id="GRU.get_possible_initializer_keys" />
+#### [`GRU.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1489)<a id="GRU.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -9675,7 +9675,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`GRU.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1585)<a id="GRU.output_size" />
+#### [`GRU.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1590)<a id="GRU.output_size" />
 
 
 
@@ -9685,7 +9685,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`GRU.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1581)<a id="GRU.state_size" />
+#### [`GRU.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1586)<a id="GRU.state_size" />
 
 
 
@@ -10070,7 +10070,7 @@ Attributes:
   state_size: Integer indicating the size of state tensor.
   output_size: Integer indicating the size of the core output.
 
-#### [`HighwayCore.__init__(hidden_size, num_layers, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='highwaycore')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1608)<a id="HighwayCore.__init__" />
+#### [`HighwayCore.__init__(hidden_size, num_layers, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='highwaycore')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1613)<a id="HighwayCore.__init__" />
 
 Construct a new Recurrent Highway core.
 
@@ -10106,7 +10106,7 @@ Construct a new Recurrent Highway core.
     `HighwayCore.get_possible_initializer_keys`.
 
 
-#### [`HighwayCore.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1684)<a id="HighwayCore.__call__" />
+#### [`HighwayCore.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1689)<a id="HighwayCore.__call__" />
 
 Connects the highway core module into the graph.
 
@@ -10169,7 +10169,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`HighwayCore.get_possible_initializer_keys(cls, num_layers)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1656)<a id="HighwayCore.get_possible_initializer_keys" />
+#### [`HighwayCore.get_possible_initializer_keys(cls, num_layers)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1661)<a id="HighwayCore.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -10313,7 +10313,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`HighwayCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1739)<a id="HighwayCore.output_size" />
+#### [`HighwayCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1744)<a id="HighwayCore.output_size" />
 
 
 
@@ -10323,7 +10323,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`HighwayCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1735)<a id="HighwayCore.state_size" />
+#### [`HighwayCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1740)<a id="HighwayCore.state_size" />
 
 
 
@@ -18077,7 +18077,7 @@ Returns a tuple `tf.Variable`s in a scope for a given collection.
 Determines whether the given object has a variable scope.
 
 
-### [`highway_core_with_recurrent_dropout(hidden_size, num_layers, keep_prob=0.5, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1744)<a id="highway_core_with_recurrent_dropout" />
+### [`highway_core_with_recurrent_dropout(hidden_size, num_layers, keep_prob=0.5, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1749)<a id="highway_core_with_recurrent_dropout" />
 
 Highway core with recurrent dropout.
 
@@ -18946,285 +18946,16 @@ unconstrained neural network activation to parameterize a variance.
 A pre-canned builder for a ubiquitous stochastic KL estimator.
 
 
-### [`class experimental.v2.BatchFlatten`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?q=class:BatchFlatten)<a id="experimental.v2.BatchFlatten" />
-
-Flattens the input Tensor, preserving the batch dimension(s).
-
-`BatchFlatten` reshapes input tensors to combine all trailing dimensions apart
-from the first. Additional leading dimensions can be preserved by setting the
-`preserve_dims` parameter.
-
-See `snt.BatchReshape` for more details.
-
-#### [`experimental.v2.BatchFlatten.__init__(preserve_dims=1, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=227)<a id="experimental.v2.BatchFlatten.__init__" />
-
-Constructs a BatchFlatten module.
-
-##### Args:
-
-
-* `preserve_dims`: Number of leading dimensions that will not be reshaped.
-* `name`: Name of the module.
-
-
-#### [`experimental.v2.BatchFlatten.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.BatchFlatten.name" />
-
-Returns the name of this module as passed or determined in the ctor.
-
-NOTE: This is not the same as the `self.name_scope.name` which includes
-parent module names.
-
-
-#### [`experimental.v2.BatchFlatten.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.BatchFlatten.name_scope" />
-
-Returns a `tf.name_scope` instance for this class.
-
-
-#### [`experimental.v2.BatchFlatten.reversed(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=206)<a id="experimental.v2.BatchFlatten.reversed" />
-
-Returns inverse batch reshape.
-
-
-#### [`experimental.v2.BatchFlatten.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.BatchFlatten.submodules" />
-
-Sequence of all sub-modules.
-
-Submodules are modules which are properties of this module, or found as
-properties of modules which are properties of this module (and so on).
-
->>> a = tf.Module()
->>> b = tf.Module()
->>> c = tf.Module()
->>> a.b = b
->>> b.c = c
->>> assert list(a.submodules) == [b, c]
->>> assert list(b.submodules) == [c]
->>> assert list(c.submodules) == []
-
-##### Returns:
-
-  A sequence of all submodules.
-
-
-#### [`experimental.v2.BatchFlatten.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.BatchFlatten.trainable_variables" />
-
-Sequence of variables owned by this module and it's submodules.
-
-Note: this method uses reflection to find variables on the current instance
-and submodules. For performance reasons you may wish to cache the result
-of calling this method if you don't expect the return value to change.
-
-##### Returns:
-
-  A sequence of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (breadth
-  first).
-
-
-#### [`experimental.v2.BatchFlatten.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.BatchFlatten.variables" />
-
-Sequence of variables owned by this module and it's submodules.
-
-Note: this method uses reflection to find variables on the current instance
-and submodules. For performance reasons you may wish to cache the result
-of calling this method if you don't expect the return value to change.
-
-##### Returns:
-
-  A sequence of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (breadth
-  first).
-
-
-#### [`experimental.v2.BatchFlatten.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.BatchFlatten.with_name_scope" />
-
-Decorator to automatically enter the module name scope.
-
->>> class MyModule(tf.Module):
-...   @tf.Module.with_name_scope
-...   def __call__(self, x):
-...     if not hasattr(self, 'w'):
-...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
-...     return tf.matmul(x, self.w)
-
-Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
-names included the module name:
-
->>> mod = MyModule()
->>> mod(tf.ones([8, 32]))
-<tf.Tensor: ...>
->>> mod.w
-<tf.Variable ...'my_module/w:0'>
-
-##### Args:
-
-
-* `method`: The method to wrap.
-
-##### Returns:
-
-  The original method wrapped such that it enters the module's name scope.
-
-
-
-### [`class experimental.v2.BatchReshape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?q=class:BatchReshape)<a id="experimental.v2.BatchReshape" />
-
-Reshapes input Tensor, preserving the batch dimension.
-
-For example, given an input Tensor with shape `[B, H, W, C, D]`:
-
->>> B, H, W, C, D = range(1, 6)
->>> x = tf.ones([B, H, W, C, D])
-
-The default behavior when `output_shape` is (-1, D) is to flatten all
-dimensions between `B` and `D`:
-
->>> mod = snt.BatchReshape(output_shape=(-1, D))
->>> assert mod(x).shape == [B, H*W*C, D]
-
-You can change the number of preserved leading dimensions via
-`preserve_dims`:
-
->>> mod = snt.BatchReshape(output_shape=(-1, D), preserve_dims=2)
->>> assert mod(x).shape == [B, H, W*C, D]
-
->>> mod = snt.BatchReshape(output_shape=(-1, D), preserve_dims=3)
->>> assert mod(x).shape == [B, H, W, C, D]
-
->>> mod = snt.BatchReshape(output_shape=(-1, D), preserve_dims=4)
->>> assert mod(x).shape == [B, H, W, C, 1, D]
-
-#### [`experimental.v2.BatchReshape.__init__(output_shape, preserve_dims=1, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=158)<a id="experimental.v2.BatchReshape.__init__" />
-
-Constructs a BatchReshape module.
-
-##### Args:
-
-
-* `output_shape`: Shape to reshape the input Tensor to while preserving its
-      first `preserve_dims` dimensions. When the special value -1
-      appears in `output_shape` the corresponding size is automatically
-      inferred. Note that -1 can only appear once in `output_shape`. To
-      flatten all non-batch dimensions use `snt.BatchFlatten`.
-* `preserve_dims`: Number of leading dimensions that will not be reshaped.
-* `name`: Name of the module.
-
-##### Raises:
-
-
-* `ValueError`: If `preserve_dims <= 0`.
-
-
-#### [`experimental.v2.BatchReshape.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.BatchReshape.name" />
-
-Returns the name of this module as passed or determined in the ctor.
-
-NOTE: This is not the same as the `self.name_scope.name` which includes
-parent module names.
-
-
-#### [`experimental.v2.BatchReshape.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.BatchReshape.name_scope" />
-
-Returns a `tf.name_scope` instance for this class.
-
-
-#### [`experimental.v2.BatchReshape.reversed(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=206)<a id="experimental.v2.BatchReshape.reversed" />
-
-Returns inverse batch reshape.
-
-
-#### [`experimental.v2.BatchReshape.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.BatchReshape.submodules" />
-
-Sequence of all sub-modules.
-
-Submodules are modules which are properties of this module, or found as
-properties of modules which are properties of this module (and so on).
-
->>> a = tf.Module()
->>> b = tf.Module()
->>> c = tf.Module()
->>> a.b = b
->>> b.c = c
->>> assert list(a.submodules) == [b, c]
->>> assert list(b.submodules) == [c]
->>> assert list(c.submodules) == []
-
-##### Returns:
-
-  A sequence of all submodules.
-
-
-#### [`experimental.v2.BatchReshape.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.BatchReshape.trainable_variables" />
-
-Sequence of variables owned by this module and it's submodules.
-
-Note: this method uses reflection to find variables on the current instance
-and submodules. For performance reasons you may wish to cache the result
-of calling this method if you don't expect the return value to change.
-
-##### Returns:
-
-  A sequence of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (breadth
-  first).
-
-
-#### [`experimental.v2.BatchReshape.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.BatchReshape.variables" />
-
-Sequence of variables owned by this module and it's submodules.
-
-Note: this method uses reflection to find variables on the current instance
-and submodules. For performance reasons you may wish to cache the result
-of calling this method if you don't expect the return value to change.
-
-##### Returns:
-
-  A sequence of variables for the current module (sorted by attribute
-  name) followed by variables from all submodules recursively (breadth
-  first).
-
-
-#### [`experimental.v2.BatchReshape.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.BatchReshape.with_name_scope" />
-
-Decorator to automatically enter the module name scope.
-
->>> class MyModule(tf.Module):
-...   @tf.Module.with_name_scope
-...   def __call__(self, x):
-...     if not hasattr(self, 'w'):
-...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
-...     return tf.matmul(x, self.w)
-
-Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
-names included the module name:
-
->>> mod = MyModule()
->>> mod(tf.ones([8, 32]))
-<tf.Tensor: ...>
->>> mod.w
-<tf.Variable ...'my_module/w:0'>
-
-##### Args:
-
-
-* `method`: The method to wrap.
-
-##### Returns:
-
-  The original method wrapped such that it enters the module's name scope.
-
-
-
 ### [`class experimental.v2.Conv1D`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?q=class:Conv1D)<a id="experimental.v2.Conv1D" />
 
 Conv1D module.
 
-#### [`experimental.v2.Conv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=174)<a id="experimental.v2.Conv1D.__init__" />
+#### [`experimental.v2.Conv1D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=166)<a id="experimental.v2.Conv1D.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv1D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv1D.name" />
+#### [`experimental.v2.Conv1D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv1D.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19232,12 +18963,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv1D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv1D.name_scope" />
+#### [`experimental.v2.Conv1D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv1D.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv1D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv1D.submodules" />
+#### [`experimental.v2.Conv1D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv1D.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19258,7 +18989,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv1D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv1D.trainable_variables" />
+#### [`experimental.v2.Conv1D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv1D.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19273,7 +19004,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv1D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv1D.variables" />
+#### [`experimental.v2.Conv1D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv1D.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19288,7 +19019,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv1D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv1D.with_name_scope" />
+#### [`experimental.v2.Conv1D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv1D.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19323,12 +19054,12 @@ names included the module name:
 
 Conv1DTranspose module.
 
-#### [`experimental.v2.Conv1DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=187)<a id="experimental.v2.Conv1DTranspose.__init__" />
+#### [`experimental.v2.Conv1DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=178)<a id="experimental.v2.Conv1DTranspose.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv1DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv1DTranspose.name" />
+#### [`experimental.v2.Conv1DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv1DTranspose.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19336,12 +19067,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv1DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv1DTranspose.name_scope" />
+#### [`experimental.v2.Conv1DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv1DTranspose.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv1DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv1DTranspose.submodules" />
+#### [`experimental.v2.Conv1DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv1DTranspose.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19362,7 +19093,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv1DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv1DTranspose.trainable_variables" />
+#### [`experimental.v2.Conv1DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv1DTranspose.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19377,7 +19108,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv1DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv1DTranspose.variables" />
+#### [`experimental.v2.Conv1DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv1DTranspose.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19392,7 +19123,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv1DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv1DTranspose.with_name_scope" />
+#### [`experimental.v2.Conv1DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv1DTranspose.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19427,12 +19158,12 @@ names included the module name:
 
 Conv2D module.
 
-#### [`experimental.v2.Conv2D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=201)<a id="experimental.v2.Conv2D.__init__" />
+#### [`experimental.v2.Conv2D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=193)<a id="experimental.v2.Conv2D.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv2D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv2D.name" />
+#### [`experimental.v2.Conv2D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv2D.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19440,12 +19171,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv2D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv2D.name_scope" />
+#### [`experimental.v2.Conv2D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv2D.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv2D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv2D.submodules" />
+#### [`experimental.v2.Conv2D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv2D.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19466,7 +19197,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv2D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv2D.trainable_variables" />
+#### [`experimental.v2.Conv2D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv2D.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19481,7 +19212,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv2D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv2D.variables" />
+#### [`experimental.v2.Conv2D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv2D.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19496,7 +19227,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv2D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv2D.with_name_scope" />
+#### [`experimental.v2.Conv2D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv2D.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19531,12 +19262,12 @@ names included the module name:
 
 Conv2DTranspose module.
 
-#### [`experimental.v2.Conv2DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=216)<a id="experimental.v2.Conv2DTranspose.__init__" />
+#### [`experimental.v2.Conv2DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=207)<a id="experimental.v2.Conv2DTranspose.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv2DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv2DTranspose.name" />
+#### [`experimental.v2.Conv2DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv2DTranspose.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19544,12 +19275,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv2DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv2DTranspose.name_scope" />
+#### [`experimental.v2.Conv2DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv2DTranspose.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv2DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv2DTranspose.submodules" />
+#### [`experimental.v2.Conv2DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv2DTranspose.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19570,7 +19301,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv2DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv2DTranspose.trainable_variables" />
+#### [`experimental.v2.Conv2DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv2DTranspose.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19585,7 +19316,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv2DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv2DTranspose.variables" />
+#### [`experimental.v2.Conv2DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv2DTranspose.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19600,7 +19331,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv2DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv2DTranspose.with_name_scope" />
+#### [`experimental.v2.Conv2DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv2DTranspose.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19635,12 +19366,12 @@ names included the module name:
 
 Conv3D module.
 
-#### [`experimental.v2.Conv3D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NDHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=228)<a id="experimental.v2.Conv3D.__init__" />
+#### [`experimental.v2.Conv3D.__init__(output_channels, kernel_shape, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NDHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?l=220)<a id="experimental.v2.Conv3D.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv3D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv3D.name" />
+#### [`experimental.v2.Conv3D.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv3D.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19648,12 +19379,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv3D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv3D.name_scope" />
+#### [`experimental.v2.Conv3D.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv3D.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv3D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv3D.submodules" />
+#### [`experimental.v2.Conv3D.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv3D.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19674,7 +19405,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv3D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv3D.trainable_variables" />
+#### [`experimental.v2.Conv3D.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv3D.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19689,7 +19420,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv3D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv3D.variables" />
+#### [`experimental.v2.Conv3D.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv3D.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19704,7 +19435,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv3D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv3D.with_name_scope" />
+#### [`experimental.v2.Conv3D.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv3D.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19739,12 +19470,12 @@ names included the module name:
 
 Conv3DTranspose module.
 
-#### [`experimental.v2.Conv3DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NDHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=245)<a id="experimental.v2.Conv3DTranspose.__init__" />
+#### [`experimental.v2.Conv3DTranspose.__init__(output_channels, kernel_shape, output_shape=None, stride=1, rate=1, padding='SAME', with_bias=True, w_init=None, b_init=None, data_format='NDHWC', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv_transpose.py?l=236)<a id="experimental.v2.Conv3DTranspose.__init__" />
 
 
 
 
-#### [`experimental.v2.Conv3DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Conv3DTranspose.name" />
+#### [`experimental.v2.Conv3DTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Conv3DTranspose.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19752,12 +19483,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Conv3DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Conv3DTranspose.name_scope" />
+#### [`experimental.v2.Conv3DTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Conv3DTranspose.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Conv3DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Conv3DTranspose.submodules" />
+#### [`experimental.v2.Conv3DTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Conv3DTranspose.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19778,7 +19509,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Conv3DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Conv3DTranspose.trainable_variables" />
+#### [`experimental.v2.Conv3DTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Conv3DTranspose.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19793,7 +19524,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv3DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Conv3DTranspose.variables" />
+#### [`experimental.v2.Conv3DTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Conv3DTranspose.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19808,7 +19539,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Conv3DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Conv3DTranspose.with_name_scope" />
+#### [`experimental.v2.Conv3DTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Conv3DTranspose.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19885,7 +19616,7 @@ Initializes the Deferred module.
 * `name`: Name for the deferred module.
 
 
-#### [`experimental.v2.Deferred.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Deferred.name" />
+#### [`experimental.v2.Deferred.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Deferred.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -19893,12 +19624,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Deferred.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Deferred.name_scope" />
+#### [`experimental.v2.Deferred.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Deferred.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Deferred.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Deferred.submodules" />
+#### [`experimental.v2.Deferred.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Deferred.submodules" />
 
 Sequence of all sub-modules.
 
@@ -19931,7 +19662,7 @@ Subsequent calls to `target` will return the same instance.
   A `Module` instance as created by `self.constructor()` .
 
 
-#### [`experimental.v2.Deferred.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Deferred.trainable_variables" />
+#### [`experimental.v2.Deferred.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Deferred.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19946,7 +19677,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Deferred.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Deferred.variables" />
+#### [`experimental.v2.Deferred.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Deferred.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -19961,7 +19692,128 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Deferred.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Deferred.with_name_scope" />
+#### [`experimental.v2.Deferred.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Deferred.with_name_scope" />
+
+Decorator to automatically enter the module name scope.
+
+>>> class MyModule(tf.Module):
+...   @tf.Module.with_name_scope
+...   def __call__(self, x):
+...     if not hasattr(self, 'w'):
+...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
+...     return tf.matmul(x, self.w)
+
+Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
+names included the module name:
+
+>>> mod = MyModule()
+>>> mod(tf.ones([8, 32]))
+<tf.Tensor: ...>
+>>> mod.w
+<tf.Variable ...'my_module/w:0'>
+
+##### Args:
+
+
+* `method`: The method to wrap.
+
+##### Returns:
+
+  The original method wrapped such that it enters the module's name scope.
+
+
+
+### [`class experimental.v2.Flatten`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?q=class:Flatten)<a id="experimental.v2.Flatten" />
+
+Flattens the input Tensor, preserving the batch dimension(s).
+
+`Flatten` reshapes input tensors to combine all trailing dimensions apart
+from the first. Additional leading dimensions can be preserved by setting the
+`preserve_dims` parameter.
+
+See `snt.Reshape` for more details.
+
+#### [`experimental.v2.Flatten.__init__(preserve_dims=1, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=227)<a id="experimental.v2.Flatten.__init__" />
+
+Constructs a Flatten module.
+
+##### Args:
+
+
+* `preserve_dims`: Number of leading dimensions that will not be reshaped.
+* `name`: Name of the module.
+
+
+#### [`experimental.v2.Flatten.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Flatten.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.Flatten.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Flatten.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.Flatten.reversed(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=206)<a id="experimental.v2.Flatten.reversed" />
+
+Returns inverse batch reshape.
+
+
+#### [`experimental.v2.Flatten.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Flatten.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.Module()
+>>> b = tf.Module()
+>>> c = tf.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.Flatten.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Flatten.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Flatten.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Flatten.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Flatten.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Flatten.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -19996,7 +19848,7 @@ names included the module name:
 
 Linear module, optionally including bias.
 
-#### [`experimental.v2.Linear.__init__(output_size, with_bias=True, w_init=None, b_init=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/linear.py?l=18)<a id="experimental.v2.Linear.__init__" />
+#### [`experimental.v2.Linear.__init__(output_size, with_bias=True, w_init=None, b_init=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/linear.py?l=19)<a id="experimental.v2.Linear.__init__" />
 
 Constructs a Linear module.
 
@@ -20014,7 +19866,7 @@ Constructs a Linear module.
 * `name`: Name of the module.
 
 
-#### [`experimental.v2.Linear.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Linear.name" />
+#### [`experimental.v2.Linear.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Linear.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -20022,12 +19874,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Linear.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Linear.name_scope" />
+#### [`experimental.v2.Linear.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Linear.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Linear.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Linear.submodules" />
+#### [`experimental.v2.Linear.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Linear.submodules" />
 
 Sequence of all sub-modules.
 
@@ -20048,7 +19900,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Linear.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Linear.trainable_variables" />
+#### [`experimental.v2.Linear.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Linear.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20063,7 +19915,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Linear.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Linear.variables" />
+#### [`experimental.v2.Linear.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Linear.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20078,7 +19930,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Linear.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Linear.with_name_scope" />
+#### [`experimental.v2.Linear.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Linear.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -20132,7 +19984,7 @@ apply operations combining user input and module parameters. For example:
 
 
 
-#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Module.name" />
+#### [`experimental.v2.Module.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Module.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -20140,12 +19992,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Module.name_scope" />
+#### [`experimental.v2.Module.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Module.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Module.submodules" />
+#### [`experimental.v2.Module.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Module.submodules" />
 
 Sequence of all sub-modules.
 
@@ -20166,7 +20018,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Module.trainable_variables" />
+#### [`experimental.v2.Module.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Module.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20181,7 +20033,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Module.variables" />
+#### [`experimental.v2.Module.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Module.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20196,7 +20048,155 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Module.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Module.with_name_scope" />
+#### [`experimental.v2.Module.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Module.with_name_scope" />
+
+Decorator to automatically enter the module name scope.
+
+>>> class MyModule(tf.Module):
+...   @tf.Module.with_name_scope
+...   def __call__(self, x):
+...     if not hasattr(self, 'w'):
+...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
+...     return tf.matmul(x, self.w)
+
+Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
+names included the module name:
+
+>>> mod = MyModule()
+>>> mod(tf.ones([8, 32]))
+<tf.Tensor: ...>
+>>> mod.w
+<tf.Variable ...'my_module/w:0'>
+
+##### Args:
+
+
+* `method`: The method to wrap.
+
+##### Returns:
+
+  The original method wrapped such that it enters the module's name scope.
+
+
+
+### [`class experimental.v2.Reshape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?q=class:Reshape)<a id="experimental.v2.Reshape" />
+
+Reshapes input Tensor, preserving the batch dimension.
+
+For example, given an input Tensor with shape `[B, H, W, C, D]`:
+
+>>> B, H, W, C, D = range(1, 6)
+>>> x = tf.ones([B, H, W, C, D])
+
+The default behavior when `output_shape` is (-1, D) is to flatten all
+dimensions between `B` and `D`:
+
+>>> mod = snt.Reshape(output_shape=(-1, D))
+>>> assert mod(x).shape == [B, H*W*C, D]
+
+You can change the number of preserved leading dimensions via
+`preserve_dims`:
+
+>>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=2)
+>>> assert mod(x).shape == [B, H, W*C, D]
+
+>>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=3)
+>>> assert mod(x).shape == [B, H, W, C, D]
+
+>>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=4)
+>>> assert mod(x).shape == [B, H, W, C, 1, D]
+
+#### [`experimental.v2.Reshape.__init__(output_shape, preserve_dims=1, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=158)<a id="experimental.v2.Reshape.__init__" />
+
+Constructs a Reshape module.
+
+##### Args:
+
+
+* `output_shape`: Shape to reshape the input Tensor to while preserving its
+      first `preserve_dims` dimensions. When the special value -1
+      appears in `output_shape` the corresponding size is automatically
+      inferred. Note that -1 can only appear once in `output_shape`. To
+      flatten all non-batch dimensions use `snt.Flatten`.
+* `preserve_dims`: Number of leading dimensions that will not be reshaped.
+* `name`: Name of the module.
+
+##### Raises:
+
+
+* `ValueError`: If `preserve_dims <= 0`.
+
+
+#### [`experimental.v2.Reshape.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Reshape.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.Reshape.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Reshape.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.Reshape.reversed(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/reshape.py?l=206)<a id="experimental.v2.Reshape.reversed" />
+
+Returns inverse batch reshape.
+
+
+#### [`experimental.v2.Reshape.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Reshape.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.Module()
+>>> b = tf.Module()
+>>> c = tf.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.Reshape.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Reshape.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Reshape.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Reshape.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.Reshape.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Reshape.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -20267,7 +20267,7 @@ recommended solution is to subclass `snt.Module` and implement `__call__`:
 
 
 
-#### [`experimental.v2.Sequential.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.Sequential.name" />
+#### [`experimental.v2.Sequential.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.Sequential.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -20275,12 +20275,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.Sequential.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.Sequential.name_scope" />
+#### [`experimental.v2.Sequential.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.Sequential.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.Sequential.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.Sequential.submodules" />
+#### [`experimental.v2.Sequential.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.Sequential.submodules" />
 
 Sequence of all sub-modules.
 
@@ -20301,7 +20301,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.Sequential.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.Sequential.trainable_variables" />
+#### [`experimental.v2.Sequential.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.Sequential.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20316,7 +20316,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Sequential.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.Sequential.variables" />
+#### [`experimental.v2.Sequential.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.Sequential.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20331,7 +20331,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.Sequential.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.Sequential.with_name_scope" />
+#### [`experimental.v2.Sequential.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.Sequential.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -20437,7 +20437,7 @@ Indents `s` with `amount` spaces.
 Patches the given method so it enters the modules name scope.
 
 
-### [`experimental.v2.base.wrap_with_name_scope(f)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=32)<a id="experimental.v2.base.wrap_with_name_scope" />
+### [`experimental.v2.base.wrap_with_name_scope(f)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=33)<a id="experimental.v2.base.wrap_with_name_scope" />
 
 Decorator that calls the given function in the module name scope.
 
@@ -20454,7 +20454,7 @@ Decorator that calls the given function in the module name scope.
   `with instance.name_scope: return method(*args, **kwargs)`
 
 
-### [`experimental.v2.base.wrap_with_name_scope_no_exception(f)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=32)<a id="experimental.v2.base.wrap_with_name_scope_no_exception" />
+### [`experimental.v2.base.wrap_with_name_scope_no_exception(f)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/base.py?l=33)<a id="experimental.v2.base.wrap_with_name_scope_no_exception" />
 
 Patches the given method so it enters the modules name scope.
 
@@ -20497,7 +20497,7 @@ Constructs a ConvND module.
 * `name`: Name of the module.
 
 
-#### [`experimental.v2.conv.ConvND.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.conv.ConvND.name" />
+#### [`experimental.v2.conv.ConvND.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.conv.ConvND.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -20505,12 +20505,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.conv.ConvND.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.conv.ConvND.name_scope" />
+#### [`experimental.v2.conv.ConvND.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.conv.ConvND.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.conv.ConvND.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.conv.ConvND.submodules" />
+#### [`experimental.v2.conv.ConvND.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.conv.ConvND.submodules" />
 
 Sequence of all sub-modules.
 
@@ -20531,7 +20531,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.conv.ConvND.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.conv.ConvND.trainable_variables" />
+#### [`experimental.v2.conv.ConvND.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.conv.ConvND.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20546,7 +20546,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.conv.ConvND.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.conv.ConvND.variables" />
+#### [`experimental.v2.conv.ConvND.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.conv.ConvND.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20561,7 +20561,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.conv.ConvND.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.conv.ConvND.with_name_scope" />
+#### [`experimental.v2.conv.ConvND.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.conv.ConvND.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -20637,7 +20637,7 @@ Constructs a ConvNDTranspose module.
 * `name`: Name of the module.
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=111)<a id="experimental.v2.conv_transpose.ConvNDTranspose.name" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.conv_transpose.ConvNDTranspose.name" />
 
 Returns the name of this module as passed or determined in the ctor.
 
@@ -20645,12 +20645,12 @@ NOTE: This is not the same as the `self.name_scope.name` which includes
 parent module names.
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=120)<a id="experimental.v2.conv_transpose.ConvNDTranspose.name_scope" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.conv_transpose.ConvNDTranspose.name_scope" />
 
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=156)<a id="experimental.v2.conv_transpose.ConvNDTranspose.submodules" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.conv_transpose.ConvNDTranspose.submodules" />
 
 Sequence of all sub-modules.
 
@@ -20671,7 +20671,7 @@ properties of modules which are properties of this module (and so on).
   A sequence of all submodules.
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=141)<a id="experimental.v2.conv_transpose.ConvNDTranspose.trainable_variables" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.conv_transpose.ConvNDTranspose.trainable_variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20686,7 +20686,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=126)<a id="experimental.v2.conv_transpose.ConvNDTranspose.variables" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.conv_transpose.ConvNDTranspose.variables" />
 
 Sequence of variables owned by this module and it's submodules.
 
@@ -20701,7 +20701,7 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`experimental.v2.conv_transpose.ConvNDTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=239)<a id="experimental.v2.conv_transpose.ConvNDTranspose.with_name_scope" />
+#### [`experimental.v2.conv_transpose.ConvNDTranspose.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.conv_transpose.ConvNDTranspose.with_name_scope" />
 
 Decorator to automatically enter the module name scope.
 
@@ -20961,12 +20961,12 @@ Next time the method is run, it will be treated as not having run before.
   called.
 
 
-### [`experimental.v2.pad.causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=25)<a id="experimental.v2.pad.causal" />
+### [`experimental.v2.pad.causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=34)<a id="experimental.v2.pad.causal" />
 
 "Pre-padding such that output has no dependence on the future.
 
 
-### [`experimental.v2.pad.create(padding, kernel, rate, n, channel_index)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=35)<a id="experimental.v2.pad.create" />
+### [`experimental.v2.pad.create(padding, kernel, rate, n, channel_index)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=44)<a id="experimental.v2.pad.create" />
 
 Generates the padding required for a given padding algorithm.
 
@@ -20993,32 +20993,58 @@ Generates the padding required for a given padding algorithm.
   the form [pad_before, pad_after].
 
 
-### [`experimental.v2.pad.full(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=20)<a id="experimental.v2.pad.full" />
+### [`experimental.v2.pad.full(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=29)<a id="experimental.v2.pad.full" />
 
 Maximal padding whilst not convolving over just padded elements.
 
 
-### [`experimental.v2.pad.reverse_causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=30)<a id="experimental.v2.pad.reverse_causal" />
+### [`experimental.v2.pad.reverse_causal(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=39)<a id="experimental.v2.pad.reverse_causal" />
 
 Post-padding such that output has no dependence on the past.
 
 
-### [`experimental.v2.pad.same(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=15)<a id="experimental.v2.pad.same" />
+### [`experimental.v2.pad.same(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=24)<a id="experimental.v2.pad.same" />
 
 "Pads such that the output size matches input size for stride=1.
 
 
-### [`experimental.v2.pad.valid(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=10)<a id="experimental.v2.pad.valid" />
+### [`experimental.v2.pad.valid(effective_kernel_size)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/pad.py?l=19)<a id="experimental.v2.pad.valid" />
 
 No padding.
 
 
-### [`experimental.v2.utils.decorator(decorator_fn)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=30)<a id="experimental.v2.utils.decorator" />
+### [`experimental.v2.utils.assert_rank(inputs, rank)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=99)<a id="experimental.v2.utils.assert_rank" />
+
+Asserts the rank of the input is `rank`.
+
+
+### [`experimental.v2.utils.decorator(decorator_fn)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=31)<a id="experimental.v2.utils.decorator" />
 
 Returns a wrapt style decorator.
 
 
-### [`experimental.v2.utils.replicate(element, num_times, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=12)<a id="experimental.v2.utils.replicate" />
+### [`experimental.v2.utils.get_channel_index(data_format)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=69)<a id="experimental.v2.utils.get_channel_index" />
+
+Returns the channel index when given a valid data format.
+
+##### Args:
+
+
+* `data_format`: String, the data format to get the channel index from. Valid
+    data formats are spatial (e.g.`NCHW`), sequential (e.g. `BTHWD`),
+    `channels_first` and `channels_last`).
+
+##### Returns:
+
+  The channel index as an int - either 1 or -1.
+
+##### Raises:
+
+
+* `ValueError`: If the data format is unrecognised.
+
+
+### [`experimental.v2.utils.replicate(element, num_times, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/utils.py?l=13)<a id="experimental.v2.utils.replicate" />
 
 Replicates entry in `element` `num_times` if needed.
 
@@ -24501,7 +24527,7 @@ Construct ConvLSTM.
     or if `input_shape` is incompatible with `conv_ndims`.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1359)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
+#### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
 
 
 
@@ -24511,7 +24537,7 @@ Construct ConvLSTM.
 Returns the subgraphs created by this module so far.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1342)<a id="python.modules.gated_rnn.ConvLSTM.convolutions" />
+#### [`python.modules.gated_rnn.ConvLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="python.modules.gated_rnn.ConvLSTM.convolutions" />
 
 
 
@@ -24674,7 +24700,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1353)<a id="python.modules.gated_rnn.ConvLSTM.output_size" />
+#### [`python.modules.gated_rnn.ConvLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="python.modules.gated_rnn.ConvLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -24684,7 +24710,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1346)<a id="python.modules.gated_rnn.ConvLSTM.state_size" />
+#### [`python.modules.gated_rnn.ConvLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="python.modules.gated_rnn.ConvLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -24709,7 +24735,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1391)<a id="python.modules.gated_rnn.ConvLSTM.use_layer_norm" />
+#### [`python.modules.gated_rnn.ConvLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="python.modules.gated_rnn.ConvLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 

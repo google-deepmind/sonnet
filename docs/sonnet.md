@@ -18946,6 +18946,154 @@ unconstrained neural network activation to parameterize a variance.
 A pre-canned builder for a ubiquitous stochastic KL estimator.
 
 
+### [`class experimental.v2.AxisNorm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/axis_norm.py?q=class:AxisNorm)<a id="experimental.v2.AxisNorm" />
+
+Normalizes inputs along the given axes.
+
+This is a generic implementation of normalization along specific axes of the
+input. LayerNorm and InstanceNorm are subclasses of this module, they
+normalize over the channel and spatial dimensions respectively.
+It transforms the input x into:
+
+  outputs = scale * (x - mu) / (sigma + eps) + offset
+
+where mu and sigma are respectively the mean and standard deviation of x.
+
+There are many different variations for how people want to manage scale and
+offset if they require them at all. These are:
+  - no scale/offset in which case create_* should be set to False and
+    scale/offset aren't passed when the module is called.
+  - trainable scale/offset in which case create_* should be set to True and
+    again scale/offset aren't passed when the module is called. In this case
+    this module creates and owns the scale/offset variables.
+  - externally generated scale/offset, such as for conditional normalization,
+    in which case create_* should be set to False and then scale/offset
+    passed in at call time.
+
+Attributes:
+  scale: If `create_scale`, a trainable variable holding the current scale
+    after the module is connected for the first time.
+  offset: If `create_offset`, a trainable variable holding the current offset
+    after the module is connected for the first time.
+
+#### [`experimental.v2.AxisNorm.__init__(axis, create_scale, create_offset, eps=0.0001, scale_init=None, offset_init=None, data_format='channels_last', name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/axis_norm.py?l=47)<a id="experimental.v2.AxisNorm.__init__" />
+
+Constructs a AxisNorm module.
+
+##### Args:
+
+
+* `axis`: An int, slice or sequence of ints representing the axes which should
+    be normalized across.
+* `create_scale`: Boolean representing whether to create a trainable scale per
+    channel applied after the normalization.
+* `create_offset`: Boolean representing whether to create a trainable offset
+    per channel applied after normalization and scaling.
+* `eps`: Small epsilon to avoid division by zero variance. Defaults to 1e-4.
+* `scale_init`: Optional initializer for the scale variable. Can only be set
+    if `create_scale` is True. By default scale is initialized to one.
+* `offset_init`: Optional initializer for the offset variable. Can only be set
+    if `create_offset` is True. By default offset is initialized to zero.
+* `data_format`: The data format of the input. Can be either `channels_first`,
+    `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
+* `name`: Name of the module.
+
+
+#### [`experimental.v2.AxisNorm.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.AxisNorm.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.AxisNorm.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.AxisNorm.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.AxisNorm.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.AxisNorm.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.Module()
+>>> b = tf.Module()
+>>> c = tf.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.AxisNorm.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.AxisNorm.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.AxisNorm.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.AxisNorm.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.AxisNorm.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.AxisNorm.with_name_scope" />
+
+Decorator to automatically enter the module name scope.
+
+>>> class MyModule(tf.Module):
+...   @tf.Module.with_name_scope
+...   def __call__(self, x):
+...     if not hasattr(self, 'w'):
+...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
+...     return tf.matmul(x, self.w)
+
+Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
+names included the module name:
+
+>>> mod = MyModule()
+>>> mod(tf.ones([8, 32]))
+<tf.Tensor: ...>
+>>> mod.w
+<tf.Variable ...'my_module/w:0'>
+
+##### Args:
+
+
+* `method`: The method to wrap.
+
+##### Returns:
+
+  The original method wrapped such that it enters the module's name scope.
+
+
+
 ### [`class experimental.v2.Conv1D`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/conv.py?q=class:Conv1D)<a id="experimental.v2.Conv1D" />
 
 Conv1D module.
@@ -20915,6 +21063,160 @@ Initializer that generates tensors initialized to 0.
 ### [`experimental.v2.initializers.check_initializers(initializers, expected_keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/initializers.py?l=325)<a id="experimental.v2.initializers.check_initializers" />
 
 Checks a dictionary of initializers only contains the given keys.
+
+
+### [`class experimental.v2.nets.MLP`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/nets/mlp.py?q=class:MLP)<a id="experimental.v2.nets.MLP" />
+
+A Multi-Layer perceptron module.
+
+#### [`experimental.v2.nets.MLP.__init__(output_sizes, w_init=None, b_init=None, with_bias=True, activation=relu, activate_final=False, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/nets/mlp.py?l=15)<a id="experimental.v2.nets.MLP.__init__" />
+
+Constructs an MLP.
+
+##### Args:
+
+
+* `output_sizes`: Sequence of layer sizes.
+* `w_init`: Initializer for Linear weights.
+* `b_init`: Initializer for Linear bias. Must be `None` if `with_bias` is
+    `False`.
+* `with_bias`: Whether or not to apply a bias in each layer.
+* `activation`: Activation function to apply between linear layers. Defaults
+    to ReLU.
+* `activate_final`: Whether or not to activate the final layer of the MLP.
+* `name`: Optional name for this module.
+
+##### Raises:
+
+
+* `ValueError`: If with_bias is False and b_init is not None.
+
+
+#### [`experimental.v2.nets.MLP.name`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=112)<a id="experimental.v2.nets.MLP.name" />
+
+Returns the name of this module as passed or determined in the ctor.
+
+NOTE: This is not the same as the `self.name_scope.name` which includes
+parent module names.
+
+
+#### [`experimental.v2.nets.MLP.name_scope`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=121)<a id="experimental.v2.nets.MLP.name_scope" />
+
+Returns a `tf.name_scope` instance for this class.
+
+
+#### [`experimental.v2.nets.MLP.reverse(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/nets/mlp.py?l=43)<a id="experimental.v2.nets.MLP.reverse" />
+
+Returns a new MLP which is the reverse of this MLP layer wise.
+
+NOTE: Since computing the reverse of an MLP requries knowing the input size
+of each linear layer this method will fail if the module has not been called
+at least once. See `snt.Deferred` as a possible solution to this problem.
+
+The contract of reverse is that the reversed module will accept the output
+of the parent module as input and produce an output which is the input size
+of the parent.
+
+>>> mlp = MLP([1, 2, 3])
+>>> y = mlp(tf.ones([1, 2]))
+>>> rev = mlp.reverse()
+>>> rev(y)
+<tf.Tensor: ... shape=(1, 2), ...>
+
+##### Args:
+
+
+* `activate_final`: Whether the final layer of the MLP should be activated.
+* `name`: Optional name for the new module. The default name will be the name
+    of the current module prefixed with "reversed_".
+
+##### Returns:
+
+  An MLP instance which is the reverse of the current instance. Note these
+  instances do not share weights and apart from being symetrical are not
+  coupled in any way.
+
+
+#### [`experimental.v2.nets.MLP.submodules`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=157)<a id="experimental.v2.nets.MLP.submodules" />
+
+Sequence of all sub-modules.
+
+Submodules are modules which are properties of this module, or found as
+properties of modules which are properties of this module (and so on).
+
+>>> a = tf.Module()
+>>> b = tf.Module()
+>>> c = tf.Module()
+>>> a.b = b
+>>> b.c = c
+>>> assert list(a.submodules) == [b, c]
+>>> assert list(b.submodules) == [c]
+>>> assert list(c.submodules) == []
+
+##### Returns:
+
+  A sequence of all submodules.
+
+
+#### [`experimental.v2.nets.MLP.trainable_variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=142)<a id="experimental.v2.nets.MLP.trainable_variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.nets.MLP.variables`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=127)<a id="experimental.v2.nets.MLP.variables" />
+
+Sequence of variables owned by this module and it's submodules.
+
+Note: this method uses reflection to find variables on the current instance
+and submodules. For performance reasons you may wish to cache the result
+of calling this method if you don't expect the return value to change.
+
+##### Returns:
+
+  A sequence of variables for the current module (sorted by attribute
+  name) followed by variables from all submodules recursively (breadth
+  first).
+
+
+#### [`experimental.v2.nets.MLP.with_name_scope(cls, method)`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/module/module.py?l=240)<a id="experimental.v2.nets.MLP.with_name_scope" />
+
+Decorator to automatically enter the module name scope.
+
+>>> class MyModule(tf.Module):
+...   @tf.Module.with_name_scope
+...   def __call__(self, x):
+...     if not hasattr(self, 'w'):
+...       self.w = tf.Variable(tf.random.normal([x.shape[1], 64]))
+...     return tf.matmul(x, self.w)
+
+Using the above module would produce `tf.Variable`s and `tf.Tensor`s whose
+names included the module name:
+
+>>> mod = MyModule()
+>>> mod(tf.ones([8, 32]))
+<tf.Tensor: ...>
+>>> mod.w
+<tf.Variable ...'my_module/w:0'>
+
+##### Args:
+
+
+* `method`: The method to wrap.
+
+##### Returns:
+
+  The original method wrapped such that it enters the module's name scope.
+
 
 
 ### [`experimental.v2.once.once(f)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/experimental/v2/once.py?l=12)<a id="experimental.v2.once.once" />

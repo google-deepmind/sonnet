@@ -99,6 +99,8 @@
   * [`experimental.v2.pad.valid`](sonnet.md#experimental.v2.pad.valid)
   * [`experimental.v2.Reshape`](sonnet.md#experimental.v2.Reshape)
   * [`experimental.v2.Sequential`](sonnet.md#experimental.v2.Sequential)
+  * [`experimental.v2.SGD`](sonnet.md#experimental.v2.SGD)
+  * [`experimental.v2.sgd.ReferenceSGD`](sonnet.md#experimental.v2.sgd.ReferenceSGD)
   * [`experimental.v2.utils.assert_rank`](sonnet.md#experimental.v2.utils.assert_rank)
   * [`experimental.v2.utils.decorator`](sonnet.md#experimental.v2.utils.decorator)
   * [`experimental.v2.utils.get_channel_index`](sonnet.md#experimental.v2.utils.get_channel_index)

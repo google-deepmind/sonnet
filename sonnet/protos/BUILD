@@ -12,8 +12,16 @@ proto_library(
     srcs = ["module.proto"],
 )
 
-genrule(
+py_library(
     name = "module_pb2",
+    srcs = [
+        "__init__.py",
+        ":gen_module_pb2",
+    ],
+)
+
+genrule(
+    name = "gen_module_pb2",
     srcs = ["module.proto"],
     outs = ["module_pb2.py"],
     cmd = "$(location @com_google_protobuf//:protoc) --python_out=$(@D) -I$$(dirname $<) $<",

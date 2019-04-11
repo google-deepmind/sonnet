@@ -43,6 +43,7 @@ py_library(
 py_binary(
     name = "mnist_mlp",
     srcs = ["mnist_mlp.py"],
+    python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [":mnist_mlp_main_lib"],
 )
@@ -64,6 +65,7 @@ py_library(
 py_binary(
     name = "rnn_shakespeare",
     srcs = ["rnn_shakespeare.py"],
+    python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [":rnn_shakespeare_main_lib"],
 )
@@ -90,6 +92,7 @@ py_library(
 py_binary(
     name = "brnn_ptb",
     srcs = ["brnn_ptb.py"],
+    python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [":brnn_ptb_main_lib"],
 )
@@ -114,8 +117,12 @@ py_library(
 py_binary(
     name = "rmc_learn_to_execute",
     srcs = ["rmc_learn_to_execute.py"],
+    python_version = "PY3",
     srcs_version = "PY2AND3",
-    deps = [":rmc_learn_to_execute_main_lib"],
+    deps = [
+        ":rmc_learn_to_execute_main_lib",
+        # six dep,
+    ],
 )
 
 py_library(
@@ -138,8 +145,12 @@ py_library(
 py_binary(
     name = "rmc_nth_farthest",
     srcs = ["rmc_nth_farthest.py"],
+    python_version = "PY3",
     srcs_version = "PY2AND3",
-    deps = [":rmc_nth_farthest_main_lib"],
+    deps = [
+        ":rmc_nth_farthest_main_lib",
+        # six dep,
+    ],
 )
 
 py_library(

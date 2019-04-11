@@ -31,8 +31,8 @@ import six
 import tensorflow as tf
 import wrapt
 
-from tensorflow.python.framework import function
-from tensorflow.python.ops import variable_scope as variable_scope_ops
+from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import
+from tensorflow.python.ops import variable_scope as variable_scope_ops  # pylint: disable=g-direct-tensorflow-import
 
 
 def get_variable_scope_name(value):
@@ -870,7 +870,7 @@ def reuse_variables(method):
         obj._is_connected = True  # pylint: disable=protected-access
         if not tf.executing_eagerly():
           obj._add_connected_subgraph(  # pylint: disable=protected-access
-              method, out_ops, scope, *args, **kwargs)
+              method, out_ops, scope, args, kwargs)
       except AttributeError:
         pass
     return out_ops

@@ -352,15 +352,15 @@ class AbstractModule(object):
       parent_module._all_variables.update(self._all_variables)  # pylint: disable=protected-access
 
   def _add_connected_subgraph(self, call_method, outputs, subgraph_name_scope,
-                              *inputs_args, **inputs_kwargs):
+                              inputs_args, inputs_kwargs):
     """Adds a newly connected subgraph.
 
     Args:
       call_method: the function used to connect this Sonnet module to the graph.
       outputs: `call_method` outputs.
       subgraph_name_scope: name scope of the newly connected subgraph.
-      *inputs_args: `self._build` inputs `*args`.
-      **inputs_kwargs: `self._build` inputs `*kwargs`.
+      inputs_args: `self._build` inputs `*args`.
+      inputs_kwargs: `self._build` inputs `*kwargs`.
     """
     build_inputs = inspect.getcallargs(call_method,
                                        *inputs_args, **inputs_kwargs)
@@ -422,7 +422,7 @@ class AbstractModule(object):
       # mode (for each training step) and so we don't keep track of connected
       # subgraphs (since there will be orders of magnitude more of them).
       self._add_connected_subgraph(self._build, outputs, subgraph_name_scope,
-                                   *args, **kwargs)
+                                   args, kwargs)
     return outputs
 
   @property

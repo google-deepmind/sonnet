@@ -1,11 +1,14 @@
 # Sonnet Changelog
 
-## Version 1.32 - Tuesday, 9. April 2019
+## Version 1.32 - Friday, 12. April 2019
 * Documentation updates.
 * Tiny shakespeare data is now compressed.
 * `setup.py` now uses environment variables for GPU builds.
 * Removed unused  `wrap_rnn_cell_class` decorator from `rnn_core`.
 * Add deprecation warning for layer norm in `ConvLSTM`.
+* Modules now support named outputs.
+* Switch to using Python3 as default.
+
 
 
 ## Version 1.31 - Tuesday, 12. March 2019

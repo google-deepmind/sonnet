@@ -145,8 +145,10 @@ $ bazel build :install
 $ ./bazel-bin/install /tmp/sonnet
 </code></pre>
 
-<p>To build the GPU version instead, add a flag to the <code>bazel build :install</code>
-command above: <code>bazel build :install --define gpu=true</code>.</p>
+<p>To build the GPU accelerated version of Sonnet use:</p>
+<pre><code class="shell">$ SONNET_GPU=1 ./bazel-bin/install /tmp/sonnet
+</code></pre>
+
 <p>By default, the wheel file is built using <code>python</code>. You can optionally specify
 another python binary in the previous command to build the wheel file, such as
 <code>python3</code>:</p>
@@ -166,6 +168,7 @@ the wheel file:</p>
 trying to instantiate and connect a Linear module:</p>
 <pre><code class="shell">$ cd ~/
 $ python
+&gt;&gt;&gt; import tensorflow as tf
 &gt;&gt;&gt; import sonnet as snt
 &gt;&gt;&gt; input_ = tf.zeros(3, 5)
 &gt;&gt;&gt; output = snt.Linear(10)(input_)

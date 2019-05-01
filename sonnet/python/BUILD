@@ -177,7 +177,6 @@ module_tests = [
     srcs_version = "PY2AND3",
     deps = [
         # absl/testing:parameterized dep,
-        # mox dep,
         # numpy dep,
         "//sonnet",
         # tensorflow dep,

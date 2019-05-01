@@ -115,6 +115,8 @@
   * [`ParentNotBuiltError`](sonnet.md#ParentNotBuiltError)
   * [`parse_string_to_constructor`](sonnet.md#parse_string_to_constructor)
   * [`protos.module_pb2._b`](sonnet.md#protos.module_pb2._b)
+  * [`protos.module_pb2.NestedData`](sonnet.md#protos.module_pb2.NestedData)
+  * [`protos.module_pb2.SonnetModule`](sonnet.md#protos.module_pb2.SonnetModule)
   * [`python.modules.attention.AttentionOutput`](sonnet.md#python.modules.attention.AttentionOutput)
   * [`python.modules.base.get_connection_stack`](sonnet.md#python.modules.base.get_connection_stack)
   * [`python.modules.base.get_module_stack`](sonnet.md#python.modules.base.get_module_stack)

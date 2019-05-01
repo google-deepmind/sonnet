@@ -19,50 +19,32 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
 import sys
 
 from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.install import install as InstallCommandBase
 
-# This version string is semver compatible, but incompatible with pip.
-# For pip, we will remove all '-' characters from this string, and use the
-# result for pip.
 _VERSION = '1.32'
 
-# Use the SONNET_GPU env var to configure GPU deps.
-with_gpu = os.environ.get('SONNET_GPU', '0').lower() not in ('0', 'false', 'no')
-
-project_name = 'dm-sonnet-gpu' if with_gpu else 'dm-sonnet'
-
-_packages = {
-    'tensorflow': ['tensorflow>=1.8.0'],
-    'tensorflow-gpu': ['tensorflow-gpu>=1.8.0'],
-    'tensorflow-probability': ['tensorflow-probability>=0.4.0'],
-    'tensorflow-probability-gpu': ['tensorflow-probability-gpu>=0.4.0'],
-}
 
 EXTRA_PACKAGES = {
-    'tensorflow': _packages['tensorflow'],
-    'tensorflow with gpu': _packages['tensorflow-gpu'],
-    'tensorflow probability': _packages['tensorflow-probability'],
-    'tensorflow probability with gpu': _packages['tensorflow-probability-gpu'],
+    'tensorflow': ['tensorflow>=1.8.0'],
+    'tensorflow with gpu': ['tensorflow-gpu>=1.8.0'],
 }
 
 REQUIRED_PACKAGES = [
-    'six', 'absl-py', 'semantic_version', 'contextlib2', 'wrapt'
+    'tensorflow-probability>=0.4.0',
+    'six',
+    'absl-py',
+    'semantic_version',
+    'contextlib2',
+    'wrapt'
 ]
-
-# If this is the GPU build of sonnet, tensorflow-gpu is a hard requirement.
-# The CPU only version works well with both versions of tensorflow.
-if with_gpu:
-  REQUIRED_PACKAGES += _packages['tensorflow-gpu']
-  REQUIRED_PACKAGES += _packages['tensorflow-probability-gpu']
 
 
 setup(
-    name=project_name,
+    name='dm-sonnet',
     version=_VERSION,
     description=(
         'Sonnet is a library for building neural networks in TensorFlow.'),

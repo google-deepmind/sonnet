@@ -33,6 +33,7 @@ import wrapt
 
 from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.ops import variable_scope as variable_scope_ops  # pylint: disable=g-direct-tensorflow-import
+from tensorflow.python.util import tf_inspect  # pylint: disable=g-direct-tensorflow-import
 
 
 def get_variable_scope_name(value):
@@ -721,7 +722,7 @@ def reuse_variables(method):
 
   # Ensure that the argument passed in is really a method by checking that the
   # first positional argument to it is "self".
-  arg_spec = inspect.getargspec(method)
+  arg_spec = tf_inspect.getargspec(method)
   is_method = arg_spec.args and arg_spec.args[0] == "self"
 
   if not is_method:
@@ -1075,7 +1076,7 @@ def supports_kwargs(module_or_fn, kwargs_list):
   if not (inspect.isfunction(module_or_fn) or inspect.ismethod(module_or_fn)):
     module_or_fn = module_or_fn.__call__
 
-  arg_spec = inspect.getargspec(module_or_fn)
+  arg_spec = tf_inspect.getargspec(module_or_fn)
 
   # If there is a keywords element, then an arbitrary kwargs will work, as far
   # as we can tell from here.

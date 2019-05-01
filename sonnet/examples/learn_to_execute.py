@@ -234,7 +234,7 @@ class MixCurriculum(LTECurriculum):
   def fetch(self):
     """Samples up to maximum difficulty."""
     length = np.random.randint(1, self._max_length + 1)
-    nesting = np.random.randint(1, self._max_length + 1)
+    nesting = np.random.randint(1, self._max_nesting + 1)
     return length, nesting
 
 
@@ -317,7 +317,7 @@ class CodeOp(object):
       elem_type: type of all elements.
 
     Raises:
-      ValueError: When length and type of elems is not as exepcted.
+      ValueError: When length and type of elems is not as expected.
     """
     if len(elems) != count and all(isinstance(e, elem_type) for e in elems):
       raise ValueError("Not all elements valid: {}".format(elems))
@@ -935,7 +935,7 @@ class LearnToExecuteState(object):
     Yields:
       tuple:
         1. one-hot input tensor, representing programmatic input
-        2. one-hot target tensor, the vealuation result.
+        2. one-hot target tensor, the evaluation result.
         3. one-hot decoder target, start symbol added for sequence decoding.
         4. batch size tensor containing integer input sequence lengths.
         5. batch size tensor containing integer output sequence lengths.

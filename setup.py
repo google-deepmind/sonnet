@@ -31,7 +31,7 @@ setup(
     author='DeepMind',
     description=(
         'Sonnet is a library for building neural networks in TensorFlow.'),
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
     author_email='sonnet-dev-os@google.com',
     # Contained modules and scripts.
     packages=find_namespace_packages(exclude=['*_test.py']),

@@ -1,4 +1,0 @@
-recursive-include * *.py
-recursive-include * *.so
-recursive-include * *.csv
-recursive-include * *.txt

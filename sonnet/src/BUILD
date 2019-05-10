@@ -318,6 +318,7 @@ py_library(
     srcs = ["adam.py"],
     deps = [
         ":base",
+        ":optimizer_utils",
     ],
 )
 
@@ -337,6 +338,7 @@ py_library(
     srcs = ["momentum.py"],
     deps = [
         ":base",
+        ":optimizer_utils",
     ],
 )
 
@@ -356,6 +358,7 @@ py_library(
     srcs = ["rmsprop.py"],
     deps = [
         ":base",
+        ":optimizer_utils",
     ],
 )
 
@@ -375,6 +378,7 @@ py_library(
     srcs = ["sgd.py"],
     deps = [
         ":base",
+        ":optimizer_utils",
     ],
 )
 
@@ -464,6 +468,11 @@ py_library(
     deps = [
         # tensorflow dep,
     ],
+)
+
+py_library(
+    name = "optimizer_utils",
+    srcs = ["optimizer_utils.py"],
 )
 
 snt_py_test(

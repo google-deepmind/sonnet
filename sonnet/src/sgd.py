@@ -20,22 +20,8 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import optimizer_utils
 import tensorflow as tf
-
-
-def _check_updates_parameters(updates, parameters):
-  if len(updates) != len(parameters):
-    raise ValueError("`updates` and `parameters` must be the same length.")
-  if not parameters:
-    raise ValueError("`parameters` cannot be empty.")
-
-
-def _check_same_dtype(update, parameter):
-  # TODO(petebu): Consider casting inconsistent dtypes.
-  if update.dtype != parameter.dtype:
-    raise ValueError(
-        "DType of update {!r} is not equal to that of parameter {!r}".format(
-            update, parameter))
 
 
 class SGD(base.Module):
@@ -59,13 +45,13 @@ class SGD(base.Module):
       ValueError: If `updates` and `parameters` are empty, have different
         lengths, or have inconsistent types.
     """
-    _check_updates_parameters(updates, parameters)
+    optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
-        _check_same_dtype(update, parameter)
+        optimizer_utils.check_same_dtype(update, parameter)
         tf.raw_ops.ResourceApplyGradientDescent(
             var=parameter.handle,
             alpha=tf.cast(self.learning_rate, update.dtype.base_dtype),
@@ -99,9 +85,9 @@ class ReferenceSGD(base.Module):
       ValueError: If `updates` and `parameters` are empty, have different
         lengths, or have inconsistent types.
     """
-    _check_updates_parameters(updates, parameters)
+    optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
       if update is not None:
-        _check_same_dtype(update, parameter)
+        optimizer_utils.check_same_dtype(update, parameter)
         parameter.assign_sub(
             update * tf.cast(self.learning_rate, update.dtype.base_dtype))

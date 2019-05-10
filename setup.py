@@ -12,7 +12,9 @@ def _get_sonnet_version():
   with open('sonnet/__init__.py') as fp:
     for line in fp:
       if line.startswith('__version__'):
-        return line.split('=', 2)[1].strip()
+        g = {}
+        exec(line, g)  # pylint: disable=exec-used
+        return g['__version__']
     raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
 
 _VERSION = _get_sonnet_version()

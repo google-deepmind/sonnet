@@ -17,6 +17,12 @@ def _get_sonnet_version():
         return g['__version__']
     raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
 
+
+def _parse_requirements(requirements_txt_path):
+  with open(requirements_txt_path) as fp:
+    return fp.read().splitlines()
+
+
 _VERSION = _get_sonnet_version()
 
 EXTRA_PACKAGES = {
@@ -43,9 +49,9 @@ setup(
     author_email='sonnet-dev-os@google.com',
     # Contained modules and scripts.
     packages=find_namespace_packages(exclude=['*_test.py']),
-    install_requires=REQUIRED_PACKAGES,
+    install_requires=_parse_requirements('requirements.txt'),
     extras_require=EXTRA_PACKAGES,
-    tests_require=['mock'],
+    tests_require=_parse_requirements('requirements-test.txt'),
     requires_python='>=3.6',
     include_package_data=True,
     zip_safe=False,

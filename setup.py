@@ -7,9 +7,15 @@ from __future__ import print_function
 from setuptools import find_namespace_packages
 from setuptools import setup
 
-import sonnet as sonnet
 
-_VERSION = sonnet.__version__
+def _get_sonnet_version():
+  with open('sonnet/__init__.py') as fp:
+    for line in fp:
+      if line.startswith('__version__'):
+        return line.split('=', 2)[1].strip()
+    raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
+
+_VERSION = _get_sonnet_version()
 
 EXTRA_PACKAGES = {
     'tensorflow': ['tensorflow>=2'],

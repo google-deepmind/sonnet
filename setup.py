@@ -30,13 +30,6 @@ EXTRA_PACKAGES = {
     'tensorflow with gpu': ['tensorflow-gpu>=2'],
 }
 
-REQUIRED_PACKAGES = [
-    'absl-py',
-    'numpy',
-    'six',
-    'wrapt'
-]
-
 setup(
     name='dm-sonnet',
     version=_VERSION,

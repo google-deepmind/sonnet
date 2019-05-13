@@ -37,6 +37,7 @@ snt_py_test(
     data = glob(["*/**"]),
     deps = [
         ":goldens",
+        # absl/logging dep,
         # absl/testing:absltest dep,
         # absl/testing:parameterized dep,
         # six dep,

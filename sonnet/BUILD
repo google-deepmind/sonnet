@@ -21,6 +21,7 @@ py_library(
         "//sonnet/src:dropout",
         "//sonnet/src:group_norm",
         "//sonnet/src:linear",
+        "//sonnet/src:metrics",
         "//sonnet/src:once",
         "//sonnet/src:recurrent",
         "//sonnet/src:reshape",

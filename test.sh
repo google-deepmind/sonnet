@@ -19,6 +19,9 @@
 set -e
 set -x
 
+python3 -m venv .
+source bin/activate
+
 N_JOBS=$(grep -c ^processor /proc/cpuinfo)
 
 echo ""

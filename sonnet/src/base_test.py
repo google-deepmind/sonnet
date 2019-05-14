@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import sys
 
 import six
 from sonnet.src import base
@@ -537,5 +538,6 @@ class WildcardInit(base.Module):
     del args, kwargs
 
 if __name__ == "__main__":
+  print(sys.version_info)
   # tf.enable_v2_behavior()
   tf.test.main()

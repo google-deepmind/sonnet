@@ -29,5 +29,6 @@ def snt_py_test(
         deps = deps,
         tags = tags + py3_tags,
         main = main,
+        python_version = "PY3",
         **kwargs
     )

@@ -19,7 +19,7 @@
 set -e
 set -x
 
-python3 -m venv .
+virtualenv -p python3 .
 source bin/activate
 
 N_JOBS=$(grep -c ^processor /proc/cpuinfo)
@@ -40,3 +40,5 @@ bazel test --jobs=${N_JOBS} --test_timeout 300,450,1200,3600 \
     --build_tests_only --test_output=errors \
     --cache_test_results=no \
     -- //sonnet/...
+
+deactivate

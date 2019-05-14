@@ -19,7 +19,8 @@
 set -e
 set -x
 
-virtualenv -p python3.6 .
+pyenv global 3.6.1
+virtualenv -p python3 .
 source bin/activate
 python3 --version
 
@@ -30,11 +31,11 @@ echo "Bazel will use ${N_JOBS} concurrent job(s)."
 echo ""
 
 # Python dependencies.
-python3.6 -m pip install -r requirements.txt
-python3.6 -m pip install -r requirements-test.txt
+python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-test.txt
 
-python3.6 -m pip install --upgrade tf-nightly-2.0-preview
-python3.6 -c 'import tensorflow as tf; print(tf.__version__)'
+python3 -m pip install --upgrade tf-nightly-2.0-preview
+python3 -c 'import tensorflow as tf; print(tf.__version__)'
 
 
 # Run bazel test command. Double test timeouts to avoid flakes.

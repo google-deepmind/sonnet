@@ -19,10 +19,12 @@
 set -e
 set -x
 
-pyenv global 3.6.1
 virtualenv -p python3 .
 source bin/activate
 python3 --version
+
+# Run setup.py, this installs the python dependencies
+python3 setup.py install
 
 N_JOBS=$(grep -c ^processor /proc/cpuinfo)
 
@@ -30,8 +32,7 @@ echo ""
 echo "Bazel will use ${N_JOBS} concurrent job(s)."
 echo ""
 
-# Python dependencies.
-python3 -m pip install -r requirements.txt
+# Python test dependencies.
 python3 -m pip install -r requirements-test.txt
 
 python3 -m pip install --upgrade tf-nightly-2.0-preview

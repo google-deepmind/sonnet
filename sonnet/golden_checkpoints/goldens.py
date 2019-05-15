@@ -374,4 +374,10 @@ class TrainableState(AbstractGolden):
     return snt.TrainableState(tf.zeros([1]))
 
 
+@_register_golden(snt.Bias, "bias_3x3x3")
+class BiasTest(AbstractGolden):
+  create_module = lambda _: snt.Bias()
+  input_spec = tf.TensorSpec([1, 3, 3, 3])
+  num_variables = 1
+
 # pylint: enable=missing-docstring

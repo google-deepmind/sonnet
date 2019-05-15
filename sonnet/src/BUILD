@@ -527,3 +527,25 @@ snt_py_test(
         # tensorflow dep,
     ],
 )
+
+py_library(
+    name = "bias",
+    srcs = ["bias.py"],
+    deps = [
+        ":base",
+        ":initializers",
+        ":once",
+        ":utils",
+        # tensorflow dep,
+    ],
+)
+
+snt_py_test(
+    name = "bias_test",
+    srcs = ["bias_test.py"],
+    deps = [
+        ":bias",
+        ":test_utils",
+        # tensorflow dep,
+    ],
+)

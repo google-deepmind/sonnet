@@ -121,6 +121,14 @@ def assert_rank(inputs, rank):
     raise ValueError("Shape %r must have rank %d" % (shape, rank))
 
 
+def assert_minimum_rank(inputs, rank):
+  """Asserts the rank of the input is at least `rank`."""
+  shape = tuple(inputs.shape)
+  actual_rank = len(shape)
+  if actual_rank < rank:
+    raise ValueError("Shape %r must have rank >= %d" % (shape, rank))
+
+
 def smart_autograph(f):
   """Wraps `f` such that in graph mode it uses autograph but not in eager.
 

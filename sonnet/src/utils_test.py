@@ -158,6 +158,7 @@ class AssertRankTest(test_utils.TestCase, parameterized.TestCase):
     for rank in range(2, 5):
       inputs = input_fn(rank)
       utils.assert_rank(inputs, rank)
+      utils.assert_minimum_rank(inputs, rank - 2)
 
   @parameterized.parameters(range(10))
   def test_invalid_rank(self, rank):
@@ -168,6 +169,10 @@ class AssertRankTest(test_utils.TestCase, parameterized.TestCase):
 
     with self.assertRaisesRegexp(ValueError, "must have rank %d" % (rank - 1)):
       utils.assert_rank(x, rank - 1)
+
+    with self.assertRaisesRegexp(ValueError,
+                                 "must have rank >= %d" % (rank + 1)):
+      utils.assert_minimum_rank(x, rank + 1)
     # pylint: enable=g-error-prone-assert-raises
 
 

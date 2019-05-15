@@ -30,6 +30,7 @@ from sonnet.src.base import Module
 from sonnet.src.base import no_name_scope
 from sonnet.src.batch_norm import BaseBatchNorm
 from sonnet.src.batch_norm import BatchNorm
+from sonnet.src.bias import Bias
 from sonnet.src.conv import Conv1D
 from sonnet.src.conv import Conv2D
 from sonnet.src.conv import Conv3D
@@ -65,6 +66,7 @@ __all__ = (
     "AxisNorm",
     "BaseBatchNorm",
     "BatchNorm",
+    "Bias",
     "Conv1D",
     "Conv1DLSTM",
     "Conv1DTranspose",

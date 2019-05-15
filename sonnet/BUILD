@@ -15,6 +15,7 @@ py_library(
         "//sonnet/src:axis_norm",
         "//sonnet/src:base",
         "//sonnet/src:batch_norm",
+        "//sonnet/src:bias",
         "//sonnet/src:conv",
         "//sonnet/src:conv_transpose",
         "//sonnet/src:deferred",

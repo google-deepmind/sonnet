@@ -399,8 +399,8 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     v2 = restored_model.all_variables
 
     if golden.deterministic:
-      # The output before and after saving should be exactly the same.
-      self.assertAllEqual(y1, y2)
+      # The output before and after saving should be close.
+      self.assertAllClose(y1, y2)
 
     for a, b in zip(v1, v2):
       self.assertEqual(a.name, b.name)

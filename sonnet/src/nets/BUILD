@@ -12,7 +12,7 @@ py_library(
     deps = [
         "//sonnet/src:base",
         "//sonnet/src:linear",
-        # tensorflow dep,
+        # tensorflow
     ],
 )
 
@@ -21,9 +21,9 @@ snt_py_test(
     srcs = ["mlp_test.py"],
     deps = [
         ":mlp",
-        # absl/testing:parameterized dep,
+        # absl/testing:parameterized
         "//sonnet/src:test_utils",
-        # tensorflow dep,
+        # tensorflow
     ],
 )
 
@@ -36,7 +36,7 @@ py_library(
         "//sonnet/src:conv",
         "//sonnet/src:linear",
         "//sonnet/src:moving_averages",
-        # tensorflow dep,
+        # tensorflow
     ],
 )
 
@@ -45,8 +45,8 @@ snt_py_test(
     srcs = ["cifar10_convnet_test.py"],
     deps = [
         ":cifar10_convnet",
-        # absl/testing:parameterized dep,
+        # absl/testing:parameterized
         "//sonnet/src:test_utils",
-        # tensorflow dep,
+        # tensorflow
     ],
 )

@@ -13,10 +13,10 @@ py_binary(
     srcs_version = "PY2AND3",
     deps = [
         ":goldens",
-        # absl:app dep,
-        # absl/flags dep,
-        # absl/logging dep,
-        # tensorflow dep,
+        # absl:app
+        # absl/flags
+        # absl/logging
+        # tensorflow
     ],
 )
 
@@ -24,10 +24,10 @@ py_library(
     name = "goldens",
     srcs = ["goldens.py"],
     deps = [
-        # numpy dep,
-        # six dep,
+        # numpy
+        # six
         "//sonnet",
-        # tensorflow dep,
+        # tensorflow
     ],
 )
 
@@ -37,13 +37,13 @@ snt_py_test(
     data = glob(["*/**"]),
     deps = [
         ":goldens",
-        # absl/logging dep,
-        # absl/testing:absltest dep,
-        # absl/testing:parameterized dep,
-        # six dep,
+        # absl/logging
+        # absl/testing:absltest
+        # absl/testing:parameterized
+        # six
         "//sonnet",
         "//sonnet/src:test_utils",
-        # tensorflow dep,
-        # wrapt dep,
+        # tensorflow
+        # wrapt
     ],
 )

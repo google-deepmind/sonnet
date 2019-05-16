@@ -10,9 +10,9 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [
-        # absl:app dep,
+        # absl:app
         "//sonnet",
-        # tensorflow dep,
-        # tensorflow_datasets dep,
+        # tensorflow
+        # tensorflow_datasets
     ],
 )

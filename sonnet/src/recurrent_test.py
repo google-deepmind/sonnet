@@ -589,10 +589,17 @@ class Counter(recurrent.RNNCore):
   def __init__(self, hidden_size, name=None):
     super(Counter, self).__init__(name)
     self._hidden_size = hidden_size
+    self._built = False
 
   def __call__(self, inputs, prev_state):
+    if not self._built:
+      # Strictly speaking this variable is redundant, but all real-world
+      # cores have variables, so Counter is no different.
+      self.one = tf.Variable(1.0)
+      self._built = True
+
     t, h = prev_state
-    return inputs * (h + t), (t + 1, h)
+    return inputs * (h + t), (t + self.one, h)
 
   def initial_state(self, batch_size):
     return (

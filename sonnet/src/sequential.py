@@ -25,13 +25,13 @@ from sonnet.src import base
 class Sequential(base.Module):
   """Sequential applies a linear chain of modules / callables.
 
-  >>> mlp = snt.Sequential([
-  ...     snt.Linear(1024),
-  ...     tf.nn.relu,
-  ...     snt.Linear(10),
-  ... ])
-  >>> mlp(tf.random.normal([8, 100]))
-  <tf.Tensor: ...>
+      >>> mlp = snt.Sequential([
+      ...     snt.Linear(1024),
+      ...     tf.nn.relu,
+      ...     snt.Linear(10),
+      ... ])
+      >>> mlp(tf.random.normal([8, 100]))
+      <tf.Tensor: ...>
 
   Note that `Sequential` is limited in the range of possible architectures
   it can handle. This is a deliberate design decision; `Sequential` is only
@@ -44,17 +44,17 @@ class Sequential(base.Module):
   to switch the `is_training` flag. If this is the desired use case, the
   recommended solution is to subclass `snt.Module` and implement `__call__`:
 
-  >>> class CustomModule(snt.Module):
-  ...   def __init__(self, name=None):
-  ...     super(CustomModule, self).__init__(name=name)
-  ...     self.conv2d = snt.Conv2D(output_channels=32, kernel_shape=4, stride=2)
-  ...     self.bn = snt.BatchNorm()
-  ...
-  ...   def __call__(self, inputs, is_training):
-  ...     outputs = self.conv2d(inputs)
-  ...     outputs = self.bn(outputs, is_training=is_training)
-  ...     outputs = tf.nn.relu(outputs)
-  ...     return outputs
+      >>> class CustomModule(snt.Module):
+      ...   def __init__(self, name=None):
+      ...     super(CustomModule, self).__init__(name=name)
+      ...     self.conv2d = snt.Conv2D(32, 4, 2)
+      ...     self.bn = snt.BatchNorm()
+      ...
+      ...   def __call__(self, inputs, is_training):
+      ...     outputs = self.conv2d(inputs)
+      ...     outputs = self.bn(outputs, is_training=is_training)
+      ...     outputs = tf.nn.relu(outputs)
+      ...     return outputs
   """
 
   def __init__(self, layers=None, name=None):

@@ -27,29 +27,29 @@ import tensorflow as tf
 class RMSProp(base.Module):
   """RMSProp module.
 
-  http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
+  See: http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
 
   Maintain a moving (discounted) average of the square of updates. Divides each
   update by the root of this average.
 
-  ms <- decay * ms + (1-decay) * update^2
-  mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
-  parameter := parameter - mom
+      ms <- decay * ms + (1-decay) * update^2
+      mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
+      parameter := parameter - mom
 
-  This implementation of RMSprop uses plain momentum, not Nesterov momentum.
+  This implementation of `RMSprop` uses plain momentum, not Nesterov momentum.
 
   The centered version additionally maintains a moving average of the
   gradients, and uses that average to estimate the variance:
 
-  mg = decay * mg + (1-decay) * update
-  ms = decay * ms + (1-decay) * update^2
-  mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
-  parameter := parameter - mom
+      mg = decay * mg + (1-decay) * update
+      ms = decay * ms + (1-decay) * update^2
+      mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
+      parameter := parameter - mom
   """
 
   def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
                centered=False, name=None):
-    """Constructs an RMSProp module.
+    """Constructs an `RMSProp` module.
 
     Args:
       learning_rate: Learning rate.
@@ -136,24 +136,24 @@ class RMSProp(base.Module):
 class ReferenceRMSProp(base.Module):
   """Reference version of the RMSProp module.
 
-  http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
+  See: http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
 
   Maintain a moving (discounted) average of the square of updates. Divides each
   update by the root of this average.
 
-  ms <- decay * ms + (1-decay) * update^2
-  mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
-  parameter := parameter - mom
+      ms <- decay * ms + (1-decay) * update^2
+      mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
+      parameter := parameter - mom
 
   This implementation of RMSprop uses plain momentum, not Nesterov momentum.
 
   The centered version additionally maintains a moving average of the
   gradients, and uses that average to estimate the variance:
 
-  mg = decay * mg + (1-decay) * update
-  ms = decay * ms + (1-decay) * update^2
-  mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
-  parameter := parameter - mom
+      mg = decay * mg + (1-decay) * update
+      ms = decay * ms + (1-decay) * update^2
+      mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
+      parameter := parameter - mom
 
   This is a reference implementation of the RMSProp module. It doesn't use
   raw_ops so it will be slower but you may find it easier to customize. It is

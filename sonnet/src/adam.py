@@ -63,10 +63,11 @@ class Adam(base.Module):
     """Apply updates to parameters.
 
     Applies the Adam update rule for each update, parameter pair:
-      alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
-      m_t <- beta1 * m_{t-1} + (1 - beta1) * update
-      v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
-      parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
+
+        alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
+        m_t <- beta1 * m_{t-1} + (1 - beta1) * update
+        v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
+        parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a
@@ -151,10 +152,11 @@ class ReferenceAdam(base.Module):
     """Apply updates to parameters.
 
     Applies the Adam update rule for each update, parameter pair:
-      alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
-      m_t <- beta1 * m_{t-1} + (1 - beta1) * update
-      v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
-      parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
+
+        alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
+        m_t <- beta1 * m_{t-1} + (1 - beta1) * update
+        v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
+        parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a

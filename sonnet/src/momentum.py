@@ -28,7 +28,7 @@ class Momentum(base.Module):
   """SGD with Momentum module."""
 
   def __init__(self, learning_rate, momentum, name=None):
-    """Constructs a Momentum module."""
+    """Constructs a `Momentum` module."""
     super(Momentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum
@@ -78,16 +78,16 @@ class Momentum(base.Module):
 
 
 class ReferenceMomentum(base.Module):
-  """Reference version of the Momentum module.
+  """Reference version of the `Momentum` module.
 
   This is a reference implementation of the Momentum module. It doesn't use
-  raw_ops so it will be slower but you may find it easier to customize. It is
-  fully tested and its behaviour matches the raw_ops version. If you need a
-  custom variant of Momentum, we recommend starting with this.
+  `tf.raw_ops` so it will be slower but you may find it easier to customize. It
+  is fully tested and its behaviour matches the `tf.raw_ops` version. If you
+  need a custom variant of `Momentum`, we recommend starting with this.
   """
 
   def __init__(self, learning_rate, momentum, name=None):
-    """Constructs a reference Momentum module."""
+    """Constructs a `ReferenceMomentum` module."""
     super(ReferenceMomentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum

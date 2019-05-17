@@ -44,11 +44,11 @@ class BaseBatchNorm(base.Module):
 
   It transforms the input x into:
 
-    outputs = scale * (x - mu) / (sigma + eps) + offset
+      outputs = scale * (x - mu) / (sigma + eps) + offset
 
-  where mu and sigma are respectively the mean and standard deviation of x. Note
-  that this module automatically uses the fused batch norm op if the data format
-  is NHWC.
+  Where `mu` and `sigma` are respectively the mean and standard deviation of
+  `x`. Note that this module automatically uses the fused batch norm op if the
+  data format is `NHWC`.
 
   There are many different variations for how users want to manage scale and
   offset if they require them at all. These are:
@@ -72,7 +72,7 @@ class BaseBatchNorm(base.Module):
   def __init__(self, create_scale, create_offset, moving_mean, moving_variance,
                eps=1e-4, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
-    """Constructs a BaseBatchNorm module.
+    """Constructs a `BaseBatchNorm` module.
 
     Args:
       create_scale: Boolean representing whether to create a trainable scale per
@@ -235,9 +235,9 @@ class BaseBatchNorm(base.Module):
 
 
 class BatchNorm(BaseBatchNorm):
-  """Batch normalization module with EMA for tracking test statistics.
+  """Batch normalization with exponential moving average for test statistics.
 
-  See snt.BaseBatchNorm for details.
+  See `BaseBatchNorm` for details.
 
   Attributes:
     scale: If `create_scale`, a trainable variable holding the current scale
@@ -249,7 +249,7 @@ class BatchNorm(BaseBatchNorm):
   def __init__(self, create_scale, create_offset, decay_rate=0.999,
                eps=1e-4, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
-    """Constructs a BatchNorm module.
+    """Constructs a `BatchNorm` module.
 
     Args:
       create_scale: Boolean representing whether to create a trainable scale per

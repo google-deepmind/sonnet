@@ -31,7 +31,7 @@ import tensorflow as tf
 
 
 class ConvND(base.Module):
-  """ConvND module."""
+  """`ConvND` module."""
 
   def __init__(self,
                num_spatial_dims,
@@ -45,7 +45,7 @@ class ConvND(base.Module):
                b_init=None,
                data_format=None,
                name=None):
-    """Constructs a ConvND module.
+    """Constructs a `ConvND` module.
 
     Args:
       num_spatial_dims: The number of spatial dimensions of the input.
@@ -107,12 +107,11 @@ class ConvND(base.Module):
     """Applies the defined convolution to the inputs.
 
     Args:
-      inputs: An n+2 rank Tensor and of type `tf.float16`, `tf.bfloat16` or
-        `tf.float32` to which the convolution is applied.
+      inputs: An `N + 2` rank `tf.Tensor` of dtype `tf.float16`, `tf.bfloat16`
+        or `tf.float32` to which the convolution is applied.
     Returns:
-      Returns:
-      An n+2 dimensional Tensor of shape [batch_size, output_dim_1,
-        output_dim_2, ..., output_channels].
+      An `N + 2` dimensional `tf.Tensor` of shape
+        `[batch_size, output_dim_1, output_dim_2, ..., output_channels]`.
     """
     self._create_parameters(inputs)
 
@@ -167,7 +166,7 @@ class ConvND(base.Module):
 
 
 class Conv1D(ConvND):
-  """Conv1D module."""
+  """`Conv1D` module."""
 
   def __init__(self,
                output_channels,
@@ -194,7 +193,7 @@ class Conv1D(ConvND):
 
 
 class Conv2D(ConvND):
-  """Conv2D module."""
+  """`Conv2D` module."""
 
   def __init__(self,
                output_channels,
@@ -221,7 +220,7 @@ class Conv2D(ConvND):
 
 
 class Conv3D(ConvND):
-  """Conv3D module."""
+  """`Conv3D` module."""
 
   def __init__(self,
                output_channels,

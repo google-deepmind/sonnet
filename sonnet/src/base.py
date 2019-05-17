@@ -39,11 +39,11 @@ def no_name_scope(method):
   By default, any method on a module is considered as a forwards function, and
   so any variables / modules created by the method will be scoped as belonging
   to the module. In some cases this is undesirable, for example when
-  implementing .clone() / .transpose(), as in those cases we want the new
-  module to have the scope of wherever the .transpose() call is made. To
+  implementing `.clone()` / `.transpose()`, as in those cases we want the new
+  module to have the scope of wherever the `.transpose()` call is made. To
   allow this, decorate any methods with `no_module_name_scope`.
 
-  This logic is tied to ModuleMetaclass.__new__, if anything is
+  This logic is tied to `ModuleMetaclass.__new__`, if anything is
   changed here corresponding changes will be needed there.
 
   Args:
@@ -57,7 +57,7 @@ def no_name_scope(method):
 
 
 class ModuleMetaclass(abc.ABCMeta):
-  """Metaclass for `tf.Module`."""
+  """Metaclass for `Module`."""
 
   def __new__(mcs, name, bases, clsdict):
     methods = []
@@ -142,15 +142,15 @@ class ModuleMetaclass(abc.ABCMeta):
 def auto_repr(cls, *args, **kwargs):
   """Derive a `__repr__` from constructor arguments of a given class.
 
-  >>> class Foo(object):
-  ...   def __init__(self, x, y=42):
-  ...      pass
-  ...
-  >>> auto_repr(Foo, "x")
-  "Foo(x='x')"
+      >>> class Foo(object):
+      ...   def __init__(self, x, y=42):
+      ...      pass
+      ...
+      >>> auto_repr(Foo, "x")
+      "Foo(x='x')"
 
-  >>> auto_repr(Foo, "x", 21)
-  "Foo(x='x', y=21)"
+      >>> auto_repr(Foo, "x", 21)
+      "Foo(x='x', y=21)"
 
   Args:
     cls: a class to derive `__repr__` for.
@@ -204,7 +204,7 @@ def wrap_with_name_scope(method, instance, args, kwargs):
 
   Args:
     method: The bound method to call.
-    instance: Module instance.
+    instance: `Module` instance.
     args: Positional arguments to `method`.
     kwargs: Keyword arguments to `method`.
 
@@ -267,15 +267,15 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   Modules typically define one or more "forward" methods (e.g. `__call__`) which
   apply operations combining user input and module parameters. For example:
 
-  >>> class MultiplyModule(snt.Module):
-  ...   def __call__(self, x):
-  ...     if not hasattr(self, 'w'):
-  ...       self.w = tf.Variable(2., name='w')
-  ...     return x * self.w
+      >>> class MultiplyModule(snt.Module):
+      ...   def __call__(self, x):
+      ...     if not hasattr(self, 'w'):
+      ...       self.w = tf.Variable(2., name='w')
+      ...     return x * self.w
 
-  >>> mod = MultiplyModule()
-  >>> mod(1.)
-  <tf.Tensor: ... numpy=2.0>
+      >>> mod = MultiplyModule()
+      >>> mod(1.)
+      <tf.Tensor: ... numpy=2.0>
   """
 
   def __init__(self, name=None):

@@ -33,13 +33,15 @@ class AxisNorm(base.Module):
   """Normalizes inputs along the given axes.
 
   This is a generic implementation of normalization along specific axes of the
-  input. LayerNorm and InstanceNorm are subclasses of this module, they
+  input. `LayerNorm` and `InstanceNorm` are subclasses of this module, they
   normalize over the channel and spatial dimensions respectively.
+
   It transforms the input x into:
 
-    outputs = scale * (x - mu) / (sigma + eps) + offset
+      outputs = scale * (x - mu) / (sigma + eps) + offset
 
-  where mu and sigma are respectively the mean and standard deviation of x.
+  Where `mu` and `sigma` are respectively the mean and standard deviation of
+  `x`.
 
   There are many different variations for how users want to manage scale and
   offset if they require them at all. These are:
@@ -63,7 +65,7 @@ class AxisNorm(base.Module):
   def __init__(self, axis, create_scale, create_offset, eps=1e-4,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    """Constructs a AxisNorm module.
+    """Constructs an `AxisNorm` module.
 
     Args:
       axis: An int, slice or sequence of ints representing the axes which should
@@ -193,7 +195,7 @@ class AxisNorm(base.Module):
 class LayerNorm(AxisNorm):
   """Normalizes inputs along the spatial and channel dimensions.
 
-  See `snt.AxisNorm` for more details.
+  See `AxisNorm` for more details.
 
   Attributes:
     scale: If `create_scale`, a trainable variable holding the current scale
@@ -205,7 +207,7 @@ class LayerNorm(AxisNorm):
   def __init__(self, create_scale, create_offset, eps=1e-4,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    """Constructs an LayerNorm module.
+    """Constructs an `LayerNorm` module.
 
     This method creates a module which normalizes over the spatial and channel
     dimensions.
@@ -241,7 +243,7 @@ class LayerNorm(AxisNorm):
 class InstanceNorm(AxisNorm):
   """Normalizes inputs along the channel dimension.
 
-  See `snt.AxisNorm` for more details.
+  See `AxisNorm` for more details.
 
   Attributes:
     scale: If `create_scale`, a trainable variable holding the current scale

@@ -30,27 +30,27 @@ class Deferred(base.Module):
   the declaration and use of modules. For example at the start of your program
   you can declare two modules which are coupled:
 
-  >>> encoder = snt.Linear(64)
-  >>> decoder = snt.Deferred(lambda: snt.Linear(encoder.input_size))
+      >>> encoder = snt.Linear(64)
+      >>> decoder = snt.Deferred(lambda: snt.Linear(encoder.input_size))
 
   Later you can use these naturally (note: that using `decoder` first would
   cause an error since `encoder.input_size` is only defined after `encoder` has
   been called):
 
-  >>> x = tf.ones([8, 32])
-  >>> y = encoder(x)
-  >>> z = decoder(y)  # Constructs the Linear encoder by calling the lambda.
+      >>> x = tf.ones([8, 32])
+      >>> y = encoder(x)
+      >>> z = decoder(y)  # Constructs the Linear encoder by calling the lambda.
 
   The result will satisfy the following conditions:
 
-  >>> assert x.shape == z.shape
-  >>> assert y.shape == [8, 64]
-  >>> assert decoder.input_size == encoder.output_size
-  >>> assert decoder.output_size == encoder.input_size
+      >>> assert x.shape == z.shape
+      >>> assert y.shape == [8, 64]
+      >>> assert decoder.input_size == encoder.output_size
+      >>> assert decoder.output_size == encoder.input_size
   """
 
   def __init__(self, constructor, call_methods=("__call__",), name=None):
-    """Initializes the Deferred module.
+    """Initializes the `Deferred` module.
 
     Args:
       constructor: A no argument callable which constructs the module to defer

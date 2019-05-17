@@ -37,7 +37,7 @@ class Linear(base.Module):
                w_init=None,
                b_init=None,
                name=None):
-    """Constructs a Linear module.
+    """Constructs a `Linear` module.
 
     Args:
       output_size: Output dimensionality.

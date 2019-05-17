@@ -26,11 +26,10 @@ import tensorflow as tf
 class Dropout(base.Module):
   """Randomly drop units in the input at a given rate.
 
-  Dropout was originally described by Hinton et al [0]. `TensorFlow deviates
-  slightly from this paper by scaling activations at training time rather than
-  test time.
+  See: http://www.cs.toronto.edu/~hinton/absps/dropout.pdf
 
-  [0] http://www.cs.toronto.edu/~hinton/absps/dropout.pdf
+  Dropout was originally described by Hinton et al. TensorFlow deviates slightly
+  from this paper by scaling activations at training time rather than test time.
   """
 
   def __init__(self,

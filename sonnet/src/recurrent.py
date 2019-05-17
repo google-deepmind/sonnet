@@ -158,13 +158,13 @@ def static_unroll(
     sequence_length=None):
   """Perform a static unroll of an RNN.
 
-  >>> core = snt.LSTM(hidden_size=16)
-  >>> batch_size = 3
-  >>> input_sequence = tf.random.uniform([1, batch_size, 2])
-  >>> output_sequence, final_state = snt.static_unroll(
-  ...     core,
-  ...     input_sequence,
-  ...     core.initial_state(batch_size))
+      >>> core = snt.LSTM(hidden_size=16)
+      >>> batch_size = 3
+      >>> input_sequence = tf.random.uniform([1, batch_size, 2])
+      >>> output_sequence, final_state = snt.static_unroll(
+      ...     core,
+      ...     input_sequence,
+      ...     core.initial_state(batch_size))
 
   An *unroll* corresponds to calling an RNN on each element of the
   input sequence in a loop, carrying the state through:
@@ -253,13 +253,13 @@ def dynamic_unroll(
     swap_memory=False):
   """Perform a dynamic unroll of an RNN.
 
-  >>> core = snt.LSTM(hidden_size=16)
-  >>> batch_size = 3
-  >>> input_sequence = tf.random.uniform([1, batch_size, 2])
-  >>> output_sequence, final_state = snt.dynamic_unroll(
-  ...     core,
-  ...     input_sequence,
-  ...     core.initial_state(batch_size))
+      >>> core = snt.LSTM(hidden_size=16)
+      >>> batch_size = 3
+      >>> input_sequence = tf.random.uniform([1, batch_size, 2])
+      >>> output_sequence, final_state = snt.dynamic_unroll(
+      ...     core,
+      ...     input_sequence,
+      ...     core.initial_state(batch_size))
 
   An *unroll* corresponds to calling an RNN on each element of the
   input sequence in a loop, carrying the state through:
@@ -415,14 +415,14 @@ class VanillaRNN(RNNCore):
 
   Given x_t and the previous hidden state h_{t-1} the core computes
 
-    h_t = w_i x_t + w_h h_{t-1} + b
+      h_t = w_i x_t + w_h h_{t-1} + b
 
   Variables:
-    input_to_hidden/w: weights w_i, a Tensor of shape
-      [input_size, hidden_size].
-    hidden_to_hidden/w: weights w_h, a Tensor of shape
-      [input_size, hidden_size].
-    b: bias, a Tensor or shape [hidden_size].
+    input_to_hidden/w: weights w_i, a `tf.Tensor` of shape
+      `[input_size, hidden_size]`.
+    hidden_to_hidden/w: weights w_h, a `tf.Tensor` of shape
+      `[input_size, hidden_size]`.
+    b: bias, a `tf.Tensor` or shape `[hidden_size]`.
   """
 
   def __init__(
@@ -510,7 +510,7 @@ class _LegacyDeepRNN(RNNCore):
       skip_connections,
       concat_final_output_if_skip=True,
       name=None):
-    """Construct a DeepRNN.
+    """Construct a `DeepRNN`.
 
     Args:
       layers: A list of `RNNCore`s or callables.
@@ -568,17 +568,17 @@ class DeepRNN(_LegacyDeepRNN):
   through each internal module in the order they were presented, using
   elements from `prev_state` as necessary for internal RNN cores.
 
-  >>> deep_rnn = snt.DeepRNN([
-  ...     snt.LSTM(hidden_size=16),
-  ...     snt.LSTM(hidden_size=16),
-  ... ])
+      >>> deep_rnn = snt.DeepRNN([
+      ...     snt.LSTM(hidden_size=16),
+      ...     snt.LSTM(hidden_size=16),
+      ... ])
 
   Note that the state of a `DeepRNN` is always a tuple, which will contain
   the same number of elements as there are internal RNN cores. If no
-  internal modules are RNN cores, the state of the DeepRNN as a whole is
+  internal modules are RNN cores, the state of the `DeepRNN` as a whole is
   an empty tuple.
 
-  Wrapping non-recurrent modules into a DeepRNN can be useful to produce
+  Wrapping non-recurrent modules into a `DeepRNN` can be useful to produce
   something API compatible with a "real" recurrent module, simplifying
   code that handles the cores.
   """
@@ -598,10 +598,10 @@ def deep_rnn_with_skip_connections(
   Specifically, input to the i-th layer (i > 0) is given by a
   concatenation of the core's inputs and the outputs of the (i-1)-th layer.
 
-    outputs0, ... = layers[0](inputs, ...)
-    outputs1, ... = layers[1](tf.concat([inputs, outputs0], axis=1], ...)
-    outputs2, ... = layers[2](tf.concat([inputs, outputs1], axis=1], ...)
-    ...
+      outputs0, ... = layers[0](inputs, ...)
+      outputs1, ... = layers[1](tf.concat([inputs, outputs0], axis=1], ...)
+      outputs2, ... = layers[2](tf.concat([inputs, outputs1], axis=1], ...)
+      ...
 
   This allows the layers to learn decoupled features.
 
@@ -662,13 +662,13 @@ def deep_rnn_with_residual_connections(
   the original core's inputs and the outputs of all the preceding
   layers (<i).
 
-    outputs0, ... = layers[0](inputs, ...)
-    outputs0 += inputs
-    outputs1, ... = layers[1](outputs0, ...)
-    outputs1 += outputs0
-    outputs2, ... = layers[2](outputs1, ...)
-    outputs2 += outputs1
-    ...
+      outputs0, ... = layers[0](inputs, ...)
+      outputs0 += inputs
+      outputs1, ... = layers[1](outputs0, ...)
+      outputs1 += outputs0
+      outputs2, ... = layers[2](outputs1, ...)
+      outputs2 += outputs1
+      ...
 
   This allows the layers to learn specialized features that compose
   incrementally.
@@ -704,18 +704,18 @@ class LSTM(RNNCore):
   The implementation is based on: http://arxiv.org/abs/1409.2329.
   Given x_t and the previous state (h_{t-1}, c_{t-1}) the core computes
 
-    i_t = sigm(W_{ii} x_t + W_{hi} h_{t-1} + b_i)
-    f_t = sigm(W_{if} x_t + W_{hf} h_{t-1} + b_f)
-    g_t = tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g)
-    o_t = sigm(W_{io} x_t + W_{ho} h_{t-1} + b_o)
-    c_t = f_t c_{t-1} + i_t g_t
-    h_t = o_t tanh(c_t)
+      i_t = sigm(W_{ii} x_t + W_{hi} h_{t-1} + b_i)
+      f_t = sigm(W_{if} x_t + W_{hf} h_{t-1} + b_f)
+      g_t = tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g)
+      o_t = sigm(W_{io} x_t + W_{ho} h_{t-1} + b_o)
+      c_t = f_t c_{t-1} + i_t g_t
+      h_t = o_t tanh(c_t)
 
-  where i_t, f_t, o_t are input, forget and output gate activations,
-  and g_t is a vector of cell updates.
+  Where `i_t`, `f_t`, `o_t` are input, forget and output gate activations,
+  and `g_t` is a vector of cell updates.
 
   Following http://proceedings.mlr.press/v37/jozefowicz15.pdf we add a
-  constant `forget_bias` (defaults to 1.0) to b_f in order to reduce
+  constant `forget_bias` (defaults to 1.0) to `b_f` in order to reduce
   the scale of forgetting in the beginning of the training.
 
   #### Recurrent projections
@@ -725,12 +725,12 @@ class LSTM(RNNCore):
   details see https://arxiv.org/abs/1402.1128.
 
   Variables:
-    w_i: input-to-hidden weights W_{ii}, W_{if}, W_{ig} and W_{io}
-      concatenated into a Tensor of shape [input_size, 3 * hidden_size].
-    w_h: hidden-to-hidden weights W_{hi}, W_{hf}, W_{hg} and W_{ho}
-      concatenated into a Tensor of shape [hidden_size, 3 * hidden_size].
-    b: biases b_i, b_f, b_g and b_o concatenated into a Tensor of shape
-      [3 * hidden_size].
+    w_i: input-to-hidden weights `W_{ii}`, `W_{if}`, `W_{ig}` and `W_{io}`
+      concatenated into a `tf.Tensor` of shape `[input_size, 3 * hidden_size]`.
+    w_h: hidden-to-hidden weights `W_{hi}`, `W_{hf}`, `W_{hg}` and `W_{ho}`
+      concatenated into a `tf.Tensor` of shape `[hidden_size, 3 * hidden_size]`.
+    b: biases `b_i`, `b_f`, `b_g` and `b_o` concatenated into a `tf.Tensor` of
+      shape `[3 * hidden_size]`.
   """
 
   def __init__(
@@ -744,7 +744,7 @@ class LSTM(RNNCore):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
-    """Construct an LSTM.
+    """Construct an `LSTM`.
 
     Args:
       hidden_size: Hidden layer size.
@@ -858,7 +858,7 @@ class CuDNNLSTM(RNNCore):
 
   Unlike `LSTM` this core operates on the whole batch of sequences at
   once, i.e. the expected shape of `inputs` is
-  [num_steps, batch_size, input_size].
+  `[num_steps, batch_size, input_size]`.
   """
 
   def __init__(
@@ -870,7 +870,7 @@ class CuDNNLSTM(RNNCore):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
-    """Construct an LSTM.
+    """Construct an `CuDNNLSTM`.
 
     Args:
       hidden_size: Hidden layer size.
@@ -1021,13 +1021,13 @@ def lstm_with_recurrent_dropout(
   """Construct an LSTM with recurrent dropout.
 
   The implementation is based on https://arxiv.org/abs/1512.05287.
-  Dropout is applied on the previous hidden state h_{t-1} during the
+  Dropout is applied on the previous hidden state `h_{t-1}` during the
   computation of gate activations
 
-    i_t = sigm(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i)
-    f_t = sigm(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f)
-    g_t = tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g)
-    o_t = sigm(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
+      i_t = sigm(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i)
+      f_t = sigm(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f)
+      g_t = tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g)
+      o_t = sigm(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
 
   Args:
     hidden_size: Hidden layer size.
@@ -1057,32 +1057,31 @@ class _ConvNDLSTM(RNNCore):
   The implementation is based on: https://arxiv.org/abs/1506.04214.
   Given x_t and the previous state (h_{t-1}, c_{t-1}) the core computes
 
-    i_t = sigm(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i)
-    f_t = sigm(W_{if} * x_t + W_{hf} * h_{t-1} + b_f)
-    g_t = tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g)
-    o_t = sigm(W_{io} * x_t + W_{ho} * h_{t-1} + b_o)
-    c_t = f_t c_{t-1} + i_t g_t
-    h_t = o_t tanh(c_t)
+      i_t = sigm(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i)
+      f_t = sigm(W_{if} * x_t + W_{hf} * h_{t-1} + b_f)
+      g_t = tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g)
+      o_t = sigm(W_{io} * x_t + W_{ho} * h_{t-1} + b_o)
+      c_t = f_t c_{t-1} + i_t g_t
+      h_t = o_t tanh(c_t)
 
-  where * denotes the convolution operator; i_t, f_t, o_t are input,
-  forget and output gate activations, and g_t is a vector of cell
-  updates.
+  Where * denotes the convolution operator; `i_t`, `f_t`, `o_t` are input,
+  forget and output gate activations, and `g_t` is a vector of cell updates.
 
   Following http://proceedings.mlr.press/v37/jozefowicz15.pdf we add a
-  constant `forget_bias` (defaults to 1.0) to b_f in order to reduce
+  constant `forget_bias` (defaults to 1.0) to `b_f` in order to reduce
   the scale of forgetting in the beginning of the training.
 
   Variables:
-    input_to_hidden/w: convolution weights W_{ii}, W_{if}, W_{ig} and
-       W_{io} concatenated into a single Tensor of shape
-       [kernel_shape*, input_channels, 4 * output_channels] where
+    input_to_hidden/w: convolution weights `W_{ii}`, `W_{if}`, `W_{ig}` and
+       `W_{io}` concatenated into a single Tensor of shape
+       `[kernel_shape*, input_channels, 4 * output_channels]` where
        `kernel_shape` is repeated `num_spatial_dims` times.
-    hidden_to_hidden/w: convolution weights W_{hi}, W_{hf}, W_{hg} and
-       W_{ho} concatenated into a single Tensor of shape
-       [kernel_shape*, input_channels, 4 * output_channels] where
+    hidden_to_hidden/w: convolution weights `W_{hi}`, `W_{hf}`, `W_{hg}` and
+       `W_{ho}` concatenated into a single Tensor of shape
+       `[kernel_shape*, input_channels, 4 * output_channels]` where
        `kernel_shape` is repeated `num_spatial_dims` times.
-    b: biases b_i, b_f, b_g and b_o concatenated into a Tensor of shape
-      [4 * output_channels].
+    b: biases `b_i`, `b_f`, `b_g` and `b_o` concatenated into a Tensor of shape
+      `[4 * output_channels]`.
   """
 
   def __init__(
@@ -1293,7 +1292,7 @@ class GRU(RNNCore):
       a_t = tanh(W_{ia} x_t + W_{ha} (r_t h_{t-1}) + b_a)
       h_t = (1 - z_t) h_{t-1} + z_t a_t
 
-  where z_t and r_t are reset and update gates.
+  where `z_t` and `r_t` are reset and update gates.
 
   Variables:
     w_i: input-to-hidden weights W_{iz}, W_{ir} and W_{ia} concatenated
@@ -1312,7 +1311,7 @@ class GRU(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Construct a GRU.
+    """Construct a `GRU`.
 
     Args:
       hidden_size: Hidden layer size.
@@ -1393,7 +1392,7 @@ class CuDNNGRU(RNNCore):
 
   Unlike `GRU` this core operates on the whole batch of sequences at
   once, i.e. the expected shape of `inputs` is
-  [num_steps, batch_size, input_size].
+  `[num_steps, batch_size, input_size]`.
   """
 
   def __init__(
@@ -1404,7 +1403,7 @@ class CuDNNGRU(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Construct a GRU.
+    """Construct a `GRU`.
 
     Args:
       hidden_size: Hidden layer size.

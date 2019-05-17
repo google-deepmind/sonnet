@@ -45,7 +45,7 @@ class DepthwiseConv2D(base.Module):
                b_init=None,
                data_format="NHWC",
                name=None):
-    """Constructs a DepthwiseConv2D module.
+    """Constructs a `DepthwiseConv2D` module.
 
     Args:
       kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an

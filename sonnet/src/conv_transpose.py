@@ -29,13 +29,13 @@ import tensorflow as tf
 
 
 class ConvNDTranspose(base.Module):
-  """ConvNDTranspose module.
+  """`ConvNDTranspose` module.
 
   Attributes:
-     w: Weight variable. Note is None until module is connected.
-     b: Biases variable. Note is None until module is connected.
+     w: Weight variable. Note is `None` until module is connected.
+     b: Biases variable. Note is `None` until module is connected.
      input_shape: The input shape of the first set of inputs.
-         Note is None until module is connected.
+         Note is `None` until module is connected.
   """
 
   def __init__(self,
@@ -51,7 +51,7 @@ class ConvNDTranspose(base.Module):
                b_init=None,
                data_format=None,
                name=None):
-    """Constructs a ConvNDTranspose module.
+    """Constructs a `ConvNDTranspose` module.
 
     Args:
       num_spatial_dims: An integer, the number of spatial dimensions of the
@@ -187,7 +187,7 @@ class ConvNDTranspose(base.Module):
 
 
 class Conv1DTranspose(ConvNDTranspose):
-  """Conv1DTranspose module."""
+  """`Conv1DTranspose` module."""
 
   def __init__(self,
                output_channels,
@@ -216,7 +216,7 @@ class Conv1DTranspose(ConvNDTranspose):
 
 
 class Conv2DTranspose(ConvNDTranspose):
-  """Conv2DTranspose module."""
+  """`Conv2DTranspose` module."""
 
   def __init__(self,
                output_channels,
@@ -245,7 +245,7 @@ class Conv2DTranspose(ConvNDTranspose):
 
 
 class Conv3DTranspose(ConvNDTranspose):
-  """Conv3DTranspose module."""
+  """`Conv3DTranspose` module."""
 
   def __init__(self,
                output_channels,

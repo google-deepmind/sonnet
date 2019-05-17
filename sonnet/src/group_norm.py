@@ -40,9 +40,10 @@ class GroupNorm(base.Module):
 
   It transforms the input x into:
 
-    outputs = scale * (x - mu) / sigma + offset
+      outputs = scale * (x - mu) / sigma + offset
 
-  Where mu and sigma are respectively the mean and standard deviation of x.
+  Where `mu` and `sigma` are respectively the mean and standard deviation of
+  `x`.
 
   There are many different variations for how users want to manage scale and
   offset if they require them at all. These are:
@@ -66,7 +67,7 @@ class GroupNorm(base.Module):
   def __init__(self, groups, axis=slice(1, None), create_scale=True,
                create_offset=True, eps=1e-4, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
-    """Constructs a GroupNorm module.
+    """Constructs a `GroupNorm` module.
 
     Args:
       groups: An int, the number of groups to divide the channels by. The number
@@ -125,19 +126,19 @@ class GroupNorm(base.Module):
     """Returns normalized inputs.
 
     Args:
-      inputs: An n-D tensor of the data_format specified above on which the
+      inputs: An `N - D` tensor of the data_format specified above on which the
         transformation is performed.
-      scale: A tensor up to n-D. The shape of this tensor must be broadcastable
-        to the shape of `inputs`. This is the scale applied to the normalised
-        inputs. This cannot be passed in if the module was constructed with
-        create_scale=True.
-      offset: A tensor up to n-D. The shape of this tensor must be broadcastable
-        to the shape of `inputs`. This is the offset applied to the normalised
-        inputs. This cannot be passed in if the module was constructed with
-        create_offset=True.
+      scale: A tensor up to `N - D`. The shape of this tensor must be
+        broadcastable to the shape of `inputs`. This is the scale applied to the
+        normalised inputs. This cannot be passed in if the module was
+        constructed with `create_scale=True`.
+      offset: A tensor up to `N - D`. The shape of this tensor must be
+        broadcastable to the shape of `inputs`. This is the offset applied to
+        the normalised inputs. This cannot be passed in if the module was
+        constructed with `create_offset=True`.
 
     Returns:
-      An n-d tensor of the same shape as inputs that has been normalized.
+      An `N - D` tensor of the same shape as inputs that has been normalized.
     """
     self._create_parameters(inputs)
     if self._create_scale:

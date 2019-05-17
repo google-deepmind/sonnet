@@ -37,7 +37,7 @@ class Initializer(object):
 
 
 class Zeros(Initializer):
-  """Initializer that generates tensors initialized to 0."""
+  """`Initializer` that generates tensors initialized to 0."""
 
   def __call__(self, shape, dtype):
     dtype = _as_numerical_dtype(dtype)
@@ -45,7 +45,7 @@ class Zeros(Initializer):
 
 
 class Ones(Initializer):
-  """Initializer that generates tensors initialized to 1."""
+  """`Initializer` that generates tensors initialized to 1."""
 
   def __call__(self, shape, dtype):
     dtype = _as_numerical_dtype(dtype)
@@ -53,7 +53,7 @@ class Ones(Initializer):
 
 
 class Constant(Initializer):
-  """Initializer that generates tensors initialized to the given value."""
+  """`Initializer` that generates tensors initialized to the given value."""
 
   def __init__(self, value):
     if not np.isscalar(value):
@@ -69,10 +69,10 @@ class Constant(Initializer):
 
 
 class RandomUniform(Initializer):
-  """Initializer that generates tensors with a uniform distribution.
+  """`Initializer` that generates tensors with a uniform distribution.
 
-  The generated values follow a uniform distribution in the range [minval,
-  maxval).
+  The generated values follow a uniform distribution in the range
+  `[minval, maxval)`.
 
   Args:
     minval: A scalar. Lower bound of the range of random values to generate.
@@ -98,7 +98,7 @@ class RandomUniform(Initializer):
 
 
 class RandomNormal(Initializer):
-  """Initializer that generates tensors with a normal distribution.
+  """`Initializer` that generates tensors with a normal distribution.
 
   Args:
     mean: A python scalar or a scalar tensor. Mean of the random values
@@ -124,7 +124,7 @@ class RandomNormal(Initializer):
 
 
 class TruncatedNormal(Initializer):
-  """Initializer that generates a truncated normal distribution.
+  """`Initializer` that generates a truncated normal distribution.
 
   These values follow a normal distribution except that values more than two
   standard deviations from the mean are discarded and re-drawn. This is the
@@ -154,7 +154,7 @@ class TruncatedNormal(Initializer):
 
 
 class Identity(Initializer):
-  """Initializer that generates the identity matrix.
+  """`Initializer` that generates the identity matrix.
 
   Constructs a 2D identity matrix or batches of these.
 
@@ -180,9 +180,9 @@ class Identity(Initializer):
 
 
 class Orthogonal(Initializer):
-  """Initializer that generates an orthogonal matrix.
+  """`Initializer` that generates an orthogonal matrix.
 
-  Doesn't work for 1D tensors.
+  NOTE: Does not support 1D tensors.
 
   If the shape of the tensor to initialize is two-dimensional, it is initialized
   with an orthogonal matrix obtained from the QR decomposition of a matrix of
@@ -240,22 +240,23 @@ class VarianceScaling(Initializer):
   With `distribution="truncated_normal" or "normal"`,
   samples are drawn from a distribution with a mean of zero and a standard
   deviation (after truncation, if used) `stddev = sqrt(scale / n)`
-  where n is:
+  where `n` is:
 
-    - number of input units in the weight tensor, if mode = "fan_in"
-    - number of output units, if mode = "fan_out"
-    - average of the numbers of input and output units, if mode = "fan_avg"
+    - Number of input units in the weight tensor, if `mode = "fan_in"`.
+    - Number of output units, if `mode = "fan_out"`.
+    - Average of the numbers of input and output units, if `mode = "fan_avg"`.
 
   Note that for transposed convolution the mode selected should be reversed. For
   number of input units use "fan_out" and for number of output units "fan_in".
 
   With `distribution="uniform"`, samples are drawn from a uniform distribution
-  within [-limit, limit], with `limit = sqrt(3 * scale / n)`.
+  within `[-limit, limit]`, with `limit = sqrt(3 * scale / n)`.
 
   The variance scaling initializer can be configured to generate other standard
   initializers using the scale, mode and distribution arguments. Here are some
   example configurations:
 
+  ```
   +----------------+-----------------------------------------------------------+
   | name           | parameters                                                |
   +----------------+-----------------------------------------------------------+
@@ -266,6 +267,7 @@ class VarianceScaling(Initializer):
   | he_uniform     | scale=2.0, mode='fan_in',  distribution='uniform'         |
   | he_normal      | scale=2.0, mode='fan_in',  distribution='truncated_normal'|
   +----------------+-----------------------------------------------------------+
+  ```
 
   Args:
     scale: Scaling factor (positive float).
@@ -360,10 +362,10 @@ def _compute_fans(shape):
   """Computes the number of input and output units for a weight shape.
 
   Args:
-    shape: Integer shape tuple or TF tensor shape.
+    shape: Integer shape tuple or `tf.TensorShape`.
 
   Returns:
-    A tuple of scalars (fan_in, fan_out).
+    A tuple of scalars `(fan_in, fan_out)`.
   """
   if len(shape) < 1:  # Just to avoid errors for constants.
     fan_in = fan_out = 1

@@ -25,10 +25,10 @@ import tensorflow as tf
 
 
 class SGD(base.Module):
-  """Stochastic Gradient Descent module."""
+  """Stochastic Gradient Descent (SGD) module."""
 
   def __init__(self, learning_rate, name=None):
-    """Constructs a Stochastic Gradient Descent module."""
+    """Constructs an `SGD` module."""
     super(SGD, self).__init__(name)
     self.learning_rate = learning_rate
 

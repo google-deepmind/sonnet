@@ -27,10 +27,10 @@ import tensorflow as tf
 def _extract_input_shape(inputs, preserve_dims=1):
   """Extracts the shape minus ignored dimensions from `inputs`.
 
-  >>> _extract_input_shape(tf.ones([1, 2, 3]))
-  [2, 3]
-  >>> _extract_input_shape(tf.ones([1, 2, 3]), preserve_dims=2)
-  [3]
+      >>> _extract_input_shape(tf.ones([1, 2, 3]))
+      [2, 3]
+      >>> _extract_input_shape(tf.ones([1, 2, 3]), preserve_dims=2)
+      [3]
 
   Args:
     inputs: A tf.Tensor whose shape should be extracted.
@@ -54,15 +54,17 @@ def _extract_input_shape(inputs, preserve_dims=1):
 def _batch_reshape(inputs, output_shape, preserve_dims=1):
   """Reshapes input Tensor, preserving the batch dimension.
 
-  >>> _batch_reshape(tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=1)
-  <tf.Tensor: ... shape=(10, 12), ...>
+      >>> _batch_reshape(
+      ...   tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=1)
+      <tf.Tensor: ... shape=(10, 12), ...>
 
-  >>> _batch_reshape(tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=2)
-  <tf.Tensor: ... shape=(10, 2, 6), ...>
+      >>> _batch_reshape(
+      ...   tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=2)
+      <tf.Tensor: ... shape=(10, 2, 6), ...>
 
   Args:
-    inputs: A Tensor of shape [b_1, b_2, ..., b_preserve_dims,
-      b_preserve_dims+1, ...].
+    inputs: A Tensor of shape
+        `[b_1, b_2, ..., b_preserve_dims, b_preserve_dims+1, ...]`.
     output_shape: Shape to reshape the input Tensor to while preserving its
         first `preserve_dims` dimensions; `shape` can be either a tuple/list, or
         a callable that returns the actual shape. The callable does not need to
@@ -148,26 +150,26 @@ class Reshape(base.Module):
 
   For example, given an input Tensor with shape `[B, H, W, C, D]`:
 
-  >>> B, H, W, C, D = range(1, 6)
-  >>> x = tf.ones([B, H, W, C, D])
+      >>> B, H, W, C, D = range(1, 6)
+      >>> x = tf.ones([B, H, W, C, D])
 
   The default behavior when `output_shape` is (-1, D) is to flatten all
   dimensions between `B` and `D`:
 
-  >>> mod = snt.Reshape(output_shape=(-1, D))
-  >>> assert mod(x).shape == [B, H*W*C, D]
+      >>> mod = snt.Reshape(output_shape=(-1, D))
+      >>> assert mod(x).shape == [B, H*W*C, D]
 
   You can change the number of preserved leading dimensions via
   `preserve_dims`:
 
-  >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=2)
-  >>> assert mod(x).shape == [B, H, W*C, D]
+      >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=2)
+      >>> assert mod(x).shape == [B, H, W*C, D]
 
-  >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=3)
-  >>> assert mod(x).shape == [B, H, W, C, D]
+      >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=3)
+      >>> assert mod(x).shape == [B, H, W, C, D]
 
-  >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=4)
-  >>> assert mod(x).shape == [B, H, W, C, 1, D]
+      >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=4)
+      >>> assert mod(x).shape == [B, H, W, C, 1, D]
   """
 
   def __init__(self, output_shape, preserve_dims=1, name=None):

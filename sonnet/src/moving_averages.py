@@ -36,10 +36,13 @@ class ExponentialMovingAverage(metrics.Metric):
   initial value. Reference (https://arxiv.org/pdf/1412.6980.pdf)
 
   Initially:
-    `hidden_0 = 0`
+
+      hidden_0 = 0
+
   Then iteratively:
-    `hidden_i = (1 - decay)*value + decay*hidden_i-1`
-    `average_i = hidden_i / (1 - decay^i)
+
+      hidden_i = (1 - decay)*value + decay*hidden_i-1
+      average_i = hidden_i / (1 - decay^i)
 
   Attributes:
     average: Variable holding average. Note that this is None until the first

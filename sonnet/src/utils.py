@@ -138,17 +138,17 @@ def smart_autograph(f):
   might expect and still be compatible with code that uses
   `@tf.function(autograph=False)`.
 
-  >>> @smart_autograph
-  ... def f(x):
-  ...   if x > 0:
-  ...     y = x * x
-  ...   else:
-  ...     y = -x
-  ...   return y
+      >>> @smart_autograph
+      ... def f(x):
+      ...   if x > 0:
+      ...     y = x * x
+      ...   else:
+      ...     y = -x
+      ...   return y
 
-  >>> f = tf.function(f, autograph=False)
-  >>> f(tf.constant(2))
-  <tf.Tensor: ... numpy=4>
+      >>> f = tf.function(f, autograph=False)
+      >>> f(tf.constant(2))
+      <tf.Tensor: ... numpy=4>
 
   Args:
     f: A function to wrap conditionally in `tf.autograph`.

@@ -30,6 +30,7 @@ from sonnet.src import initializers
 from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import utils
+import tensorflow.compat.v1 as tf1
 import tensorflow as tf
 
 # A temporary import until tree is open-sourced.
@@ -375,7 +376,8 @@ def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
     # This is to match the `tf.nn.*_rnn` behavior. In general, we might
     # want to branch on `tf.reduce_all(condition)`.
     return y
-  return tf.where(condition, x, y)
+  # TODO(tomhennigan) Broadcasting with SelectV2 is currently broken.
+  return tf1.where(condition, x, y)
 
 
 def _rnn_step(

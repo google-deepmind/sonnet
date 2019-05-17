@@ -35,7 +35,7 @@ echo ""
 # Python test dependencies.
 python3 -m pip install -r requirements-test.txt
 
-python3 -m pip install --upgrade tf-nightly-2.0-preview
+python3 -m pip install --upgrade tf-nightly-2.0-preview==2.0.0.dev20190517
 python3 -c 'import tensorflow as tf; print(tf.__version__)'
 
 

@@ -4,15 +4,16 @@ licenses(["notice"])  # Apache 2.0 License
 
 exports_files(["LICENSE"])
 
-load("//sonnet/src:build_defs.bzl", "snt_py_test")
+load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
-py_library(
+snt_py_library(
     name = "base",
     srcs = ["base.py"],
     deps = [
         ":utils",
         # six
         # tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -27,7 +28,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "reshape",
     srcs = ["reshape.py"],
     deps = [
@@ -49,7 +50,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "conv",
     srcs = ["conv.py"],
     deps = [
@@ -75,7 +76,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "depthwise_conv",
     srcs = ["depthwise_conv.py"],
     deps = [
@@ -100,7 +101,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "conv_transpose",
     srcs = ["conv_transpose.py"],
     deps = [
@@ -124,11 +125,11 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "deferred",
     srcs = ["deferred.py"],
     deps = [
-        # tensorflow
+        ":base",
     ],
 )
 
@@ -143,7 +144,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "initializers",
     srcs = ["initializers.py"],
     deps = [
@@ -165,7 +166,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "linear",
     srcs = ["linear.py"],
     deps = [
@@ -190,7 +191,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "batch_norm",
     srcs = ["batch_norm.py"],
     deps = [
@@ -198,6 +199,7 @@ py_library(
         ":initializers",
         ":moving_averages",
         ":once",
+        ":utils",
         # tensorflow
     ],
 )
@@ -214,7 +216,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "pad",
     srcs = ["pad.py"],
     deps = [
@@ -233,11 +235,12 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "metrics",
     srcs = ["metrics.py"],
     deps = [
         ":base",
+        # six
     ],
 )
 
@@ -251,7 +254,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "once",
     srcs = ["once.py"],
     deps = [":utils"],
@@ -267,7 +270,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "recurrent",
     srcs = ["recurrent.py"],
     deps = [
@@ -294,7 +297,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "sequential",
     srcs = ["sequential.py"],
     deps = [
@@ -313,12 +316,13 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "adam",
     srcs = ["adam.py"],
     deps = [
         ":base",
         ":optimizer_utils",
+        # tensorflow
     ],
 )
 
@@ -333,12 +337,13 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "momentum",
     srcs = ["momentum.py"],
     deps = [
         ":base",
         ":optimizer_utils",
+        # tensorflow
     ],
 )
 
@@ -353,12 +358,13 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "rmsprop",
     srcs = ["rmsprop.py"],
     deps = [
         ":base",
         ":optimizer_utils",
+        # tensorflow
     ],
 )
 
@@ -373,12 +379,13 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "sgd",
     srcs = ["sgd.py"],
     deps = [
         ":base",
         ":optimizer_utils",
+        # tensorflow
     ],
 )
 
@@ -393,13 +400,15 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "axis_norm",
     srcs = ["axis_norm.py"],
     deps = [
         ":base",
         ":initializers",
         ":once",
+        ":utils",
+        # six
         # tensorflow
     ],
 )
@@ -417,13 +426,15 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "group_norm",
     srcs = ["group_norm.py"],
     deps = [
         ":base",
         ":initializers",
         ":once",
+        ":utils",
+        # six
         # tensorflow
     ],
 )
@@ -441,7 +452,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "moving_averages",
     srcs = ["moving_averages.py"],
     deps = [
@@ -462,15 +473,16 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "utils",
     srcs = ["utils.py"],
     deps = [
         # tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
-py_library(
+snt_py_library(
     name = "optimizer_utils",
     srcs = ["optimizer_utils.py"],
 )
@@ -498,7 +510,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "test_utils",
     srcs = ["test_utils.py"],
     deps = [
@@ -507,7 +519,7 @@ py_library(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "dropout",
     srcs = ["dropout.py"],
     deps = [
@@ -528,7 +540,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "bias",
     srcs = ["bias.py"],
     deps = [

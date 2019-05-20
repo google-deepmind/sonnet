@@ -1,5 +1,17 @@
 """Sonnet specific build rules."""
 
+def snt_py_library(name, **kwargs):
+    """Proxy for py_library.
+
+    Internally we override this to enable type checking via PyType (more
+    information at https://github.com/google/pytype).
+
+    Args:
+        name: library name.
+        **kwargs: keyword args passed straight to py_library.
+    """
+    native.py_library(name = name, **kwargs)
+
 def snt_py_test(
         name,
         deps = [],

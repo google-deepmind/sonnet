@@ -17,6 +17,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import collections
@@ -25,9 +26,16 @@ import inspect
 import re
 
 import tensorflow as tf
+from typing import Any, Callable, Dict, Sequence, Text, Tuple, TypeVar, Union
+
+T = TypeVar("T")
 
 
-def replicate(element, num_times, name):
+def replicate(
+    element: Union[T, Sequence[T]],
+    num_times: int,
+    name: Text,
+) -> Tuple[T]:
   """Replicates entry in `element` `num_times` if needed."""
   if not isinstance(element, collections.Sequence):
     return (element,) * num_times
@@ -40,12 +48,14 @@ def replicate(element, num_times, name):
       .format(name, num_times))
 
 
-def _is_object(f):
+def _is_object(f: Any) -> bool:
   return not inspect.isfunction(f) and not inspect.ismethod(f)
 
 
 # TODO(b/123870292) Remove this and use wrapt.decorator when supported by TF.
-def decorator(decorator_fn):
+def decorator(
+    decorator_fn: Callable[[T, Any, Sequence[Any], Dict[Text, Any]], Any],
+) -> T:
   """Returns a wrapt style decorator."""
   @functools.wraps(decorator_fn)
   def _decorator(f):
@@ -66,7 +76,7 @@ def decorator(decorator_fn):
     if argspec.args and argspec.args[0] == "self":
       @functools.wraps(f)
       def _decorate_unbound_method(self, *args, **kwargs):
-        bound_method = f.__get__(self, self.__class__)
+        bound_method = f.__get__(self, self.__class__)  # pytype: disable=attribute-error
         return decorator_fn(bound_method, self, args, kwargs)
       return _decorate_unbound_method
 
@@ -83,7 +93,7 @@ _SPATIAL_CHANNELS_LAST = re.compile("^N[^C]*C$")
 _SEQUENTIAL = re.compile("^((BT)|(TB))[^D]*D$")
 
 
-def get_channel_index(data_format):
+def get_channel_index(data_format: Text) -> int:
   """Returns the channel index when given a valid data format.
 
   Args:
@@ -113,7 +123,7 @@ def get_channel_index(data_format):
       "`channels_last`).".format(data_format))
 
 
-def assert_rank(inputs, rank):
+def assert_rank(inputs, rank: int):
   """Asserts the rank of the input is `rank`."""
   shape = tuple(inputs.shape)
   actual_rank = len(shape)
@@ -121,7 +131,7 @@ def assert_rank(inputs, rank):
     raise ValueError("Shape %r must have rank %d" % (shape, rank))
 
 
-def assert_minimum_rank(inputs, rank):
+def assert_minimum_rank(inputs, rank: int):
   """Asserts the rank of the input is at least `rank`."""
   shape = tuple(inputs.shape)
   actual_rank = len(shape)
@@ -129,7 +139,7 @@ def assert_minimum_rank(inputs, rank):
     raise ValueError("Shape %r must have rank >= %d" % (shape, rank))
 
 
-def smart_autograph(f):
+def smart_autograph(f: T) -> T:
   """Wraps `f` such that in graph mode it uses autograph but not in eager.
 
   Whilst wrapping `f` in autograph is (intended to be) semantics preserving,

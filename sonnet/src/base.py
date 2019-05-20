@@ -17,6 +17,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
@@ -28,12 +29,14 @@ import sys
 import six
 from sonnet.src import utils
 import tensorflow as tf
+from typing import Any, Callable, Dict, Optional, Sequence, Text, Tuple, Type, TypeVar
 
-APPLY_NAME_SCOPE = "_with_name_scope__"
+T = TypeVar("T")
 TFFunctionType = type(tf.function(lambda: None, autograph=False))  # pylint: disable=invalid-name
+APPLY_NAME_SCOPE = "_with_name_scope__"
 
 
-def no_name_scope(method):
+def no_name_scope(method: T) -> T:
   """Decorator to wrap a method, preventing automatic name scope wrapping.
 
   By default, any method on a module is considered as a forwards function, and
@@ -59,7 +62,12 @@ def no_name_scope(method):
 class ModuleMetaclass(abc.ABCMeta):
   """Metaclass for `Module`."""
 
-  def __new__(mcs, name, bases, clsdict):
+  def __new__(
+      mcs: Type[Type[T]],
+      name: Text,
+      bases: Tuple[Type[Any], ...],
+      clsdict: Dict[Text, Any],
+  ) -> Type[T]:
     methods = []
 
     for key, value in clsdict.items():
@@ -103,12 +111,15 @@ class ModuleMetaclass(abc.ABCMeta):
 
     return cls
 
-  def __call__(cls, *args, **kwargs):
+  def __call__(cls: Type[T], *args, **kwargs) -> T:
     # Call new such that we have an un-initialized module instance that we can
     # still reference even if there is an exception during __init__. This is
     # needed such that we can make sure the name_scope constructed in __init__
     # is closed even if there is an exception.
-    module = cls.__new__(cls, *args, **kwargs)
+
+    # NOTE: We disable pytype since (somewhat surprisingly) this method is bound
+    # with the new class and not the metaclass.
+    module = cls.__new__(cls, *args, **kwargs)  # pytype: disable=wrong-arg-types
 
     # Now attempt to initialize the object.
     try:
@@ -139,7 +150,7 @@ class ModuleMetaclass(abc.ABCMeta):
     return module
 
 
-def auto_repr(cls, *args, **kwargs):
+def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
   """Derive a `__repr__` from constructor arguments of a given class.
 
       >>> class Foo(object):
@@ -160,7 +171,8 @@ def auto_repr(cls, *args, **kwargs):
   Returns:
     A string representing a call equivalent to `cls(*args, **kwargs)`.
   """
-  argspec = inspect.getargspec(cls.__init__)
+  getargspec = getattr(inspect, "getfullargspec", inspect.getargspec)
+  argspec = getargspec(cls.__init__)
   arg_names = argspec.args
   # Keep used positionals minus self.
   arg_names = arg_names[1:(len(args) + 1)]
@@ -185,21 +197,26 @@ def auto_repr(cls, *args, **kwargs):
         indent(4, ",\n".join(fancy_repr(n, v) for n, v in names_and_values)))
 
 
-def fancy_repr(name, value):
+def fancy_repr(name: Text, value: Any) -> Text:
   repr_value = pprint.pformat(value)
   if name:
     repr_value = indent(len(name), repr_value).strip()
   return name + repr_value
 
 
-def indent(amount, s):
+def indent(amount: int, s: Text) -> Text:
   """Indents `s` with `amount` spaces."""
   prefix = amount * " "
   return "\n".join(prefix + line for line in s.splitlines())
 
 
 @utils.decorator
-def wrap_with_name_scope(method, instance, args, kwargs):
+def wrap_with_name_scope(
+    method: Callable[..., T],
+    instance: Any,
+    args: Sequence[Any],
+    kwargs: Dict[Text, Any],
+) -> T:
   """Decorator that calls the given function in the module name scope.
 
   Args:
@@ -232,7 +249,12 @@ def wrap_with_name_scope(method, instance, args, kwargs):
 
 
 @utils.decorator
-def wrap_with_name_scope_no_exception(method, instance, args, kwargs):
+def wrap_with_name_scope_no_exception(
+    method: Callable[..., T],
+    instance: Any,
+    args: Sequence[Any],
+    kwargs: Dict[Text, Any],
+) -> T:
   """Patches the given method so it enters the modules name scope."""
   if instance is None:
     instance = args[0]
@@ -245,7 +267,7 @@ def wrap_with_name_scope_no_exception(method, instance, args, kwargs):
     return method(*args, **kwargs)
 
 
-def with_name_scope(method):
+def with_name_scope(method: T) -> T:
   """Patches the given method so it enters the modules name scope."""
   if not getattr(method, APPLY_NAME_SCOPE, True):
     # The function has been annotated to say that no autoscoping should be
@@ -278,7 +300,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       <tf.Tensor: ... numpy=2.0>
   """
 
-  def __init__(self, name=None):
+  def __init__(self, name: Optional[Text] = None):
     super(Module, self).__init__(name=name)
 
     if getattr(self.__init__, APPLY_NAME_SCOPE, True):

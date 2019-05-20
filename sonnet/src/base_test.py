@@ -116,6 +116,17 @@ class TestModuleNaming(tf.test.TestCase):
     self.assertEqual(getter_scope_name, "")
     self.assertEqual(setter_scope_name, "")
 
+  def test_ctor_no_name_scope(self):
+    mod = CtorNoNameScope()
+    self.assertEqual(mod.ctor_name_scope, "")
+    self.assertEqual(mod.w.name, "w:0")
+
+  def test_ctor_no_name_scope_no_super(self):
+    msg = ("Constructing a snt.Module without calling the super constructor is "
+           "not supported")
+    with self.assertRaisesRegexp(ValueError, msg):
+      CtorNoNameScopeNoSuper()
+
   def test_invalid_name(self):
     msg = ".* is not a valid module name"
     with self.assertRaisesRegexp(ValueError, msg):
@@ -434,6 +445,22 @@ class ModuleWithFunctionAnnotatedCall(base.Module):
   @tf.function(autograph=True)
   def forward_ag(self):
     return get_name_scope()
+
+
+class CtorNoNameScope(base.Module):
+
+  @base.no_name_scope
+  def __init__(self):
+    super(CtorNoNameScope, self).__init__()
+    self.ctor_name_scope = get_name_scope()
+    self.w = tf.Variable(1., name="w")
+
+
+class CtorNoNameScopeNoSuper(base.Module):
+
+  @base.no_name_scope
+  def __init__(self):
+    pass
 
 
 class PropertyModule(base.Module):

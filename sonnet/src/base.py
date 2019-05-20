@@ -29,7 +29,7 @@ import six
 from sonnet.src import utils
 import tensorflow as tf
 
-NO_MODULE_NAME_SCOPE = "__no_module_name_scope__"
+APPLY_NAME_SCOPE = "_with_name_scope__"
 TFFunctionType = type(tf.function(lambda: None, autograph=False))  # pylint: disable=invalid-name
 
 
@@ -41,7 +41,7 @@ def no_name_scope(method):
   to the module. In some cases this is undesirable, for example when
   implementing `.clone()` / `.transpose()`, as in those cases we want the new
   module to have the scope of wherever the `.transpose()` call is made. To
-  allow this, decorate any methods with `no_module_name_scope`.
+  allow this, decorate any methods with `no_name_scope`.
 
   This logic is tied to `ModuleMetaclass.__new__`, if anything is
   changed here corresponding changes will be needed there.
@@ -52,7 +52,7 @@ def no_name_scope(method):
   Returns:
     The method, with a flag indicating no name scope wrapping should occur.
   """
-  setattr(method, NO_MODULE_NAME_SCOPE, True)
+  setattr(method, APPLY_NAME_SCOPE, False)
   return method
 
 
@@ -120,21 +120,21 @@ class ModuleMetaclass(abc.ABCMeta):
     else:
       module._auto_repr = auto_repr(cls, *args, **kwargs)  # pylint: disable=protected-access
     finally:
+      exc_info = sys.exc_info()
+
       # The base Module constructor enters the modules name scope before
       # returning such that other functionality in the ctor happens within the
       # modules name scope.
-      scope = getattr(module, "_ctor_name_scope", None)
-      exc_info = sys.exc_info()
-      if scope is None:
-        if exc_info[0] is None:
-          raise ValueError(
-              "Constructing a snt.Module without calling the super constructor "
-              "is not supported. Add the following as the first line in your "
-              "__init__ method:\n\n"
-              "super(%s, self).__init__()" % cls.__name__)
-      else:
-        scope.__exit__(*exc_info)
+      ctor_name_scope = getattr(module, "_ctor_name_scope", None)
+      if ctor_name_scope is not None:
+        ctor_name_scope.__exit__(*exc_info)
         del module._ctor_name_scope
+
+      if exc_info[0] is None and not hasattr(module, "_scope_name"):
+        raise ValueError(
+            "Constructing a snt.Module without calling the super constructor "
+            "is not supported. Add the following as the first line in your "
+            "__init__ method:\n\nsuper(%s, self).__init__()" % cls.__name__)
 
     return module
 
@@ -222,12 +222,12 @@ def wrap_with_name_scope(method, instance, args, kwargs):
     exc_value = AttributeError(
         "The super constructor must be called before any other methods in "
         "your constructor. If this is not possible then annotate all the "
-        "methods called with `@snt.no_module_name_scope`.")
+        "methods called with `@snt.no_name_scope`.")
     six.raise_from(exc_value, exc_value_from)
 
   with module_name_scope:
     # snt.Module enters the module name scope for all methods. To disable this
-    # for a particular method annotate it with `@snt.no_module_name_scope`.
+    # for a particular method annotate it with `@snt.no_name_scope`.
     return method(*args, **kwargs)
 
 
@@ -241,13 +241,13 @@ def wrap_with_name_scope_no_exception(method, instance, args, kwargs):
 
   with instance.name_scope:
     # snt.Module enters the module name scope for all methods. To disable this
-    # for a particular method annotate it with `@snt.no_module_name_scope`.
+    # for a particular method annotate it with `@snt.no_name_scope`.
     return method(*args, **kwargs)
 
 
 def with_name_scope(method):
   """Patches the given method so it enters the modules name scope."""
-  if getattr(method, NO_MODULE_NAME_SCOPE, False):
+  if not getattr(method, APPLY_NAME_SCOPE, True):
     # The function has been annotated to say that no autoscoping should be
     # applied, so do not patch it.
     return method
@@ -281,8 +281,9 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   def __init__(self, name=None):
     super(Module, self).__init__(name=name)
 
-    # Enter the name scope so subsequent code in the contructor (e.g. creating
-    # submodules) happens inside the modules name scope. This is exited when
-    # the subclass __init__ returns (this is implemented in ModuleMetaclass).
-    self._ctor_name_scope = self.name_scope
-    self._ctor_name_scope.__enter__()
+    if getattr(self.__init__, APPLY_NAME_SCOPE, True):
+      # Enter the name scope so subsequent code in the contructor (e.g. creating
+      # submodules) happens inside the modules name scope. This is exited when
+      # the subclass __init__ returns (this is implemented in ModuleMetaclass).
+      self._ctor_name_scope = self.name_scope
+      self._ctor_name_scope.__enter__()

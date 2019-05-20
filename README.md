@@ -47,7 +47,7 @@ You can run the following to verify things installed correctly:
 
 ```python
 import tensorflow as tf
-import sonnet.v2 as snt
+import sonnet as snt
 
 # tf.enable_v2_behavior()
 

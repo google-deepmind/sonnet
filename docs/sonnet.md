@@ -744,22 +744,22 @@ mod.w
 
 See `_ConvNDLSTM`.
 
-#### [`Conv1DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1198){#Conv1DLSTM.__init__ .code-reference}
+#### [`Conv1DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1200){#Conv1DLSTM.__init__ .code-reference}
 
 
 
 
-#### [`Conv1DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv1DLSTM.hidden_to_hidden .code-reference}
+#### [`Conv1DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv1DLSTM.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`Conv1DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#Conv1DLSTM.initial_state .code-reference}
+#### [`Conv1DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#Conv1DLSTM.initial_state .code-reference}
 
 See base class.
 
 
-#### [`Conv1DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv1DLSTM.input_to_hidden .code-reference}
+#### [`Conv1DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv1DLSTM.input_to_hidden .code-reference}
 
 
 
@@ -1089,22 +1089,22 @@ mod.w
 
 See `_ConvNDLSTM`.
 
-#### [`Conv2DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NHWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1227){#Conv2DLSTM.__init__ .code-reference}
+#### [`Conv2DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NHWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1229){#Conv2DLSTM.__init__ .code-reference}
 
 
 
 
-#### [`Conv2DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv2DLSTM.hidden_to_hidden .code-reference}
+#### [`Conv2DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv2DLSTM.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`Conv2DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#Conv2DLSTM.initial_state .code-reference}
+#### [`Conv2DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#Conv2DLSTM.initial_state .code-reference}
 
 See base class.
 
 
-#### [`Conv2DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv2DLSTM.input_to_hidden .code-reference}
+#### [`Conv2DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv2DLSTM.input_to_hidden .code-reference}
 
 
 
@@ -1434,22 +1434,22 @@ mod.w
 
 See `_ConvNDLSTM`.
 
-#### [`Conv3DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NDHWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1256){#Conv3DLSTM.__init__ .code-reference}
+#### [`Conv3DLSTM.__init__(input_shape, output_channels, kernel_shape, data_format='NDHWC', w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1258){#Conv3DLSTM.__init__ .code-reference}
 
 
 
 
-#### [`Conv3DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv3DLSTM.hidden_to_hidden .code-reference}
+#### [`Conv3DLSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv3DLSTM.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`Conv3DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#Conv3DLSTM.initial_state .code-reference}
+#### [`Conv3DLSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#Conv3DLSTM.initial_state .code-reference}
 
 See base class.
 
 
-#### [`Conv3DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#Conv3DLSTM.input_to_hidden .code-reference}
+#### [`Conv3DLSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#Conv3DLSTM.input_to_hidden .code-reference}
 
 
 
@@ -1687,12 +1687,12 @@ Wrapping non-recurrent modules into a `DeepRNN` can be useful to produce
 something API compatible with a "real" recurrent module, simplifying
 code that handles the cores.
 
-#### [`DeepRNN.__init__(layers, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=585){#DeepRNN.__init__ .code-reference}
+#### [`DeepRNN.__init__(layers, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=587){#DeepRNN.__init__ .code-reference}
 
 
 
 
-#### [`DeepRNN.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#DeepRNN.initial_state .code-reference}
+#### [`DeepRNN.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#DeepRNN.initial_state .code-reference}
 
 See base class.
 
@@ -2233,7 +2233,7 @@ Variables:
   b: biases b_z, b_r and b_a concatenated into a Tensor of shape
     [3 * hidden_size].
 
-#### [`GRU.__init__(hidden_size, w_i_init=None, w_h_init=None, b_init=None, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1304){#GRU.__init__ .code-reference}
+#### [`GRU.__init__(hidden_size, w_i_init=None, w_h_init=None, b_init=None, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1306){#GRU.__init__ .code-reference}
 
 Construct a `GRU`.
 
@@ -2251,17 +2251,17 @@ Construct a `GRU`.
 * `name`: Name of the module.
 
 
-#### [`GRU.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#GRU.hidden_to_hidden .code-reference}
+#### [`GRU.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#GRU.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`GRU.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#GRU.initial_state .code-reference}
+#### [`GRU.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#GRU.initial_state .code-reference}
 
 See base class.
 
 
-#### [`GRU.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#GRU.input_to_hidden .code-reference}
+#### [`GRU.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#GRU.input_to_hidden .code-reference}
 
 
 
@@ -2706,7 +2706,7 @@ Variables:
   b: biases `b_i`, `b_f`, `b_g` and `b_o` concatenated into a `tf.Tensor` of
     shape `[3 * hidden_size]`.
 
-#### [`LSTM.__init__(hidden_size, projection_size=None, projection_init=None, w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=734){#LSTM.__init__ .code-reference}
+#### [`LSTM.__init__(hidden_size, projection_size=None, projection_init=None, w_i_init=None, w_h_init=None, b_init=None, forget_bias=1.0, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=736){#LSTM.__init__ .code-reference}
 
 Construct an `LSTM`.
 
@@ -2734,17 +2734,17 @@ Construct an `LSTM`.
 * `name`: Name of the module.
 
 
-#### [`LSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#LSTM.hidden_to_hidden .code-reference}
+#### [`LSTM.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#LSTM.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`LSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#LSTM.initial_state .code-reference}
+#### [`LSTM.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#LSTM.initial_state .code-reference}
 
 See base class.
 
 
-#### [`LSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#LSTM.input_to_hidden .code-reference}
+#### [`LSTM.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#LSTM.input_to_hidden .code-reference}
 
 
 
@@ -3133,7 +3133,7 @@ mod.w
 
 Metric base class.
 
-#### [`Metric.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=281){#Metric.__init__ .code-reference}
+#### [`Metric.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=303){#Metric.__init__ .code-reference}
 
 
 
@@ -3151,7 +3151,7 @@ parent module names.
 Returns a `tf.name_scope` instance for this class.
 
 
-#### [`Metric.reset(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=60){#Metric.reset .code-reference}
+#### [`Metric.reset(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=70){#Metric.reset .code-reference}
 
 Resets the metric.
 
@@ -3194,12 +3194,12 @@ of calling this method if you don't expect the return value to change.
   first).
 
 
-#### [`Metric.update(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=60){#Metric.update .code-reference}
+#### [`Metric.update(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=70){#Metric.update .code-reference}
 
 Accumulates values.
 
 
-#### [`Metric.value`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=67){#Metric.value .code-reference}
+#### [`Metric.value`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/metrics.py?l=77){#Metric.value .code-reference}
 
 Returns the current value of the metric.
 
@@ -3272,7 +3272,7 @@ apply operations combining user input and module parameters. For example:
     >>> mod(1.)
     <tf.Tensor: ... numpy=2.0>
 
-#### [`Module.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=281){#Module.__init__ .code-reference}
+#### [`Module.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=303){#Module.__init__ .code-reference}
 
 
 
@@ -3390,12 +3390,12 @@ previous state to an input.
 Cores are typically used with `snt.*_unroll` to iteratively construct
 an output sequence from the given input sequence.
 
-#### [`RNNCore.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=281){#RNNCore.__init__ .code-reference}
+#### [`RNNCore.__init__(name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=303){#RNNCore.__init__ .code-reference}
 
 
 
 
-#### [`RNNCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#RNNCore.initial_state .code-reference}
+#### [`RNNCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#RNNCore.initial_state .code-reference}
 
 Construct an initial state for this core.
 
@@ -3820,7 +3820,7 @@ or automatically for a given `RNNCore`
     core = snt.LSTM(hidden_size=16)
     snt.TrainableState.for_core(core)
 
-#### [`TrainableState.__init__(initial_values, mask=None, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=116){#TrainableState.__init__ .code-reference}
+#### [`TrainableState.__init__(initial_values, mask=None, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=117){#TrainableState.__init__ .code-reference}
 
 Construct a trainable state from initial values.
 
@@ -3834,7 +3834,7 @@ Construct a trainable state from initial values.
 * `name`: Name of the module.
 
 
-#### [`TrainableState.for_core(cls, core, mask=None, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=97){#TrainableState.for_core .code-reference}
+#### [`TrainableState.for_core(cls, core, mask=None, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=98){#TrainableState.for_core .code-reference}
 
 Construct a trainable state for a given `RNNCore`.
 
@@ -3968,7 +3968,7 @@ Variables:
     `[input_size, hidden_size]`.
   b: bias, a `tf.Tensor` or shape `[hidden_size]`.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=tanh, w_i_init=None, w_h_init=None, b_init=None, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=426){#VanillaRNN.__init__ .code-reference}
+#### [`VanillaRNN.__init__(hidden_size, activation=tanh, w_i_init=None, w_h_init=None, b_init=None, dtype=tf.float32, name=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=428){#VanillaRNN.__init__ .code-reference}
 
 Construct a vanilla RNN core.
 
@@ -3989,17 +3989,17 @@ Construct a vanilla RNN core.
 * `name`: Name of the module.
 
 
-#### [`VanillaRNN.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#VanillaRNN.hidden_to_hidden .code-reference}
+#### [`VanillaRNN.hidden_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#VanillaRNN.hidden_to_hidden .code-reference}
 
 
 
 
-#### [`VanillaRNN.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=60){#VanillaRNN.initial_state .code-reference}
+#### [`VanillaRNN.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=70){#VanillaRNN.initial_state .code-reference}
 
 See base class.
 
 
-#### [`VanillaRNN.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=67){#VanillaRNN.input_to_hidden .code-reference}
+#### [`VanillaRNN.input_to_hidden`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=77){#VanillaRNN.input_to_hidden .code-reference}
 
 
 
@@ -4105,7 +4105,7 @@ mod.w
 
 
 
-### [`deep_rnn_with_residual_connections(layers, name='deep_rnn_with_residual_connections')`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=653){#deep_rnn_with_residual_connections .code-reference}
+### [`deep_rnn_with_residual_connections(layers, name='deep_rnn_with_residual_connections')`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=655){#deep_rnn_with_residual_connections .code-reference}
 
 Construct a `DeepRNN` with residual connections.
 
@@ -4141,7 +4141,7 @@ incrementally.
 * `ValueError`: If any of the layers is not an `RNNCore`.
 
 
-### [`deep_rnn_with_skip_connections(layers, concat_final_output=True, name='deep_rnn_with_skip_connections')`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=589){#deep_rnn_with_skip_connections .code-reference}
+### [`deep_rnn_with_skip_connections(layers, concat_final_output=True, name='deep_rnn_with_skip_connections')`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=591){#deep_rnn_with_skip_connections .code-reference}
 
 Construct a `DeepRNN` with skip connections.
 
@@ -4176,7 +4176,7 @@ This allows the layers to learn decoupled features.
 * `ValueError`: If any of the layers is not an `RNNCore`.
 
 
-### [`dynamic_unroll(core, input_sequence, initial_state, sequence_length=None, parallel_iterations=1, swap_memory=False)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=246){#dynamic_unroll .code-reference}
+### [`dynamic_unroll(core, input_sequence, initial_state, sequence_length=None, parallel_iterations=1, swap_memory=False)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=247){#dynamic_unroll .code-reference}
 
 Perform a dynamic unroll of an RNN.
 
@@ -4234,7 +4234,7 @@ replaces a loop with its body repeated multiple times.
 * `ValueError`: if `input_sequence` is empty.
 
 
-### [`lstm_with_recurrent_dropout(hidden_size, dropout=0.5, seed=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1014){#lstm_with_recurrent_dropout .code-reference}
+### [`lstm_with_recurrent_dropout(hidden_size, dropout=0.5, seed=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=1016){#lstm_with_recurrent_dropout .code-reference}
 
 Construct an LSTM with recurrent dropout.
 
@@ -4267,7 +4267,7 @@ computation of gate activations
 * `ValueError`: If `dropout` is not in `[0, 1)`.
 
 
-### [`no_name_scope(method)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=36){#no_name_scope .code-reference}
+### [`no_name_scope(method)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/base.py?l=39){#no_name_scope .code-reference}
 
 Decorator to wrap a method, preventing automatic name scope wrapping.
 
@@ -4276,7 +4276,7 @@ so any variables / modules created by the method will be scoped as belonging
 to the module. In some cases this is undesirable, for example when
 implementing `.clone()` / `.transpose()`, as in those cases we want the new
 module to have the scope of wherever the `.transpose()` call is made. To
-allow this, decorate any methods with `no_module_name_scope`.
+allow this, decorate any methods with `no_name_scope`.
 
 This logic is tied to `ModuleMetaclass.__new__`, if anything is
 changed here corresponding changes will be needed there.
@@ -4335,7 +4335,7 @@ Next time the method is run, it will be treated as not having run before.
   called.
 
 
-### [`static_unroll(core, input_sequence, initial_state, sequence_length=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=153){#static_unroll .code-reference}
+### [`static_unroll(core, input_sequence, initial_state, sequence_length=None)`](https://github.com/deepmind/sonnet/blob/v2/sonnet/src/recurrent.py?l=154){#static_unroll .code-reference}
 
 Perform a static unroll of an RNN.
 

@@ -28,14 +28,12 @@ import tensorflow_datasets as tfds
 def mnist(split, batch_size):
   """Returns a tf.data.Dataset with MNIST image/label pairs."""
   @tf.function
-  def map_fn(batch):
+  def map_fn(images, labels):
     # Mnist images are int8 [0, 255], we cast and rescale to float32 [-1, 1].
-    images = tf.cast(batch["image"], tf.float32)
-    images = ((images / 255.) - .5) * 2.
-    labels = batch["label"]
+    images = ((tf.cast(images, tf.float32)  / 255.) - .5) * 2.
     return images, labels
 
-  dataset = tfds.load(name="mnist", split=split)
+  dataset = tfds.load(name="mnist", split=split, as_supervised=True)
   dataset = dataset.map(map_fn)
   dataset = dataset.shuffle(buffer_size=4 * batch_size)
   dataset = dataset.batch(batch_size)
@@ -44,7 +42,6 @@ def mnist(split, batch_size):
   return dataset
 
 
-@tf.function
 def train_step(model, optimizer, images, labels):
   """Runs a single training step of the model on the given input."""
   with tf.GradientTape() as tape:
@@ -54,12 +51,14 @@ def train_step(model, optimizer, images, labels):
     loss = tf.reduce_mean(loss)
   variables = model.trainable_variables
   gradients = tape.gradient(loss, variables)
-  optimizer.apply_gradients(zip(gradients, variables))
+  optimizer.apply(gradients, variables)
   return loss
 
 
+@tf.function
 def train_epoch(model, optimizer):
   train_data = mnist("train", batch_size=128)
+  loss = 0.
   for images, labels in train_data:
     loss = train_step(model, optimizer, images, labels)
   return loss
@@ -85,7 +84,7 @@ def main(unused_argv):
       snt.Linear(10),
   ])
 
-  optimizer = tf.optimizers.SGD(0.1)
+  optimizer = snt.optimizers.SGD(0.1)
 
   for epoch in range(5):
     train_loss = train_epoch(model, optimizer)

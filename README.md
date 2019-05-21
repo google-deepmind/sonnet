@@ -1,6 +1,4 @@
-# Sonnet 2
-
-https://sonnet.dev
+# ![Sonnet](https://sonnet.dev/images/sonnet_logo.png)
 
 WARNING: Sonnet 2 is currently **alpha**. We would love to have you use it as an
 early adopter and please let us know if things aren't working as you would
@@ -29,11 +27,9 @@ Sonnet is also designed to be simple to understand, our code is (hopefully!)
 clear and focussed. Where we have picked defaults (e.g. defaults for initial
 parameter values) we try to point out why.
 
-[TOC]
-
 # Basics
 
-## Getting started from GitHub
+## Installation
 
 Sonnet 2 is built for TensorFlow 2. To get started install the TensorFlow 2.0
 nightly preview and Sonnet 2 from source:
@@ -212,7 +208,7 @@ for step_num in range(num_steps):
 checkpoint.save(save_prefix)
 ```
 
-## TensorFlow Saved Model {#saving}
+## TensorFlow Saved Model
 
 **Reference:** https://www.tensorflow.org/alpha/guide/saved_model
 

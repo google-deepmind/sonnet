@@ -189,7 +189,11 @@ class BaseBatchNorm(base.Module):
     rank = len(input_shape)
     self._fused = (rank == 4 and self._channel_index == -1)
     self._fused_data_format = "NHWC" if self._channel_index == -1 else "NCHW"
-    self._axis = [i for i in range(rank) if i != self._channel_index]
+    if self._channel_index < 0:
+      channel_index = self._channel_index + rank
+    else:
+      channel_index = self._channel_index
+    self._axis = tuple(i for i in range(rank) if i != channel_index)
 
     dtype = inputs.dtype
 

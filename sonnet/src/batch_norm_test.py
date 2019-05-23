@@ -40,6 +40,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
     outputs = layer(inputs, True, scale=scale, offset=offset).numpy()
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    self.assertEqual((0, 1, 2), layer._axis)
 
   def testSimpleTrainingNCHW(self):
     layer = batch_norm.BaseBatchNorm(
@@ -52,6 +53,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
     outputs = layer(inputs, True, scale=scale, offset=offset).numpy()
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    self.assertEqual((0, 2, 3), layer._axis)
 
   def testSimpleTraining3D(self):
     layer = batch_norm.BaseBatchNorm(
@@ -64,6 +66,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
     outputs = layer(inputs, True, scale=scale, offset=offset).numpy()
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    self.assertEqual((0, 1, 2, 3), layer._axis)
 
   def testSimpleTraining3DNCDHW(self):
     layer = batch_norm.BaseBatchNorm(
@@ -76,6 +79,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
     outputs = layer(inputs, True, scale=scale, offset=offset).numpy()
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    self.assertEqual((0, 2, 3, 4), layer._axis)
 
   def testNoScaleAndOffset(self):
     layer = batch_norm.BaseBatchNorm(

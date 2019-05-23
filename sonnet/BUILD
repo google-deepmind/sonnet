@@ -4,7 +4,9 @@ licenses(["notice"])  # Apache 2.0 License
 
 exports_files(["LICENSE"])
 
-py_library(
+load("//sonnet/src:build_defs.bzl", "snt_py_library")
+
+snt_py_library(
     name = "sonnet",
     srcs = ["__init__.py"],
     deps = [
@@ -30,7 +32,7 @@ py_library(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "initializers",
     srcs = ["initializers.py"],
     visibility = ["//visibility:private"],
@@ -39,7 +41,7 @@ py_library(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "nets",
     srcs = ["nets.py"],
     visibility = ["//visibility:private"],
@@ -49,7 +51,7 @@ py_library(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "optimizers",
     srcs = ["optimizers.py"],
     visibility = ["//visibility:private"],
@@ -61,7 +63,7 @@ py_library(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "pad",
     srcs = ["pad.py"],
     visibility = ["//visibility:private"],

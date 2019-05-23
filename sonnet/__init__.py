@@ -108,3 +108,15 @@ __all__ = (
 )
 
 __version__ = "2.0.0a0"
+
+#  ________________________________________
+# / Please don't use symbols in `src` they \
+# \ are not part of the Sonnet public API. /
+#  ----------------------------------------
+#         \   ^__^
+#          \  (oo)\_______
+#             (__)\       )\/\
+#                 ||----w |
+#                 ||     ||
+#
+del src  # pylint: disable=undefined-variable

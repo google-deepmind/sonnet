@@ -443,23 +443,6 @@ class CoverageTest(test_utils.TestCase):
         snt.Reshape,
         snt.RNNCore,
         snt.Sequential,
-        snt.src.recurrent._ConvNDLSTM,
-        snt.src.recurrent._LegacyDeepRNN,
-        snt.src.recurrent._RecurrentDropoutWrapper,
-        snt.src.recurrent._ResidualWrapper,
-
-        # TODO(slebedev): remove these once CuDNN cores are exported.
-        snt.src.recurrent.CuDNNGRU,
-        snt.src.recurrent.CuDNNLSTM,
-
-        # TODO(tamaranorman) remove these when visibility set correctly
-        snt.src.conv.ConvND,
-        snt.src.conv_transpose.ConvNDTranspose,
-        snt.src.moving_averages.ExponentialMovingAverage,
-        snt.src.adam.ReferenceAdam,
-        snt.src.momentum.ReferenceMomentum,
-        snt.src.rmsprop.ReferenceRMSProp,
-        snt.src.sgd.ReferenceSGD,
     ])
 
     # Find all the snt.Module types reachable from `import sonnet as snt`
@@ -478,6 +461,12 @@ class CoverageTest(test_utils.TestCase):
 
     # Make sure everything is covered.
     self.assertEqual(tested_modules | no_checkpoint_whitelist, all_sonnet_types)
+
+
+class PublicSymbolsTest(test_utils.TestCase):
+
+  def test_src_not_exported(self):
+    self.assertFalse(hasattr(snt, "src"))
 
 
 def setUpModule():

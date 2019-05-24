@@ -946,11 +946,11 @@ def notify_about_new_variables(callback):
   variables to be modified should use `variable_creator_scope` directly and sit
   within the variable creator stack.
 
-  >>> variables = []
-  >>> with notify_about_variables(variables.append):
-  ...   v = tf.Variable(1.0, name='v')
-  ...   w = tf.get_variable('w', [])
-  >>> assert variables == [v, w]
+      >>> variables = []
+      >>> with notify_about_variables(variables.append):
+      ...   v = tf.Variable(1.0, name='v')
+      ...   w = tf.get_variable('w', [])
+      >>> assert variables == [v, w]
 
   Args:
     callback: a callable taking a single argument which is a tf.Variable.

@@ -25,7 +25,7 @@ from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.install import install as InstallCommandBase
 
-_VERSION = '1.32'
+_VERSION = '1.33'
 
 
 EXTRA_PACKAGES = {

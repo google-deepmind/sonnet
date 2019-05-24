@@ -1,5 +1,13 @@
 # Sonnet Changelog
 
+## Version 1.33 - Friday, 21 May 2019
+* Documentation updates.
+* Added developmental branch for Sonnet 2.
+* `setup.py` is now simpler. The `dm-sonnet-gpu` package has been retired, all
+  functionality has been available in `dm-sonnet` for some time now.
+* Use `tf_inspect` instead of `inspect` for inspecting arguments.
+
+
 ## Version 1.32 - Friday, 12. April 2019
 * Documentation updates.
 * Tiny shakespeare data is now compressed.
@@ -8,7 +16,6 @@
 * Add deprecation warning for layer norm in `ConvLSTM`.
 * Modules now support named outputs.
 * Switch to using Python3 as default.
-
 
 
 ## Version 1.31 - Tuesday, 12. March 2019

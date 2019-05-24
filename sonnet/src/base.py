@@ -171,8 +171,7 @@ def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
   Returns:
     A string representing a call equivalent to `cls(*args, **kwargs)`.
   """
-  getargspec = getattr(inspect, "getfullargspec", inspect.getargspec)
-  argspec = getargspec(cls.__init__)
+  argspec = utils.getfullargspec(cls.__init__)
   arg_names = argspec.args
   # Keep used positionals minus self.
   arg_names = arg_names[1:(len(args) + 1)]

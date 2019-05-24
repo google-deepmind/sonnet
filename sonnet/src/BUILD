@@ -477,6 +477,7 @@ snt_py_library(
     name = "utils",
     srcs = ["utils.py"],
     deps = [
+        # six
         # tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

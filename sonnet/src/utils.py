@@ -25,6 +25,7 @@ import functools
 import inspect
 import re
 
+import six
 import tensorflow as tf
 from typing import Any, Callable, Dict, Sequence, Text, Tuple, TypeVar, Union
 
@@ -72,7 +73,7 @@ def decorator(
         return decorator_fn(f, f.__self__, args, kwargs)
       return _decorate_bound_method
 
-    argspec = inspect.getargspec(f)
+    argspec = getfullargspec(f)
     if argspec.args and argspec.args[0] == "self":
       @functools.wraps(f)
       def _decorate_unbound_method(self, *args, **kwargs):
@@ -176,3 +177,13 @@ def smart_autograph(f: T) -> T:
       return f_autograph(*args, **kwargs)
 
   return smart_autograph_wrapper
+
+
+def getfullargspec(func):
+  """Get the names and default values of a function's parameters."""
+  if six.PY2:
+    # Assume that we are running with PyType patched Python 2.7 and getargspec
+    # will not barf if `func` has type annotations.
+    return inspect.getargspec(func)
+  else:
+    return inspect.getfullargspec(func)

@@ -19,6 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet import distribute
 from sonnet import initializers
 from sonnet import nets
 from sonnet import optimizers
@@ -96,6 +97,7 @@ __all__ = (
     "VanillaRNN",
     "deep_rnn_with_residual_connections",
     "deep_rnn_with_skip_connections",
+    "distribute",
     "dynamic_unroll",
     "initializers",
     "lstm_with_recurrent_dropout",

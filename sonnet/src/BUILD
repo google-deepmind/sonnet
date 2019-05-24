@@ -562,3 +562,21 @@ snt_py_test(
         # tensorflow
     ],
 )
+
+snt_py_library(
+    name = "replicator",
+    srcs = ["replicator.py"],
+    deps = [
+        # tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "replicator_test",
+    srcs = ["replicator_test.py"],
+    deps = [
+        ":replicator",
+        ":test_utils",
+        # tensorflow
+    ],
+)

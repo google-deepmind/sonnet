@@ -10,6 +10,7 @@ snt_py_library(
     name = "sonnet",
     srcs = ["__init__.py"],
     deps = [
+        ":distribute",
         ":initializers",
         ":nets",
         ":optimizers",
@@ -29,6 +30,15 @@ snt_py_library(
         "//sonnet/src:recurrent",
         "//sonnet/src:reshape",
         "//sonnet/src:sequential",
+    ],
+)
+
+snt_py_library(
+    name = "distribute",
+    srcs = ["distribute.py"],
+    visibility = ["//visibility:private"],
+    deps = [
+        "//sonnet/src:replicator",
     ],
 )
 

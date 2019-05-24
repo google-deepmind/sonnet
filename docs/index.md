@@ -787,3 +787,20 @@ serialize the configuration information which will allow you to regenerate the
 Graph, such as the name and constructor parameters of some top level module.
 This avoids any complications with adding new members to modules, and then
 having to deal with old serialized instances where those members don't exist.
+
+### Q: How can I cite Sonnet?
+
+A: Please use the following BibTeX:
+
+```
+@misc{sonnetblog,
+  title="{Open sourcing Sonnet - a new library for constructing neural networks}",
+  author={Reynolds, Malcolm and Barth-Maron, Gabriel and Besse, Frederic and
+      de Las Casas, Diego and Fidjeland, Andreas and Green, Tim and
+      Puigdom{\`e}nech, Adri{\`a} and Racani{\`e}re, S{\'e}bastien and Rae, Jack
+      and Viola, Fabio},
+  howpublished={\url{https://deepmind.com/blog/open-sourcing-sonnet/}},
+  year={2017}
+}
+```
+

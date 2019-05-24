@@ -179,6 +179,34 @@ class Conv1D(ConvND):
                b_init=None,
                data_format="NWC",
                name=None):
+    """Constructs a `Conv1D` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
+        integer. `kernel_shape` will be expanded to define a kernel size in
+        all dimensions.
+      stride: Sequence of strides (of length num_spatial_dims), or an integer.
+        `stride` will be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length num_spatial_dims), or integer
+        that is used to define dilation rate in all dimensions. 1 corresponds
+        to standard ND convolution, `rate > 1` corresponds to dilated
+        convolution.
+      padding: Padding to apply to the input. This can either "SAME", "VALID" or
+        a callable or sequence of callables up to size N. Any callables must
+        take a single integer argument equal to the effective kernel size and
+        return a list of two integers representing the padding before and
+        after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        `1 / sqrt(input_feature_size)`, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv1D, self).__init__(num_spatial_dims=1,
                                  output_channels=output_channels,
                                  kernel_shape=kernel_shape,
@@ -206,6 +234,34 @@ class Conv2D(ConvND):
                b_init=None,
                data_format="NHWC",
                name=None):
+    """Constructs a `Conv2D` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
+        integer. `kernel_shape` will be expanded to define a kernel size in
+        all dimensions.
+      stride: Sequence of strides (of length num_spatial_dims), or an integer.
+        `stride` will be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length num_spatial_dims), or integer
+        that is used to define dilation rate in all dimensions. 1 corresponds
+        to standard ND convolution, `rate > 1` corresponds to dilated
+        convolution.
+      padding: Padding to apply to the input. This can either "SAME", "VALID" or
+        a callable or sequence of callables up to size N. Any callables must
+        take a single integer argument equal to the effective kernel size and
+        return a list of two integers representing the padding before and
+        after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        `1 / sqrt(input_feature_size)`, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv2D, self).__init__(num_spatial_dims=2,
                                  output_channels=output_channels,
                                  kernel_shape=kernel_shape,
@@ -233,6 +289,34 @@ class Conv3D(ConvND):
                b_init=None,
                data_format="NDHWC",
                name=None):
+    """Constructs a `Conv3D` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
+        integer. `kernel_shape` will be expanded to define a kernel size in
+        all dimensions.
+      stride: Sequence of strides (of length num_spatial_dims), or an integer.
+        `stride` will be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length num_spatial_dims), or integer
+        that is used to define dilation rate in all dimensions. 1 corresponds
+        to standard ND convolution, `rate > 1` corresponds to dilated
+        convolution.
+      padding: Padding to apply to the input. This can either "SAME", "VALID" or
+        a callable or sequence of callables up to size N. Any callables must
+        take a single integer argument equal to the effective kernel size and
+        return a list of two integers representing the padding before and
+        after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        `1 / sqrt(input_feature_size)`, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv3D, self).__init__(num_spatial_dims=3,
                                  output_channels=output_channels,
                                  kernel_shape=kernel_shape,

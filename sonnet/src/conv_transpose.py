@@ -201,6 +201,33 @@ class Conv1DTranspose(ConvNDTranspose):
                b_init=None,
                data_format="NWC",
                name=None):
+    """Constructs a `Conv1DTranspose` module.
+
+    Args:
+      output_channels: An integer, The number of output channels.
+      kernel_shape: Sequence of integers (of length 1), or an integer
+        representing kernel shape. `kernel_shape` will be expanded to define a
+        kernel size in all dimensions.
+      output_shape: Output shape of the spatial dimensions of a transpose
+        convolution. Can be either an integer or an iterable of integers or
+        `Dimension`s, or a `TensorShape` (of length 1). If a `None` value is
+        given, a default shape is automatically calculated.
+      stride: Sequence of integers (of length 1), or an integer. `stride` will
+        be expanded to define stride in all dimensions.
+      rate: Sequence of integers (of length 1), or integer that is used to
+      define dilation rate in all dimensions. 1 corresponds to standard 1D
+        convolution, `rate > 1` corresponds to dilated convolution.
+      padding: Padding algorithm, either "SAME" or "VALID".
+      with_bias: Boolean, whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation
+        of `1 / sqrt(input_feature_size)`, which is commonly used when the
+        inputs are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv1DTranspose, self).__init__(num_spatial_dims=1,
                                           output_channels=output_channels,
                                           kernel_shape=kernel_shape,
@@ -230,6 +257,33 @@ class Conv2DTranspose(ConvNDTranspose):
                b_init=None,
                data_format="NHWC",
                name=None):
+    """Constructs a `Conv2DTranspose` module.
+
+    Args:
+      output_channels: An integer, The number of output channels.
+      kernel_shape: Sequence of integers (of length 2), or an integer
+        representing kernel shape. `kernel_shape` will be expanded to define a
+        kernel size in all dimensions.
+      output_shape: Output shape of the spatial dimensions of a transpose
+        convolution. Can be either an integer or an iterable of integers or
+        `Dimension`s, or a `TensorShape` (of length 2). If a `None` value is
+        given, a default shape is automatically calculated.
+      stride: Sequence of integers (of length 2), or an integer. `stride` will
+        be expanded to define stride in all dimensions.
+      rate: Sequence of integers (of length 2), or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard 2D
+        convolution, `rate > 1` corresponds to dilated convolution.
+      padding: Padding algorithm, either "SAME" or "VALID".
+      with_bias: Boolean, whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation
+        of `1 / sqrt(input_feature_size)`, which is commonly used when the
+        inputs are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv2DTranspose, self).__init__(num_spatial_dims=2,
                                           output_channels=output_channels,
                                           kernel_shape=kernel_shape,
@@ -259,6 +313,33 @@ class Conv3DTranspose(ConvNDTranspose):
                b_init=None,
                data_format="NDHWC",
                name=None):
+    """Constructs a `Conv3DTranspose` module.
+
+    Args:
+      output_channels: An integer, The number of output channels.
+      kernel_shape: Sequence of integers (of length 3), or
+        an integer representing kernel shape. `kernel_shape` will be expanded
+        to define a kernel size in all dimensions.
+      output_shape: Output shape of the spatial dimensions of a transpose
+        convolution. Can be either an integer or an iterable of integers or
+        `Dimension`s, or a `TensorShape` (of length 3). If a
+        None value is given, a default shape is automatically calculated.
+      stride: Sequence of integers (of length 3), or an integer. `stride` will
+        be expanded to define stride in all dimensions.
+      rate: Sequence of integers (of length 3), or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard 3D
+        convolution, `rate > 1` corresponds to dilated convolution.
+      padding: Padding algorithm, either "SAME" or "VALID".
+      with_bias: Boolean, whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation
+        of `1 / sqrt(input_feature_size)`, which is commonly used when the
+        inputs are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super(Conv3DTranspose, self).__init__(num_spatial_dims=3,
                                           output_channels=output_channels,
                                           kernel_shape=kernel_shape,

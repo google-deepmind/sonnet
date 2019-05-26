@@ -1,0 +1,27 @@
+package(
+    default_testonly = True,
+    default_visibility = ["//sonnet:__subpackages__"],
+)
+
+licenses(["notice"])  # Apache 2.0 License
+
+exports_files(["LICENSE"])
+
+py_binary(
+    name = "generate",
+    srcs = ["generate.py"],
+    python_version = "PY3",
+    srcs_version = "PY2AND3",
+    deps = [
+        # absl:app
+        # absl/flags
+        # absl/logging
+        "//sonnet/src/conformance:goldens",
+        # tensorflow
+    ],
+)
+
+filegroup(
+    name = "checkpoints",
+    srcs = glob(["**/*"]),
+)

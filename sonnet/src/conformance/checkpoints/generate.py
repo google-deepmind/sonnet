@@ -25,14 +25,14 @@ import re
 from absl import app
 from absl import flags
 from absl import logging
-from sonnet.golden_checkpoints import goldens
+from sonnet.src.conformance import goldens
 import tensorflow as tf
 
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string(
     "golden_dir",
-    "sonnet/golden_checkpoints",
+    "sonnet/src/conformance/checkpoints/",
     "Directory where golden files are to be found.")
 flags.DEFINE_string("filter", ".*", "Filter to a specific golden by name.")
 flags.DEFINE_bool("regenerate", False,

@@ -27,7 +27,7 @@ class Linear32x64(Golden):
 Then run the `generate` binary to generate new golden checkpoints:
 
 ```shell
-$ bazel run :generate -- --dry_run=false --golden_dir="$PWD/sonnet/golden_checkpoints" --alsologtostderr
+$ bazel run :generate -- --dry_run=false --golden_dir="$PWD/sonnet/src/conformance/checkpoints/" --alsologtostderr
 ```
 
 At this point your golden checkpoint will be created and registered to run
@@ -48,5 +48,5 @@ If you absolutely need to regenerate the checkpoint and know what you're doing
 then you can do so with:
 
 ```shell
-$ bazel run :generate -- --dry_run=false --golden_dir="$PWD/sonnet/golden_checkpoints" --alsologtostderr --filter=my_checkpoint_name --regenerate
+$ bazel run :generate -- --dry_run=false --golden_dir="$PWD/sonnet/src/conformance/checkpoints/" --alsologtostderr --filter=my_checkpoint_name --regenerate
 ```

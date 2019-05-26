@@ -21,12 +21,18 @@ from __future__ import print_function
 
 import abc
 
+from absl.testing import parameterized
 import numpy as np
 import six
 import sonnet as snt
 import tensorflow as tf
 
 _all_goldens = []
+
+
+def all_goldens(test_method):
+  cases = ((name, cls()) for _, name, cls in list_goldens())
+  return parameterized.named_parameters(cases)(test_method)
 
 
 def _register_golden(module_cls, golden_name):

@@ -13,22 +13,19 @@
 # limitations under the License.
 # ============================================================================
 
-"""Tests for sonnet.v2.golden_checkpoints."""
+"""Tests checkpointing with Sonnet."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import inspect
 import os
-import pickle
 
 from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
-import sonnet as snt
-from sonnet.golden_checkpoints import goldens
 from sonnet.src import test_utils
+from sonnet.src.conformance import goldens
 import tensorflow as tf
 
 
@@ -39,8 +36,9 @@ class TestCheckpoint(object):
     if golden is None:
       root = absltest.get_default_test_tmpdir()
     else:
-      root = os.path.join("sonnet/golden_checkpoints/",
-                          golden.name)
+      root = os.path.join(
+          "sonnet/src/conformance/checkpoints/",
+          golden.name)
     self._root = root
     self._prefix = os.path.join(self._root, "checkpoint")
     self._checkpoint = tf.train.Checkpoint(**kwargs)
@@ -55,11 +53,6 @@ class TestCheckpoint(object):
       # checkpointable Python object.
       status.assert_consumed()
     return status
-
-
-def all_goldens(test_method):
-  cases = ((name, cls()) for _, name, cls in goldens.list_goldens())
-  return parameterized.named_parameters(cases)(test_method)
 
 
 def mirrored_all_devices(device_type):
@@ -83,7 +76,7 @@ def with_soft_placement(f):
 class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
   """Adds test methods running standard checkpointing tests."""
 
-  @all_goldens
+  @goldens.all_goldens
   def test_save_load(self, golden):
     """Test a basic save/load cycle."""
     module = golden.create_module()
@@ -114,7 +107,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       self.assertAllClose(golden.forward(module), old_y)
 
-  @all_goldens
+  @goldens.all_goldens
   def test_save_then_load_new_instance(self, golden):
     """Checks that a checkpoint created for one instance can restore another."""
     module_1 = golden.create_module()
@@ -141,7 +134,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       self.assertAllClose(golden.forward(module_1), golden.forward(module_2))
 
-  @all_goldens
+  @goldens.all_goldens
   def test_restore_on_create(self, golden):
     """Tests that Variable values are restored on creation."""
     # Create a module, set its variables to sequential values and save.
@@ -167,7 +160,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       self.assertAllClose(golden.forward(module_1), golden.forward(module_2))
 
-  @all_goldens
+  @goldens.all_goldens
   def test_restore_golden(self, golden):
     """Test restoring from a golden checkpoint still works."""
     module = golden.create_module()
@@ -183,17 +176,17 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 class DistributionStrategyCheckpointTest(test_utils.TestCase,
                                          parameterized.TestCase):
 
-  @all_goldens
+  @goldens.all_goldens
   def test_checkpoint_mirrored_strategy(self, golden):
     strategy = mirrored_all_devices(self.primary_device)
     self.assertCheckpointWithStrategy(golden, strategy, use_function=False)
 
-  @all_goldens
+  @goldens.all_goldens
   def test_checkpoint_mirrored_strategy_function(self, golden):
     strategy = mirrored_all_devices(self.primary_device)
     self.assertCheckpointWithStrategy(golden, strategy, use_function=True)
 
-  @all_goldens
+  @goldens.all_goldens
   def test_checkpoint_tpu_strategy(self, golden):
     if self.primary_device != "TPU":
       self.skipTest("Test requires a TPU")
@@ -354,119 +347,6 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     variables = golden.create_all_variables(module)
     for variable in variables:
       self.assertAllEqual(variable.read_value(), goldens.range_like(variable))
-
-
-class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
-
-  @all_goldens
-  def test_save_restore_cycle(self, golden):
-    module = golden.create_module()
-
-    # Create all parameters and set them to sequential (but different) values.
-    variables = golden.create_all_variables(module)
-    for index, variable in enumerate(variables):
-      variable.assign(goldens.range_like(variable, start=index))
-
-    @tf.function(input_signature=[golden.input_spec])
-    def inference(x):
-      # We'll let `golden.forward` run the model with a fixed input. This allows
-      # for additional positional arguments like is_training.
-      del x
-      return golden.forward(module)
-
-    # Create a saved model, add a method for inference and a dependency on our
-    # module such that it can find dependencies.
-    saved_model = snt.Module()
-    saved_model._module = module
-    saved_model.inference = inference
-    saved_model.all_variables = list(module.variables)
-
-    # Sample input, the value is not important (it is not used in the inference
-    # function).
-    x = goldens.range_like(golden.input_spec)
-
-    # Run the saved model and pull variable values.
-    y1 = saved_model.inference(x)
-    v1 = saved_model.all_variables
-
-    # Save the model to disk and restore it.
-    tmp_dir = os.path.join(absltest.get_default_test_tmpdir(), golden.name)
-    tf.saved_model.save(saved_model, tmp_dir)
-    restored_model = tf.saved_model.load(tmp_dir)
-
-    # Run the loaded model and pull variable values.
-    y2 = restored_model.inference(x)
-    v2 = restored_model.all_variables
-
-    if golden.deterministic:
-      # The output before and after saving should be close.
-      self.assertAllClose(y1, y2)
-
-    for a, b in zip(v1, v2):
-      self.assertEqual(a.name, b.name)
-      self.assertEqual(a.device, b.device)
-      self.assertAllEqual(a.read_value(), b.read_value())
-
-
-class PickleTest(test_utils.TestCase, parameterized.TestCase):
-
-  # TODO(tomhennigan) Add tests with dill and cloudpickle.
-
-  @all_goldens
-  def test_pickle(self, golden):
-    m1 = golden.create_module()
-    y1 = golden.forward(m1)
-    m2 = pickle.loads(pickle.dumps(m1))
-    for v1, v2 in zip(m1.variables, m2.variables):
-      self.assertAllEqual(v1.read_value(), v2.read_value())
-    if golden.deterministic:
-      y2 = golden.forward(m2)
-      self.assertAllEqual(y1, y2)
-
-
-class CoverageTest(test_utils.TestCase):
-
-  def test_all_modules_covered(self):
-    no_checkpoint_whitelist = set([
-        # TODO(petebu): Remove this once optimizer goldens check works.
-        snt.optimizers.Adam,
-        snt.optimizers.Momentum,
-        snt.optimizers.RMSProp,
-        snt.optimizers.SGD,
-
-        # Stateless or abstract.
-        snt.Module,
-        snt.DeepRNN,
-        snt.Deferred,
-        snt.Flatten,
-        snt.Metric,
-        snt.Reshape,
-        snt.RNNCore,
-        snt.Sequential,
-    ])
-
-    # Find all the snt.Module types reachable from `import sonnet as snt`
-    all_sonnet_types = set()
-    for _, python_module in test_utils.find_sonnet_python_modules(snt):
-      for _, cls in inspect.getmembers(python_module, inspect.isclass):
-        if issubclass(cls, snt.Module):
-          all_sonnet_types.add(cls)
-
-    # Find all the modules that have checkpoint tests.
-    tested_modules = {module_cls for module_cls, _, _ in goldens.list_goldens()}
-
-    # Make sure we don't leave entries in no_checkpoint_whitelist if they are
-    # actually tested.
-    self.assertEmpty(tested_modules & no_checkpoint_whitelist)
-
-    # Make sure everything is covered.
-    self.assertEqual(tested_modules | no_checkpoint_whitelist, all_sonnet_types)
-
-
-class PublicSymbolsTest(test_utils.TestCase):
-
-  def test_src_not_exported(self):
-    self.assertFalse(hasattr(snt, "src"))
 
 
 def setUpModule():

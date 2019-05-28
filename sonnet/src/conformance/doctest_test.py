@@ -13,7 +13,7 @@
 # limitations under the License.
 # ============================================================================
 
-"""Doctests for Sonnet."""
+"""Ensures that code samples in Sonnet are accurate."""
 
 from __future__ import absolute_import
 from __future__ import division

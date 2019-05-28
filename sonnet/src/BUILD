@@ -500,17 +500,6 @@ snt_py_test(
     ],
 )
 
-snt_py_test(
-    name = "doctest_test",
-    srcs = ["doctest_test.py"],
-    deps = [
-        ":test_utils",
-        # absl/testing:parameterized
-        "//sonnet",
-        # tensorflow
-    ],
-)
-
 snt_py_library(
     name = "test_utils",
     srcs = ["test_utils.py"],

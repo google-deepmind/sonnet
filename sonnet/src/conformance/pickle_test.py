@@ -36,8 +36,15 @@ class PickleTest(test_utils.TestCase, parameterized.TestCase):
     m1 = golden.create_module()
     y1 = golden.forward(m1)
     m2 = pickle.loads(pickle.dumps(m1))
+    self.assertIsNot(m1, m2)
+
+    # Check that module variables are recreated with equivalent properties.
     for v1, v2 in zip(m1.variables, m2.variables):
+      self.assertIsNot(v1, v2)
+      self.assertEqual(v1.name, v2.name)
+      self.assertEqual(v1.device, v2.device)
       self.assertAllEqual(v1.read_value(), v2.read_value())
+
     if golden.deterministic:
       y2 = golden.forward(m2)
       self.assertAllEqual(y1, y2)

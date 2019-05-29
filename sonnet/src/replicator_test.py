@@ -19,7 +19,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import itertools
+
 from absl import logging
+from absl.testing import parameterized
 from sonnet.src import replicator
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -35,7 +38,7 @@ def replicator_all_devices(device_type):
   return replicator.Replicator(devices=devices)
 
 
-class ReplicatorTest(test_utils.TestCase):
+class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_scope(self):
     strategy = replicator_all_devices(self.primary_device)
@@ -55,6 +58,35 @@ class ReplicatorTest(test_utils.TestCase):
       self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
       self.assertTrue(v.trainable)
     strategy.experimental_run_v2(step)
+
+  @parameterized.parameters(
+      *itertools.product(
+          [("assign", 1.), ("assign_add", 1.), ("assign_sub", -1.)],
+          [True, False]))
+  def test_assign(self, updates, cross_replica):
+    strategy = replicator_all_devices(self.primary_device)
+    with strategy.scope():
+      v = tf.Variable(0.)
+    method_name, update_value = updates
+    update_fn = lambda: getattr(v, method_name)(update_value)
+    if cross_replica:
+      # NOTE: Explicitly not running inside strategy.scope (fn should handle).
+      update_fn()
+    else:
+      strategy.experimental_run_v2(update_fn)
+    for component in v._values:
+      self.assertAllEqual(component.read_value(), tf.ones_like(component))
+
+
+def setUpModule():
+  # If a physical GPU is available make sure TF sees at least two.
+  gpus = tf.config.experimental.list_physical_devices(device_type="GPU")
+  if len(gpus) == 1:
+    logging.info("Splitting one physical GPU into two logical GPUs.")
+    tf.config.experimental.set_virtual_device_configuration(
+        gpus[0],
+        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024),
+         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

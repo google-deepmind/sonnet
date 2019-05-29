@@ -17,37 +17,107 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import contextlib
+import functools
+
 import tensorflow as tf
 
 
-def _replica_local_creator(getter, **kwargs):  # pylint: disable=missing-docstring
+@contextlib.contextmanager
+def maybe_enter_scope(strategy):
+  """Enter the strategy scope if it is not already active."""
+  if strategy is not tf.distribute.get_strategy():
+    with strategy.scope():
+      yield
+  else:
+    yield
+
+
+def replica_local_assign(v, assign_fn):
+  """Replaces `assign_fn` on `v` so that it works in cross-replica context."""
+  @functools.wraps(v.assign)
+  def wrapper(value):
+    with maybe_enter_scope(v.distribute_strategy):
+      ctx = tf.distribute.get_replica_context()
+      if ctx is None:
+        for component in v._values:  # pylint: disable=protected-access
+          getattr(component, assign_fn)(value)
+        return None
+      else:
+        return getattr(v.get(), assign_fn)(value)
+  return wrapper
+
+
+def replica_local_creator(getter, **kwargs) -> tf.Variable:
+  """Variable creator that by default creates replica local variables."""
   if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
     kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
     if kwargs["aggregation"] == tf.VariableAggregation.NONE:
       kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
-  v = getter(**kwargs)
-  # TODO(petebu): Revisit this once ReplicaLocalVariable allows trainable=True.
-  if kwargs["trainable"] is None and not v.trainable:
-    for c in v._values:  # pylint: disable=protected-access
-      c._trainable = True  # pylint: disable=protected-access
+    v = getter(**kwargs)
+    # TODO(petebu): Remove when local variables support cross-replica assign.
+    v.assign = replica_local_assign(v, "assign")
+    v.assign_add = replica_local_assign(v, "assign_add")
+    v.assign_sub = replica_local_assign(v, "assign_sub")
+    # TODO(petebu): Remove when local variables allow trainable.
+    if kwargs["trainable"] is None and not v.trainable:
+      for component in v._values:  # pylint: disable=protected-access
+        component._trainable = True  # pylint: disable=protected-access
+  else:
+    v = getter(**kwargs)
   return v
 
 
 class Replicator(tf.distribute.MirroredStrategy):
-  """Replicator Distribution Strategy.
+  """Replicates input, parameters and compute over multiple accelerators.
 
-  A distribution strategy which creates ReplicaLocal variables by default. These
-  are not automatically aggregated in a replica context. Instead, you must
-  manually aggregate them e.g. using `tf.distribute.ReplicaContext.all_reduce`.
-  In a cross-replica context, reading reads from the first replica only and
-  assignment broadcasts to all replicas.
+  `Replicator` is a TensorFlow "Distribution Strategy" implementing the
+  programming model described in the TF-Replicator paper [0]_ and TensorFlow RFC
+  [1]_. `Replicator` enables data-parallel training across multiple accelerators
+  on a single machine, it supports eager execution and `@tf.function`.
+
+  To get started create a `Replicator` instance:
+
+      >>> replicator = snt.distribute.Replicator()
+
+  Replicator provides a scope inside which any new `tf.Variable`s will be
+  replicated across all local devices:
+
+      >>> with replicator.scope():
+      ...    mod = snt.Linear(32)
+
+  Additionally replicator provides utility functions to apply a module in
+  parallel on multiple devices. First we need to define some computation that
+  runs on each GPU. The "replica context" object provides us a way to
+  communicate between replicas:
+
+      >>> def forward():
+      ...   # Compute a random output on each GPU.
+      ...   x = tf.random.normal([8, 28 * 28])
+      ...   y = mod(x)
+      ...   # Synchronize the value of `y` between all GPUs.
+      ...   ctx = tf.distribute.get_replica_context()
+      ...   y = ctx.all_reduce("mean", y)
+      ...   return y
+
+  Finally we use the run API to apply `forward` in parallel on all accelerator
+  devices:
+
+      >>> per_replica_y = replicator.experimental_run_v2(forward)
+
+  References:
+    .. [0] Buchlovsky, Peter, et al. "TF-Replicator: Distributed Machine
+       Learning for Researchers." arXiv preprint arXiv:1902.00465 (2019).
+    .. [1] Buchlovsky, Peter, et al. "RFC: Distribution Strategy - Revised API."
+       TensorFlow Community RFCs, Google / DeepMind, 12 Nov. 2018,
+       https://github.com/tensorflow/community/pull/25
   """
 
   @contextlib.contextmanager
   def scope(self):
     parent_scope = super(Replicator, self).scope()
-    with parent_scope, tf.variable_creator_scope(_replica_local_creator):
+    with parent_scope, tf.variable_creator_scope(replica_local_creator):
       yield

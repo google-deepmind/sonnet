@@ -12,6 +12,7 @@ composable abstractions for machine learning research.
 
    api/sonnet
    api/initializers
+   api/distribute
    api/nets
    api/optimizers
    api/pad

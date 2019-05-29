@@ -19,16 +19,19 @@
 # list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+import sonnet as snt
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+# pylint: disable=g-bad-import-order
+import inspect
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-
 
 # -- Project information -----------------------------------------------------
 
@@ -47,9 +50,9 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.linkcode',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -73,3 +76,40 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
+
+
+# -- Source code links -------------------------------------------------------
+
+
+def linkcode_resolve(domain, info):
+  """Resolve a GitHub URL corresponding to Python object."""
+  if domain != 'py':
+    return None
+
+  try:
+    mod = sys.modules[info['module']]
+  except ImportError:
+    return None
+
+  obj = mod
+  try:
+    for attr in info['fullname'].split('.'):
+      obj = getattr(obj, attr)
+  except AttributeError:
+    return None
+
+  try:
+    filename = inspect.getsourcefile(obj)
+  except TypeError:
+    return None
+
+  try:
+    source, lineno = inspect.getsourcelines(obj)
+  except OSError:
+    return None
+
+  # TODO(slebedev): support tags after we release an initial version.
+  return 'https://github.com/deepmind/sonnet/blob/v2/sonnet/%s#L%d#L%d' % (
+      os.path.relpath(filename, start=os.path.dirname(snt.__file__)),
+      lineno,
+      lineno + len(source) - 1)

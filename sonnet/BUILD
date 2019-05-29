@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 licenses(["notice"])  # Apache 2.0 License
 
@@ -9,6 +9,7 @@ load("//sonnet/src:build_defs.bzl", "snt_py_library")
 snt_py_library(
     name = "sonnet",
     srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
     deps = [
         ":distribute",
         ":initializers",
@@ -36,7 +37,6 @@ snt_py_library(
 snt_py_library(
     name = "distribute",
     srcs = ["distribute.py"],
-    visibility = ["//visibility:private"],
     deps = [
         "//sonnet/src:replicator",
     ],
@@ -45,7 +45,6 @@ snt_py_library(
 snt_py_library(
     name = "initializers",
     srcs = ["initializers.py"],
-    visibility = ["//visibility:private"],
     deps = [
         "//sonnet/src:initializers",
     ],
@@ -54,7 +53,6 @@ snt_py_library(
 snt_py_library(
     name = "nets",
     srcs = ["nets.py"],
-    visibility = ["//visibility:private"],
     deps = [
         "//sonnet/src/nets:cifar10_convnet",
         "//sonnet/src/nets:mlp",
@@ -64,7 +62,6 @@ snt_py_library(
 snt_py_library(
     name = "optimizers",
     srcs = ["optimizers.py"],
-    visibility = ["//visibility:private"],
     deps = [
         "//sonnet/src:adam",
         "//sonnet/src:momentum",
@@ -76,7 +73,6 @@ snt_py_library(
 snt_py_library(
     name = "pad",
     srcs = ["pad.py"],
-    visibility = ["//visibility:private"],
     deps = [
         "//sonnet/src:pad",
     ],

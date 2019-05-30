@@ -113,7 +113,7 @@ class ConvND(base.Module):
       An `N + 2` dimensional `tf.Tensor` of shape
         `[batch_size, output_dim_1, output_dim_2, ..., output_channels]`.
     """
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     if self.padding_func:
       inputs = tf.pad(inputs, self._padding)
@@ -131,7 +131,7 @@ class ConvND(base.Module):
     return outputs
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     """Constructs parameters used by this module."""
     utils.assert_rank(inputs, self._num_spatial_dims + 2)
     self.input_channels = inputs.shape[self._channel_index]

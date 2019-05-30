@@ -60,7 +60,7 @@ class Linear(base.Module):
       raise ValueError("When not using a bias the b_init must be None.")
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     """Constructs parameters used by this module."""
     utils.assert_rank(inputs, 2)
 
@@ -84,7 +84,7 @@ class Linear(base.Module):
                            name="b")
 
   def __call__(self, inputs):
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     outputs = tf.matmul(inputs, self.w)
     if self.with_bias:

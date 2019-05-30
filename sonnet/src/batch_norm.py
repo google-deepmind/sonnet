@@ -151,7 +151,7 @@ class BaseBatchNorm(base.Module):
         raise ValueError(
             "Cannot pass `offset` at call time if `create_offset=True`.")
 
-    self._create_parameters(inputs)
+    self._initialize(inputs)
     if scale is None:
       scale = self.scale
     if offset is None:
@@ -184,7 +184,7 @@ class BaseBatchNorm(base.Module):
     return out
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     input_shape = inputs.shape
     rank = len(input_shape)
     self._fused = (rank == 4 and self._channel_index == -1)

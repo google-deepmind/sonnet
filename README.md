@@ -113,13 +113,13 @@ class MyLinear(snt.Module):
     self.output_size = output_size
 
   @snt.once
-  def _create_parameters(self, x):
+  def _initialize(self, x):
     initial_w = tf.random.normal([x.shape[1], self.output_size])
     self.w = tf.Variable(initial_w, name="w")
     self.b = tf.Variable(tf.zeros([self.output_size]), name="b")
 
   def __call__(self, x):
-    self._create_parameters(x)
+    self._initialize(x)
     return tf.matmul(x, self.w) + self.b
 ```
 

@@ -140,7 +140,7 @@ class GroupNorm(base.Module):
     Returns:
       An `N - D` tensor of the same shape as inputs that has been normalized.
     """
-    self._create_parameters(inputs)
+    self._initialize(inputs)
     if self._create_scale:
       if scale is not None:
         raise ValueError(
@@ -173,7 +173,7 @@ class GroupNorm(base.Module):
     return outputs
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     """Setup of rank specific values."""
     self._rank = len(inputs.shape)
 

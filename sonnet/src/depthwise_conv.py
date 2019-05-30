@@ -97,7 +97,7 @@ class DepthwiseConv2D(base.Module):
       raise ValueError("When not using a bias the b_init must be None.")
 
   def __call__(self, inputs):
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     outputs = tf.nn.depthwise_conv2d(inputs,
                                      self.w,
@@ -112,7 +112,7 @@ class DepthwiseConv2D(base.Module):
     return outputs
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     self.input_channels = inputs.shape[self._channel_index]
     if self.input_channels is None:
       raise ValueError("The number of input channels must be known.")

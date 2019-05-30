@@ -291,7 +291,7 @@ class CuDNNLSTMTest(test_utils.TestCase, parameterized.TestCase):
         cudnn_lstm.initial_state(self.batch_size))
 
     lstm = recurrent.LSTM(self.hidden_size)
-    lstm._create_parameters(inputs[0])
+    lstm._initialize(inputs[0])
     lstm._w_i = cudnn_lstm._w_i
     lstm._w_h = cudnn_lstm._w_h
     lstm.b = cudnn_lstm.b

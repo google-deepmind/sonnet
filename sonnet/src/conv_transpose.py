@@ -111,7 +111,7 @@ class ConvNDTranspose(base.Module):
       raise ValueError("When not using a bias the b_init must be None.")
 
   def __call__(self, inputs):
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     output_shape = tf.concat([[tf.shape(inputs)[0]], self._output_shape], 0)
 
@@ -127,7 +127,7 @@ class ConvNDTranspose(base.Module):
     return outputs
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_rank(inputs, self._num_spatial_dims + 2)
     self.input_channels = inputs.shape[self._channel_index]
     if self.input_channels is None:

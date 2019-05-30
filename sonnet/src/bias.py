@@ -86,7 +86,7 @@ class Bias(base.Module):
     self.b_init = initializers.Zeros() if b_init is None else b_init
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_minimum_rank(inputs, 2)
 
     input_shape = inputs.shape
@@ -115,7 +115,7 @@ class Bias(base.Module):
     Returns:
       A Tensor of size `[batch_size, input_size1, ...]`.
     """
-    self._create_parameters(inputs)
+    self._initialize(inputs)
     if multiplier is not None:
       return inputs + (self.b * multiplier)
     else:

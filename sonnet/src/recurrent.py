@@ -477,7 +477,7 @@ class VanillaRNN(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     outputs = self._activation(
         self._input_to_hidden(inputs)
@@ -492,7 +492,7 @@ class VanillaRNN(RNNCore):
     return tf.zeros(shape=[batch_size, self._hidden_size], dtype=self._dtype)
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     dtype = _check_inputs_dtype(inputs, self._dtype)
     self._b = tf.Variable(self._b_init([self._hidden_size], dtype), name="b")
 
@@ -784,7 +784,7 @@ class LSTM(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     gates_x = tf.matmul(inputs, self._w_i)
     gates_h = tf.matmul(prev_state.hidden, self._w_h)
@@ -819,7 +819,7 @@ class LSTM(RNNCore):
     return self._w_h
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
     input_size = tf.shape(inputs)[1]
     dtype = _check_inputs_dtype(inputs, self._dtype)
@@ -898,7 +898,7 @@ class CuDNNLSTM(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     # TODO(slebedev): consider allocating a single parameter Tensor.
     # This will remove the need for tf.transpose and tf.concat and
@@ -938,7 +938,7 @@ class CuDNNLSTM(RNNCore):
     return self._w_h
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_rank(inputs, 3)  # [num_steps, batch_size, input_size].
     input_size = tf.shape(inputs)[2]
     dtype = _check_inputs_dtype(inputs, self._dtype)
@@ -1150,7 +1150,7 @@ class _ConvNDLSTM(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     gates = self._input_to_hidden(inputs)
     gates += self._hidden_to_hidden(prev_state.hidden)
@@ -1185,7 +1185,7 @@ class _ConvNDLSTM(RNNCore):
         cell=tf.zeros(shape, dtype=self._dtype))
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     dtype = _check_inputs_dtype(inputs, self._dtype)
     i, f, g, o = tf.split(
         self._b_init([4 * self._output_channels], dtype),
@@ -1336,7 +1336,7 @@ class GRU(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     gates_x = tf.matmul(inputs, self._w_i)
     zr_idx = slice(2 * self._hidden_size)
@@ -1366,7 +1366,7 @@ class GRU(RNNCore):
     return self._w_h
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
     input_size = tf.shape(inputs)[1]
     dtype = _check_inputs_dtype(inputs, self._dtype)
@@ -1428,7 +1428,7 @@ class CuDNNGRU(RNNCore):
 
   def __call__(self, inputs, prev_state):
     """See base class."""
-    self._create_parameters(inputs)
+    self._initialize(inputs)
 
     # TODO(slebedev): consider allocating a single parameter Tensor.
     # This will remove the need for tf.transpose and tf.concat and
@@ -1476,7 +1476,7 @@ class CuDNNGRU(RNNCore):
     return tf.zeros([batch_size, self._hidden_size], dtype=self._dtype)
 
   @once.once
-  def _create_parameters(self, inputs):
+  def _initialize(self, inputs):
     utils.assert_rank(inputs, 3)  # [num_steps, batch_size, input_size].
     input_size = tf.shape(inputs)[2]
     dtype = _check_inputs_dtype(inputs, self._dtype)

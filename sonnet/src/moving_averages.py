@@ -67,7 +67,7 @@ class ExponentialMovingAverage(metrics.Metric):
 
   def update(self, value):
     """Applies EMA to the value given."""
-    self._create_parameters(value)
+    self._initialize(value)
 
     self._counter.assign_add(1.)
     self._hidden.assign_sub((self._hidden-value) * (1-self._decay))
@@ -86,7 +86,7 @@ class ExponentialMovingAverage(metrics.Metric):
     self.average.assign(0.)
 
   @once.once
-  def _create_parameters(self, value):
+  def _initialize(self, value):
     self._hidden = tf.Variable(tf.zeros_like(value), trainable=False,
                                name="hidden")
     self.average = tf.Variable(tf.zeros_like(value), trainable=False,

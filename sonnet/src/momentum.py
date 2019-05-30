@@ -25,13 +25,27 @@ import tensorflow as tf
 
 
 class Momentum(base.Module):
-  """SGD with Momentum module."""
+  """SGD with Momentum module.
 
-  def __init__(self, learning_rate, momentum, name=None):
+  By default it applies the momentum update rule for each update, parameter
+  pair:
+
+      accum_t <- momentum * accum_{t-1} + update
+      parameter <- parameter - learning_rate * accum_t
+
+  And when using Nesterov momentum (`use_nesterov=True`) it applies:
+
+      accum_t <- momentum * accum_{t-1} + update
+      parameter <- parameter - (learning_rate * update +
+                                learning_rate * momentum * accum_t)
+  """
+
+  def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
     """Constructs a `Momentum` module."""
     super(Momentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum
+    self.use_nesterov = use_nesterov
     self.accumulated_momentum = {}
 
   def _get_accumulated_momentum(self, variable):
@@ -74,7 +88,8 @@ class Momentum(base.Module):
             accum=accumulated_momentum.handle,
             lr=learning_rate,
             grad=update,
-            momentum=momentum)
+            momentum=momentum,
+            use_nesterov=self.use_nesterov)
 
 
 class ReferenceMomentum(base.Module):
@@ -84,13 +99,26 @@ class ReferenceMomentum(base.Module):
   `tf.raw_ops` so it will be slower but you may find it easier to customize. It
   is fully tested and its behaviour matches the `tf.raw_ops` version. If you
   need a custom variant of `Momentum`, we recommend starting with this.
+
+  By default it applies the momentum update rule for each update, parameter
+  pair:
+
+      accum_t <- momentum * accum_{t-1} + update
+      parameter <- parameter - learning_rate * accum_t
+
+  And when using Nesterov momentum (`use_nesterov=True`) it applies:
+
+      accum_t <- momentum * accum_{t-1} + update
+      parameter <- parameter - (learning_rate * update +
+                                learning_rate * momentum * accum_t)
   """
 
-  def __init__(self, learning_rate, momentum, name=None):
+  def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
     """Constructs a `ReferenceMomentum` module."""
     super(ReferenceMomentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum
+    self.use_nesterov = use_nesterov
     self.accumulated_momentum = {}
 
   def _get_accumulated_momentum(self, variable):
@@ -131,4 +159,8 @@ class ReferenceMomentum(base.Module):
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         # TODO(petebu): Use a tf.CriticalSection for the assignments.
         accumulated_momentum.assign((momentum * accumulated_momentum) + update)
-        parameter.assign_sub(learning_rate * accumulated_momentum)
+        if self.use_nesterov:
+          parameter.assign_sub(learning_rate * update +
+                               learning_rate * momentum * accumulated_momentum)
+        else:
+          parameter.assign_sub(learning_rate * accumulated_momentum)

@@ -180,7 +180,7 @@ def smart_autograph(f: T) -> T:
 
 
 def getfullargspec(func):
-  """Get the names and default values of a function's parameters."""
+  """Gets the names and default values of a function's parameters."""
   if six.PY2:
     # Assume that we are running with PyType patched Python 2.7 and getargspec
     # will not barf if `func` has type annotations.

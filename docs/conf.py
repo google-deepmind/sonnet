@@ -19,8 +19,6 @@
 # list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
-import sonnet as snt
-
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -28,10 +26,13 @@ import sonnet as snt
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 # pylint: disable=g-bad-import-order
+# pylint: disable=g-import-not-at-top
 import inspect
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
+
+import sonnet as snt
 
 # -- Project information -----------------------------------------------------
 

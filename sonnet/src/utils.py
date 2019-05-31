@@ -26,6 +26,7 @@ import inspect
 import re
 
 import six
+from sonnet.src import initializers
 import tensorflow as tf
 from typing import Any, Callable, Dict, Sequence, Text, Tuple, TypeVar, Union
 
@@ -187,3 +188,18 @@ def getfullargspec(func):
     return inspect.getargspec(func)
   else:
     return inspect.getfullargspec(func)
+
+
+def variable_like(
+    inputs,
+    initializer=initializers.Zeros(),
+    trainable=None,
+    name=None):
+  """Creates a new variable with the same shape/dtype/device as the input."""
+  if trainable is None:
+    trainable = getattr(inputs, "trainable", None)
+  if name is None:
+    name = getattr(inputs, "name", "Variable").split(":")[0]
+  with tf.device(inputs.device):
+    initial_value = initializer(inputs.shape, inputs.dtype)
+    return tf.Variable(initial_value, trainable=trainable, name=name)

@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from absl.testing import parameterized
 import numpy as np
+from sonnet.src import initializers
 from sonnet.src import test_utils
 from sonnet.src import utils
 import tensorflow as tf
@@ -197,6 +198,74 @@ class SmartAutographTest(test_utils.TestCase):
       y = foo(x)
       self.assertAllEqual(smart_foo(x), y)
       self.assertAllEqual(func_smart_foo(x), y)
+
+
+class VariableLikeTest(test_utils.TestCase, parameterized.TestCase):
+
+  @parameterized.parameters([lambda: tf.constant([0., 1.]),
+                             lambda: tf.Variable([0., 1.])])
+  def test_copies_shape(self, a):
+    a = a()
+    b = utils.variable_like(a)
+    self.assertEqual(a.shape, b.shape)
+
+  @parameterized.parameters([lambda: tf.constant(1, dtype=tf.int64),
+                             lambda: tf.Variable(1, dtype=tf.int64)])
+  def test_copies_dtype(self, a):
+    a = a()
+    b = utils.variable_like(a)
+    self.assertEqual(a.dtype, b.dtype)
+
+  @parameterized.parameters([lambda: tf.constant(1.), lambda: tf.Variable(1.)])
+  def test_copies_device(self, a):
+    with tf.device("CPU:0"):
+      a = a()
+    b = utils.variable_like(a)
+    self.assertEqual(a.device, b.device)
+
+  def test_default_initializer_is_zero(self):
+    a = tf.Variable(1.)
+    b = utils.variable_like(a)
+    self.assertEqual(0., b.numpy())
+
+  def test_override_initializer(self):
+    a = tf.Variable(1.)
+    b = utils.variable_like(a, initializer=initializers.Ones())
+    self.assertEqual(1., b.numpy())
+
+  @parameterized.parameters([True, False])
+  def test_copies_variable_trainable(self, trainable):
+    a = tf.Variable(1., trainable=trainable)
+    b = utils.variable_like(a)
+    self.assertEqual(a.trainable, b.trainable)
+
+  def test_default_trainable_for_tensor(self):
+    a = tf.constant(1.)
+    b = utils.variable_like(a)
+    self.assertEqual(True, b.trainable)
+
+  @parameterized.parameters([True, False])
+  def test_override_trainable(self, trainable):
+    a = tf.Variable(1.)
+    b = utils.variable_like(a, trainable=trainable)
+    self.assertEqual(trainable, b.trainable)
+
+  def test_copies_variable_name(self):
+    a = tf.Variable(1., name="a")
+    b = utils.variable_like(a)
+    self.assertEqual(a.name, b.name)
+
+  def test_default_name_for_tensor(self):
+    a = tf.constant(1.)
+    b = utils.variable_like(a)
+    self.assertEqual("Variable:0", b.name)
+
+  @parameterized.parameters([lambda: tf.constant(1.), lambda: tf.Variable(1.)])
+  def test_override_name(self, a):
+    a = a()
+    b = utils.variable_like(a, name="b")
+    self.assertEqual("b:0", b.name)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

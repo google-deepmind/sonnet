@@ -401,6 +401,11 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "optimizer_utils",
+    srcs = ["optimizer_utils.py"],
+)
+
+snt_py_library(
     name = "axis_norm",
     srcs = ["axis_norm.py"],
     deps = [
@@ -477,21 +482,18 @@ snt_py_library(
     name = "utils",
     srcs = ["utils.py"],
     deps = [
+        ":initializers",
         # six
         # tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
-snt_py_library(
-    name = "optimizer_utils",
-    srcs = ["optimizer_utils.py"],
-)
-
 snt_py_test(
     name = "utils_test",
     srcs = ["utils_test.py"],
     deps = [
+        ":initializers",
         ":test_utils",
         ":utils",
         # absl/testing:parameterized

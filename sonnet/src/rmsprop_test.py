@@ -112,12 +112,11 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
   def testMovingVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.1)
-    device = "GPU:0" if self.primary_device == "GPU" else "CPU:0"
-    with tf.device(device):
+    with tf.device("CPU:0"):
       var = tf.Variable(1.0)
-    for moving_var in optimizer._get_or_create_moving_vars(var):
-      if moving_var is not None:
-        self.assertEqual(moving_var.device, var.device)
+    optimizer.apply([tf.constant(0.1)], [var])
+    self.assertEqual(optimizer.mom[0].device, var.device)
+    self.assertEqual(optimizer.ms[0].device, var.device)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

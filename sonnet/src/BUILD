@@ -321,7 +321,9 @@ snt_py_library(
     srcs = ["adam.py"],
     deps = [
         ":base",
+        ":once",
         ":optimizer_utils",
+        ":utils",
         # tensorflow
     ],
 )
@@ -342,7 +344,9 @@ snt_py_library(
     srcs = ["momentum.py"],
     deps = [
         ":base",
+        ":once",
         ":optimizer_utils",
+        ":utils",
         # tensorflow
     ],
 )
@@ -363,7 +367,10 @@ snt_py_library(
     srcs = ["rmsprop.py"],
     deps = [
         ":base",
+        ":once",
         ":optimizer_utils",
+        ":utils",
+        # six
         # tensorflow
     ],
 )

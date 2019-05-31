@@ -112,8 +112,9 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     optimizer = opt_class(learning_rate=0.001)
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
-    for moment in optimizer._get_or_create_moments(var):
-      self.assertEqual(moment.device, var.device)
+    optimizer.apply([tf.constant(0.1)], [var])
+    self.assertEqual(optimizer.m[0].device, var.device)
+    self.assertEqual(optimizer.v[0].device, var.device)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

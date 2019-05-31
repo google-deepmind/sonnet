@@ -20,7 +20,9 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import utils
 import tensorflow as tf
 
 
@@ -46,19 +48,13 @@ class Momentum(base.Module):
     self.learning_rate = learning_rate
     self.momentum = momentum
     self.use_nesterov = use_nesterov
-    self.accumulated_momentum = {}
+    self.accumulated_momentum = []
 
-  def _get_accumulated_momentum(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    accum = self.accumulated_momentum.get(variable, None)
-    if accum is None:
-      accum_name = "accum/" + variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        accum = tf.Variable(
-            tf.zeros_like(variable), name=accum_name, trainable=False)
-      self.accumulated_momentum[variable] = accum
-    return accum
+  @once.once
+  def _initialize(self, parameters):
+    with tf.name_scope("accumulated_momentum"):
+      self.accumulated_momentum.extend(
+          utils.variable_like(p, trainable=False) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -74,13 +70,14 @@ class Momentum(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-    for update, parameter in zip(updates, parameters):
+    self._initialize(parameters)
+    for update, parameter, accumulated_momentum in zip(
+        updates, parameters, self.accumulated_momentum):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        accumulated_momentum = self._get_accumulated_momentum(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         tf.raw_ops.ResourceApplyMomentum(
@@ -119,20 +116,13 @@ class ReferenceMomentum(base.Module):
     self.learning_rate = learning_rate
     self.momentum = momentum
     self.use_nesterov = use_nesterov
-    self.accumulated_momentum = {}
+    self.accumulated_momentum = []
 
-  def _get_accumulated_momentum(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    # TODO(petebu): Should we weakref the variables?
-    accum = self.accumulated_momentum.get(variable, None)
-    if accum is None:
-      accum_name = "accum/" + variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        accum = tf.Variable(
-            tf.zeros_like(variable), name=accum_name, trainable=False)
-      self.accumulated_momentum[variable] = accum
-    return accum
+  @once.once
+  def _initialize(self, parameters):
+    with tf.name_scope("accumulated_momentum"):
+      self.accumulated_momentum.extend(
+          utils.variable_like(p, trainable=False) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -148,13 +138,14 @@ class ReferenceMomentum(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-    for update, parameter in zip(updates, parameters):
+    self._initialize(parameters)
+    for update, parameter, accumulated_momentum in zip(
+        updates, parameters, self.accumulated_momentum):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        accumulated_momentum = self._get_accumulated_momentum(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         # TODO(petebu): Use a tf.CriticalSection for the assignments.

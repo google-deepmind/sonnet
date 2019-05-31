@@ -19,8 +19,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import six
 from sonnet.src import base
+from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import utils
 import tensorflow as tf
 
 
@@ -68,22 +71,20 @@ class RMSProp(base.Module):
     self.momentum = momentum
     self.epsilon = epsilon
     self.centered = centered
-    self.moving_variables = {}  # TODO(petebu): Revisit this name.
+    self.mom = []
+    self.ms = []
+    self.mg = []
 
-  def _get_or_create_moving_vars(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    mom, ms, mg = self.moving_variables.get(variable, (None, None, None))
-    if mom is None:
-      var_name = variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        zeros = tf.zeros_like(variable)
-        mom = tf.Variable(zeros, trainable=False, name="momentum/" + var_name)
-        ms = tf.Variable(zeros, trainable=False, name="rms/" + var_name)
-        if self.centered:
-          mg = tf.Variable(zeros, trainable=False, name="mg/" + var_name)
-      self.moving_variables[variable] = mom, ms, mg
-    return mom, ms, mg
+  @once.once
+  def _initialize(self, parameters):
+    zero_var = lambda p: utils.variable_like(p, trainable=False)
+    with tf.name_scope("momentum"):
+      self.mom.extend(zero_var(p) for p in parameters)
+    with tf.name_scope("rms"):
+      self.ms.extend(zero_var(p) for p in parameters)
+    if self.centered:
+      with tf.name_scope("mg"):
+        self.mg.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -99,13 +100,14 @@ class RMSProp(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-    for update, parameter in zip(updates, parameters):
+    self._initialize(parameters)
+    for update, parameter, mom, ms, mg in six.moves.zip_longest(
+        updates, parameters, self.mom, self.ms, self.mg):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        mom, ms, mg = self._get_or_create_moving_vars(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         decay = tf.cast(self.decay, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
@@ -182,22 +184,20 @@ class ReferenceRMSProp(base.Module):
     self.momentum = momentum
     self.epsilon = epsilon
     self.centered = centered
-    self.moving_variables = {}
+    self.mom = []
+    self.ms = []
+    self.mg = []
 
-  def _get_or_create_moving_vars(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    mom, ms, mg = self.moving_variables.get(variable, (None, None, None))
-    if mom is None:
-      var_name = variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        zeros = tf.zeros_like(variable)
-        mom = tf.Variable(zeros, trainable=False, name="momentum/" + var_name)
-        ms = tf.Variable(zeros, trainable=False, name="rms/" + var_name)
-        if self.centered:
-          mg = tf.Variable(zeros, trainable=False, name="mg/" + var_name)
-      self.moving_variables[variable] = mom, ms, mg
-    return mom, ms, mg
+  @once.once
+  def _initialize(self, parameters):
+    zero_var = lambda p: utils.variable_like(p, trainable=False)
+    with tf.name_scope("momentum"):
+      self.mom.extend(zero_var(p) for p in parameters)
+    with tf.name_scope("rms"):
+      self.ms.extend(zero_var(p) for p in parameters)
+    if self.centered:
+      with tf.name_scope("mg"):
+        self.mg.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -213,13 +213,14 @@ class ReferenceRMSProp(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-    for update, parameter in zip(updates, parameters):
+    self._initialize(parameters)
+    for update, parameter, mom, ms, mg in six.moves.zip_longest(
+        updates, parameters, self.mom, self.ms, self.mg):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        mom, ms, mg = self._get_or_create_moving_vars(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         decay = tf.cast(self.decay, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)

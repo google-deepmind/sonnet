@@ -20,7 +20,9 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import utils
 import tensorflow as tf
 
 
@@ -44,20 +46,16 @@ class Adam(base.Module):
     self.epsilon = epsilon
     # TODO(petebu): Consider allowing the user to pass in a step.
     self.step = tf.Variable(0, trainable=False, name="t", dtype=tf.int64)
-    self.moments = {}
+    self.m = []
+    self.v = []
 
-  def _get_or_create_moments(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    m, v = self.moments.get(variable, (None, None))
-    if m is None:
-      var_name = variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        zeros = tf.zeros_like(variable)
-        m = tf.Variable(zeros, trainable=False, name="m/" + var_name)
-        v = tf.Variable(zeros, trainable=False, name="v/" + var_name)
-      self.moments[variable] = m, v
-    return m, v
+  @once.once
+  def _initialize(self, parameters):
+    zero_var = lambda p: utils.variable_like(p, trainable=False)
+    with tf.name_scope("m"):
+      self.m.extend(zero_var(p) for p in parameters)
+    with tf.name_scope("v"):
+      self.v.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -80,16 +78,14 @@ class Adam(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-
+    self._initialize(parameters)
     self.step.assign_add(1)
-
-    for update, parameter in zip(updates, parameters):
+    for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        m, v = self._get_or_create_moments(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
         beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
@@ -133,20 +129,16 @@ class ReferenceAdam(base.Module):
     self.beta2 = beta2
     self.epsilon = epsilon
     self.step = tf.Variable(0, trainable=False, name="t", dtype=tf.int64)
-    self.moments = {}
+    self.m = []
+    self.v = []
 
-  def _get_or_create_moments(self, variable):
-    # TODO(petebu): Consider using a checkpointable dict.
-    m, v = self.moments.get(variable, (None, None))
-    if m is None:
-      var_name = variable.name.replace(":0", "")
-      with tf.device(variable.device):
-        # TODO(petebu): Consider setting the dtype to equal that of variable.
-        zeros = tf.zeros_like(variable)
-        m = tf.Variable(zeros, trainable=False, name="m/" + var_name)
-        v = tf.Variable(zeros, trainable=False, name="v/" + var_name)
-      self.moments[variable] = m, v
-    return m, v
+  @once.once
+  def _initialize(self, parameters):
+    zero_var = lambda p: utils.variable_like(p, trainable=False)
+    with tf.name_scope("m"):
+      self.m.extend(zero_var(p) for p in parameters)
+    with tf.name_scope("v"):
+      self.v.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
     """Apply updates to parameters.
@@ -169,16 +161,14 @@ class ReferenceAdam(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
-
+    self._initialize(parameters)
     self.step.assign_add(1)
-
-    for update, parameter in zip(updates, parameters):
+    for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
       # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        m, v = self._get_or_create_moments(parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
         beta2 = tf.cast(self.beta2, update.dtype.base_dtype)

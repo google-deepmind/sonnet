@@ -112,8 +112,8 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     optimizer = opt_class(learning_rate=0.1, momentum=0.9)
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
-    accum_var = optimizer._get_accumulated_momentum(var)
-    self.assertEqual(accum_var.device, var.device)
+    optimizer.apply([tf.constant(0.1)], [var])
+    self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
 
   @parameterized.parameters(opt.Momentum, opt.ReferenceMomentum)
   def testNesterov(self, opt_class):

@@ -32,7 +32,7 @@ class DropoutTest(test_utils.TestCase, parameterized.TestCase):
   def test_sum_close(self, rate):
     mod = dropout.Dropout(rate=rate)
     x = tf.ones([1000])
-    rtol = 0.2 if "TPU" in self.device_types else 0.1
+    rtol = 0.3 if "TPU" in self.device_types else 0.1
     self.assertAllClose(
         tf.reduce_sum(mod(x, is_training=True)),
         tf.reduce_sum(mod(x, is_training=False)),
@@ -45,8 +45,8 @@ class DropoutTest(test_utils.TestCase, parameterized.TestCase):
     x = mod(x, is_training=True)
 
     # We should have dropped something, test we're within 10% of rate.
-    # (or 20% on a TPU)
-    rtol = 0.2 if "TPU" in self.device_types else 0.1
+    # (or 30% on a TPU)
+    rtol = 0.3 if "TPU" in self.device_types else 0.1
     kept = tf.math.count_nonzero(x).numpy()
     keep_prob = 1 - rate
     self.assertAllClose(kept, 1000 * keep_prob, rtol=rtol)

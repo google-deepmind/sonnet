@@ -59,9 +59,11 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertAllEqual(out.shape, [8, 49, 49, 1])
     self.assertEqual(out.dtype, dtype)
+
     # Note that for unit variance inputs the output is below unit variance
     # because of the use of the truncated normal initalizer
-    self.assertNear(out.numpy().std(), 0.87, err=0.1)
+    err = 0.2 if self.primary_device == "TPU" else 0.1
+    self.assertNear(out.numpy().std(), 0.87, err=err)
 
   @parameterized.named_parameters(
       ("SamePaddingUseBias", True, "SAME"),

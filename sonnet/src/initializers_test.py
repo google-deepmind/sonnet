@@ -52,7 +52,7 @@ class InitializersTest(test_utils.TestCase, parameterized.TestCase):
                   dtype=tf.float32):
     output = self.evaluate(init(shape, dtype))
     self.assertEqual(output.shape, shape)
-    lim = 3e-2
+    lim = 4e-2
     if target_std is not None:
       self.assertNear(output.std(), target_std, err=lim)
     if target_mean is not None:

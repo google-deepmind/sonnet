@@ -54,7 +54,7 @@ class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
         + prev_state.dot(self.evaluate(core.hidden_to_hidden))
         + self.evaluate(core._b))
 
-    atol = 1e-2 if self.primary_device == "TPU" else 1e-6
+    atol = 3e-2 if self.primary_device == "TPU" else 1e-6
     self.assertAllClose(outputs, expected_output, atol=atol)
     self.assertAllClose(next_state, expected_output, atol=atol)
 
@@ -256,7 +256,8 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
     almost_zero = rate == 1e-6
     if almost_zero:
       # The train and test versions have the same output when rate is ~0.
-      self.assertAllClose(train_output, test_output)
+      rtol = 1e-3 if self.primary_device == "TPU" else 1e-6
+      self.assertAllClose(train_output, test_output, rtol=rtol)
     else:
       self.assertGreater(
           self.evaluate(tf.reduce_max(tf.abs(train_output - test_output))),

@@ -119,7 +119,7 @@ class GroupNormTest(test_utils.TestCase, parameterized.TestCase):
     c_first_output = c_first(inputs, scale, offset)
     c_first_output = tf.transpose(c_first_output, [0, 2, 3, 1])
 
-    self.assertAllClose(c_last_output.numpy(), c_first_output.numpy())
+    self.assertAllClose(c_last_output, c_first_output, rtol=1e-5)
 
   @parameterized.parameters("NHW", "HWC", "channel_last")
   def testInvalidDataFormat(self, data_format):

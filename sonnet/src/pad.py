@@ -28,7 +28,7 @@ def valid(effective_kernel_size):  # pylint: disable=unused-argument
 
 
 def same(effective_kernel_size):
-  """"Pads such that the output size matches input size for stride=1."""
+  """Pads such that the output size matches input size for stride=1."""
   return [(effective_kernel_size - 1) // 2, effective_kernel_size // 2]
 
 
@@ -38,7 +38,7 @@ def full(effective_kernel_size):
 
 
 def causal(effective_kernel_size):
-  """"Pre-padding such that output has no dependence on the future."""
+  """Pre-padding such that output has no dependence on the future."""
   return [effective_kernel_size - 1, 0]
 
 

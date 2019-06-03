@@ -40,6 +40,7 @@ from sonnet.src.conv_transpose import Conv2DTranspose
 from sonnet.src.conv_transpose import Conv3DTranspose
 from sonnet.src.deferred import Deferred
 from sonnet.src.dropout import Dropout
+from sonnet.src.embed import Embed
 from sonnet.src.group_norm import GroupNorm
 from sonnet.src.linear import Linear
 from sonnet.src.metrics import Metric
@@ -80,6 +81,7 @@ __all__ = (
     "DeepRNN",
     "Deferred",
     "Dropout",
+    "Embed",
     "Flatten",
     "GroupNorm",
     "InstanceNorm",

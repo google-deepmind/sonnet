@@ -373,17 +373,22 @@ class VanillaRNN(AbstractRNNGolden):
 
 @_register_golden(snt.TrainableState, "trainable_state")
 class TrainableState(AbstractGolden):
+  create_module = lambda _: snt.TrainableState(tf.zeros([1]))
   input_spec = tf.TensorSpec(())
   num_variables = 1
-
-  def create_module(self):
-    return snt.TrainableState(tf.zeros([1]))
 
 
 @_register_golden(snt.Bias, "bias_3x3x3")
 class BiasTest(AbstractGolden):
   create_module = lambda _: snt.Bias()
   input_spec = tf.TensorSpec([1, 3, 3, 3])
+  num_variables = 1
+
+
+@_register_golden(snt.Embed, "embed_100_100")
+class EmbedTest(AbstractGolden):
+  create_module = lambda _: snt.Embed(vocab_size=100, embed_dim=100)
+  input_spec = tf.TensorSpec([10], dtype=tf.int32)
   num_variables = 1
 
 # pylint: enable=missing-docstring

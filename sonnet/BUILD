@@ -24,6 +24,7 @@ snt_py_library(
         "//sonnet/src:conv_transpose",
         "//sonnet/src:deferred",
         "//sonnet/src:dropout",
+        "//sonnet/src:embed",
         "//sonnet/src:group_norm",
         "//sonnet/src:linear",
         "//sonnet/src:metrics",

@@ -578,3 +578,25 @@ snt_py_test(
         # tensorflow
     ],
 )
+
+snt_py_library(
+    name = "embed",
+    srcs = ["embed.py"],
+    deps = [
+        ":base",
+        ":initializers",
+        ":once",
+        # tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "embed_test",
+    srcs = ["embed_test.py"],
+    deps = [
+        ":embed",
+        ":initializers",
+        ":test_utils",
+        # tensorflow
+    ],
+)

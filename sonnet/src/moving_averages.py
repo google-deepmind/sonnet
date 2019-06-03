@@ -41,7 +41,7 @@ class ExponentialMovingAverage(metrics.Metric):
 
   Then iteratively:
 
-      hidden_i = (1 - decay)*value + decay*hidden_i-1
+      hidden_i = (hidden_{i-1} - value) * (1 - decay)
       average_i = hidden_i / (1 - decay^i)
 
   Attributes:
@@ -60,7 +60,8 @@ class ExponentialMovingAverage(metrics.Metric):
     """
     super(ExponentialMovingAverage, self).__init__(name=name)
     self._decay = decay
-    self._counter = tf.Variable(0., trainable=False, name="counter")
+    self._counter = tf.Variable(0, trainable=False, dtype=tf.int64,
+                                name="counter")
 
     self._hidden = None
     self.average = None
@@ -69,19 +70,20 @@ class ExponentialMovingAverage(metrics.Metric):
     """Applies EMA to the value given."""
     self._initialize(value)
 
-    self._counter.assign_add(1.)
-    self._hidden.assign_sub((self._hidden-value) * (1-self._decay))
-    self.average.assign((self._hidden / (1. - tf.pow(
-        self._decay, self._counter))))
+    self._counter.assign_add(1)
+    value = tf.convert_to_tensor(value)
+    counter = tf.cast(self._counter, value.dtype.base_dtype)
+    self._hidden.assign_sub((self._hidden - value) * (1 - self._decay))
+    self.average.assign((self._hidden / (1. - tf.pow(self._decay, counter))))
 
   @property
   def value(self):
     """Returns the current EMA."""
-    return self.average
+    return self.average.read_value()
 
   def reset(self):
     """Resets the EMA."""
-    self._counter.assign(0.)
+    self._counter.assign(0)
     self._hidden.assign(0.)
     self.average.assign(0.)
 

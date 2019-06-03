@@ -16,6 +16,7 @@ composable abstractions for machine learning research.
    api/nets
    api/optimizers
    api/pad
+   api/regularizers
 
 Indices and tables
 ==================

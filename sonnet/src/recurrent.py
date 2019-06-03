@@ -53,7 +53,7 @@ class RNNCore(base.Module):
 
   @abc.abstractmethod
   def __call__(self, inputs, prev_state):
-    """Perform one step of an RNN.
+    """Performs one step of an RNN.
 
     Args:
       inputs: An arbitrarily nested structure of shape `[B, ...]` where B
@@ -70,7 +70,7 @@ class RNNCore(base.Module):
 
   @abc.abstractmethod
   def initial_state(self, batch_size, **kwargs):
-    """Construct an initial state for this core.
+    """Constructs an initial state for this core.
 
     Args:
       batch_size: An int or an integral scalar tensor representing
@@ -97,7 +97,7 @@ class TrainableState(base.Module):
 
   @classmethod
   def for_core(cls, core, mask=None, name=None):
-    """Construct a trainable state for a given `RNNCore`.
+    """Constructs a trainable state for a given `RNNCore`.
 
     Args:
       core: `RNNCore` to construct the state for.
@@ -115,7 +115,7 @@ class TrainableState(base.Module):
     return cls(initial_values, mask, name)
 
   def __init__(self, initial_values, mask=None, name=None):
-    """Construct a trainable state from initial values.
+    """Constructs a trainable state from initial values.
 
     Args:
       initial_values: Arbitrarily nested initial values for the state.
@@ -145,7 +145,7 @@ class TrainableState(base.Module):
     self._template = nest.pack_sequence_as(initial_values, flat_template)
 
   def __call__(self, batch_size):
-    """Return a trainable state for the given batch size."""
+    """Returns a trainable state for the given batch size."""
     return nest.map_structure(
         lambda s: tf.tile(s, [batch_size] + [1]*(s.shape.rank - 1)),
         self._template)
@@ -156,7 +156,7 @@ def static_unroll(
     input_sequence,  # time-major.
     initial_state,
     sequence_length=None):
-  """Perform a static unroll of an RNN.
+  """Performs a static unroll of an RNN.
 
       >>> core = snt.LSTM(hidden_size=16)
       >>> batch_size = 3
@@ -251,7 +251,7 @@ def dynamic_unroll(
     sequence_length=None,
     parallel_iterations=1,
     swap_memory=False):
-  """Perform a dynamic unroll of an RNN.
+  """Performs a dynamic unroll of an RNN.
 
       >>> core = snt.LSTM(hidden_size=16)
       >>> batch_size = 3
@@ -338,7 +338,7 @@ def dynamic_unroll(
 
 
 def _unstack_input_sequence(input_sequence):
-  """Unstack the input sequence into a nest of `tf.TensorArray`s.
+  """Unstacks the input sequence into a nest of `tf.TensorArray`s.
 
   This allows to traverse the input sequence using `tf.TensorArray.read`
   instead of a slice, avoiding O(sliced tensor) slice gradient
@@ -387,7 +387,7 @@ def _rnn_step(
     t,
     prev_outputs,
     prev_state):
-  """Perform a single step of an RNN optionally accounting for variable length."""
+  """Performs a single step of an RNN optionally accounting for variable length."""
   outputs, state = core(
       nest.map_structure(lambda i: i.read(t), input_tas),
       prev_state)
@@ -434,7 +434,7 @@ class VanillaRNN(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Construct a vanilla RNN core.
+    """Constructs a vanilla RNN core.
 
     Args:
       hidden_size: Hidden layer size.
@@ -510,7 +510,7 @@ class _LegacyDeepRNN(RNNCore):
       skip_connections,
       concat_final_output_if_skip=True,
       name=None):
-    """Construct a `DeepRNN`.
+    """Constructs a `DeepRNN`.
 
     Args:
       layers: A list of `RNNCore`s or callables.
@@ -592,7 +592,7 @@ def deep_rnn_with_skip_connections(
     layers,
     concat_final_output=True,
     name="deep_rnn_with_skip_connections"):
-  """Construct a `DeepRNN` with skip connections.
+  """Constructs a `DeepRNN` with skip connections.
 
   Skip connections alter the dependency structure within a `DeepRNN`.
   Specifically, input to the i-th layer (i > 0) is given by a
@@ -655,7 +655,7 @@ class _ResidualWrapper(RNNCore):
 def deep_rnn_with_residual_connections(
     layers,
     name="deep_rnn_with_residual_connections"):
-  """Construct a `DeepRNN` with residual connections.
+  """Constructs a `DeepRNN` with residual connections.
 
   Residual connections alter the dependency structure in a `DeepRNN`.
   Specifically, the input to the i-th intermediate layer is a sum of
@@ -744,7 +744,7 @@ class LSTM(RNNCore):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
-    """Construct an `LSTM`.
+    """Constructs an LSTM.
 
     Args:
       hidden_size: Hidden layer size.
@@ -974,7 +974,7 @@ class _RecurrentDropoutWrapper(RNNCore):
   """
 
   def __init__(self, base_core, rates, seed=None):
-    """Wrap a given base RNN core.
+    """Wraps a given base RNN core.
 
     Args:
       base_core: The RNNCore to be wrapped
@@ -1018,7 +1018,7 @@ def lstm_with_recurrent_dropout(
     dropout=0.5,
     seed=None,
     **kwargs):
-  """Construct an LSTM with recurrent dropout.
+  """Constructs an LSTM with recurrent dropout.
 
   The implementation is based on https://arxiv.org/abs/1512.05287.
   Dropout is applied on the previous hidden state `h_{t-1}` during the
@@ -1311,7 +1311,7 @@ class GRU(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Construct a `GRU`.
+    """Constructs a `GRU`.
 
     Args:
       hidden_size: Hidden layer size.
@@ -1403,7 +1403,7 @@ class CuDNNGRU(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Construct a `GRU`.
+    """Constructs a `GRU`.
 
     Args:
       hidden_size: Hidden layer size.

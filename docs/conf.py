@@ -99,6 +99,8 @@ def linkcode_resolve(domain, info):
       obj = getattr(obj, attr)
   except AttributeError:
     return None
+  else:
+    obj = inspect.unwrap(obj)
 
   try:
     filename = inspect.getsourcefile(obj)

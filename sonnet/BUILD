@@ -16,6 +16,7 @@ snt_py_library(
         ":nets",
         ":optimizers",
         ":pad",
+        ":regularizers",
         "//sonnet/src:axis_norm",
         "//sonnet/src:base",
         "//sonnet/src:batch_norm",
@@ -76,5 +77,13 @@ snt_py_library(
     srcs = ["pad.py"],
     deps = [
         "//sonnet/src:pad",
+    ],
+)
+
+snt_py_library(
+    name = "regularizers",
+    srcs = ["regularizers.py"],
+    deps = [
+        "//sonnet/src:regularizers",
     ],
 )

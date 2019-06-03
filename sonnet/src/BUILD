@@ -298,6 +298,26 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "regularizers",
+    srcs = ["regularizers.py"],
+    deps = [
+        ":utils",
+        # tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "regularizers_test",
+    srcs = ["regularizers_test.py"],
+    deps = [
+        ":regularizers",
+        ":test_utils",
+        # numpy
+        # tensorflow
+    ],
+)
+
+snt_py_library(
     name = "sequential",
     srcs = ["sequential.py"],
     deps = [

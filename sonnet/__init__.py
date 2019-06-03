@@ -24,6 +24,7 @@ from sonnet import initializers
 from sonnet import nets
 from sonnet import optimizers
 from sonnet import pad
+from sonnet import regularizers
 from sonnet.src.axis_norm import AxisNorm
 from sonnet.src.axis_norm import InstanceNorm
 from sonnet.src.axis_norm import LayerNorm
@@ -108,6 +109,7 @@ __all__ = (
     "once",
     "optimizers",
     "pad",
+    "regularizers",
     "static_unroll",
 )
 

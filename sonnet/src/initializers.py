@@ -256,18 +256,16 @@ class VarianceScaling(Initializer):
   initializers using the scale, mode and distribution arguments. Here are some
   example configurations:
 
-  ```
-  +----------------+-----------------------------------------------------------+
-  | name           | parameters                                                |
-  +----------------+-----------------------------------------------------------+
-  | glorot_uniform | scale=1.0, mode='fan_avg', distribution='uniform'         |
-  | glorot_normal  | scale=1.0, mode='fan_avg', distribution='truncated_normal'|
-  | lecun_uniform  | scale=1.0, mode='fan_in',  distribution='uniform'         |
-  | lecun_normal   | scale=1.0, mode='fan_in',  distribution='truncated_normal'|
-  | he_uniform     | scale=2.0, mode='fan_in',  distribution='uniform'         |
-  | he_normal      | scale=2.0, mode='fan_in',  distribution='truncated_normal'|
-  +----------------+-----------------------------------------------------------+
-  ```
+  ================  ==========================================================
+  Name              Parameters
+  ================  ==========================================================
+  glorot_uniform    scale=1.0, mode='fan_avg', distribution='uniform'
+  glorot_normal     scale=1.0, mode='fan_avg', distribution='truncated_normal'
+  lecun_uniform     scale=1.0, mode='fan_in',  distribution='uniform'
+  lecun_normal      scale=1.0, mode='fan_in',  distribution='truncated_normal'
+  he_uniform        scale=2.0, mode='fan_in',  distribution='uniform'
+  he_normal         scale=2.0, mode='fan_in',  distribution='truncated_normal'
+  ================  ==========================================================
 
   Args:
     scale: Scaling factor (positive float).

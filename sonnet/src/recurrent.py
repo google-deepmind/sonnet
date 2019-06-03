@@ -43,12 +43,13 @@ class RNNCore(base.Module):
   """Base class for Recurrent Neural Network cores.
 
   This class defines the basic functionality that every core should
-  implement: `initial_state` ,used to construct an example of the core
-  state; and `__call__` which applies the core parameterized by a
-  previous state to an input.
+  implement: :meth:`initial_state`, used to construct an example of the
+  core state; and :meth:`__call__` which applies the core parameterized
+  by a previous state to an input.
 
-  Cores are typically used with `snt.*_unroll` to iteratively construct
-  an output sequence from the given input sequence.
+  Cores are typically used with :func:`dynamic_unroll` and
+  :func:`static_unroll` to iteratively construct an output sequence from
+  the given input sequence.
   """
 
   @abc.abstractmethod
@@ -56,12 +57,12 @@ class RNNCore(base.Module):
     """Performs one step of an RNN.
 
     Args:
-      inputs: An arbitrarily nested structure of shape `[B, ...]` where B
-        is the batch size.
+      inputs: An arbitrarily nested structure of shape [B, ...] where
+        B is the batch size.
       prev_state: Previous core state.
 
     Returns:
-      outputs: An arbitrarily nested structure of shape `[B, ...]`.
+      outputs: An arbitrarily nested structure of shape [B, ...].
         Dimensions following the batch size could be different from that
         of `inputs`.
       next_state: next core state, must be of the same shape as the
@@ -83,13 +84,13 @@ class RNNCore(base.Module):
 
 
 class TrainableState(base.Module):
-  """Trainable state for an `RNNCore`.
+  """Trainable state for an :class:`RNNCore`.
 
-  The state can be constructed manually from a nest of initial values
+  The state can be constructed manually from a nest of initial values::
 
       snt.TrainableState((tf.zeros([16]), tf.zeros([16])))
 
-  or automatically for a given `RNNCore`
+  or automatically for a given :class:`RNNCore`::
 
       core = snt.LSTM(hidden_size=16)
       snt.TrainableState.for_core(core)
@@ -97,10 +98,10 @@ class TrainableState(base.Module):
 
   @classmethod
   def for_core(cls, core, mask=None, name=None):
-    """Constructs a trainable state for a given `RNNCore`.
+    """Constructs a trainable state for a given :class:`RNNCore`.
 
     Args:
-      core: `RNNCore` to construct the state for.
+      core: An :class:`RNNCore` to construct the state for.
       mask: Optional boolean mask of the same structure as the initial
         state of `core` specifying which components should be trainable.
         If not given, the whole state is considered trainable.
@@ -166,15 +167,15 @@ def static_unroll(
       ...     input_sequence,
       ...     core.initial_state(batch_size))
 
-  An *unroll* corresponds to calling an RNN on each element of the
-  input sequence in a loop, carrying the state through:
+  An *unroll* corresponds to calling the core on each element of the
+  input sequence in a loop, carrying the state through::
 
       state = initial_state
       for t in range(len(input_sequence)):
          outputs, state = core(input_sequence[t], state)
 
   A *static* unroll replaces a loop with its body repeated multiple
-  times when executed inside `tf.function`:
+  times when executed inside `tf.function`::
 
       state = initial_state
       outputs0, state = core(input_sequence[0], state)
@@ -182,12 +183,12 @@ def static_unroll(
       outputs2, state = core(input_sequence[2], state)
       ...
 
-  See `snt.dynamic_unroll` for a loop-preserving unroll function.
+  See :func:`dynamic_unroll` for a loop-preserving unroll function.
 
   Args:
-    core: An `RNNCore` to unroll.
+    core: An :class:`RNNCore` to unroll.
     input_sequence: An arbitrarily nested structure of tensors of shape
-      `[T, B, ...]` where T is the number of time steps, and B is the
+      [T, B, ...] where T is the number of time steps, and B is the
       batch size.
     initial_state: initial state of the given core.
     sequence_length: An optional tensor of shape `[B]` specifying the
@@ -195,12 +196,12 @@ def static_unroll(
 
   Returns:
     output_sequence: An arbitrarily nested structure of tensors of shape
-      `[T, B, ...]`. Dimensions following the batch size could be
-      different from that of `input`.
+      [T, B, ...]. Dimensions following the batch size could be
+      different from that of the ``input_sequence``.
     final_state: Core state at time step T.
 
   Raises:
-    ValueError: if `input_sequence` is empty.
+    ValueError: If ``input_sequence`` is empty.
   """
   num_steps, input_tas = _unstack_input_sequence(input_sequence)
 
@@ -261,24 +262,24 @@ def dynamic_unroll(
       ...     input_sequence,
       ...     core.initial_state(batch_size))
 
-  An *unroll* corresponds to calling an RNN on each element of the
-  input sequence in a loop, carrying the state through:
+  An *unroll* corresponds to calling the core on each element of the
+  input sequence in a loop, carrying the state through::
 
       state = initial_state
       for t in range(len(input_sequence)):
          outputs, state = core(input_sequence[t], state)
 
   A *dynamic* unroll preserves the loop structure when executed within
-  `tf.function`. See `snt.static_unroll` for an unroll function which
+  `tf.function`. See :func:`static_unroll` for an unroll function which
   replaces a loop with its body repeated multiple times.
 
   Args:
-    core: An `RNNCore` to unroll.
+    core: An :class:`RNNCore` to unroll.
     input_sequence: An arbitrarily nested structure of tensors of shape
-      `[T, B, ...]` where T is the number of time steps, and B is the
+      [T, B, ...] where T is the number of time steps, and B is the
       batch size.
     initial_state: initial state of the given core.
-    sequence_length: An optional tensor of shape `[B]` specifying the
+    sequence_length: An optional tensor of shape [B] specifying the
       lengths of sequences within the (padded) batch.
     parallel_iterations: An optional int specifying the number of
       iterations to run in parallel. Those operations which do not have
@@ -293,12 +294,12 @@ def dynamic_unroll(
 
   Returns:
     output_sequence: An arbitrarily nested structure of tensors of shape
-      `[T, B, ...]`. Dimensions following the batch size could be
-      different from that of `input`.
+      [T, B, ...]. Dimensions following the batch size could be
+      different from that of the ``input_sequence``.
     final_state: Core state at time step T.
 
   Raises:
-    ValueError: if `input_sequence` is empty.
+    ValueError: If ``input_sequence`` is empty.
   """
   num_steps, input_tas = _unstack_input_sequence(input_sequence)
 
@@ -345,15 +346,15 @@ def _unstack_input_sequence(input_sequence):
   computation during the backwards pass.
 
   Args:
-    input_sequence: See `dynamic_unroll` or `static_unroll`.
+    input_sequence: See :func:`dynamic_unroll` or :func:`static_unroll`.
 
   Returns:
     num_steps: Number of steps in the input sequence.
-    input_tas: An arbitrarily nested structure of tf.TensorArrays of
-      size `num_steps`.
+    input_tas: An arbitrarily nested structure of `tf.TensorArrays` of
+      size ``num_steps``.
 
   Raises:
-    ValueError: If tensors in `input_sequence` have inconsistent number
+    ValueError: If tensors in ``input_sequence`` have inconsistent number
       of steps or the number of steps is 0.
   """
   all_num_steps = {i.shape[0] for i in nest.flatten(input_sequence)}
@@ -413,16 +414,19 @@ def _rnn_step(
 class VanillaRNN(RNNCore):
   """Basic fully-connected RNN core.
 
-  Given x_t and the previous hidden state h_{t-1} the core computes
+  Given :math:`x_t` and the previous hidden state :math:`h_{t-1}` the
+  core computes
 
-      h_t = w_i x_t + w_h h_{t-1} + b
+  .. math::
 
-  Variables:
-    input_to_hidden/w: weights w_i, a `tf.Tensor` of shape
-      `[input_size, hidden_size]`.
-    hidden_to_hidden/w: weights w_h, a `tf.Tensor` of shape
-      `[input_size, hidden_size]`.
-    b: bias, a `tf.Tensor` or shape `[hidden_size]`.
+     h_t = w_i x_t + w_h h_{t-1} + b
+
+  Attributes:
+    input_to_hidden: Input-to-hidden weights :math:`w_i`, a tensor
+      of shape [hidden_size, hidden_size].
+    hidden_to_hidden: Hidden-to-hidden weights :math:`w_i`, a tensor
+      of shape [input_size, hidden_size].
+    b: bias, a tensor or shape [hidden_size].
   """
 
   def __init__(
@@ -440,12 +444,13 @@ class VanillaRNN(RNNCore):
       hidden_size: Hidden layer size.
       activation: Activation function to use. Defaults to `tf.tanh`.
       w_i_init: Optional initializer for the input-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(input_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(hidden_size).
-      b_init: Optional initializer for the bias. Defaults to `Zeros`.
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(hidden_size)``.
+      b_init: Optional initializer for the bias. Defaults to
+        :class:`~initializers.Zeros`.
       dtype: Optional `tf.DType` of the core's variables. Defaults to
         `tf.float32`.
       name: Name of the module.
@@ -498,10 +503,10 @@ class VanillaRNN(RNNCore):
 
 
 class _LegacyDeepRNN(RNNCore):
-  """Sonnet 1 compatible `DeepRNN` implementation.
+  """Sonnet 1 compatible :class:`DeepRNN` implementation.
 
-  This class is not intended to be used directly. Refer to `DeepRNN`
-  and `deep_rnn_with_*_connections`.
+  This class is not intended to be used directly. Refer to
+  :class:`DeepRNN` and ``deep_rnn_with_*_connections``.
   """
 
   def __init__(
@@ -510,12 +515,12 @@ class _LegacyDeepRNN(RNNCore):
       skip_connections,
       concat_final_output_if_skip=True,
       name=None):
-    """Constructs a `DeepRNN`.
+    r"""Constructs a ``DeepRNN``.
 
     Args:
-      layers: A list of `RNNCore`s or callables.
-      skip_connections: See `deep_rnn_with_skip_connections`.
-      concat_final_output_if_skip: See `deep_rnn_with_skip_connections`.
+      layers: A list of :class:`RNNCore`\ s or callables.
+      skip_connections: See :func:`deep_rnn_with_skip_connections`.
+      concat_final_output_if_skip: See :func:`deep_rnn_with_skip_connections`.
       name: Name of the module.
     """
     super(_LegacyDeepRNN, self).__init__(name)
@@ -562,25 +567,25 @@ class _LegacyDeepRNN(RNNCore):
 
 
 class DeepRNN(_LegacyDeepRNN):
-  """Linear chain of modules or callables.
+  r"""Linear chain of :class:`RNNCore`\ s or callables.
 
-  The core takes `(input, prev_state)` as input and passes the input
+  The core takes ``(input, prev_state)`` as input and passes the input
   through each internal module in the order they were presented, using
-  elements from `prev_state` as necessary for internal RNN cores.
+  elements from ``prev_state`` as necessary for internal RNN cores.
 
       >>> deep_rnn = snt.DeepRNN([
       ...     snt.LSTM(hidden_size=16),
       ...     snt.LSTM(hidden_size=16),
       ... ])
 
-  Note that the state of a `DeepRNN` is always a tuple, which will contain
-  the same number of elements as there are internal RNN cores. If no
-  internal modules are RNN cores, the state of the `DeepRNN` as a whole is
-  an empty tuple.
+  Note that the state of a ``DeepRNN`` is always a tuple, which will
+  contain the same number of elements as there are internal RNN cores.
+  If no internal modules are RNN cores, the state of the ``DeepRNN`` as
+  a whole is an empty tuple.
 
-  Wrapping non-recurrent modules into a `DeepRNN` can be useful to produce
-  something API compatible with a "real" recurrent module, simplifying
-  code that handles the cores.
+  Wrapping non-recurrent modules into a ``DeepRNN`` can be useful to
+  produce something API compatible with a "real" recurrent module,
+  simplifying code that handles the cores.
   """
 
   # TODO(slebedev): currently called `layers` to be in-sync with `Sequential`.
@@ -592,11 +597,12 @@ def deep_rnn_with_skip_connections(
     layers,
     concat_final_output=True,
     name="deep_rnn_with_skip_connections"):
-  """Constructs a `DeepRNN` with skip connections.
+  r"""Constructs a :class:`DeepRNN` with skip connections.
 
-  Skip connections alter the dependency structure within a `DeepRNN`.
+  Skip connections alter the dependency structure within a :class:`DeepRNN`.
   Specifically, input to the i-th layer (i > 0) is given by a
   concatenation of the core's inputs and the outputs of the (i-1)-th layer.
+  ::
 
       outputs0, ... = layers[0](inputs, ...)
       outputs1, ... = layers[1](tf.concat([inputs, outputs0], axis=1], ...)
@@ -606,18 +612,18 @@ def deep_rnn_with_skip_connections(
   This allows the layers to learn decoupled features.
 
   Args:
-    layers: A list of `RNNCore`s.
+    layers: A list of :class:`RNNCore`\ s.
     concat_final_output: If enabled (default), the outputs of the core
       is a concatenation of the outputs of all intermediate layers;
       otherwise, only the outputs of the final layer, i.e. that of
-      `layers[-1]`, are returned.
+      ``layers[-1]``, are returned.
     name: Name of the module.
 
   Returns:
-    A `DeepRNN` with skip connections.
+    A :class:`DeepRNN` with skip connections.
 
   Raises:
-    ValueError: If any of the layers is not an `RNNCore`.
+    ValueError: If any of the layers is not an :class:`RNNCore`.
   """
   if not all(isinstance(l, RNNCore) for l in layers):
     raise ValueError(
@@ -632,7 +638,7 @@ def deep_rnn_with_skip_connections(
 
 
 class _ResidualWrapper(RNNCore):
-  """Residual connection wrapper for a base RNN core.
+  """Residual connection wrapper for a base :class:`RNNCore`.
 
   The output of the wrapper is the sum of the outputs of the base core
   with its inputs.
@@ -655,12 +661,13 @@ class _ResidualWrapper(RNNCore):
 def deep_rnn_with_residual_connections(
     layers,
     name="deep_rnn_with_residual_connections"):
-  """Constructs a `DeepRNN` with residual connections.
+  r"""Constructs a :class:`DeepRNN` with residual connections.
 
-  Residual connections alter the dependency structure in a `DeepRNN`.
+  Residual connections alter the dependency structure in a :class:`DeepRNN`.
   Specifically, the input to the i-th intermediate layer is a sum of
   the original core's inputs and the outputs of all the preceding
   layers (<i).
+  ::
 
       outputs0, ... = layers[0](inputs, ...)
       outputs0 += inputs
@@ -674,16 +681,15 @@ def deep_rnn_with_residual_connections(
   incrementally.
 
   Args:
-    layers: A list of `RNNCore`s.
+    layers: A list of :class:`RNNCore`\ s.
     name: Name of the module.
 
   Returns:
-    A `DeepRNN` with residual connections.
+    A :class:`DeepRNN` with residual connections.
 
   Raises:
-    ValueError: If any of the layers is not an `RNNCore`.
+    ValueError: If any of the layers is not an :class:`RNNCore`.
   """
-
   if not all(isinstance(l, RNNCore) for l in layers):
     raise ValueError(
         "deep_rnn_with_residual_connections requires all layers to be "
@@ -699,38 +705,56 @@ LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 
 
 class LSTM(RNNCore):
-  """Long short-term memory (LSTM) RNN core.
+  r"""Long short-term memory (LSTM) RNN core.
 
-  The implementation is based on: http://arxiv.org/abs/1409.2329.
-  Given x_t and the previous state (h_{t-1}, c_{t-1}) the core computes
+  The implementation is based on [ZSV14]_. Given :math:`x_t` and the
+  previous state :math:`(h_{t-1}, c_{t-1})` the core computes
 
-      i_t = sigm(W_{ii} x_t + W_{hi} h_{t-1} + b_i)
-      f_t = sigm(W_{if} x_t + W_{hf} h_{t-1} + b_f)
-      g_t = tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g)
-      o_t = sigm(W_{io} x_t + W_{ho} h_{t-1} + b_o)
-      c_t = f_t c_{t-1} + i_t g_t
-      h_t = o_t tanh(c_t)
+  .. math::
 
-  Where `i_t`, `f_t`, `o_t` are input, forget and output gate activations,
-  and `g_t` is a vector of cell updates.
+     \begin{align*}
+     i_t &= \sigma(W_{ii} x_t + W_{hi} h_{t-1} + b_i) \\
+     f_t &= \sigma(W_{if} x_t + W_{hf} h_{t-1} + b_f) \\
+     g_t &= \tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g) \\
+     o_t &= \sigma(W_{io} x_t + W_{ho} h_{t-1} + b_o) \\
+     c_t &= f_t c_{t-1} + i_t g_t \\
+     h_t &= o_t \tanh(c_t)
+     \end{align*}
 
-  Following http://proceedings.mlr.press/v37/jozefowicz15.pdf we add a
-  constant `forget_bias` (defaults to 1.0) to `b_f` in order to reduce
-  the scale of forgetting in the beginning of the training.
+  Where :math:`i_t`, :math:`f_t`, :math:`o_t` are input, forget and
+  output gate activations, and :math:`g_t` is a vector of cell updates.
 
-  #### Recurrent projections
+  Attributes:
+    input_to_hidden: Input-to-hidden weights :math:`W_{ii}`, :math:`W_{if}`,
+      :math:`W_{ig}` and :math:`W_{io}` concatenated into a tensor
+      of shape [input_size, 4 * hidden_size].
+    hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hi}`, :math:`W_{hf}`,
+      :math:`W_{hg}` and :math:`W_{ho}` concatenated into a tensor
+      of shape [hidden_size, 4 * hidden_size].
+    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
+      concatenated into a tensor of shape [4 * hidden_size].
 
-  Hidden state could be projected (via the `project_size` parameter)
-  to reduce the number of parameters and speed up computation. For more
-  details see https://arxiv.org/abs/1402.1128.
+  Notes:
+    Forget gate initialization:
+      Following [JZS15]_ we add a constant ``forget_bias`` (defaults to 1.0)
+      to :math:`b_f` after initialization in order to reduce the scale of
+      forgetting in the beginning of the training.
+    Recurrent projections:
+      Hidden state could be projected (via the ``project_size`` parameter)
+      to reduce the number of parameters and speed up computation. For more
+      details see [SSB14]_.
 
-  Variables:
-    w_i: input-to-hidden weights `W_{ii}`, `W_{if}`, `W_{ig}` and `W_{io}`
-      concatenated into a `tf.Tensor` of shape `[input_size, 3 * hidden_size]`.
-    w_h: hidden-to-hidden weights `W_{hi}`, `W_{hf}`, `W_{hg}` and `W_{ho}`
-      concatenated into a `tf.Tensor` of shape `[hidden_size, 3 * hidden_size]`.
-    b: biases `b_i`, `b_f`, `b_g` and `b_o` concatenated into a `tf.Tensor` of
-      shape `[3 * hidden_size]`.
+  References:
+    .. [ZSV14] Zaremba, Wojciech, Ilya Sutskever, and Oriol Vinyals.
+       "Recurrent neural network regularization."
+       arXiv preprint arXiv:1409.2329 (2014).
+    .. [JZS15] Jozefowicz, Rafal, Wojciech Zaremba, and Ilya Sutskever.
+       "An empirical exploration of recurrent network architectures."
+       International Conference on Machine Learning (2015).
+    .. [SSB14] Sak, Hasim, Andrew Senior, and Francoise Beaufays.
+       "Long short-term memory based recurrent neural network architectures
+       for large vocabulary speech recognition."
+       arXiv preprint arXiv:1402.1128 (2014).
   """
 
   def __init__(
@@ -751,16 +775,16 @@ class LSTM(RNNCore):
       projection_size: Optional int; if set, then the hidden state is
         projected to this size via a trainable projection matrix.
       projection_init: Optional initializer for the projection matrix.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(hidden_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(hidden_size)``.
       w_i_init: Optional initializer for the input-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(input_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(hidden_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the biases. Defaults to
-        `Zeros`.
+        :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
       dtype: Optional `tf.DType` of the core's variables. Defaults to
@@ -856,9 +880,9 @@ class LSTM(RNNCore):
 class CuDNNLSTM(RNNCore):
   """Long short-term memory (LSTM) RNN implemented using CuDNN-RNN.
 
-  Unlike `LSTM` this core operates on the whole batch of sequences at
-  once, i.e. the expected shape of `inputs` is
-  `[num_steps, batch_size, input_size]`.
+  Unlike :class:`LSTM` this core operates on the whole batch of sequences at
+  once, i.e. the expected shape of ``inputs` is
+  [num_steps, batch_size, input_size].
   """
 
   def __init__(
@@ -875,13 +899,13 @@ class CuDNNLSTM(RNNCore):
     Args:
       hidden_size: Hidden layer size.
       w_i_init: Optional initializer for the input-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(input_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
-        Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(hidden_size).
+        Defaults to :class:`~initializers.TruncatedNormal` with a standard
+        deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the biases. Defaults to
-        `Zeros`.
+        :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
       dtype: Optional `tf.DType` of the core's variables. Defaults to
@@ -1018,29 +1042,39 @@ def lstm_with_recurrent_dropout(
     dropout=0.5,
     seed=None,
     **kwargs):
-  """Constructs an LSTM with recurrent dropout.
+  r"""Constructs an LSTM with recurrent dropout.
 
-  The implementation is based on https://arxiv.org/abs/1512.05287.
-  Dropout is applied on the previous hidden state `h_{t-1}` during the
-  computation of gate activations
+  The implementation is based on [GG16]_. Dropout is applied on the
+  previous hidden state :math:`h_{t-1}` during the computation of gate
+  activations:
 
-      i_t = sigm(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i)
-      f_t = sigm(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f)
-      g_t = tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g)
-      o_t = sigm(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
+  .. math::
+
+     \begin{align*}
+     i_t &= \sigma(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i) \\
+     f_t &= \sigma(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f) \\
+     g_t &= \tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g) \\
+     o_t &= \sigma(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
+     \end{align*}
 
   Args:
     hidden_size: Hidden layer size.
     dropout: Dropout probability.
     seed: Optional int; seed passed to `tf.nn.dropout`.
-    **kwargs: Optional keyword arguments to pass to the `LSTM` constructor.
+    **kwargs: Optional keyword arguments to pass to the :class:`LSTM`
+      constructor.
 
   Returns:
-    train_lstm: an `LSTM` with recurrent dropout enabled for training.
-    test_lstm: the same as `train_lstm` but without recurrent dropout.
+    train_lstm: An :class:`LSTM` with recurrent dropout enabled for training.
+    test_lstm: The same as ``train_lstm`` but without recurrent dropout.
 
   Raises:
-    ValueError: If `dropout` is not in `[0, 1)`.
+    ValueError: If ``dropout`` is not in [0, 1).
+
+  References:
+    .. [GG16] Gal, Yarin, and Zoubin Ghahramani.
+       "A theoretically grounded application of dropout in recurrent neural
+       networks." Advances in neural information processing systems (2016).
   """
   if dropout < 0 or dropout >= 1:
     raise ValueError(
@@ -1052,36 +1086,59 @@ def lstm_with_recurrent_dropout(
 
 
 class _ConvNDLSTM(RNNCore):
-  """Convolutional LSTM.
+  r"""Convolutional LSTM.
 
-  The implementation is based on: https://arxiv.org/abs/1506.04214.
-  Given x_t and the previous state (h_{t-1}, c_{t-1}) the core computes
+  The implementation is based on [ZSV14]_. Given :math:`x_t` and the
+  previous state :math:`(h_{t-1}, c_{t-1})` the core computes
 
-      i_t = sigm(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i)
-      f_t = sigm(W_{if} * x_t + W_{hf} * h_{t-1} + b_f)
-      g_t = tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g)
-      o_t = sigm(W_{io} * x_t + W_{ho} * h_{t-1} + b_o)
-      c_t = f_t c_{t-1} + i_t g_t
-      h_t = o_t tanh(c_t)
+  .. math::
 
-  Where * denotes the convolution operator; `i_t`, `f_t`, `o_t` are input,
-  forget and output gate activations, and `g_t` is a vector of cell updates.
+     i_t &= \sigma(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i) \\
+     f_t &= \sigma(W_{if} * x_t + W_{hf} * h_{t-1} + b_f) \\
+     g_t &= \tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g) \\
+     o_t &= \sigma(W_{io} * x_t + W_{ho} * h_{t-1} + b_o) \\
+     c_t &= f_t c_{t-1} + i_t g_t \\
+     h_t &= o_t \tanh(c_t)
 
-  Following http://proceedings.mlr.press/v37/jozefowicz15.pdf we add a
-  constant `forget_bias` (defaults to 1.0) to `b_f` in order to reduce
-  the scale of forgetting in the beginning of the training.
+  where :math:`*` denotes the convolution operator; :math:`i_t`,
+  :math:`f_t`, :math:`o_t` are input, forget and output gate activations,
+  and :math:`g_t` is a vector of cell updates.
 
-  Variables:
-    input_to_hidden/w: convolution weights `W_{ii}`, `W_{if}`, `W_{ig}` and
-       `W_{io}` concatenated into a single Tensor of shape
-       `[kernel_shape*, input_channels, 4 * output_channels]` where
-       `kernel_shape` is repeated `num_spatial_dims` times.
-    hidden_to_hidden/w: convolution weights `W_{hi}`, `W_{hf}`, `W_{hg}` and
-       `W_{ho}` concatenated into a single Tensor of shape
-       `[kernel_shape*, input_channels, 4 * output_channels]` where
-       `kernel_shape` is repeated `num_spatial_dims` times.
-    b: biases `b_i`, `b_f`, `b_g` and `b_o` concatenated into a Tensor of shape
-      `[4 * output_channels]`.
+  Attributes:
+    input_to_hidden: Input-to-hidden convolution weights :math:`W_{ii}`,
+      :math:`W_{if}`, :math:`W_{ig}` and :math:`W_{io}` concatenated into
+      a single tensor of shape
+       [kernel_shape*, input_channels, 4 * output_channels] where
+       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
+    hidden_to_hidden: Hidden-to-hidden convolution weights :math:`W_{hi}`,
+      :math:`W_{hf}`, :math:`W_{hg}` and :math:`W_{ho}` concatenated into
+      a single tensor of shape
+       [kernel_shape*, input_channels, 4 * output_channels] where
+       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
+    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
+      concatenated into a tensor of shape [4 * output_channels].
+
+  Notes:
+    Forget gate initialization:
+      Following [JZS15]_ we add a constant ``forget_bias`` (defaults to 1.0)
+      to :math:`b_f` after initialization in order to reduce the scale of
+      forgetting in the beginning of the training.
+    Recurrent projections:
+      Hidden state could be projected (via the ``project_size`` parameter)
+      to reduce the number of parameters and speed up computation. For more
+      details see [SSB14]_.
+
+  References:
+    .. [ZSV14] Zaremba, Wojciech, Ilya Sutskever, and Oriol Vinyals.
+       "Recurrent neural network regularization."
+       arXiv preprint arXiv:1409.2329 (2014).
+    .. [JZS15] Jozefowicz, Rafal, Wojciech Zaremba, and Ilya Sutskever.
+       "An empirical exploration of recurrent network architectures."
+       International Conference on Machine Learning (2015).
+    .. [SSB14] Sak, Hasim, Andrew Senior, and Francoise Beaufays.
+       "Long short-term memory based recurrent neural network architectures
+       for large vocabulary speech recognition."
+       arXiv preprint arXiv:1402.1128 (2014).
   """
 
   def __init__(
@@ -1108,12 +1165,15 @@ class _ConvNDLSTM(RNNCore):
         size in all dimensions.
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
-        weights. Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(kernel_shape**num_spatial_dims * input_channels)`.
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**num_spatial_dims * input_channels)``.
       w_h_init: Optional initializer for the hidden-to-hidden convolution
-        weights. Defaults to `TruncatedNormal` with a standard deviation of
-        `1 / sqrt(kernel_shape**num_spatial_dims * input_channels)`.
-      b_init: Optional initializer for the biases. Defaults to zeros.
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**num_spatial_dims * input_channels)``.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
       dtype: Optional `tf.DType` of the core's variables. Defaults to
@@ -1282,25 +1342,36 @@ class Conv3DLSTM(_ConvNDLSTM):
 
 
 class GRU(RNNCore):
-  """Gated recurrent unit (GRU) RNN core.
+  r"""Gated recurrent unit (GRU) RNN core.
 
-  The implementation is based on: https://arxiv.org/abs/1412.3555.
-  Given x_t and previous hidden state h_{t-1} the core computes
+  The implementation is based on [C+14]_. Given :math:`x_t` and the
+  previous state :math:`h_{t-1}` the core computes
 
-      z_t = sigm(W_{iz} x_t + W_{hz} h_{t-1} + b_z)
-      r_t = sigm(W_{ir} x_t + W_{hr} h_{t-1} + b_r)
-      a_t = tanh(W_{ia} x_t + W_{ha} (r_t h_{t-1}) + b_a)
-      h_t = (1 - z_t) h_{t-1} + z_t a_t
+  .. math::
 
-  where `z_t` and `r_t` are reset and update gates.
+     \begin{align*}
+     z_t &= \sigma(W_{iz} x_t + W_{hz} h_{t-1} + b_z) \\
+     r_t &= \sigma(W_{ir} x_t + W_{hr} h_{t-1} + b_r) \\
+     a_t &= \tanh(W_{ia} x_t + W_{ha} (r_t h_{t-1}) + b_a) \\
+     h_t &= (1 - z_t) h_{t-1} + z_t a_t
+     \end{align*}
 
-  Variables:
-    w_i: input-to-hidden weights W_{iz}, W_{ir} and W_{ia} concatenated
-      into a Tensor of shape [input_size, 3 * hidden_size].
-    w_h: hidden-to-hidden weights W_{hz}, W_{hr} and W_{ha} concatenated
-      into a Tensor of shape [hidden_size, 3 * hidden_size].
-    b: biases b_z, b_r and b_a concatenated into a Tensor of shape
-      [3 * hidden_size].
+  where :math:`z_t` and :math:`r_t` are reset and update gates.
+
+  Attributes:
+    input_to_hidden: Input-to-hidden weights :math:`W_{iz}`, :math:`W_{ir}`
+      and :math:`W_{ia}` concatenated into a tensor
+      of shape [input_size, 3 * hidden_size].
+    hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hz}`, :math:`W_{hr}`
+      and :math:`W_{ha}` concatenated into a tensor of shape
+      [hidden_size, 3 * hidden_size].
+    b: Biases :math:`b_z`, :math:`b_r` and :math:`b_a` concatenated into
+      a tensor of shape [3 * hidden_size].
+
+  References:
+    .. [C+14] Chung, Junyoung, et al.
+       "Empirical evaluation of gated recurrent neural networks on sequence
+       modeling." arXiv preprint arXiv:1412.3555 (2014).
   """
 
   def __init__(
@@ -1311,7 +1382,7 @@ class GRU(RNNCore):
       b_init=None,
       dtype=tf.float32,
       name=None):
-    """Constructs a `GRU`.
+    """Constructs a GRU.
 
     Args:
       hidden_size: Hidden layer size.
@@ -1319,7 +1390,8 @@ class GRU(RNNCore):
         Defaults to Glorot uniform initializer.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to Glorot uniform initializer.
-      b_init: Optional initializer for the biases. Defaults to `Zeros`.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
       dtype: Optional `tf.DType` of the core's variables. Defaults to
         `tf.float32`.
       name: Name of the module.
@@ -1381,6 +1453,7 @@ class GRU(RNNCore):
         name="b")
 
 
+# TODO(slebedev): remove or document and export.
 class CuDNNGRU(RNNCore):
   """Gated recurrent unit (GRU) RNN core implemented using CuDNN-RNN.
 

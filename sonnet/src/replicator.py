@@ -75,9 +75,10 @@ class Replicator(tf.distribute.MirroredStrategy):
   """Replicates input, parameters and compute over multiple accelerators.
 
   `Replicator` is a TensorFlow "Distribution Strategy" implementing the
-  programming model described in the TF-Replicator paper [0]_ and TensorFlow RFC
-  [1]_. `Replicator` enables data-parallel training across multiple accelerators
-  on a single machine, it supports eager execution and `@tf.function`.
+  programming model described in the TF-Replicator paper [B+19]_ and
+  TensorFlow RFC [B+18]_. `Replicator` enables data-parallel training across
+  multiple accelerators on a single machine, it supports eager execution
+  and `@tf.function`.
 
   To get started create a `Replicator` instance:
 
@@ -109,11 +110,11 @@ class Replicator(tf.distribute.MirroredStrategy):
       >>> per_replica_y = replicator.experimental_run_v2(forward)
 
   References:
-    .. [0] Buchlovsky, Peter, et al. "TF-Replicator: Distributed Machine
+    .. [B+19] Buchlovsky, Peter, et al. "TF-Replicator: Distributed Machine
        Learning for Researchers." arXiv preprint arXiv:1902.00465 (2019).
-    .. [1] Buchlovsky, Peter, et al. "RFC: Distribution Strategy - Revised API."
-       TensorFlow Community RFCs, Google / DeepMind, 12 Nov. 2018,
-       https://github.com/tensorflow/community/pull/25
+    .. [B+18] Buchlovsky, Peter, et al. "RFC: Distribution Strategy -
+       Revised API." TensorFlow Community RFCs, Google / DeepMind, 12 Nov.
+       2018, https://github.com/tensorflow/community/pull/25
   """
 
   @contextlib.contextmanager

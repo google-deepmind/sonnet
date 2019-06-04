@@ -98,7 +98,7 @@ class MLP(base.Module):
     Args:
       activate_final: Whether the final layer of the MLP should be activated.
       name: Optional name for the new module. The default name will be the name
-        of the current module prefixed with "reversed_".
+        of the current module prefixed with ``"reversed_"``.
 
     Returns:
       An MLP instance which is the reverse of the current instance. Note these

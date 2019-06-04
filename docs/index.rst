@@ -10,13 +10,7 @@ composable abstractions for machine learning research.
    :caption: Package Reference
    :maxdepth: 1
 
-   api/sonnet
-   api/initializers
-   api/distribute
-   api/nets
-   api/optimizers
-   api/pad
-   api/regularizers
+   api
 
 Indices and tables
 ==================

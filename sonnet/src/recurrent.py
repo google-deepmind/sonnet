@@ -195,10 +195,11 @@ def static_unroll(
       lengths of sequences within the (padded) batch.
 
   Returns:
-    output_sequence: An arbitrarily nested structure of tensors of shape
-      [T, B, ...]. Dimensions following the batch size could be
-      different from that of the ``input_sequence``.
-    final_state: Core state at time step T.
+    A tuple with two elements:
+      * **output_sequence** - An arbitrarily nested structure of tensors
+        of shape [T, B, ...]. Dimensions following the batch size could
+        be different from that of the ``input_sequence``.
+      * **final_state** - Core state at time step T.
 
   Raises:
     ValueError: If ``input_sequence`` is empty.
@@ -293,10 +294,11 @@ def dynamic_unroll(
       with very minimal (or no) performance penalty. Defaults to False.
 
   Returns:
-    output_sequence: An arbitrarily nested structure of tensors of shape
-      [T, B, ...]. Dimensions following the batch size could be
-      different from that of the ``input_sequence``.
-    final_state: Core state at time step T.
+    A tuple with two elements:
+      * **output_sequence** - An arbitrarily nested structure of tensors
+        of shape [T, B, ...]. Dimensions following the batch size could
+        be different from that of the ``input_sequence``.
+      * **final_state** - Core state at time step T.
 
   Raises:
     ValueError: If ``input_sequence`` is empty.
@@ -724,16 +726,6 @@ class LSTM(RNNCore):
   Where :math:`i_t`, :math:`f_t`, :math:`o_t` are input, forget and
   output gate activations, and :math:`g_t` is a vector of cell updates.
 
-  Attributes:
-    input_to_hidden: Input-to-hidden weights :math:`W_{ii}`, :math:`W_{if}`,
-      :math:`W_{ig}` and :math:`W_{io}` concatenated into a tensor
-      of shape [input_size, 4 * hidden_size].
-    hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hi}`, :math:`W_{hf}`,
-      :math:`W_{hg}` and :math:`W_{ho}` concatenated into a tensor
-      of shape [hidden_size, 4 * hidden_size].
-    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
-      concatenated into a tensor of shape [4 * hidden_size].
-
   Notes:
     Forget gate initialization:
       Following [JZS15]_ we add a constant ``forget_bias`` (defaults to 1.0)
@@ -755,6 +747,16 @@ class LSTM(RNNCore):
        "Long short-term memory based recurrent neural network architectures
        for large vocabulary speech recognition."
        arXiv preprint arXiv:1402.1128 (2014).
+
+  Attributes:
+    input_to_hidden: Input-to-hidden weights :math:`W_{ii}`, :math:`W_{if}`,
+      :math:`W_{ig}` and :math:`W_{io}` concatenated into a tensor
+      of shape [input_size, 4 * hidden_size].
+    hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hi}`, :math:`W_{hf}`,
+      :math:`W_{hg}` and :math:`W_{ho}` concatenated into a tensor
+      of shape [hidden_size, 4 * hidden_size].
+    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
+      concatenated into a tensor of shape [4 * hidden_size].
   """
 
   def __init__(
@@ -1093,30 +1095,18 @@ class _ConvNDLSTM(RNNCore):
 
   .. math::
 
-     i_t &= \sigma(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i) \\
-     f_t &= \sigma(W_{if} * x_t + W_{hf} * h_{t-1} + b_f) \\
-     g_t &= \tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g) \\
-     o_t &= \sigma(W_{io} * x_t + W_{ho} * h_{t-1} + b_o) \\
-     c_t &= f_t c_{t-1} + i_t g_t \\
-     h_t &= o_t \tanh(c_t)
+     \begin{array}{ll}
+     i_t = \sigma(W_{ii} * x_t + W_{hi} * h_{t-1} + b_i) \\
+     f_t = \sigma(W_{if} * x_t + W_{hf} * h_{t-1} + b_f) \\
+     g_t = \tanh(W_{ig} * x_t + W_{hg} * h_{t-1} + b_g) \\
+     o_t = \sigma(W_{io} * x_t + W_{ho} * h_{t-1} + b_o) \\
+     c_t = f_t c_{t-1} + i_t g_t \\
+     h_t = o_t \tanh(c_t)
+     \end{array}
 
   where :math:`*` denotes the convolution operator; :math:`i_t`,
   :math:`f_t`, :math:`o_t` are input, forget and output gate activations,
   and :math:`g_t` is a vector of cell updates.
-
-  Attributes:
-    input_to_hidden: Input-to-hidden convolution weights :math:`W_{ii}`,
-      :math:`W_{if}`, :math:`W_{ig}` and :math:`W_{io}` concatenated into
-      a single tensor of shape
-       [kernel_shape*, input_channels, 4 * output_channels] where
-       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
-    hidden_to_hidden: Hidden-to-hidden convolution weights :math:`W_{hi}`,
-      :math:`W_{hf}`, :math:`W_{hg}` and :math:`W_{ho}` concatenated into
-      a single tensor of shape
-       [kernel_shape*, input_channels, 4 * output_channels] where
-       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
-    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
-      concatenated into a tensor of shape [4 * output_channels].
 
   Notes:
     Forget gate initialization:
@@ -1139,6 +1129,20 @@ class _ConvNDLSTM(RNNCore):
        "Long short-term memory based recurrent neural network architectures
        for large vocabulary speech recognition."
        arXiv preprint arXiv:1402.1128 (2014).
+
+  Attributes:
+    input_to_hidden: Input-to-hidden convolution weights :math:`W_{ii}`,
+      :math:`W_{if}`, :math:`W_{ig}` and :math:`W_{io}` concatenated into
+      a single tensor of shape
+      [kernel_shape*, input_channels, 4 * output_channels] where
+      ``kernel_shape`` is repeated ``num_spatial_dims`` times.
+    hidden_to_hidden: Hidden-to-hidden convolution weights :math:`W_{hi}`,
+      :math:`W_{hf}`, :math:`W_{hg}` and :math:`W_{ho}` concatenated into
+      a single tensor of shape
+      [kernel_shape*, input_channels, 4 * output_channels] where
+       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
+    b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
+      concatenated into a tensor of shape [4 * output_channels].
   """
 
   def __init__(

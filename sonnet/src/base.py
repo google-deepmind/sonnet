@@ -299,10 +299,10 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       <tf.Tensor: ... numpy=2.0>
 
   Sonnet modules are a layer on top of `tf.Module`, implementing automatic name
-  scoping as described in the original RFC [0]_.
+  scoping as described in the original RFC [H+19]_.
 
   References:
-    .. [0] Hennigan, Tom, et al. "RFC: Stateful Containers with tf.Module."
+    .. [H+19] Hennigan, Tom, et al. "RFC: Stateful Containers with tf.Module."
        TensorFlow Community RFCs, Google / DeepMind, 17 Jan. 2019,
        https://github.com/tensorflow/community/pull/56
   """

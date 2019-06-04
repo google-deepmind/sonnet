@@ -148,7 +148,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
       if activate_final:
         self.assertEqual(net.op.type, "Relu")
       elif use_bias:
-        self.assertEqual(net.op.type, "Add")
+        self.assertIn(net.op.type, ("Add", "AddV2"))
       else:
         self.assertEqual(net.op.type, "MatMul")
 
@@ -276,7 +276,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
       if activate_final:
         self.assertEqual(mlp_transposed_output.op.type, "Relu")
       elif use_bias:
-        self.assertEqual(mlp_transposed_output.op.type, "Add")
+        self.assertIn(mlp_transposed_output.op.type, ("Add", "AddV2"))
       else:
         self.assertEqual(mlp_transposed_output.op.type, "MatMul")
 

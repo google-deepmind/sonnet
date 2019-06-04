@@ -1,2 +1,3 @@
 sphinx>=2.0.1
 sphinx_rtd_theme>=0.4.3
+sphinxcontrib-katex>=0.4.1

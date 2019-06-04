@@ -712,14 +712,14 @@ class LSTM(RNNCore):
 
   .. math::
 
-     \begin{align*}
-     i_t &= \sigma(W_{ii} x_t + W_{hi} h_{t-1} + b_i) \\
-     f_t &= \sigma(W_{if} x_t + W_{hf} h_{t-1} + b_f) \\
-     g_t &= \tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g) \\
-     o_t &= \sigma(W_{io} x_t + W_{ho} h_{t-1} + b_o) \\
-     c_t &= f_t c_{t-1} + i_t g_t \\
-     h_t &= o_t \tanh(c_t)
-     \end{align*}
+     \begin{array}{ll}
+     i_t = \sigma(W_{ii} x_t + W_{hi} h_{t-1} + b_i) \\
+     f_t = \sigma(W_{if} x_t + W_{hf} h_{t-1} + b_f) \\
+     g_t = \tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g) \\
+     o_t = \sigma(W_{io} x_t + W_{ho} h_{t-1} + b_o) \\
+     c_t = f_t c_{t-1} + i_t g_t \\
+     h_t = o_t \tanh(c_t)
+     \end{array}
 
   Where :math:`i_t`, :math:`f_t`, :math:`o_t` are input, forget and
   output gate activations, and :math:`g_t` is a vector of cell updates.
@@ -1050,12 +1050,12 @@ def lstm_with_recurrent_dropout(
 
   .. math::
 
-     \begin{align*}
-     i_t &= \sigma(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i) \\
-     f_t &= \sigma(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f) \\
-     g_t &= \tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g) \\
-     o_t &= \sigma(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
-     \end{align*}
+     \begin{array}{ll}
+     i_t = \sigma(W_{ii} x_t + W_{hi} d(h_{t-1}) + b_i) \\
+     f_t = \sigma(W_{if} x_t + W_{hf} d(h_{t-1}) + b_f) \\
+     g_t = \tanh(W_{ig} x_t + W_{hg} d(h_{t-1}) + b_g) \\
+     o_t = \sigma(W_{io} x_t + W_{ho} d(h_{t-1}) + b_o)
+     \end{array}
 
   Args:
     hidden_size: Hidden layer size.
@@ -1349,12 +1349,12 @@ class GRU(RNNCore):
 
   .. math::
 
-     \begin{align*}
+     \begin{array}{ll}
      z_t &= \sigma(W_{iz} x_t + W_{hz} h_{t-1} + b_z) \\
      r_t &= \sigma(W_{ir} x_t + W_{hr} h_{t-1} + b_r) \\
      a_t &= \tanh(W_{ia} x_t + W_{ha} (r_t h_{t-1}) + b_a) \\
      h_t &= (1 - z_t) h_{t-1} + z_t a_t
-     \end{align*}
+     \end{array}
 
   where :math:`z_t` and :math:`r_t` are reset and update gates.
 

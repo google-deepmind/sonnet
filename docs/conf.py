@@ -54,8 +54,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.linkcode',
-    'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.katex',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

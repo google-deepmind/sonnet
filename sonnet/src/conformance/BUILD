@@ -40,6 +40,7 @@ snt_py_test(
         # absl/testing:absltest
         # absl/testing:parameterized
         "//sonnet",
+        "//sonnet/src:replicator",
         "//sonnet/src:test_utils",
         # tensorflow
     ],

@@ -77,6 +77,20 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     for component in v._values:
       self.assertAllEqual(component.read_value(), tf.ones_like(component))
 
+  @parameterized.parameters(True, False)
+  def test_read_value(self, cross_replica):
+    strategy = replicator_all_devices(self.primary_device)
+    with strategy.scope():
+      v = tf.Variable(0.)
+    if cross_replica:
+      values = [v.read_value()]
+    else:
+      values = strategy.experimental_run_v2(v.read_value)
+      values = strategy.experimental_local_results(values)
+    for component in v._values:
+      for value in values:
+        self.assertAllEqual(component.read_value(), value)
+
 
 def setUpModule():
   # If a physical GPU is available make sure TF sees at least two.

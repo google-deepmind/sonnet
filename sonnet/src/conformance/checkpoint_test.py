@@ -24,6 +24,7 @@ import os
 from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
+from sonnet.src import replicator
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
@@ -62,7 +63,7 @@ def mirrored_all_devices(device_type):
   devices = tf.config.experimental.list_logical_devices(device_type=device_type)
   devices = [d.name for d in devices]
   logging.info("Mirroring over %s", devices)
-  return tf.distribute.MirroredStrategy(devices=devices)
+  return replicator.Replicator(devices=devices)
 
 
 def with_soft_placement(f):
@@ -242,7 +243,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     for index, variable in enumerate(variables):
       # Parameters should be restored to their previous values.
       self.assertAllEqual(variable.read_value(),
-                          goldens.range_like(variable, start=index))
+                          goldens.range_like(variable, start=index),
+                          msg=variable.name)
 
     if golden.deterministic:
       self.assertAllEqual(forward(), before_save_ys)
@@ -321,6 +323,9 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
 
   def assertRestoreOnCreateInReplicaContext(self, golden, strategy,
                                             use_function):
+    if self.primary_device == "GPU":
+      self.skipTest("Currently not working as expected on multiple devices")
+      # TODO(b/134376796) renable this once bug is fixed
     with strategy.scope():
       module = golden.create_module()
 

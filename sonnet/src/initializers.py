@@ -184,6 +184,8 @@ class Orthogonal(Initializer):
 
   NOTE: Does not support 1D tensors.
 
+  The implementation is based on :cite:`saxe2013exact`.
+
   If the shape of the tensor to initialize is two-dimensional, it is initialized
   with an orthogonal matrix obtained from the QR decomposition of a matrix of
   random numbers drawn from a normal distribution.
@@ -198,10 +200,6 @@ class Orthogonal(Initializer):
   Args:
     gain: Multiplicative factor to apply to the orthogonal matrix
     seed: An integer. Seed used in the generation of random numbers.
-
-  References:
-      [Saxe et al., 2014](https://openreview.net/forum?id=_wzZwKpTDF_9C)
-      ([pdf](https://arxiv.org/pdf/1312.6120.pdf))
   """
 
   def __init__(self, gain=1.0, seed=None):

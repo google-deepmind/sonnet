@@ -55,6 +55,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.linkcode',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.bibtex',
     'sphinxcontrib.katex',
 ]
 

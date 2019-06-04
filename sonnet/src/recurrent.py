@@ -709,8 +709,9 @@ LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 class LSTM(RNNCore):
   r"""Long short-term memory (LSTM) RNN core.
 
-  The implementation is based on [ZSV14]_. Given :math:`x_t` and the
-  previous state :math:`(h_{t-1}, c_{t-1})` the core computes
+  The implementation is based on :cite:`zaremba2014recurrent`. Given
+  :math:`x_t` and the previous state :math:`(h_{t-1}, c_{t-1})` the core
+  computes
 
   .. math::
 
@@ -728,25 +729,14 @@ class LSTM(RNNCore):
 
   Notes:
     Forget gate initialization:
-      Following [JZS15]_ we add a constant ``forget_bias`` (defaults to 1.0)
-      to :math:`b_f` after initialization in order to reduce the scale of
-      forgetting in the beginning of the training.
+      Following :cite:`jozefowicz2015empirical` we add a constant
+      ``forget_bias`` (defaults to 1.0) to :math:`b_f` after initialization
+      in order to reduce the scale of forgetting in the beginning of
+      the training.
     Recurrent projections:
       Hidden state could be projected (via the ``project_size`` parameter)
       to reduce the number of parameters and speed up computation. For more
-      details see [SSB14]_.
-
-  References:
-    .. [ZSV14] Zaremba, Wojciech, Ilya Sutskever, and Oriol Vinyals.
-       "Recurrent neural network regularization."
-       arXiv preprint arXiv:1409.2329 (2014).
-    .. [JZS15] Jozefowicz, Rafal, Wojciech Zaremba, and Ilya Sutskever.
-       "An empirical exploration of recurrent network architectures."
-       International Conference on Machine Learning (2015).
-    .. [SSB14] Sak, Hasim, Andrew Senior, and Francoise Beaufays.
-       "Long short-term memory based recurrent neural network architectures
-       for large vocabulary speech recognition."
-       arXiv preprint arXiv:1402.1128 (2014).
+      details see :cite:`sak2014long`.
 
   Attributes:
     input_to_hidden: Input-to-hidden weights :math:`W_{ii}`, :math:`W_{if}`,
@@ -1046,9 +1036,9 @@ def lstm_with_recurrent_dropout(
     **kwargs):
   r"""Constructs an LSTM with recurrent dropout.
 
-  The implementation is based on [GG16]_. Dropout is applied on the
-  previous hidden state :math:`h_{t-1}` during the computation of gate
-  activations:
+  The implementation is based on :cite:`gal2016theoretically`. Dropout
+  is applied on the previous hidden state :math:`h_{t-1}` during the
+  computation of gate activations:
 
   .. math::
 
@@ -1072,11 +1062,6 @@ def lstm_with_recurrent_dropout(
 
   Raises:
     ValueError: If ``dropout`` is not in [0, 1).
-
-  References:
-    .. [GG16] Gal, Yarin, and Zoubin Ghahramani.
-       "A theoretically grounded application of dropout in recurrent neural
-       networks." Advances in neural information processing systems (2016).
   """
   if dropout < 0 or dropout >= 1:
     raise ValueError(
@@ -1090,8 +1075,9 @@ def lstm_with_recurrent_dropout(
 class _ConvNDLSTM(RNNCore):
   r"""Convolutional LSTM.
 
-  The implementation is based on [ZSV14]_. Given :math:`x_t` and the
-  previous state :math:`(h_{t-1}, c_{t-1})` the core computes
+  The implementation is based on :cite:`xingjian2015convolutional`.
+  Given :math:`x_t` and the previous state :math:`(h_{t-1}, c_{t-1})`
+  the core computes
 
   .. math::
 
@@ -1110,25 +1096,10 @@ class _ConvNDLSTM(RNNCore):
 
   Notes:
     Forget gate initialization:
-      Following [JZS15]_ we add a constant ``forget_bias`` (defaults to 1.0)
-      to :math:`b_f` after initialization in order to reduce the scale of
-      forgetting in the beginning of the training.
-    Recurrent projections:
-      Hidden state could be projected (via the ``project_size`` parameter)
-      to reduce the number of parameters and speed up computation. For more
-      details see [SSB14]_.
-
-  References:
-    .. [ZSV14] Zaremba, Wojciech, Ilya Sutskever, and Oriol Vinyals.
-       "Recurrent neural network regularization."
-       arXiv preprint arXiv:1409.2329 (2014).
-    .. [JZS15] Jozefowicz, Rafal, Wojciech Zaremba, and Ilya Sutskever.
-       "An empirical exploration of recurrent network architectures."
-       International Conference on Machine Learning (2015).
-    .. [SSB14] Sak, Hasim, Andrew Senior, and Francoise Beaufays.
-       "Long short-term memory based recurrent neural network architectures
-       for large vocabulary speech recognition."
-       arXiv preprint arXiv:1402.1128 (2014).
+      Following :cite:`jozefowicz2015empirical` we add a constant
+      ``forget_bias`` (defaults to 1.0) to :math:`b_f` after initialization
+      in order to reduce the scale of forgetting in the beginning of
+      the training.
 
   Attributes:
     input_to_hidden: Input-to-hidden convolution weights :math:`W_{ii}`,
@@ -1348,8 +1319,8 @@ class Conv3DLSTM(_ConvNDLSTM):
 class GRU(RNNCore):
   r"""Gated recurrent unit (GRU) RNN core.
 
-  The implementation is based on [C+14]_. Given :math:`x_t` and the
-  previous state :math:`h_{t-1}` the core computes
+  The implementation is based on :cite:`chung2014empirical`. Given
+  :math:`x_t` and the previous state :math:`h_{t-1}` the core computes
 
   .. math::
 
@@ -1371,11 +1342,6 @@ class GRU(RNNCore):
       [hidden_size, 3 * hidden_size].
     b: Biases :math:`b_z`, :math:`b_r` and :math:`b_a` concatenated into
       a tensor of shape [3 * hidden_size].
-
-  References:
-    .. [C+14] Chung, Junyoung, et al.
-       "Empirical evaluation of gated recurrent neural networks on sequence
-       modeling." arXiv preprint arXiv:1412.3555 (2014).
   """
 
   def __init__(

@@ -422,3 +422,9 @@ Cifar10ConvNet
 
 .. autoclass:: Cifar10ConvNet
    :members:
+
+References
+----------
+
+.. bibliography:: references.bib
+   :style: unsrt

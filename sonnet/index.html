@@ -7291,7 +7291,7 @@ information about what variables are captured.</p>
 <li><code>name</code>: String, the name of the layer. Layers with the same name will
     share weights, but to avoid mistakes we require reuse=True in such
     cases.  By default this is "lstm_cell", for variable-name compatibility
-    with <code>tf.nn.rnn_cell.LSTMCell</code>.</li>
+    with <code>tf.compat.v1.nn.rnn_cell.LSTMCell</code>.</li>
 </ul>
 <p>When restoring from CudnnLSTM-trained checkpoints, must use
   CudnnCompatibleLSTMBlockCell instead.</p>
@@ -11269,7 +11269,7 @@ information about what variables are captured.</p>
 <p>If <code>state_size</code> is a nested list or tuple, then the return value is
   a nested list or tuple (of the same structure) of <code>2-D</code> tensors with
   the shapes <code>[batch_size x s]</code> for each s in <code>state_size</code>.</p>
-<h3 id="check_initializersinitializers-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=140"><code>check_initializers(initializers, keys)</code></a><a id="check_initializers" /></h3>
+<h3 id="check_initializersinitializers-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=141"><code>check_initializers(initializers, keys)</code></a><a id="check_initializers" /></h3>
 <p>Checks the given initializers.</p>
 <p>This checks that <code>initializers</code> is a dictionary that only contains keys in
 <code>keys</code>, and furthermore the entries in <code>initializers</code> are functions or
@@ -11290,7 +11290,7 @@ to modules inside modules) that must satisfy the same constraints.</p>
 <li><code>TypeError</code>: If a provided initializer is not a callable function, or
     <code>initializers</code> is not a Mapping.</li>
 </ul>
-<h3 id="check_partitionerspartitioners-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=181"><code>check_partitioners(partitioners, keys)</code></a><a id="check_partitioners" /></h3>
+<h3 id="check_partitionerspartitioners-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=182"><code>check_partitioners(partitioners, keys)</code></a><a id="check_partitioners" /></h3>
 <p>Checks the given partitioners.</p>
 <p>This checks that <code>partitioners</code> is a dictionary that only contains keys in
 <code>keys</code>, and furthermore the entries in <code>partitioners</code> are functions or
@@ -11311,7 +11311,7 @@ to modules inside modules) that must satisfy the same constraints.</p>
 <li><code>TypeError</code>: If a provided partitioner is not a callable function, or
     <code>partitioners</code> is not a Mapping.</li>
 </ul>
-<h3 id="check_regularizersregularizers-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=222"><code>check_regularizers(regularizers, keys)</code></a><a id="check_regularizers" /></h3>
+<h3 id="check_regularizersregularizers-keys"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=223"><code>check_regularizers(regularizers, keys)</code></a><a id="check_regularizers" /></h3>
 <p>Checks the given regularizers.</p>
 <p>This checks that <code>regularizers</code> is a dictionary that only contains keys in
 <code>keys</code>, and furthermore the entries in <code>regularizers</code> are functions or
@@ -11351,7 +11351,7 @@ limit values.</p>
 <ul>
 <li><code>ValueError</code>: If <code>net</code> dtype is non-float.</li>
 </ul>
-<h3 id="count_variables_by_typevariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=630"><code>count_variables_by_type(variables=None)</code></a><a id="count_variables_by_type" /></h3>
+<h3 id="count_variables_by_typevariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=631"><code>count_variables_by_type(variables=None)</code></a><a id="count_variables_by_type" /></h3>
 <p>Returns a dict mapping dtypes to number of variables and scalars.</p>
 <h5 id="args_248">Args:</h5>
 <ul>
@@ -11361,7 +11361,7 @@ limit values.</p>
 <h5 id="returns_520">Returns:</h5>
 <p>A dict mapping tf.dtype keys to a dict containing the keys 'num_scalars' and
     'num_variables'.</p>
-<h3 id="custom_getter_routercustom_getter_map-name_fn"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=300"><code>custom_getter_router(custom_getter_map, name_fn)</code></a><a id="custom_getter_router" /></h3>
+<h3 id="custom_getter_routercustom_getter_map-name_fn"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=301"><code>custom_getter_router(custom_getter_map, name_fn)</code></a><a id="custom_getter_router" /></h3>
 <p>Creates a custom getter than matches requests to dict of custom getters.</p>
 <p>Custom getters are callables which implement the
 [custom getter API]
@@ -11388,13 +11388,13 @@ before matching.</p>
 <ul>
 <li><code>TypeError</code>: If an entry in <code>custom_getter_map</code> is not a callable function.</li>
 </ul>
-<h3 id="deprecation_warningdeprecation_message"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=969"><code>deprecation_warning(deprecation_message)</code></a><a id="deprecation_warning" /></h3>
+<h3 id="deprecation_warningdeprecation_message"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=970"><code>deprecation_warning(deprecation_message)</code></a><a id="deprecation_warning" /></h3>
 <p>Log a warning message the user is using deprecated functionality.</p>
-<h3 id="format_variable_mapvariable_map-join_linestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=550"><code>format_variable_map(variable_map, join_lines=True)</code></a><a id="format_variable_map" /></h3>
+<h3 id="format_variable_mapvariable_map-join_linestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=551"><code>format_variable_map(variable_map, join_lines=True)</code></a><a id="format_variable_map" /></h3>
 <p>Takes a key-to-variable map and formats it as a table.</p>
-<h3 id="format_variablesvariables-join_linestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=534"><code>format_variables(variables, join_lines=True)</code></a><a id="format_variables" /></h3>
+<h3 id="format_variablesvariables-join_linestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=535"><code>format_variables(variables, join_lines=True)</code></a><a id="format_variables" /></h3>
 <p>Takes a collection of variables and formats it as a table.</p>
-<h3 id="get_normalized_variable_mapscope_or_module-collectionvariables-contextnone-group_sliced_variablestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=371"><code>get_normalized_variable_map(scope_or_module, collection='variables', context=None, group_sliced_variables=True)</code></a><a id="get_normalized_variable_map" /></h3>
+<h3 id="get_normalized_variable_mapscope_or_module-collectionvariables-contextnone-group_sliced_variablestrue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=372"><code>get_normalized_variable_map(scope_or_module, collection='variables', context=None, group_sliced_variables=True)</code></a><a id="get_normalized_variable_map" /></h3>
 <p>Builds map of <code>tf.Variable</code>s in scope or module with normalized names.</p>
 <p>The names of the variables are normalized to remove the scope prefix.</p>
 <h5 id="args_250">Args:</h5>
@@ -11417,7 +11417,7 @@ before matching.</p>
 <ul>
 <li><code>ValueError</code>: If <code>context</code> is given but is not a proper prefix of <code>scope</code>.</li>
 </ul>
-<h3 id="get_saverscope-collectionsvariables-contextnone-kwargs"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=428"><code>get_saver(scope, collections=('variables',), context=None, **kwargs)</code></a><a id="get_saver" /></h3>
+<h3 id="get_saverscope-collectionsvariables-contextnone-kwargs"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=429"><code>get_saver(scope, collections=('variables',), context=None, **kwargs)</code></a><a id="get_saver" /></h3>
 <p>Builds a <code>tf.train.Saver</code> for the scope or module, with normalized names.</p>
 <p>The names of the variables are normalized to remove the scope prefix.
 This allows the same variables to be restored into another similar scope or
@@ -11434,7 +11434,7 @@ module using a complementary <code>tf.train.Saver</code> object.</p>
 </ul>
 <h5 id="returns_523">Returns:</h5>
 <p>A <code>tf.train.Saver</code> object for Variables in the scope or module.</p>
-<h3 id="get_variables_in_modulemodule-collectiontrainable_variables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=84"><code>get_variables_in_module(module, collection='trainable_variables')</code></a><a id="get_variables_in_module" /></h3>
+<h3 id="get_variables_in_modulemodule-collectiontrainable_variables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=85"><code>get_variables_in_module(module, collection='trainable_variables')</code></a><a id="get_variables_in_module" /></h3>
 <p>Returns tuple of <code>tf.Variable</code>s declared inside an <code>snt.Module</code>.</p>
 <p>Note that this operates by searching the variable scope a module contains,
 and so does not know about any modules which were constructed elsewhere but
@@ -11452,7 +11452,7 @@ used inside this module.</p>
 <ul>
 <li><code>NotConnectedError</code>: If the module is not connected to the Graph.</li>
 </ul>
-<h3 id="get_variables_in_scopescope-collectiontrainable_variables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=61"><code>get_variables_in_scope(scope, collection='trainable_variables')</code></a><a id="get_variables_in_scope" /></h3>
+<h3 id="get_variables_in_scopescope-collectiontrainable_variables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=62"><code>get_variables_in_scope(scope, collection='trainable_variables')</code></a><a id="get_variables_in_scope" /></h3>
 <p>Returns a tuple <code>tf.Variable</code>s in a scope for a given collection.</p>
 <h5 id="args_253">Args:</h5>
 <ul>
@@ -11463,7 +11463,7 @@ used inside this module.</p>
 </ul>
 <h5 id="returns_525">Returns:</h5>
 <p>A tuple of <code>tf.Variable</code> objects.</p>
-<h3 id="has_variable_scopeobj"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=456"><code>has_variable_scope(obj)</code></a><a id="has_variable_scope" /></h3>
+<h3 id="has_variable_scopeobj"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=457"><code>has_variable_scope(obj)</code></a><a id="has_variable_scope" /></h3>
 <p>Determines whether the given object has a variable scope.</p>
 <h3 id="highway_core_with_recurrent_dropouthidden_size-num_layers-keep_prob05-kwargs"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1749"><code>highway_core_with_recurrent_dropout(hidden_size, num_layers, keep_prob=0.5, **kwargs)</code></a><a id="highway_core_with_recurrent_dropout" /></h3>
 <p>Highway core with recurrent dropout.</p>
@@ -11478,7 +11478,7 @@ used inside this module.</p>
 <p>A tuple (train_core, test_core) where train_core is a higway core with
   recurrent dropout enabled to be used for training and test_core is the
   same highway core without recurrent dropout.</p>
-<h3 id="log_variablesvariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=565"><code>log_variables(variables=None)</code></a><a id="log_variables" /></h3>
+<h3 id="log_variablesvariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=566"><code>log_variables(variables=None)</code></a><a id="log_variables" /></h3>
 <p>Logs variable information.</p>
 <p>This function logs the name, shape, type, collections, and device for either
 all variables or a given iterable of variables. In the "Device" columns,
@@ -11554,7 +11554,7 @@ with snt.observe_connections(logging_observer):
 <ul>
 <li><code>None</code>: just yields control to the inner context.</li>
 </ul>
-<h3 id="parse_string_to_constructorctor_string"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=984"><code>parse_string_to_constructor(ctor_string)</code></a><a id="parse_string_to_constructor" /></h3>
+<h3 id="parse_string_to_constructorctor_string"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=985"><code>parse_string_to_constructor(ctor_string)</code></a><a id="parse_string_to_constructor" /></h3>
 <p>Returns a callable which corresponds to the constructor string.</p>
 <p>Various modules (eg, ConvNet2D) take constructor arguments which are
 callables, indicating a submodule to build. These can be passed as
@@ -11574,7 +11574,7 @@ remain serializable where necessary.</p>
 </ul>
 <h5 id="returns_530">Returns:</h5>
 <p>Callable constructor which corresponds to <code>ctor_string</code>.</p>
-<h3 id="remove_unsupported_kwargsmodule_or_fn-all_kwargs_dict"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1102"><code>remove_unsupported_kwargs(module_or_fn, all_kwargs_dict)</code></a><a id="remove_unsupported_kwargs" /></h3>
+<h3 id="remove_unsupported_kwargsmodule_or_fn-all_kwargs_dict"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1103"><code>remove_unsupported_kwargs(module_or_fn, all_kwargs_dict)</code></a><a id="remove_unsupported_kwargs" /></h3>
 <p>Removes any kwargs not supported by <code>module_or_fn</code> from <code>all_kwargs_dict</code>.</p>
 <p>A new dict is return with shallow copies of keys &amp; values from
 <code>all_kwargs_dict</code>, as long as the key is accepted by module_or_fn. The
@@ -11600,7 +11600,7 @@ function if in doubt.</p>
 <p>A dict containing some subset of the keys and values in <code>all_kwargs_dict</code>.
   This subset may be empty. If <code>all_kwargs_dict</code> is None, this will be an
   empty dict.</p>
-<h3 id="reuse_variablesmethod"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=660"><code>reuse_variables(method)</code></a><a id="reuse_variables" /></h3>
+<h3 id="reuse_variablesmethod"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=661"><code>reuse_variables(method)</code></a><a id="reuse_variables" /></h3>
 <p>Wraps an arbitrary method so it does variable sharing.</p>
 <p>This decorator creates variables the first time it calls <code>method</code>, and reuses
 them for subsequent calls. The object that calls <code>method</code> provides a
@@ -11685,7 +11685,7 @@ is <code>1.0</code>, this op reduces to <code>tf.identity</code>.</p>
 </ul>
 <h5 id="returns_534">Returns:</h5>
 <p>The input tensor, with its first dimension split.</p>
-<h3 id="summarize_variablesvariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=595"><code>summarize_variables(variables=None)</code></a><a id="summarize_variables" /></h3>
+<h3 id="summarize_variablesvariablesnone"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=596"><code>summarize_variables(variables=None)</code></a><a id="summarize_variables" /></h3>
 <p>Logs a summary of variable information.</p>
 <p>This function groups Variables by dtype and prints out the number of Variables
 and the total number of scalar values for each datatype, as well as the total
@@ -11700,7 +11700,7 @@ is logged, along with a warning.</p>
 <li><code>variables</code>: iterable of variables; if not provided, then all variables
     (in the default graph) are summarized.</li>
 </ul>
-<h3 id="supports_kwargsmodule_or_fn-kwargs_list"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1039"><code>supports_kwargs(module_or_fn, kwargs_list)</code></a><a id="supports_kwargs" /></h3>
+<h3 id="supports_kwargsmodule_or_fn-kwargs_list"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1040"><code>supports_kwargs(module_or_fn, kwargs_list)</code></a><a id="supports_kwargs" /></h3>
 <p>Determines whether the provided callable supports all the kwargs.</p>
 <p>This is useful when you have a module that might or might not support a
 kwarg such as <code>is_training</code>. Rather than calling the module and catching the
@@ -11752,7 +11752,7 @@ the kwargs are supported (e.g. by just calling the function).</p>
 <li><code>ValueError</code>: if the user passes initializers that are not functions.</li>
 <li><code>ValueError</code>: if the user passes regularizers that are not functions.</li>
 </ul>
-<h3 id="variable_map_itemsvariable_map"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=471"><code>variable_map_items(variable_map)</code></a><a id="variable_map_items" /></h3>
+<h3 id="variable_map_itemsvariable_map"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=472"><code>variable_map_items(variable_map)</code></a><a id="variable_map_items" /></h3>
 <p>Yields an iterator over (string, variable) pairs in the variable map.</p>
 <p>In general, variable maps map variable names to either a <code>tf.Variable</code>, or
 list of <code>tf.Variable</code>s (in case of sliced variables).</p>
@@ -14048,6 +14048,8 @@ is "spread out" across multiple copies of the input.</p>
 </ul>
 <h5 id="returns_644">Returns:</h5>
 <p>Initializer function for building a noisy identity kernel.</p>
+<h3 id="class-protosmodule_pb2nesteddata"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?q=class:NestedData"><code>class protos.module_pb2.NestedData</code></a><a id="protos.module_pb2.NestedData" /></h3>
+<h3 id="class-protosmodule_pb2sonnetmodule"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?q=class:SonnetModule"><code>class protos.module_pb2.SonnetModule</code></a><a id="protos.module_pb2.SonnetModule" /></h3>
 <h3 id="protosmodule_pb2_bx"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?l=6"><code>protos.module_pb2._b(x)</code></a><a id="protos.module_pb2._b" /></h3>
 <h3 id="class-pythonmodulesattentionattentionoutput"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/attention.py?q=class:AttentionOutput"><code>class python.modules.attention.AttentionOutput</code></a><a id="python.modules.attention.AttentionOutput" /></h3>
 <p>AttentionOutput(read, weights, weight_logits)</p>
@@ -14647,7 +14649,7 @@ information about what variables are captured.</p>
 <h5 id="returns_673">Returns:</h5>
 <p>Decorated version of <code>wrapper_init</code> with documentation copied from
   <code>fn_with_doc_to_copy</code>.</p>
-<h3 id="pythonmodulesutilget_variable_scope_namevalue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=38"><code>python.modules.util.get_variable_scope_name(value)</code></a><a id="python.modules.util.get_variable_scope_name" /></h3>
+<h3 id="pythonmodulesutilget_variable_scope_namevalue"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=39"><code>python.modules.util.get_variable_scope_name(value)</code></a><a id="python.modules.util.get_variable_scope_name" /></h3>
 <p>Returns the name of the variable scope indicated by the given value.</p>
 <h5 id="args_336">Args:</h5>
 <ul>
@@ -14660,33 +14662,28 @@ information about what variables are captured.</p>
 <ul>
 <li><code>ValueError</code>: If <code>value</code> does not identify a variable scope.</li>
 </ul>
-<h3 id="pythonmodulesutilname_for_callablefunc"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=881"><code>python.modules.util.name_for_callable(func)</code></a><a id="python.modules.util.name_for_callable" /></h3>
+<h3 id="pythonmodulesutilname_for_callablefunc"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=882"><code>python.modules.util.name_for_callable(func)</code></a><a id="python.modules.util.name_for_callable" /></h3>
 <p>Returns a module name for a callable or <code>None</code> if no name can be found.</p>
 <h3 id="pythonmodulesutilnotify_about_new_variablescallback"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=82"><code>python.modules.util.notify_about_new_variables(callback)</code></a><a id="python.modules.util.notify_about_new_variables" /></h3>
 <p>Calls <code>callback(var)</code> for all newly created variables.</p>
 <p>Callback should not modify the variable passed in. Use cases that require
 variables to be modified should use <code>variable_creator_scope</code> directly and sit
 within the variable creator stack.</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>variables = []
-with notify_about_variables(variables.append):
+<pre><code>&gt;&gt;&gt; variables = []
+&gt;&gt;&gt; with notify_about_variables(variables.append):
 ...   v = tf.Variable(1.0, name='v')
 ...   w = tf.get_variable('w', [])
-assert variables == [v, w]</p>
-</blockquote>
-</blockquote>
-</blockquote>
+&gt;&gt;&gt; assert variables == [v, w]
+</code></pre>
 <h5 id="args_337">Args:</h5>
 <ul>
 <li><code>callback</code>: a callable taking a single argument which is a tf.Variable.</li>
 </ul>
 <h5 id="yields_2">Yields:</h5>
 <p><code>None</code> - used for contextmanager API.</p>
-<h3 id="pythonmodulesutilsort_by_namevariables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=935"><code>python.modules.util.sort_by_name(variables)</code></a><a id="python.modules.util.sort_by_name" /></h3>
+<h3 id="pythonmodulesutilsort_by_namevariables"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=936"><code>python.modules.util.sort_by_name(variables)</code></a><a id="python.modules.util.sort_by_name" /></h3>
 <p>Returns a tuple of <code>variables</code> sorted ascending by name.</p>
-<h3 id="pythonmodulesutilto_snake_casecamel_case"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=897"><code>python.modules.util.to_snake_case(camel_case)</code></a><a id="python.modules.util.to_snake_case" /></h3>
+<h3 id="pythonmodulesutilto_snake_casecamel_case"><a href="https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=898"><code>python.modules.util.to_snake_case(camel_case)</code></a><a id="python.modules.util.to_snake_case" /></h3>
 <p>Returns a CamelCase string as a snake_case string.</p>
               
             </div>

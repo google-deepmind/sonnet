@@ -91,8 +91,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
       # TODO(tomhennigan) Perhaps limit the range/switch to random to avoid
       # overflow/underflow in the forward pass?
       variable.assign(goldens.range_like(variable))
-    old_y = golden.forward(module)
     checkpoint.save()
+    old_y = golden.forward(module)
 
     # Overwrite zeros with ones.
     for variable in all_variables:
@@ -101,7 +101,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     # Check restored values match the saved values.
     checkpoint.restore_latest(assert_consumed=True)
     for variable in all_variables:
-      self.assertAllClose(variable.read_value(), goldens.range_like(variable))
+      self.assertAllClose(variable.read_value(), goldens.range_like(variable),
+                          msg=variable.name)
 
     # Test the output from the module remains stable.
     # TODO(tomhennigan) Handle modules with nested outputs.
@@ -145,6 +146,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     for variable in variables_1:
       variable.assign(goldens.range_like(variable))
     checkpoint_1.save()
+    golden.forward(module_1)
 
     # Create a different module, restore from a checkpoint, create parameters
     # and assert their values are sequential.
@@ -153,8 +155,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     status = checkpoint_2.restore_latest(assert_consumed=False)
     variables_2 = golden.create_all_variables(module_2)
     status.assert_consumed()
-    for variable in variables_2:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable))
+    for var1, var2 in zip(variables_1, variables_2):
+      self.assertAllEqual(var1.read_value(), var2.read_value())
 
     # Assert the output from both modules is the same.
     # TODO(tomhennigan) Handle modules with nested outputs.
@@ -219,14 +221,16 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
         # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
         forward = with_soft_placement(forward)
 
-    # Assign sequential values to the weights and compute a forward pass.
+    # Assign sequential values to the weights.
     for index, variable in enumerate(variables):
       variable.assign(goldens.range_like(variable, start=index))
-    before_save_ys = forward()
 
     # Create a checkpoint and save the weights.
     checkpoint = TestCheckpoint(module=module)
     checkpoint.save()
+
+    # Compute a forward pass of the previously saved module.
+    before_save_ys = forward()
 
     # Assign different values into the weights and do another forward pass. The
     # result should be different.
@@ -267,22 +271,10 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint = TestCheckpoint(module=module)
     checkpoint.save()
 
-    def run_forward(module):
-      forward = lambda: golden.forward(module)
-      if use_function:
-        forward = tf.function(forward)
-        if self.primary_device == "TPU":
-          # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
-          forward = with_soft_placement(forward)
-      return forward()
-
-    if golden.deterministic:
-      y_before = run_forward(module)
-
     # Create the same model (new params) in the strategy scope.
     with strategy.scope():
-      module = golden.create_module()
-      strategy_variables = golden.create_all_variables(module)
+      module2 = golden.create_module()
+      strategy_variables = golden.create_all_variables(module2)
 
     # Ensure the distributed params are != the values in the checkpoint.
     for normal, distributed in zip(normal_variables, strategy_variables):
@@ -290,14 +282,25 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       self.assertNotAllClose(normal.read_value(), distributed.read_value())
 
     # Restore the checkpoint and ensure the parameters are the same.
-    checkpoint = TestCheckpoint(module=module)
+    checkpoint = TestCheckpoint(module=module2)
     checkpoint.restore_latest(assert_consumed=True)
 
     for normal, distributed in zip(normal_variables, strategy_variables):
       self.assertAllEqual(normal.read_value(), distributed.read_value())
 
     if golden.deterministic:
-      y_after = run_forward(module)
+
+      def run_forward(module):
+        forward = lambda: golden.forward(module)
+        if use_function:
+          forward = tf.function(forward)
+          if self.primary_device == "TPU":
+            # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
+            forward = with_soft_placement(forward)
+        return forward()
+
+      y_before = run_forward(module)
+      y_after = run_forward(module2)
       self.assertAllEqual(y_before, y_after)
 
   def assertRestoreOnCreate(self, golden, strategy):
@@ -308,6 +311,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       variable.assign(goldens.range_like(variable, start=(index + 1)))
     checkpoint = TestCheckpoint(module=module)
     checkpoint.save()
+    golden.forward(module)
 
     # Create the same model (new params) in the strategy scope.
     with strategy.scope():
@@ -316,7 +320,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       status = checkpoint.restore_latest(assert_consumed=False)
       golden.forward(module)
       status.assert_consumed()
-      strategy_variables = golden.create_all_variables(module)
+      strategy_variables = module.variables
 
     for normal, distributed in zip(normal_variables, strategy_variables):
       self.assertAllEqual(normal.read_value(), distributed.read_value())
@@ -326,6 +330,16 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     if self.primary_device == "GPU":
       self.skipTest("Currently not working as expected on multiple devices")
       # TODO(b/134376796) renable this once bug is fixed
+
+    # Save a checkpoint from a non-distributed model.
+    module = golden.create_module()
+    normal_variables = golden.create_all_variables(module)
+    for index, variable in enumerate(normal_variables):
+      variable.assign(goldens.range_like(variable, start=(index + 1)))
+    checkpoint = TestCheckpoint(module=module)
+    checkpoint.save()
+    golden.forward(module)
+
     with strategy.scope():
       module = golden.create_module()
 
@@ -338,7 +352,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
         # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
         forward = with_soft_placement(forward)
 
-    checkpoint = TestCheckpoint(golden=golden, module=module)
+    checkpoint = TestCheckpoint(module=module)
     status = checkpoint.restore_latest(assert_consumed=False)
     result = forward()
     status.assert_consumed()
@@ -349,9 +363,9 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       for next_replica in result_iter:
         self.assertAllEqual(first_replica, next_replica)
 
-    variables = golden.create_all_variables(module)
-    for variable in variables:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable))
+    strategy_variables = module.variables
+    for normal, distributed in zip(normal_variables, strategy_variables):
+      self.assertAllEqual(normal.read_value(), distributed.read_value())
 
 
 def setUpModule():

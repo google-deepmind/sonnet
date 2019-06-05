@@ -175,7 +175,7 @@ def static_unroll(
          outputs, state = core(input_sequence[t], state)
 
   A *static* unroll replaces a loop with its body repeated multiple
-  times when executed inside `tf.function`::
+  times when executed inside :tf:`function`::
 
       state = initial_state
       outputs0, state = core(input_sequence[0], state)
@@ -271,7 +271,7 @@ def dynamic_unroll(
          outputs, state = core(input_sequence[t], state)
 
   A *dynamic* unroll preserves the loop structure when executed within
-  `tf.function`. See :func:`static_unroll` for an unroll function which
+  :tf:`function`. See :func:`static_unroll` for an unroll function which
   replaces a loop with its body repeated multiple times.
 
   Args:
@@ -453,8 +453,8 @@ class VanillaRNN(RNNCore):
         deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the bias. Defaults to
         :class:`~initializers.Zeros`.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(VanillaRNN, self).__init__(name)
@@ -779,8 +779,8 @@ class LSTM(RNNCore):
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(LSTM, self).__init__(name)
@@ -900,8 +900,8 @@ class CuDNNLSTM(RNNCore):
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(CuDNNLSTM, self).__init__(name)
@@ -1151,8 +1151,8 @@ class _ConvNDLSTM(RNNCore):
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate
         after initialization.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(_ConvNDLSTM, self).__init__(name)
@@ -1362,8 +1362,8 @@ class GRU(RNNCore):
         Defaults to Glorot uniform initializer.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(GRU, self).__init__(name)
@@ -1455,8 +1455,8 @@ class CuDNNGRU(RNNCore):
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to Glorot uniform initializer.
       b_init: Optional initializer for the biases. Defaults to `Zeros`.
-      dtype: Optional `tf.DType` of the core's variables. Defaults to
-        `tf.float32`.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
       name: Name of the module.
     """
     super(CuDNNGRU, self).__init__(name)

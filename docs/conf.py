@@ -31,6 +31,7 @@ import inspect
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.append(os.path.abspath('ext'))
 
 import sonnet as snt
 
@@ -49,6 +50,7 @@ master_doc = 'index'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'link_tf_api',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',

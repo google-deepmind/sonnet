@@ -70,16 +70,20 @@ def replica_local_creator(getter, **kwargs) -> tf.Variable:
     kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
     if kwargs["aggregation"] == tf.VariableAggregation.NONE:
       kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
+
+    # TODO(petebu): Remove when local variables allow trainable.
+    saved_trainable = kwargs["trainable"]
+    kwargs["trainable"] = False
     v = getter(**kwargs)
+    if saved_trainable or saved_trainable is None:
+      for component in v._values:  # pylint: disable=protected-access
+        component._trainable = True  # pylint: disable=protected-access
+
     # TODO(petebu): Remove when local variables support cross-replica assign.
     v.assign = replica_local_assign(v, "assign")
     v.assign_add = replica_local_assign(v, "assign_add")
     v.assign_sub = replica_local_assign(v, "assign_sub")
     v.read_value = replica_local_read_value(v)
-    # TODO(petebu): Remove when local variables allow trainable.
-    if kwargs["trainable"] is None and not v.trainable:
-      for component in v._values:  # pylint: disable=protected-access
-        component._trainable = True  # pylint: disable=protected-access
   else:
     v = getter(**kwargs)
   return v

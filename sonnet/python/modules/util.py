@@ -27,6 +27,7 @@ import re
 import weakref
 
 # Dependency imports
+from absl import logging
 import six
 import tensorflow as tf
 import wrapt
@@ -444,7 +445,7 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
     **kwargs: Extra keyword arguments to pass to tf.train.Saver.
 
   Returns:
-    A `tf.train.Saver` object for Variables in the scope or module.
+      A `tf.train.Saver` object for Variables in the scope or module.
   """
 
   variable_map = {}
@@ -578,7 +579,7 @@ def log_variables(variables=None):
   if variables is None:
     variables = tf.global_variables() + tf.local_variables()
   for row in format_variables(variables, join_lines=False):
-    tf.logging.info(row)
+    logging.info(row)
 
 
 def _num_bytes_to_human_readable(num_bytes):
@@ -622,10 +623,10 @@ def summarize_variables(variables=None):
     num_bytes = var_info_for_type["num_scalars"] * dtype.size
     total_num_scalars += var_info_for_type["num_scalars"]
     total_num_bytes += num_bytes
-    tf.logging.info("%r: %d variables comprising %d scalars, %s",
-                    dtype, var_info_for_type["num_variables"],
-                    var_info_for_type["num_scalars"],
-                    _num_bytes_to_human_readable(num_bytes))
+    logging.info("%r: %d variables comprising %d scalars, %s",
+                 dtype, var_info_for_type["num_variables"],
+                 var_info_for_type["num_scalars"],
+                 _num_bytes_to_human_readable(num_bytes))
 
 
 def count_variables_by_type(variables=None):
@@ -645,7 +646,7 @@ def count_variables_by_type(variables=None):
   results_dict = {}
   for dtype in unique_types:
     if dtype == tf.string:
-      tf.logging.warning(
+      logging.warning(
           "NB: string Variables present. The memory usage for these  Variables "
           "will not be accurately computed as it depends on the exact strings "
           "stored in a particular session.")
@@ -970,7 +971,7 @@ def notify_about_new_variables(callback):
 def deprecation_warning(deprecation_message):
   """Log a warning message the user is using deprecated functionality."""
 
-  tf.logging.log_first_n(tf.logging.WARN, deprecation_message, 1)
+  logging.log_first_n(logging.WARN, deprecation_message, 1)
 
 
 def _recursive_getattr(module, path):

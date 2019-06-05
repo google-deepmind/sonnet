@@ -28,6 +28,21 @@ Deferred
    :members:
    :exclude-members: __getattr__, __setattr__
 
+Linear modules
+--------------
+
+Linear
+~~~~~~
+
+.. autoclass:: Linear
+   :members:
+
+Bias
+~~~~
+
+.. autoclass:: Bias
+   :members:
+
 Convolutional modules
 ---------------------
 
@@ -67,32 +82,6 @@ Conv3DTranspose
 ~~~~~~~~~~~~~~~
 
 .. autoclass:: Conv3DTranspose
-   :members:
-
-Linear modules
---------------
-
-Linear
-~~~~~~
-
-.. autoclass:: Linear
-   :members:
-
-Bias
-~~~~
-
-.. autoclass:: Bias
-   :members:
-
-Embedding modules
------------------
-
-.. currentmodule:: sonnet
-
-Embed
-~~~~~
-
-.. autoclass:: Embed
    :members:
 
 Normalization modules
@@ -210,18 +199,10 @@ GRU
 .. autoclass:: GRU
    :members:
 
-Utilities
----------
+Batch
+-----
 
 .. currentmodule:: sonnet
-
-.. TODO(slebedev): move these to a more specific "topic"?
-
-Metric
-~~~~~~
-
-.. autoclass:: Metric
-   :members:
 
 Reshape
 ~~~~~~~
@@ -233,6 +214,46 @@ Flatten
 ~~~~~~~
 
 .. autoclass:: Flatten
+   :members:
+
+Embedding modules
+-----------------
+
+.. currentmodule:: sonnet
+
+Embed
+~~~~~
+
+.. autoclass:: Embed
+   :members:
+
+Optimizers
+----------
+
+.. automodule:: sonnet.optimizers
+
+Adam
+~~~~
+
+.. autoclass:: Adam
+   :members:
+
+Momentum
+~~~~~~~~
+
+.. autoclass:: Momentum
+   :members:
+
+RMSProp
+~~~~~~~
+
+.. autoclass:: RMSProp
+   :members:
+
+SGD
+~~~
+
+.. autoclass:: SGD
    :members:
 
 Initializers
@@ -329,35 +350,6 @@ OffDiagonalOrthogonal
 .. autoclass:: OffDiagonalOrthogonal
    :members:
 
-Optimizers
-----------
-
-.. automodule:: sonnet.optimizers
-
-Adam
-~~~~
-
-.. autoclass:: Adam
-   :members:
-
-Momentum
-~~~~~~~~
-
-.. autoclass:: Momentum
-   :members:
-
-RMSProp
-~~~~~~~
-
-.. autoclass:: RMSProp
-   :members:
-
-SGD
-~~~
-
-.. autoclass:: SGD
-   :members:
-
 Paddings
 --------
 
@@ -395,8 +387,8 @@ valid
 
 .. TODO(petebu): better title?
 
-Distribute
-----------
+Distribution
+------------
 
 .. automodule:: sonnet.distribute
 
@@ -405,6 +397,19 @@ Replicator
 
 .. autoclass:: Replicator
    :members:
+
+Metrics
+-------
+
+.. currentmodule:: sonnet
+
+Metric
+~~~~~~
+
+.. autoclass:: Metric
+   :members:
+
+.. TODO(tomhennigan): rename to something more appropriate.
 
 Nets
 ----

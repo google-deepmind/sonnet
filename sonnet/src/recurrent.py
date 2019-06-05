@@ -65,7 +65,7 @@ class RNNCore(base.Module):
       outputs: An arbitrarily nested structure of shape [B, ...].
         Dimensions following the batch size could be different from that
         of `inputs`.
-      next_state: next core state, must be of the same shape as the
+      next_state: Next core state, must be of the same shape as the
         previous one.
     """
 
@@ -1073,7 +1073,7 @@ def lstm_with_recurrent_dropout(
 
 
 class _ConvNDLSTM(RNNCore):
-  r"""Convolutional LSTM.
+  r"""``num_spatial_dims``-D convolutional LSTM.
 
   The implementation is based on :cite:`xingjian2015convolutional`.
   Given :math:`x_t` and the previous state :math:`(h_{t-1}, c_{t-1})`
@@ -1111,7 +1111,7 @@ class _ConvNDLSTM(RNNCore):
       :math:`W_{hf}`, :math:`W_{hg}` and :math:`W_{ho}` concatenated into
       a single tensor of shape
       [kernel_shape*, input_channels, 4 * output_channels] where
-       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
+      ``kernel_shape`` is repeated ``num_spatial_dims`` times.
     b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
       concatenated into a tensor of shape [4 * output_channels].
   """
@@ -1135,8 +1135,8 @@ class _ConvNDLSTM(RNNCore):
       num_spatial_dims: Number of spatial dimensions of the input.
       input_shape: Shape of the inputs excluding batch size.
       output_channels: Number of output channels.
-      kernel_shape: Sequence of kernel sizes (of length num_spatial_dims),
-        or an int. `kernel_shape` will be expanded to define a kernel
+      kernel_shape: Sequence of kernel sizes (of length ``num_spatial_dims``),
+        or an int. ``kernel_shape`` will be expanded to define a kernel
         size in all dimensions.
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
@@ -1229,8 +1229,8 @@ class _ConvNDLSTM(RNNCore):
     self.b = tf.Variable(tf.concat([i, f, g, o], axis=0), name="b")
 
 
-class Conv1DLSTM(_ConvNDLSTM):
-  """See `_ConvNDLSTM`."""
+class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "1")
 
   def __init__(
       self,
@@ -1244,6 +1244,31 @@ class Conv1DLSTM(_ConvNDLSTM):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
+    """Constructs a 1-D convolutional LSTM.
+
+    Args:
+      input_shape: Shape of the inputs excluding batch size.
+      output_channels: Number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length 1),
+        or an int. ``kernel_shape`` will be expanded to define a kernel
+        size in all dimensions.
+      data_format: The data format of the input.
+      w_i_init: Optional initializer for the input-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape * input_channels)``.
+      w_h_init: Optional initializer for the hidden-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape * input_channels)``.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
+      forget_bias: Optional float to add to the bias of the forget gate
+        after initialization.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
+      name: Name of the module.
+    """
     super(Conv1DLSTM, self).__init__(
         num_spatial_dims=1,
         input_shape=input_shape,
@@ -1258,8 +1283,8 @@ class Conv1DLSTM(_ConvNDLSTM):
         name=name)
 
 
-class Conv2DLSTM(_ConvNDLSTM):
-  """See `_ConvNDLSTM`."""
+class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "2")
 
   def __init__(
       self,
@@ -1273,6 +1298,31 @@ class Conv2DLSTM(_ConvNDLSTM):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
+    """Constructs a 2-D convolutional LSTM.
+
+    Args:
+      input_shape: Shape of the inputs excluding batch size.
+      output_channels: Number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length 2),
+        or an int. ``kernel_shape`` will be expanded to define a kernel
+        size in all dimensions.
+      data_format: The data format of the input.
+      w_i_init: Optional initializer for the input-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**2 * input_channels)``.
+      w_h_init: Optional initializer for the hidden-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**2 * input_channels)``.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
+      forget_bias: Optional float to add to the bias of the forget gate
+        after initialization.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
+      name: Name of the module.
+    """
     super(Conv2DLSTM, self).__init__(
         num_spatial_dims=2,
         input_shape=input_shape,
@@ -1287,8 +1337,8 @@ class Conv2DLSTM(_ConvNDLSTM):
         name=name)
 
 
-class Conv3DLSTM(_ConvNDLSTM):
-  """See `_ConvNDLSTM`."""
+class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "3")
 
   def __init__(
       self,
@@ -1302,6 +1352,31 @@ class Conv3DLSTM(_ConvNDLSTM):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
+    """Constructs a 3-D convolutional LSTM.
+
+    Args:
+      input_shape: Shape of the inputs excluding batch size.
+      output_channels: Number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length 3),
+        or an int. ``kernel_shape`` will be expanded to define a kernel
+        size in all dimensions.
+      data_format: The data format of the input.
+      w_i_init: Optional initializer for the input-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**3 * input_channels)``.
+      w_h_init: Optional initializer for the hidden-to-hidden convolution
+        weights. Defaults to :class:`~initializers.TruncatedNormal` with
+        a standard deviation of
+        ``1 / sqrt(kernel_shape**3 * input_channels)``.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
+      forget_bias: Optional float to add to the bias of the forget gate
+        after initialization.
+      dtype: Optional :tf:`DType` of the core's variables. Defaults to
+        ``tf.float32``.
+      name: Name of the module.
+    """
     super(Conv3DLSTM, self).__init__(
         num_spatial_dims=3,
         input_shape=input_shape,

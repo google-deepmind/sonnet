@@ -157,6 +157,7 @@ VanillaRNN
 
 .. autoclass:: VanillaRNN
    :members:
+   :special-members:
 
 DeepRNN
 ~~~~~~~
@@ -181,14 +182,20 @@ lstm_with_recurrent_dropout
 
 .. autofunction:: lstm_with_recurrent_dropout
 
-ConvNDLSTM
+Conv1DLSTM
 ~~~~~~~~~~
 
 .. autoclass:: Conv1DLSTM
    :members:
 
+Conv2DLSTM
+~~~~~~~~~~
+
 .. autoclass:: Conv2DLSTM
    :members:
+
+Conv3DLSTM
+~~~~~~~~~~
 
 .. autoclass:: Conv3DLSTM
    :members:

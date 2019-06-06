@@ -514,7 +514,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
         expected_exception = tf.errors.UnimplementedError
       else:
         expected_exception = tf.errors.InvalidArgumentError
-      with self.assertRaisesRegexp(expected_exception, "only supports NHWC"):
+      with self.assertRaisesRegexp(expected_exception, "only supports.*NHWC"):
         output = net(input_to_net)
 
     else:

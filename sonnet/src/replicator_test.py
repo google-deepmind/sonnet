@@ -38,26 +38,46 @@ def replicator_all_devices(device_type):
   return replicator.Replicator(devices=devices)
 
 
+def _create_variable_in_strategy_scope(strategy):
+  with strategy.scope():
+    v = tf.Variable(1.)
+  return v
+
+
+def _create_variable_in_step_fn(strategy):
+  return strategy.experimental_run_v2(lambda: tf.Variable(1.))
+
+
 class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
-  def test_scope(self):
+  @parameterized.parameters(
+      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+  def test_variable_synchronization_default(self, create_var):
     strategy = replicator_all_devices(self.primary_device)
-    with strategy.scope():
-      v = tf.Variable(1.0)
+    v = create_var(strategy)
     self.assertEqual(
         tf.VariableSynchronization.ON_READ, v.primary.synchronization)
+
+  @parameterized.parameters(
+      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+  def test_variable_aggregation_default(self, create_var):
+    strategy = replicator_all_devices(self.primary_device)
+    v = create_var(strategy)
     self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
+
+  @parameterized.parameters(
+      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+  def test_variable_trainable_default(self, create_var):
+    strategy = replicator_all_devices(self.primary_device)
+    v = create_var(strategy)
     self.assertTrue(v.trainable)
 
-  def test_experimental_run_v2(self):
+  @parameterized.parameters([True, False])
+  def test_variable_trainable(self, trainable):
     strategy = replicator_all_devices(self.primary_device)
-    def step():
-      v = tf.Variable(1.0)
-      self.assertEqual(
-          tf.VariableSynchronization.ON_READ, v.primary.synchronization)
-      self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
-      self.assertTrue(v.trainable)
-    strategy.experimental_run_v2(step)
+    with strategy.scope():
+      v = tf.Variable(1., trainable=trainable)
+    self.assertEqual(trainable, v.trainable)
 
   @parameterized.parameters(
       *itertools.product(

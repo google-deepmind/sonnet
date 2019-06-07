@@ -1,11 +1,18 @@
-# ![Sonnet](https://sonnet.dev/images/sonnet_logo.png)
+![Sonnet](https://sonnet.dev/images/sonnet_logo.png)
+
+# Sonnet
+
+[**Documentation**](https://sonnet.readthedocs.io/) | [**Examples**](#examples)
 
 WARNING: Sonnet 2 is currently **alpha**. We would love to have you use it as an
 early adopter and please let us know if things aren't working as you would
 expect.
 
-Sonnet is a library built on top of TensorFlow designed to provide simple,
-composable abstractions for machine learning research.
+Sonnet is a library built on top of [TensorFlow 2](https://www.tensorflow.org/)
+designed to provide simple, composable abstractions for machine learning
+research.
+
+# Introduction
 
 Sonnet has been designed and built by researchers at DeepMind. It can be used to
 construct neural networks for many different purposes (un/supervised learning,
@@ -28,7 +35,14 @@ Sonnet is also designed to be simple to understand, our code is (hopefully!)
 clear and focussed. Where we have picked defaults (e.g. defaults for initial
 parameter values) we try to point out why.
 
-# Basics
+# Getting Started
+
+## Examples
+
+The easiest way to try Sonnet is to use Google Colab which offers a free Python
+notebook attached to a GPU or TPU.
+
+- [Basics: Predicting MNIST with an MLP](https://colab.research.google.com/github/deepmind/sonnet/blob/v2/notebooks/mlp_on_mnist.ipynb)
 
 ## Installation
 

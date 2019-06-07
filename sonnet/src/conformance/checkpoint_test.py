@@ -129,7 +129,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Assert the parameters in both modules are the same.
     for variable in variables_2:
-      self.assertAllClose(variable.read_value(), goldens.range_like(variable))
+      self.assertAllClose(variable.read_value(), goldens.range_like(variable),
+                          msg=variable.name)
 
     # Assert the output from both modules are the same.
     # TODO(tomhennigan) Handle modules with nested outputs.
@@ -156,7 +157,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     variables_2 = golden.create_all_variables(module_2)
     status.assert_consumed()
     for var1, var2 in zip(variables_1, variables_2):
-      self.assertAllEqual(var1.read_value(), var2.read_value())
+      self.assertAllEqual(var1.read_value(), var2.read_value(),
+                          msg=var1.name)
 
     # Assert the output from both modules is the same.
     # TODO(tomhennigan) Handle modules with nested outputs.
@@ -173,7 +175,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
       variable.assign(tf.zeros_like(variable))
     checkpoint.restore_latest(assert_consumed=True)
     for variable in variables:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable))
+      self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
+                          msg=variable.name)
 
 
 class DistributionStrategyCheckpointTest(test_utils.TestCase,
@@ -260,7 +263,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint = TestCheckpoint(golden=golden, module=module)
     checkpoint.restore_latest(assert_consumed=True)
     for variable in variables:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable))
+      self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
+                          msg=variable.name)
 
   def assertRestoreFromNonDistributed(self, golden, strategy, use_function):
     # Save a checkpoint from a non-distributed model.
@@ -286,7 +290,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint.restore_latest(assert_consumed=True)
 
     for normal, distributed in zip(normal_variables, strategy_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value())
+      self.assertAllEqual(normal.read_value(), distributed.read_value(),
+                          msg=normal.name)
 
     if golden.deterministic:
 
@@ -323,7 +328,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       strategy_variables = module.variables
 
     for normal, distributed in zip(normal_variables, strategy_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value())
+      self.assertAllEqual(normal.read_value(), distributed.read_value(),
+                          msg=normal.name)
 
   def assertRestoreOnCreateInReplicaContext(self, golden, strategy,
                                             use_function):
@@ -365,7 +371,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
 
     strategy_variables = module.variables
     for normal, distributed in zip(normal_variables, strategy_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value())
+      self.assertAllEqual(normal.read_value(), distributed.read_value(),
+                          msg=normal.name)
 
 
 def setUpModule():

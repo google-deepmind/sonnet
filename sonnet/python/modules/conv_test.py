@@ -29,7 +29,7 @@ import sonnet as snt
 from sonnet.python.modules import conv
 import tensorflow as tf
 
-from tensorflow.python.ops import variables
+from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
 def create_constant_initializers(w, b, use_bias):
@@ -281,9 +281,9 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
 
     self.assertEqual(convolution_t.partitioners, convolution.partitioners)
 
-  @parameterized.parameters(*itertools.product(modules,
-                                               (True, False),
-                                               (tf.float16, tf.float32)))
+  @parameterized.parameters(
+      *itertools.product(modules, (True, False),
+                         (tf.float16, tf.float32, tf.float64)))
   def testVariables(self, module_info, use_bias, dtype):
     """The correct number of variables are created."""
     module, num_input_dims, module_kwargs = module_info
@@ -619,7 +619,7 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
                        initializers=create_constant_initializers(
                            1.0, 1.0, use_bias))
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
@@ -879,9 +879,9 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(net.output_channels, clone1.output_channels)
     self.assertEqual(net.module_name + "_clone", clone1.module_name)
     self.assertEqual("clone2", clone2.module_name)
-    self.assertEqual(len(all_vars), 3*len(net_vars))
-    self.assertEqual(len(net_vars), len(clone1_vars))
-    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertLen(all_vars, 3*len(net_vars))
+    self.assertLen(net_vars, len(clone1_vars))
+    self.assertLen(net_vars, len(clone2_vars))
     self.assertEqual(net_out.get_shape().as_list(),
                      clone1_out.get_shape().as_list())
     self.assertEqual(net_out.get_shape().as_list(),
@@ -1254,7 +1254,7 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv2_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv2_transpose.output_shape, conv2.input_shape)
+      _ = conv2.input_shape
 
   @parameterized.named_parameters(
       ("WithBiasWithOutputShape", True, True),
@@ -1307,7 +1307,7 @@ class Conv2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv2_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv2_transpose.output_shape, conv2.input_shape)
+      _ = conv2.input_shape
 
 
 class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
@@ -1481,7 +1481,7 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
                        initializers=create_constant_initializers(
                            1.0, 1.0, use_bias))
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 1]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
@@ -1763,9 +1763,9 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(net.output_channels, clone1.output_channels)
     self.assertEqual(net.module_name + "_clone", clone1.module_name)
     self.assertEqual("clone2", clone2.module_name)
-    self.assertEqual(len(all_vars), 3*len(net_vars))
-    self.assertEqual(len(net_vars), len(clone1_vars))
-    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertLen(all_vars, 3*len(net_vars))
+    self.assertLen(net_vars, len(clone1_vars))
+    self.assertLen(net_vars, len(clone2_vars))
     self.assertEqual(net_out.get_shape().as_list(),
                      clone1_out.get_shape().as_list())
     self.assertEqual(net_out.get_shape().as_list(),
@@ -1973,7 +1973,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
         name="conv1",
         use_bias=use_bias)
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([batch_size, in_length,
                                in_channels]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
@@ -2065,7 +2065,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv1_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv1_transpose.output_shape, conv1.input_shape)
+      _ = conv1.input_shape
 
   @parameterized.parameters(
       *zip(batch_size, in_length, in_channels, out_channels, kernel_shape,
@@ -2112,7 +2112,7 @@ class Conv1DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv1_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv1_transpose.output_shape, conv1.input_shape)
+      _ = conv1.input_shape
 
   def testInitializerMutation(self):
     """Test that initializers are not mutated."""
@@ -2281,9 +2281,9 @@ class CausalConv1DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(net.output_channels, clone1.output_channels)
     self.assertEqual(net.module_name + "_clone", clone1.module_name)
     self.assertEqual("clone2", clone2.module_name)
-    self.assertEqual(len(all_vars), 3*len(net_vars))
-    self.assertEqual(len(net_vars), len(clone1_vars))
-    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertLen(all_vars, 3*len(net_vars))
+    self.assertLen(net_vars, len(clone1_vars))
+    self.assertLen(net_vars, len(clone2_vars))
     self.assertEqual(net_out.get_shape().as_list(),
                      clone1_out.get_shape().as_list())
     self.assertEqual(net_out.get_shape().as_list(),
@@ -2481,7 +2481,7 @@ class DepthwiseConv2DTest(parameterized.TestCase, tf.test.TestCase):
         use_bias=use_bias,
         initializers=create_constant_initializers(1.0, 1.0, use_bias))
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
@@ -2820,7 +2820,7 @@ class SeparableConv2DTest(parameterized.TestCase, tf.test.TestCase):
         initializers=create_separable_constant_initializers(
             1.0, 1.0, 1.0, use_bias))
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 5, 1]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
@@ -3251,7 +3251,7 @@ class SeparableConv1DTest(parameterized.TestCase, tf.test.TestCase):
         initializers=create_separable_constant_initializers(
             1.0, 1.0, 1.0, use_bias))
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 1]), dtype=dtype)
       err = "Input must have dtype tf.float.*"
       with self.assertRaisesRegexp(TypeError, err):
@@ -3681,7 +3681,7 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
                            "b": tf.constant_initializer(1.0),
                        })
 
-    for dtype in (tf.uint32, tf.float64):
+    for dtype in (tf.uint32, tf.uint64):
       x = tf.constant(np.ones([1, 5, 5, 5, 1]), dtype=dtype)
       self.assertRaisesRegexp(TypeError, "Input must have dtype tf.float.*",
                               conv1, x)
@@ -4067,9 +4067,9 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
     self.assertEqual(net.output_channels, clone1.output_channels)
     self.assertEqual(net.module_name + "_clone", clone1.module_name)
     self.assertEqual("clone2", clone2.module_name)
-    self.assertEqual(len(all_vars), 3*len(net_vars))
-    self.assertEqual(len(net_vars), len(clone1_vars))
-    self.assertEqual(len(net_vars), len(clone2_vars))
+    self.assertLen(all_vars, 3*len(net_vars))
+    self.assertLen(net_vars, len(clone1_vars))
+    self.assertLen(net_vars, len(clone2_vars))
     self.assertEqual(net_out.get_shape().as_list(),
                      clone1_out.get_shape().as_list())
     self.assertEqual(net_out.get_shape().as_list(),
@@ -4294,7 +4294,7 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv3_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv3_transpose.output_shape, conv3.input_shape)
+      _ = conv3.input_shape
 
   @parameterized.named_parameters(
       ("WithBias", True),
@@ -4340,7 +4340,7 @@ class Conv3DTransposeTest(parameterized.TestCase, tf.test.TestCase):
     # transpose convolution!)
     err = "Variables in conv3_transpose_transpose not instantiated yet"
     with self.assertRaisesRegexp(snt.NotConnectedError, err):
-      self.assertEqual(conv3_transpose.output_shape, conv3.input_shape)
+      _ = conv3.input_shape
 
 if __name__ == "__main__":
   tf.test.main()

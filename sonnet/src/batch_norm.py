@@ -271,10 +271,14 @@ class BatchNorm(BaseBatchNorm):
         `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
       name: Name of the module.
     """
+    with tf.name_scope(name or "batch_norm"):
+      moving_mean = moving_averages.ExponentialMovingAverage(decay_rate)
+      moving_variance = moving_averages.ExponentialMovingAverage(decay_rate)
+
     super(BatchNorm, self).__init__(
         create_scale=create_scale,
         create_offset=create_offset,
-        moving_mean=moving_averages.ExponentialMovingAverage(decay_rate),
-        moving_variance=moving_averages.ExponentialMovingAverage(decay_rate),
+        moving_mean=moving_mean,
+        moving_variance=moving_variance,
         data_format=data_format,
         name=name)

@@ -7,9 +7,10 @@ expect.
 Sonnet is a library built on top of TensorFlow designed to provide simple,
 composable abstractions for machine learning research.
 
-Sonnet has been designed and built by researchers at DeepMind who are pushing
-the state of the art in several frontiers of machine learning research. We
-find it is a successful abstraction for our organization, you might too!
+Sonnet has been designed and built by researchers at DeepMind. It can be used to
+construct neural networks for many different purposes (un/supervised learning,
+reinforcement learning, ...). We find it is a successful abstraction for our
+organization, you might too!
 
 More specifically, Sonnet provides a simple but powerful programming model
 centered around a single concept: `snt.Module`. Modules can hold references to

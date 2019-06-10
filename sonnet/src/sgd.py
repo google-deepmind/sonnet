@@ -52,9 +52,10 @@ class SGD(base.Module):
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
+        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         tf.raw_ops.ResourceApplyGradientDescent(
             var=parameter.handle,
-            alpha=tf.cast(self.learning_rate, update.dtype.base_dtype),
+            alpha=learning_rate,
             delta=update)
 
 
@@ -89,5 +90,5 @@ class ReferenceSGD(base.Module):
     for update, parameter in zip(updates, parameters):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        parameter.assign_sub(
-            update * tf.cast(self.learning_rate, update.dtype.base_dtype))
+        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        parameter.assign_sub(update * learning_rate)

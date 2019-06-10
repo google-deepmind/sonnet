@@ -80,6 +80,7 @@ class Momentum(base.Module):
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
+
         tf.raw_ops.ResourceApplyMomentum(
             var=parameter.handle,
             accum=accumulated_momentum.handle,
@@ -148,7 +149,7 @@ class ReferenceMomentum(base.Module):
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
-        # TODO(petebu): Use a tf.CriticalSection for the assignments.
+
         accumulated_momentum.assign((momentum * accumulated_momentum) + update)
         if self.use_nesterov:
           parameter.assign_sub(learning_rate * update +

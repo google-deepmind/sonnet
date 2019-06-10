@@ -112,6 +112,7 @@ class RMSProp(base.Module):
         decay = tf.cast(self.decay, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
+
         if self.centered:
           tf.raw_ops.ResourceApplyCenteredRMSProp(
               var=parameter.handle,
@@ -226,7 +227,6 @@ class ReferenceRMSProp(base.Module):
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
 
-        # TODO(petebu): Use a tf.CriticalSection for the assignments.
         ms.assign(tf.square(update) * (1. - decay) + ms * decay)
         if self.centered:
           mg.assign(update * (1. - decay) + mg * decay)

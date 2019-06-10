@@ -179,7 +179,6 @@ class ReferenceAdam(base.Module):
         inv_beta2 = 1. - beta2
         inv_beta1_power = 1. - tf.pow(beta1, step)
         inv_beta2_power = 1. - tf.pow(beta2, step)
-        # TODO(petebu): Use a tf.CriticalSection for the assignments.
         m.assign((beta1 * m) + inv_beta1 * update)
         v.assign((beta2 * v) + inv_beta2 * tf.square(update))
         adam_update = learning_rate * (

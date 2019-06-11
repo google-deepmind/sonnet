@@ -10,6 +10,7 @@ snt_py_library(
     name = "base",
     srcs = ["base.py"],
     deps = [
+        ":once",
         ":utils",
         # six
         # tensorflow
@@ -267,6 +268,7 @@ snt_py_test(
     deps = [
         ":once",
         # absl/testing:absltest
+        # absl/testing:parameterized
     ],
 )
 

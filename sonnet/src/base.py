@@ -27,6 +27,7 @@ import pprint
 import sys
 
 import six
+from sonnet.src import once
 from sonnet.src import utils
 import tensorflow as tf
 from typing import Any, Callable, Dict, Optional, Sequence, Text, Tuple, Type, TypeVar
@@ -277,6 +278,11 @@ def with_name_scope(method: T) -> T:
     # Autograph cannot convert functions that have try/catch.
     method._decorate(wrap_with_name_scope_no_exception)  # pylint: disable=protected-access
     return method
+  elif hasattr(method, "__snt_once_wrapped__"):
+    # Special case methods decorated with @snt.once so the name scope is pushed
+    # inside the function body rather than outside. This removes the overhead of
+    # entering/exiting the name_scope just to do nothing.
+    return once.once(wrap_with_name_scope(method.__snt_once_wrapped__))  # pylint: disable=no-value-for-parameter
   else:
     return wrap_with_name_scope(method)  # pylint: disable=no-value-for-parameter
 

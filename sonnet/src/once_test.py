@@ -22,10 +22,11 @@ from __future__ import print_function
 import pickle
 
 from absl.testing import absltest
+from absl.testing import parameterized
 from sonnet.src import once
 
 
-class OnceTest(absltest.TestCase):
+class OnceTest(parameterized.TestCase):
 
   def test_runs_once(self):
     r = []
@@ -105,6 +106,29 @@ class OnceTest(absltest.TestCase):
     for _ in range(10):
       f()
     self.assertEqual(r, [None])
+
+  @parameterized.named_parameters(
+      ("lambda", lambda: lambda: None),
+      ("function", lambda: nop),
+      ("method", lambda: NoOpCallable().nop),
+      ("special_method", lambda: NoOpCallable().__call__),
+      ("object", lambda: NoOpCallable()))  # pylint: disable=unnecessary-lambda
+  def test_adds_property(self, factory):
+    f = factory()
+    self.assertIs(once.once(f).__snt_once_wrapped__, f)
+
+
+def nop():
+  pass
+
+
+class NoOpCallable(object):
+
+  def nop(self):
+    pass
+
+  def __call__(self):
+    pass
 
 
 class Counter(object):

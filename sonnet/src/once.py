@@ -91,4 +91,6 @@ def once(f):
 
   wrapper.seen_none = False
 
-  return wrapper(f)  # pylint: disable=no-value-for-parameter
+  decorated = wrapper(f)  # pylint: disable=no-value-for-parameter,assignment-from-none
+  decorated.__snt_once_wrapped__ = f
+  return decorated

@@ -47,6 +47,19 @@ snt_py_test(
 )
 
 snt_py_test(
+    name = "distribute_test",
+    srcs = ["distribute_test.py"],
+    gpu = False,
+    deps = [
+        ":goldens",
+        # absl/testing:absltest
+        # absl/testing:parameterized
+        "//sonnet/src:test_utils",
+        # tensorflow
+    ],
+)
+
+snt_py_test(
     name = "doctest_test",
     srcs = ["doctest_test.py"],
     deps = [

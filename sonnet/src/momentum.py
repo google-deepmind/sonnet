@@ -52,6 +52,7 @@ class Momentum(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     with tf.name_scope("accumulated_momentum"):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)
@@ -121,6 +122,7 @@ class ReferenceMomentum(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     with tf.name_scope("accumulated_momentum"):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)

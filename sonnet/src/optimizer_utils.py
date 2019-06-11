@@ -19,6 +19,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet.src import replicator
+import tensorflow as tf
+
+
+def check_strategy():
+  if tf.distribute.has_strategy():
+    strategy = tf.distribute.get_strategy()
+    if not isinstance(strategy, replicator.Replicator):
+      raise ValueError("Sonnet optimizers are not compatible with {}. Please"
+                       "use `sonnet.distribute.Replicator` instead.".format(
+                           strategy.__class__.__name__))
+
 
 def check_updates_parameters(updates, parameters):
   if len(updates) != len(parameters):

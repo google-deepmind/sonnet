@@ -77,6 +77,7 @@ class RMSProp(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)
@@ -191,6 +192,7 @@ class ReferenceRMSProp(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)

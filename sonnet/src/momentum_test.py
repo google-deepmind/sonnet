@@ -133,6 +133,18 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
                         [x.numpy() for x in parameters])
 
+  @parameterized.parameters(opt.Momentum, opt.ReferenceMomentum)
+  def testUnsuppportedStrategyError(self, opt_class):
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+      var = tf.Variable(1.0)
+      optimizer = opt_class(learning_rate=0.1, momentum=0.9)
+    step = lambda: optimizer.apply([tf.constant(0.1)], [var])
+    with self.assertRaisesRegexp(
+        ValueError,
+        "Sonnet optimizers are not compatible with MirroredStrategy"):
+      strategy.experimental_run_v2(step)
+
 if __name__ == "__main__":
   # tf.enable_v2_behavior()
   tf.test.main()

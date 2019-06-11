@@ -51,6 +51,7 @@ class Adam(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)
@@ -134,6 +135,7 @@ class ReferenceAdam(base.Module):
 
   @once.once
   def _initialize(self, parameters):
+    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)

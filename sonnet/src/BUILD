@@ -432,6 +432,7 @@ snt_py_test(
 snt_py_library(
     name = "optimizer_utils",
     srcs = ["optimizer_utils.py"],
+    deps = [":replicator"],
 )
 
 snt_py_library(

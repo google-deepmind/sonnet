@@ -125,4 +125,7 @@ __version__ = "2.0.0a0"
 #                 ||----w |
 #                 ||     ||
 #
-del src  # pylint: disable=undefined-variable
+try:
+  del src  # pylint: disable=undefined-variable
+except NameError:
+  pass

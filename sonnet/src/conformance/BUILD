@@ -24,6 +24,7 @@ snt_py_test(
     name = "api_test",
     srcs = ["api_test.py"],
     deps = [
+        # six
         "//sonnet",
         "//sonnet/src:test_utils",
         # tensorflow

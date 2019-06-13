@@ -19,6 +19,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import importlib
+
+import six
 import sonnet as snt
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -28,6 +31,15 @@ class PublicSymbolsTest(test_utils.TestCase):
 
   def test_src_not_exported(self):
     self.assertFalse(hasattr(snt, "src"))
+
+  def test_supports_reload(self):
+    mysnt = snt
+    for _ in range(2):
+      if six.PY2:
+        mysnt = reload(mysnt)
+      else:
+        mysnt = importlib.reload(mysnt)
+      self.assertFalse(hasattr(mysnt, "src"))
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

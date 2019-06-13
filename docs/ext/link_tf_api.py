@@ -78,7 +78,7 @@ def tf_role_fn(
   try:
     symbol = tf
     for chunk in text.split("."):
-      symbol = getattr(tf, chunk)
+      symbol = getattr(symbol, chunk)
   except AttributeError:
     canonical_name = ""
   else:

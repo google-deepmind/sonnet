@@ -142,7 +142,11 @@ class ModuleMetaclass(abc.ABCMeta):
         ctor_name_scope.__exit__(*exc_info)
         del module._ctor_name_scope
 
-      if exc_info[0] is None and not hasattr(module, "_scope_name"):
+      # TODO(tomhennigan) Remove `_scope_name` after next TF release.
+      ran_super_ctor = (
+          hasattr(module, "_name_scope") or hasattr(module, "_scope_name"))
+
+      if exc_info[0] is None and not ran_super_ctor:
         raise ValueError(
             "Constructing a snt.Module without calling the super constructor "
             "is not supported. Add the following as the first line in your "

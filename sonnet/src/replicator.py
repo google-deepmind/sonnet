@@ -20,9 +20,9 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import contextlib
 import functools
 
+import contextlib
 import tensorflow as tf
 
 
@@ -40,7 +40,7 @@ def replica_local_assign(v, assign_fn):
   """Replaces `assign_fn` on `v` so that it works in cross-replica context."""
   @functools.wraps(v.assign)
   def wrapper(value):
-    with maybe_enter_scope(v.distribute_strategy):
+    with maybe_enter_scope(v.distribute_strategy):  # pylint: disable=not-context-manager
       ctx = tf.distribute.get_replica_context()
       if ctx is None:
         for component in v._values:  # pylint: disable=protected-access
@@ -55,7 +55,7 @@ def replica_local_read_value(v):
   """Replaces `read_value` on `v` so that it works in cross-replica context."""
   @functools.wraps(v.read_value)
   def wrapper():
-    with maybe_enter_scope(v.distribute_strategy):
+    with maybe_enter_scope(v.distribute_strategy):  # pylint: disable=not-context-manager
       ctx = tf.distribute.get_replica_context()
       if ctx is None:
         return v._values[0].read_value()  # pylint: disable=protected-access

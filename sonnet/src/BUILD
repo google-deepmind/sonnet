@@ -52,6 +52,36 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "bayes_by_backprop",
+    srcs = ["bayes_by_backprop.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":initializers",
+        # absl/logging
+        # enum
+        # tensorflow
+        # tensorflow_probability
+        # https://github.com/google/pytype/blob/master/2.7_patches/
+    ],
+)
+
+snt_py_test(
+    name = "bayes_by_backprop_test",
+    srcs = ["bayes_by_backprop_test.py"],
+    deps = [
+        ":base",
+        ":bayes_by_backprop",
+        ":custom_getter",
+        ":linear",
+        ":sgd",
+        ":test_utils",
+        # numpy
+        # tensorflow
+        # tensorflow_probability
+    ],
+)
+
+snt_py_library(
     name = "conv",
     srcs = ["conv.py"],
     deps = [
@@ -122,6 +152,28 @@ snt_py_test(
         ":conv_transpose",
         ":test_utils",
         # absl/testing:parameterized
+        # tensorflow
+    ],
+)
+
+snt_py_library(
+    name = "custom_getter",
+    srcs = ["custom_getter.py"],
+    deps = [
+        ":base",
+        # contextlib2
+        # tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
+    ],
+)
+
+snt_py_test(
+    name = "custom_getter_test",
+    srcs = ["custom_getter_test.py"],
+    deps = [
+        ":base",
+        ":custom_getter",
+        ":test_utils",
         # tensorflow
     ],
 )
@@ -588,6 +640,7 @@ snt_py_library(
     name = "replicator",
     srcs = ["replicator.py"],
     deps = [
+        # contextlib2
         # tensorflow
     ],
 )

@@ -137,6 +137,14 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     for x in np.nditer(outputs):
       self.assertAllClose(x, 2.0, rtol=1e-5, atol=1e-3)
 
+  def testIsTrainingFalseFirstCall(self):
+    layer = batch_norm.BaseBatchNorm(
+        moving_mean=TestMetric(), moving_variance=TestMetric(),
+        create_scale=False, create_offset=False)
+    inputs = tf.ones([2, 3, 3, 5])
+    outputs = layer(inputs, False)
+    self.assertAllEqual(outputs, tf.fill(inputs.shape, 0.0))
+
   @parameterized.parameters("NHW", "HWC", "channel_last")
   def testInvalidDataFormat(self, data_format):
     with self.assertRaisesRegexp(
@@ -211,6 +219,10 @@ class TestMetric(object):
   @property
   def value(self):
     return self._foo
+
+  def initialize(self, x):
+    self._foo = tf.Variable(x)
+    self._built = True
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

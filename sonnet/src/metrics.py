@@ -48,3 +48,8 @@ class Metric(base.Module):
     """Updates the metric and returns the new value."""
     self.update(value)
     return self.value
+
+  @abc.abstractmethod
+  def initialize(self, value):
+    """Creates any input dependent variables or state."""
+    pass

@@ -46,6 +46,9 @@ class CompleteMetric(metrics.Metric):
   def reset(self):
     return 42
 
+  def initialize(self, value):
+    pass
+
 
 if __name__ == "__main__":
   absltest.main()

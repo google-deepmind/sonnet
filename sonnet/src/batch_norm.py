@@ -195,6 +195,12 @@ class BaseBatchNorm(base.Module):
       channel_index = self._channel_index
     self._axis = tuple(i for i in range(rank) if i != channel_index)
 
+    # Ensure all the variables are created on the first call
+    mean, variance = tf.nn.moments(inputs, self._axis, keepdims=True)
+    self.shape = mean.shape
+    self.moving_mean.initialize(mean)
+    self.moving_variance.initialize(variance)
+
     dtype = inputs.dtype
 
     if self._channel_index == -1:
@@ -231,9 +237,15 @@ class BaseBatchNorm(base.Module):
     else:  # use moving stats
       mean = self.moving_mean.value
       variance = self.moving_variance.value
+      if self._fused:
+        mean = tf.squeeze(mean)
+        variance = tf.squeeze(variance)
     return mean, variance
 
   def _update_statistics(self, mean, variance):
+    if self._fused:
+      mean = tf.reshape(mean, self.shape)
+      variance = tf.reshape(variance, self.shape)
     self.moving_mean.update(mean)
     self.moving_variance.update(variance)
 

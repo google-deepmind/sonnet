@@ -199,7 +199,7 @@ class Cifar10ConvNet(AbstractGolden):
   create_module = (
       lambda _: snt.nets.Cifar10ConvNet(output_channels=(2, 3), strides=(2, 2)))
   input_spec = tf.TensorSpec([1, 3, 3, 2])
-  num_variables = 14
+  num_variables = 22
 
   def forward(self, module):
     x = range_like(self.input_spec, start=1)
@@ -240,7 +240,8 @@ class GroupNorm(AbstractGolden):
 
 @_register_golden(snt.BaseBatchNorm, "base_batch_norm_1x2x2x3")
 class BaseBatchNorm(AbstractGolden):
-  create_module = (lambda _: snt.BaseBatchNorm(True, False, None, None))
+  create_module = (
+      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
@@ -251,7 +252,8 @@ class BaseBatchNorm(AbstractGolden):
 
 @_register_golden(snt.BaseBatchNorm, "base_batch_norm_scale_offset_1x2x2x3")
 class BaseBatchNormScaleOffset(AbstractGolden):
-  create_module = (lambda _: snt.BaseBatchNorm(True, False, None, None))
+  create_module = (
+      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
@@ -264,7 +266,7 @@ class BaseBatchNormScaleOffset(AbstractGolden):
 class BatchNorm(AbstractGolden):
   create_module = (lambda _: snt.BatchNorm(True, False))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
-  num_variables = 4
+  num_variables = 8
 
   def forward(self, module):
     x = range_like(self.input_spec, start=1)
@@ -275,7 +277,7 @@ class BatchNorm(AbstractGolden):
 class BatchNormScaleOffset(AbstractGolden):
   create_module = (lambda _: snt.BatchNorm(True, False))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
-  num_variables = 4
+  num_variables = 8
 
   def forward(self, module):
     x = range_like(self.input_spec, start=1)
@@ -390,5 +392,11 @@ class EmbedTest(AbstractGolden):
   create_module = lambda _: snt.Embed(vocab_size=100, embed_dim=100)
   input_spec = tf.TensorSpec([10], dtype=tf.int32)
   num_variables = 1
-
 # pylint: enable=missing-docstring
+
+
+class FooMetric(object):
+  """Used for testing a class which uses Metrics."""
+
+  def initialize(self, x):
+    pass

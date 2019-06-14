@@ -36,21 +36,6 @@ def maybe_enter_scope(strategy):
     yield
 
 
-def replica_local_assign(v, assign_fn):
-  """Replaces `assign_fn` on `v` so that it works in cross-replica context."""
-  @functools.wraps(v.assign)
-  def wrapper(value):
-    with maybe_enter_scope(v.distribute_strategy):  # pylint: disable=not-context-manager
-      ctx = tf.distribute.get_replica_context()
-      if ctx is None:
-        for component in v._values:  # pylint: disable=protected-access
-          getattr(component, assign_fn)(value)
-        return None
-      else:
-        return getattr(v.get(), assign_fn)(value)
-  return wrapper
-
-
 def replica_local_read_value(v):
   """Replaces `read_value` on `v` so that it works in cross-replica context."""
   @functools.wraps(v.read_value)
@@ -74,10 +59,7 @@ def replica_local_creator(getter, **kwargs) -> tf.Variable:
       kwargs["trainable"] = True
     v = getter(**kwargs)
 
-    # TODO(petebu): Remove when local variables support cross-replica assign.
-    v.assign = replica_local_assign(v, "assign")
-    v.assign_add = replica_local_assign(v, "assign_add")
-    v.assign_sub = replica_local_assign(v, "assign_sub")
+    # TODO(petebu): Remove when local variables support x-replica read_value.
     v.read_value = replica_local_read_value(v)
   else:
     v = getter(**kwargs)

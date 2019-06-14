@@ -19,9 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import importlib
-
-import six
+from six.moves import reload_module as reload
 import sonnet as snt
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -35,10 +33,7 @@ class PublicSymbolsTest(test_utils.TestCase):
   def test_supports_reload(self):
     mysnt = snt
     for _ in range(2):
-      if six.PY2:
-        mysnt = reload(mysnt)
-      else:
-        mysnt = importlib.reload(mysnt)
+      mysnt = reload(mysnt)
       self.assertFalse(hasattr(mysnt, "src"))
 
 if __name__ == "__main__":

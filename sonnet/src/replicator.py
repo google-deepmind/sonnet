@@ -20,36 +20,11 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import functools
-
 import contextlib
 import tensorflow as tf
 
 
-@contextlib.contextmanager
-def maybe_enter_scope(strategy):
-  """Enter the strategy scope if it is not already active."""
-  if strategy is not tf.distribute.get_strategy():
-    with strategy.scope():
-      yield
-  else:
-    yield
-
-
-def replica_local_read_value(v):
-  """Replaces `read_value` on `v` so that it works in cross-replica context."""
-  @functools.wraps(v.read_value)
-  def wrapper():
-    with maybe_enter_scope(v.distribute_strategy):  # pylint: disable=not-context-manager
-      ctx = tf.distribute.get_replica_context()
-      if ctx is None:
-        return v._values[0].read_value()  # pylint: disable=protected-access
-      else:
-        return v.get().read_value()
-  return wrapper
-
-
-def replica_local_creator(getter, **kwargs) -> tf.Variable:
+def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
   """Variable creator that by default creates replica local variables."""
   if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
     kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
@@ -57,13 +32,7 @@ def replica_local_creator(getter, **kwargs) -> tf.Variable:
       kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
     if kwargs["trainable"] is None:
       kwargs["trainable"] = True
-    v = getter(**kwargs)
-
-    # TODO(petebu): Remove when local variables support x-replica read_value.
-    v.read_value = replica_local_read_value(v)
-  else:
-    v = getter(**kwargs)
-  return v
+  return next_creator(**kwargs)
 
 
 class Replicator(tf.distribute.MirroredStrategy):

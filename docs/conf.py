@@ -27,6 +27,7 @@
 
 # pylint: disable=g-bad-import-order
 # pylint: disable=g-import-not-at-top
+import doctest
 import inspect
 import os
 import sys
@@ -90,6 +91,17 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
 
+# -- Options for doctest -----------------------------------------------------
+
+doctest_test_doctest_blocks = 'true'
+doctest_global_setup = '''
+import tensorflow as tf
+import sonnet as snt
+'''
+doctest_default_flags = (doctest.ELLIPSIS
+                         | doctest.IGNORE_EXCEPTION_DETAIL
+                         | doctest.DONT_ACCEPT_TRUE_FOR_1
+                         | doctest.NORMALIZE_WHITESPACE)
 
 # -- Source code links -------------------------------------------------------
 

@@ -29,7 +29,7 @@ ONCE_PROPERTY = "_snt_once"
 def once(f):
   """Decorator which ensures a wrapped method is only ever run once.
 
-      >>> @once
+      >>> @snt.once
       ... def f():
       ...   print('Hello, world!')
       >>> f()
@@ -40,7 +40,7 @@ def once(f):
   If `f` is a method then it will be evaluated once per instance:
 
       >>> class MyObject(object):
-      ...   @once
+      ...   @snt.once
       ...   def f(self):
       ...     print('Hello, world!')
 

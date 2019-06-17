@@ -89,7 +89,7 @@ class MLP(base.Module):
     of the parent module as input and produce an output which is the input size
     of the parent.
 
-    >>> mlp = MLP([1, 2, 3])
+    >>> mlp = snt.nets.MLP([1, 2, 3])
     >>> y = mlp(tf.ones([1, 2]))
     >>> rev = mlp.reverse()
     >>> rev(y)

@@ -44,8 +44,9 @@ class Regularizer(object):
 class L1(Regularizer):
   """L1 regularizer.
 
-  >>> L1(0.01)([tf.constant([1.0, 2.0, 3.0])])
-  <tf.Tensor: ..., numpy=0.059...>
+  >>> reg = snt.regularizers.L1(0.01)
+  >>> reg([tf.constant([1.0, 2.0, 3.0])])
+  <tf.Tensor: ...>
   """
 
   def __init__(self, scale):
@@ -78,8 +79,9 @@ class L1(Regularizer):
 class L2(Regularizer):
   """L2 regularizer.
 
-  >>> L2(0.01)([tf.constant([1.0, 2.0, 3.0])])
-  <tf.Tensor: ..., numpy=0.14>
+  >>> reg = snt.regularizers.L2(0.01)
+  >>> reg([tf.constant([1.0, 2.0, 3.0])])
+  <tf.Tensor: ...>
   """
 
   def __init__(self, scale):
@@ -126,25 +128,16 @@ class OffDiagonalOrthogonal(Regularizer):
   For example,
 
       >>> t = tf.reshape(tf.range(8, dtype=tf.float32), [2, 2, 2])
-      >>> OffDiagonalOrthogonal(0.01)([t])
-      <tf.Tensor: ..., numpy=92.479996>
+      >>> reg = snt.regularizers.OffDiagonalOrthogonal(0.01)
+      >>> reg([t])
+      <tf.Tensor: ...>
 
   corresponds to copmuting
 
       >>> w = tf.reshape(t, [-1, 2])
-      >>> w
-      <tf.Tensor: ..., numpy=
-      array([[ 0.,  1.],
-             [ 2.,  3.],
-             [ 4.,  5.],
-             [ 6.,  7.]], dtype=float32)>
       >>> w_gram_sq = tf.square(tf.matmul(tf.transpose(w), w))
-      >>> w_gram_sq
-      <tf.Tensor: ..., numpy=
-      array([[ 3136.,  4624.],
-             [ 4624.,  7056.]], dtype=float32)>
       >>> 0.01 * (tf.reduce_sum(w_gram_sq) - tf.linalg.trace(w_gram_sq))
-      <tf.Tensor: ..., numpy=92.479996>
+      <tf.Tensor: ...>
   """
 
   def __init__(self, scale):

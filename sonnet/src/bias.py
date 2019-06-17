@@ -34,31 +34,31 @@ class Bias(base.Module):
       >>> N, H, W, C = 1, 2, 3, 4
       >>> x = tf.random.normal([N, H, W, C])
 
-      >>> scalar_bias = Bias(bias_dims=[])
+      >>> scalar_bias = snt.Bias(bias_dims=[])
       >>> scalar_bias_output = scalar_bias(x)
       >>> assert scalar_bias.b.shape == []
 
   Create a bias over all non-minibatch dimensions:
 
-      >>> all_bias = Bias()
+      >>> all_bias = snt.Bias()
       >>> all_bias_output = all_bias(x)
       >>> assert all_bias.b.shape == [H, W, C]
 
   Create a bias over the last non-minibatch dimension:
 
-      >>> last_bias = Bias(bias_dims=[-1])
+      >>> last_bias = snt.Bias(bias_dims=[-1])
       >>> last_bias_output = last_bias(x)
       >>> assert last_bias.b.shape == [C]
 
   Create a bias over the first non-minibatch dimension:
 
-      >>> first_bias = Bias(bias_dims=[1])
+      >>> first_bias = snt.Bias(bias_dims=[1])
       >>> first_bias_output = first_bias(x)
       >>> assert first_bias.b.shape == [H, 1, 1]
 
   Subtract and later add the same learned bias:
 
-      >>> bias = Bias()
+      >>> bias = snt.Bias()
       >>> h1 = bias(x, multiplier=-1)
       >>> h2 = bias(x)
       >>> h3 = bias(x, multiplier=-1)

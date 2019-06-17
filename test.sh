@@ -46,6 +46,6 @@ bazel test --jobs=${N_JOBS} --test_timeout 300,450,1200,3600 \
 # Test docs still build.
 cd docs/
 pip install -r requirements.txt
-make html
+make doctest html
 
 deactivate

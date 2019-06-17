@@ -43,12 +43,9 @@ def no_name_scope(method: T) -> T:
   By default, any method on a module is considered as a forwards function, and
   so any variables / modules created by the method will be scoped as belonging
   to the module. In some cases this is undesirable, for example when
-  implementing `.clone()` / `.transpose()`, as in those cases we want the new
-  module to have the scope of wherever the `.transpose()` call is made. To
-  allow this, decorate any methods with `no_name_scope`.
-
-  This logic is tied to `ModuleMetaclass.__new__`, if anything is
-  changed here corresponding changes will be needed there.
+  implementing ``.clone()`` / ``.transpose()``, as in those cases we want the
+  new module to have the scope of wherever the ``.transpose()`` call is made. To
+  allow this, decorate any methods with ``no_name_scope``.
 
   Args:
     method: the method to wrap.
@@ -56,6 +53,8 @@ def no_name_scope(method: T) -> T:
   Returns:
     The method, with a flag indicating no name scope wrapping should occur.
   """
+  # NOTE: This logic is tied to ModuleMetaclass.__new__, if anything is
+  # changed here corresponding changes will be needed there.
   setattr(method, APPLY_NAME_SCOPE, False)
   return method
 
@@ -295,8 +294,9 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   """Base class for Sonnet modules.
 
   A Sonnet module is a lightweight container for variables and other modules.
-  Modules typically define one or more "forward" methods (e.g. `__call__`) which
-  apply operations combining user input and module parameters. For example:
+  Modules typically define one or more "forward" methods (e.g. ``__call__``)
+  which apply operations combining user input and module parameters. For
+  example::
 
       >>> class MultiplyModule(snt.Module):
       ...   def __call__(self, x):
@@ -308,11 +308,22 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       >>> mod(1.)
       <tf.Tensor: ... numpy=2.0>
 
-  Sonnet modules are a layer on top of `tf.Module`, implementing automatic name
+  Sonnet modules are a layer on top of :tf:`Module`, implementing automatic name
   scoping as described in the original RFC :cite:`agarwal2019stateful`.
   """
 
   def __init__(self, name: Optional[Text] = None):
+    """Initialize the current module with the given name.
+
+    Subclasses should call this constructor before creating other modules or
+    variables such that those modules are named correctly.
+
+    Args:
+      name: An optional string name for the class. Must be a valid Python
+        identifier. If ``name`` is not provided then the class name for the
+        current instance is converted to ``lower_snake_case`` and used instead.
+    """
+
     super(Module, self).__init__(name=name)
 
     if getattr(self.__init__, APPLY_NAME_SCOPE, True):

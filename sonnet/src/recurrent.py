@@ -33,6 +33,10 @@ from sonnet.src import utils
 import tensorflow.compat.v1 as tf1
 import tensorflow as tf
 
+# Required for specializing `UnrolledLSTM` per device.
+# pylint: disable=g-direct-tensorflow-import
+from tensorflow.python.eager import function as function_lib
+
 # A temporary import until tree is open-sourced.
 # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.util import nest
@@ -80,6 +84,46 @@ class RNNCore(base.Module):
 
     Returns:
       Arbitrarily nested initial state for this core.
+    """
+
+
+@six.add_metaclass(abc.ABCMeta)
+class UnrolledRNN(base.Module):
+  """Base class for unrolled Recurrent Neural Networks.
+
+  This class is a generalization of `RNNCore` which operates on an
+  input sequence as opposed to a single time step.
+  """
+
+  @abc.abstractmethod
+  def __call__(self, input_sequence, initial_state):
+    """Apply this RNN to the input sequence.
+
+    Args:
+      input_sequence: An arbitrarily nested structure of shape
+        `[T, B, ...]` where T is the number of time steps and B is
+        the batch size.
+      initial_state: Initial RNN state.
+
+    Returns:
+      output_sequence: An arbitrarily nested structure of shape
+        `[T, B, ...]`. Dimensions following the batch size could be
+        different from that of `inputs`.
+      final_state: Final RNN state, must be of the same shape as the
+        initial one.
+    """
+
+  @abc.abstractmethod
+  def initial_state(self, batch_size, **kwargs):
+    """Construct an initial state for this RNN.
+
+    Args:
+      batch_size: An int or an integral scalar tensor representing
+        batch size.
+      **kwargs: Optional keyword arguments.
+
+    Returns:
+      Arbitrarily nested initial state for this RNN.
     """
 
 
@@ -801,22 +845,13 @@ class LSTM(RNNCore):
   def __call__(self, inputs, prev_state):
     """See base class."""
     self._initialize(inputs)
-
-    gates_x = tf.matmul(inputs, self._w_i)
-    gates_h = tf.matmul(prev_state.hidden, self._w_h)
-    gates = gates_x + gates_h + self.b
-
-    # i = input, f = forget, g = cell updates, o = output.
-    i, f, g, o = tf.split(gates, num_or_size_splits=4, axis=1)
-
-    next_cell = tf.sigmoid(f) * prev_state.cell
-    next_cell += tf.sigmoid(i) * tf.tanh(g)
-    next_hidden = tf.sigmoid(o) * tf.tanh(next_cell)
-
-    if self._projection_size is not None:
-      next_hidden = tf.matmul(next_hidden, self.projection)
-
-    return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
+    return _lstm_fn(
+        inputs,
+        prev_state,
+        self._w_i,
+        self._w_h,
+        self.b,
+        self.projection)
 
   def initial_state(self, batch_size):
     """See base class."""
@@ -869,12 +904,31 @@ class LSTM(RNNCore):
           name="projection")
 
 
-class CuDNNLSTM(RNNCore):
-  """Long short-term memory (LSTM) RNN implemented using CuDNN-RNN.
+def _lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
+  """Compute one step of an LSTM."""
+  gates_x = tf.matmul(inputs, w_i)
+  gates_h = tf.matmul(prev_state.hidden, w_h)
+  gates = gates_x + gates_h + b
 
-  Unlike :class:`LSTM` this core operates on the whole batch of sequences at
-  once, i.e. the expected shape of ``inputs` is
-  [num_steps, batch_size, input_size].
+  # i = input, f = forget, g = cell updates, o = output.
+  i, f, g, o = tf.split(gates, num_or_size_splits=4, axis=1)
+
+  next_cell = tf.sigmoid(f) * prev_state.cell
+  next_cell += tf.sigmoid(i) * tf.tanh(g)
+  next_hidden = tf.sigmoid(o) * tf.tanh(next_cell)
+
+  if projection is not None:
+    next_hidden = tf.matmul(next_hidden, projection)
+
+  return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
+
+
+class UnrolledLSTM(UnrolledRNN):
+  """Unrolled long short-term memory (LSTM).
+
+  The implementation uses efficient device-specialized ops, e.g. CuDNN-RNN
+  on a CUDA-enabled GPU, and can be an order of magnitude faster than
+  `snt.*_unroll` with an `snt.LSTM` core.
   """
 
   def __init__(
@@ -886,7 +940,7 @@ class CuDNNLSTM(RNNCore):
       forget_bias=1.0,
       dtype=tf.float32,
       name=None):
-    """Construct an `CuDNNLSTM`.
+    """Construct an unrolled LSTM.
 
     Args:
       hidden_size: Hidden layer size.
@@ -904,7 +958,7 @@ class CuDNNLSTM(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(CuDNNLSTM, self).__init__(name)
+    super(UnrolledLSTM, self).__init__(name)
     self._hidden_size = hidden_size
     self._w_i_init = w_i_init
     self._w_h_init = w_h_init
@@ -912,32 +966,15 @@ class CuDNNLSTM(RNNCore):
     self._forget_bias = forget_bias
     self._dtype = dtype
 
-  def __call__(self, inputs, prev_state):
+  def __call__(self, input_sequence, initial_state):
     """See base class."""
-    self._initialize(inputs)
-
-    # TODO(slebedev): consider allocating a single parameter Tensor.
-    # This will remove the need for tf.transpose and tf.concat and
-    # will likely result in a significant speedup. On the downside,
-    # checkpoints of `CuDNNLSTM` incompatible with that of `LSTM`.
-    b_h_zero = tf.zeros([self._hidden_size])
-    outputs, next_hidden, next_cell, _ = tf.raw_ops.CudnnRNN(
-        input=inputs,
-        input_h=tf.expand_dims(prev_state.hidden, axis=0),
-        input_c=tf.expand_dims(prev_state.cell, axis=0),
-        params=tf.concat([
-            tf.reshape(tf.transpose(self._w_i), [-1]),
-            tf.reshape(tf.transpose(self._w_h), [-1]),
-            # CuDNN has two sets of biases: b_i and b_h, zero-out b_h.
-            self.b,
-            b_h_zero,
-            b_h_zero,
-            b_h_zero,
-            b_h_zero
-        ], axis=0),
-        rnn_mode="lstm")
-
-    return outputs, LSTMState(hidden=next_hidden, cell=next_cell)
+    self._initialize(input_sequence)
+    return _specialized_unrolled_lstm(
+        input_sequence,
+        initial_state,
+        self._w_i,
+        self._w_h,
+        self.b)
 
   def initial_state(self, batch_size):
     """See base class."""
@@ -954,10 +991,10 @@ class CuDNNLSTM(RNNCore):
     return self._w_h
 
   @once.once
-  def _initialize(self, inputs):
-    utils.assert_rank(inputs, 3)  # [num_steps, batch_size, input_size].
-    input_size = tf.shape(inputs)[2]
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+  def _initialize(self, input_sequence):
+    utils.assert_rank(input_sequence, 3)  # [num_steps, batch_size, input_size].
+    input_size = tf.shape(input_sequence)[2]
+    dtype = _check_inputs_dtype(input_sequence, self._dtype)
 
     w_i_init = self._w_i_init or initializers.TruncatedNormal(
         stddev=1.0 / tf.sqrt(tf.cast(input_size, dtype)))
@@ -975,6 +1012,85 @@ class CuDNNLSTM(RNNCore):
         num_or_size_splits=4)
     f += self._forget_bias
     self.b = tf.Variable(tf.concat([i, f, g, o], axis=0), name="b")
+
+
+# TODO(b/133740216): consider upstreaming into TensorFlow.
+def _specialize_per_device(
+    unique_api_name,
+    specializations,
+    default,
+    **tf_function_kwargs):
+  """Create a `tf.function` specialized per-device.
+
+  Args:
+    unique_api_name: Globally unique name of the function, e.g. `"lstm"`.
+    specializations: A mapping from device type (e.g. `"CPU"` or `"TPU`)
+      to a Python function with a specialized implementation for that
+      device.
+    default: Default device type to use (typically, `"CPU"`).
+    **tf_function_kwargs: Additional keyword arguments to pass to
+      `tf.function` when compiling specializations.
+
+  Returns:
+    A `tf.function` which when called dispatches to the specialization
+    for the current device.
+  """
+  functions = {}
+  for device, specialization in specializations.items():
+    functions[device] = function_lib.defun_with_attributes(
+        specialization,
+        attributes={
+            "api_implements": unique_api_name,
+            "api_preferred_device": device,
+            # TODO(b/133178886): remove _noinline once the bug is fixed.
+            "_noinline": True},
+        **tf_function_kwargs)
+
+  # NOTE: tf.function is required to allow Grappler select a specialization.
+  @tf.function(autograph=False, **tf_function_kwargs)
+  def wrapper(*args, **kwargs):
+    for function in functions.values():
+      function_lib.register(function, *args, **kwargs)
+    return functions[default](*args, **kwargs)
+
+  return wrapper
+
+
+def _fallback_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
+  """Fallback version of `UnrolledLSTM` which works on any device."""
+  return dynamic_unroll(
+      functools.partial(_lstm_fn, w_i=w_i, w_h=w_h, b=b),
+      input_sequence,
+      initial_state)
+
+
+def _cudnn_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
+  """GPU/CuDNN-RNN specialization of `UnrolledLSTM`."""
+  # Intuitively, concat/transpose is not free but we did not see
+  # it significantly affecting performance in benchmarks.
+  output_sequence, all_hidden, all_cell, _ = tf.raw_ops.CudnnRNN(
+      input=input_sequence,
+      input_h=tf.expand_dims(initial_state.hidden, axis=0),
+      input_c=tf.expand_dims(initial_state.cell, axis=0),
+      params=tf.concat([
+          tf.reshape(tf.transpose(w_i), [-1]),
+          tf.reshape(tf.transpose(w_h), [-1]),
+          b,
+          # CuDNN has two sets of biases: b_i and b_h, zero-out b_h.
+          tf.zeros_like(b),
+      ], axis=0),
+      rnn_mode="lstm")
+  return output_sequence, LSTMState(all_hidden[-1], all_cell[-1])
+
+
+_specialized_unrolled_lstm = _specialize_per_device(
+    "snt_unrolled_lstm",
+    specializations={
+        "CPU": _fallback_unrolled_lstm,
+        "GPU": _cudnn_unrolled_lstm,
+        "TPU": _fallback_unrolled_lstm,
+    },
+    default="CPU")
 
 
 class _RecurrentDropoutWrapper(RNNCore):

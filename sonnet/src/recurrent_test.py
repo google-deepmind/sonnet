@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import itertools
+import unittest
 
 from absl.testing import parameterized
 import numpy as np
@@ -270,13 +271,13 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
       recurrent.lstm_with_recurrent_dropout(self.hidden_size, -1)
 
 
-class CuDNNLSTMTest(test_utils.TestCase, parameterized.TestCase):
+class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(CuDNNLSTMTest, self).setUp()
+    super(UnrolledLSTMTest, self).setUp()
 
-    if self.primary_device != "GPU":
-      self.skipTest("Only available on GPU")
+    if self.primary_device == "TPU":
+      self.skipTest("b/134132912")
 
     self.batch_size = 3
     self.input_size = 2
@@ -284,52 +285,64 @@ class CuDNNLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters([1, 4])
   def testComputationAgainstLSTM(self, num_steps):
-    inputs = tf.random.uniform([num_steps, self.batch_size, self.input_size])
+    input_sequence = tf.random.uniform(
+        [num_steps, self.batch_size, self.input_size])
 
-    cudnn_lstm = recurrent.CuDNNLSTM(self.hidden_size)
-    outputs, states = cudnn_lstm(
-        inputs,
-        cudnn_lstm.initial_state(self.batch_size))
+    unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
+    output_sequence, final_state = unrolled_lstm(
+        input_sequence,
+        unrolled_lstm.initial_state(self.batch_size))
 
     lstm = recurrent.LSTM(self.hidden_size)
-    lstm._initialize(inputs[0])
-    lstm._w_i = cudnn_lstm._w_i
-    lstm._w_h = cudnn_lstm._w_h
-    lstm.b = cudnn_lstm.b
-    expected_outputs, expected_final_state = recurrent.dynamic_unroll(
+    lstm._initialize(input_sequence[0])
+    lstm._w_i = unrolled_lstm._w_i
+    lstm._w_h = unrolled_lstm._w_h
+    lstm.b = unrolled_lstm.b
+    expected_output_sequence, expected_final_state = recurrent.dynamic_unroll(
         lstm,
-        inputs,
+        input_sequence,
         lstm.initial_state(self.batch_size))
 
-    self.assertAllClose(outputs, expected_outputs)
-    self.assertAllClose(states.hidden[-1], expected_final_state.hidden)
-    self.assertAllClose(states.cell[-1], expected_final_state.cell)
+    self.assertAllClose(output_sequence, expected_output_sequence)
+    self.assertAllClose(final_state.hidden, expected_final_state.hidden)
+    self.assertAllClose(final_state.cell, expected_final_state.cell)
+
+  @unittest.skip("b/134377706")
+  def testNumStepsPolymorphism(self):
+    unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
+    initial_state = unrolled_lstm.initial_state(self.batch_size)
+    # Check that the same instance can be called with different `num_steps`.
+    for num_steps in [1, 2, 4]:
+      output_sequence, _ = unrolled_lstm(
+          tf.random.uniform([num_steps, self.batch_size, self.input_size]),
+          initial_state)
+      self.assertEqual(output_sequence.shape[0], num_steps)
 
   def testDtypeMismatch(self):
-    core = recurrent.CuDNNLSTM(
+    unrolled_lstm = recurrent.UnrolledLSTM(
         hidden_size=self.hidden_size,
         dtype=tf.bfloat16)
-    inputs = tf.random.uniform([1, self.batch_size, self.input_size])
-    prev_state = core.initial_state(self.batch_size)
-    self.assertIs(prev_state.hidden.dtype, tf.bfloat16)
-    self.assertIs(prev_state.cell.dtype, tf.bfloat16)
+    input_sequence = tf.random.uniform([1, self.batch_size, self.input_size])
+    initial_state = unrolled_lstm.initial_state(self.batch_size)
+    self.assertIs(initial_state.hidden.dtype, tf.bfloat16)
+    self.assertIs(initial_state.cell.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
         TypeError,
         "inputs must have dtype tf.bfloat16, got tf.float32"):
-      core(inputs, prev_state)
+      unrolled_lstm(input_sequence, initial_state)
 
   def testInitialization(self):
-    core = recurrent.CuDNNLSTM(
+    unrolled_lstm = recurrent.UnrolledLSTM(
         hidden_size=self.hidden_size,
         forget_bias=0.0,
         w_i_init=initializers.Ones(),
         w_h_init=initializers.Ones(),
         b_init=initializers.Ones())
-    inputs = tf.random.uniform([1, self.batch_size, self.input_size])
-    prev_state = core.initial_state(self.batch_size)
-    core(inputs, prev_state)
+    input_sequence = tf.random.uniform([1, self.batch_size, self.input_size])
+    initial_state = unrolled_lstm.initial_state(self.batch_size)
+    unrolled_lstm(input_sequence, initial_state)
 
-    for v in core.variables:
+    for v in unrolled_lstm.variables:
       self.assertAllClose(self.evaluate(v), self.evaluate(tf.ones_like(v)))
 
 

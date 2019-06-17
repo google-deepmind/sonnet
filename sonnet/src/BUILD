@@ -12,8 +12,8 @@ snt_py_library(
     deps = [
         ":once",
         ":utils",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -24,8 +24,8 @@ snt_py_test(
     deps = [
         ":base",
         ":test_utils",
-        # tensorflow
-        # wrapt
+        # pip: tensorflow
+        # pip: wrapt
     ],
 )
 
@@ -34,8 +34,8 @@ snt_py_library(
     srcs = ["reshape.py"],
     deps = [
         ":base",
-        # numpy
-        # tensorflow
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -45,9 +45,9 @@ snt_py_test(
     deps = [
         ":reshape",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -57,10 +57,10 @@ snt_py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":initializers",
-        # absl/logging
-        # enum
-        # tensorflow
-        # tensorflow_probability
+        # pip: absl/logging
+        # pip: enum
+        # pip: tensorflow
+        # pip: tensorflow_probability
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -75,9 +75,9 @@ snt_py_test(
         ":linear",
         ":sgd",
         ":test_utils",
-        # numpy
-        # tensorflow
-        # tensorflow_probability
+        # pip: numpy
+        # pip: tensorflow
+        # pip: tensorflow_probability
     ],
 )
 
@@ -90,9 +90,9 @@ snt_py_library(
         ":once",
         ":pad",
         ":utils",
-        # numpy
-        # six
-        # tensorflow
+        # pip: numpy
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -102,8 +102,8 @@ snt_py_test(
     deps = [
         ":conv",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -115,9 +115,9 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # numpy
-        # six
-        # tensorflow
+        # pip: numpy
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -127,8 +127,8 @@ snt_py_test(
     deps = [
         ":depthwise_conv",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -140,8 +140,8 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # numpy
-        # tensorflow
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -151,8 +151,8 @@ snt_py_test(
     deps = [
         ":conv_transpose",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -161,8 +161,8 @@ snt_py_library(
     srcs = ["custom_getter.py"],
     deps = [
         ":base",
-        # contextlib2
-        # tensorflow
+        # pip: contextlib2
+        # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -174,7 +174,7 @@ snt_py_test(
         ":base",
         ":custom_getter",
         ":test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -193,7 +193,7 @@ snt_py_test(
         ":base",
         ":deferred",
         ":test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -201,9 +201,9 @@ snt_py_library(
     name = "initializers",
     srcs = ["initializers.py"],
     deps = [
-        # numpy
-        # six
-        # tensorflow
+        # pip: numpy
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -213,9 +213,9 @@ snt_py_test(
     deps = [
         ":initializers",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -227,7 +227,7 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -238,9 +238,9 @@ snt_py_test(
     deps = [
         ":linear",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -253,7 +253,7 @@ snt_py_library(
         ":moving_averages",
         ":once",
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -264,8 +264,8 @@ snt_py_test(
         "test_utils",
         ":batch_norm",
         ":initializers",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -283,8 +283,8 @@ snt_py_test(
     deps = [
         ":pad",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -293,7 +293,7 @@ snt_py_library(
     srcs = ["metrics.py"],
     deps = [
         ":base",
-        # six
+        # pip: six
     ],
 )
 
@@ -303,7 +303,7 @@ snt_py_test(
     py3_tags = ["noasan"],
     deps = [
         ":metrics",
-        # absl/testing:absltest
+        # pip: absl/testing:absltest
     ],
 )
 
@@ -319,8 +319,8 @@ snt_py_test(
     py3_tags = ["noasan"],
     deps = [
         ":once",
-        # absl/testing:absltest
-        # absl/testing:parameterized
+        # pip: absl/testing:absltest
+        # pip: absl/testing:parameterized
     ],
 )
 
@@ -334,8 +334,8 @@ snt_py_library(
         ":linear",
         ":once",
         ":utils",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -346,8 +346,8 @@ snt_py_test(
         ":initializers",
         ":recurrent",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -356,7 +356,7 @@ snt_py_library(
     srcs = ["regularizers.py"],
     deps = [
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -366,8 +366,8 @@ snt_py_test(
     deps = [
         ":regularizers",
         ":test_utils",
-        # numpy
-        # tensorflow
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -385,8 +385,8 @@ snt_py_test(
     deps = [
         ":sequential",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -398,7 +398,7 @@ snt_py_library(
         ":once",
         ":optimizer_utils",
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -408,8 +408,8 @@ snt_py_test(
     deps = [
         ":adam",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -421,7 +421,7 @@ snt_py_library(
         ":once",
         ":optimizer_utils",
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -431,8 +431,8 @@ snt_py_test(
     deps = [
         ":momentum",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -444,8 +444,8 @@ snt_py_library(
         ":once",
         ":optimizer_utils",
         ":utils",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -455,8 +455,8 @@ snt_py_test(
     deps = [
         ":rmsprop",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -466,7 +466,7 @@ snt_py_library(
     deps = [
         ":base",
         ":optimizer_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -476,8 +476,8 @@ snt_py_test(
     deps = [
         ":sgd",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -495,8 +495,8 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -507,9 +507,9 @@ snt_py_test(
         ":axis_norm",
         ":initializers",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -521,8 +521,8 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -533,9 +533,9 @@ snt_py_test(
         ":group_norm",
         ":initializers",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -545,7 +545,7 @@ snt_py_library(
     deps = [
         ":metrics",
         ":once",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -555,8 +555,8 @@ snt_py_test(
     deps = [
         ":moving_averages",
         ":test_utils",
-        # absl/testing:parameterized
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
     ],
 )
 
@@ -565,8 +565,8 @@ snt_py_library(
     srcs = ["utils.py"],
     deps = [
         ":initializers",
-        # six
-        # tensorflow
+        # pip: six
+        # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -578,9 +578,9 @@ snt_py_test(
         ":initializers",
         ":test_utils",
         ":utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -588,8 +588,8 @@ snt_py_library(
     name = "test_utils",
     srcs = ["test_utils.py"],
     deps = [
-        # numpy
-        # tensorflow
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -598,7 +598,7 @@ snt_py_library(
     srcs = ["dropout.py"],
     deps = [
         ":base",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -608,9 +608,9 @@ snt_py_test(
     deps = [
         ":dropout",
         ":test_utils",
-        # absl/testing:parameterized
-        # numpy
-        # tensorflow
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        # pip: tensorflow
     ],
 )
 
@@ -622,7 +622,7 @@ snt_py_library(
         ":initializers",
         ":once",
         ":utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -632,7 +632,7 @@ snt_py_test(
     deps = [
         ":bias",
         ":test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -640,8 +640,8 @@ snt_py_library(
     name = "replicator",
     srcs = ["replicator.py"],
     deps = [
-        # contextlib2
-        # tensorflow
+        # pip: contextlib2
+        # pip: tensorflow
     ],
 )
 
@@ -651,7 +651,7 @@ snt_py_test(
     deps = [
         ":replicator",
         ":test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -662,7 +662,7 @@ snt_py_library(
         ":base",
         ":initializers",
         ":once",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -673,6 +673,6 @@ snt_py_test(
         ":embed",
         ":initializers",
         ":test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )

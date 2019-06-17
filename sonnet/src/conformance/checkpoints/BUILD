@@ -13,11 +13,11 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY2AND3",
     deps = [
-        # absl:app
-        # absl/flags
-        # absl/logging
+        # pip: absl:app
+        # pip: absl/flags
+        # pip: absl/logging
         "//sonnet/src/conformance:goldens",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 

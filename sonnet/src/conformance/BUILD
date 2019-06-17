@@ -13,10 +13,10 @@ snt_py_library(
     name = "goldens",
     srcs = ["goldens.py"],
     deps = [
-        # numpy
-        # six
+        # pip: numpy
+        # pip: six
         "//sonnet",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -24,10 +24,10 @@ snt_py_test(
     name = "api_test",
     srcs = ["api_test.py"],
     deps = [
-        # six
+        # pip: six
         "//sonnet",
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -37,13 +37,13 @@ snt_py_test(
     data = [":checkpoints"],
     deps = [
         ":goldens",
-        # absl/logging
-        # absl/testing:absltest
-        # absl/testing:parameterized
+        # pip: absl/logging
+        # pip: absl/testing:absltest
+        # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:replicator",
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -53,10 +53,10 @@ snt_py_test(
     gpu = False,
     deps = [
         ":goldens",
-        # absl/testing:absltest
-        # absl/testing:parameterized
+        # pip: absl/testing:absltest
+        # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -64,10 +64,10 @@ snt_py_test(
     name = "doctest_test",
     srcs = ["doctest_test.py"],
     deps = [
-        # absl/testing:parameterized
+        # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -78,7 +78,7 @@ snt_py_test(
         ":goldens",
         "//sonnet",
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -87,9 +87,9 @@ snt_py_test(
     srcs = ["pickle_test.py"],
     deps = [
         ":goldens",
-        # absl/testing:parameterized
+        # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
     ],
 )
 
@@ -98,10 +98,24 @@ snt_py_test(
     srcs = ["saved_model_test.py"],
     deps = [
         ":goldens",
-        # absl/testing:absltest
-        # absl/testing:parameterized
+        # pip: absl/testing:absltest
+        # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:test_utils",
-        # tensorflow
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "xla_test",
+    srcs = ["xla_test.py"],
+    deps = [
+        ":goldens",
+        # pip: absl/testing:absltest
+        # pip: absl/testing:parameterized
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+        # tf: compiler/jit:xla_cpu_jit
+        # tf: compiler/jit:xla_gpu_jit
     ],
 )

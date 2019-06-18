@@ -676,3 +676,25 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_library(
+    name = "batch_apply",
+    srcs = ["batch_apply.py"],
+    deps = [
+        ":base",
+        # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
+    ],
+)
+
+snt_py_test(
+    name = "batch_apply_test",
+    srcs = ["batch_apply_test.py"],
+    deps = [
+        ":base",
+        ":batch_apply",
+        ":test_utils",
+        # pip: tensorflow
+        # pip: wrapt
+    ],
+)

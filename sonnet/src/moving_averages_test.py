@@ -67,25 +67,28 @@ class ExponentialMovingAverageTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(ema.value.numpy(), 5.0,
                         atol=1e-3, rtol=1e-5)
 
-  def testWithTFFunction(self):
+  @parameterized.parameters(True, False)
+  def testWithTFFunction(self, autograph):
     ema_1 = moving_averages.ExponentialMovingAverage(0.95)
     ema_2 = moving_averages.ExponentialMovingAverage(0.95)
-    ema_function = tf.function(ema_2)
+    ema_func = tf.function(ema_2, autograph=autograph)
 
     for _ in range(10):
       x = tf.random.uniform((), 0, 10)
-      self.assertAllClose(ema_1(x).numpy(), ema_function(x).numpy(),
+      self.assertAllClose(ema_1(x).numpy(), ema_func(x).numpy(),
                           atol=1e-3, rtol=1e-5)
 
-  def testResetWithTFFunction(self):
+  @parameterized.parameters(True, False)
+  def testResetWithTFFunction(self, autograph):
     ema = moving_averages.ExponentialMovingAverage(0.90)
-    self.assertAllClose(ema(3.0).numpy(), 3.0,
+    ema_func = tf.function(ema, autograph=autograph)
+    self.assertAllClose(ema_func(3.0).numpy(), 3.0,
                         atol=1e-3, rtol=1e-5)
 
     ema.reset()
     self.assertEqual(ema.value.numpy(), 0.0)
 
-    self.assertAllClose(ema(3.0).numpy(), 3.0,
+    self.assertAllClose(ema_func(3.0).numpy(), 3.0,
                         atol=1e-3, rtol=1e-5)
 
   @parameterized.named_parameters(("2D", [2, 2]), ("3D", [1, 1, 3]))

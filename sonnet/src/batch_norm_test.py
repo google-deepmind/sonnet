@@ -19,6 +19,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import itertools
+
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import batch_norm
@@ -90,7 +92,8 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     outputs = layer(inputs, True)
     self.assertAllEqual(outputs, tf.zeros_like(inputs))
 
-  def testWithTfFunction(self):
+  @parameterized.parameters(True, False)
+  def testWithTfFunction(self, autograph):
     if "TPU" in self.device_types:
       self.skipTest("Test not working on TPU")
       # TODO(tamaranorman) enable on TPU
@@ -98,29 +101,43 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     layer = batch_norm.BaseBatchNorm(
         moving_mean=TestMetric(), moving_variance=TestMetric(),
         create_scale=False, create_offset=False, data_format="NHWC")
-    layer = tf.function(layer)
+    layer = tf.function(layer, autograph=autograph)
 
     inputs = tf.ones([2, 5, 3, 3, 3])
     scale = tf.constant(0.5, shape=(5, 1, 1, 1))
     offset = tf.constant(2.0, shape=(5, 1, 1, 1))
+    expected1 = tf.zeros_like(inputs)
+    expected2 = tf.fill(inputs.shape, 2.0)
 
-    outputs = layer(inputs, True, scale=scale, offset=offset)
-    self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    for is_training, use_batch_stats in itertools.product((True, False),
+                                                          (True, False)):
+      outputs = layer(inputs, is_training, use_batch_stats)
+      self.assertAllEqual(outputs, expected1)
 
-    outputs = layer(inputs, True)
-    self.assertAllEqual(outputs, tf.zeros_like(inputs))
+      outputs = layer(inputs, is_training, use_batch_stats,
+                      scale=scale, offset=offset)
+      self.assertAllEqual(outputs, expected2)
 
-    outputs = layer(inputs, False, scale=scale, offset=offset)
-    self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+  @parameterized.parameters(True, False)
+  def testWithTfFunctionTfArgs(self, autograph):
+    if "TPU" in self.device_types:
+      self.skipTest("Test not working on TPU")
+      # TODO(tamaranorman) enable on TPU
 
-    outputs = layer(inputs, False)
-    self.assertAllEqual(outputs, tf.zeros_like(inputs))
+    layer = batch_norm.BaseBatchNorm(
+        moving_mean=TestMetric(), moving_variance=TestMetric(),
+        create_scale=False, create_offset=False, data_format="NHWC")
+    layer = tf.function(layer, autograph=autograph)
 
-    outputs = layer(inputs, False, True, scale=scale, offset=offset)
-    self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
+    inputs = tf.ones([2, 5, 3, 3, 3])
+    expected = tf.zeros_like(inputs)
 
-    outputs = layer(inputs, False, True)
-    self.assertAllEqual(outputs, tf.zeros_like(inputs))
+    for is_training, use_batch_stats in itertools.product((True, False),
+                                                          (True, False)):
+      # NOTE: The use of `tf.constant` means we require graph control flow
+      outputs = layer(inputs, tf.constant(is_training),
+                      tf.constant(use_batch_stats))
+      self.assertAllEqual(outputs, expected)
 
   def testUsingTestStats(self):
     layer = batch_norm.BaseBatchNorm(

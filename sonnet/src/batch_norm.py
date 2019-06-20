@@ -116,6 +116,7 @@ class BaseBatchNorm(base.Module):
       raise ValueError("Cannot set `offset_init` if `create_offset=False`")
     self._offset_init = offset_init or initializers.Zeros()
 
+  @utils.smart_autograph
   def __call__(self, inputs, is_training, test_local_stats=False,
                scale=None, offset=None):
     """Returns normalized inputs.

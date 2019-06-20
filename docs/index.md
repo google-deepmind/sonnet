@@ -544,7 +544,7 @@ instantiate modules wrapping user-provided functions.
 The `snt.Module` class constructor takes a callable and returns a Sonnet module.
 The provided function is invoked when the module is called, thus specifying how
 new nodes are added to the computational graph and how to compute output Tensors
-from input Tensors. Please refer to the module [documentation](https://github.com/deepmind/sonnet/blob/master/sonnet/docs/sonnet.md?#Module)
+from input Tensors. Please refer to the module [documentation](https://github.com/deepmind/sonnet/blob/master/docs/sonnet.md#sonnet---module-reference)
 for more details and examples.
 
 ## FAQ

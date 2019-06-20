@@ -1,2 +1,4 @@
 tf-nightly-2.0-preview==2.0.0.dev20190617
 tfp-nightly==0.8.0.dev20190610
+# TODO(tomhennigan) Remove this when estimator nightly works.
+tensorflow-estimator-2.0-preview==1.14.0.dev2019061700

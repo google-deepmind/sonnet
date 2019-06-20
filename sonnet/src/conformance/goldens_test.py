@@ -38,11 +38,12 @@ class CoverageTest(test_utils.TestCase):
         snt.optimizers.SGD,
 
         # Stateless or abstract.
-        snt.Module,
+        snt.BatchApply,
         snt.DeepRNN,
         snt.Deferred,
         snt.Flatten,
         snt.Metric,
+        snt.Module,
         snt.Reshape,
         snt.RNNCore,
         snt.Sequential,

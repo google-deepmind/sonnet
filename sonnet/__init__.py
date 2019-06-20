@@ -30,6 +30,7 @@ from sonnet.src.axis_norm import InstanceNorm
 from sonnet.src.axis_norm import LayerNorm
 from sonnet.src.base import Module
 from sonnet.src.base import no_name_scope
+from sonnet.src.batch_apply import BatchApply
 from sonnet.src.batch_norm import BaseBatchNorm
 from sonnet.src.batch_norm import BatchNorm
 from sonnet.src.bias import Bias
@@ -68,6 +69,7 @@ from sonnet.src.sequential import Sequential
 __all__ = (
     "AxisNorm",
     "BaseBatchNorm",
+    "BatchApply",
     "BatchNorm",
     "Bias",
     "Conv1D",

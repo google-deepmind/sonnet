@@ -223,6 +223,12 @@ Flatten
 .. autoclass:: Flatten
    :members:
 
+BatchApply
+~~~~~~~~~~
+
+.. autoclass:: BatchApply
+   :members:
+
 Embedding modules
 -----------------
 

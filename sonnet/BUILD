@@ -19,6 +19,7 @@ snt_py_library(
         ":regularizers",
         "//sonnet/src:axis_norm",
         "//sonnet/src:base",
+        "//sonnet/src:batch_apply",
         "//sonnet/src:batch_norm",
         "//sonnet/src:bias",
         "//sonnet/src:conv",

@@ -17,6 +17,7 @@ def snt_py_test(
         deps = [],
         tags = [],
         py3_tags = [],
+        python_version = "PY3",
         main = None,
         gpu = True,
         tpu = True,
@@ -28,6 +29,7 @@ def snt_py_test(
         deps: additional dependencies for the test targets.
         tags: tags to be assigned to the different test targets.
         py3_tags: python3 specific tags to be appended to tags.
+        python_version: ignored in OSS build, Sonnet always runs with Python 3.
         main: main script to be run for the test.
         gpu: Whether the test can be run on GPU. Note ignored by test.
         tpu: Whether the test can be run on TPU. Note ignored by test.

@@ -25,10 +25,11 @@ generates a link to ``tf.Module``.
 
 # from __future__ import google_type_annotations
 
-import urllib
+import functools
 
 from docutils import nodes
 from docutils.parsers.rst import states
+from six.moves.urllib import parse as urlparse
 import tensorflow as tf
 from typing import Any
 from typing import List
@@ -75,28 +76,15 @@ def tf_role_fn(
   """
   del options, content  # Unused.
 
-  try:
-    symbol = tf
-    for chunk in text.split("."):
-      symbol = getattr(symbol, chunk)
-  except AttributeError:
-    canonical_name = ""
-  else:
-    canonical_name = tf_export.get_canonical_name_for_symbol(
-        symbol,
-        add_prefix_to_v1_names=True)
-
+  canonical_url = tf_doc_url(text)
   xref = nodes.literal(rawtext, typ + "." + text, classes=["xref"])
-  if not canonical_name:
+  if not canonical_url:
     warning = (
         "unable to expand :%s:`%s`; symbol is not exported by TensorFlow."
         % (typ, text))
     inliner.reporter.warning(warning, line=lineno)
     return [xref], []
   else:
-    canonical_url = urllib.parse.urljoin(
-        TF_API_BASE_URL,
-        canonical_name.replace(".", "/"))
     node = nodes.reference(
         rawtext,
         "",
@@ -104,6 +92,42 @@ def tf_role_fn(
         internal=False,
         refuri=canonical_url)
     return [node], []
+
+
+def tf_doc_url(text):
+  """Retrieves the TensorFlow doc URL for the given symbol.
+
+  Args:
+    text: A string for a symbol inside TF (e.g. ``"optimizers.Adam"``).
+
+  Returns:
+    A string URL linking to the TensorFlow doc site or ``None`` if a URL could
+    not be resolved.
+  """
+  get_tf_name = functools.partial(
+      tf_export.get_canonical_name_for_symbol, add_prefix_to_v1_names=True)
+
+  try:
+    prev_symbol = None
+    symbol = tf
+    for chunk in text.split("."):
+      prev_symbol = symbol
+      symbol = getattr(prev_symbol, chunk)
+  except AttributeError:
+    return None
+
+  canonical_name = get_tf_name(symbol)
+
+  # Check if we're looking at a method reference (e.g. "TensorArray.read").
+  if prev_symbol and not canonical_name:
+    prev_canonical_name = get_tf_name(prev_symbol)
+    if prev_canonical_name:
+      canonical_name = prev_canonical_name + "#" + text.split(".")[-1]
+
+  if not canonical_name:
+    return None
+
+  return urlparse.urljoin(TF_API_BASE_URL, canonical_name.replace(".", "/"))
 
 
 def setup(app):

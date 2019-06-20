@@ -30,57 +30,63 @@ import tensorflow as tf
 
 
 class AxisNorm(base.Module):
-  """Normalizes inputs along the given axes.
+  r"""Normalizes inputs along the given axes.
 
   This is a generic implementation of normalization along specific axes of the
-  input. `LayerNorm` and `InstanceNorm` are subclasses of this module, they
-  normalize over the channel and spatial dimensions respectively.
+  input. :class:`LayerNorm` and :class:`InstanceNorm` are subclasses of this
+  module, they normalize over the channel and spatial dimensions respectively.
 
-  It transforms the input x into:
+  It transforms the input ``x`` into:
 
-      outputs = scale * (x - mu) / (sigma + eps) + offset
+  .. math::
 
-  Where `mu` and `sigma` are respectively the mean and standard deviation of
-  `x`.
+     \d{outputs} = \d{scale} \dfrac{x - \mu}{\sigma + \epsilon} + \d{offset}
+
+  Where :math:`\mu` and :math:`\sigma` are respectively the mean and standard
+  deviation of ``x``.
 
   There are many different variations for how users want to manage scale and
   offset if they require them at all. These are:
 
-    - No scale/offset in which case create_* should be set to False and
-      scale/offset aren't passed when the module is called.
-    - Trainable scale/offset in which case create_* should be set to True and
-      again scale/offset aren't passed when the module is called. In this case
-      this module creates and owns the scale/offset variables.
-    - Externally generated scale/offset, such as for conditional normalization,
-      in which case create_* should be set to False and then the values fed in
-      at call time.
+    - No ``scale``/``offset`` in which case ``create_*`` should be set to
+      ``False`` and ``scale``/``offset`` aren't passed when the module is
+      called.
+    - Trainable ``scale``/``offset`` in which case create_* should be set to
+      ``True`` and again ``scale``/``offset`` aren't passed when the module is
+      called. In this case this module creates and owns the scale/offset
+      variables.
+    - Externally generated ``scale``/``offset``, such as for conditional
+      normalization, in which case ``create_*`` should be set to ``False`` and
+      then the values fed in at call time.
 
   Attributes:
-    scale: If `create_scale`, a trainable variable holding the current scale
-      after the module is connected for the first time.
-    offset: If `create_offset`, a trainable variable holding the current offset
-      after the module is connected for the first time.
+    scale: If ``create_scale=True``, a trainable :tf:`Variable` holding the
+      current scale.
+    offset: If ``create_offset=True``, a trainable :tf:`Variable` holding the
+      current offset.
   """
 
   def __init__(self, axis, create_scale, create_offset, eps=1e-4,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    """Constructs an `AxisNorm` module.
+    r"""Constructs an ``AxisNorm`` module.
 
     Args:
-      axis: An int, slice or sequence of ints representing the axes which should
-        be normalized across.
-      create_scale: Boolean representing whether to create a trainable scale per
-        channel applied after the normalization.
-      create_offset: Boolean representing whether to create a trainable offset
+      axis: An ``int``, ``slice`` or sequence of ``int``\s representing the axes
+        which should be normalized across.
+      create_scale: ``bool`` representing whether to create a trainable scale
+        per channel applied after the normalization.
+      create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
-      eps: Small epsilon to avoid division by zero variance. Defaults to 1e-4.
+      eps: Small epsilon to avoid division by zero variance. Defaults to
+        ``1e-4``.
       scale_init: Optional initializer for the scale variable. Can only be set
-        if `create_scale` is True. By default scale is initialized to one.
+        if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
-        if `create_offset` is True. By default offset is initialized to zero.
-      data_format: The data format of the input. Can be either `channels_first`,
-        `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
+        if ``create_offset=True``. By default offset is initialized to ``0``.
+      data_format: The data format of the input. Can be either
+        ``channels_first``, ``channels_last``, ``N...C`` or ``NC...``. By
+        default it is ``channels_last``.
       name: Name of the module.
     """
     super(AxisNorm, self).__init__(name=name)
@@ -120,16 +126,16 @@ class AxisNorm(base.Module):
     """Returns normalized inputs.
 
     Args:
-      inputs: An n-D tensor of the data_format specified above on which the
-        transformation is performed.
+      inputs: An n-D tensor of the ``data_format`` specified in the constructor
+        on which the transformation is performed.
       scale: A tensor up to n-D. The shape of this tensor must be broadcastable
-        to the shape of `inputs`. This is the scale applied to the normalized
+        to the shape of ``inputs``. This is the scale applied to the normalized
         inputs. This cannot be passed in if the module was constructed with
-        create_scale=True.
+        ``create_scale=True``.
       offset: A tensor up to n-D. The shape of this tensor must be broadcastable
-        to the shape of `inputs`. This is the offset applied to the normalized
-        inputs. This cannot be passed in if the module was constructed with
-        `create_offset=True`.
+        to the shape of ``inputs``. This is the offset applied to the normalized
+        ``inputs``. This cannot be passed in if the module was constructed with
+        ``create_offset=True``.
 
     Returns:
       An n-d tensor of the same shape as inputs that has been normalized.
@@ -195,39 +201,38 @@ class AxisNorm(base.Module):
 class LayerNorm(AxisNorm):
   """Normalizes inputs along the spatial and channel dimensions.
 
-  See `AxisNorm` for more details.
+  See :class:`AxisNorm` for more details.
 
   Attributes:
-    scale: If `create_scale`, a trainable variable holding the current scale
-      after the module is connected for the first time.
-    offset: If `create_offset`, a trainable variable holding the current offset
-      after the module is connected for the first time.
+    scale: If ``create_scale=True``, a trainable :tf:`Variable` holding the
+      current scale.
+    offset: If ``create_offset=True``, a trainable :tf:`Variable` holding the
+      current offset.
   """
 
   def __init__(self, create_scale, create_offset, eps=1e-4,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    """Constructs an `LayerNorm` module.
+    """Constructs a ``LayerNorm`` module.
 
     This method creates a module which normalizes over the spatial and channel
     dimensions.
 
     Args:
-      create_scale: Boolean representing whether to create a trainable scale per
-        channel applied after the normalization.
-      create_offset: Boolean representing whether to create a trainable offset
+      create_scale: ``bool`` representing whether to create a trainable scale
+        per channel applied after the normalization.
+      create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
-      eps: Small epsilon to avoid division by zero variance. Defaults to 1e-4.
+      eps: Small epsilon to avoid division by zero variance. Defaults to
+        ``1e-4``.
       scale_init: Optional initializer for the scale variable. Can only be set
-        if `create_scale` is True. By default scale is initialized to one.
+        if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
-        if `create_offset` is True. By default offset is initialized to zero.
-      data_format: The data format of the input. Can be either `channels_first`,
-        `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
+        if ``create_offset=True``. By default offset is initialized to ``0``.
+      data_format: The data format of the input. Can be either
+        ``channels_first``, ``channels_last``, ``N...C`` or ``NC...``. By
+        default it is ``channels_last``.
       name: Name of the module.
-
-    Returns:
-      An AxisNorm module.
     """
     super(LayerNorm, self).__init__(
         axis=slice(1, None),
@@ -243,42 +248,40 @@ class LayerNorm(AxisNorm):
 class InstanceNorm(AxisNorm):
   """Normalizes inputs along the channel dimension.
 
-  See `AxisNorm` for more details.
+  See :class:`AxisNorm` for more details.
 
   Attributes:
-    scale: If `create_scale`, a trainable variable holding the current scale
-      after the module is connected for the first time.
-    offset: If `create_offset`, a trainable variable holding the current offset
-      after the module is connected for the first time.
+    scale: If ``create_scale=True``, a trainable :tf:`Variable` holding the
+      current scale.
+    offset: If ``create_offset=True``, a trainable :tf:`Variable` holding the
+      current offset.
   """
 
   def __init__(self, create_scale, create_offset, eps=1e-4,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    """Constructs an InstanceNorm module.
+    """Constructs an ``InstanceNorm`` module.
 
     This method creates a module which normalizes over the channel dimension.
 
     Args:
-      create_scale: Boolean representing whether to create a trainable scale per
-        channel applied after the normalization.
-      create_offset: Boolean representing whether to create a trainable offset
+      create_scale: ``bool`` representing whether to create a trainable scale
+        per channel applied after the normalization.
+      create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
-      eps: Small epsilon to avoid division by zero variance. Defaults to 1e-4.
+      eps: Small epsilon to avoid division by zero variance. Defaults to
+        ``1e-4``.
       scale_init: Optional initializer for the scale variable. Can only be set
-        if `create_scale` is True. By default scale is initialized to one.
+        if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
-        if `create_offset` is True. By default offset is initialized to zero.
-      data_format: The data format of the input. Can be either `channels_first`,
-        `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
+        if ``create_offset=True``. By default offset is initialized to ``0``.
+      data_format: The data format of the input. Can be either
+        ``channels_first``, ``channels_last``, ``N...C`` or ``NC...``. By
+        default it is ``channels_last``.
       name: Name of the module.
-
-    Returns:
-      An AxisNorm module.
     """
-    channel_index = utils.get_channel_index(data_format)
     super(InstanceNorm, self).__init__(
-        axis=channel_index,
+        axis=utils.get_channel_index(data_format),
         create_scale=create_scale,
         create_offset=create_offset,
         eps=eps,

@@ -31,10 +31,12 @@ import doctest
 import inspect
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.append(os.path.abspath('ext'))
 
 import sonnet as snt
+import sphinxcontrib.katex as katex
 
 # -- Project information -----------------------------------------------------
 
@@ -102,6 +104,20 @@ doctest_default_flags = (doctest.ELLIPSIS
                          | doctest.IGNORE_EXCEPTION_DETAIL
                          | doctest.DONT_ACCEPT_TRUE_FOR_1
                          | doctest.NORMALIZE_WHITESPACE)
+
+# -- Options for katex ------------------------------------------------------
+
+# See: https://sphinxcontrib-katex.readthedocs.io/en/0.4.1/macros.html
+latex_macros = r"""
+    \def \d              #1{\operatorname{#1}}
+"""
+
+# Translate LaTeX macros to KaTeX and add to options for HTML builder
+katex_macros = katex.latex_defs_to_katex_macros(latex_macros)
+katex_options = 'macros: {' + katex_macros + '}'
+
+# Add LaTeX macros for LATEX builder
+latex_elements = {'preamble': latex_macros}
 
 # -- Source code links -------------------------------------------------------
 

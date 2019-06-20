@@ -132,12 +132,12 @@ class TrainableState(base.Module):
 
   The state can be constructed manually from a nest of initial values::
 
-      snt.TrainableState((tf.zeros([16]), tf.zeros([16])))
+      >>> state = snt.TrainableState((tf.zeros([16]), tf.zeros([16])))
 
   or automatically for a given :class:`RNNCore`::
 
-      core = snt.LSTM(hidden_size=16)
-      snt.TrainableState.for_core(core)
+      >>> core = snt.LSTM(hidden_size=16)
+      >>> state = snt.TrainableState.for_core(core)
   """
 
   @classmethod
@@ -164,7 +164,7 @@ class TrainableState(base.Module):
 
     Args:
       initial_values: Arbitrarily nested initial values for the state.
-      mask: Optional boolean mask of the same structure as `initial_values`
+      mask: Optional boolean mask of the same structure as ``initial_values``
         specifying which components should be trainable. If not given,
         the whole state is considered trainable.
       name: Name of the module.
@@ -232,18 +232,18 @@ def static_unroll(
   Args:
     core: An :class:`RNNCore` to unroll.
     input_sequence: An arbitrarily nested structure of tensors of shape
-      [T, B, ...] where T is the number of time steps, and B is the
+      ``[T, B, ...]`` where ``T`` is the number of time steps, and ``B`` is the
       batch size.
     initial_state: initial state of the given core.
-    sequence_length: An optional tensor of shape `[B]` specifying the
+    sequence_length: An optional tensor of shape ``[B]`` specifying the
       lengths of sequences within the (padded) batch.
 
   Returns:
     A tuple with two elements:
       * **output_sequence** - An arbitrarily nested structure of tensors
-        of shape [T, B, ...]. Dimensions following the batch size could
+        of shape ``[T, B, ...]``. Dimensions following the batch size could
         be different from that of the ``input_sequence``.
-      * **final_state** - Core state at time step T.
+      * **final_state** - Core state at time step ``T``.
 
   Raises:
     ValueError: If ``input_sequence`` is empty.
@@ -321,12 +321,12 @@ def dynamic_unroll(
   Args:
     core: An :class:`RNNCore` to unroll.
     input_sequence: An arbitrarily nested structure of tensors of shape
-      [T, B, ...] where T is the number of time steps, and B is the
+      ``[T, B, ...]`` where ``T`` is the number of time steps, and ``B`` is the
       batch size.
     initial_state: initial state of the given core.
-    sequence_length: An optional tensor of shape [B] specifying the
+    sequence_length: An optional tensor of shape ``[B]`` specifying the
       lengths of sequences within the (padded) batch.
-    parallel_iterations: An optional int specifying the number of
+    parallel_iterations: An optional ``int`` specifying the number of
       iterations to run in parallel. Those operations which do not have
       any temporal dependency and can be run in parallel, will be. This
       parameter trades off time for space. Values >> 1 use more memory
@@ -340,9 +340,9 @@ def dynamic_unroll(
   Returns:
     A tuple with two elements:
       * **output_sequence** - An arbitrarily nested structure of tensors
-        of shape [T, B, ...]. Dimensions following the batch size could
+        of shape ``[T, B, ...]``. Dimensions following the batch size could
         be different from that of the ``input_sequence``.
-      * **final_state** - Core state at time step T.
+      * **final_state** - Core state at time step ``T``.
 
   Raises:
     ValueError: If ``input_sequence`` is empty.
@@ -385,9 +385,9 @@ def dynamic_unroll(
 
 
 def _unstack_input_sequence(input_sequence):
-  """Unstacks the input sequence into a nest of `tf.TensorArray`s.
+  r"""Unstacks the input sequence into a nest of :tf:`TensorArray`\ s.
 
-  This allows to traverse the input sequence using `tf.TensorArray.read`
+  This allows to traverse the input sequence using :tf:`TensorArray.read`
   instead of a slice, avoiding O(sliced tensor) slice gradient
   computation during the backwards pass.
 
@@ -396,7 +396,7 @@ def _unstack_input_sequence(input_sequence):
 
   Returns:
     num_steps: Number of steps in the input sequence.
-    input_tas: An arbitrarily nested structure of `tf.TensorArrays` of
+    input_tas: An arbitrarily nested structure of :tf:`TensorArray`\ s of
       size ``num_steps``.
 
   Raises:
@@ -434,7 +434,7 @@ def _rnn_step(
     t,
     prev_outputs,
     prev_state):
-  """Performs a single step of an RNN optionally accounting for variable length."""
+  """Performs a single RNN step optionally accounting for variable length."""
   outputs, state = core(
       nest.map_structure(lambda i: i.read(t), input_tas),
       prev_state)
@@ -469,10 +469,10 @@ class VanillaRNN(RNNCore):
 
   Attributes:
     input_to_hidden: Input-to-hidden weights :math:`w_i`, a tensor
-      of shape [hidden_size, hidden_size].
+      of shape ``[hidden_size, hidden_size]``.
     hidden_to_hidden: Hidden-to-hidden weights :math:`w_i`, a tensor
-      of shape [input_size, hidden_size].
-    b: bias, a tensor or shape [hidden_size].
+      of shape ``[input_size, hidden_size]``.
+    b: bias, a tensor or shape ``[hidden_size]``.
   """
 
   def __init__(
@@ -551,8 +551,8 @@ class VanillaRNN(RNNCore):
 class _LegacyDeepRNN(RNNCore):
   """Sonnet 1 compatible :class:`DeepRNN` implementation.
 
-  This class is not intended to be used directly. Refer to
-  :class:`DeepRNN` and ``deep_rnn_with_*_connections``.
+  This class is not intended to be used directly. Refer to :class:`DeepRNN`
+  and ``deep_rnn_with_*_connections``.
   """
 
   def __init__(
@@ -785,12 +785,12 @@ class LSTM(RNNCore):
   Attributes:
     input_to_hidden: Input-to-hidden weights :math:`W_{ii}`, :math:`W_{if}`,
       :math:`W_{ig}` and :math:`W_{io}` concatenated into a tensor
-      of shape [input_size, 4 * hidden_size].
+      of shape ``[input_size, 4 * hidden_size]``.
     hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hi}`, :math:`W_{hf}`,
       :math:`W_{hg}` and :math:`W_{ho}` concatenated into a tensor
-      of shape [hidden_size, 4 * hidden_size].
+      of shape ``[hidden_size, 4 * hidden_size]``.
     b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
-      concatenated into a tensor of shape [4 * hidden_size].
+      concatenated into a tensor of shape ``[4 * hidden_size]``.
   """
 
   def __init__(
@@ -928,7 +928,7 @@ class UnrolledLSTM(UnrolledRNN):
 
   The implementation uses efficient device-specialized ops, e.g. CuDNN-RNN
   on a CUDA-enabled GPU, and can be an order of magnitude faster than
-  `snt.*_unroll` with an `snt.LSTM` core.
+  ``snt.*_unroll`` with an :class:`LSTM` core.
   """
 
   def __init__(
@@ -1020,19 +1020,19 @@ def _specialize_per_device(
     specializations,
     default,
     **tf_function_kwargs):
-  """Create a `tf.function` specialized per-device.
+  """Create a :tf:`function` specialized per-device.
 
   Args:
-    unique_api_name: Globally unique name of the function, e.g. `"lstm"`.
-    specializations: A mapping from device type (e.g. `"CPU"` or `"TPU`)
+    unique_api_name: Globally unique name of the function, e.g. ``"lstm"``.
+    specializations: A mapping from device type (e.g. ``"CPU"`` or ``"TPU``)
       to a Python function with a specialized implementation for that
       device.
-    default: Default device type to use (typically, `"CPU"`).
+    default: Default device type to use (typically, ``"CPU"``).
     **tf_function_kwargs: Additional keyword arguments to pass to
-      `tf.function` when compiling specializations.
+      :tf:`function` when compiling specializations.
 
   Returns:
-    A `tf.function` which when called dispatches to the specialization
+    A :tf:`function` which when called dispatches to the specialization
     for the current device.
   """
   functions = {}
@@ -1097,22 +1097,22 @@ class _RecurrentDropoutWrapper(RNNCore):
   """Recurrent dropout wrapper for a base RNN core.
 
   The wrapper drops the previous state of the base core according to
-  dropout `rates`. Specifically, dropout is only applied if the rate
+  dropout ``rates``. Specifically, dropout is only applied if the rate
   corresponding to the state element is not `None`. Dropout masks
   are sampled in `initial_state` of the wrapper.
 
   This class is not intended to be used directly. See
-  `lstm_with_recurrent_dropout`.
+  ``lstm_with_recurrent_dropout``.
   """
 
   def __init__(self, base_core, rates, seed=None):
     """Wraps a given base RNN core.
 
     Args:
-      base_core: The RNNCore to be wrapped
+      base_core: The ``RNNCore`` to be wrapped
       rates: Recurrent dropout probabilities. The structure should
-        match that of `base_core.initial_state`.
-      seed: Optional int; seed passed to `tf.nn.dropout`.
+        match that of ``base_core.initial_state``.
+      seed: Optional int; seed passed to :tf:`nn.dropout`.
     """
     super(_RecurrentDropoutWrapper, self).__init__(
         name=base_core.name + "_recurrent_dropout")
@@ -1168,7 +1168,7 @@ def lstm_with_recurrent_dropout(
   Args:
     hidden_size: Hidden layer size.
     dropout: Dropout probability.
-    seed: Optional int; seed passed to `tf.nn.dropout`.
+    seed: Optional int; seed passed to :tf:`nn.dropout`.
     **kwargs: Optional keyword arguments to pass to the :class:`LSTM`
       constructor.
 
@@ -1177,7 +1177,7 @@ def lstm_with_recurrent_dropout(
     test_lstm: The same as ``train_lstm`` but without recurrent dropout.
 
   Raises:
-    ValueError: If ``dropout`` is not in [0, 1).
+    ValueError: If ``dropout`` is not in ``[0, 1)``.
   """
   if dropout < 0 or dropout >= 1:
     raise ValueError(
@@ -1221,15 +1221,15 @@ class _ConvNDLSTM(RNNCore):
     input_to_hidden: Input-to-hidden convolution weights :math:`W_{ii}`,
       :math:`W_{if}`, :math:`W_{ig}` and :math:`W_{io}` concatenated into
       a single tensor of shape
-      [kernel_shape*, input_channels, 4 * output_channels] where
+      ``[kernel_shape*, input_channels, 4 * output_channels]`` where
       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
     hidden_to_hidden: Hidden-to-hidden convolution weights :math:`W_{hi}`,
       :math:`W_{hf}`, :math:`W_{hg}` and :math:`W_{ho}` concatenated into
       a single tensor of shape
-      [kernel_shape*, input_channels, 4 * output_channels] where
+      ``[kernel_shape*, input_channels, 4 * output_channels]`` where
       ``kernel_shape`` is repeated ``num_spatial_dims`` times.
     b: Biases :math:`b_i`, :math:`b_f`, :math:`b_g` and :math:`b_o`
-      concatenated into a tensor of shape [4 * output_channels].
+      concatenated into a tensor of shape ``[4 * output_channels]``.
   """
 
   def __init__(
@@ -1527,12 +1527,12 @@ class GRU(RNNCore):
   Attributes:
     input_to_hidden: Input-to-hidden weights :math:`W_{iz}`, :math:`W_{ir}`
       and :math:`W_{ia}` concatenated into a tensor
-      of shape [input_size, 3 * hidden_size].
+      of shape ``[input_size, 3 * hidden_size]``.
     hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hz}`, :math:`W_{hr}`
       and :math:`W_{ha}` concatenated into a tensor of shape
-      [hidden_size, 3 * hidden_size].
+      ``[hidden_size, 3 * hidden_size]``.
     b: Biases :math:`b_z`, :math:`b_r` and :math:`b_a` concatenated into
-      a tensor of shape [3 * hidden_size].
+      a tensor of shape ``[3 * hidden_size]``.
   """
 
   def __init__(
@@ -1645,7 +1645,8 @@ class CuDNNGRU(RNNCore):
         Defaults to Glorot uniform initializer.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to Glorot uniform initializer.
-      b_init: Optional initializer for the biases. Defaults to `Zeros`.
+      b_init: Optional initializer for the biases. Defaults to
+        :class:`~initializers.Zeros`.
       dtype: Optional :tf:`DType` of the core's variables. Defaults to
         ``tf.float32``.
       name: Name of the module.

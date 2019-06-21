@@ -82,39 +82,20 @@ class Momentum(base.Module):
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
 
-        tf.raw_ops.ResourceApplyMomentum(
-            var=parameter.handle,
-            accum=accumulated_momentum.handle,
-            lr=learning_rate,
-            grad=update,
-            momentum=momentum,
-            use_nesterov=self.use_nesterov)
+        accumulated_momentum.assign((momentum * accumulated_momentum) + update)
+        if self.use_nesterov:
+          parameter.assign_sub(learning_rate * update +
+                               learning_rate * momentum * accumulated_momentum)
+        else:
+          parameter.assign_sub(learning_rate * accumulated_momentum)
 
 
-class ReferenceMomentum(base.Module):
-  """Reference version of the `Momentum` module.
-
-  This is a reference implementation of the Momentum module. It doesn't use
-  `tf.raw_ops` so it will be slower but you may find it easier to customize. It
-  is fully tested and its behaviour matches the `tf.raw_ops` version. If you
-  need a custom variant of `Momentum`, we recommend starting with this.
-
-  By default it applies the momentum update rule for each update, parameter
-  pair:
-
-      accum_t <- momentum * accum_{t-1} + update
-      parameter <- parameter - learning_rate * accum_t
-
-  And when using Nesterov momentum (`use_nesterov=True`) it applies:
-
-      accum_t <- momentum * accum_{t-1} + update
-      parameter <- parameter - (learning_rate * update +
-                                learning_rate * momentum * accum_t)
-  """
+class FastMomentum(base.Module):
+  """Faster SGD with Momentum module."""
 
   def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
-    """Constructs a `ReferenceMomentum` module."""
-    super(ReferenceMomentum, self).__init__(name)
+    """Constructs a `Momentum` module."""
+    super(FastMomentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum
     self.use_nesterov = use_nesterov
@@ -152,9 +133,10 @@ class ReferenceMomentum(base.Module):
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
 
-        accumulated_momentum.assign((momentum * accumulated_momentum) + update)
-        if self.use_nesterov:
-          parameter.assign_sub(learning_rate * update +
-                               learning_rate * momentum * accumulated_momentum)
-        else:
-          parameter.assign_sub(learning_rate * accumulated_momentum)
+        tf.raw_ops.ResourceApplyMomentum(
+            var=parameter.handle,
+            accum=accumulated_momentum.handle,
+            lr=learning_rate,
+            grad=update,
+            momentum=momentum,
+            use_nesterov=self.use_nesterov)

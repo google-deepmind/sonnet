@@ -27,7 +27,7 @@ import tensorflow as tf
 
 class SGDTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testDense(self, sgd_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -36,7 +36,7 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-14., -13.], [-6., -5.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testNoneUpdate(self, sgd_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]
@@ -44,7 +44,7 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose([[1., 2.]], [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testVariableLearningRate(self, sgd_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -59,7 +59,7 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-24., -23.], [-12., -11.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testLearningRateDTypeConversion(self, sgd_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -70,7 +70,7 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-14., -13.], [-6., -5.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testDifferentLengthUpdatesParams(self, sgd_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -79,13 +79,13 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testEmptyParams(self, sgd_class):
     optimizer = sgd_class(learning_rate=3.)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(sgd.SGD, sgd.ReferenceSGD)
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testInconsistentDTypes(self, sgd_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]

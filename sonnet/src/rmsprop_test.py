@@ -29,7 +29,7 @@ import tensorflow as tf
 
 class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -47,7 +47,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.262262, 1.262262], [2.262262, 3.262262]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]
@@ -55,7 +55,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose([[1., 2.]], [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testVariableHyperParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -70,7 +70,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.660831, 1.660831], [2.660831, 3.660831]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testHyperParamDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -85,7 +85,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -94,13 +94,13 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=0.1)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
@@ -109,7 +109,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testMovingVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.1)
     with tf.device("CPU:0"):
@@ -118,7 +118,7 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(optimizer.mom[0].device, var.device)
     self.assertEqual(optimizer.ms[0].device, var.device)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.ReferenceRMSProp)
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testUnsuppportedStrategyError(self, opt_class):
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

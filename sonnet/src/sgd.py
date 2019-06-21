@@ -53,24 +53,15 @@ class SGD(base.Module):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        tf.raw_ops.ResourceApplyGradientDescent(
-            var=parameter.handle,
-            alpha=learning_rate,
-            delta=update)
+        parameter.assign_sub(update * learning_rate)
 
 
-class ReferenceSGD(base.Module):
-  """Reference version of the Stochastic Gradient Descent module.
-
-  This is a reference implementation of the SGD module. It doesn't use raw_ops
-  so it will be slower but you may find it easier to customize. It is fully
-  tested and its behaviour matches the raw_ops version. If you need a custom
-  variant of SGD, we recommend starting with this.
-  """
+class FastSGD(base.Module):
+  """Faster Stochastic Gradient Descent (SGD) module."""
 
   def __init__(self, learning_rate, name=None):
-    """Constructs a reference Stochastic Gradient Descent module."""
-    super(ReferenceSGD, self).__init__(name)
+    """Constructs an `SGD` module."""
+    super(FastSGD, self).__init__(name)
     self.learning_rate = learning_rate
 
   def apply(self, updates, parameters):
@@ -88,7 +79,13 @@ class ReferenceSGD(base.Module):
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
+      # TODO(petebu): Add support for sparse tensors.
+      # TODO(petebu): Consider caching learning_rate cast.
+      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        parameter.assign_sub(update * learning_rate)
+        tf.raw_ops.ResourceApplyGradientDescent(
+            var=parameter.handle,
+            alpha=learning_rate,
+            delta=update)

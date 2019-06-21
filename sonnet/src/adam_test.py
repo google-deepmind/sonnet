@@ -27,7 +27,7 @@ import tensorflow as tf
 
 class AdamTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -45,7 +45,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.997, 1.997], [2.997, 3.997]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]
@@ -53,7 +53,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose([[1., 2.]], [x.numpy() for x in parameters])
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testVariableHyperParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -68,7 +68,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.899, 1.899], [2.899, 3.899]],
                         [x.numpy() for x in parameters], rtol=1e-4)
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testHyperParamDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -83,7 +83,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.999, 1.999], [2.999, 3.999]],
                         [x.numpy() for x in parameters], rtol=1e-4)
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -92,13 +92,13 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=0.001)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
@@ -107,7 +107,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testMomentVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.001)
     with tf.device("CPU:0"):
@@ -116,7 +116,7 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(optimizer.m[0].device, var.device)
     self.assertEqual(optimizer.v[0].device, var.device)
 
-  @parameterized.parameters(adam.Adam, adam.ReferenceAdam)
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testUnsuppportedStrategyError(self, opt_class):
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

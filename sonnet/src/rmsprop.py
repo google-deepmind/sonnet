@@ -114,60 +114,23 @@ class RMSProp(base.Module):
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
 
+        ms.assign(tf.square(update) * (1. - decay) + ms * decay)
         if self.centered:
-          tf.raw_ops.ResourceApplyCenteredRMSProp(
-              var=parameter.handle,
-              mg=mg.handle,
-              ms=ms.handle,
-              mom=mom.handle,
-              lr=learning_rate,
-              rho=decay,
-              momentum=momentum,
-              epsilon=epsilon,
-              grad=update)
+          mg.assign(update * (1. - decay) + mg * decay)
+          denominator = ms - mg + epsilon
         else:
-          tf.raw_ops.ResourceApplyRMSProp(
-              var=parameter.handle,
-              ms=ms.handle,
-              mom=mom.handle,
-              lr=learning_rate,
-              rho=decay,
-              momentum=momentum,
-              epsilon=epsilon,
-              grad=update)
+          denominator = ms + epsilon
+        mom.assign(momentum * mom + (
+            learning_rate * update * tf.math.rsqrt(denominator)))
+        parameter.assign_sub(mom)
 
 
-class ReferenceRMSProp(base.Module):
-  """Reference version of the RMSProp module.
-
-  See: http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
-
-  Maintain a moving (discounted) average of the square of updates. Divides each
-  update by the root of this average.
-
-      ms <- decay * ms + (1-decay) * update^2
-      mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
-      parameter := parameter - mom
-
-  This implementation of RMSprop uses plain momentum, not Nesterov momentum.
-
-  The centered version additionally maintains a moving average of the
-  gradients, and uses that average to estimate the variance:
-
-      mg = decay * mg + (1-decay) * update
-      ms = decay * ms + (1-decay) * update^2
-      mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
-      parameter := parameter - mom
-
-  This is a reference implementation of the RMSProp module. It doesn't use
-  raw_ops so it will be slower but you may find it easier to customize. It is
-  fully tested and its behaviour matches the raw_ops version. If you need a
-  custom variant of RMSProp, we recommend starting with this.
-  """
+class FastRMSProp(base.Module):
+  """Faster RMSProp module."""
 
   def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
                centered=False, name=None):
-    """Constructs a reference RMSProp module.
+    """Constructs an `RMSProp` module.
 
     Args:
       learning_rate: Learning rate.
@@ -180,7 +143,7 @@ class ReferenceRMSProp(base.Module):
         computation and memory. Defaults to False.
       name: Name for this module.
     """
-    super(ReferenceRMSProp, self).__init__(name)
+    super(FastRMSProp, self).__init__(name)
     self.learning_rate = learning_rate
     self.decay = decay
     self.momentum = momentum
@@ -229,12 +192,24 @@ class ReferenceRMSProp(base.Module):
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
 
-        ms.assign(tf.square(update) * (1. - decay) + ms * decay)
         if self.centered:
-          mg.assign(update * (1. - decay) + mg * decay)
-          denominator = ms - mg + epsilon
+          tf.raw_ops.ResourceApplyCenteredRMSProp(
+              var=parameter.handle,
+              mg=mg.handle,
+              ms=ms.handle,
+              mom=mom.handle,
+              lr=learning_rate,
+              rho=decay,
+              momentum=momentum,
+              epsilon=epsilon,
+              grad=update)
         else:
-          denominator = ms + epsilon
-        mom.assign(momentum * mom + (
-            learning_rate * update * tf.math.rsqrt(denominator)))
-        parameter.assign_sub(mom)
+          tf.raw_ops.ResourceApplyRMSProp(
+              var=parameter.handle,
+              ms=ms.handle,
+              mom=mom.handle,
+              lr=learning_rate,
+              rho=decay,
+              momentum=momentum,
+              epsilon=epsilon,
+              grad=update)

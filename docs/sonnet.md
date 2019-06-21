@@ -11266,7 +11266,7 @@ Return zero-filled state tensor(s).
 
 Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.
 
-#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/python/ops/lstm_ops.py?l=344)<a id="LSTMBlockCell.__init__" />
+#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/python/ops/lstm_ops.py?l=307)<a id="LSTMBlockCell.__init__" />
 
 Initialize the basic LSTM cell.
 

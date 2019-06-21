@@ -131,6 +131,9 @@ from sonnet.python.modules.gated_rnn import lstm_with_zoneout
 from sonnet.python.modules.gated_rnn import LSTMBlockCell
 from sonnet.python.modules.gated_rnn import LSTMState
 from sonnet.python.modules.layer_norm import LayerNorm
+from sonnet.python.modules.moving_average import MovingAverage
+from sonnet.python.modules.optimization_constraints import get_lagrange_multiplier
+from sonnet.python.modules.optimization_constraints import OptimizationConstraints
 from sonnet.python.modules.pondering_rnn import ACTCore
 from sonnet.python.modules.relational_memory import RelationalMemory
 from sonnet.python.modules.residual import Residual

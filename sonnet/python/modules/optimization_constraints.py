@@ -124,7 +124,7 @@ class OptimizationConstraints(object):
       `TypeError`, when input expression op is not one of `Greater`,
       `GreaterEqual`, `Less`, `LessEqual`.
     """
-    self._assert_is_not_frozen()
+    self._assert_is_not_connected()
     lhs = expression.op.inputs[0]
     rhs = expression.op.inputs[1]
     op_type = expression.op.type
@@ -162,7 +162,7 @@ class OptimizationConstraints(object):
     Returns:
       Self.
     """
-    self._assert_is_not_frozen()
+    self._assert_is_not_connected()
     constraint_op = lhs - rhs
     self._constraints.append(constraint_op)
     valid_range = valid_range or self._valid_range
@@ -197,7 +197,7 @@ class OptimizationConstraints(object):
     Returns:
       Self.
     """
-    self._assert_is_not_frozen()
+    self._assert_is_not_connected()
     constraint_op = rhs - lhs
     return self.add_leq(
         constraint_op, rate=rate, valid_range=valid_range,
@@ -205,7 +205,7 @@ class OptimizationConstraints(object):
 
   def __call__(self):
     """Adds constrains and Lagrange multipliers to graph."""
-    if self._is_frozen:
+    if self._is_connected:
       return self._penalty
 
     self._penalty = tf.zeros(())
@@ -214,14 +214,14 @@ class OptimizationConstraints(object):
     return self._penalty
 
   @property
-  def _is_frozen(self):
+  def _is_connected(self):
     return self._penalty is not None
 
-  def _assert_is_not_frozen(self):
-    if self._is_frozen:
+  def _assert_is_not_connected(self):
+    if self._is_connected:
       raise ValueError(
           'Cannot add further constraints once OptimizationConstraints has '
-          'been connected to the graph by call it.')
+          'been connected to the graph by calling it.')
 
 
 def get_lagrange_multiplier(shape=(),

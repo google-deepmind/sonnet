@@ -148,11 +148,11 @@ class OptimizationConstrainsTest(tf.test.TestCase, parameterized.TestCase):
     constr = optimization_constraints.OptimizationConstraints().add(
         x > min_value)
 
-    self.assertFalse(constr._is_frozen)
+    self.assertFalse(constr._is_connected)
     loss = moving_average.MovingAverage()(
         x2 + tf.random.normal((), stddev=1.0)) + constr()
 
-    self.assertTrue(constr._is_frozen)
+    self.assertTrue(constr._is_connected)
     with self.assertRaisesRegexp(ValueError, 'Cannot add further constraints'):
       constr.add(x > min_value)
     with self.assertRaisesRegexp(ValueError, 'Cannot add further constraints'):

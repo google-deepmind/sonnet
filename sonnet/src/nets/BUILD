@@ -42,6 +42,7 @@ py_library(
 
 snt_py_test(
     name = "cifar10_convnet_test",
+    timeout = "long",
     srcs = ["cifar10_convnet_test.py"],
     deps = [
         ":cifar10_convnet",

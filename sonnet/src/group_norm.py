@@ -30,7 +30,7 @@ import tensorflow as tf
 
 
 class GroupNorm(base.Module):
-  """Constructs a group norm module.
+  r"""Group normalization module.
 
   This applies group normalization to the inputs. This involves splitting the
   channels into groups before calculating the mean and variance. The default
@@ -38,56 +38,61 @@ class GroupNorm(base.Module):
   the grouped channels. The mean and variance will never be computed over the
   created groups axis.
 
-  It transforms the input x into:
+  It transforms the input ``x`` into:
 
-      outputs = scale * (x - mu) / sigma + offset
+  .. math::
 
-  Where `mu` and `sigma` are respectively the mean and standard deviation of
-  `x`.
+     \d{outputs} = \d{scale} \dfrac{x - \mu}{\sigma + \epsilon} + \d{offset}
+
+  Where :math:`\mu` and :math:`\sigma` are respectively the mean and standard
+  deviation of ``x``.
 
   There are many different variations for how users want to manage scale and
   offset if they require them at all. These are:
 
-    - No scale/offset in which case create_* should be set to False and
-      scale/offset aren't passed when the module is called.
-    - Trainable scale/offset in which case create_* should be set to True and
-      again scale/offset aren't passed when the module is called. In this case
-      this module creates and owns the scale/offset variables.
-    - Externally generated scale/offset, such as for conditional normalization,
-      in which case create_* should be set to False and then the values fed in
-      at call time.
+    - No ``scale``/``offset`` in which case ``create_*`` should be set to
+      ``False`` and ``scale``/``offset`` aren't passed when the module is
+      called.
+    - Trainable ``scale``/``offset`` in which case create_* should be set to
+      ``True`` and again ``scale``/``offset`` aren't passed when the module is
+      called. In this case this module creates and owns the scale/offset
+      variables.
+    - Externally generated ``scale``/``offset``, such as for conditional
+      normalization, in which case ``create_*`` should be set to ``False`` and
+      then the values fed in at call time.
 
   Attributes:
-    scale: If `create_scale`, a trainable variable holding the current scale
-      after the module is connected for the first time.
-    offset: If `create_offset`, a trainable variable holding the current offset
-      after the module is connected for the first time.
+    scale: If ``create_scale=True``, a trainable :tf:`Variable` holding the
+      current scale.
+    offset: If ``create_offset=True``, a trainable :tf:`Variable` holding the
+      current offset.
   """
 
   def __init__(self, groups, axis=slice(1, None), create_scale=True,
                create_offset=True, eps=1e-4, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
-    """Constructs a `GroupNorm` module.
+    """Constructs a ``GroupNorm`` module.
 
     Args:
-      groups: An int, the number of groups to divide the channels by. The number
-        of channels must be divisible by this.
-      axis: An int, slice or sequence of ints representing the axes which should
-        be normalized across. By default this is all but the first dimension.
-        For time series data use `slice(2, None)` to average over the none Batch
-        and Time data.
-      create_scale: Boolean representing whether to create a trainable scale per
-        channel applied after the normalization.
-      create_offset: Boolean representing whether to create a trainable offset
+      groups: ``int`` representing the number of groups to divide the channels
+        by. The number of channels must be divisible by this.
+      axis: ``int``, ``slice`` or sequence of ints representing the axes which
+        should be normalized across. By default this is all but the first
+        dimension. For time series data use `slice(2, None)` to average over the
+        none Batch and Time data.
+      create_scale: ``bool`` representing whether to create a trainable scale
+        per channel applied after the normalization.
+      create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
       eps: Small epsilon to add to the variance to avoid division by zero.
-        Defaults to 1e-4.
+        Defaults to ``1e-4``.
       scale_init: Optional initializer for the scale variable. Can only be set
-        if with_scale is True. By default scale is initialized to one.
+        if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
-        if with_offset is True. By default offset is initialized to zero.
-      data_format: The data format of the input. Can be either `channels_first`,
-        `channels_last`, `N...C` or `NC...`. By default it is `channels_last`.
+        if ``create_offset=True``. By default offset is initialized to ``0``.
+      data_format: The data format of the input. Can be either
+        ``channels_first``, ``channels_last``, ``N...C`` or ``NC...``. By
+        default it is ``channels_last``.
       name: Name of the module.
     """
     super(GroupNorm, self).__init__(name=name)
@@ -126,19 +131,19 @@ class GroupNorm(base.Module):
     """Returns normalized inputs.
 
     Args:
-      inputs: An `N - D` tensor of the data_format specified above on which the
-        transformation is performed.
-      scale: A tensor up to `N - D`. The shape of this tensor must be
-        broadcastable to the shape of `inputs`. This is the scale applied to the
-        normalised inputs. This cannot be passed in if the module was
-        constructed with `create_scale=True`.
-      offset: A tensor up to `N - D`. The shape of this tensor must be
-        broadcastable to the shape of `inputs`. This is the offset applied to
-        the normalised inputs. This cannot be passed in if the module was
-        constructed with `create_offset=True`.
+      inputs: An n-D tensor of the ``data_format`` specified in the constructor
+        on which the transformation is performed.
+      scale: A tensor up to n-D. The shape of this tensor must be broadcastable
+        to the shape of ``inputs``. This is the scale applied to the normalized
+        inputs. This cannot be passed in if the module was constructed with
+        ``create_scale=True``.
+      offset: A tensor up to n-D. The shape of this tensor must be broadcastable
+        to the shape of ``inputs``. This is the offset applied to the normalized
+        ``inputs``. This cannot be passed in if the module was constructed with
+        ``create_offset=True``.
 
     Returns:
-      An `N - D` tensor of the same shape as inputs that has been normalized.
+      An n-d tensor of the same shape as inputs that has been normalized.
     """
     self._initialize(inputs)
     if self._create_scale:

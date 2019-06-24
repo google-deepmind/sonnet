@@ -83,7 +83,7 @@ class ConstantInitializersTest(InitializersTest):
   def testConstantInvalidValue(self, value, value_type):
     with self.assertRaisesRegexp(
         TypeError,
-        r"Invalid type for initial value: .*{}.*".format(value_type)):
+        r"Invalid type for value: .*{}.*".format(value_type)):
       initializers.Constant(value())
 
   @parameterized.parameters(

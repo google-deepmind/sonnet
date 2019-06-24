@@ -32,12 +32,12 @@ class Initializer(object):
 
   @abc.abstractmethod
   def __call__(self, shape, dtype):
-    """Returns a tensor of the given shape and dtype."""
+    """Returns a tensor of the given ``shape`` and ``dtype``."""
     pass
 
 
 class Zeros(Initializer):
-  """`Initializer` that generates tensors initialized to 0."""
+  """Initializer that generates tensors initialized to 0."""
 
   def __call__(self, shape, dtype):
     dtype = _as_numerical_dtype(dtype)
@@ -45,7 +45,7 @@ class Zeros(Initializer):
 
 
 class Ones(Initializer):
-  """`Initializer` that generates tensors initialized to 1."""
+  """Initializer that generates tensors initialized to 1."""
 
   def __call__(self, shape, dtype):
     dtype = _as_numerical_dtype(dtype)
@@ -53,12 +53,12 @@ class Ones(Initializer):
 
 
 class Constant(Initializer):
-  """`Initializer` that generates tensors initialized to the given value."""
+  """Initializer that generates tensors initialized to the given value."""
 
   def __init__(self, value):
     if not np.isscalar(value):
       raise TypeError(
-          "Invalid type for initial value: {} (expected scalar).".
+          "Invalid type for value: {} (expected scalar).".
           format(type(value)))
     self.value = value
 
@@ -69,20 +69,22 @@ class Constant(Initializer):
 
 
 class RandomUniform(Initializer):
-  """`Initializer` that generates tensors with a uniform distribution.
+  """Initializer that generates tensors with a uniform distribution.
 
   The generated values follow a uniform distribution in the range
-  `[minval, maxval)`.
-
-  Args:
-    minval: A scalar. Lower bound of the range of random values to generate.
-      Defaults to 0.
-    maxval: A scalar. Upper bound of the range of random values to generate.
-      Defaults to 1 for float types.
-    seed: An integer. Seed used in the generation of random numbers.
+  ``[minval, maxval)``.
   """
 
   def __init__(self, minval=0, maxval=1, seed=None):
+    """Constructs a random uniform initializer.
+
+    Args:
+      minval: A python scalar or a scalar tensor. Lower bound of the range of
+        random values to generate. Defaults to ``0``.
+      maxval: A python scalar or a scalar tensor. Upper bound of the range of
+        random values to generate. Defaults to ``1``.
+      seed: ``int``, the seed used in the generation of random numbers.
+    """
     self.minval = minval
     self.maxval = maxval
     self.seed = seed
@@ -98,17 +100,18 @@ class RandomUniform(Initializer):
 
 
 class RandomNormal(Initializer):
-  """`Initializer` that generates tensors with a normal distribution.
-
-  Args:
-    mean: A python scalar or a scalar tensor. Mean of the random values
-      to generate.
-    stddev: A python scalar or a scalar tensor. Standard deviation of the
-      random values to generate.
-    seed: An integer. Seed used in the generation of random numbers.
-  """
+  """Initializer that generates tensors with a normal distribution."""
 
   def __init__(self, mean=0.0, stddev=1.0, seed=None):
+    """Constructs a random normal initializer.
+
+    Args:
+      mean: A python scalar or a scalar tensor. Mean of the random values
+        to generate.
+      stddev: A python scalar or a scalar tensor. Standard deviation of the
+        random values to generate.
+      seed: ``int``, the seed used in the generation of random numbers.
+    """
     self.mean = mean
     self.stddev = stddev
     self.seed = seed
@@ -124,21 +127,23 @@ class RandomNormal(Initializer):
 
 
 class TruncatedNormal(Initializer):
-  """`Initializer` that generates a truncated normal distribution.
+  """Initializer that generates a truncated normal distribution.
 
   These values follow a normal distribution except that values more than two
   standard deviations from the mean are discarded and re-drawn. This is the
   recommended initializer for neural network weights and filters.
-
-  Args:
-    mean: A python scalar or a scalar tensor. Mean of the random values
-      to generate.
-    stddev: A python scalar or a scalar tensor. Standard deviation of the
-      random values to generate.
-    seed: An integer. Seed used in the generation of random numbers.
   """
 
   def __init__(self, mean=0.0, stddev=1.0, seed=None):
+    """Constructs a truncated normal initializer.
+
+    Args:
+      mean: A python scalar or a scalar tensor. Mean of the random values
+        to generate.
+      stddev: A python scalar or a scalar tensor. Standard deviation of the
+        random values to generate.
+      seed: ``int``, the seed used in the generation of random numbers.
+    """
     self.mean = mean
     self.stddev = stddev
     self.seed = seed
@@ -154,15 +159,17 @@ class TruncatedNormal(Initializer):
 
 
 class Identity(Initializer):
-  """`Initializer` that generates the identity matrix.
+  """Initializer that generates the identity matrix.
 
   Constructs a 2D identity matrix or batches of these.
-
-  Args:
-    gain: Multiplicative factor to apply to the identity matrix.
   """
 
   def __init__(self, gain=1.0):
+    """Constructs an identity initializer.
+
+    Args:
+      gain: Multiplicative factor to apply to the identity matrix.
+    """
     self.gain = gain
 
   def __call__(self, shape, dtype):
@@ -180,7 +187,7 @@ class Identity(Initializer):
 
 
 class Orthogonal(Initializer):
-  """`Initializer` that generates an orthogonal matrix.
+  """Initializer that generates an orthogonal matrix.
 
   NOTE: Does not support 1D tensors.
 
@@ -193,16 +200,18 @@ class Orthogonal(Initializer):
   rows. Otherwise, the output will have orthogonal columns.
 
   If the shape of the tensor to initialize is more than two-dimensional,
-  a matrix of shape `(shape[0] * ... * shape[n - 2], shape[n - 1])`
-  is initialized, where `n` is the length of the shape vector.
+  a matrix of shape ``(shape[0] * ... * shape[n - 2], shape[n - 1])``
+  is initialized, where ``n`` is the length of the shape vector.
   The matrix is subsequently reshaped to give a tensor of the desired shape.
-
-  Args:
-    gain: Multiplicative factor to apply to the orthogonal matrix
-    seed: An integer. Seed used in the generation of random numbers.
   """
 
   def __init__(self, gain=1.0, seed=None):
+    """Constructs an orthogonal initializer.
+
+    Args:
+      gain: Multiplicative factor to apply to the orthogonal matrix
+      seed: ``int``, the seed used in the generation of random numbers.
+    """
     self.gain = gain
     self.seed = seed
 
@@ -235,46 +244,36 @@ class Orthogonal(Initializer):
 class VarianceScaling(Initializer):
   """Initializer capable of adapting its scale to the shape of weights tensors.
 
-  With `distribution="truncated_normal" or "normal"`,
+  With ``distribution="truncated_normal" or "normal"``,
   samples are drawn from a distribution with a mean of zero and a standard
-  deviation (after truncation, if used) `stddev = sqrt(scale / n)`
-  where `n` is:
+  deviation (after truncation, if used) ``stddev = sqrt(scale / n)``
+  where ``n`` is:
 
-    - Number of input units in the weight tensor, if `mode = "fan_in"`.
-    - Number of output units, if `mode = "fan_out"`.
-    - Average of the numbers of input and output units, if `mode = "fan_avg"`.
+    - Number of input units in the weight tensor, if ``mode = fan_in``.
+    - Number of output units, if ``mode = fan_out``.
+    - Average of the numbers of input and output units, if ``mode = fan_avg``.
 
   Note that for transposed convolution the mode selected should be reversed. For
-  number of input units use "fan_out" and for number of output units "fan_in".
+  number of input units use ``fan_out`` and for number of output units
+  ``fan_in``.
 
-  With `distribution="uniform"`, samples are drawn from a uniform distribution
-  within `[-limit, limit]`, with `limit = sqrt(3 * scale / n)`.
+  With ``distribution=uniform``, samples are drawn from a uniform distribution
+  within ``[-limit, limit]``, with ``limit = sqrt(3 * scale / n)``.
 
   The variance scaling initializer can be configured to generate other standard
   initializers using the scale, mode and distribution arguments. Here are some
   example configurations:
 
-  ================  ==========================================================
-  Name              Parameters
-  ================  ==========================================================
-  glorot_uniform    scale=1.0, mode='fan_avg', distribution='uniform'
-  glorot_normal     scale=1.0, mode='fan_avg', distribution='truncated_normal'
-  lecun_uniform     scale=1.0, mode='fan_in',  distribution='uniform'
-  lecun_normal      scale=1.0, mode='fan_in',  distribution='truncated_normal'
-  he_uniform        scale=2.0, mode='fan_in',  distribution='uniform'
-  he_normal         scale=2.0, mode='fan_in',  distribution='truncated_normal'
-  ================  ==========================================================
-
-  Args:
-    scale: Scaling factor (positive float).
-    mode: One of "fan_in", "fan_out", "fan_avg".
-    distribution: Random distribution to use. One of "truncated_normal",
-      "untruncated_normal" and  "uniform".
-    seed: An integer. Seed used in the generation of random numbers.
-
-  Raises:
-    ValueError: In case of an invalid value for the "scale", mode" or
-      "distribution" arguments.
+  ==============  ==============================================================
+  Name            Parameters
+  ==============  ==============================================================
+  glorot_uniform  scale=1.0, mode=``fan_avg``, distribution=``uniform``
+  glorot_normal   scale=1.0, mode=``fan_avg``, distribution=``truncated_normal``
+  lecun_uniform   scale=1.0, mode=``fan_in``,  distribution=``uniform``
+  lecun_normal    scale=1.0, mode=``fan_in``,  distribution=``truncated_normal``
+  he_uniform      scale=2.0, mode=``fan_in``,  distribution=``uniform``
+  he_normal       scale=2.0, mode=``fan_in``,  distribution=``truncated_normal``
+  ==============  ==============================================================
   """
 
   def __init__(self,
@@ -282,6 +281,19 @@ class VarianceScaling(Initializer):
                mode="fan_in",
                distribution="truncated_normal",
                seed=None):
+    """Constructs a variance scaling initalizer.
+
+    Args:
+      scale: Scaling factor (positive ``float``).
+      mode: One of ``fan_in``, ``fan_out``, ``fan_avg``.
+      distribution: Random distribution to use. One of ``truncated_normal``,
+        ``untruncated_normal`` and  ``uniform``.
+      seed: ``int``, the seed used in the generation of random numbers.
+
+    Raises:
+      ValueError: In case of an invalid value for the ``scale``, ``mode`` or
+        ``distribution`` arguments.
+    """
     if scale <= 0.:
       raise ValueError("`scale` must be positive float.")
     if mode not in {"fan_in", "fan_out", "fan_avg"}:

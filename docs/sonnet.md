@@ -13108,6 +13108,256 @@ information about what variables are captured.
 Error raised when Sonnet `ModuleInfo` cannot be serialized.
 
 
+### [`class MovingAverage`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/moving_average.py?q=class:MovingAverage)<a id="MovingAverage" />
+
+Calculates a differentiable decaying moving average.
+
+The moving average is kept in a variable that can either be local or global.
+The initial moving average value is set to the first value that is received
+by the module. The module lets gradients flow through the last element added
+to the moving average.
+
+#### [`MovingAverage.__init__(decay=0.99, local=False, name='moving_average')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/moving_average.py?l=38)<a id="MovingAverage.__init__" />
+
+Constructor.
+
+##### Args:
+
+
+* `decay`: float in range [0, 1], decay of the moving average.
+* `local`: bool, specifies whether the variables are local or not.
+* `name`: string, name of the Sonnet module. Default is 'moving_average'.
+
+##### Raises:
+
+
+* `ValueError`: if decay is not in the valid range [0, 1].
+
+
+#### [`MovingAverage.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/moving_average.py?l=65)<a id="MovingAverage.__call__" />
+
+Returns the moving average of the values that went through `inputs`.
+
+##### Args:
+
+
+* `inputs`: tensor.
+
+##### Returns:
+
+  A moving average calculated as `(1 - decay) * inputs + decay * average`.
+
+
+#### [`MovingAverage.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="MovingAverage.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`MovingAverage.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=391)<a id="MovingAverage.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`MovingAverage.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=386)<a id="MovingAverage.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`MovingAverage.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="MovingAverage.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.get_possible_initializer_keys(cls)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=503)<a id="MovingAverage.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`MovingAverage.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="MovingAverage.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=474)<a id="MovingAverage.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`MovingAverage.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="MovingAverage.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`MovingAverage.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=487)<a id="MovingAverage.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=464)<a id="MovingAverage.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`MovingAverage.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=430)<a id="MovingAverage.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`MovingAverage.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=622)<a id="MovingAverage.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.reset()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/moving_average.py?l=59)<a id="MovingAverage.reset" />
+
+
+
+
+#### [`MovingAverage.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="MovingAverage.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`MovingAverage.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="MovingAverage.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=438)<a id="MovingAverage.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`MovingAverage.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=585)<a id="MovingAverage.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+
 ### [`class NotConnectedError`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base_errors.py?q=class:NotConnectedError)<a id="NotConnectedError" />
 
 Error raised when operating on a module that has not yet been connected.
@@ -13130,6 +13380,149 @@ Before they can be connected, all Sonnet modules must call
 Error raised when something that cannot be supported is requested.
 
 For example a Dilated Convolution module cannot be transposed.
+
+
+### [`class OptimizationConstraints`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?q=class:OptimizationConstraints)<a id="OptimizationConstraints" />
+
+Container for optimization constraints.
+
+Users can add to an OptimizationConstraints instance multiple inequality
+constraints, either implicitly passing inequality ops, such as
+`optimization_constraints.add(x < y)`, or explicitly specifying the constraint
+type, as in `optimization_constraints.add_geq(x, y)`.
+Users can finally add the constraints to the TensorFlow graph calling
+`optimization_constraints()`; when doing so, Lagrange multipliers are
+automatically added to the graph, so that users can optimize them alongside
+other variables in the graph, using the same optimizer and `minimize()`.
+
+Example usage:
+```
+regularization_loss = model.regularization_loss(data)
+reconstruction_error = model.reconstruction_error(data)
+avg_reconstruction_error = snt.MovingAverage()(reconstruction_error)
+constraints = snt.OptimizationConstraints()
+constraints.add(avg_reconstruction_error < reconstruction_threshold)
+loss = regularization_loss + constraints()
+# The following call actually performs an update step for
+# min_{theta} max_{lambda} (
+#     regularization_loss(theta) +
+#     lambda * (avg_reconstruction_error - reconstruction_threshold))
+# where theta are the model parameters and lambda are the Lagrange
+# multipliers.
+update = optimizer.minimize(loss)
+```
+
+#### [`OptimizationConstraints.__init__(rate=1.0, valid_range=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=72)<a id="OptimizationConstraints.__init__" />
+
+Instantiates a container for optimization constraints.
+
+##### Args:
+
+
+* `rate`: optional float, default 1.0. Default factor for Lagrange multiplier
+      gradient scaling. Use there `rate` argument to scale the gradients of
+      the Lagrange multipliers - note that this parameter has no effect when
+      using optimisers such as Adam. This parameter can be overridden
+      when adding constraints to the container.
+* `valid_range`: optional tuple of length 2, default None. Default valid range
+      for Lagrange multipliers. This parameter can be overridden when adding
+      constraints to the container.
+
+
+#### [`OptimizationConstraints.add(expression, rate=None, valid_range=None, initializer=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=100)<a id="OptimizationConstraints.add" />
+
+Add inequality contraint whose type depends on analysis of input op.
+
+##### Args:
+
+
+* `expression`: op of type `Greater`, `GreaterEqual`, `Less` or `LessEqual`.
+      Note that `GreaterEqual` and `LessEqual` are accepted only for
+      convenience, and will result in the same behavior as `Greater` and
+      `Less` respectively.
+* `rate`: optional float, default None. Factor for Lagrange multiplier
+      gradient scaling. Use there `rate` argument to scale the gradients of
+      the Lagrange multipliers - note that this parameter has no effect when
+      using optimisers such as Adam. This parameter overrides the defaults
+      defined instantiating the container.
+* `valid_range`: optional tuple of length 2, default None. Default valid
+      range for Lagrange multipliers. This parameter overrides the defaults
+      defined instantiating the container.
+* `initializer`: optional tensorflow initializer, array or value to be used
+      for the Lagrange multiplier initialization. By default Lagrange
+      multiplier will be initialized to 1.0.
+
+##### Returns:
+
+  Self.
+
+##### Raises:
+
+  `TypeError`, when input expression op is not one of `Greater`,
+  `GreaterEqual`, `Less`, `LessEqual`.
+
+
+#### [`OptimizationConstraints.add_geq(lhs, rhs=0.0, rate=None, valid_range=None, initializer=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=178)<a id="OptimizationConstraints.add_geq" />
+
+Add a 'greater than' inequality constraint.
+
+##### Args:
+
+
+* `lhs`: left hand argument of inequality expression.
+* `rhs`: reft hand argument of inequality expression, defaults to 0.0.
+* `rate`: optional float, default None. Factor for Lagrange multiplier
+      gradient scaling. Use there `rate` argument to scale the gradients of
+      the Lagrange multipliers - note that this parameter has no effect when
+      using optimisers such as Adam. This parameter overrides the defaults
+      defined instantiating the container.
+* `valid_range`: optional tuple of length 2, default None. Default valid
+      range for Lagrange multipliers. This parameter overrides the defaults
+      defined instantiating the container.
+* `initializer`: optional tensorflow initializer, array or value to be used
+      for the Lagrange multiplier initialization. By default Lagrange
+      multiplier will be initialized to 1.0.
+
+##### Returns:
+
+  Self.
+
+
+#### [`OptimizationConstraints.add_leq(lhs, rhs=0.0, rate=None, valid_range=None, initializer=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=143)<a id="OptimizationConstraints.add_leq" />
+
+Add a 'less than' inequality constraint.
+
+##### Args:
+
+
+* `lhs`: left hand argument of inequality expression.
+* `rhs`: reft hand argument of inequality expression, defaults to 0.0.
+* `rate`: optional float, default None. Factor for Lagrange multiplier
+      gradient scaling. Use there `rate` argument to scale the gradients of
+      the Lagrange multipliers - note that this parameter has no effect when
+      using optimisers such as Adam. This parameter overrides the defaults
+      defined instantiating the container.
+* `valid_range`: optional tuple of length 2, default None. Default valid
+      range for Lagrange multipliers. This parameter overrides the defaults
+      defined instantiating the container.
+* `initializer`: optional tensorflow initializer, array or value to be used
+      for the Lagrange multiplier initialization. By default Lagrange
+      multiplier will be initialized to 1.0.
+
+##### Returns:
+
+  Self.
+
+
+#### [`OptimizationConstraints.constraints`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=92)<a id="OptimizationConstraints.constraints" />
+
+
+
+
+#### [`OptimizationConstraints.lagrange_multipliers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=96)<a id="OptimizationConstraints.lagrange_multipliers" />
+
+
+
 
 
 ### [`class ParentNotBuiltError`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base_errors.py?q=class:ParentNotBuiltError)<a id="ParentNotBuiltError" />
@@ -17972,6 +18365,55 @@ Takes a key-to-variable map and formats it as a table.
 ### [`format_variables(variables, join_lines=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=536)<a id="format_variables" />
 
 Takes a collection of variables and formats it as a table.
+
+
+### [`get_lagrange_multiplier(shape=(), rate=1.0, initializer=1.0, maximize=True, valid_range=None, name='lagrange_multiplier')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=227)<a id="get_lagrange_multiplier" />
+
+Lagrange multiplier factory.
+
+This factory returns ops that help setting up constrained optimization
+problems in Tensorflow. Given a constraint function op (either scalar or
+vectorial), use this function to instantiate a Lagrange multiplier op, then
+dot product the two and add them to the loss that is being optimized over.
+There is no need to instantiate a second optimizer to solve the minmax
+problem, as the Lagrange Multiplier op is setup to manipulate its own
+gradients so that a single optmizer can be used to update all the variables
+correctly.
+
+##### Args:
+
+
+* `shape`: Lagrange multipliers can be used with both scalar and vector
+      constraint functions; when using vector constraints use the shape kwarg
+      to pass in shape information and instantiate variables of the correct
+      shape.
+* `rate`: Scalar used to scale the magnitude of gradients of the Lagrange
+      multipliers, defaulting to 1e-2. Using the default value will make the
+      Lagrange multipliers updates slower compared to the ones for the model's
+      parameters.
+* `initializer`: Initializer for the Lagrange multipliers. Note that
+      when using inequality constraints the initial value of the multiplier
+      will be transformed via the parametrization function.
+* `maximize`: Boolean, True if we want to maximize the loss w.r.t. the Lagrange
+      multipliers, False otherwise.
+* `valid_range`: tuple, or list. of values used to clip the value of the
+      (possibly reparametrized) Lagrange multipliers.
+* `name`: Name of the Lagrange multiplier op.
+
+##### Returns:
+
+  An op to be inserted in the graph, by multipling it with a constraint op
+      and adding the resulting op to a loss. The Lagrange multiplier
+      gradients are modified to that by calling minimize on the loss the
+      optimizer will actually minimize w.r.t. to the model's parameters and
+      maximize w.r.t. the Lagrande multipliers, hence enforcing the
+      constraints.
+
+##### Raises:
+
+
+* `ValueError`: If the Lagrange multiplier is set to enforce an equality
+      constraint and a parametrization function is also provided.
 
 
 ### [`get_normalized_variable_map(scope_or_module, collection='variables', context=None, group_sliced_variables=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=373)<a id="get_normalized_variable_map" />

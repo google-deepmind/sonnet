@@ -25,7 +25,6 @@ from __future__ import print_function
 
 # Dependency imports
 
-import numpy as np
 
 from sonnet.python.modules import base
 from sonnet.python.modules import conv
@@ -33,8 +32,10 @@ from sonnet.python.modules import util
 
 import tensorflow as tf
 
+# pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.layers import utils
 from tensorflow.python.training import moving_averages
+# pylint: enable=g-direct-tensorflow-import
 
 
 def create_beta_initializer():
@@ -276,7 +277,7 @@ class BatchNormV2(base.AbstractModule):
             tf.cast(self._moving_variance, input_dtype),
         )
 
-    mean, variance = utils.smart_cond(
+    mean, variance = tf.contrib.framework.smart_cond(
         use_batch_stats,
         build_batch_stats,
         build_moving_stats,
@@ -324,7 +325,7 @@ class BatchNormV2(base.AbstractModule):
     # `is_training` is unknown.
     is_training_const = utils.constant_value(is_training)
     if is_training_const is None or is_training_const:
-      update_mean_op, update_variance_op = utils.smart_cond(
+      update_mean_op, update_variance_op = tf.contrib.framework.smart_cond(
           is_training,
           build_update_ops,
           build_no_ops,
@@ -349,25 +350,26 @@ class BatchNormV2(base.AbstractModule):
     use_batch_stats = tf.convert_to_tensor(use_batch_stats)
 
     input_shape = input_batch.get_shape()
-    output_shape = [-1] + input_shape.as_list()[1:]
+    output_shape = tf.shape(input_batch)
 
-    flat_image_size = np.prod(self._image_shape, dtype=np.int32)
+    flat_image_size = tf.cast(tf.reduce_prod(self._image_shape, keepdims=True),
+                              tf.int64)
 
     if len(self._data_format) == 4:
       fusable_data_format = self._data_format
       fusable_batch = input_batch
-    elif self._channel_index == 1 and self._image_shape:
+    elif self._channel_index == 1 and input_shape.rank > 2:
       fusable_data_format = "NCHW"
-      fusable_batch = tf.reshape(
-          input_batch,
-          shape=(-1, self._num_channels, 1, flat_image_size))
+      fusable_shape = tf.concat(
+          [[-1, self._num_channels, 1], flat_image_size], axis=0)
+      fusable_batch = tf.reshape(input_batch, shape=fusable_shape)
     else:
       # The CPU implementation of FusedBatchNorm only supports NHWC tensor
       # format for now.
       fusable_data_format = "NHWC"
-      fusable_batch = tf.reshape(
-          input_batch,
-          shape=(-1, 1, flat_image_size, self._num_channels))
+      fusable_shape = tf.concat(
+          [[-1, 1], flat_image_size, [self._num_channels]], axis=0)
+      fusable_batch = tf.reshape(input_batch, shape=fusable_shape)
 
     common_args = {
         "scale": gamma_flatten,
@@ -393,7 +395,7 @@ class BatchNormV2(base.AbstractModule):
           is_training=False,
           **common_args)
 
-    batch_norm_op, mean, variance = utils.smart_cond(
+    batch_norm_op, mean, variance = tf.contrib.framework.smart_cond(
         use_batch_stats, use_batch_stats_fused_batch_norm,
         moving_average_fused_batch_norm)
 
@@ -443,8 +445,8 @@ class BatchNormV2(base.AbstractModule):
 
       batch_norm_op = tf.nn.batch_normalization(
           input_batch,
-          mean,
-          variance,
+          tf.reshape(mean, self._expanded_mean_shape),
+          tf.reshape(variance, self._expanded_mean_shape),
           beta,
           gamma,
           self._eps,
@@ -516,15 +518,17 @@ class BatchNormV2(base.AbstractModule):
       base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.
     """
     input_shape = input_batch.get_shape()
+    input_shape_list = input_shape.as_list()
+    input_shape_len = len(input_shape_list)
 
     if not self._data_format:
-      if len(input_shape) == 2:
+      if input_shape_len == 2:
         self._data_format = "NC"
-      elif len(input_shape) == 3:
+      elif input_shape_len == 3:
         self._data_format = "NWC"
-      elif len(input_shape) == 4:
+      elif input_shape_len == 4:
         self._data_format = "NHWC"
-      elif len(input_shape) == 5:
+      elif input_shape_len == 5:
         self._data_format = "NDHWC"
       else:
         raise base.IncompatibleShapeError(
@@ -536,7 +540,7 @@ class BatchNormV2(base.AbstractModule):
     self._axis = list(range(len(self._data_format)))
     del self._axis[self._channel_index]
 
-    if len(self._data_format) != len(input_shape):
+    if len(self._data_format) != input_shape_len:
       raise base.IncompatibleShapeError(
           "Incorrect data format {} for input shape {}.".format(
               self._data_format, input_shape))
@@ -548,13 +552,20 @@ class BatchNormV2(base.AbstractModule):
     # Maintain moving averages at a minimum precision of tf.float32.
     stat_dtype = tf.float32 if dtype in [tf.float16, tf.bfloat16] else dtype
 
-    self._num_channels = int(input_shape[self._channel_index])
+    self._num_channels = int(input_shape_list[self._channel_index])
     if self._channel_index == 1:
-      self._image_shape = [int(x) for x in input_shape[2:]]
+      spatial_dimensions_slice = slice(2, input_shape_len)
     else:
-      self._image_shape = [int(x) for x in input_shape[1:-1]]
-
-    self._expanded_mean_shape = [1] * len(input_shape)
+      assert self._channel_index == (input_shape_len - 1)
+      spatial_dimensions_slice = slice(1, -1)
+    # If the spatial dimensions are not fully defined, then self._image_shape
+    # has to be a Tensor instead of a list of python ints.
+    if input_shape[spatial_dimensions_slice].is_fully_defined():
+      self._image_shape = [
+          int(x) for x in input_shape[spatial_dimensions_slice]]
+    else:
+      self._image_shape = tf.shape(input_batch)[spatial_dimensions_slice]
+    self._expanded_mean_shape = [1] * input_shape_len
     self._expanded_mean_shape[self._channel_index] = self._num_channels
 
     use_batch_stats = is_training | test_local_stats

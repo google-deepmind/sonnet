@@ -99,9 +99,8 @@ class MovingAverage(base.AbstractModule):
     def initialize():
       with tf.control_dependencies([update_op]):
         value = tf.assign(self._moving_average, inputs)
-      with tf.control_dependencies([value]):
         update_initialized = tf.assign(self._initialized, True)
-      with tf.control_dependencies([update_initialized]):
+      with tf.control_dependencies([value, update_initialized]):
         return tf.identity(value)
 
     moving_avg = tf.cond(self._initialized, update, initialize)

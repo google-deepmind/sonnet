@@ -80,3 +80,49 @@ class Replicator(tf.distribute.MirroredStrategy):
     parent_scope = super(Replicator, self).scope()
     with parent_scope, tf.variable_creator_scope(replica_local_creator):
       yield
+
+
+class TpuReplicator(tf.distribute.experimental.TPUStrategy):
+  """Replicates input, parameters and compute over multiple TPUs.
+
+  `TpuReplicator` is a TensorFlow "Distribution Strategy" implementing the
+  programming model described in the TF-Replicator paper
+  :cite:`buchlovsky2019tf` and TensorFlow RFC
+  :cite:`buchlovsky2019distribution`. `TpuReplicator` enables data-parallel
+  training across multiple TPUs on one or more machines, it supports eager
+  execution and `@tf.function`.
+
+  To get started create a `Replicator` instance:
+
+      >>> replicator = snt.distribute.TpuReplicator()
+
+  Replicator provides a scope inside which any new `tf.Variable`s will be
+  replicated across all local devices:
+
+      >>> with replicator.scope():
+      ...    mod = snt.Linear(32)
+
+  Additionally replicator provides utility functions to apply a module in
+  parallel on multiple devices. First we need to define some computation that
+  runs on each TPU. The "replica context" object provides us a way to
+  communicate between replicas:
+
+      >>> def forward():
+      ...   # Compute a random output on each GPU.
+      ...   x = tf.random.normal([8, 28 * 28])
+      ...   y = mod(x)
+      ...   # Synchronize the value of `y` between all GPUs.
+      ...   ctx = tf.distribute.get_replica_context()
+      ...   y = ctx.all_reduce("mean", y)
+      ...   return y
+
+  Finally we use the run API to apply `forward` in parallel on all TPU devices:
+
+      >>> per_replica_y = replicator.experimental_run_v2(forward)
+  """
+
+  @contextlib.contextmanager
+  def scope(self):
+    parent_scope = super(TpuReplicator, self).scope()
+    with parent_scope, tf.variable_creator_scope(replica_local_creator):
+      yield

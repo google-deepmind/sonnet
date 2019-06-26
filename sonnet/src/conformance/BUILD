@@ -55,6 +55,7 @@ snt_py_test(
         ":goldens",
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
+        "//sonnet/src:replicator",
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],

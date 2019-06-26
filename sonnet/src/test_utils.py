@@ -33,6 +33,8 @@ tpu_initialized_lock = threading.Lock()
 class TestCase(tf.test.TestCase):
   """Test case which handles TPU hard placement."""
 
+  ENTER_PRIMARY_DEVICE = True
+
   def setUp(self):
     super(TestCase, self).setUp()
 
@@ -52,13 +54,15 @@ class TestCase(tf.test.TestCase):
           tf.tpu.experimental.initialize_tpu_system()
         tpu_initialized = True
 
-    self._device = tf.device("/device:%s:0" % self.primary_device)
-    self._device.__enter__()
+    if self.ENTER_PRIMARY_DEVICE:
+      self._device = tf.device("/device:%s:0" % self.primary_device)
+      self._device.__enter__()
 
   def tearDown(self):
     super(TestCase, self).tearDown()
-    self._device.__exit__(*sys.exc_info())
-    del self._device
+    if self.ENTER_PRIMARY_DEVICE:
+      self._device.__exit__(*sys.exc_info())
+      del self._device
 
   @property
   def primary_device(self):

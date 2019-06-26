@@ -20,23 +20,20 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import parameterized
+from sonnet.src import replicator
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
 
 
-class TPUStrategyTest(test_utils.TestCase, parameterized.TestCase):
+class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
   @goldens.all_goldens
   def test_variable_creation_in_replica_context(self, golden):
     if self.primary_device != "TPU":
       self.skipTest("Requires TPU")
 
-    if golden.has_side_effects:
-      # TODO(tamaranorman) enable when these can be run on TPU
-      self.skipTest("Test requires TPUReplicator")
-
-    strategy = tf.distribute.experimental.TPUStrategy()
+    strategy = replicator.TpuReplicator()
     with strategy.scope():
       mod = golden.create_module()
 

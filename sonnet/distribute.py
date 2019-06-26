@@ -20,7 +20,9 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src.replicator import Replicator
+from sonnet.src.replicator import TpuReplicator
 
 __all__ = (
     "Replicator",
+    "TpuReplicator",
 )

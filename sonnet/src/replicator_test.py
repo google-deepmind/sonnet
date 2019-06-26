@@ -29,6 +29,11 @@ import tensorflow as tf
 
 
 def replicator_all_devices(device_type):
+  # TODO(petebu) Enable `Replicator` tests on TPU
+  if device_type == "TPU":
+    logging.info("Using TpuReplicator")
+    return replicator.TpuReplicator()
+
   # NOTE: The explicit device list is required since currently Replicator
   # only considers CPU and GPU devices. This means on TPU by default we only
   # mirror on the local CPU.
@@ -44,11 +49,24 @@ def _create_variable_in_strategy_scope(strategy):
   return v
 
 
+class TrainableVariable(object):
+
+  def __call__(self):
+    if not hasattr(self, "v"):
+      self.v = tf.Variable(1.)
+    return self.v
+
+
 def _create_variable_in_step_fn(strategy):
-  return strategy.experimental_run_v2(lambda: tf.Variable(1.))
+  o = TrainableVariable()
+  strategy.experimental_run_v2(o)
+  return o.v
 
 
 class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
+
+  # Avoid running tests inside a `with tf.device("TPU:0"):` block.
+  ENTER_PRIMARY_DEVICE = False
 
   @parameterized.parameters(
       [_create_variable_in_strategy_scope, _create_variable_in_step_fn])

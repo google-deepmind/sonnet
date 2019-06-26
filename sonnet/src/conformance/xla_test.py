@@ -48,7 +48,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
     else:
       xla_out = forward()
 
-    if golden.deterministic:
+    if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
       self.assertAllClose(out, xla_out)
 
@@ -64,7 +64,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
     xla_out = forward()
 
-    if golden.deterministic:
+    if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
       self.assertAllClose(out, xla_out)
 

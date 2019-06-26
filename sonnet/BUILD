@@ -30,6 +30,7 @@ snt_py_library(
         "//sonnet/src:group_norm",
         "//sonnet/src:linear",
         "//sonnet/src:metrics",
+        "//sonnet/src:moving_averages",
         "//sonnet/src:once",
         "//sonnet/src:recurrent",
         "//sonnet/src:reshape",

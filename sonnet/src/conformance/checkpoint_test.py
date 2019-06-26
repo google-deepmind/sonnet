@@ -197,6 +197,10 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     if self.primary_device != "TPU":
       self.skipTest("Test requires a TPU")
 
+    if golden.has_side_effects:
+      # TODO(tamaranorman) enable when these can be run on TPU
+      self.skipTest("Test requires TPUReplicator")
+
     strategy = tf.distribute.experimental.TPUStrategy()
     self.assertCheckpointWithStrategy(golden, strategy, use_function=True)
 

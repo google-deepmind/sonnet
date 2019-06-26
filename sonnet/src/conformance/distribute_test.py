@@ -32,6 +32,10 @@ class TPUStrategyTest(test_utils.TestCase, parameterized.TestCase):
     if self.primary_device != "TPU":
       self.skipTest("Requires TPU")
 
+    if golden.has_side_effects:
+      # TODO(tamaranorman) enable when these can be run on TPU
+      self.skipTest("Test requires TPUReplicator")
+
     strategy = tf.distribute.experimental.TPUStrategy()
     with strategy.scope():
       mod = golden.create_module()

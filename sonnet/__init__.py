@@ -46,6 +46,7 @@ from sonnet.src.embed import Embed
 from sonnet.src.group_norm import GroupNorm
 from sonnet.src.linear import Linear
 from sonnet.src.metrics import Metric
+from sonnet.src.moving_averages import ExponentialMovingAverage
 from sonnet.src.once import once
 from sonnet.src.recurrent import Conv1DLSTM
 from sonnet.src.recurrent import Conv2DLSTM
@@ -85,6 +86,7 @@ __all__ = (
     "Deferred",
     "Dropout",
     "Embed",
+    "ExponentialMovingAverage",
     "Flatten",
     "GroupNorm",
     "InstanceNorm",

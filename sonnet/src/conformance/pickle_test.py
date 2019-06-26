@@ -34,7 +34,7 @@ class PickleTest(test_utils.TestCase, parameterized.TestCase):
   @goldens.all_goldens
   def test_pickle(self, golden):
     m1 = golden.create_module()
-    y1 = golden.forward(m1)
+    golden.create_all_variables(m1)
     m2 = pickle.loads(pickle.dumps(m1))
     self.assertIsNot(m1, m2)
 
@@ -46,6 +46,7 @@ class PickleTest(test_utils.TestCase, parameterized.TestCase):
       self.assertAllEqual(v1.read_value(), v2.read_value())
 
     if golden.deterministic:
+      y1 = golden.forward(m1)
       y2 = golden.forward(m2)
       self.assertAllEqual(y1, y2)
 

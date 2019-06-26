@@ -99,6 +99,8 @@ class AbstractGolden(Golden):
 
   deterministic = True
 
+  has_side_effects = False
+
   @abc.abstractproperty
   def input_spec(self):
     pass
@@ -264,7 +266,7 @@ class BaseBatchNormScaleOffset(AbstractGolden):
 
 @_register_golden(snt.BatchNorm, "batch_norm_1x2x2x3")
 class BatchNorm(AbstractGolden):
-  create_module = (lambda _: snt.BatchNorm(True, False))
+  create_module = (lambda _: snt.BatchNorm(True, True))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 8
 
@@ -275,13 +277,37 @@ class BatchNorm(AbstractGolden):
 
 @_register_golden(snt.BatchNorm, "batch_norm_scale_offset_1x2x2x3")
 class BatchNormScaleOffset(AbstractGolden):
-  create_module = (lambda _: snt.BatchNorm(True, False))
+  create_module = (lambda _: snt.BatchNorm(True, True))
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 8
 
   def forward(self, module):
     x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
+
+
+@_register_golden(snt.ExponentialMovingAverage, "ema_2")
+class ExponentialMovingAverage(AbstractGolden):
+  create_module = (lambda _: snt.ExponentialMovingAverage(decay=0.9))
+  input_spec = tf.TensorSpec([2])
+  num_variables = 3
+  has_side_effects = True
+
+  def forward(self, module):
+    x = range_like(self.input_spec, start=1)
+    return module(x)
+
+
+@_register_golden(snt.BatchNorm, "batch_norm_training_1x2x2x3")
+class BatchNormTraining(AbstractGolden):
+  create_module = (lambda _: snt.BatchNorm(True, True))
+  input_spec = tf.TensorSpec([1, 2, 2, 3])
+  num_variables = 8
+  has_side_effects = True
+
+  def forward(self, module):
+    x = range_like(self.input_spec, start=1)
+    return module(x, is_training=True)
 
 
 @_register_golden(snt.Dropout, "dropout")

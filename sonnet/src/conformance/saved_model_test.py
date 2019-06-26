@@ -59,7 +59,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     x = goldens.range_like(golden.input_spec)
 
     # Run the saved model and pull variable values.
-    y1 = saved_model.inference(x)
+    saved_model.inference(x)
     v1 = saved_model.all_variables
 
     # Save the model to disk and restore it.
@@ -68,12 +68,13 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     restored_model = tf.saved_model.load(tmp_dir)
 
     # Run the loaded model and pull variable values.
-    y2 = restored_model.inference(x)
     v2 = restored_model.all_variables
+    y2 = restored_model.inference(x)
 
     if golden.deterministic:
-      # The output before and after saving should be close.
-      self.assertAllClose(y1, y2)
+      # The output from both the saved and restored model should be close.
+      y1 = saved_model.inference(x)
+      self.assertAllEqual(y1, y2)
 
     for a, b in zip(v1, v2):
       self.assertEqual(a.name, b.name)

@@ -98,7 +98,7 @@ class OptimizationConstraints(object):
     return self._lagrange_multipliers
 
   def add(self, expression, rate=None, valid_range=None, initializer=None):
-    """Add inequality contraint whose type depends on analysis of input op.
+    """Add inequality constraint whose type depends on analysis of input op.
 
     Args:
       expression: op of type `Greater`, `GreaterEqual`, `Less` or `LessEqual`.

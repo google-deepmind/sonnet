@@ -26,7 +26,8 @@ import tensorflow as tf
 def check_strategy():
   if tf.distribute.has_strategy():
     strategy = tf.distribute.get_strategy()
-    if not isinstance(strategy, replicator.Replicator):
+    if not (isinstance(strategy, replicator.Replicator) or
+            isinstance(strategy, replicator.TpuReplicator)):
       raise ValueError("Sonnet optimizers are not compatible with {}. Please"
                        "use `sonnet.distribute.Replicator` instead.".format(
                            strategy.__class__.__name__))

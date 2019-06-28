@@ -71,12 +71,20 @@ class MovingAverage(base.AbstractModule):
     Returns:
       A moving average calculated as `(1 - decay) * inputs + decay * average`.
     """
+    # This trivial op helps correct execution of control flow when inputs is
+    # not a resource variable. See, for example,
+    # MovingAverageTest.testAverage(use_resource_vars=False) in
+    # moving_averate_test.py.
+    # Note that inputs = tf.identity(inputs) does NOT have the same effect.
+    inputs = 1 * inputs
+
     self._initialized = tf.get_variable(
         "initialized",
         shape=(),
         dtype=tf.bool,
         initializer=tf.constant_initializer(False),
         trainable=False,
+        use_resource=True,
         collections=[self._collection])
 
     self._moving_average = tf.get_variable(
@@ -84,6 +92,7 @@ class MovingAverage(base.AbstractModule):
         shape=inputs.get_shape(),
         initializer=tf.zeros_initializer(),
         trainable=False,
+        use_resource=True,
         collections=[self._collection])
 
     update_op = moving_averages.assign_moving_average(
@@ -99,9 +108,11 @@ class MovingAverage(base.AbstractModule):
     def initialize():
       with tf.control_dependencies([update_op]):
         value = tf.assign(self._moving_average, inputs)
+      with tf.control_dependencies([value]):
         update_initialized = tf.assign(self._initialized, True)
-      with tf.control_dependencies([value, update_initialized]):
-        return tf.identity(value)
+      with tf.control_dependencies([update_initialized]):
+        value = tf.identity(value)
+      return value
 
     moving_avg = tf.cond(self._initialized, update, initialize)
     return _pass_through_gradients(inputs, moving_avg)

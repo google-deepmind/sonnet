@@ -60,23 +60,26 @@ class MovingAverageTest(parameterized.TestCase, tf.test.TestCase):
       ('no_resource_vars', False),
       ('resource_vars', True))
   def testAverage(self, use_resource_vars):
+    decay = 0.9
+    num_steps = 10
+    init_value = 3.14
+
     with tf.variable_scope('', use_resource=use_resource_vars):
-      var = tf.Variable(10.0)
-      decay = 0.9
-      avg = moving_average.MovingAverage(decay=decay)(var)
+      var = tf.get_variable(
+          'var', (), initializer=tf.constant_initializer(init_value))
 
-      increment = tf.assign(var, var + 1.0)
+    avg = moving_average.MovingAverage(decay=decay)(tf.identity(var))
+    with tf.control_dependencies([avg]):
+      increment = tf.assign_add(var, 1.0)
 
-      with tf.train.MonitoredSession() as sess:
-        for _ in range(10):
-          avg_value = sess.run(avg)
-          sess.run(increment)
-
-      expected_value = 10.0
-      for i in range(11, 20):
-        expected_value = expected_value * decay + i * (1 - decay)
-
-      self.assertNear(avg_value, expected_value, 1e-4)
+    with tf.train.MonitoredSession() as sess:
+      expected_value = init_value
+      x = init_value
+      for _ in range(num_steps):
+        avg_value, _ = sess.run([avg, increment])
+        self.assertNear(avg_value, expected_value, 1e-4)
+        x += 1
+        expected_value = expected_value * decay + x * (1 - decay)
 
   def testAssertDecayIsValid(self):
     with self.assertRaisesRegexp(ValueError, 'Decay must be'):

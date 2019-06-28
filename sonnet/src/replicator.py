@@ -36,20 +36,20 @@ def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
 
 
 class Replicator(tf.distribute.MirroredStrategy):
-  """Replicates input, parameters and compute over multiple accelerators.
+  r"""Replicates input, parameters and compute over multiple accelerators.
 
-  `Replicator` is a TensorFlow "Distribution Strategy" implementing the
+  ``Replicator`` is a TensorFlow "Distribution Strategy" implementing the
   programming model described in the TF-Replicator paper
   :cite:`buchlovsky2019tf` and TensorFlow RFC
-  :cite:`buchlovsky2019distribution`. `Replicator` enables data-parallel
+  :cite:`buchlovsky2019distribution`. ``Replicator`` enables data-parallel
   training across multiple accelerators on a single machine, it supports
-  eager execution and `@tf.function`.
+  eager execution and :tf:`function`.
 
-  To get started create a `Replicator` instance:
+  To get started create a ``Replicator`` instance:
 
       >>> replicator = snt.distribute.Replicator()
 
-  Replicator provides a scope inside which any new `tf.Variable`s will be
+  Replicator provides a scope inside which any new :tf:`Variable`\ s will be
   replicated across all local devices:
 
       >>> with replicator.scope():
@@ -58,7 +58,7 @@ class Replicator(tf.distribute.MirroredStrategy):
   Additionally replicator provides utility functions to apply a module in
   parallel on multiple devices. First we need to define some computation that
   runs on each GPU. The "replica context" object provides us a way to
-  communicate between replicas:
+  communicate between replicas (e.g. to perform an ``all_reduce``):
 
       >>> def forward():
       ...   # Compute a random output on each GPU.
@@ -69,7 +69,7 @@ class Replicator(tf.distribute.MirroredStrategy):
       ...   y = ctx.all_reduce("mean", y)
       ...   return y
 
-  Finally we use the run API to apply `forward` in parallel on all accelerator
+  Finally we use the run API to apply ``forward`` in parallel on all accelerator
   devices:
 
       >>> per_replica_y = replicator.experimental_run_v2(forward)
@@ -83,21 +83,21 @@ class Replicator(tf.distribute.MirroredStrategy):
 
 
 class TpuReplicator(tf.distribute.experimental.TPUStrategy):
-  """Replicates input, parameters and compute over multiple TPUs.
+  r"""Replicates input, parameters and compute over multiple TPUs.
 
-  `TpuReplicator` is a TensorFlow "Distribution Strategy" implementing the
+  ``TpuReplicator`` is a TensorFlow "Distribution Strategy" implementing the
   programming model described in the TF-Replicator paper
   :cite:`buchlovsky2019tf` and TensorFlow RFC
-  :cite:`buchlovsky2019distribution`. `TpuReplicator` enables data-parallel
-  training across multiple TPUs on one or more machines, it supports eager
-  execution and `@tf.function`.
+  :cite:`buchlovsky2019distribution`. ``TpuReplicator`` enables data-parallel
+  training across multiple TPUs on one or more machines, it supports
+  :tf:`function`.
 
-  To get started create a `Replicator` instance:
+  To get started create a ``TpuReplicator`` instance:
 
       >>> replicator = snt.distribute.TpuReplicator()
 
-  Replicator provides a scope inside which any new `tf.Variable`s will be
-  replicated across all local devices:
+  This provides a scope inside which any new :tf:`Variable`\ s will be
+  replicated across all TPU cores:
 
       >>> with replicator.scope():
       ...    mod = snt.Linear(32)
@@ -116,9 +116,15 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
       ...   y = ctx.all_reduce("mean", y)
       ...   return y
 
-  Finally we use the run API to apply `forward` in parallel on all TPU devices:
+  Finally we use the run API to apply ``forward`` in parallel on all TPU
+  devices. This must be run as part of a :tf:`function` since ``TpuReplicator``
+  uses XLA to compile and replicate our function to run in parallel over all
+  TPU cores:
 
-      >>> per_replica_y = replicator.experimental_run_v2(forward)
+      >>> @tf.function(autograph=False)
+      ... def all_forward():
+      ...   return replicator.experimental_run_v2(forward)
+      >>> per_replica_y = all_forward()
   """
 
   @contextlib.contextmanager

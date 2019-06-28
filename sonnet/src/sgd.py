@@ -47,13 +47,16 @@ class SGD(base.Module):
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        parameter.assign_sub(update * learning_rate)
+        if isinstance(update, tf.IndexedSlices):
+          parameter.scatter_nd_sub(
+              update.indices, update.values * learning_rate)
+        else:
+          parameter.assign_sub(update * learning_rate)
 
 
 class FastSGD(base.Module):
@@ -79,13 +82,16 @@ class FastSGD(base.Module):
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        tf.raw_ops.ResourceApplyGradientDescent(
-            var=parameter.handle,
-            alpha=learning_rate,
-            delta=update)
+        if isinstance(update, tf.IndexedSlices):
+          parameter.scatter_nd_sub(
+              update.indices, update.values * learning_rate)
+        else:
+          tf.raw_ops.ResourceApplyGradientDescent(
+              var=parameter.handle,
+              alpha=learning_rate,
+              delta=update)

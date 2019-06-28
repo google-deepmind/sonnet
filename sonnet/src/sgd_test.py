@@ -37,6 +37,21 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
                         [x.numpy() for x in parameters])
 
   @parameterized.parameters(sgd.SGD, sgd.FastSGD)
+  def testSparse(self, sgd_class):
+    if self.primary_device == "TPU":
+      self.skipTest("IndexedSlices not supported on TPU.")
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = sgd_class(learning_rate=3.)
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [4.0 - 3.0 * 0.01]], parameters[1].numpy())
+
+  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testNoneUpdate(self, sgd_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]

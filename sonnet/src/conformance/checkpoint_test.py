@@ -24,7 +24,7 @@ import os
 from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
-from sonnet.src import replicator
+from sonnet.src import replicator as snt_replicator
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
@@ -56,14 +56,15 @@ class TestCheckpoint(object):
     return status
 
 
-def mirrored_all_devices(device_type):
-  # NOTE: The explicit device list is required since currently MirroredStrategy
+# TODO(petebu) Fix these tests for `TpuReplicator`.
+def replicator_all_devices(device_type):
+  # NOTE: The explicit device list is required since currently Replicator
   # only considers CPU and GPU devices. This means on TPU by default we only
   # mirror on the local CPU.
   devices = tf.config.experimental.list_logical_devices(device_type=device_type)
   devices = [d.name for d in devices]
-  logging.info("Mirroring over %s", devices)
-  return replicator.Replicator(devices=devices)
+  logging.info("Replicating over %s", devices)
+  return snt_replicator.Replicator(devices=devices)
 
 
 def with_soft_placement(f):
@@ -179,44 +180,45 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
                           msg=variable.name)
 
 
-class DistributionStrategyCheckpointTest(test_utils.TestCase,
-                                         parameterized.TestCase):
+class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
   @goldens.all_goldens
-  def test_checkpoint_mirrored_strategy(self, golden):
-    strategy = mirrored_all_devices(self.primary_device)
-    self.assertCheckpointWithStrategy(golden, strategy, use_function=False)
+  def test_checkpoint_replicator(self, golden):
+    replicator = replicator_all_devices(self.primary_device)
+    self.assertCheckpointWithReplicator(golden, replicator, use_function=False)
 
   @goldens.all_goldens
-  def test_checkpoint_mirrored_strategy_function(self, golden):
-    strategy = mirrored_all_devices(self.primary_device)
-    self.assertCheckpointWithStrategy(golden, strategy, use_function=True)
+  def test_checkpoint_replicator_function(self, golden):
+    replicator = replicator_all_devices(self.primary_device)
+    self.assertCheckpointWithReplicator(golden, replicator, use_function=True)
 
   @goldens.all_goldens
-  def test_checkpoint_tpu_strategy(self, golden):
+  def test_checkpoint_tpu_replicator(self, golden):
     if self.primary_device != "TPU":
       self.skipTest("Test requires a TPU")
 
-    strategy = replicator.TpuReplicator()
-    self.assertCheckpointWithStrategy(golden, strategy, use_function=True)
+    replicator = snt_replicator.TpuReplicator()
+    self.assertCheckpointWithReplicator(golden, replicator, use_function=True)
 
-  def assertCheckpointWithStrategy(self, golden, strategy, use_function):
-    self.assertSaveRestore(golden, strategy, use_function)
-    self.assertRestoreFromGolden(golden, strategy)
-    self.assertRestoreFromNonDistributed(golden, strategy, use_function)
-    self.assertRestoreOnCreate(golden, strategy)
+  def assertCheckpointWithReplicator(self, golden, replicator, use_function):
+    self.assertSaveRestore(golden, replicator, use_function)
+    self.assertRestoreFromGolden(golden, replicator)
+    self.assertRestoreFromNonDistributed(golden, replicator, use_function)
+    self.assertRestoreOnCreate(golden, replicator)
     if self.primary_device != "TPU":
       # TODO(b/130555244) Enable on TPU when functions can create variables.
-      self.assertRestoreOnCreateInReplicaContext(golden, strategy, use_function)
+      self.assertRestoreOnCreateInReplicaContext(golden, replicator,
+                                                 use_function)
 
-  def assertSaveRestore(self, golden, strategy, use_function):
-    with strategy.scope():
+  def assertSaveRestore(self, golden, replicator, use_function):
+    with replicator.scope():
       module = golden.create_module()
       variables = golden.create_all_variables(module)
 
     def forward():
-      per_replica = strategy.experimental_run_v2(lambda: golden.forward(module))
-      return tf.stack(strategy.unwrap(per_replica), axis=0)
+      per_replica = replicator.experimental_run_v2(
+          lambda: golden.forward(module))
+      return tf.stack(replicator.unwrap(per_replica), axis=0)
 
     if use_function:
       forward = tf.function(forward)
@@ -256,8 +258,8 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     if golden.deterministic:
       self.assertAllEqual(forward(), before_save_ys)
 
-  def assertRestoreFromGolden(self, golden, strategy):
-    with strategy.scope():
+  def assertRestoreFromGolden(self, golden, replicator):
+    with replicator.scope():
       module = golden.create_module()
       variables = golden.create_all_variables(module)
     checkpoint = TestCheckpoint(golden=golden, module=module)
@@ -266,7 +268,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
                           msg=variable.name)
 
-  def assertRestoreFromNonDistributed(self, golden, strategy, use_function):
+  def assertRestoreFromNonDistributed(self, golden, replicator, use_function):
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
     normal_variables = golden.create_all_variables(module)
@@ -275,13 +277,13 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint = TestCheckpoint(module=module)
     checkpoint.save()
 
-    # Create the same model (new params) in the strategy scope.
-    with strategy.scope():
+    # Create the same model (new params) in the replicator scope.
+    with replicator.scope():
       module2 = golden.create_module()
-      strategy_variables = golden.create_all_variables(module2)
+      replicator_variables = golden.create_all_variables(module2)
 
     # Ensure the distributed params are != the values in the checkpoint.
-    for normal, distributed in zip(normal_variables, strategy_variables):
+    for normal, distributed in zip(normal_variables, replicator_variables):
       distributed.assign(tf.zeros_like(distributed))
       self.assertNotAllClose(normal.read_value(), distributed.read_value())
 
@@ -289,7 +291,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint = TestCheckpoint(module=module2)
     checkpoint.restore_latest(assert_consumed=True)
 
-    for normal, distributed in zip(normal_variables, strategy_variables):
+    for normal, distributed in zip(normal_variables, replicator_variables):
       self.assertAllEqual(normal.read_value(), distributed.read_value(),
                           msg=normal.name)
 
@@ -308,7 +310,7 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
       y_after = run_forward(module2)
       self.assertAllEqual(y_before, y_after)
 
-  def assertRestoreOnCreate(self, golden, strategy):
+  def assertRestoreOnCreate(self, golden, replicator):
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
     normal_variables = golden.create_all_variables(module)
@@ -318,20 +320,20 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint.save()
     golden.forward(module)
 
-    # Create the same model (new params) in the strategy scope.
-    with strategy.scope():
+    # Create the same model (new params) in the replicator scope.
+    with replicator.scope():
       module = golden.create_module()
       checkpoint = TestCheckpoint(module=module)
       status = checkpoint.restore_latest(assert_consumed=False)
       golden.forward(module)
       status.assert_consumed()
-      strategy_variables = module.variables
+      replicator_variables = module.variables
 
-    for normal, distributed in zip(normal_variables, strategy_variables):
+    for normal, distributed in zip(normal_variables, replicator_variables):
       self.assertAllEqual(normal.read_value(), distributed.read_value(),
                           msg=normal.name)
 
-  def assertRestoreOnCreateInReplicaContext(self, golden, strategy,
+  def assertRestoreOnCreateInReplicaContext(self, golden, replicator,
                                             use_function):
     if self.primary_device == "GPU":
       self.skipTest("Currently not working as expected on multiple devices")
@@ -346,11 +348,11 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     checkpoint.save()
     golden.forward(module)
 
-    with strategy.scope():
+    with replicator.scope():
       module = golden.create_module()
 
     def forward():
-      return strategy.experimental_run_v2(lambda: golden.forward(module))
+      return replicator.experimental_run_v2(lambda: golden.forward(module))
 
     if use_function:
       forward = tf.function(forward)
@@ -364,13 +366,13 @@ class DistributionStrategyCheckpointTest(test_utils.TestCase,
     status.assert_consumed()
 
     if golden.deterministic:
-      result_iter = iter(strategy.experimental_local_results(result))
+      result_iter = iter(replicator.experimental_local_results(result))
       first_replica = next(result_iter)
       for next_replica in result_iter:
         self.assertAllEqual(first_replica, next_replica)
 
-    strategy_variables = module.variables
-    for normal, distributed in zip(normal_variables, strategy_variables):
+    replicator_variables = module.variables
+    for normal, distributed in zip(normal_variables, replicator_variables):
       self.assertAllEqual(normal.read_value(), distributed.read_value(),
                           msg=normal.name)
 

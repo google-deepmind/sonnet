@@ -23,16 +23,16 @@ import itertools
 
 from absl import logging
 from absl.testing import parameterized
-from sonnet.src import replicator
+from sonnet.src import replicator as snt_replicator
 from sonnet.src import test_utils
 import tensorflow as tf
 
 
 def replicator_all_devices(device_type):
-  # TODO(petebu) Enable `Replicator` tests on TPU
+  # TODO(petebu) Enable `Replicator` tests on TPU.
   if device_type == "TPU":
     logging.info("Using TpuReplicator")
-    return replicator.TpuReplicator()
+    return snt_replicator.TpuReplicator()
 
   # NOTE: The explicit device list is required since currently Replicator
   # only considers CPU and GPU devices. This means on TPU by default we only
@@ -40,11 +40,11 @@ def replicator_all_devices(device_type):
   devices = tf.config.experimental.list_logical_devices(device_type=device_type)
   devices = [d.name for d in devices]
   logging.info("Replicating over %s", devices)
-  return replicator.Replicator(devices=devices)
+  return snt_replicator.Replicator(devices=devices)
 
 
-def _create_variable_in_strategy_scope(strategy):
-  with strategy.scope():
+def _create_variable_in_replicator_scope(replicator):
+  with replicator.scope():
     v = tf.Variable(1.)
   return v
 
@@ -57,9 +57,9 @@ class TrainableVariable(object):
     return self.v
 
 
-def _create_variable_in_step_fn(strategy):
+def _create_variable_in_step_fn(replicator):
   o = TrainableVariable()
-  strategy.experimental_run_v2(o)
+  replicator.experimental_run_v2(o)
   return o.v
 
 
@@ -69,31 +69,31 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
   ENTER_PRIMARY_DEVICE = False
 
   @parameterized.parameters(
-      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
   def test_variable_synchronization_default(self, create_var):
-    strategy = replicator_all_devices(self.primary_device)
-    v = create_var(strategy)
+    replicator = replicator_all_devices(self.primary_device)
+    v = create_var(replicator)
     self.assertEqual(
         tf.VariableSynchronization.ON_READ, v.primary.synchronization)
 
   @parameterized.parameters(
-      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
   def test_variable_aggregation_default(self, create_var):
-    strategy = replicator_all_devices(self.primary_device)
-    v = create_var(strategy)
+    replicator = replicator_all_devices(self.primary_device)
+    v = create_var(replicator)
     self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
 
   @parameterized.parameters(
-      [_create_variable_in_strategy_scope, _create_variable_in_step_fn])
+      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
   def test_variable_trainable_default(self, create_var):
-    strategy = replicator_all_devices(self.primary_device)
-    v = create_var(strategy)
+    replicator = replicator_all_devices(self.primary_device)
+    v = create_var(replicator)
     self.assertTrue(v.trainable)
 
   @parameterized.parameters([True, False])
   def test_variable_trainable(self, trainable):
-    strategy = replicator_all_devices(self.primary_device)
-    with strategy.scope():
+    replicator = replicator_all_devices(self.primary_device)
+    with replicator.scope():
       v = tf.Variable(1., trainable=trainable)
     self.assertEqual(trainable, v.trainable)
 
@@ -102,29 +102,29 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
           [("assign", 1.), ("assign_add", 1.), ("assign_sub", -1.)],
           [True, False]))
   def test_assign(self, updates, cross_replica):
-    strategy = replicator_all_devices(self.primary_device)
-    with strategy.scope():
+    replicator = replicator_all_devices(self.primary_device)
+    with replicator.scope():
       v = tf.Variable(0.)
     method_name, update_value = updates
     update_fn = lambda: getattr(v, method_name)(update_value)
     if cross_replica:
-      # NOTE: Explicitly not running inside strategy.scope (fn should handle).
+      # NOTE: Explicitly not running inside replicator.scope (fn should handle).
       update_fn()
     else:
-      strategy.experimental_run_v2(update_fn)
+      replicator.experimental_run_v2(update_fn)
     for component in v._values:
       self.assertAllEqual(component.read_value(), tf.ones_like(component))
 
   @parameterized.parameters(True, False)
   def test_read_value(self, cross_replica):
-    strategy = replicator_all_devices(self.primary_device)
-    with strategy.scope():
+    replicator = replicator_all_devices(self.primary_device)
+    with replicator.scope():
       v = tf.Variable(0.)
     if cross_replica:
       values = [v.read_value()]
     else:
-      values = strategy.experimental_run_v2(v.read_value)
-      values = strategy.experimental_local_results(values)
+      values = replicator.experimental_run_v2(v.read_value)
+      values = replicator.experimental_local_results(values)
     for component in v._values:
       for value in values:
         self.assertAllEqual(component.read_value(), value)

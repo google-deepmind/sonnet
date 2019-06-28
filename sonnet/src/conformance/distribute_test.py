@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import parameterized
-from sonnet.src import replicator
+from sonnet.src import replicator as snt_replicator
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
@@ -33,14 +33,14 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     if self.primary_device != "TPU":
       self.skipTest("Requires TPU")
 
-    strategy = replicator.TpuReplicator()
-    with strategy.scope():
+    replicator = snt_replicator.TpuReplicator()
+    with replicator.scope():
       mod = golden.create_module()
 
     @tf.function
     def forward():
       step = lambda: golden.create_all_variables(mod)
-      return strategy.experimental_run_v2(step)
+      return replicator.experimental_run_v2(step)
 
     # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
     with tf.device(None):
@@ -50,7 +50,7 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
     # Check all variables have the same value on each replica.
     for per_replica in variables_per_replica:
-      per_replica = strategy.experimental_local_results(per_replica)
+      per_replica = replicator.experimental_local_results(per_replica)
       first_replica = per_replica[0]
       for nth_replica in per_replica[1:]:
         self.assertAllEqual(first_replica, nth_replica)

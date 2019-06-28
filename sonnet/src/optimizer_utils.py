@@ -22,15 +22,26 @@ from __future__ import print_function
 from sonnet.src import replicator
 import tensorflow as tf
 
+# Sonnet only supports a subset of distribution strategies since it makes use of
+# a simplified update model and replica local variables.
+# TODO(cjfj,petebu,tomhennigan) Add async parameter server strategy when needed.
+# TODO(cjfj,petebu,tomhennigan) Add sync multi-worker GPU strategy when needed.
+SUPPORTED_STRATEGIES = (
+    tf.distribute.OneDeviceStrategy,
+    replicator.Replicator,
+    replicator.TpuReplicator,
+)
+
 
 def check_strategy():
   if tf.distribute.has_strategy():
     strategy = tf.distribute.get_strategy()
-    if not (isinstance(strategy, replicator.Replicator) or
-            isinstance(strategy, replicator.TpuReplicator)):
-      raise ValueError("Sonnet optimizers are not compatible with {}. Please"
-                       "use `sonnet.distribute.Replicator` instead.".format(
-                           strategy.__class__.__name__))
+    if not isinstance(strategy, SUPPORTED_STRATEGIES):
+      raise ValueError(
+          "Sonnet optimizers are not compatible with `{}`. "
+          "Please use one of `{}` instead.".format(
+              strategy.__class__.__name__,
+              "`, `".join(s.__name__ for s in SUPPORTED_STRATEGIES)))
 
 
 def check_updates_parameters(updates, parameters):

@@ -142,7 +142,7 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     step = lambda: optimizer.apply([tf.constant(0.1)], [var])
     with self.assertRaisesRegexp(
         ValueError,
-        "Sonnet optimizers are not compatible with MirroredStrategy"):
+        "Sonnet optimizers are not compatible with `MirroredStrategy`"):
       strategy.experimental_run_v2(step)
 
 if __name__ == "__main__":

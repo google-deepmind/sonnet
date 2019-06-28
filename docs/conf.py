@@ -99,6 +99,10 @@ doctest_test_doctest_blocks = 'true'
 doctest_global_setup = '''
 import tensorflow as tf
 import sonnet as snt
+
+# `TpuReplicator` cannot be constructed without a TPU, however it has exactly
+# the same API as `Replicator` so we can run doctests using that instead.
+snt.distribute.TpuReplicator = snt.distribute.Replicator
 '''
 doctest_default_flags = (doctest.ELLIPSIS
                          | doctest.IGNORE_EXCEPTION_DETAIL

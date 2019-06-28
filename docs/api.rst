@@ -411,6 +411,12 @@ Replicator
 .. autoclass:: Replicator
    :members:
 
+TpuReplicator
+~~~~~~~~~~~~~
+
+.. autoclass:: TpuReplicator
+   :members:
+
 Metrics
 -------
 

@@ -3161,7 +3161,7 @@ Some batch normalization caveats:
     the batch. This can exhibit itself as a higher test score with
     `test_local_stats=True` than `test_local_stats=False`.
 
-#### [`BatchNormV2.__init__(data_format=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection=None, fused=True, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=148)<a id="BatchNormV2.__init__" />
+#### [`BatchNormV2.__init__(data_format=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection=None, fused=True, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=156)<a id="BatchNormV2.__init__" />
 
 Constructs a BatchNormV2 module.
 
@@ -3212,7 +3212,7 @@ additional elements of the minibatch.
 * `ValueError`: If `data_format` is invalid.
 
 
-#### [`BatchNormV2.__call__(input_batch, is_training, test_local_stats=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=496)<a id="BatchNormV2.__call__" />
+#### [`BatchNormV2.__call__(input_batch, is_training, test_local_stats=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=505)<a id="BatchNormV2.__call__" />
 
 Connects the BatchNormV2 module into the graph.
 
@@ -3237,7 +3237,7 @@ Connects the BatchNormV2 module into the graph.
   base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.
 
 
-#### [`BatchNormV2.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=607)<a id="BatchNormV2.beta" />
+#### [`BatchNormV2.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=625)<a id="BatchNormV2.beta" />
 
 
 
@@ -3257,7 +3257,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchNormV2.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=617)<a id="BatchNormV2.gamma" />
+#### [`BatchNormV2.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=635)<a id="BatchNormV2.gamma" />
 
 
 
@@ -3334,7 +3334,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchNormV2.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=585)<a id="BatchNormV2.initializers" />
+#### [`BatchNormV2.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=603)<a id="BatchNormV2.initializers" />
 
 
 
@@ -3363,12 +3363,12 @@ Returns the last subgraph created by this module.
 Returns the name of the Module.
 
 
-#### [`BatchNormV2.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=597)<a id="BatchNormV2.moving_mean" />
+#### [`BatchNormV2.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=615)<a id="BatchNormV2.moving_mean" />
 
 
 
 
-#### [`BatchNormV2.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=602)<a id="BatchNormV2.moving_variance" />
+#### [`BatchNormV2.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=620)<a id="BatchNormV2.moving_variance" />
 
 
 
@@ -3398,12 +3398,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchNormV2.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=589)<a id="BatchNormV2.partitioners" />
+#### [`BatchNormV2.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=607)<a id="BatchNormV2.partitioners" />
 
 
 
 
-#### [`BatchNormV2.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=593)<a id="BatchNormV2.regularizers" />
+#### [`BatchNormV2.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=611)<a id="BatchNormV2.regularizers" />
 
 
 
@@ -13431,7 +13431,7 @@ Instantiates a container for optimization constraints.
 
 #### [`OptimizationConstraints.add(expression, rate=None, valid_range=None, initializer=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/optimization_constraints.py?l=100)<a id="OptimizationConstraints.add" />
 
-Add inequality contraint whose type depends on analysis of input op.
+Add inequality constraint whose type depends on analysis of input op.
 
 ##### Args:
 
@@ -22797,22 +22797,22 @@ Returns a default initializer for the `moving_mean` in batch norm.
 Returns a default initializer for the `moving_variance` in batch norm.
 
 
-### [`python.modules.batch_norm_v2.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=40)<a id="python.modules.batch_norm_v2.create_beta_initializer" />
+### [`python.modules.batch_norm_v2.create_beta_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=48)<a id="python.modules.batch_norm_v2.create_beta_initializer" />
 
 Returns a default initializer for the `beta` in batch norm.
 
 
-### [`python.modules.batch_norm_v2.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=45)<a id="python.modules.batch_norm_v2.create_gamma_initializer" />
+### [`python.modules.batch_norm_v2.create_gamma_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=53)<a id="python.modules.batch_norm_v2.create_gamma_initializer" />
 
 Returns a default initializer for the `gamma` in batch norm.
 
 
-### [`python.modules.batch_norm_v2.create_mean_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=50)<a id="python.modules.batch_norm_v2.create_mean_initializer" />
+### [`python.modules.batch_norm_v2.create_mean_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=58)<a id="python.modules.batch_norm_v2.create_mean_initializer" />
 
 Returns a default initializer for the `moving_mean` in batch norm.
 
 
-### [`python.modules.batch_norm_v2.create_variance_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=55)<a id="python.modules.batch_norm_v2.create_variance_initializer" />
+### [`python.modules.batch_norm_v2.create_variance_initializer()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=63)<a id="python.modules.batch_norm_v2.create_variance_initializer" />
 
 Returns a default initializer for the `moving_variance` in batch norm.
 

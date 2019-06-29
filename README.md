@@ -207,7 +207,7 @@ checkpoint = tf.train.Checkpoint(module=my_module)
 # something else, or in a cloud environment if your instance is preempted).
 latest = tf.train.latest_checkpoint(checkpoint_root)
 if latest is not None:
-  checkpoint.restore(tf.train.latest_checkpoint(checkpoint_root))
+  checkpoint.restore(latest)
 
 for step_num in range(num_steps):
   train(my_module)

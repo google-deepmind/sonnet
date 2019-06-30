@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import doctest
+import inspect
 
 from absl.testing import parameterized
 import sonnet as snt
@@ -29,8 +30,30 @@ import tensorflow as tf
 
 class DoctestTest(test_utils.TestCase, parameterized.TestCase):
 
+  # Avoid running doctests inside a `with tf.device` block.
+  ENTER_PRIMARY_DEVICE = False
+
+  def setUp(self):
+    super(DoctestTest, self).setUp()
+    if self.primary_device != "TPU":
+      # `TpuReplicator` cannot be constructed without a TPU, however it has
+      # exactly the same API as `Replicator` so we can run doctests using that
+      # instead.
+      snt.distribute.TpuReplicator = snt.distribute.Replicator
+
   @parameterized.named_parameters(test_utils.find_sonnet_python_modules(snt))
   def test_doctest(self, module):
+    # `snt` et al import all dependencies from `src`, however doctest does not
+    # test imported deps so we must manually set `__test__` such that imported
+    # symbols are tested.
+    # See: docs.python.org/3/library/doctest.html#which-docstrings-are-examined
+    if not hasattr(module, "__test__") or not module.__test__:
+      module.__test__ = {}
+    for name in module.__all__:
+      value = getattr(module, name)
+      if not inspect.ismodule(value):
+        module.__test__[name] = value
+
     num_failed, num_attempted = doctest.testmod(
         module, optionflags=doctest.ELLIPSIS, extraglobs={"snt": snt, "tf": tf})
     if num_attempted == 0:

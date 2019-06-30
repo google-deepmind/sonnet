@@ -598,6 +598,7 @@ snt_py_library(
     name = "test_utils",
     srcs = ["test_utils.py"],
     deps = [
+        ":base",
         # pip: numpy
         # pip: tensorflow
     ],

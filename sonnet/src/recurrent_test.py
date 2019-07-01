@@ -331,6 +331,7 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
         "inputs must have dtype tf.bfloat16, got tf.float32"):
       unrolled_lstm(input_sequence, initial_state)
 
+  @unittest.skip("b/134132912")
   def testInitialization(self):
     unrolled_lstm = recurrent.UnrolledLSTM(
         hidden_size=self.hidden_size,

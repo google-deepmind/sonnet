@@ -30,6 +30,15 @@ class Adam(base.Module):
   """Adaptive Moment Estimation (Adam) module.
 
   https://arxiv.org/abs/1412.6980
+
+  Attributes:
+    learning_rate: Learning rate.
+    beta1: Beta1.
+    beta2: Beta2.
+    epsilon: Small value to avoid zero denominator.
+    step: Step count.
+    m: Accumulated m for each parameter.
+    v: Accumulated v for each parameter.
   """
 
   def __init__(self,
@@ -38,7 +47,15 @@ class Adam(base.Module):
                beta2=0.999,
                epsilon=1e-8,
                name=None):
-    """Constructs an `Adam` module."""
+    """Constructs an `Adam` module.
+
+    Args:
+      learning_rate: Learning rate.
+      beta1: Beta1.
+      beta2: Beta2.
+      epsilon: Small value to avoid zero denominator.
+      name: Name of the module.
+    """
     super(Adam, self).__init__(name)
     self.learning_rate = learning_rate
     self.beta1 = beta1
@@ -59,7 +76,7 @@ class Adam(base.Module):
       self.v.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
+    """Applies updates to parameters.
 
     Applies the Adam update rule for each update, parameter pair:
 
@@ -105,7 +122,7 @@ class Adam(base.Module):
 
 
 class FastAdam(base.Module):
-  """Faster Adaptive Moment Estimation (Adam) module."""
+  """Adaptive Moment Estimation (Adam) module."""
 
   def __init__(self,
                learning_rate,  # TODO(petebu): Consider a default here.
@@ -133,25 +150,7 @@ class FastAdam(base.Module):
       self.v.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
-
-    Applies the Adam update rule for each update, parameter pair:
-
-        alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
-        m_t <- beta1 * m_{t-1} + (1 - beta1) * update
-        v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
-        parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
-
-    Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
-
-    Raises:
-      ValueError: If `updates` and `parameters` are empty, have different
-        lengths, or have inconsistent types.
-    """
+    """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     self.step.assign_add(1)

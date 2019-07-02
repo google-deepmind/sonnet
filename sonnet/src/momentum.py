@@ -29,21 +29,22 @@ import tensorflow as tf
 class Momentum(base.Module):
   """SGD with Momentum module.
 
-  By default it applies the momentum update rule for each update, parameter
-  pair:
-
-      accum_t <- momentum * accum_{t-1} + update
-      parameter <- parameter - learning_rate * accum_t
-
-  And when using Nesterov momentum (`use_nesterov=True`) it applies:
-
-      accum_t <- momentum * accum_{t-1} + update
-      parameter <- parameter - (learning_rate * update +
-                                learning_rate * momentum * accum_t)
+  Attributes:
+    learning_rate: Learning rate.
+    momentum: Momentum scalar.
+    use_nesterov: `True` if using Nesterov momentum.
+    accumulated_momentum: Accumulated momentum for each parameter.
   """
 
   def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
-    """Constructs a `Momentum` module."""
+    """Constructs a `Momentum` module.
+
+    Args:
+      learning_rate: Learning rate.
+      momentum: Momentum scalar.
+      use_nesterov: Whether to use Nesterov momentum.
+      name: Name of the module.
+    """
     super(Momentum, self).__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum
@@ -58,7 +59,19 @@ class Momentum(base.Module):
           utils.variable_like(p, trainable=False) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
+    """Applies updates to parameters.
+
+    By default it applies the momentum update rule for each update, parameter
+    pair:
+
+        accum_t <- momentum * accum_{t-1} + update
+        parameter <- parameter - learning_rate * accum_t
+
+    And when using Nesterov momentum (`use_nesterov=True`) it applies:
+
+        accum_t <- momentum * accum_{t-1} + update
+        parameter <- parameter - (learning_rate * update +
+                                  learning_rate * momentum * accum_t)
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a
@@ -91,7 +104,7 @@ class Momentum(base.Module):
 
 
 class FastMomentum(base.Module):
-  """Faster SGD with Momentum module."""
+  """SGD with Momentum module."""
 
   def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
     """Constructs a `Momentum` module."""
@@ -109,18 +122,7 @@ class FastMomentum(base.Module):
           utils.variable_like(p, trainable=False) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
-
-    Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
-
-    Raises:
-      ValueError: If `updates` and `parameters` are empty, have different
-        lengths, or have inconsistent types.
-    """
+    """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, accumulated_momentum in zip(

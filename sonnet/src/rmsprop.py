@@ -36,18 +36,28 @@ class RMSProp(base.Module):
   update by the root of this average.
 
       ms <- decay * ms + (1-decay) * update^2
-      mom = momentum * mom + learning_rate * update / sqrt(ms + epsilon)
-      parameter := parameter - mom
+      mom <- momentum * mom + learning_rate * update / sqrt(ms + epsilon)
+      parameter <- parameter - mom
 
   This implementation of `RMSprop` uses plain momentum, not Nesterov momentum.
 
   The centered version additionally maintains a moving average of the
   gradients, and uses that average to estimate the variance:
 
-      mg = decay * mg + (1-decay) * update
-      ms = decay * ms + (1-decay) * update^2
-      mom = momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
-      parameter := parameter - mom
+      mg <- decay * mg + (1-decay) * update
+      ms <- decay * ms + (1-decay) * update^2
+      mom <- momentum * mom + learning_rate * update / sqrt(ms - mg^2 + epsilon)
+      parameter <- parameter - mom
+
+  Attributes:
+    learning_rate: Learning rate.
+    decay: Learning rate decay over each update.
+    momentum: Momentum scalar.
+    epsilon: Small value to avoid zero denominator.
+    centered: `True` if centered.
+    mom: Accumulated mom for each parameter.
+    ms: Accumulated ms for each parameter.
+    mg: Accumulated mg for each parameter.
   """
 
   def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
@@ -57,7 +67,7 @@ class RMSProp(base.Module):
     Args:
       learning_rate: Learning rate.
       decay: Learning rate decay over each update.
-      momentum: Momentum.
+      momentum: Momentum scalar.
       epsilon: Small value to avoid zero denominator.
       centered: If True, gradients are normalized by the estimated variance of
         the gradient; if False, by the uncentered second moment. Setting this to
@@ -88,7 +98,7 @@ class RMSProp(base.Module):
         self.mg.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
+    """Applies updates to parameters.
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a
@@ -126,23 +136,11 @@ class RMSProp(base.Module):
 
 
 class FastRMSProp(base.Module):
-  """Faster RMSProp module."""
+  """RMSProp module."""
 
   def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
                centered=False, name=None):
-    """Constructs an `RMSProp` module.
-
-    Args:
-      learning_rate: Learning rate.
-      decay: Learning rate decay over each update.
-      momentum: Momentum.
-      epsilon: Small value to avoid zero denominator.
-      centered: If True, gradients are normalized by the estimated variance of
-        the gradient; if False, by the uncentered second moment. Setting this to
-        True may help with training, but is slightly more expensive in terms of
-        computation and memory. Defaults to False.
-      name: Name for this module.
-    """
+    """Constructs an `RMSProp` module."""
     super(FastRMSProp, self).__init__(name)
     self.learning_rate = learning_rate
     self.decay = decay
@@ -166,18 +164,7 @@ class FastRMSProp(base.Module):
         self.mg.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
-
-    Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
-
-    Raises:
-      ValueError: If `updates` and `parameters` are empty, have different
-        lengths, or have inconsistent types.
-    """
+    """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, mom, ms, mg in six.moves.zip_longest(

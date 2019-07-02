@@ -25,15 +25,24 @@ import tensorflow as tf
 
 
 class SGD(base.Module):
-  """Stochastic Gradient Descent (SGD) module."""
+  """Stochastic Gradient Descent (SGD) module.
+
+  Attributes:
+    learning_rate: Learning rate.
+  """
 
   def __init__(self, learning_rate, name=None):
-    """Constructs an `SGD` module."""
+    """Constructs an `SGD` module.
+
+    Args:
+      learning_rate: Learning rate.
+      name: Name of the module.
+    """
     super(SGD, self).__init__(name)
     self.learning_rate = learning_rate
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
+    """Applies updates to parameters.
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a
@@ -60,7 +69,7 @@ class SGD(base.Module):
 
 
 class FastSGD(base.Module):
-  """Faster Stochastic Gradient Descent (SGD) module."""
+  """Stochastic Gradient Descent (SGD) module."""
 
   def __init__(self, learning_rate, name=None):
     """Constructs an `SGD` module."""
@@ -68,18 +77,7 @@ class FastSGD(base.Module):
     self.learning_rate = learning_rate
 
   def apply(self, updates, parameters):
-    """Apply updates to parameters.
-
-    Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
-
-    Raises:
-      ValueError: If `updates` and `parameters` are empty, have different
-        lengths, or have inconsistent types.
-    """
+    """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
       # TODO(petebu): Consider caching learning_rate cast.

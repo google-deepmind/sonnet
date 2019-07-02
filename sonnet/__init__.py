@@ -63,7 +63,9 @@ from sonnet.src.recurrent import RNNCore
 from sonnet.src.recurrent import static_unroll
 from sonnet.src.recurrent import TrainableState
 from sonnet.src.recurrent import VanillaRNN
+from sonnet.src.reshape import flatten
 from sonnet.src.reshape import Flatten
+from sonnet.src.reshape import reshape
 from sonnet.src.reshape import Reshape
 from sonnet.src.sequential import Sequential
 
@@ -87,6 +89,7 @@ __all__ = (
     "Dropout",
     "Embed",
     "ExponentialMovingAverage",
+    "flatten",
     "Flatten",
     "GroupNorm",
     "InstanceNorm",
@@ -97,6 +100,7 @@ __all__ = (
     "Linear",
     "Metric",
     "Module",
+    "reshape",
     "Reshape",
     "RNNCore",
     "Sequential",

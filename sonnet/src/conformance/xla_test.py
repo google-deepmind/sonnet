@@ -50,7 +50,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      self.assertAllClose(out, xla_out)
+      self.assertAllClose(out, xla_out, atol=1e-3)
 
   @goldens.all_goldens
   def test_jit_scope(self, golden):
@@ -66,7 +66,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      self.assertAllClose(out, xla_out)
+      self.assertAllClose(out, xla_out, atol=1e-3)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

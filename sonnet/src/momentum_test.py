@@ -46,6 +46,74 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
                         [x.numpy() for x in parameters])
 
   @parameterized.parameters(opt.Momentum, opt.FastMomentum)
+  def testDenseNesterov(self, opt_class):
+    parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
+    updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
+    optimizer = opt_class(learning_rate=0.1, momentum=0.9, use_nesterov=True)
+    # Step 1 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.05, 1.05], [2.43, 3.43]],
+                        [x.numpy() for x in parameters])
+    # Step 2 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-1.305, -0.305], [1.617, 2.617]],
+                        [x.numpy() for x in parameters])
+    # Step 3 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
+                        [x.numpy() for x in parameters])
+
+  @parameterized.parameters(opt.Momentum, opt.FastMomentum)
+  def testSparse(self, opt_class):
+    if self.primary_device in ("GPU", "TPU"):
+      self.skipTest("IndexedSlices not supported on {}.".format(
+          self.primary_device))
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = opt_class(learning_rate=3., momentum=0.9)
+    # Step 1 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [4.0 - 3.0 * 0.01]], parameters[1].numpy())
+    # Step 2 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.7 - 3.0 * 0.19], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.97 - 3.0 * 0.019]], parameters[1].numpy())
+    # Step 3 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.13 - 3.0 * 0.271], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.913 - 3.0 * 0.0271]], parameters[1].numpy())
+
+  @parameterized.parameters(opt.Momentum, opt.FastMomentum)
+  def testSparseNesterov(self, opt_class):
+    if self.primary_device in ("GPU", "TPU"):
+      self.skipTest("IndexedSlices not supported on {}.".format(
+          self.primary_device))
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = opt_class(learning_rate=3., momentum=0.9, use_nesterov=True)
+    # Step 1 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.43], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.943]], parameters[1].numpy())
+    # Step 2 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-0.383], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.8617]], parameters[1].numpy())
+    # Step 3 of Momentum
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-1.4147], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.75853]], parameters[1].numpy())
+
+  @parameterized.parameters(opt.Momentum, opt.FastMomentum)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]
@@ -114,24 +182,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
       var = tf.Variable(1.0)
     optimizer.apply([tf.constant(0.1)], [var])
     self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
-
-  @parameterized.parameters(opt.Momentum, opt.FastMomentum)
-  def testNesterov(self, opt_class):
-    parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
-    updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9, use_nesterov=True)
-    # Step 1 of Momentum
-    optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.05, 1.05], [2.43, 3.43]],
-                        [x.numpy() for x in parameters])
-    # Step 2 of Momentum
-    optimizer.apply(updates, parameters)
-    self.assertAllClose([[-1.305, -0.305], [1.617, 2.617]],
-                        [x.numpy() for x in parameters])
-    # Step 3 of Momentum
-    optimizer.apply(updates, parameters)
-    self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
-                        [x.numpy() for x in parameters])
 
   @parameterized.parameters(opt.Momentum, opt.FastMomentum)
   def testUnsuppportedStrategyError(self, opt_class):

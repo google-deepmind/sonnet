@@ -47,9 +47,9 @@ class Momentum(base.Module):
     """
     super(Momentum, self).__init__(name)
     self.learning_rate = learning_rate
-    self.momentum = momentum
+    self.momentum = momentum  # TODO(petebu) Reconsider name.
     self.use_nesterov = use_nesterov
-    self.accumulated_momentum = []
+    self.accumulated_momentum = []  # TODO(petebu) Reconsider name.
 
   @once.once
   def _initialize(self, parameters):
@@ -85,22 +85,30 @@ class Momentum(base.Module):
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
-    for update, parameter, accumulated_momentum in zip(
+    for update, parameter, momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        momentum = tf.cast(self.momentum, update.dtype.base_dtype)
-
-        accumulated_momentum.assign((momentum * accumulated_momentum) + update)
-        if self.use_nesterov:
-          parameter.assign_sub(learning_rate * update +
-                               learning_rate * momentum * accumulated_momentum)
+        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        mu = tf.cast(self.momentum, update.dtype.base_dtype)
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          sparse_momentum_update = (mu * momentum.gather_nd(indices)) + update
+          momentum.scatter_nd_update(indices, sparse_momentum_update)
+          if self.use_nesterov:
+            parameter.scatter_nd_sub(
+                indices, (lr * update) + (lr * mu * sparse_momentum_update))
+          else:
+            parameter.scatter_nd_sub(indices, lr * sparse_momentum_update)
         else:
-          parameter.assign_sub(learning_rate * accumulated_momentum)
+          momentum.assign((mu * momentum) + update)
+          if self.use_nesterov:
+            parameter.assign_sub((lr * update) + (lr * mu * momentum))
+          else:
+            parameter.assign_sub(lr * momentum)
 
 
 class FastMomentum(base.Module):
@@ -127,18 +135,28 @@ class FastMomentum(base.Module):
     self._initialize(parameters)
     for update, parameter, accumulated_momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
-
-        tf.raw_ops.ResourceApplyMomentum(
-            var=parameter.handle,
-            accum=accumulated_momentum.handle,
-            lr=learning_rate,
-            grad=update,
-            momentum=momentum,
-            use_nesterov=self.use_nesterov)
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          tf.raw_ops.ResourceSparseApplyMomentum(
+              var=parameter.handle,
+              accum=accumulated_momentum.handle,
+              lr=learning_rate,
+              grad=update,
+              indices=indices,
+              momentum=momentum,
+              use_nesterov=self.use_nesterov)
+        else:
+          tf.raw_ops.ResourceApplyMomentum(
+              var=parameter.handle,
+              accum=accumulated_momentum.handle,
+              lr=learning_rate,
+              grad=update,
+              momentum=momentum,
+              use_nesterov=self.use_nesterov)

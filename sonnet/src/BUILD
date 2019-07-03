@@ -599,6 +599,7 @@ snt_py_library(
     srcs = ["test_utils.py"],
     deps = [
         ":base",
+        # pip: absl/testing:parameterized
         # pip: numpy
         # pip: tensorflow
     ],

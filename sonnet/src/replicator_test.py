@@ -19,8 +19,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import itertools
-
 from absl import logging
 from absl.testing import parameterized
 from sonnet.src import replicator as snt_replicator
@@ -28,22 +26,34 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
-def replicator_all_devices(device_type):
-  # TODO(petebu) Enable `Replicator` tests on TPU.
-  if device_type == "TPU":
-    logging.info("Using TpuReplicator")
-    return snt_replicator.TpuReplicator()
-
+def replicator_all_devices():
   # NOTE: The explicit device list is required since currently Replicator
   # only considers CPU and GPU devices. This means on TPU by default we only
   # mirror on the local CPU.
-  devices = tf.config.experimental.list_logical_devices(device_type=device_type)
-  devices = [d.name for d in devices]
-  logging.info("Replicating over %s", devices)
-  return snt_replicator.Replicator(devices=devices)
+  device_types = ["TPU", "GPU", "CPU"]
+  while device_types:
+    device_type = device_types.pop(0)
+    devices = tf.config.experimental.list_logical_devices(
+        device_type=device_type)
+    if devices:
+      devices = [d.name for d in devices]
+      logging.info("Replicating over %s", devices)
+      return snt_replicator.Replicator(devices=devices)
 
 
-def _create_variable_in_replicator_scope(replicator):
+def maybe_tpu_replicator():
+  tpus = tf.config.experimental.list_logical_devices(device_type="TPU")
+  if tpus:
+    logging.info("Using TpuReplicator over %s", [t.name for t in tpus])
+    return snt_replicator.TpuReplicator()
+
+
+def all_replicators():
+  return (("TpuReplicator", maybe_tpu_replicator),
+          ("Replicator", replicator_all_devices))
+
+
+def _create_variable_in_cross_replica_context(replicator):
   with replicator.scope():
     v = tf.Variable(1.)
   return v
@@ -57,10 +67,19 @@ class TrainableVariable(object):
     return self.v
 
 
-def _create_variable_in_step_fn(replicator):
+def _create_variable_in_replica_context(replicator):
   o = TrainableVariable()
   replicator.experimental_run_v2(o)
   return o.v
+
+
+def all_variable_creators():
+  return (("cross_replica_context", _create_variable_in_cross_replica_context),
+          ("replica_context", _create_variable_in_replica_context))
+
+
+def bools(name):
+  return (name, True), ("not_{}".format(name), False)
 
 
 class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
@@ -68,45 +87,56 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
   # Avoid running tests inside a `with tf.device("TPU:0"):` block.
   ENTER_PRIMARY_DEVICE = False
 
-  @parameterized.parameters(
-      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
-  def test_variable_synchronization_default(self, create_var):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(),
+                                        all_variable_creators())
+  def test_variable_synchronization_default(self, replicator_fn, create_var):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
     v = create_var(replicator)
     self.assertEqual(
         tf.VariableSynchronization.ON_READ, v.primary.synchronization)
 
-  @parameterized.parameters(
-      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
-  def test_variable_aggregation_default(self, create_var):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(),
+                                        all_variable_creators())
+  def test_variable_aggregation_default(self, replicator_fn, create_var):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
     v = create_var(replicator)
     self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
 
-  @parameterized.parameters(
-      [_create_variable_in_replicator_scope, _create_variable_in_step_fn])
-  def test_variable_trainable_default(self, create_var):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(),
+                                        all_variable_creators())
+  def test_variable_trainable_default(self, replicator_fn, create_var):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
     v = create_var(replicator)
     self.assertTrue(v.trainable)
 
-  @parameterized.parameters([True, False])
-  def test_variable_trainable(self, trainable):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(), bools("trainable"))
+  def test_variable_trainable(self, replicator_fn, trainable):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
     with replicator.scope():
       v = tf.Variable(1., trainable=trainable)
     self.assertEqual(trainable, v.trainable)
 
-  @parameterized.parameters(
-      *itertools.product(
-          [("assign", 1.), ("assign_add", 1.), ("assign_sub", -1.)],
-          [True, False]))
-  def test_assign(self, updates, cross_replica):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(),
+                                        (("assign", "assign", 1.),
+                                         ("assign_add", "assign_add", 1.),
+                                         ("assign_sub", "assign_sub", -1.)),
+                                        bools("cross_replica"))
+  def test_assign(self, replicator_fn, method_name, value, cross_replica):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
+
     with replicator.scope():
       v = tf.Variable(0.)
-    method_name, update_value = updates
-    update_fn = lambda: getattr(v, method_name)(update_value)
+    update_fn = lambda: getattr(v, method_name)(value)
     if cross_replica:
       # NOTE: Explicitly not running inside replicator.scope (fn should handle).
       update_fn()
@@ -115,9 +145,13 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     for component in v._values:
       self.assertAllEqual(component.read_value(), tf.ones_like(component))
 
-  @parameterized.parameters(True, False)
-  def test_read_value(self, cross_replica):
-    replicator = replicator_all_devices(self.primary_device)
+  @test_utils.combined_named_parameters(all_replicators(),
+                                        bools("cross_replica"))
+  def test_read_value(self, replicator_fn, cross_replica):
+    replicator = replicator_fn()
+    if replicator is None:
+      self.skipTest("No replicator supplied.")
+
     with replicator.scope():
       v = tf.Variable(0.)
     if cross_replica:

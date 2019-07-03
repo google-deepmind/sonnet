@@ -293,7 +293,9 @@ snt_py_library(
     srcs = ["metrics.py"],
     deps = [
         ":base",
+        ":once",
         # pip: six
+        # pip: tensorflow
     ],
 )
 
@@ -303,7 +305,8 @@ snt_py_test(
     py3_tags = ["noasan"],
     deps = [
         ":metrics",
-        # pip: absl/testing:absltest
+        ":test_utils",
+        # pip: tensorflow
     ],
 )
 

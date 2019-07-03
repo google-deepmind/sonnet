@@ -45,7 +45,9 @@ from sonnet.src.dropout import Dropout
 from sonnet.src.embed import Embed
 from sonnet.src.group_norm import GroupNorm
 from sonnet.src.linear import Linear
+from sonnet.src.metrics import Mean
 from sonnet.src.metrics import Metric
+from sonnet.src.metrics import Sum
 from sonnet.src.moving_averages import ExponentialMovingAverage
 from sonnet.src.once import once
 from sonnet.src.recurrent import Conv1DLSTM
@@ -98,12 +100,14 @@ __all__ = (
     "LSTMState",
     "LayerNorm",
     "Linear",
+    "Mean",
     "Metric",
     "Module",
     "reshape",
     "Reshape",
     "RNNCore",
     "Sequential",
+    "Sum",
     "TrainableState",
     "VanillaRNN",
     "deep_rnn_with_residual_connections",

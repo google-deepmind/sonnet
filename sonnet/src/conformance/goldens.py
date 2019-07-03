@@ -418,6 +418,22 @@ class EmbedTest(AbstractGolden):
   create_module = lambda _: snt.Embed(vocab_size=100, embed_dim=100)
   input_spec = tf.TensorSpec([10], dtype=tf.int32)
   num_variables = 1
+
+
+@_register_golden(snt.Mean, "mean_2x2")
+class MeanTest(AbstractGolden):
+  create_module = lambda _: snt.Mean()
+  input_spec = tf.TensorSpec([2, 2])
+  num_variables = 2
+  has_side_effects = True
+
+
+@_register_golden(snt.Sum, "sum_2x2")
+class SumTest(AbstractGolden):
+  create_module = lambda _: snt.Sum()
+  input_spec = tf.TensorSpec([2, 2])
+  num_variables = 1
+  has_side_effects = True
 # pylint: enable=missing-docstring
 
 

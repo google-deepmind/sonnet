@@ -17,12 +17,16 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
 import six
 
 from sonnet.src import base
+from sonnet.src import once
+import tensorflow as tf
+from typing import Optional, Text
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -30,26 +34,79 @@ class Metric(base.Module):
   """Metric base class."""
 
   @abc.abstractmethod
+  def initialize(self, value):
+    """Creates any input dependent variables or state."""
+
+  @abc.abstractmethod
   def update(self, value):
     """Accumulates values."""
-    pass
 
   @abc.abstractproperty
   def value(self):
     """Returns the current value of the metric."""
-    pass
 
   @abc.abstractmethod
   def reset(self):
     """Resets the metric."""
-    pass
 
   def __call__(self, value):
     """Updates the metric and returns the new value."""
     self.update(value)
     return self.value
 
-  @abc.abstractmethod
-  def initialize(self, value):
-    """Creates any input dependent variables or state."""
-    pass
+
+class Sum(Metric):
+  """Calculates the element-wise sum of the given values."""
+
+  def __init__(self, name: Optional[Text] = None):
+    super(Sum, self).__init__(name=name)
+    self.sum = None
+
+  @once.once
+  def initialize(self, value: tf.Tensor):
+    """See base class."""
+    self.sum = tf.Variable(tf.zeros_like(value), trainable=False, name="sum")
+
+  def update(self, value: tf.Tensor):
+    """See base class."""
+    self.initialize(value)
+    self.sum.assign_add(value)
+
+  @property
+  def value(self) -> tf.Tensor:
+    """See base class."""
+    return tf.convert_to_tensor(self.sum)
+
+  def reset(self):
+    """See base class."""
+    self.sum.assign(tf.zeros_like(self.sum))
+
+
+class Mean(Metric):
+  """Calculates the element-wise mean of the given values."""
+
+  def __init__(self, name: Optional[Text] = None):
+    super(Mean, self).__init__(name=name)
+    self.sum = None
+    self.count = tf.Variable(0, dtype=tf.int64, trainable=False, name="count")
+
+  @once.once
+  def initialize(self, value: tf.Tensor):
+    """See base class."""
+    self.sum = tf.Variable(tf.zeros_like(value), trainable=False, name="sum")
+
+  def update(self, value: tf.Tensor):
+    """See base class."""
+    self.initialize(value)
+    self.sum.assign_add(value)
+    self.count.assign_add(1)
+
+  @property
+  def value(self) -> tf.Tensor:
+    """See base class."""
+    # TODO(cjfj): Assert summed type is floating-point?
+    return self.sum / tf.cast(self.count, dtype=self.sum.dtype)
+
+  def reset(self):
+    self.sum.assign(tf.zeros_like(self.sum))
+    self.count.assign(0)

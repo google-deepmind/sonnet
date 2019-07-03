@@ -19,36 +19,51 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl.testing import absltest
 from sonnet.src import metrics
+from sonnet.src import test_utils
+import tensorflow as tf
 
 
-class MetricsTest(absltest.TestCase):
+class SumTest(test_utils.TestCase):
 
-  def testCompleteMetric(self):
-    metric = CompleteMetric()
+  def testSimple(self):
+    acc = metrics.Sum()
+    self.assertAllEqual([2., 3.], acc(tf.constant([2., 3.])))
+    self.assertAllEqual([6., 8.], acc(tf.constant([4., 5.])))
 
-    self.assertEqual(metric.update("test"), "test")
-    self.assertEqual(metric.value, 42)
-    self.assertEqual(metric.reset(), 42)
-    self.assertEqual(metric("foo"), 42)
+  def testInitialize(self):
+    acc = metrics.Sum()
+    acc.initialize(tf.constant([1., 2.]))
+    self.assertAllEqual([0., 0.], acc.value)
+
+  def testReset(self):
+    acc = metrics.Sum()
+    self.assertAllEqual([2., 3.], acc(tf.constant([2., 3.])))
+    self.assertAllEqual([6., 8.], acc(tf.constant([4., 5.])))
+    acc.reset()
+    self.assertAllEqual([7., 8.], acc(tf.constant([7., 8.])))
 
 
-class CompleteMetric(metrics.Metric):
+class MeanTest(test_utils.TestCase):
 
-  def update(self, value):
-    return value
+  def testSimple(self):
+    mean = metrics.Mean()
+    self.assertAllEqual([2., 3.], mean(tf.constant([2., 3.])))
+    self.assertAllEqual([3., 4.], mean(tf.constant([4., 5.])))
 
-  @property
-  def value(self):
-    return 42
+  def testInitialize(self):
+    mean = metrics.Mean()
+    mean.initialize(tf.constant([1., 2.]))
+    self.assertAllEqual([1., 2.], mean(tf.constant([1., 2.])))
 
-  def reset(self):
-    return 42
-
-  def initialize(self, value):
-    pass
+  def testReset(self):
+    mean = metrics.Mean()
+    self.assertAllEqual([2., 3.], mean(tf.constant([2., 3.])))
+    self.assertAllEqual([3., 4.], mean(tf.constant([4., 5.])))
+    mean.reset()
+    self.assertAllEqual([7., 8.], mean(tf.constant([7., 8.])))
 
 
 if __name__ == "__main__":
-  absltest.main()
+  # tf.enable_v2_behavior()
+  tf.test.main()

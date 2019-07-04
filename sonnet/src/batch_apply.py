@@ -98,8 +98,10 @@ def merge_leading_dims(
     x: Optional[tf.Tensor],
     num_dims: int,
 ) -> Optional[tf.Tensor]:
-  if x is None:
+  """Merges leading dimensions."""
+  if x is None or not isinstance(x, (tf.Tensor, tf.Variable)):
     return x
+
   if len(x.shape) < num_dims:
     return x
   return tf.reshape(x, [-1] + x.shape.as_list()[num_dims:])

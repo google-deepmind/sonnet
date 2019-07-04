@@ -38,11 +38,23 @@ class BatchApplyTest(test_utils.TestCase):
     y = m(tf.ones([1, 1, 1]))
     self.assertIsNone(y)
 
+  def test_kwargs(self):
+    m = batch_apply.BatchApply(KwargsModule())
+    y = m(tf.ones([1, 1, 1]), is_training=True)
+    self.assertIsNone(y)
+
 
 class NoOutputModule(base.Module):
 
   def __call__(self, x):
     return None
+
+
+class KwargsModule(base.Module):
+
+  def __call__(self, x, is_training=None):
+    if is_training:
+      return None
 
 
 class AddOne(base.Module):

@@ -60,6 +60,7 @@ snt_py_library(
     deps = [
         "//sonnet/src/nets:cifar10_convnet",
         "//sonnet/src/nets:mlp",
+        "//sonnet/src/nets:vqvae",
     ],
 )
 

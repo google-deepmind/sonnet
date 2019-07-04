@@ -108,7 +108,10 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     # Test the output from the module remains stable.
     # TODO(tomhennigan) Handle modules with nested outputs.
     if golden.deterministic:
-      self.assertAllClose(golden.forward(module), old_y)
+      tf.nest.map_structure(
+          self.assertAllClose,
+          golden.forward(module),
+          old_y)
 
   @goldens.all_goldens
   def test_save_then_load_new_instance(self, golden):
@@ -164,7 +167,10 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     # Assert the output from both modules is the same.
     # TODO(tomhennigan) Handle modules with nested outputs.
     if golden.deterministic:
-      self.assertAllClose(golden.forward(module_1), golden.forward(module_2))
+      tf.nest.map_structure(
+          self.assertAllClose,
+          golden.forward(module_1),
+          golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_golden(self, golden):
@@ -218,7 +224,9 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
     def forward():
       per_replica = replicator.experimental_run_v2(
           lambda: golden.forward(module))
-      return tf.stack(replicator.unwrap(per_replica), axis=0)
+      return tf.nest.map_structure(
+          lambda args: tf.stack(replicator.unwrap(args), axis=0),
+          per_replica)
 
     if use_function:
       forward = tf.function(forward)
@@ -256,7 +264,10 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
                           msg=variable.name)
 
     if golden.deterministic:
-      self.assertAllEqual(forward(), before_save_ys)
+      tf.nest.map_structure(
+          self.assertAllEqual,
+          forward(),
+          before_save_ys)
 
   def assertRestoreFromGolden(self, golden, replicator):
     with replicator.scope():
@@ -308,7 +319,10 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
       y_before = run_forward(module)
       y_after = run_forward(module2)
-      self.assertAllEqual(y_before, y_after)
+      tf.nest.map_structure(
+          self.assertAllEqual,
+          y_before,
+          y_after)
 
   def assertRestoreOnCreate(self, golden, replicator):
     # Save a checkpoint from a non-distributed model.

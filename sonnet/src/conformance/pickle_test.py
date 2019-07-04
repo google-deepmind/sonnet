@@ -48,7 +48,7 @@ class PickleTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       y1 = golden.forward(m1)
       y2 = golden.forward(m2)
-      self.assertAllEqual(y1, y2)
+      tf.nest.map_structure(self.assertAllEqual, y1, y2)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

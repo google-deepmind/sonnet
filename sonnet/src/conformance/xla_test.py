@@ -19,6 +19,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 from absl.testing import parameterized
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
@@ -39,18 +41,22 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
       if len(out) == 1:
         return out[0]
       else:
-        return tuple(out) if out else None
+        return out if out else None
 
     if self.primary_device == "TPU":
       # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
       with tf.device(None):
         xla_out = forward()
+      atol = golden.tpu_atol
     else:
       xla_out = forward()
+      atol = 1e-3
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      self.assertAllClose(out, xla_out, atol=1e-3)
+      tf.nest.map_structure(
+          functools.partial(self.assertAllClose, atol=atol),
+          out, xla_out)
 
   @goldens.all_goldens
   def test_jit_scope(self, golden):
@@ -63,10 +69,16 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
         return golden.forward(mod)
 
     xla_out = forward()
+    if self.primary_device == "TPU":
+      atol = golden.tpu_atol
+    else:
+      atol = 1e-3
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      self.assertAllClose(out, xla_out, atol=1e-3)
+      tf.nest.map_structure(
+          functools.partial(self.assertAllClose, atol=atol),
+          out, xla_out)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

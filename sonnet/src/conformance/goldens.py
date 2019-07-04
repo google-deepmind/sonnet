@@ -101,6 +101,10 @@ class AbstractGolden(Golden):
 
   has_side_effects = False
 
+  # Tolerance to be used for assertAllClose calls on TPU, where lower precision
+  # can mean results differ more.
+  tpu_atol = 1e-3
+
   @abc.abstractproperty
   def input_spec(self):
     pass
@@ -434,6 +438,69 @@ class SumTest(AbstractGolden):
   input_spec = tf.TensorSpec([2, 2])
   num_variables = 1
   has_side_effects = True
+
+
+@_register_golden(snt.nets.VectorQuantizer, "vqvae")
+class VectorQuantizerTest(AbstractGolden):
+
+  def create_module(self):
+    return snt.nets.VectorQuantizer(
+        embedding_dim=4, num_embeddings=6, commitment_cost=0.25)
+
+  # Input can be any shape as long as final dimension is equal to embedding_dim.
+  input_spec = tf.TensorSpec([2, 3, 4])
+
+  def forward(self, module):
+    x = range_like(self.input_spec)
+    return module(x, is_training=True)
+
+  # Numerical results can be quite different on TPU, be a bit more loose here.
+  tpu_atol = 4e-2
+
+  num_variables = 1
+
+
+@_register_golden(snt.nets.VectorQuantizerEMA, "vqvae_ema_train")
+class VectorQuantizerEMATrainTest(AbstractGolden):
+
+  def create_module(self):
+    return snt.nets.VectorQuantizerEMA(
+        embedding_dim=5, num_embeddings=7, commitment_cost=0.5, decay=0.9)
+
+  # Input can be any shape as long as final dimension is equal to embedding_dim.
+  input_spec = tf.TensorSpec([2, 5])
+
+  def forward(self, module):
+    x = range_like(self.input_spec)
+    return module(x, is_training=True)
+
+  # Numerical results can be quite different on TPU, be a bit more loose here.
+  tpu_atol = 4e-2
+
+  num_variables = 7  # 1 embedding, then 2 EMAs each of which contain 3.
+  has_side_effects = True
+
+
+@_register_golden(snt.nets.VectorQuantizerEMA, "vqvae_ema_eval")
+class VectorQuantizerEMAEvalTest(AbstractGolden):
+
+  def create_module(self):
+    return snt.nets.VectorQuantizerEMA(
+        embedding_dim=3, num_embeddings=4, commitment_cost=0.5, decay=0.9)
+
+  # Input can be any shape as long as final dimension is equal to embedding_dim.
+  input_spec = tf.TensorSpec([2, 3])
+
+  def forward(self, module):
+    x = range_like(self.input_spec)
+    return module(x, is_training=False)
+
+  # Numerical results can be quite different on TPU, be a bit more loose here.
+  tpu_atol = 4e-2
+
+  num_variables = 7  # 1 embedding, then 2 EMAs each of which contain 3.
+  has_side_effects = False  # only has side effects when is_training==True
+
 # pylint: enable=missing-docstring
 
 

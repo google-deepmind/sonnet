@@ -74,7 +74,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       # The output from both the saved and restored model should be close.
       y1 = saved_model.inference(x)
-      self.assertAllEqual(y1, y2)
+      tf.nest.map_structure(self.assertAllEqual, y1, y2)
 
     for a, b in zip(v1, v2):
       self.assertEqual(a.name, b.name)

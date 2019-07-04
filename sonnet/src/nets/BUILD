@@ -4,9 +4,9 @@ licenses(["notice"])  # Apache 2.0 License
 
 exports_files(["LICENSE"])
 
-load("//sonnet/src:build_defs.bzl", "snt_py_test")
+load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
-py_library(
+snt_py_library(
     name = "mlp",
     srcs = ["mlp.py"],
     deps = [
@@ -27,7 +27,7 @@ snt_py_test(
     ],
 )
 
-py_library(
+snt_py_library(
     name = "cifar10_convnet",
     srcs = ["cifar10_convnet.py"],
     deps = [
@@ -47,6 +47,27 @@ snt_py_test(
     deps = [
         ":cifar10_convnet",
         # pip: absl/testing:parameterized
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
+    name = "vqvae",
+    srcs = ["vqvae.py"],
+    deps = [
+        "//sonnet/src:base",
+        "//sonnet/src:initializers",
+        "//sonnet/src:moving_averages",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "vqvae_test",
+    srcs = ["vqvae_test.py"],
+    deps = [
+        ":vqvae",
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],

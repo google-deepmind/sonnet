@@ -127,7 +127,7 @@ class RMSProp(base.Module):
         ms.assign(tf.square(update) * (1. - decay) + ms * decay)
         if self.centered:
           mg.assign(update * (1. - decay) + mg * decay)
-          denominator = ms - mg + epsilon
+          denominator = ms - tf.square(mg) + epsilon
         else:
           denominator = ms + epsilon
         mom.assign(momentum * mom + (

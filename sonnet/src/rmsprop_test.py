@@ -24,8 +24,6 @@ from sonnet.src import rmsprop
 from sonnet.src import test_utils
 import tensorflow as tf
 
-# TODO(petebu): Add tests for centered mode.
-
 
 class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
 
@@ -45,6 +43,24 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.262262, 1.262262], [2.262262, 3.262262]],
+                        [x.numpy() for x in parameters])
+
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
+  def testDenseCentered(self, opt_class):
+    parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
+    updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
+    optimizer = opt_class(learning_rate=0.1, centered=True)
+    # Step 1 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.666667, 1.666667], [2.666667, 3.666667]],
+                        [x.numpy() for x in parameters])
+    # Step 2 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.41176, 1.41176], [2.41176, 3.41176]],
+                        [x.numpy() for x in parameters])
+    # Step 3 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.186776, 1.186776], [2.186776, 3.186776]],
                         [x.numpy() for x in parameters])
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)

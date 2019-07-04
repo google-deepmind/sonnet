@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """A minimal interface mlp module."""
 
 from __future__ import absolute_import
@@ -33,6 +32,8 @@ class MLP(base.Module):
                b_init=None,
                with_bias=True,
                activation=tf.nn.relu,
+               use_dropout=False,
+               dropout_rate=0.5,
                activate_final=False,
                name=None):
     """Constructs an MLP.
@@ -45,6 +46,9 @@ class MLP(base.Module):
       with_bias: Whether or not to apply a bias in each layer.
       activation: Activation function to apply between linear layers. Defaults
         to ReLU.
+      use_dropout: Whether to apply dropout to all hidden layers. Default
+        `False`.
+      dropout_rate: Dropout rate applied if using dropout.
       activate_final: Whether or not to activate the final layer of the MLP.
       name: Optional name for this module.
 
@@ -60,6 +64,8 @@ class MLP(base.Module):
     self._b_init = b_init
     self._activation = activation
     self._activate_final = activate_final
+    self._use_dropout = use_dropout
+    self._dropout_rate = dropout_rate
     self._layers = []
     for index, output_size in enumerate(output_sizes):
       self._layers.append(
@@ -70,11 +76,30 @@ class MLP(base.Module):
               with_bias=with_bias,
               name="linear_%d" % index))
 
-  def __call__(self, inputs):
+  def __call__(self, inputs, is_training=None):
+    """Connects the module to some inputs.
+
+    Args:
+      inputs: A Tensor of shape `[batch_size, input_size]`.
+      is_training: A bool indicating if we are currently training. Defaults to
+        `None`. Required if using dropout.
+
+    Returns:
+      output: The output of the model of size `[batch_size, output_size]`.
+    """
+    if self._use_dropout:
+      assert is_training is not None, ("The is_training argument is required "
+                                       "when dropout is used.")
+
     num_layers = len(self._layers)
+
     for i, layer in enumerate(self._layers):
       inputs = layer(inputs)
       if i < (num_layers - 1) or self._activate_final:
+        # Only perform dropout if we are activating the output.
+        if self._use_dropout and is_training:
+          inputs = tf.nn.dropout(inputs, rate=self._dropout_rate)
+
         inputs = self._activation(inputs)
     return inputs
 
@@ -117,5 +142,7 @@ class MLP(base.Module):
         b_init=self._b_init,
         with_bias=self._with_bias,
         activation=self._activation,
+        use_dropout=self._use_dropout,
+        dropout_rate=self._dropout_rate,
         activate_final=activate_final,
         name=name)

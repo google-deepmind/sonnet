@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.nets.mlp."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import itertools
 from absl.testing import parameterized
 from sonnet.src import test_utils
 from sonnet.src.nets import mlp
@@ -31,8 +31,9 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(ValueError, "b_init must not be set"):
       mlp.MLP([1], with_bias=False, b_init=object())
 
-  @parameterized.parameters(1, 2, 3)
-  def test_submodules(self, num_layers):
+  @parameterized.parameters(
+      itertools.product((1, 2, 3), (True, False), (0.1, 0.0)))
+  def test_submodules(self, num_layers, use_dropout, dropout_rate):
     mod = mlp.MLP([1] * num_layers)
     self.assertLen(mod.submodules, num_layers)
 
@@ -129,6 +130,13 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     mod(tf.ones([1, 1]))
     self.assertEqual(activation.count, 3 if activate_final else 2)
 
+  @parameterized.parameters(itertools.product((False, True), (False, True)))
+  def test_applies_activation_with_dropout(self, use_dropout, is_training):
+    activation = CountingActivation()
+    mod = mlp.MLP([1, 1, 1], use_dropout=use_dropout, activation=activation)
+    mod(tf.ones([1, 1]), is_training=is_training)
+    self.assertEqual(activation.count, 2)
+
 
 def reversed_mlp(**kwargs):
   mod = mlp.MLP([2, 3, 4], **kwargs)
@@ -154,6 +162,7 @@ class CountingInitializer(object):
   def __call__(self, shape, dtype=tf.float32):
     self.count += 1
     return tf.ones(shape, dtype=dtype)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

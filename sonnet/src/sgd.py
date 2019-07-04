@@ -62,8 +62,8 @@ class SGD(base.Module):
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
         if isinstance(update, tf.IndexedSlices):
-          parameter.scatter_nd_sub(
-              update.indices, update.values * learning_rate)
+          parameter.scatter_sub(
+              tf.IndexedSlices(update.values * learning_rate, update.indices))
         else:
           parameter.assign_sub(update * learning_rate)
 

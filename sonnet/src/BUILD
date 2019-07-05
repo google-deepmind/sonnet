@@ -234,7 +234,6 @@ snt_py_library(
 snt_py_test(
     name = "linear_test",
     srcs = ["linear_test.py"],
-    gpu = False,  # TODO(tomhennigan) Flip me!
     deps = [
         ":linear",
         ":test_utils",

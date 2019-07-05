@@ -33,7 +33,7 @@ class MLP(base.Module):
                with_bias=True,
                activation=tf.nn.relu,
                use_dropout=False,
-               dropout_rate=0.5,
+               dropout_rate=None,
                activate_final=False,
                name=None):
     """Constructs an MLP.
@@ -57,6 +57,11 @@ class MLP(base.Module):
     """
     if not with_bias and b_init is not None:
       raise ValueError("When with_bias=False b_init must not be set.")
+
+    if use_dropout and dropout_rate is None:
+      raise ValueError("When use_dropout=True dropout_rate must be set.")
+    elif not use_dropout and dropout_rate is not None:
+      raise ValueError("When use_dropout=False dropout_rate must not be set.")
 
     super(MLP, self).__init__(name=name)
     self._with_bias = with_bias
@@ -87,9 +92,12 @@ class MLP(base.Module):
     Returns:
       output: The output of the model of size `[batch_size, output_size]`.
     """
-    if self._use_dropout:
-      assert is_training is not None, ("The is_training argument is required "
-                                       "when dropout is used.")
+    if self._use_dropout and is_training is None:
+      raise ValueError(
+          "The `is_training` argument is required when dropout is used.")
+    elif not self._use_dropout and is_training is not None:
+      raise ValueError(
+          "The `is_training` argument should only be used with dropout.")
 
     num_layers = len(self._layers)
 
@@ -99,8 +107,8 @@ class MLP(base.Module):
         # Only perform dropout if we are activating the output.
         if self._use_dropout and is_training:
           inputs = tf.nn.dropout(inputs, rate=self._dropout_rate)
-
         inputs = self._activation(inputs)
+
     return inputs
 
   def reverse(self, activate_final=None, name=None):

@@ -122,6 +122,25 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     mod(tf.ones([1, 1]))
     self.assertEqual(activation.count, 2)
 
+  def test_dropout_requires_rate(self):
+    with self.assertRaisesRegexp(ValueError, "dropout_rate must be set"):
+      mlp.MLP([1, 1], use_dropout=True)
+
+  def test_no_dropout_rejects_rate(self):
+    with self.assertRaisesRegexp(ValueError, "dropout_rate must not be set"):
+      mlp.MLP([1, 1], dropout_rate=0.5)
+
+  def test_dropout_requires_is_training(self):
+    mod = mlp.MLP([1, 1], use_dropout=True, dropout_rate=0.5)
+    with self.assertRaisesRegexp(ValueError, "is_training.* is required"):
+      mod(tf.ones([1, 1]))
+
+  @parameterized.parameters(False, True)
+  def test_no_dropout_rejects_is_training(self, is_training):
+    mod = mlp.MLP([1, 1])
+    with self.assertRaisesRegexp(ValueError, "is_training.*only.*with dropout"):
+      mod(tf.ones([1, 1]), is_training=is_training)
+
   @parameterized.parameters(False, True)
   def test_reverse_activate_final(self, activate_final):
     activation = CountingActivation()
@@ -133,8 +152,11 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters(itertools.product((False, True), (False, True)))
   def test_applies_activation_with_dropout(self, use_dropout, is_training):
     activation = CountingActivation()
-    mod = mlp.MLP([1, 1, 1], use_dropout=use_dropout, activation=activation)
-    mod(tf.ones([1, 1]), is_training=is_training)
+    mod = mlp.MLP([1, 1, 1],
+                  use_dropout=use_dropout,
+                  dropout_rate=(0.5 if use_dropout else None),
+                  activation=activation)
+    mod(tf.ones([1, 1]), is_training=(is_training if use_dropout else None))
     self.assertEqual(activation.count, 2)
 
 

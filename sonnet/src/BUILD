@@ -260,9 +260,9 @@ snt_py_test(
     name = "batch_norm_test",
     srcs = ["batch_norm_test.py"],
     deps = [
-        "test_utils",
         ":batch_norm",
         ":initializers",
+        ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
@@ -598,12 +598,14 @@ snt_py_test(
 
 snt_py_library(
     name = "test_utils",
+    testonly = 1,
     srcs = ["test_utils.py"],
     deps = [
         ":base",
         # pip: absl/testing:parameterized
         # pip: numpy
         # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -664,8 +666,21 @@ snt_py_test(
     srcs = ["replicator_test.py"],
     deps = [
         ":replicator",
+        ":replicator_test_utils",
         ":test_utils",
         # pip: tensorflow
+    ],
+)
+
+snt_py_library(
+    name = "replicator_test_utils",
+    testonly = 1,
+    srcs = ["replicator_test_utils.py"],
+    deps = [
+        ":replicator",
+        # pip: absl/logging
+        # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

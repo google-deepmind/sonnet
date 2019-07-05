@@ -21,36 +21,9 @@ from __future__ import print_function
 
 from absl import logging
 from absl.testing import parameterized
-from sonnet.src import replicator as snt_replicator
+from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 import tensorflow as tf
-
-
-def replicator_all_devices():
-  # NOTE: The explicit device list is required since currently Replicator
-  # only considers CPU and GPU devices. This means on TPU by default we only
-  # mirror on the local CPU.
-  device_types = ["TPU", "GPU", "CPU"]
-  while device_types:
-    device_type = device_types.pop(0)
-    devices = tf.config.experimental.list_logical_devices(
-        device_type=device_type)
-    if devices:
-      devices = [d.name for d in devices]
-      logging.info("Replicating over %s", devices)
-      return snt_replicator.Replicator(devices=devices)
-
-
-def maybe_tpu_replicator():
-  tpus = tf.config.experimental.list_logical_devices(device_type="TPU")
-  if tpus:
-    logging.info("Using TpuReplicator over %s", [t.name for t in tpus])
-    return snt_replicator.TpuReplicator()
-
-
-def all_replicators():
-  return (("TpuReplicator", maybe_tpu_replicator),
-          ("Replicator", replicator_all_devices))
 
 
 def _create_variable_in_cross_replica_context(replicator):
@@ -78,16 +51,12 @@ def all_variable_creators():
           ("replica_context", _create_variable_in_replica_context))
 
 
-def bools(name):
-  return (name, True), ("not_{}".format(name), False)
-
-
 class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
   # Avoid running tests inside a `with tf.device("TPU:0"):` block.
   ENTER_PRIMARY_DEVICE = False
 
-  @test_utils.combined_named_parameters(all_replicators(),
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())
   def test_variable_synchronization_default(self, replicator_fn, create_var):
     replicator = replicator_fn()
@@ -97,7 +66,7 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(
         tf.VariableSynchronization.ON_READ, v.primary.synchronization)
 
-  @test_utils.combined_named_parameters(all_replicators(),
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())
   def test_variable_aggregation_default(self, replicator_fn, create_var):
     replicator = replicator_fn()
@@ -106,7 +75,7 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     v = create_var(replicator)
     self.assertEqual(tf.VariableAggregation.ONLY_FIRST_REPLICA, v.aggregation)
 
-  @test_utils.combined_named_parameters(all_replicators(),
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())
   def test_variable_trainable_default(self, replicator_fn, create_var):
     replicator = replicator_fn()
@@ -115,7 +84,8 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     v = create_var(replicator)
     self.assertTrue(v.trainable)
 
-  @test_utils.combined_named_parameters(all_replicators(), bools("trainable"))
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
+                                        test_utils.named_bools("trainable"))
   def test_variable_trainable(self, replicator_fn, trainable):
     replicator = replicator_fn()
     if replicator is None:
@@ -124,11 +94,11 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
       v = tf.Variable(1., trainable=trainable)
     self.assertEqual(trainable, v.trainable)
 
-  @test_utils.combined_named_parameters(all_replicators(),
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         (("assign", "assign", 1.),
                                          ("assign_add", "assign_add", 1.),
                                          ("assign_sub", "assign_sub", -1.)),
-                                        bools("cross_replica"))
+                                        test_utils.named_bools("cross_replica"))
   def test_assign(self, replicator_fn, method_name, value, cross_replica):
     replicator = replicator_fn()
     if replicator is None:
@@ -145,8 +115,8 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     for component in v._values:
       self.assertAllEqual(component.read_value(), tf.ones_like(component))
 
-  @test_utils.combined_named_parameters(all_replicators(),
-                                        bools("cross_replica"))
+  @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
+                                        test_utils.named_bools("cross_replica"))
   def test_read_value(self, replicator_fn, cross_replica):
     replicator = replicator_fn()
     if replicator is None:

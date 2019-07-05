@@ -17,6 +17,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
@@ -26,13 +27,17 @@ import numpy as np
 import six
 import sonnet as snt
 import tensorflow as tf
+from typing import Text, Tuple, Sequence
 
 _all_goldens = []
 
 
+def named_goldens() -> Sequence[Tuple[Text, "Golden"]]:
+  return ((name, cls()) for _, name, cls in list_goldens())
+
+
 def all_goldens(test_method):
-  cases = ((name, cls()) for _, name, cls in list_goldens())
-  return parameterized.named_parameters(cases)(test_method)
+  return parameterized.named_parameters(named_goldens())(test_method)
 
 
 def _register_golden(module_cls, golden_name):

@@ -17,6 +17,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import functools
@@ -28,6 +29,7 @@ import threading
 
 from absl.testing import parameterized
 import tensorflow as tf
+from typing import Sequence, Text, Tuple
 
 tpu_initialized = None
 tpu_initialized_lock = threading.Lock()
@@ -126,3 +128,8 @@ def combined_named_parameters(*parameters):
   combine = lambda a, b: ("_".join((a[0], b[0])),) + a[1:] + b[1:]
   return parameterized.named_parameters(
       functools.reduce(combine, r) for r in itertools.product(*parameters))
+
+
+def named_bools(name) -> Sequence[Tuple[Text, bool]]:
+  """Returns a pair of booleans suitable for use with ``named_parameters``."""
+  return (name, True), ("not_{}".format(name), False)

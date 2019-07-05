@@ -25,6 +25,7 @@ from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
 from sonnet.src import replicator as snt_replicator
+from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
@@ -54,17 +55,6 @@ class TestCheckpoint(object):
       # checkpointable Python object.
       status.assert_consumed()
     return status
-
-
-# TODO(petebu) Fix these tests for `TpuReplicator`.
-def replicator_all_devices(device_type):
-  # NOTE: The explicit device list is required since currently Replicator
-  # only considers CPU and GPU devices. This means on TPU by default we only
-  # mirror on the local CPU.
-  devices = tf.config.experimental.list_logical_devices(device_type=device_type)
-  devices = [d.name for d in devices]
-  logging.info("Replicating over %s", devices)
-  return snt_replicator.Replicator(devices=devices)
 
 
 def with_soft_placement(f):
@@ -188,35 +178,19 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
 class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
-  @goldens.all_goldens
-  def test_checkpoint_replicator(self, golden):
-    replicator = replicator_all_devices(self.primary_device)
-    self.assertCheckpointWithReplicator(golden, replicator, use_function=False)
+  def replicatorOrSkip(self, replicator_fn, use_function):
+    replicator = replicator_fn()
+    if not use_function and isinstance(replicator,
+                                       snt_replicator.TpuReplicator):
+      self.skipTest("TpuReplicator does not support eager mode.")
+    return replicator
 
-  @goldens.all_goldens
-  def test_checkpoint_replicator_function(self, golden):
-    replicator = replicator_all_devices(self.primary_device)
-    self.assertCheckpointWithReplicator(golden, replicator, use_function=True)
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators(),
+                                        test_utils.named_bools("use_function"))
+  def test_save_restore(self, golden, replicator_fn, use_function):
+    replicator = self.replicatorOrSkip(replicator_fn, use_function)
 
-  @goldens.all_goldens
-  def test_checkpoint_tpu_replicator(self, golden):
-    if self.primary_device != "TPU":
-      self.skipTest("Test requires a TPU")
-
-    replicator = snt_replicator.TpuReplicator()
-    self.assertCheckpointWithReplicator(golden, replicator, use_function=True)
-
-  def assertCheckpointWithReplicator(self, golden, replicator, use_function):
-    self.assertSaveRestore(golden, replicator, use_function)
-    self.assertRestoreFromGolden(golden, replicator)
-    self.assertRestoreFromNonDistributed(golden, replicator, use_function)
-    self.assertRestoreOnCreate(golden, replicator)
-    if self.primary_device != "TPU":
-      # TODO(b/130555244) Enable on TPU when functions can create variables.
-      self.assertRestoreOnCreateInReplicaContext(golden, replicator,
-                                                 use_function)
-
-  def assertSaveRestore(self, golden, replicator, use_function):
     with replicator.scope():
       module = golden.create_module()
       variables = golden.create_all_variables(module)
@@ -269,7 +243,11 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
           forward(),
           before_save_ys)
 
-  def assertRestoreFromGolden(self, golden, replicator):
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators())
+  def test_restore_from_golden(self, golden, replicator_fn):
+    replicator = self.replicatorOrSkip(replicator_fn, use_function=False)
+
     with replicator.scope():
       module = golden.create_module()
       variables = golden.create_all_variables(module)
@@ -279,7 +257,12 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
                           msg=variable.name)
 
-  def assertRestoreFromNonDistributed(self, golden, replicator, use_function):
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators(),
+                                        test_utils.named_bools("use_function"))
+  def test_restore_from_non_distributed(self, golden, replicator_fn,
+                                        use_function):
+    replicator = self.replicatorOrSkip(replicator_fn, use_function)
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
     normal_variables = golden.create_all_variables(module)
@@ -324,7 +307,11 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
           y_before,
           y_after)
 
-  def assertRestoreOnCreate(self, golden, replicator):
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators())
+  def test_restore_on_create(self, golden, replicator_fn):
+    replicator = self.replicatorOrSkip(replicator_fn, use_function=False)
+
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
     normal_variables = golden.create_all_variables(module)
@@ -347,11 +334,16 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       self.assertAllEqual(normal.read_value(), distributed.read_value(),
                           msg=normal.name)
 
-  def assertRestoreOnCreateInReplicaContext(self, golden, replicator,
-                                            use_function):
-    if self.primary_device == "GPU":
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators(),
+                                        test_utils.named_bools("use_function"))
+  def test_restore_on_create_in_replica_context(self, golden, replicator_fn,
+                                                use_function):
+    if self.primary_device != "CPU":
       self.skipTest("Currently not working as expected on multiple devices")
       # TODO(b/134376796) renable this once bug is fixed
+
+    replicator = self.replicatorOrSkip(replicator_fn, use_function)
 
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()

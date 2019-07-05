@@ -25,6 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+# TODO(petebu) Add tests for tf.function with/without autograph.
+
+
 class MomentumTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(opt.Momentum, opt.FastMomentum)

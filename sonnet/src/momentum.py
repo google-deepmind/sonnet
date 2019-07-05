@@ -96,13 +96,15 @@ class Momentum(base.Module):
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
-          sparse_momentum_update = (mu * momentum.gather_nd(indices)) + update
-          momentum.scatter_nd_update(indices, sparse_momentum_update)
+          sparse_momentum_update = (mu * momentum.sparse_read(indices)) + update
+          momentum.scatter_update(
+              tf.IndexedSlices(sparse_momentum_update, indices))
           if self.use_nesterov:
-            parameter.scatter_nd_sub(
-                indices, (lr * update) + (lr * mu * sparse_momentum_update))
+            parameter.scatter_sub(tf.IndexedSlices(
+                (lr * update) + (lr * mu * sparse_momentum_update), indices))
           else:
-            parameter.scatter_nd_sub(indices, lr * sparse_momentum_update)
+            parameter.scatter_sub(tf.IndexedSlices(
+                lr * sparse_momentum_update, indices))
         else:
           momentum.assign((mu * momentum) + update)
           if self.use_nesterov:

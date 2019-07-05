@@ -106,7 +106,6 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
                           msg=variable.name)
 
     # Test the output from the module remains stable.
-    # TODO(tomhennigan) Handle modules with nested outputs.
     if golden.deterministic:
       tf.nest.map_structure(
           self.assertAllClose,
@@ -137,9 +136,11 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
                           msg=variable.name)
 
     # Assert the output from both modules are the same.
-    # TODO(tomhennigan) Handle modules with nested outputs.
     if golden.deterministic:
-      self.assertAllClose(golden.forward(module_1), golden.forward(module_2))
+      tf.nest.map_structure(
+          self.assertAllClose,
+          golden.forward(module_1),
+          golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_on_create(self, golden):
@@ -165,7 +166,6 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
                           msg=var1.name)
 
     # Assert the output from both modules is the same.
-    # TODO(tomhennigan) Handle modules with nested outputs.
     if golden.deterministic:
       tf.nest.map_structure(
           self.assertAllClose,

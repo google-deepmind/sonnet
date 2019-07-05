@@ -178,7 +178,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
 class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
-  def replicatorOrSkip(self, replicator_fn, use_function):
+  def replicator_or_skip(self, replicator_fn, use_function):
     replicator = replicator_fn()
     if not use_function and isinstance(replicator,
                                        snt_replicator.TpuReplicator):
@@ -189,7 +189,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
                                         replicator_utils.named_replicators(),
                                         test_utils.named_bools("use_function"))
   def test_save_restore(self, golden, replicator_fn, use_function):
-    replicator = self.replicatorOrSkip(replicator_fn, use_function)
+    replicator = self.replicator_or_skip(replicator_fn, use_function)
 
     with replicator.scope():
       module = golden.create_module()
@@ -246,7 +246,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())
   def test_restore_from_golden(self, golden, replicator_fn):
-    replicator = self.replicatorOrSkip(replicator_fn, use_function=False)
+    replicator = self.replicator_or_skip(replicator_fn, use_function=False)
 
     with replicator.scope():
       module = golden.create_module()
@@ -262,7 +262,8 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
                                         test_utils.named_bools("use_function"))
   def test_restore_from_non_distributed(self, golden, replicator_fn,
                                         use_function):
-    replicator = self.replicatorOrSkip(replicator_fn, use_function)
+    replicator = self.replicator_or_skip(replicator_fn, use_function)
+
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
     normal_variables = golden.create_all_variables(module)
@@ -310,7 +311,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())
   def test_restore_on_create(self, golden, replicator_fn):
-    replicator = self.replicatorOrSkip(replicator_fn, use_function=False)
+    replicator = self.replicator_or_skip(replicator_fn, use_function=False)
 
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()
@@ -343,7 +344,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       self.skipTest("Currently not working as expected on multiple devices")
       # TODO(b/134376796) renable this once bug is fixed
 
-    replicator = self.replicatorOrSkip(replicator_fn, use_function)
+    replicator = self.replicator_or_skip(replicator_fn, use_function)
 
     # Save a checkpoint from a non-distributed model.
     module = golden.create_module()

@@ -114,25 +114,41 @@ class RMSProp(base.Module):
     self._initialize(parameters)
     for update, parameter, mom, ms, mg in six.moves.zip_longest(
         updates, parameters, self.mom, self.ms, self.mg):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
         decay = tf.cast(self.decay, update.dtype.base_dtype)
-        momentum = tf.cast(self.momentum, update.dtype.base_dtype)
+        mu = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
-
-        ms.assign(tf.square(update) * (1. - decay) + ms * decay)
-        if self.centered:
-          mg.assign(update * (1. - decay) + mg * decay)
-          denominator = ms - tf.square(mg) + epsilon
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          sparse_ms_update = (tf.square(update) * (1. - decay) +
+                              ms.sparse_read(indices) * decay)
+          ms.scatter_update(tf.IndexedSlices(sparse_ms_update, indices))
+          if self.centered:
+            sparse_mg_update = (update * (1. - decay) +
+                                mg.sparse_read(indices) * decay)
+            mg.scatter_update(tf.IndexedSlices(sparse_mg_update, indices))
+            denominator = (
+                sparse_ms_update - tf.square(sparse_mg_update) + epsilon)
+          else:
+            denominator = sparse_ms_update + epsilon
+          sparse_mom_update = (mu * mom.sparse_read(indices)) + (
+              lr * update * tf.math.rsqrt(denominator))
+          mom.scatter_update(tf.IndexedSlices(sparse_mom_update, indices))
+          parameter.scatter_sub(tf.IndexedSlices(sparse_mom_update, indices))
         else:
-          denominator = ms + epsilon
-        mom.assign(momentum * mom + (
-            learning_rate * update * tf.math.rsqrt(denominator)))
-        parameter.assign_sub(mom)
+          ms.assign(tf.square(update) * (1. - decay) + ms * decay)
+          if self.centered:
+            mg.assign(update * (1. - decay) + mg * decay)
+            denominator = ms - tf.square(mg) + epsilon
+          else:
+            denominator = ms + epsilon
+          mom.assign((mu * mom) + (lr * update * tf.math.rsqrt(denominator)))
+          parameter.assign_sub(mom)
 
 
 class FastRMSProp(base.Module):
@@ -169,7 +185,6 @@ class FastRMSProp(base.Module):
     self._initialize(parameters)
     for update, parameter, mom, ms, mg in six.moves.zip_longest(
         updates, parameters, self.mom, self.ms, self.mg):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
@@ -178,25 +193,51 @@ class FastRMSProp(base.Module):
         decay = tf.cast(self.decay, update.dtype.base_dtype)
         momentum = tf.cast(self.momentum, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
-
-        if self.centered:
-          tf.raw_ops.ResourceApplyCenteredRMSProp(
-              var=parameter.handle,
-              mg=mg.handle,
-              ms=ms.handle,
-              mom=mom.handle,
-              lr=learning_rate,
-              rho=decay,
-              momentum=momentum,
-              epsilon=epsilon,
-              grad=update)
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          if self.centered:
+            tf.raw_ops.ResourceSparseApplyCenteredRMSProp(
+                var=parameter.handle,
+                mg=mg.handle,
+                ms=ms.handle,
+                mom=mom.handle,
+                lr=learning_rate,
+                rho=decay,
+                momentum=momentum,
+                epsilon=epsilon,
+                grad=update,
+                indices=indices)
+          else:
+            tf.raw_ops.ResourceSparseApplyRMSProp(
+                var=parameter.handle,
+                ms=ms.handle,
+                mom=mom.handle,
+                lr=learning_rate,
+                rho=decay,
+                momentum=momentum,
+                epsilon=epsilon,
+                grad=update,
+                indices=indices)
         else:
-          tf.raw_ops.ResourceApplyRMSProp(
-              var=parameter.handle,
-              ms=ms.handle,
-              mom=mom.handle,
-              lr=learning_rate,
-              rho=decay,
-              momentum=momentum,
-              epsilon=epsilon,
-              grad=update)
+          if self.centered:
+            tf.raw_ops.ResourceApplyCenteredRMSProp(
+                var=parameter.handle,
+                mg=mg.handle,
+                ms=ms.handle,
+                mom=mom.handle,
+                lr=learning_rate,
+                rho=decay,
+                momentum=momentum,
+                epsilon=epsilon,
+                grad=update)
+          else:
+            tf.raw_ops.ResourceApplyRMSProp(
+                var=parameter.handle,
+                ms=ms.handle,
+                mom=mom.handle,
+                lr=learning_rate,
+                rho=decay,
+                momentum=momentum,
+                epsilon=epsilon,
+                grad=update)

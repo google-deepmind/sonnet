@@ -25,6 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+# TODO(petebu) Add tests for tf.function with/without autograph.
+
+
 class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
@@ -62,6 +65,56 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.186776, 1.186776], [2.186776, 3.186776]],
                         [x.numpy() for x in parameters])
+
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
+  def testSparse(self, opt_class):
+    if self.primary_device in ("GPU", "TPU"):
+      self.skipTest("IndexedSlices not supported on {}.".format(
+          self.primary_device))
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = opt_class(learning_rate=3.)
+    # Step 1 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-8.486831], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-5.486784]], parameters[1].numpy())
+    # Step 2 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-15.369301], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-12.369237]], parameters[1].numpy())
+    # Step 3 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-21.132141], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-18.132067]], parameters[1].numpy())
+
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
+  def testSparseCentered(self, opt_class):
+    if self.primary_device in ("GPU", "TPU"):
+      self.skipTest("IndexedSlices not supported on {}.".format(
+          self.primary_device))
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = opt_class(learning_rate=3., centered=True)
+    # Step 1 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-8.999999], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-5.999944]], parameters[1].numpy())
+    # Step 2 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-16.64719], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-13.647109]], parameters[1].numpy())
+    # Step 3 of RMSProp
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[-23.396709], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [-20.39661]], parameters[1].numpy())
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testNoneUpdate(self, opt_class):

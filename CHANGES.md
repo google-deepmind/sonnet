@@ -1,5 +1,9 @@
 # Sonnet Changelog
 
+## Version 1.34 - Friday, 5 July 2019
+* Added tools for constrained optimisation as found in GECO, https://arxiv.org/abs/1810.00597
+* Added differentiable moving average.
+
 ## Version 1.33 - Friday, 21 May 2019
 * Documentation updates.
 * Added developmental branch for Sonnet 2.

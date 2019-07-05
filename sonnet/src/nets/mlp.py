@@ -32,7 +32,6 @@ class MLP(base.Module):
                b_init=None,
                with_bias=True,
                activation=tf.nn.relu,
-               use_dropout=False,
                dropout_rate=None,
                activate_final=False,
                name=None):
@@ -46,9 +45,8 @@ class MLP(base.Module):
       with_bias: Whether or not to apply a bias in each layer.
       activation: Activation function to apply between linear layers. Defaults
         to ReLU.
-      use_dropout: Whether to apply dropout to all hidden layers. Default
-        `False`.
-      dropout_rate: Dropout rate applied if using dropout.
+      dropout_rate: Dropout rate to apply, a rate of `None` (the default) or `0`
+        means no dropout will be applied.
       activate_final: Whether or not to activate the final layer of the MLP.
       name: Optional name for this module.
 
@@ -58,18 +56,12 @@ class MLP(base.Module):
     if not with_bias and b_init is not None:
       raise ValueError("When with_bias=False b_init must not be set.")
 
-    if use_dropout and dropout_rate is None:
-      raise ValueError("When use_dropout=True dropout_rate must be set.")
-    elif not use_dropout and dropout_rate is not None:
-      raise ValueError("When use_dropout=False dropout_rate must not be set.")
-
     super(MLP, self).__init__(name=name)
     self._with_bias = with_bias
     self._w_init = w_init
     self._b_init = b_init
     self._activation = activation
     self._activate_final = activate_final
-    self._use_dropout = use_dropout
     self._dropout_rate = dropout_rate
     self._layers = []
     for index, output_size in enumerate(output_sizes):
@@ -92,10 +84,11 @@ class MLP(base.Module):
     Returns:
       output: The output of the model of size `[batch_size, output_size]`.
     """
-    if self._use_dropout and is_training is None:
+    use_dropout = self._dropout_rate not in (None, 0)
+    if use_dropout and is_training is None:
       raise ValueError(
           "The `is_training` argument is required when dropout is used.")
-    elif not self._use_dropout and is_training is not None:
+    elif not use_dropout and is_training is not None:
       raise ValueError(
           "The `is_training` argument should only be used with dropout.")
 
@@ -105,7 +98,7 @@ class MLP(base.Module):
       inputs = layer(inputs)
       if i < (num_layers - 1) or self._activate_final:
         # Only perform dropout if we are activating the output.
-        if self._use_dropout and is_training:
+        if use_dropout and is_training:
           inputs = tf.nn.dropout(inputs, rate=self._dropout_rate)
         inputs = self._activation(inputs)
 
@@ -150,7 +143,6 @@ class MLP(base.Module):
         b_init=self._b_init,
         with_bias=self._with_bias,
         activation=self._activation,
-        use_dropout=self._use_dropout,
         dropout_rate=self._dropout_rate,
         activate_final=activate_final,
         name=name)

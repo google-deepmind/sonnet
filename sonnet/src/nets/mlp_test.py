@@ -32,9 +32,9 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
       mlp.MLP([1], with_bias=False, b_init=object())
 
   @parameterized.parameters(
-      itertools.product((1, 2, 3), (True, False), (0.1, 0.0)))
-  def test_submodules(self, num_layers, use_dropout, dropout_rate):
-    mod = mlp.MLP([1] * num_layers)
+      itertools.product((1, 2, 3), (0.1, 0.0, None)))
+  def test_submodules(self, num_layers, dropout_rate):
+    mod = mlp.MLP([1] * num_layers, dropout_rate=dropout_rate)
     self.assertLen(mod.submodules, num_layers)
 
   @parameterized.parameters(1, 2, 3)
@@ -122,16 +122,8 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     mod(tf.ones([1, 1]))
     self.assertEqual(activation.count, 2)
 
-  def test_dropout_requires_rate(self):
-    with self.assertRaisesRegexp(ValueError, "dropout_rate must be set"):
-      mlp.MLP([1, 1], use_dropout=True)
-
-  def test_no_dropout_rejects_rate(self):
-    with self.assertRaisesRegexp(ValueError, "dropout_rate must not be set"):
-      mlp.MLP([1, 1], dropout_rate=0.5)
-
   def test_dropout_requires_is_training(self):
-    mod = mlp.MLP([1, 1], use_dropout=True, dropout_rate=0.5)
+    mod = mlp.MLP([1, 1], dropout_rate=0.5)
     with self.assertRaisesRegexp(ValueError, "is_training.* is required"):
       mod(tf.ones([1, 1]))
 
@@ -153,7 +145,6 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
   def test_applies_activation_with_dropout(self, use_dropout, is_training):
     activation = CountingActivation()
     mod = mlp.MLP([1, 1, 1],
-                  use_dropout=use_dropout,
                   dropout_rate=(0.5 if use_dropout else None),
                   activation=activation)
     mod(tf.ones([1, 1]), is_training=(is_training if use_dropout else None))

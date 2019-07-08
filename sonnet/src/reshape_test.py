@@ -196,7 +196,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     mod = reshape.Flatten()
     output = mod(inputs)
     flattened_size = np.prod(in_shape)
-    self.assertEqual(output.get_shape(), [batch_size, flattened_size])
+    self.assertEqual(output.shape, [batch_size, flattened_size])
 
   def testFlatten_unknownBatchSize(self):
     mod = reshape.Flatten()
@@ -215,7 +215,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     output = mod(inputs)
     flattened_shape = (
         in_shape[:preserve_dims] + [np.prod(in_shape[preserve_dims:])])
-    self.assertEqual(output.get_shape(), flattened_shape)
+    self.assertEqual(output.shape, flattened_shape)
 
   @parameterized.parameters(5, 6, 7, 10)
   def testPreserveDimsError(self, preserve_dims):
@@ -228,7 +228,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
   def testFlattenWithZeroDim(self):
     inputs = tf.ones([1, 0])
     output = reshape.Flatten()(inputs)
-    self.assertEqual(output.get_shape(), [1, 0])
+    self.assertEqual(output.shape, [1, 0])
 
   def testInvalidFlattenFromError(self):
     with self.assertRaisesRegexp(ValueError, "preserve_dims"):

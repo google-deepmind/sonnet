@@ -17,10 +17,12 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import numpy as np
 from sonnet.src import base
+from sonnet.src import once
 import tensorflow as tf
 
 
@@ -95,13 +97,13 @@ def flatten(inputs, name="flatten"):
     return _batch_reshape(inputs, output_shape=(-1,), preserve_dims=1)
 
 
-def _extract_input_shape(inputs, preserve_dims=1):
+def _extract_input_shape(inputs, preserve_dims=1) -> tf.TensorShape:
   """Extracts the shape minus ignored dimensions from `inputs`.
 
       >>> _extract_input_shape(tf.ones([1, 2, 3]))
-      [2, 3]
+      TensorShape([2, 3])
       >>> _extract_input_shape(tf.ones([1, 2, 3]), preserve_dims=2)
-      [3]
+      TensorShape([3])
 
   Args:
     inputs: A tf.Tensor whose shape should be extracted.
@@ -114,8 +116,8 @@ def _extract_input_shape(inputs, preserve_dims=1):
     ValueError: If the number of dimensions in the input is not compatible with
         preserve dims.
   """
-  input_shape = inputs.get_shape().as_list()
-  if len(input_shape) < preserve_dims:
+  input_shape = inputs.shape
+  if input_shape.rank < preserve_dims:
     raise ValueError("Input tensor has {} dimensions, should have at least "
                      "as many as preserve_dims={}".format(
                          len(input_shape), preserve_dims))
@@ -133,20 +135,17 @@ def _batch_reshape(inputs, output_shape, preserve_dims):
     if output_shape[0] == -1 or output_shape[0] == input_shape[0]:
       return inputs
 
-  # Slicing the shape tensor loses information, we keep it in a list too.
-  preserved_shape = tf.shape(inputs)[:preserve_dims]
-  preserved_shape_list = inputs.get_shape()[:preserve_dims]
-
   if -1 in output_shape:
     trailing_shape = _infer_shape(output_shape, input_shape)
   else:
     trailing_shape = output_shape
 
-  output_shape = tf.concat([preserved_shape, trailing_shape], 0)
+  output_shape = tf.concat([tf.shape(inputs)[:preserve_dims], trailing_shape],
+                           axis=0)
   output = tf.reshape(inputs, output_shape)
 
-  # Include shape information that was lost when we sliced the shape tensor.
-  output.set_shape(preserved_shape_list.concatenate(trailing_shape))
+  # Include as much static shape information as we can.
+  output.set_shape(inputs.shape[:preserve_dims] + trailing_shape)
 
   return output
 
@@ -223,6 +222,11 @@ class Reshape(base.Module):
     self._output_shape = output_shape
     self._preserve_dims = preserve_dims
 
+  @once.once
+  def _initialize(self, inputs):
+    input_shape = _extract_input_shape(inputs, self._preserve_dims)
+    self.input_shape = input_shape.as_list()
+
   def __call__(self, inputs):
     """Reshapes `inputs`.
 
@@ -242,8 +246,7 @@ class Reshape(base.Module):
           non-preserved dimensions (except when the unknown dimension is the
           only non-preserved dimension and doesn't actually need reshaping).
     """
-    self.input_shape = _extract_input_shape(inputs, self._preserve_dims)
-
+    self._initialize(inputs)
     return _batch_reshape(inputs,
                           output_shape=self._output_shape,
                           preserve_dims=self._preserve_dims)

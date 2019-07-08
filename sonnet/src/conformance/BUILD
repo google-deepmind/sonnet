@@ -75,6 +75,17 @@ snt_py_test(
 )
 
 snt_py_test(
+    name = "function_test",
+    srcs = ["function_test.py"],
+    deps = [
+        # pip: absl/testing:parameterized
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
     name = "goldens_test",
     srcs = ["goldens_test.py"],
     deps = [

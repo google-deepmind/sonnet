@@ -711,6 +711,7 @@ snt_py_library(
     srcs = ["batch_apply.py"],
     deps = [
         ":base",
+        # pip: numpy
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

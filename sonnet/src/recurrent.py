@@ -872,7 +872,7 @@ class LSTM(RNNCore):
   @once.once
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
-    input_size = tf.shape(inputs)[1]
+    input_size = inputs.shape[1]
     dtype = _check_inputs_dtype(inputs, self._dtype)
 
     w_i_init = self._w_i_init or initializers.TruncatedNormal(
@@ -993,7 +993,7 @@ class UnrolledLSTM(UnrolledRNN):
   @once.once
   def _initialize(self, input_sequence):
     utils.assert_rank(input_sequence, 3)  # [num_steps, batch_size, input_size].
-    input_size = tf.shape(input_sequence)[2]
+    input_size = input_sequence.shape[2]
     dtype = _check_inputs_dtype(input_sequence, self._dtype)
 
     w_i_init = self._w_i_init or initializers.TruncatedNormal(
@@ -1601,7 +1601,7 @@ class GRU(RNNCore):
   @once.once
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
-    input_size = tf.shape(inputs)[1]
+    input_size = inputs.shape[1]
     dtype = _check_inputs_dtype(inputs, self._dtype)
     self._w_i = tf.Variable(
         self._w_i_init([input_size, 3 * self._hidden_size], dtype),
@@ -1713,7 +1713,7 @@ class CuDNNGRU(RNNCore):
   @once.once
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 3)  # [num_steps, batch_size, input_size].
-    input_size = tf.shape(inputs)[2]
+    input_size = inputs.shape[2]
     dtype = _check_inputs_dtype(inputs, self._dtype)
     self._w_i = tf.Variable(
         self._w_i_init([input_size, 3 * self._hidden_size], dtype),

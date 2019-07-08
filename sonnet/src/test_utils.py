@@ -26,10 +26,13 @@ import itertools
 import os
 import sys
 import threading
+import types
 
 from absl.testing import parameterized
 import tensorflow as tf
-from typing import Sequence, Text, Tuple
+from typing import Sequence, Text, Tuple, Type, TypeVar
+
+Module = TypeVar("Module")
 
 tpu_initialized = None
 tpu_initialized_lock = threading.Lock()
@@ -83,7 +86,23 @@ class TestCase(tf.test.TestCase):
     return self._device_types
 
 
-def find_sonnet_python_modules(root_module):
+def find_all_sonnet_modules(
+    root_python_module: types.ModuleType,
+    base_class: Type[Module],
+) -> Sequence[Type[Module]]:
+  """Finds all subclasses of `base_class` under `root_python_module`."""
+  modules = []
+  for _, python_module in find_sonnet_python_modules(root_python_module):
+    for name in dir(python_module):
+      value = getattr(python_module, name)
+      if inspect.isclass(value) and issubclass(value, base_class):
+        modules.append(value)
+  return modules
+
+
+def find_sonnet_python_modules(
+    root_module: types.ModuleType,
+) -> Sequence[Tuple[Text, types.ModuleType]]:
   """Returns `(name, module)` for all Sonnet submodules under `root_module`."""
   modules = set([(root_module.__name__, root_module)])
   visited = set()

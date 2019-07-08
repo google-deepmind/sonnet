@@ -20,9 +20,10 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+import numpy as np
 from sonnet.src import base
 import tensorflow as tf
-from typing import Optional, Text
+from typing import Any, Optional, Sequence, Text, Union
 
 
 class BatchApply(base.Module):
@@ -55,9 +56,12 @@ class BatchApply(base.Module):
 
   def __call__(self, *args, **kwargs):
     example = first_leaf(args, kwargs)
+    if example is None:
+      raise ValueError("BatchApply requires at least one tensor input.")
+
     num_dims = self.num_dims
     merge = lambda x: merge_leading_dims(x, num_dims=num_dims)
-    split = lambda x: split_leading_dims(x, num_dims=num_dims, inputs=example)
+    split = lambda x: split_leading_dim(x, num_dims=num_dims, inputs=example)
 
     # Merge leading dimensions of inputs.
     # Example: [T, B, N] -> [T*B, N]
@@ -73,7 +77,7 @@ class BatchApply(base.Module):
     return tf.nest.map_structure(split, outputs)
 
 
-def first_leaf(args, kwargs):
+def first_leaf(args, kwargs) -> Optional[Any]:
   flat_args = tf.nest.flatten(args)
   if flat_args:
     return flat_args[0]
@@ -83,15 +87,32 @@ def first_leaf(args, kwargs):
   return None
 
 
-def split_leading_dims(
+def split_leading_dim(
     x: Optional[tf.Tensor],
     inputs: tf.Tensor,
     num_dims: int,
 ) -> Optional[tf.Tensor]:
-  if x is None:
+  """Split the first dimension of a tensor."""
+  if x is None or not isinstance(x, (tf.Tensor, tf.Variable)):
     return x
-  out_shape = inputs.shape[:num_dims] + x.shape[1:]
-  return tf.reshape(x, out_shape)
+
+  static_shape = inputs.shape[:num_dims] + x.shape[1:]
+  if static_shape.is_fully_defined():  # pytype: disable=attribute-error
+    return tf.reshape(x, static_shape)
+
+  # Shape can't be inferred statically.
+  leading_dims = tf.shape(inputs)[:num_dims]
+  other_dims = tf.shape(x)[1:]
+  dynamic_shape = tf.concat([leading_dims, other_dims], axis=0)
+  return tf.reshape(x, dynamic_shape)
+
+
+def maybe_prod(s: Sequence[Union[int, None]]) -> Optional[int]:
+  try:
+    return np.prod(s)
+  except TypeError:
+    # Can happen if the input contains `None`.
+    return None
 
 
 def merge_leading_dims(
@@ -102,6 +123,27 @@ def merge_leading_dims(
   if x is None or not isinstance(x, (tf.Tensor, tf.Variable)):
     return x
 
-  if len(x.shape) < num_dims:
+  # Check if the rank of the input tensor is well-defined.
+  if x.shape.dims is None:
+    raise ValueError(
+        "Can't merge leading dimensions of tensor of unknown rank.")
+
+  # We can only merge the num_dims leading dimensions if the rank of the given
+  # tensor is sufficiently large.
+  if num_dims > x.shape.rank:
     return x
-  return tf.reshape(x, [-1] + x.shape.as_list()[num_dims:])
+
+  static_shape = [maybe_prod(x.shape[:num_dims])] + x.shape[num_dims:]
+  if static_shape.is_fully_defined():  # pytype: disable=attribute-error
+    return tf.reshape(x, static_shape)
+
+  # Shape can't be inferred statically.
+  tensor_shape = tf.shape(x)
+  leading_dim = tf.reduce_prod(tensor_shape[:num_dims], keepdims=True)
+  other_dims = tensor_shape[num_dims:]
+  dynamic_shape = tf.concat([leading_dim, other_dims], axis=0)
+  result = tf.reshape(x, dynamic_shape)
+  # We lose some static shape information from the above reduce/slice/concat
+  # dance, so we explicitly pass it in from what we computed earlier.
+  result.set_shape(static_shape)
+  return result

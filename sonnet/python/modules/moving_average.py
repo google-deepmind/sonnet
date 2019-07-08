@@ -177,7 +177,7 @@ def _get_pass_through_gradients_op(dtype):
       return tf.identity(moving_avg)
 
     def _backward(op, grad):
-      """Forwards the gradients moving the inputs within the valid range."""
+      """Forwards the gradients to the op's inputs."""
       del op
       return grad, None
 

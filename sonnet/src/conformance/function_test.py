@@ -173,6 +173,21 @@ BATCH_MODULES = (
         shape=(BATCH_SIZE, 3)),
 )
 
+OPTIMIZER_MODULES = (
+    ModuleDescriptor(
+        name="optimizers.Adam",
+        create=lambda: snt.optimizers.Adam(learning_rate=0.1)),
+    ModuleDescriptor(
+        name="optimizers.Momentum",
+        create=lambda: snt.optimizers.Momentum(learning_rate=0.1, momentum=.9)),
+    ModuleDescriptor(
+        name="optimizers.RMSProp",
+        create=lambda: snt.optimizers.RMSProp(learning_rate=0.1)),
+    ModuleDescriptor(
+        name="optimizers.SGD",
+        create=lambda: snt.optimizers.SGD(learning_rate=0.1)),
+)
+
 IGNORED_MODULES = {
     # Stateless or abstract.
     snt.BatchApply, snt.Deferred, snt.Module, snt.Reshape,
@@ -185,10 +200,6 @@ IGNORED_MODULES = {
 
     # Recurrent.
     snt.DeepRNN, snt.RNNCore, snt.TrainableState,
-
-    # Optimizers.
-    snt.optimizers.Adam, snt.optimizers.Momentum, snt.optimizers.RMSProp,
-    snt.optimizers.SGD,
 }
 
 
@@ -202,7 +213,8 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_coverage(self):
     all_modules = frozenset(test_utils.find_all_sonnet_modules(snt, snt.Module))
-    tested_modules = {type(unwrap(d.create())) for d in BATCH_MODULES}
+    tested_modules = {type(unwrap(d.create()))
+                      for d in BATCH_MODULES + OPTIMIZER_MODULES}
     self.assertEmpty(all_modules - (tested_modules | IGNORED_MODULES))
 
   @test_utils.combined_named_parameters(BATCH_MODULES,
@@ -252,6 +264,43 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
       # TODO(tomhennigan) Make VQ and VQ-EMA batch agnostic under BatchApply.
       return
     cf(tf.ones(input_shape, dtype=dtype))
+
+  @test_utils.combined_named_parameters(OPTIMIZER_MODULES,
+                                        test_utils.named_bools("autograph"))
+  def test_optimizer_dense(
+      self,
+      optimizer_fn: ModuleFn,
+      input_shape: Tuple[int],
+      dtype: tf.DType,
+      autograph: bool,
+  ):
+    del input_shape, dtype  # Unused.
+    parameters = [tf.Variable([1., 2.])]
+    updates = [tf.constant([5., 5.])]
+    optimizer = optimizer_fn()
+    optimizer_apply = tf.function(optimizer.apply, autograph=autograph)
+    optimizer_apply(updates, parameters)
+
+  # TODO(petebu) Add a test with completely dynamic shapes.
+
+  @test_utils.combined_named_parameters(OPTIMIZER_MODULES,
+                                        test_utils.named_bools("autograph"))
+  def test_optimizer_sparse(
+      self,
+      optimizer_fn: ModuleFn,
+      input_shape: Tuple[int],
+      dtype: tf.DType,
+      autograph: bool,
+  ):
+    del input_shape, dtype  # Unused.
+    if self.primary_device == "TPU":
+      self.skipTest("IndexedSlices not supported on TPU.")
+    parameters = [tf.Variable([[1.], [2.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1]))]
+    optimizer = optimizer_fn()
+    optimizer_apply = tf.function(optimizer.apply, autograph=autograph)
+    optimizer_apply(updates, parameters)
 
 
 if __name__ == "__main__":

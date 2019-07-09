@@ -104,20 +104,17 @@ class Adam(base.Module):
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
         beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
         beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
         step = tf.cast(self.step, update.dtype.base_dtype)
 
-        inv_beta1 = 1. - beta1
-        inv_beta2 = 1. - beta2
-        inv_beta1_power = 1. - tf.pow(beta1, step)
-        inv_beta2_power = 1. - tf.pow(beta2, step)
-        m.assign((beta1 * m) + inv_beta1 * update)
-        v.assign((beta2 * v) + inv_beta2 * tf.square(update))
-        adam_update = learning_rate * (
-            (m / inv_beta1_power) / (tf.sqrt(v / inv_beta2_power) + epsilon))
+        m.assign((beta1 * m) + (1. - beta1) * update)
+        v.assign((beta2 * v) + (1. - beta2) * tf.square(update))
+        debiased_m = m / (1. - tf.pow(beta1, step))
+        debiased_v = v / (1. - tf.pow(beta2, step))
+        adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
         parameter.assign_sub(adam_update)
 
 

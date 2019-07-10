@@ -76,14 +76,18 @@ class Adam(base.Module):
       self.v.extend(zero_var(p) for p in parameters)
 
   def apply(self, updates, parameters):
-    """Applies updates to parameters.
+    r"""Applies updates to parameters.
 
     Applies the Adam update rule for each update, parameter pair:
 
-        alpha <- learning_rate * sqrt(1 - beta2^t) / (1 - beta1^t)
         m_t <- beta1 * m_{t-1} + (1 - beta1) * update
         v_t <- beta2 * v_{t-1} + (1 - beta2) * update * update
-        parameter <- parameter - alpha * m_t / (sqrt(v_t) + epsilon)
+
+        \hat{m}_t <- m_t / (1 - beta1^t)
+        \hat{v}_t <- v_t / (1 - beta2^t)
+        scaled_update <- \hat{m}_t / (sqrt(\hat{v}_t) + epsilon)
+
+        parameter <- parameter - learning_rate * scaled_update
 
     Args:
       updates: A list of updates to apply to parameters. An update can be a

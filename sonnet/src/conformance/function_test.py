@@ -63,10 +63,6 @@ BATCH_SIZE = 8
 # pylint: disable=unnecessary-lambda
 BATCH_MODULES = (
     ModuleDescriptor(
-        name="AxisNorm",
-        create=lambda: snt.AxisNorm(1, True, True),
-        shape=(BATCH_SIZE, 3, 2)),
-    ModuleDescriptor(
         name="BatchNorm",
         create=lambda: Training(snt.BatchNorm(True, True)),
         shape=(BATCH_SIZE, 2, 2, 3)),
@@ -141,7 +137,7 @@ BATCH_MODULES = (
         shape=(BATCH_SIZE, 128)),
     ModuleDescriptor(
         name="LayerNorm",
-        create=lambda: snt.LayerNorm(True, True),
+        create=lambda: snt.LayerNorm(1, True, True),
         shape=(BATCH_SIZE, 3, 2)),
     ModuleDescriptor(
         name="Linear",

@@ -29,12 +29,12 @@ from sonnet.src import utils
 import tensorflow as tf
 
 
-class AxisNorm(base.Module):
+class LayerNorm(base.Module):
   r"""Normalizes inputs along the given axes.
 
   This is a generic implementation of normalization along specific axes of the
-  input. :class:`LayerNorm` and :class:`InstanceNorm` are subclasses of this
-  module, they normalize over the channel and spatial dimensions respectively.
+  input. :class:`InstanceNorm` is a subclass of this module, it normalizes over
+  the spatial dimensions.
 
   It transforms the input ``x`` into:
 
@@ -66,20 +66,23 @@ class AxisNorm(base.Module):
       current offset.
   """
 
-  def __init__(self, axis, create_scale, create_offset, eps=1e-4,
+  def __init__(self, axis, create_scale, create_offset, eps=1e-5,
                scale_init=None, offset_init=None, data_format="channels_last",
                name=None):
-    r"""Constructs an ``AxisNorm`` module.
+    r"""Constructs an ``LayerNorm`` module.
 
     Args:
       axis: An ``int``, ``slice`` or sequence of ``int``\s representing the axes
-        which should be normalized across.
+        which should be normalized across. Typical usages are: ``1`` or ``-1``
+        for normalization over just the channels and ``slice(1, None)``,
+        ``slice(2, None)`` for normalization over the spatial and channel
+        dimensions whilst avoiding the batch and/or time dimensions.
       create_scale: ``bool`` representing whether to create a trainable scale
         per channel applied after the normalization.
       create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
       eps: Small epsilon to avoid division by zero variance. Defaults to
-        ``1e-4``.
+        ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
         if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
@@ -89,7 +92,7 @@ class AxisNorm(base.Module):
         default it is ``channels_last``.
       name: Name of the module.
     """
-    super(AxisNorm, self).__init__(name=name)
+    super(LayerNorm, self).__init__(name=name)
 
     if isinstance(axis, slice):
       self._axis = axis
@@ -198,54 +201,7 @@ class AxisNorm(base.Module):
       self.offset = None
 
 
-class LayerNorm(AxisNorm):
-  """Normalizes inputs along the spatial and channel dimensions.
-
-  See :class:`AxisNorm` for more details.
-
-  Attributes:
-    scale: If ``create_scale=True``, a trainable :tf:`Variable` holding the
-      current scale.
-    offset: If ``create_offset=True``, a trainable :tf:`Variable` holding the
-      current offset.
-  """
-
-  def __init__(self, create_scale, create_offset, eps=1e-4,
-               scale_init=None, offset_init=None, data_format="channels_last",
-               name=None):
-    """Constructs a ``LayerNorm`` module.
-
-    This method creates a module which normalizes over the spatial and channel
-    dimensions.
-
-    Args:
-      create_scale: ``bool`` representing whether to create a trainable scale
-        per channel applied after the normalization.
-      create_offset: ``bool`` representing whether to create a trainable offset
-        per channel applied after normalization and scaling.
-      eps: Small epsilon to avoid division by zero variance. Defaults to
-        ``1e-4``.
-      scale_init: Optional initializer for the scale variable. Can only be set
-        if ``create_scale=True``. By default scale is initialized to ``1``.
-      offset_init: Optional initializer for the offset variable. Can only be set
-        if ``create_offset=True``. By default offset is initialized to ``0``.
-      data_format: The data format of the input. Can be either
-        ``channels_first``, ``channels_last``, ``N...C`` or ``NC...``. By
-        default it is ``channels_last``.
-      name: Name of the module.
-    """
-    super(LayerNorm, self).__init__(
-        axis=slice(1, None),
-        create_scale=create_scale,
-        create_offset=create_offset,
-        eps=eps,
-        scale_init=scale_init,
-        offset_init=offset_init,
-        data_format=data_format,
-        name=name)
-
-
-class InstanceNorm(AxisNorm):
+class InstanceNorm(LayerNorm):
   """Normalizes inputs along the channel dimension.
 
   See :class:`AxisNorm` for more details.

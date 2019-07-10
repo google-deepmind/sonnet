@@ -217,18 +217,10 @@ class Cifar10ConvNet(AbstractGolden):
     return module(x, is_training=False, test_local_stats=True)["logits"]
 
 
-@_register_golden(snt.AxisNorm, "axis_norm_1_1x3_2")
-class AxisNorm(AbstractGolden):
-  create_module = (
-      lambda _: snt.AxisNorm(1, create_scale=True, create_offset=True))
-  input_spec = tf.TensorSpec([1, 3, 2])
-  num_variables = 2
-
-
 @_register_golden(snt.LayerNorm, "layer_norm_1_1x3_2")
 class LayerNorm(AbstractGolden):
   create_module = (
-      lambda _: snt.LayerNorm(create_scale=True, create_offset=True))
+      lambda _: snt.LayerNorm(1, create_scale=True, create_offset=True))
   input_spec = tf.TensorSpec([1, 3, 2])
   num_variables = 2
 

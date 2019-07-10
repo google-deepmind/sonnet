@@ -27,11 +27,10 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
-class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
+class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testSimpleCase(self):
-    layer = axis_norm.AxisNorm([1, 2], create_scale=False,
-                               create_offset=False)
+    layer = axis_norm.LayerNorm([1, 2], create_scale=False, create_offset=False)
     inputs = tf.ones([2, 3, 3, 5])
 
     outputs = layer(inputs).numpy()
@@ -39,9 +38,11 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 0.0)
 
   def testSimpleCaseVar(self):
-    layer = axis_norm.AxisNorm([1, 2], create_scale=True, create_offset=True,
-                               scale_init=initializers.Constant(0.5),
-                               offset_init=initializers.Constant(2.0))
+    layer = axis_norm.LayerNorm([1, 2],
+                                create_scale=True,
+                                create_offset=True,
+                                scale_init=initializers.Constant(0.5),
+                                offset_init=initializers.Constant(2.0))
 
     inputs = tf.ones([2, 3, 3, 5])
 
@@ -50,10 +51,12 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 2.0)
 
   def testSimpleCaseNCHWVar(self):
-    layer = axis_norm.AxisNorm([1, 2], create_scale=True, create_offset=True,
-                               scale_init=initializers.Constant(0.5),
-                               offset_init=initializers.Constant(2.0),
-                               data_format="NCHW")
+    layer = axis_norm.LayerNorm([1, 2],
+                                create_scale=True,
+                                create_offset=True,
+                                scale_init=initializers.Constant(0.5),
+                                offset_init=initializers.Constant(2.0),
+                                data_format="NCHW")
 
     inputs = tf.ones([2, 5, 3, 3])
 
@@ -62,10 +65,13 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 2.0)
 
   def testDataFormatAgnosticVar(self):
-    c_last_layer = axis_norm.AxisNorm([1, 2], create_scale=True,
-                                      create_offset=True)
-    c_first_layer = axis_norm.AxisNorm([2, 3], create_scale=True,
-                                       create_offset=True, data_format="NCHW")
+    c_last_layer = axis_norm.LayerNorm([1, 2],
+                                       create_scale=True,
+                                       create_offset=True)
+    c_first_layer = axis_norm.LayerNorm([2, 3],
+                                        create_scale=True,
+                                        create_offset=True,
+                                        data_format="NCHW")
 
     inputs = tf.random.uniform([3, 4, 4, 5], 0, 10)
 
@@ -77,7 +83,7 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(c_last_output.numpy(), c_first_output.numpy())
 
   def testSimpleCaseTensor(self):
-    layer = axis_norm.AxisNorm([1, 2], create_scale=False, create_offset=False)
+    layer = axis_norm.LayerNorm([1, 2], create_scale=False, create_offset=False)
 
     inputs = tf.ones([2, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -88,8 +94,10 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 2.0)
 
   def testSimpleCaseNCHWTensor(self):
-    layer = axis_norm.AxisNorm([1, 2], data_format="NCHW", create_scale=False,
-                               create_offset=False)
+    layer = axis_norm.LayerNorm([1, 2],
+                                data_format="NCHW",
+                                create_scale=False,
+                                create_offset=False)
 
     inputs = tf.ones([2, 5, 3, 3])
     scale = tf.constant(0.5, shape=(5, 1, 1))
@@ -100,10 +108,13 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 2.0)
 
   def testDataFormatAgnosticTensor(self):
-    c_last_layer = axis_norm.AxisNorm([1, 2], create_scale=False,
-                                      create_offset=False)
-    c_first_layer = axis_norm.AxisNorm([2, 3], data_format="NCHW",
-                                       create_scale=False, create_offset=False)
+    c_last_layer = axis_norm.LayerNorm([1, 2],
+                                       create_scale=False,
+                                       create_offset=False)
+    c_first_layer = axis_norm.LayerNorm([2, 3],
+                                        data_format="NCHW",
+                                        create_scale=False,
+                                        create_offset=False)
 
     inputs = tf.random.uniform([3, 4, 4, 5], 0, 10)
     scale = tf.random.normal((5,), mean=1.0)
@@ -123,20 +134,20 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(
         ValueError,
         "Unable to extract channel information from '{}'.".format(data_format)):
-      axis_norm.AxisNorm(3, data_format=data_format, create_scale=False,
-                         create_offset=False)
+      axis_norm.LayerNorm(
+          3, data_format=data_format, create_scale=False, create_offset=False)
 
   @parameterized.parameters("NCHW", "NCW", "channels_first")
   def testValidDataFormatChannelsFirst(self, data_format):
-    test = axis_norm.AxisNorm(3, data_format=data_format, create_scale=False,
-                              create_offset=False)
+    test = axis_norm.LayerNorm(
+        3, data_format=data_format, create_scale=False, create_offset=False)
 
     self.assertEqual(test._channel_index, 1)
 
   @parameterized.parameters("NHWC", "NWC", "channels_last")
   def testValidDataFormatChannelsLast(self, data_format):
-    test = axis_norm.AxisNorm(3, data_format=data_format, create_scale=False,
-                              create_offset=False)
+    test = axis_norm.LayerNorm(
+        3, data_format=data_format, create_scale=False, create_offset=False)
 
     self.assertEqual(test._channel_index, -1)
 
@@ -146,24 +157,30 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(
         ValueError,
         "`axis` should be an int, slice or iterable of ints."):
-      axis_norm.AxisNorm(axis, create_scale=False, create_offset=False)
+      axis_norm.LayerNorm(axis, create_scale=False, create_offset=False)
 
   def testNoScaleAndInitProvided(self):
     with self.assertRaisesRegexp(
         ValueError,
         "Cannot set `scale_init` if `create_scale=False`."):
-      axis_norm.AxisNorm(3, create_scale=False, create_offset=True,
-                         scale_init=initializers.Ones())
+      axis_norm.LayerNorm(
+          3,
+          create_scale=False,
+          create_offset=True,
+          scale_init=initializers.Ones())
 
   def testNoOffsetBetaInitProvided(self):
     with self.assertRaisesRegexp(
         ValueError,
         "Cannot set `offset_init` if `create_offset=False`."):
-      axis_norm.AxisNorm(3, create_scale=True, create_offset=False,
-                         offset_init=initializers.Zeros())
+      axis_norm.LayerNorm(
+          3,
+          create_scale=True,
+          create_offset=False,
+          offset_init=initializers.Zeros())
 
   def testCreateScaleAndScaleProvided(self):
-    layer = axis_norm.AxisNorm([2], create_scale=True, create_offset=False)
+    layer = axis_norm.LayerNorm([2], create_scale=True, create_offset=False)
 
     with self.assertRaisesRegexp(
         ValueError,
@@ -171,7 +188,7 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       layer(tf.ones([2, 3, 4]), scale=tf.ones([4]))
 
   def testCreateOffsetAndOffsetProvided(self):
-    layer = axis_norm.AxisNorm([2], create_offset=True, create_scale=False)
+    layer = axis_norm.LayerNorm([2], create_offset=True, create_scale=False)
 
     with self.assertRaisesRegexp(
         ValueError,
@@ -179,10 +196,11 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       layer(tf.ones([2, 3, 4]), offset=tf.ones([4]))
 
   def testSliceAxis(self):
-    slice_layer = axis_norm.AxisNorm(slice(1, -1), create_scale=False,
+    slice_layer = axis_norm.LayerNorm(
+        slice(1, -1), create_scale=False, create_offset=False)
+    axis_layer = axis_norm.LayerNorm((1, 2),
+                                     create_scale=False,
                                      create_offset=False)
-    axis_layer = axis_norm.AxisNorm((1, 2), create_scale=False,
-                                    create_offset=False)
 
     inputs = tf.random.uniform([3, 4, 4, 5], 0, 10)
     scale = tf.random.normal((5,), mean=1.0)
@@ -194,8 +212,7 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllEqual(slice_outputs.numpy(), axis_outputs.numpy())
 
   def testRankChanges(self):
-    layer = axis_norm.AxisNorm((1, 2), create_scale=False,
-                               create_offset=False)
+    layer = axis_norm.LayerNorm((1, 2), create_scale=False, create_offset=False)
 
     inputs = tf.ones([2, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -209,8 +226,7 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       layer(tf.ones([2, 3, 3, 4, 5]), scale, offset)
 
   def testWorksWithFunction(self):
-    layer = axis_norm.AxisNorm((1, 2), create_scale=False,
-                               create_offset=False)
+    layer = axis_norm.LayerNorm((1, 2), create_scale=False, create_offset=False)
     function_layer = tf.function(layer)
 
     inputs = tf.ones([2, 3, 3, 5])
@@ -223,7 +239,7 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllEqual(outputs.numpy(), function_outputs.numpy())
 
   def testShapeAgnostic(self):
-    layer = axis_norm.AxisNorm((1, 2), create_scale=False, create_offset=False)
+    layer = axis_norm.LayerNorm((1, 2), create_scale=False, create_offset=False)
     inputs_spec = tf.TensorSpec([None, None, None, None], dtype=tf.float32)
     params_spec = tf.TensorSpec([None], dtype=tf.float32)
     function_layer = tf.function(layer).get_concrete_function(
@@ -246,10 +262,13 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(x, 2.0)
 
   def test5DDataFormatAgnostic(self):
-    c_last_layer = axis_norm.AxisNorm(
-        [1, 2, 3], create_scale=False, create_offset=False)
-    c_first_layer = axis_norm.AxisNorm(
-        [2, 3, 4], create_scale=False, create_offset=False, data_format="NCDHW")
+    c_last_layer = axis_norm.LayerNorm([1, 2, 3],
+                                       create_scale=False,
+                                       create_offset=False)
+    c_first_layer = axis_norm.LayerNorm([2, 3, 4],
+                                        create_scale=False,
+                                        create_offset=False,
+                                        data_format="NCDHW")
 
     inputs = tf.random.uniform([3, 4, 4, 4, 5], 0, 10)
     scale = tf.random.normal((5,), mean=1.0)
@@ -266,10 +285,13 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
                         atol=1e-5, rtol=1e-5)
 
   def test3DDataFormatAgnostic(self):
-    c_last_layer = axis_norm.AxisNorm(
-        [1], create_scale=False, create_offset=False)
-    c_first_layer = axis_norm.AxisNorm(
-        [2], create_scale=False, create_offset=False, data_format="NCW")
+    c_last_layer = axis_norm.LayerNorm([1],
+                                       create_scale=False,
+                                       create_offset=False)
+    c_first_layer = axis_norm.LayerNorm([2],
+                                        create_scale=False,
+                                        create_offset=False,
+                                        data_format="NCW")
 
     inputs = tf.random.uniform([3, 4, 5], 0, 10)
     scale = tf.random.normal((5,), mean=1.0)
@@ -284,14 +306,6 @@ class AxisNormTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertAllClose(c_last_output.numpy(), c_first_output.numpy(),
                         atol=1e-5, rtol=1e-5)
-
-  def testLayerNormCorrectAxis(self):
-    layer = axis_norm.LayerNorm(create_scale=True, create_offset=True)
-
-    inputs = tf.ones([3, 4, 6])
-    layer(inputs)
-
-    self.assertEqual(layer._axis, (1, 2))
 
   def testInstanceNormCorrectAxis(self):
     layer = axis_norm.InstanceNorm(create_scale=True, create_offset=True)

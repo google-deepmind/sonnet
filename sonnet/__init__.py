@@ -25,7 +25,6 @@ from sonnet import nets
 from sonnet import optimizers
 from sonnet import pad
 from sonnet import regularizers
-from sonnet.src.axis_norm import AxisNorm
 from sonnet.src.axis_norm import InstanceNorm
 from sonnet.src.axis_norm import LayerNorm
 from sonnet.src.base import Module
@@ -72,7 +71,6 @@ from sonnet.src.reshape import Reshape
 from sonnet.src.sequential import Sequential
 
 __all__ = (
-    "AxisNorm",
     "BaseBatchNorm",
     "BatchApply",
     "BatchNorm",

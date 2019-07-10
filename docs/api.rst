@@ -89,22 +89,16 @@ Normalization modules
 
 .. currentmodule:: sonnet
 
-AxisNorm
-~~~~~~~~
+LayerNorm
+~~~~~~~~~
 
-.. autoclass:: AxisNorm
+.. autoclass:: LayerNorm
    :members:
 
 InstanceNorm
 ~~~~~~~~~~~~
 
 .. autoclass:: InstanceNorm
-   :members:
-
-LayerNorm
-~~~~~~~~~
-
-.. autoclass:: LayerNorm
    :members:
 
 BaseBatchNorm

@@ -310,19 +310,19 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
   def testInstanceNormCorrectAxis(self):
     layer = axis_norm.InstanceNorm(create_scale=True, create_offset=True)
 
-    inputs = tf.ones([3, 4, 6])
+    inputs = tf.ones([3, 4, 5, 6])
     layer(inputs)
 
-    self.assertEqual(layer._axis, (-1,))
+    self.assertEqual(layer._axis, (1, 2))
 
   def testInstanceNormCorrectNCW(self):
     layer = axis_norm.InstanceNorm(create_scale=True, create_offset=True,
                                    data_format="channels_first")
 
-    inputs = tf.ones([3, 4, 6])
+    inputs = tf.ones([3, 4, 5, 6])
     layer(inputs)
 
-    self.assertEqual(layer._axis, (1,))
+    self.assertEqual(layer._axis, (2, 3))
 
 
 if __name__ == "__main__":

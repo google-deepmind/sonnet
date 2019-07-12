@@ -46,6 +46,43 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
                         [x.numpy() for x in parameters])
 
   @parameterized.parameters(adam.Adam, adam.FastAdam)
+  def testSparse(self, opt_class):
+    if self.primary_device in ("GPU", "TPU"):
+      self.skipTest("IndexedSlices not supported on {}.".format(
+          self.primary_device))
+
+    parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    tf_parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
+    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
+                                tf.constant([0]), tf.constant([2, 1])),
+               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
+                                tf.constant([1]), tf.constant([2, 1]))]
+    optimizer = opt_class(learning_rate=0.001)
+    # FastAdam doesn't use a raw_op for IndexedSlices so compare against Keras
+    tf_optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    # Step 1 of Adam
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.999], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.999]], parameters[1].numpy())
+    tf_optimizer.apply_gradients(zip(updates, tf_parameters))
+    self.assertAllClose(tf_parameters[0].numpy(), parameters[0].numpy())
+    self.assertAllClose(tf_parameters[1].numpy(), parameters[1].numpy())
+    # Step 2 of Adam
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.998], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.998]], parameters[1].numpy())
+    tf_optimizer.apply_gradients(zip(updates, tf_parameters))
+    self.assertAllClose(tf_parameters[0].numpy(), parameters[0].numpy())
+    self.assertAllClose(tf_parameters[1].numpy(), parameters[1].numpy())
+    # Step 3 of Adam
+    optimizer.apply(updates, parameters)
+    self.assertAllClose([[0.997], [2.0]], parameters[0].numpy())
+    self.assertAllClose([[3.0], [3.997]], parameters[1].numpy())
+    tf_optimizer.apply_gradients(zip(updates, tf_parameters))
+    self.assertAllClose(tf_parameters[0].numpy(), parameters[0].numpy())
+    self.assertAllClose(tf_parameters[1].numpy(), parameters[1].numpy())
+
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable([1., 2.])]
     updates = [None]

@@ -103,7 +103,6 @@ class Adam(base.Module):
     self._initialize(parameters)
     self.step.assign_add(1)
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
@@ -113,13 +112,26 @@ class Adam(base.Module):
         beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
         step = tf.cast(self.step, update.dtype.base_dtype)
-
-        m.assign((beta1 * m) + (1. - beta1) * update)
-        v.assign((beta2 * v) + (1. - beta2) * tf.square(update))
-        debiased_m = m / (1. - tf.pow(beta1, step))
-        debiased_v = v / (1. - tf.pow(beta2, step))
-        adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
-        parameter.assign_sub(adam_update)
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          sparse_m_update = (beta1 * m.sparse_read(indices) +
+                             (1. - beta1) * update)
+          m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
+          sparse_v_update = (beta2 * v.sparse_read(indices) +
+                             (1. - beta2) * tf.square(update))
+          v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
+          debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
+          debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))
+          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
+          parameter.scatter_sub(tf.IndexedSlices(adam_update, indices))
+        else:
+          m.assign((beta1 * m) + (1. - beta1) * update)
+          v.assign((beta2 * v) + (1. - beta2) * tf.square(update))
+          debiased_m = m / (1. - tf.pow(beta1, step))
+          debiased_v = v / (1. - tf.pow(beta2, step))
+          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
+          parameter.assign_sub(adam_update)
 
 
 class FastAdam(base.Module):
@@ -156,27 +168,39 @@ class FastAdam(base.Module):
     self._initialize(parameters)
     self.step.assign_add(1)
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
-      # TODO(petebu): Add support for sparse tensors.
       # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
         beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
         beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
         epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
         step = tf.cast(self.step, update.dtype.base_dtype)
-
-        beta1_power = tf.pow(beta1, step)
-        beta2_power = tf.pow(beta2, step)
-        tf.raw_ops.ResourceApplyAdam(
-            var=parameter.handle,
-            m=m.handle,
-            v=v.handle,
-            beta1_power=beta1_power,
-            beta2_power=beta2_power,
-            lr=learning_rate,
-            beta1=beta1,
-            beta2=beta2,
-            epsilon=epsilon,
-            grad=update)
+        if isinstance(update, tf.IndexedSlices):
+          update, indices = optimizer_utils.deduplicate_indexed_slices(
+              update.values, update.indices)
+          sparse_m_update = (beta1 * m.sparse_read(indices) +
+                             (1. - beta1) * update)
+          m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
+          sparse_v_update = (beta2 * v.sparse_read(indices) +
+                             (1. - beta2) * tf.square(update))
+          v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
+          debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
+          debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))
+          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
+          parameter.scatter_sub(tf.IndexedSlices(adam_update, indices))
+        else:
+          beta1_power = tf.pow(beta1, step)
+          beta2_power = tf.pow(beta2, step)
+          tf.raw_ops.ResourceApplyAdam(
+              var=parameter.handle,
+              m=m.handle,
+              v=v.handle,
+              beta1_power=beta1_power,
+              beta2_power=beta2_power,
+              lr=lr,
+              beta1=beta1,
+              beta2=beta2,
+              epsilon=epsilon,
+              grad=update)

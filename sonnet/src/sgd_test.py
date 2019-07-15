@@ -25,9 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+@parameterized.parameters(sgd.SGD, sgd.FastSGD)
 class SGDTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -36,7 +36,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-14., -13.], [-6., -5.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testSparse(self, opt_class):
     if self.primary_device == "TPU":
       self.skipTest("IndexedSlices not supported on TPU.")
@@ -51,7 +50,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [4.0 - 3.0 * 0.01]], parameters[1].numpy())
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, tf.constant(3.)]
@@ -59,7 +57,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose(1., parameters[0].numpy())
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testVariableLearningRate(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -74,7 +71,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-24., -23.], [-12., -11.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testLearningRateDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -85,7 +81,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-14., -13.], [-6., -5.]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -94,13 +89,11 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=3.)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testAllUpdatesNone(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, None]
@@ -109,7 +102,6 @@ class SGDTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "No updates provided for any parameter"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(sgd.SGD, sgd.FastSGD)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]

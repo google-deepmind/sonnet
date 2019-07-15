@@ -25,9 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+@parameterized.parameters(adam.Adam, adam.FastAdam)
 class AdamTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -45,7 +45,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.997, 1.997], [2.997, 3.997]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testSparse(self, opt_class):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
@@ -82,7 +81,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(tf_parameters[0].numpy(), parameters[0].numpy())
     self.assertAllClose(tf_parameters[1].numpy(), parameters[1].numpy())
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, tf.constant(3.)]
@@ -90,7 +88,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose(1., parameters[0].numpy())
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testVariableHyperParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -105,7 +102,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.899, 1.899], [2.899, 3.899]],
                         [x.numpy() for x in parameters], rtol=1e-4)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testHyperParamDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -120,7 +116,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.999, 1.999], [2.999, 3.999]],
                         [x.numpy() for x in parameters], rtol=1e-4)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -129,13 +124,11 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=0.001)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testAllUpdatesNone(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, None]
@@ -144,7 +137,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "No updates provided for any parameter"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
@@ -153,7 +145,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testMomentVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.001)
     with tf.device("CPU:0"):
@@ -162,7 +153,6 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(optimizer.m[0].device, var.device)
     self.assertEqual(optimizer.v[0].device, var.device)
 
-  @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testUnsuppportedStrategyError(self, opt_class):
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

@@ -25,9 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+@parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
 class MomentumTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -45,7 +45,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-1.805, -0.805], [1.317, 2.317]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testDenseNesterov(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -63,7 +62,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testSparse(self, opt_class):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
@@ -88,7 +86,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.13 - 3.0 * 0.271], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [3.913 - 3.0 * 0.0271]], parameters[1].numpy())
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testSparseNesterov(self, opt_class):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
@@ -113,7 +110,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-1.4147], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [3.75853]], parameters[1].numpy())
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, tf.constant(3.)]
@@ -121,7 +117,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose(1., parameters[0].numpy())
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testVariableHyperParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -139,7 +134,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.4455, 1.4455], [2.6673, 3.6673]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testHyperParamDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -151,7 +145,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -160,13 +153,11 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=0.1, momentum=0.9)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testAllUpdatesNone(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, None]
@@ -175,7 +166,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "No updates provided for any parameter"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
@@ -184,7 +174,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testAccumulatorVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.1, momentum=0.9)
     with tf.device("CPU:0"):
@@ -192,7 +181,6 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply([tf.constant(0.1)], [var])
     self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
 
-  @parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
   def testUnsuppportedStrategyError(self, opt_class):
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

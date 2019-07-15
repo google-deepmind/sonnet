@@ -25,9 +25,9 @@ from sonnet.src import test_utils
 import tensorflow as tf
 
 
+@parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
 class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testDense(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -45,7 +45,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.262262, 1.262262], [2.262262, 3.262262]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testDenseCentered(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -63,7 +62,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.186776, 1.186776], [2.186776, 3.186776]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testSparse(self, opt_class):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
@@ -88,7 +86,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-21.132141], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [-18.132067]], parameters[1].numpy())
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testSparseCentered(self, opt_class):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
@@ -113,7 +110,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-23.396709], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [-20.39661]], parameters[1].numpy())
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testNoneUpdate(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, tf.constant(3.)]
@@ -121,7 +117,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     optimizer.apply(updates, parameters)
     self.assertAllClose(1., parameters[0].numpy())
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testVariableHyperParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -136,7 +131,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.660831, 1.660831], [2.660831, 3.660831]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testHyperParamDTypeConversion(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
@@ -151,7 +145,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testDifferentLengthUpdatesParams(self, opt_class):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
@@ -160,13 +153,11 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testEmptyParams(self, opt_class):
     optimizer = opt_class(learning_rate=0.1)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testAllUpdatesNone(self, opt_class):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, None]
@@ -175,7 +166,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "No updates provided for any parameter"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testInconsistentDTypes(self, opt_class):
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
@@ -184,7 +174,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testMovingVariablesColocatedWithOriginal(self, opt_class):
     optimizer = opt_class(learning_rate=0.1)
     with tf.device("CPU:0"):
@@ -193,7 +182,6 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(optimizer.mom[0].device, var.device)
     self.assertEqual(optimizer.ms[0].device, var.device)
 
-  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testUnsuppportedStrategyError(self, opt_class):
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():

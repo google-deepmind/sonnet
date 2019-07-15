@@ -87,7 +87,6 @@ class Momentum(base.Module):
     self._initialize(parameters)
     for update, parameter, momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
@@ -137,7 +136,6 @@ class FastMomentum(base.Module):
     self._initialize(parameters)
     for update, parameter, accumulated_momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Consider caching learning_rate cast.
       # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)

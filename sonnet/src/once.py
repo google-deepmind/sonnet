@@ -23,7 +23,7 @@ import uuid
 
 from sonnet.src import utils
 
-ONCE_PROPERTY = "_snt_once"
+_ONCE_PROPERTY = "_snt_once"
 
 
 def once(f):
@@ -80,10 +80,10 @@ def once(f):
       return
 
     # Get or set the `seen` set for this object.
-    seen = getattr(instance, ONCE_PROPERTY, None)
+    seen = getattr(instance, _ONCE_PROPERTY, None)
     if seen is None:
       seen = set()
-      setattr(instance, ONCE_PROPERTY, seen)
+      setattr(instance, _ONCE_PROPERTY, seen)
 
     if once_id not in seen:
       wrapped(*args, **kwargs)

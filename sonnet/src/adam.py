@@ -103,7 +103,6 @@ class Adam(base.Module):
     self._initialize(parameters)
     self.step.assign_add(1)
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
@@ -167,7 +166,6 @@ class FastAdam(base.Module):
     self._initialize(parameters)
     self.step.assign_add(1)
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         lr = tf.cast(self.learning_rate, update.dtype.base_dtype)

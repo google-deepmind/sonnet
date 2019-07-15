@@ -72,12 +72,12 @@ class OptimizerUtilsTest(test_utils.TestCase, parameterized.TestCase):
         optimizer_utils.check_strategy()
 
   def test_check_updates_parameters_same_length(self):
-    x = [None] * 5
+    x = [42] * 5
     optimizer_utils.check_updates_parameters(updates=x, parameters=x)
 
   def test_check_updates_parameters_diff_length(self):
-    updates = [None] * 2
-    parameters = [None] * 3
+    updates = [42] * 2
+    parameters = [42] * 3
     with self.assertRaisesRegexp(ValueError, "must be the same length"):
       optimizer_utils.check_updates_parameters(updates=updates,
                                                parameters=parameters)

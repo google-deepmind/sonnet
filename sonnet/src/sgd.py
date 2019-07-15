@@ -56,7 +56,6 @@ class SGD(base.Module):
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
@@ -79,7 +78,6 @@ class FastSGD(base.Module):
     """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
     for update, parameter in zip(updates, parameters):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)

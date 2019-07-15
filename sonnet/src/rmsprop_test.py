@@ -115,11 +115,11 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testNoneUpdate(self, opt_class):
-    parameters = [tf.Variable([1., 2.])]
-    updates = [None]
+    parameters = [tf.Variable(1.), tf.Variable(2.)]
+    updates = [None, tf.constant(3.)]
     optimizer = opt_class(learning_rate=0.1)
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[1., 2.]], [x.numpy() for x in parameters])
+    self.assertAllClose(1., parameters[0].numpy())
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testVariableHyperParams(self, opt_class):
@@ -165,6 +165,15 @@ class RMSPropTest(test_utils.TestCase, parameterized.TestCase):
     optimizer = opt_class(learning_rate=0.1)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
+
+  @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
+  def testAllUpdatesNone(self, opt_class):
+    parameters = [tf.Variable(1.), tf.Variable(2.)]
+    updates = [None, None]
+    optimizer = opt_class(learning_rate=0.1)
+    with self.assertRaisesRegexp(
+        ValueError, "No updates provided for any parameter"):
+      optimizer.apply(updates, parameters)
 
   @parameterized.parameters(rmsprop.RMSProp, rmsprop.FastRMSProp)
   def testInconsistentDTypes(self, opt_class):

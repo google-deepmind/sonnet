@@ -49,6 +49,8 @@ def check_updates_parameters(updates, parameters):
     raise ValueError("`updates` and `parameters` must be the same length.")
   if not parameters:
     raise ValueError("`parameters` cannot be empty.")
+  if all(x is None for x in updates):
+    raise ValueError("No updates provided for any parameter.")
 
 
 def check_same_dtype(update, parameter):

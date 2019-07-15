@@ -84,11 +84,11 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testNoneUpdate(self, opt_class):
-    parameters = [tf.Variable([1., 2.])]
-    updates = [None]
+    parameters = [tf.Variable(1.), tf.Variable(2.)]
+    updates = [None, tf.constant(3.)]
     optimizer = opt_class(learning_rate=0.001)
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[1., 2.]], [x.numpy() for x in parameters])
+    self.assertAllClose(1., parameters[0].numpy())
 
   @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testVariableHyperParams(self, opt_class):
@@ -134,6 +134,15 @@ class AdamTest(test_utils.TestCase, parameterized.TestCase):
     optimizer = opt_class(learning_rate=0.001)
     with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
+
+  @parameterized.parameters(adam.Adam, adam.FastAdam)
+  def testAllUpdatesNone(self, opt_class):
+    parameters = [tf.Variable(1.), tf.Variable(2.)]
+    updates = [None, None]
+    optimizer = opt_class(learning_rate=0.001)
+    with self.assertRaisesRegexp(
+        ValueError, "No updates provided for any parameter"):
+      optimizer.apply(updates, parameters)
 
   @parameterized.parameters(adam.Adam, adam.FastAdam)
   def testInconsistentDTypes(self, opt_class):

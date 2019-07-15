@@ -87,7 +87,6 @@ class Momentum(base.Module):
     self._initialize(parameters)
     for update, parameter, momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
@@ -136,7 +135,6 @@ class FastMomentum(base.Module):
     self._initialize(parameters)
     for update, parameter, accumulated_momentum in zip(
         updates, parameters, self.accumulated_momentum):
-      # TODO(petebu): Consider the case when all updates are None.
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)

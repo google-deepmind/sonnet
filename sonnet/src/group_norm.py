@@ -69,7 +69,7 @@ class GroupNorm(base.Module):
   """
 
   def __init__(self, groups, axis=slice(1, None), create_scale=True,
-               create_offset=True, eps=1e-4, scale_init=None, offset_init=None,
+               create_offset=True, eps=1e-5, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
     """Constructs a ``GroupNorm`` module.
 
@@ -85,7 +85,7 @@ class GroupNorm(base.Module):
       create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
       eps: Small epsilon to add to the variance to avoid division by zero.
-        Defaults to ``1e-4``.
+        Defaults to ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
         if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set

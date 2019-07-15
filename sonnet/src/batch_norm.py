@@ -73,7 +73,7 @@ class BaseBatchNorm(base.Module):
   """
 
   def __init__(self, create_scale, create_offset, moving_mean, moving_variance,
-               eps=1e-4, scale_init=None, offset_init=None,
+               eps=1e-5, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
     """Constructs a ``BaseBatchNorm`` module.
 
@@ -91,7 +91,7 @@ class BaseBatchNorm(base.Module):
         have an update method which takes a value and updates the internal state
         and a value property which returns the current variance.
       eps: Small epsilon to avoid division by zero variance. Defaults to
-        ``1e-4``.
+        ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
         if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set
@@ -269,7 +269,7 @@ class BatchNorm(BaseBatchNorm):
   """
 
   def __init__(self, create_scale, create_offset, decay_rate=0.999,
-               eps=1e-4, scale_init=None, offset_init=None,
+               eps=1e-5, scale_init=None, offset_init=None,
                data_format="channels_last", name=None):
     """Constructs a ``BatchNorm`` module.
 
@@ -281,7 +281,7 @@ class BatchNorm(BaseBatchNorm):
       decay_rate: Decay rate of the exponential moving averages of the mean
         and variance.
       eps: Small epsilon to avoid division by zero variance. Defaults to
-        ``1e-4``.
+        ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
         if ``create_scale=True``. By default scale is initialized to ``1``.
       offset_init: Optional initializer for the offset variable. Can only be set

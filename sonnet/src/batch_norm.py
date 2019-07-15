@@ -300,5 +300,8 @@ class BatchNorm(BaseBatchNorm):
         create_offset=create_offset,
         moving_mean=moving_mean,
         moving_variance=moving_variance,
+        eps=eps,
+        scale_init=scale_init,
+        offset_init=offset_init,
         data_format=data_format,
         name=name)

@@ -577,6 +577,7 @@ snt_py_library(
     srcs = ["utils.py"],
     deps = [
         ":initializers",
+        # pip: absl/logging
         # pip: six
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/

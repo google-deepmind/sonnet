@@ -25,6 +25,7 @@ import functools
 import inspect
 import re
 
+from absl import logging
 import six
 from sonnet.src import initializers
 import tensorflow as tf
@@ -203,3 +204,41 @@ def variable_like(
   with tf.device(inputs.device):
     initial_value = initializer(inputs.shape, inputs.dtype)
     return tf.Variable(initial_value, trainable=trainable, name=name)
+
+
+def _format_table(rows, join_lines=True):
+  format_str = ""
+  for col in range(len(rows[0])):
+    column_width = max(len(row[col]) for row in rows)
+    format_str += "{:<" + str(column_width) + "}  "
+
+  output_rows = (format_str.format(*row).strip() for row in rows)
+  return "\n".join(output_rows) if join_lines else output_rows
+
+
+def format_variables(variables, join_lines=True):
+  """Takes a collection of variables and formats it as a table."""
+  rows = []
+  rows.append(("Variable", "Shape", "Type", "Trainable", "Device"))
+  for var in sorted(variables, key=lambda var: var.name):
+    name = var.name.split(":")[0]  # Remove the ":0" suffix.
+    shape = "x".join(str(dim) for dim in var.shape)
+    dtype = repr(var.dtype).replace("tf.", "")
+    trainable = str(var.trainable)
+    device = str(var.device) if var.device else ""
+    rows.append((name, shape, dtype, trainable, device))
+  return _format_table(rows, join_lines)
+
+
+def log_variables(variables):
+  """Logs variable information.
+
+  This function logs the name, shape, type, trainability, and device for a
+  given iterable of variables.
+
+  Args:
+    variables: iterable of variables (e.g., `module.variables`, if `module` is a
+      `snt.Module` instance).
+  """
+  for row in format_variables(variables, join_lines=False):
+    logging.info(row)

@@ -69,6 +69,8 @@ from sonnet.src.reshape import Flatten
 from sonnet.src.reshape import reshape
 from sonnet.src.reshape import Reshape
 from sonnet.src.sequential import Sequential
+from sonnet.src.utils import format_variables
+from sonnet.src.utils import log_variables
 
 __all__ = (
     "BaseBatchNorm",
@@ -112,7 +114,9 @@ __all__ = (
     "deep_rnn_with_skip_connections",
     "distribute",
     "dynamic_unroll",
+    "format_variables",
     "initializers",
+    "log_variables",
     "lstm_with_recurrent_dropout",
     "no_name_scope",
     "nets",

@@ -26,6 +26,14 @@ from sonnet.src import test_utils
 from sonnet.src import utils
 import tensorflow as tf
 
+# We have a first "\" for the new line and one at the end. The rest is a direct
+# copy-paste of the ground truth output.
+_EXPECTED_FORMATTED_VARIABLE_LIST = ("""\
+Variable  Shape  Type     Trainable  Device
+m1/v1     3x4    float32  True       /job:localhost/replica:0/task:0/device:CPU:0
+m2/v2     5      int32    False      /job:localhost/replica:0/task:0/device:CPU:0\
+""")
+
 
 class ReplicateTest(test_utils.TestCase, parameterized.TestCase):
 
@@ -265,6 +273,28 @@ class VariableLikeTest(test_utils.TestCase, parameterized.TestCase):
     a = a()
     b = utils.variable_like(a, name="b")
     self.assertEqual("b:0", b.name)
+
+
+class FormatVariablesTest(test_utils.TestCase):
+
+  def test_format_variables(self):
+    with tf.device("/device:CPU:0"):
+      with tf.name_scope("m1"):
+        v1 = tf.Variable(tf.zeros([3, 4]), name="v1")
+      with tf.name_scope("m2"):
+        v2 = tf.Variable(tf.zeros([5], dtype=tf.int32), trainable=False,
+                         name="v2")
+      self.assertEqual(utils.format_variables([v2, v1]),
+                       _EXPECTED_FORMATTED_VARIABLE_LIST)
+
+  def test_log_variables(self):
+    with tf.device("/device:CPU:0"):
+      with tf.name_scope("m1"):
+        v1 = tf.Variable(tf.zeros([3, 4]), name="v1")
+      with tf.name_scope("m2"):
+        v2 = tf.Variable(tf.zeros([5], dtype=tf.int32), trainable=False,
+                         name="v2")
+      utils.log_variables([v2, v1])
 
 
 if __name__ == "__main__":

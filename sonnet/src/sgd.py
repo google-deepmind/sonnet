@@ -55,6 +55,7 @@ class SGD(base.Module):
         lengths, or have inconsistent types.
     """
     optimizer_utils.check_updates_parameters(updates, parameters)
+    optimizer_utils.check_strategy()
     for update, parameter in zip(updates, parameters):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
@@ -77,6 +78,7 @@ class FastSGD(base.Module):
   def apply(self, updates, parameters):
     """Applies updates to parameters."""
     optimizer_utils.check_updates_parameters(updates, parameters)
+    optimizer_utils.check_strategy()
     for update, parameter in zip(updates, parameters):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)

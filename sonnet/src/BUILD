@@ -406,11 +406,13 @@ snt_py_library(
 
 snt_py_test(
     name = "adam_test",
-    srcs = ["adam_test.py"],
+    srcs = [
+        "adam_test.py",
+        "optimizer_tests.py",
+    ],
     deps = [
         ":adam",
         ":test_utils",
-        # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
 )
@@ -429,11 +431,13 @@ snt_py_library(
 
 snt_py_test(
     name = "momentum_test",
-    srcs = ["momentum_test.py"],
+    srcs = [
+        "momentum_test.py",
+        "optimizer_tests.py",
+    ],
     deps = [
         ":momentum",
         ":test_utils",
-        # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
 )
@@ -453,11 +457,13 @@ snt_py_library(
 
 snt_py_test(
     name = "rmsprop_test",
-    srcs = ["rmsprop_test.py"],
+    srcs = [
+        "optimizer_tests.py",
+        "rmsprop_test.py",
+    ],
     deps = [
         ":rmsprop",
         ":test_utils",
-        # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
 )
@@ -474,11 +480,13 @@ snt_py_library(
 
 snt_py_test(
     name = "sgd_test",
-    srcs = ["sgd_test.py"],
+    srcs = [
+        "optimizer_tests.py",
+        "sgd_test.py",
+    ],
     deps = [
         ":sgd",
         ":test_utils",
-        # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
 )

@@ -19,19 +19,24 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl.testing import parameterized
 from sonnet.src import momentum
-from sonnet.src import test_utils
+from sonnet.src import optimizer_tests
 import tensorflow as tf
 
 
-@parameterized.parameters(momentum.Momentum, momentum.FastMomentum)
-class MomentumTest(test_utils.TestCase, parameterized.TestCase):
+class MomentumTest(optimizer_tests.OptimizerTestBase):
 
-  def testDense(self, opt_class):
+  def make_optimizer(self, *args, **kwargs):
+    if "learning_rate" not in kwargs:
+      kwargs["learning_rate"] = 0.1
+    if "momentum" not in kwargs:
+      kwargs["momentum"] = 0.9
+    return momentum.Momentum(*args, **kwargs)
+
+  def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
+    optimizer = self.make_optimizer(learning_rate=0.1, momentum=0.9)
     # Step 1 of Momentum
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
@@ -45,10 +50,11 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-1.805, -0.805], [1.317, 2.317]],
                         [x.numpy() for x in parameters])
 
-  def testDenseNesterov(self, opt_class):
+  def testDenseNesterov(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9, use_nesterov=True)
+    optimizer = self.make_optimizer(
+        learning_rate=0.1, momentum=0.9, use_nesterov=True)
     # Step 1 of Momentum
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.05, 1.05], [2.43, 3.43]],
@@ -62,7 +68,7 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
                         [x.numpy() for x in parameters])
 
-  def testSparse(self, opt_class):
+  def testSparse(self):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
           self.primary_device))
@@ -72,7 +78,7 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
                                 tf.constant([0]), tf.constant([2, 1])),
                tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
                                 tf.constant([1]), tf.constant([2, 1]))]
-    optimizer = opt_class(learning_rate=3., momentum=0.9)
+    optimizer = self.make_optimizer(learning_rate=3., momentum=0.9)
     # Step 1 of Momentum
     optimizer.apply(updates, parameters)
     self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())
@@ -86,7 +92,7 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.13 - 3.0 * 0.271], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [3.913 - 3.0 * 0.0271]], parameters[1].numpy())
 
-  def testSparseNesterov(self, opt_class):
+  def testSparseNesterov(self):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
           self.primary_device))
@@ -96,7 +102,8 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
                                 tf.constant([0]), tf.constant([2, 1])),
                tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
                                 tf.constant([1]), tf.constant([2, 1]))]
-    optimizer = opt_class(learning_rate=3., momentum=0.9, use_nesterov=True)
+    optimizer = self.make_optimizer(
+        learning_rate=3., momentum=0.9, use_nesterov=True)
     # Step 1 of Momentum
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.43], [2.0]], parameters[0].numpy())
@@ -110,19 +117,13 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[-1.4147], [2.0]], parameters[0].numpy())
     self.assertAllClose([[3.0], [3.75853]], parameters[1].numpy())
 
-  def testNoneUpdate(self, opt_class):
-    parameters = [tf.Variable(1.), tf.Variable(2.)]
-    updates = [None, tf.constant(3.)]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    optimizer.apply(updates, parameters)
-    self.assertAllClose(1., parameters[0].numpy())
-
-  def testVariableHyperParams(self, opt_class):
+  def testVariableHyperParams(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
     learning_rate = tf.Variable(0.1)
     momentum_coeff = tf.Variable(0.9)
-    optimizer = opt_class(learning_rate=learning_rate, momentum=momentum_coeff)
+    optimizer = self.make_optimizer(
+        learning_rate=learning_rate, momentum=momentum_coeff)
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
                         [x.numpy() for x in parameters])
@@ -134,63 +135,35 @@ class MomentumTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose([[0.4455, 1.4455], [2.6673, 3.6673]],
                         [x.numpy() for x in parameters])
 
-  def testHyperParamDTypeConversion(self, opt_class):
+  def testHyperParamDTypeConversion(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
     dtype = tf.float32 if self.primary_device == "TPU" else tf.float64
     learning_rate = tf.Variable(0.1, dtype=dtype)
     momentum_coeff = tf.Variable(0.9, dtype=dtype)
-    optimizer = opt_class(learning_rate=learning_rate, momentum=momentum_coeff)
+    optimizer = self.make_optimizer(
+        learning_rate=learning_rate, momentum=momentum_coeff)
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
                         [x.numpy() for x in parameters])
 
-  def testDifferentLengthUpdatesParams(self, opt_class):
-    parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
-    updates = [tf.constant([5., 5.])]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    with self.assertRaisesRegexp(
-        ValueError, "`updates` and `parameters` must be the same length."):
-      optimizer.apply(updates, parameters)
-
-  def testEmptyParams(self, opt_class):
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
-      optimizer.apply([], [])
-
-  def testAllUpdatesNone(self, opt_class):
-    parameters = [tf.Variable(1.), tf.Variable(2.)]
-    updates = [None, None]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    with self.assertRaisesRegexp(
-        ValueError, "No updates provided for any parameter"):
-      optimizer.apply(updates, parameters)
-
-  def testInconsistentDTypes(self, opt_class):
-    parameters = [tf.Variable([1., 2.], name="param0")]
-    updates = [tf.constant([5, 5])]
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    with self.assertRaisesRegexp(
-        ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
-      optimizer.apply(updates, parameters)
-
-  def testAccumulatorVariablesColocatedWithOriginal(self, opt_class):
-    optimizer = opt_class(learning_rate=0.1, momentum=0.9)
+  def testAuxVariablesColocatedWithOriginal(self):
+    optimizer = self.make_optimizer(learning_rate=0.1, momentum=0.9)
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
     optimizer.apply([tf.constant(0.1)], [var])
     self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
 
-  def testUnsuppportedStrategyError(self, opt_class):
-    strategy = tf.distribute.MirroredStrategy()
-    with strategy.scope():
-      var = tf.Variable(1.0)
-      optimizer = opt_class(learning_rate=0.1, momentum=0.9)
-    step = lambda: optimizer.apply([tf.constant(0.1)], [var])
-    with self.assertRaisesRegexp(
-        ValueError,
-        "Sonnet optimizers are not compatible with `MirroredStrategy`"):
-      strategy.experimental_run_v2(step)
+
+class FastMomentumTest(MomentumTest):
+
+  def make_optimizer(self, *args, **kwargs):
+    if "learning_rate" not in kwargs:
+      kwargs["learning_rate"] = 0.1
+    if "momentum" not in kwargs:
+      kwargs["momentum"] = 0.9
+    return momentum.FastMomentum(*args, **kwargs)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

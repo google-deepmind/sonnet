@@ -265,7 +265,7 @@ class BatchNormV2(base.AbstractModule):
       """Retrieves the moving statistics."""
       # If necessary, cast the moving statistics to match the input type.
       # This is required by tf.nn.batch_normalization.
-      input_dtype = input_batch.dtype.base_dtype
+      input_dtype = input_batch.dtype
       if stat_dtype == input_dtype:
         return (
             tf.identity(self._moving_mean),
@@ -453,7 +453,7 @@ class BatchNormV2(base.AbstractModule):
           name="batch_norm")
       # We'll echo the supplied mean and variance so that they can also be used
       # to update the moving statistics. Cast to matching type if necessary.
-      if input_batch.dtype.base_dtype != stat_dtype:
+      if input_batch.dtype != stat_dtype:
         mean = tf.cast(mean, stat_dtype)
         variance = tf.cast(variance, stat_dtype)
 
@@ -545,7 +545,7 @@ class BatchNormV2(base.AbstractModule):
           "Incorrect data format {} for input shape {}.".format(
               self._data_format, input_shape))
 
-    dtype = input_batch.dtype.base_dtype
+    dtype = input_batch.dtype
     if self._fused and dtype == tf.bfloat16:
       raise base.NotSupportedError(
           "Fused batch norm does not support tf.bfloat16.")

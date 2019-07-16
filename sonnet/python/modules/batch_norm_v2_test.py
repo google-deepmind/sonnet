@@ -124,10 +124,10 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     output = batch_norm(inputs, is_training=True)
 
     self.assertEqual(dtype, output.dtype)
-    self.assertEqual(dtype, batch_norm.moving_mean.dtype.base_dtype)
-    self.assertEqual(dtype, batch_norm.moving_variance.dtype.base_dtype)
-    self.assertEqual(dtype, batch_norm.gamma.dtype.base_dtype)
-    self.assertEqual(dtype, batch_norm.beta.dtype.base_dtype)
+    self.assertEqual(dtype, batch_norm.moving_mean.dtype)
+    self.assertEqual(dtype, batch_norm.moving_variance.dtype)
+    self.assertEqual(dtype, batch_norm.gamma.dtype)
+    self.assertEqual(dtype, batch_norm.beta.dtype)
 
   @parameterized.named_parameters(
       ("Float16", tf.float16),
@@ -139,10 +139,10 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
     output = batch_norm(inputs, is_training=True)
 
     self.assertEqual(dtype, output.dtype)
-    self.assertEqual(tf.float32, batch_norm.moving_mean.dtype.base_dtype)
-    self.assertEqual(tf.float32, batch_norm.moving_variance.dtype.base_dtype)
-    self.assertEqual(dtype, batch_norm.gamma.dtype.base_dtype)
-    self.assertEqual(dtype, batch_norm.beta.dtype.base_dtype)
+    self.assertEqual(tf.float32, batch_norm.moving_mean.dtype)
+    self.assertEqual(tf.float32, batch_norm.moving_variance.dtype)
+    self.assertEqual(dtype, batch_norm.gamma.dtype)
+    self.assertEqual(dtype, batch_norm.beta.dtype)
 
   def _get_inputs(self, dtype=tf.float32):
     v = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0], dtype=dtype.as_numpy_dtype)

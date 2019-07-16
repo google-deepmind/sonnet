@@ -72,7 +72,7 @@ class ExponentialMovingAverage(metrics.Metric):
 
     self._counter.assign_add(1)
     value = tf.convert_to_tensor(value)
-    counter = tf.cast(self._counter, value.dtype.base_dtype)
+    counter = tf.cast(self._counter, value.dtype)
     self._hidden.assign_sub((self._hidden - value) * (1 - self._decay))
     self.average.assign((self._hidden / (1. - tf.pow(self._decay, counter))))
 

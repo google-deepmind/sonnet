@@ -59,7 +59,7 @@ class SGD(base.Module):
     for update, parameter in zip(updates, parameters):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        learning_rate = tf.cast(self.learning_rate, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           parameter.scatter_sub(
               tf.IndexedSlices(update.values * learning_rate, update.indices))
@@ -82,7 +82,7 @@ class FastSGD(base.Module):
     for update, parameter in zip(updates, parameters):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
+        learning_rate = tf.cast(self.learning_rate, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           parameter.scatter_nd_sub(
               update.indices, update.values * learning_rate)

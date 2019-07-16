@@ -116,10 +116,10 @@ class RMSProp(base.Module):
         updates, parameters, self.mom, self.ms, self.mg):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        decay = tf.cast(self.decay, update.dtype.base_dtype)
-        mu = tf.cast(self.momentum, update.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype)
+        decay = tf.cast(self.decay, update.dtype)
+        mu = tf.cast(self.momentum, update.dtype)
+        epsilon = tf.cast(self.epsilon, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
@@ -185,10 +185,10 @@ class FastRMSProp(base.Module):
         updates, parameters, self.mom, self.ms, self.mg):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        decay = tf.cast(self.decay, update.dtype.base_dtype)
-        momentum = tf.cast(self.momentum, update.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
+        learning_rate = tf.cast(self.learning_rate, update.dtype)
+        decay = tf.cast(self.decay, update.dtype)
+        momentum = tf.cast(self.momentum, update.dtype)
+        epsilon = tf.cast(self.epsilon, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)

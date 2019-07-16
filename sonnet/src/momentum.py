@@ -89,8 +89,8 @@ class Momentum(base.Module):
         updates, parameters, self.accumulated_momentum):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        mu = tf.cast(self.momentum, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype)
+        mu = tf.cast(self.momentum, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
@@ -137,8 +137,8 @@ class FastMomentum(base.Module):
         updates, parameters, self.accumulated_momentum):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        momentum = tf.cast(self.momentum, update.dtype.base_dtype)
+        learning_rate = tf.cast(self.learning_rate, update.dtype)
+        momentum = tf.cast(self.momentum, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)

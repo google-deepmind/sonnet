@@ -105,11 +105,11 @@ class Adam(base.Module):
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
-        beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
-        step = tf.cast(self.step, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype)
+        beta1 = tf.cast(self.beta1, update.dtype)
+        beta2 = tf.cast(self.beta2, update.dtype)
+        epsilon = tf.cast(self.epsilon, update.dtype)
+        step = tf.cast(self.step, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
@@ -168,11 +168,11 @@ class FastAdam(base.Module):
     for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype.base_dtype)
-        beta1 = tf.cast(self.beta1, update.dtype.base_dtype)
-        beta2 = tf.cast(self.beta2, update.dtype.base_dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype.base_dtype)
-        step = tf.cast(self.step, update.dtype.base_dtype)
+        lr = tf.cast(self.learning_rate, update.dtype)
+        beta1 = tf.cast(self.beta1, update.dtype)
+        beta2 = tf.cast(self.beta2, update.dtype)
+        epsilon = tf.cast(self.epsilon, update.dtype)
+        step = tf.cast(self.step, update.dtype)
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)

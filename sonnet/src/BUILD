@@ -497,16 +497,6 @@ snt_py_library(
     deps = [":replicator"],
 )
 
-snt_py_test(
-    name = "optimizer_utils_test",
-    srcs = ["optimizer_utils_test.py"],
-    deps = [
-        ":optimizer_utils",
-        ":test_utils",
-        # pip: tensorflow
-    ],
-)
-
 snt_py_library(
     name = "axis_norm",
     srcs = ["axis_norm.py"],

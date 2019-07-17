@@ -54,7 +54,6 @@ def check_updates_parameters(updates, parameters):
 
 
 def check_same_dtype(update, parameter):
-  # TODO(petebu): Consider casting inconsistent dtypes.
   if update.dtype != parameter.dtype:
     raise ValueError(
         "DType of update {!r} is not equal to that of parameter {!r}".format(

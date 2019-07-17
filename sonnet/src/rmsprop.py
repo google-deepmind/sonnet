@@ -87,7 +87,6 @@ class RMSProp(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)
@@ -110,6 +109,7 @@ class RMSProp(base.Module):
       ValueError: If `updates` and `parameters` are empty, have different
         lengths, or have inconsistent types.
     """
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, mom, ms, mg in six.moves.zip_longest(
@@ -167,7 +167,6 @@ class FastRMSProp(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)
@@ -179,6 +178,7 @@ class FastRMSProp(base.Module):
 
   def apply(self, updates, parameters):
     """Applies updates to parameters."""
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, mom, ms, mg in six.moves.zip_longest(

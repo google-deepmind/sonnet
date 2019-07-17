@@ -68,7 +68,6 @@ class Adam(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)
@@ -99,6 +98,7 @@ class Adam(base.Module):
       ValueError: If `updates` and `parameters` are empty, have different
         lengths, or have inconsistent types.
     """
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     self.step.assign_add(1)
@@ -153,7 +153,6 @@ class FastAdam(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)
@@ -162,6 +161,7 @@ class FastAdam(base.Module):
 
   def apply(self, updates, parameters):
     """Applies updates to parameters."""
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     self.step.assign_add(1)

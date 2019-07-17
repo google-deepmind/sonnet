@@ -53,7 +53,6 @@ class Momentum(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     with tf.name_scope("accumulated_momentum"):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)
@@ -83,6 +82,7 @@ class Momentum(base.Module):
       ValueError: If `updates` and `parameters` are empty, have different
         lengths, or have inconsistent types.
     """
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, momentum in zip(
@@ -124,13 +124,13 @@ class FastMomentum(base.Module):
 
   @once.once
   def _initialize(self, parameters):
-    optimizer_utils.check_strategy()
     with tf.name_scope("accumulated_momentum"):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)
 
   def apply(self, updates, parameters):
     """Applies updates to parameters."""
+    optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     for update, parameter, accumulated_momentum in zip(

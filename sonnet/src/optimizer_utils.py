@@ -26,22 +26,22 @@ import tensorflow as tf
 # a simplified update model and replica local variables.
 # TODO(cjfj,petebu,tomhennigan) Add async parameter server strategy when needed.
 # TODO(cjfj,petebu,tomhennigan) Add sync multi-worker GPU strategy when needed.
-SUPPORTED_STRATEGIES = (
+_SUPPORTED_STRATEGIES = (
     tf.distribute.OneDeviceStrategy,
     replicator.Replicator,
     replicator.TpuReplicator,
 )
 
 
-def check_strategy():
+def check_distribution_strategy():
   if tf.distribute.has_strategy():
     strategy = tf.distribute.get_strategy()
-    if not isinstance(strategy, SUPPORTED_STRATEGIES):
+    if not isinstance(strategy, _SUPPORTED_STRATEGIES):
       raise ValueError(
           "Sonnet optimizers are not compatible with `{}`. "
           "Please use one of `{}` instead.".format(
               strategy.__class__.__name__,
-              "`, `".join(s.__name__ for s in SUPPORTED_STRATEGIES)))
+              "`, `".join(s.__name__ for s in _SUPPORTED_STRATEGIES)))
 
 
 def check_updates_parameters(updates, parameters):

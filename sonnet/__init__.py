@@ -39,6 +39,7 @@ from sonnet.src.conv import Conv3D
 from sonnet.src.conv_transpose import Conv1DTranspose
 from sonnet.src.conv_transpose import Conv2DTranspose
 from sonnet.src.conv_transpose import Conv3DTranspose
+from sonnet.src.custom_getter import custom_variable_getter
 from sonnet.src.deferred import Deferred
 from sonnet.src.dropout import Dropout
 from sonnet.src.embed import Embed
@@ -110,6 +111,7 @@ __all__ = (
     "Sum",
     "TrainableState",
     "VanillaRNN",
+    "custom_variable_getter",
     "deep_rnn_with_residual_connections",
     "deep_rnn_with_skip_connections",
     "distribute",

@@ -24,6 +24,7 @@ snt_py_library(
         "//sonnet/src:bias",
         "//sonnet/src:conv",
         "//sonnet/src:conv_transpose",
+        "//sonnet/src:custom_getter",
         "//sonnet/src:deferred",
         "//sonnet/src:dropout",
         "//sonnet/src:embed",

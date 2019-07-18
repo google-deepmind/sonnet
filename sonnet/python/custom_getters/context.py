@@ -46,13 +46,15 @@ class Context(object):
   this applies an operation to the variable.
   """
 
-  def __init__(self, getter, verbose=False):
+  def __init__(self, getter, verbose=False, default_getter=None):
     """Initializes a contextual switch for a custom getter.
 
     Args:
       getter: The custom getter which we may want to switch on.
       verbose: Log out every time a variable is fetched, and whether or not
         `getter` is used.
+      default_getter: The custom getter to use when this context is not active.
+        If None, the default custom getter is used.
 
     Returns:
       A custom getter which can also be used as a context manager.
@@ -61,6 +63,7 @@ class Context(object):
     self._count = 0
     self._getter = getter
     self._verbose = verbose
+    self._default_getter = default_getter
 
   def __call__(self, getter, name, *args, **kwargs):
     if self._count:
@@ -70,9 +73,12 @@ class Context(object):
       return self._getter(getter, name, *args, **kwargs)
     else:
       if self._verbose:
-        tf.logging.info("Context: Fetching variable %s with normal getter.",
-                        name)
-      return getter(name, *args, **kwargs)
+        tf.logging.info("Context: Fetching variable %s with %s getter.",
+                        name, "default" if self._default_getter else "normal")
+      if self._default_getter:
+        return self._default_getter(getter, *args, **kwargs)
+      else:
+        return getter(name, *args, **kwargs)
 
   def __enter__(self):
     self._count += 1

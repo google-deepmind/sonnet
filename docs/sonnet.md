@@ -185,39 +185,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`ACTCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=110)<a id="ACTCore.initial_state" />
 
-Builds the default start state for an RNNCore.
 
-##### Args:
-
-
-* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
-* `dtype`: The data type to use for the state.
-* `trainable`: Boolean that indicates whether to learn the initial state.
-    Note that intializers and regularizers will be ignored if
-    `trainable=False`.
-* `trainable_initializers`: An initializer function or nested structure of
-      functions with same structure as the `state_size` property of the
-      core, to be used as initializers of the initial state variable.
-* `trainable_regularizers`: Optional regularizer function or nested structure
-    of functions with the same structure as the `state_size` property of the
-    core, to be used as regularizers of the initial state variable. As a
-    default, no regularizers are used. A regularizer should be a function
-    that takes a single `Tensor` as an input and returns a scalar `Tensor`
-    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
-* `name`: Optional string used to prefix the initial state variable names, in
-      the case of a trainable initial state. If not provided, defaults to
-      the name of the module.
-
-##### Returns:
-
-  A tensor or nested tuple of tensors with same structure and shape as the
-  `state_size` property of the core.
-
-##### Raises:
-
-
-* `ValueError`: if the user passes initializers that are not functions.
-* `ValueError`: if the user passes regularizers that are not functions.
 
 
 #### [`ACTCore.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="ACTCore.is_connected" />
@@ -271,7 +239,7 @@ information about what variables are captured.
 
 #### [`ACTCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=113)<a id="ACTCore.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`ACTCore.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="ACTCore.scope_name" />
@@ -281,10 +249,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`ACTCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/pondering_rnn.py?l=118)<a id="ACTCore.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`ACTCore.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="ACTCore.trainable_variables" />
@@ -2090,7 +2055,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`BatchFlatten.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchFlatten.input_shape" />
 
-Returns shape of input `Tensor` passed at last call to `build`.
+
 
 
 #### [`BatchFlatten.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="BatchFlatten.is_connected" />
@@ -3667,7 +3632,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`BatchReshape.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchReshape.input_shape" />
 
-Returns shape of input `Tensor` passed at last call to `build`.
+
 
 
 #### [`BatchReshape.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="BatchReshape.is_connected" />
@@ -4301,17 +4266,7 @@ information.
 
 #### [`CausalConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="CausalConv1D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`CausalConv1D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="CausalConv1D.get_variables" />
@@ -5043,17 +4998,7 @@ information.
 
 #### [`Conv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="Conv1D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv1D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv1D.get_variables" />
@@ -5320,19 +5265,7 @@ Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.
 
 #### [`Conv1DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv1DLSTM.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`Conv1DLSTM.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="Conv1DLSTM.connected_subgraphs" />
@@ -5381,17 +5314,7 @@ information.
 
 #### [`Conv1DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1405)<a id="Conv1DLSTM.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv1DLSTM.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv1DLSTM.get_variables" />
@@ -5791,17 +5714,7 @@ information.
 
 #### [`Conv1DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=991)<a id="Conv1DTranspose.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv1DTranspose.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv1DTranspose.get_variables" />
@@ -6249,17 +6162,7 @@ information.
 
 #### [`Conv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="Conv2D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv2D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv2D.get_variables" />
@@ -6526,19 +6429,7 @@ Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.
 
 #### [`Conv2DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv2DLSTM.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`Conv2DLSTM.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="Conv2DLSTM.connected_subgraphs" />
@@ -6587,17 +6478,7 @@ information.
 
 #### [`Conv2DLSTM.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1419)<a id="Conv2DLSTM.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv2DLSTM.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv2DLSTM.get_variables" />
@@ -6998,17 +6879,7 @@ information.
 
 #### [`Conv2DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=991)<a id="Conv2DTranspose.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv2DTranspose.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv2DTranspose.get_variables" />
@@ -7453,17 +7324,7 @@ information.
 
 #### [`Conv3D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="Conv3D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv3D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv3D.get_variables" />
@@ -7894,17 +7755,7 @@ information.
 
 #### [`Conv3DTranspose.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=991)<a id="Conv3DTranspose.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Conv3DTranspose.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Conv3DTranspose.get_variables" />
@@ -8427,7 +8278,7 @@ information about what variables are captured.
 
 #### [`DeepRNN.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=436)<a id="DeepRNN.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`DeepRNN.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="DeepRNN.scope_name" />
@@ -8437,10 +8288,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`DeepRNN.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=428)<a id="DeepRNN.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`DeepRNN.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="DeepRNN.trainable_variables" />
@@ -8744,17 +8592,7 @@ information.
 
 #### [`DepthwiseConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="DepthwiseConv2D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`DepthwiseConv2D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="DepthwiseConv2D.get_variables" />
@@ -9455,7 +9293,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`FlattenTrailingDimensions.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="FlattenTrailingDimensions.input_shape" />
 
-Returns shape of input `Tensor` passed at last call to `build`.
+
 
 
 #### [`FlattenTrailingDimensions.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="FlattenTrailingDimensions.is_connected" />
@@ -9839,7 +9677,7 @@ information about what variables are captured.
 
 #### [`GRU.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1590)<a id="GRU.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`GRU.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="GRU.scope_name" />
@@ -9849,10 +9687,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`GRU.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1586)<a id="GRU.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`GRU.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="GRU.trainable_variables" />
@@ -10480,7 +10315,7 @@ information about what variables are captured.
 
 #### [`HighwayCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1744)<a id="HighwayCore.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`HighwayCore.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="HighwayCore.scope_name" />
@@ -10490,10 +10325,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`HighwayCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1740)<a id="HighwayCore.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`HighwayCore.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="HighwayCore.trainable_variables" />
@@ -10781,17 +10613,7 @@ information.
 
 #### [`InPlaneConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=517)<a id="InPlaneConv2D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`InPlaneConv2D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="InPlaneConv2D.get_variables" />
@@ -11470,19 +11292,7 @@ Initialize the basic LSTM cell.
 
 #### [`LSTMBlockCell.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=373)<a id="LSTMBlockCell.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`LSTMBlockCell.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="LSTMBlockCell.connected_subgraphs" />
@@ -11660,7 +11470,7 @@ information about what variables are captured.
 
 #### [`LSTMBlockCell.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=376)<a id="LSTMBlockCell.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`LSTMBlockCell.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="LSTMBlockCell.scope_name" />
@@ -11670,10 +11480,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`LSTMBlockCell.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=380)<a id="LSTMBlockCell.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`LSTMBlockCell.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="LSTMBlockCell.trainable_variables" />
@@ -12223,17 +12030,7 @@ information.
 
 #### [`Linear.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=193)<a id="Linear.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`Linear.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="Linear.get_variables" />
@@ -12929,7 +12726,7 @@ information about what variables are captured.
 
 #### [`ModelRNN.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=543)<a id="ModelRNN.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`ModelRNN.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="ModelRNN.scope_name" />
@@ -12939,10 +12736,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`ModelRNN.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=539)<a id="ModelRNN.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`ModelRNN.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="ModelRNN.trainable_variables" />
@@ -13761,19 +13555,7 @@ Constructs the cell, within this module's variable scope.
 
 #### [`RNNCellWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=373)<a id="RNNCellWrapper.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`RNNCellWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="RNNCellWrapper.connected_subgraphs" />
@@ -13951,7 +13733,7 @@ information about what variables are captured.
 
 #### [`RNNCellWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=376)<a id="RNNCellWrapper.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`RNNCellWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="RNNCellWrapper.scope_name" />
@@ -13961,10 +13743,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`RNNCellWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=380)<a id="RNNCellWrapper.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`RNNCellWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="RNNCellWrapper.trainable_variables" />
@@ -14631,7 +14410,7 @@ information about what variables are captured.
 
 #### [`RelationalMemory.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/relational_memory.py?l=167)<a id="RelationalMemory.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`RelationalMemory.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="RelationalMemory.scope_name" />
@@ -14641,10 +14420,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`RelationalMemory.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/relational_memory.py?l=163)<a id="RelationalMemory.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`RelationalMemory.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="RelationalMemory.trainable_variables" />
@@ -14740,53 +14516,12 @@ Residual(M)(x) = M(x) + x.
 
 #### [`Residual.__init__(base_module, name='residual')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=36)<a id="Residual.__init__" />
 
-Performs the initialisation necessary for all AbstractModule instances.
 
-Every subclass of AbstractModule must begin their constructor with a call to
-this constructor, i.e.
-
-`super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
-
-If you instantiate sub-modules in __init__ you must create them within the
-`_enter_variable_scope` context manager to ensure they are in the module's
-variable scope. Alternatively, instantiate sub-modules in `_build`.
-
-##### Args:
-
-  _sentinel: Variable that only carries a non-None value if `__init__` was
-      called without named parameters. If this is the case, a deprecation
-      warning is issued in form of a `ValueError`.
-
-* `custom_getter`: Callable or dictionary of callables to use as
-    custom getters inside the module. If a dictionary, the keys
-    correspond to regexes to match variable names. See the `tf.get_variable`
-    documentation for information about the custom_getter API.
-* `name`: Name of this module. Used to construct the Templated build function.
-      If `None` the module's class name is used (converted to snake case).
-
-##### Raises:
-
-
-* `TypeError`: If `name` is not a string.
-* `TypeError`: If a given `custom_getter` is not callable.
-* `ValueError`: If `__init__` was called without named arguments.
 
 
 #### [`Residual.__call__(inputs, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=41)<a id="Residual.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`Residual.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="Residual.connected_subgraphs" />
@@ -15003,53 +14738,12 @@ Residual(M)(x) = M(x) + x.
 
 #### [`ResidualCore.__init__(base_core, name='residual_core')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=54)<a id="ResidualCore.__init__" />
 
-Performs the initialisation necessary for all AbstractModule instances.
 
-Every subclass of AbstractModule must begin their constructor with a call to
-this constructor, i.e.
-
-`super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
-
-If you instantiate sub-modules in __init__ you must create them within the
-`_enter_variable_scope` context manager to ensure they are in the module's
-variable scope. Alternatively, instantiate sub-modules in `_build`.
-
-##### Args:
-
-  _sentinel: Variable that only carries a non-None value if `__init__` was
-      called without named parameters. If this is the case, a deprecation
-      warning is issued in form of a `ValueError`.
-
-* `custom_getter`: Callable or dictionary of callables to use as
-    custom getters inside the module. If a dictionary, the keys
-    correspond to regexes to match variable names. See the `tf.get_variable`
-    documentation for information about the custom_getter API.
-* `name`: Name of this module. Used to construct the Templated build function.
-      If `None` the module's class name is used (converted to snake case).
-
-##### Raises:
-
-
-* `TypeError`: If `name` is not a string.
-* `TypeError`: If a given `custom_getter` is not callable.
-* `ValueError`: If `__init__` was called without named arguments.
 
 
 #### [`ResidualCore.__call__(inputs, prev_state, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=58)<a id="ResidualCore.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`ResidualCore.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="ResidualCore.connected_subgraphs" />
@@ -15141,39 +14835,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`ResidualCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=71)<a id="ResidualCore.initial_state" />
 
-Builds the default start state for an RNNCore.
 
-##### Args:
-
-
-* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
-* `dtype`: The data type to use for the state.
-* `trainable`: Boolean that indicates whether to learn the initial state.
-    Note that intializers and regularizers will be ignored if
-    `trainable=False`.
-* `trainable_initializers`: An initializer function or nested structure of
-      functions with same structure as the `state_size` property of the
-      core, to be used as initializers of the initial state variable.
-* `trainable_regularizers`: Optional regularizer function or nested structure
-    of functions with the same structure as the `state_size` property of the
-    core, to be used as regularizers of the initial state variable. As a
-    default, no regularizers are used. A regularizer should be a function
-    that takes a single `Tensor` as an input and returns a scalar `Tensor`
-    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
-* `name`: Optional string used to prefix the initial state variable names, in
-      the case of a trainable initial state. If not provided, defaults to
-      the name of the module.
-
-##### Returns:
-
-  A tensor or nested tuple of tensors with same structure and shape as the
-  `state_size` property of the core.
-
-##### Raises:
-
-
-* `ValueError`: if the user passes initializers that are not functions.
-* `ValueError`: if the user passes regularizers that are not functions.
 
 
 #### [`ResidualCore.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="ResidualCore.is_connected" />
@@ -15227,7 +14889,7 @@ information about what variables are captured.
 
 #### [`ResidualCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=63)<a id="ResidualCore.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`ResidualCore.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="ResidualCore.scope_name" />
@@ -15237,10 +14899,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`ResidualCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=67)<a id="ResidualCore.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`ResidualCore.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="ResidualCore.trainable_variables" />
@@ -15308,22 +14967,7 @@ information about what variables are captured.
 
 #### [`ResidualCore.zero_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=74)<a id="ResidualCore.zero_state" />
 
-Return zero-filled state tensor(s).
 
-##### Args:
-
-
-* `batch_size`: int, float, or unit Tensor representing the batch size.
-* `dtype`: the data type to use for the state.
-
-##### Returns:
-
-  If `state_size` is an int or TensorShape, then the return value is a
-  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
-
-  If `state_size` is a nested list or tuple, then the return value is
-  a nested list or tuple (of the same structure) of `2-D` tensors with
-  the shapes `[batch_size x s]` for each s in `state_size`.
 
 
 
@@ -15837,17 +15481,7 @@ information.
 
 #### [`SeparableConv1D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2854)<a id="SeparableConv1D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`SeparableConv1D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="SeparableConv1D.get_variables" />
@@ -16323,17 +15957,7 @@ information.
 
 #### [`SeparableConv2D.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/conv.py?l=2628)<a id="SeparableConv2D.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`SeparableConv2D.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="SeparableConv2D.get_variables" />
@@ -16845,19 +16469,7 @@ Construct a SkipConnectionCore.
 
 #### [`SkipConnectionCore.__call__(inputs, prev_state, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=98)<a id="SkipConnectionCore.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`SkipConnectionCore.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="SkipConnectionCore.connected_subgraphs" />
@@ -16949,39 +16561,7 @@ Returns the Graph instance which the module is connected to, or None.
 
 #### [`SkipConnectionCore.initial_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=126)<a id="SkipConnectionCore.initial_state" />
 
-Builds the default start state for an RNNCore.
 
-##### Args:
-
-
-* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
-* `dtype`: The data type to use for the state.
-* `trainable`: Boolean that indicates whether to learn the initial state.
-    Note that intializers and regularizers will be ignored if
-    `trainable=False`.
-* `trainable_initializers`: An initializer function or nested structure of
-      functions with same structure as the `state_size` property of the
-      core, to be used as initializers of the initial state variable.
-* `trainable_regularizers`: Optional regularizer function or nested structure
-    of functions with the same structure as the `state_size` property of the
-    core, to be used as regularizers of the initial state variable. As a
-    default, no regularizers are used. A regularizer should be a function
-    that takes a single `Tensor` as an input and returns a scalar `Tensor`
-    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
-* `name`: Optional string used to prefix the initial state variable names, in
-      the case of a trainable initial state. If not provided, defaults to
-      the name of the module.
-
-##### Returns:
-
-  A tensor or nested tuple of tensors with same structure and shape as the
-  `state_size` property of the core.
-
-##### Raises:
-
-
-* `ValueError`: if the user passes initializers that are not functions.
-* `ValueError`: if the user passes regularizers that are not functions.
 
 
 #### [`SkipConnectionCore.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="SkipConnectionCore.is_connected" />
@@ -17035,7 +16615,7 @@ information about what variables are captured.
 
 #### [`SkipConnectionCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=108)<a id="SkipConnectionCore.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`SkipConnectionCore.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="SkipConnectionCore.scope_name" />
@@ -17045,10 +16625,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`SkipConnectionCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=122)<a id="SkipConnectionCore.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`SkipConnectionCore.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="SkipConnectionCore.trainable_variables" />
@@ -17116,22 +16693,7 @@ information about what variables are captured.
 
 #### [`SkipConnectionCore.zero_state(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/residual.py?l=129)<a id="SkipConnectionCore.zero_state" />
 
-Return zero-filled state tensor(s).
 
-##### Args:
-
-
-* `batch_size`: int, float, or unit Tensor representing the batch size.
-* `dtype`: the data type to use for the state.
-
-##### Returns:
-
-  If `state_size` is an int or TensorShape, then the return value is a
-  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
-
-  If `state_size` is a nested list or tuple, then the return value is
-  a nested list or tuple (of the same structure) of `2-D` tensors with
-  the shapes `[batch_size x s]` for each s in `state_size`.
 
 
 
@@ -18526,7 +18088,7 @@ information about what variables are captured.
 
 #### [`VanillaRNN.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=175)<a id="VanillaRNN.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`VanillaRNN.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="VanillaRNN.scope_name" />
@@ -18536,10 +18098,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`VanillaRNN.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=171)<a id="VanillaRNN.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`VanillaRNN.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="VanillaRNN.trainable_variables" />
@@ -19058,7 +18617,7 @@ Merge the first dimensions of a tensor.
 * `ValueError`: If the rank of `array_or_tensor` is not well-defined.
 
 
-### [`observe_connections(observer)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=157)<a id="observe_connections" />
+### [`observe_connections(observer)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=82)<a id="observe_connections" />
 
 Notifies the observer whenever any Sonnet module is connected to the graph.
 
@@ -19395,7 +18954,7 @@ creation-time attribute. It is however possible to selectively switch
 off gradients using `custom_getters.stop_gradient`, since
 this applies an operation to the variable.
 
-#### [`custom_getters.Context.__init__(getter, verbose=False, default_getter=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/context.py?l=49)<a id="custom_getters.Context.__init__" />
+#### [`custom_getters.Context.__init__(getter, verbose=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/context.py?l=49)<a id="custom_getters.Context.__init__" />
 
 Initializes a contextual switch for a custom getter.
 
@@ -19405,8 +18964,6 @@ Initializes a contextual switch for a custom getter.
 * `getter`: The custom getter which we may want to switch on.
 * `verbose`: Log out every time a variable is fetched, and whether or not
     `getter` is used.
-* `default_getter`: The custom getter to use when this context is not active.
-    If None, the default custom getter is used.
 
 ##### Returns:
 
@@ -22267,17 +21824,7 @@ information.
 
 #### [`nets.MLP.get_possible_initializer_keys(cls, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=141)<a id="nets.MLP.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`nets.MLP.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="nets.MLP.get_variables" />
@@ -22527,36 +22074,7 @@ Args:
 
 #### [`nets.VectorQuantizer.__init__(embedding_dim, num_embeddings, commitment_cost, name='vq_layer')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/vqvae.py?l=54)<a id="nets.VectorQuantizer.__init__" />
 
-Performs the initialisation necessary for all AbstractModule instances.
 
-Every subclass of AbstractModule must begin their constructor with a call to
-this constructor, i.e.
-
-`super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
-
-If you instantiate sub-modules in __init__ you must create them within the
-`_enter_variable_scope` context manager to ensure they are in the module's
-variable scope. Alternatively, instantiate sub-modules in `_build`.
-
-##### Args:
-
-  _sentinel: Variable that only carries a non-None value if `__init__` was
-      called without named parameters. If this is the case, a deprecation
-      warning is issued in form of a `ValueError`.
-
-* `custom_getter`: Callable or dictionary of callables to use as
-    custom getters inside the module. If a dictionary, the keys
-    correspond to regexes to match variable names. See the `tf.get_variable`
-    documentation for information about the custom_getter API.
-* `name`: Name of this module. Used to construct the Templated build function.
-      If `None` the module's class name is used (converted to snake case).
-
-##### Raises:
-
-
-* `TypeError`: If `name` is not a string.
-* `TypeError`: If a given `custom_getter` is not callable.
-* `ValueError`: If `__init__` was called without named arguments.
 
 
 #### [`nets.VectorQuantizer.__call__(inputs, is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/vqvae.py?l=66)<a id="nets.VectorQuantizer.__call__" />
@@ -22834,36 +22352,7 @@ Args:
 
 #### [`nets.VectorQuantizerEMA.__init__(embedding_dim, num_embeddings, commitment_cost, decay, epsilon=1e-05, name='VectorQuantizerEMA')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/vqvae.py?l=158)<a id="nets.VectorQuantizerEMA.__init__" />
 
-Performs the initialisation necessary for all AbstractModule instances.
 
-Every subclass of AbstractModule must begin their constructor with a call to
-this constructor, i.e.
-
-`super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
-
-If you instantiate sub-modules in __init__ you must create them within the
-`_enter_variable_scope` context manager to ensure they are in the module's
-variable scope. Alternatively, instantiate sub-modules in `_build`.
-
-##### Args:
-
-  _sentinel: Variable that only carries a non-None value if `__init__` was
-      called without named parameters. If this is the case, a deprecation
-      warning is issued in form of a `ValueError`.
-
-* `custom_getter`: Callable or dictionary of callables to use as
-    custom getters inside the module. If a dictionary, the keys
-    correspond to regexes to match variable names. See the `tf.get_variable`
-    documentation for information about the custom_getter API.
-* `name`: Name of this module. Used to construct the Templated build function.
-      If `None` the module's class name is used (converted to snake case).
-
-##### Raises:
-
-
-* `TypeError`: If `name` is not a string.
-* `TypeError`: If a given `custom_getter` is not callable.
-* `ValueError`: If `__init__` was called without named arguments.
 
 
 #### [`nets.VectorQuantizerEMA.__call__(inputs, is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/vqvae.py?l=181)<a id="nets.VectorQuantizerEMA.__call__" />
@@ -23161,12 +22650,12 @@ is "spread out" across multiple copies of the input.
 
 ### [`class protos.module_pb2.NestedData`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?q=class:NestedData)<a id="protos.module_pb2.NestedData" />
 
-A ProtocolMessage
+
 
 
 ### [`class protos.module_pb2.SonnetModule`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?q=class:SonnetModule)<a id="protos.module_pb2.SonnetModule" />
 
-A ProtocolMessage
+
 
 
 ### [`protos.module_pb2._b(x)`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?l=6)<a id="protos.module_pb2._b" />
@@ -23389,19 +22878,7 @@ Construct ConvLSTM.
 
 #### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`python.modules.gated_rnn.ConvLSTM.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="python.modules.gated_rnn.ConvLSTM.connected_subgraphs" />
@@ -23450,17 +22927,7 @@ information.
 
 #### [`python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys(cls, conv_ndims, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1209)<a id="python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys" />
 
-Returns the keys the dictionary of variable initializers may contain.
 
-This provides the user with a way of knowing the initializer keys that are
-available without having to instantiate a sonnet module. Subclasses may
-override this class method if they need additional arguments to determine
-what initializer keys may be provided.
-
-##### Returns:
-
-  Set with strings corresponding to the strings that may be passed to the
-      constructor.
 
 
 #### [`python.modules.gated_rnn.ConvLSTM.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="python.modules.gated_rnn.ConvLSTM.get_variables" />
@@ -23705,19 +23172,7 @@ Builds a new wrapper around a given core.
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=392)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.connected_subgraphs" />
@@ -23863,7 +23318,7 @@ information about what variables are captured.
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=428)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.scope_name" />
@@ -23873,10 +23328,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=424)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`python.modules.gated_rnn.RecurrentDropoutWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.trainable_variables" />
@@ -23991,19 +23443,7 @@ Builds a new wrapper around a given core.
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=480)<a id="python.modules.gated_rnn.ZoneoutWrapper.__call__" />
 
-Add elements to the Graph, computing output Tensors from input Tensors.
 
-Subclasses must implement this method, which will be wrapped in a Template.
-
-##### Args:
-
-
-* `*args`: Input Tensors.
-* `**kwargs`: Additional Python flags controlling connection.
-
-##### Returns:
-
-  output Tensor(s).
 
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="python.modules.gated_rnn.ZoneoutWrapper.connected_subgraphs" />
@@ -24149,7 +23589,7 @@ information about what variables are captured.
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=514)<a id="python.modules.gated_rnn.ZoneoutWrapper.output_size" />
 
-Integer or TensorShape: size of outputs produced by this cell.
+
 
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="python.modules.gated_rnn.ZoneoutWrapper.scope_name" />
@@ -24159,10 +23599,7 @@ Returns the full name of the Module's variable scope.
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=510)<a id="python.modules.gated_rnn.ZoneoutWrapper.state_size" />
 
-size(s) of state(s) used by this cell.
 
-It can be represented by an Integer, a TensorShape or a tuple of Integers
-or TensorShapes.
 
 
 #### [`python.modules.gated_rnn.ZoneoutWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="python.modules.gated_rnn.ZoneoutWrapper.trainable_variables" />
@@ -24302,7 +23739,7 @@ Returns the name of the variable scope indicated by the given value.
 Returns a module name for a callable or `None` if no name can be found.
 
 
-### [`python.modules.util.notify_about_new_variables(callback)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=157)<a id="python.modules.util.notify_about_new_variables" />
+### [`python.modules.util.notify_about_new_variables(callback)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=82)<a id="python.modules.util.notify_about_new_variables" />
 
 Calls `callback(var)` for all newly created variables.
 

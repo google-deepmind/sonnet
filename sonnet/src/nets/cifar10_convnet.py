@@ -28,7 +28,7 @@ import tensorflow as tf
 class Cifar10ConvNet(base.Module):
   """Convolutional network designed for Cifar10.
 
-  Approximately equivalent to "VGG, minus max pooling, plus BatchNorm. For best
+  Approximately equivalent to "VGG, minus max pooling, plus BatchNorm". For best
   results the input data should be scaled to be between -1 and 1 when using the
   standard initializers.
   """

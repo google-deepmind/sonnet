@@ -26,7 +26,7 @@ from sonnet.src import utils
 import tensorflow as tf
 
 
-class Adam(base.Module):
+class Adam(base.Optimizer):
   """Adaptive Moment Estimation (Adam) module.
 
   https://arxiv.org/abs/1412.6980
@@ -132,7 +132,7 @@ class Adam(base.Module):
           parameter.assign_sub(adam_update)
 
 
-class FastAdam(base.Module):
+class FastAdam(base.Optimizer):
   """Adaptive Moment Estimation (Adam) module."""
 
   def __init__(self,

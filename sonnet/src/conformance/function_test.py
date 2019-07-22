@@ -186,7 +186,7 @@ OPTIMIZER_MODULES = (
 
 IGNORED_MODULES = {
     # Stateless or abstract.
-    snt.BatchApply, snt.Deferred, snt.Module, snt.Reshape,
+    snt.BatchApply, snt.Deferred, snt.Module, snt.Optimizer, snt.Reshape,
 
     # Metrics.
     snt.ExponentialMovingAverage, snt.Mean, snt.Metric, snt.Sum,

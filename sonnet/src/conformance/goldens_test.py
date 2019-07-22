@@ -44,6 +44,7 @@ class CoverageTest(test_utils.TestCase):
         snt.Flatten,
         snt.Metric,
         snt.Module,
+        snt.Optimizer,
         snt.Reshape,
         snt.RNNCore,
         snt.Sequential,

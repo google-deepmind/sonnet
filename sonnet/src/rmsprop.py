@@ -27,7 +27,7 @@ from sonnet.src import utils
 import tensorflow as tf
 
 
-class RMSProp(base.Module):
+class RMSProp(base.Optimizer):
   """RMSProp module.
 
   See: http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
@@ -149,7 +149,7 @@ class RMSProp(base.Module):
           parameter.assign_sub(mom)
 
 
-class FastRMSProp(base.Module):
+class FastRMSProp(base.Optimizer):
   """RMSProp module."""
 
   def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,

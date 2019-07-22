@@ -24,7 +24,7 @@ from sonnet.src import optimizer_utils
 import tensorflow as tf
 
 
-class SGD(base.Module):
+class SGD(base.Optimizer):
   """Stochastic Gradient Descent (SGD) module.
 
   Attributes:
@@ -67,7 +67,7 @@ class SGD(base.Module):
           parameter.assign_sub(update * learning_rate)
 
 
-class FastSGD(base.Module):
+class FastSGD(base.Optimizer):
   """Stochastic Gradient Descent (SGD) module."""
 
   def __init__(self, learning_rate, name=None):

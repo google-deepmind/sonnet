@@ -26,7 +26,7 @@ from sonnet.src import utils
 import tensorflow as tf
 
 
-class Momentum(base.Module):
+class Momentum(base.Optimizer):
   """SGD with Momentum module.
 
   Attributes:
@@ -111,7 +111,7 @@ class Momentum(base.Module):
             parameter.assign_sub(lr * momentum)
 
 
-class FastMomentum(base.Module):
+class FastMomentum(base.Optimizer):
   """SGD with Momentum module."""
 
   def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):

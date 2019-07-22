@@ -332,3 +332,11 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       # the subclass __init__ returns (this is implemented in ModuleMetaclass).
       self._ctor_name_scope = self.name_scope
       self._ctor_name_scope.__enter__()
+
+
+class Optimizer(Module):
+  """A base optimizer class."""
+
+  @abc.abstractmethod
+  def apply(self, updates, parameters):
+    """Applies `updates` to `parameters`."""

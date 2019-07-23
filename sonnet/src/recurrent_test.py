@@ -276,9 +276,6 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
   def setUp(self):
     super(UnrolledLSTMTest, self).setUp()
 
-    if self.primary_device == "TPU":
-      self.skipTest("b/134132912")
-
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -331,7 +328,6 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
         "inputs must have dtype tf.bfloat16, got tf.float32"):
       unrolled_lstm(input_sequence, initial_state)
 
-  @unittest.skip("b/134132912")
   def testInitialization(self):
     unrolled_lstm = recurrent.UnrolledLSTM(
         hidden_size=self.hidden_size,

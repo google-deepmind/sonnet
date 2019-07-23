@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from absl import logging
 from absl.testing import parameterized
+from sonnet.src import replicator as snt_replicator
 from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -63,8 +64,12 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     if replicator is None:
       self.skipTest("No replicator supplied.")
     v = create_var(replicator)
-    self.assertEqual(
-        tf.VariableSynchronization.ON_READ, v.primary.synchronization)
+    if isinstance(replicator, snt_replicator.TpuReplicator):
+      self.assertEqual(
+          tf.VariableSynchronization.AUTO, v.primary.synchronization)
+    else:
+      self.assertEqual(
+          tf.VariableSynchronization.ON_READ, v.primary.synchronization)
 
   @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())

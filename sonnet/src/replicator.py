@@ -24,15 +24,25 @@ import contextlib
 import tensorflow as tf
 
 
-def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
-  """Variable creator that by default creates replica local variables."""
-  if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
-    kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
-    if kwargs["aggregation"] == tf.VariableAggregation.NONE:
-      kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
-    if kwargs["trainable"] is None:
-      kwargs["trainable"] = True
-  return next_creator(**kwargs)
+def make_replica_local_creator(tpu_strategy):
+  """Makes a variable creator which creates replica local variables."""
+
+  def _replica_local_creator(next_creator, **kwargs) -> tf.Variable:
+    """Variable creator that by default creates replica local variables."""
+    if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
+      if not tpu_strategy:
+        # TODO(b/138116230) remove this when sync on read variables work on TPU.
+        kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
+      if kwargs["aggregation"] == tf.VariableAggregation.NONE:
+        kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
+      if kwargs["trainable"] is None:
+        kwargs["trainable"] = True
+    return next_creator(**kwargs)
+  return _replica_local_creator
+
+
+replica_local_creator = make_replica_local_creator(tpu_strategy=False)
+replica_local_creator_tpu = make_replica_local_creator(tpu_strategy=True)
 
 
 class Replicator(tf.distribute.MirroredStrategy):
@@ -130,5 +140,5 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
   @contextlib.contextmanager
   def scope(self):
     parent_scope = super(TpuReplicator, self).scope()
-    with parent_scope, tf.variable_creator_scope(replica_local_creator):
+    with parent_scope, tf.variable_creator_scope(replica_local_creator_tpu):
       yield

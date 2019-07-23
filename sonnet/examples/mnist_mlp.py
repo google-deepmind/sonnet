@@ -21,6 +21,7 @@ from __future__ import print_function
 
 # Dependency imports
 
+import os
 import numpy as np
 import sonnet as snt
 from sonnet.examples import dataset_mnist_cifar10 as dataset_mnist
@@ -41,7 +42,7 @@ tf.flags.DEFINE_integer("train_batch_size", 200, "Batch size for training.")
 
 
 def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
-                   num_train_steps, report_every, test_every):
+                   num_train_steps, report_every, test_every, gpu_auto_mixed_precision=False):
   """Creates a basic MNIST model using Sonnet, then trains and evaluates it."""
 
   data_dict = dataset_mnist.get_data("mnist", train_batch_size, test_batch_size)
@@ -70,6 +71,12 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
       labels=train_labels, logits=train_logits)
   loss_avg = tf.reduce_mean(loss)
   optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+  if os.environ.get('TF_ENABLE_AUTO_MIXED_PRECISION', default='0') == '1' or gpu_auto_mixed_precision:
+      tf_version_list = tf.__version__.split(".")
+      if int(tf_version_list[0]) < 2:
+          if int(tf_version_list[1]) < 14:
+              raise (RuntimeError("TensorFlow 1.14.0 or newer is required."))
+      optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
   optimizer_step = optimizer.minimize(loss_avg)
 
   # As before, we make a second instance of our model in the graph, which shares

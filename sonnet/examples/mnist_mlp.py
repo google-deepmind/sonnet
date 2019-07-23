@@ -75,7 +75,7 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
       tf_version_list = tf.__version__.split(".")
       if int(tf_version_list[0]) < 2:
           if int(tf_version_list[1]) < 14:
-              raise(RuntimeError("TensorFlow 1.14.0 or newer is required."))
+              raise(RuntimeError("TensorFlow 1.14.0 or newer is required for GPU automatic mixed precision training."))
       optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
   optimizer_step = optimizer.minimize(loss_avg)
 

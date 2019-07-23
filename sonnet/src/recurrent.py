@@ -1041,9 +1041,7 @@ def _specialize_per_device(
         specialization,
         attributes={
             "api_implements": unique_api_name,
-            "api_preferred_device": device,
-            # TODO(b/133178886): remove _noinline once the bug is fixed.
-            "_noinline": True},
+            "api_preferred_device": device},
         **tf_function_kwargs)
 
   # NOTE: tf.function is required to allow Grappler select a specialization.

@@ -39,7 +39,7 @@ tf.flags.DEFINE_integer("test_batch_size", 10000, "Batch size for test.")
 tf.flags.DEFINE_integer("test_every", 200,
                         "Interval, in train mini-batches, to run test pass.")
 tf.flags.DEFINE_integer("train_batch_size", 200, "Batch size for training.")
-
+tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False, "Enable GPU automatic mixed precision training")
 
 def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
                    num_train_steps, report_every, test_every, gpu_auto_mixed_precision=False):
@@ -75,7 +75,7 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
       tf_version_list = tf.__version__.split(".")
       if int(tf_version_list[0]) < 2:
           if int(tf_version_list[1]) < 14:
-              raise (RuntimeError("TensorFlow 1.14.0 or newer is required."))
+              raise(RuntimeError("TensorFlow 1.14.0 or newer is required."))
       optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
   optimizer_step = optimizer.minimize(loss_avg)
 
@@ -106,7 +106,7 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
 def main(unused_argv):
   train_and_eval(FLAGS.train_batch_size, FLAGS.test_batch_size,
                  FLAGS.num_hidden, FLAGS.learning_rate, FLAGS.num_train_steps,
-                 FLAGS.report_every, FLAGS.test_every)
+                 FLAGS.report_every, FLAGS.test_every, FLAGS.gpu_auto_mixed_precision)
 
 
 if __name__ == "__main__":

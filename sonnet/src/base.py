@@ -155,7 +155,7 @@ class ModuleMetaclass(abc.ABCMeta):
 
 
 def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
-  """Derive a `__repr__` from constructor arguments of a given class.
+  """Derives a `__repr__` from constructor arguments of a given class.
 
       >>> class Foo(object):
       ...   def __init__(self, x, y=42):
@@ -313,7 +313,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   """
 
   def __init__(self, name: Optional[Text] = None):
-    """Initialize the current module with the given name.
+    """Initializes the current module with the given name.
 
     Subclasses should call this constructor before creating other modules or
     variables such that those modules are named correctly.
@@ -335,8 +335,9 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
 
 
 class Optimizer(Module):
-  """A base optimizer class."""
+  """Base class for Sonnet optimizers."""
 
   @abc.abstractmethod
   def apply(self, updates, parameters):
     """Applies `updates` to `parameters`."""
+    pass

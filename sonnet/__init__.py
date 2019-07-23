@@ -105,6 +105,7 @@ __all__ = (
     "Mean",
     "Metric",
     "Module",
+    "Optimizer",
     "reshape",
     "Reshape",
     "RNNCore",

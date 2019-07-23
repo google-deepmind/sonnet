@@ -21,6 +21,7 @@ from __future__ import print_function
 
 # Dependency imports
 
+import os
 import sonnet as snt
 from sonnet.examples import dataset_shakespeare
 import tensorflow as tf
@@ -50,6 +51,8 @@ tf.flags.DEFINE_string("checkpoint_dir", "/tmp/tf/rnn_shakespeare",
                        "Checkpointing directory.")
 tf.flags.DEFINE_integer("checkpoint_interval", 500,
                         "Checkpointing step interval.")
+tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False,
+                        "Enable GPU automatic mixed precision training")
 
 
 def _configure_saver(checkpoint_dir, checkpoint_interval):
@@ -64,7 +67,7 @@ def _configure_saver(checkpoint_dir, checkpoint_interval):
 def build_graph(lstm_depth=3, batch_size=32, num_embedding=32, num_hidden=128,
                 truncation_length=64, sample_length=1000, max_grad_norm=5,
                 initial_learning_rate=0.1, reduce_learning_rate_multiplier=0.1,
-                optimizer_epsilon=0.01):
+                optimizer_epsilon=0.01, gpu_auto_mixed_precision=False):
   """Constructs the computation graph."""
 
   # Get datasets.
@@ -150,6 +153,12 @@ def build_graph(lstm_depth=3, batch_size=32, num_embedding=32, num_hidden=128,
   # Define optimizer and training step.
   optimizer = tf.train.AdamOptimizer(
       learning_rate, epsilon=optimizer_epsilon)
+  if os.environ.get('TF_ENABLE_AUTO_MIXED_PRECISION', default='0') == '1' or gpu_auto_mixed_precision:
+      tf_version_list = tf.__version__.split(".")
+      if int(tf_version_list[0]) < 2:
+          if int(tf_version_list[1]) < 14:
+              raise(RuntimeError("TensorFlow 1.14.0 or newer is required for automatic precision."))
+      optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
   train_step = optimizer.apply_gradients(
       zip(grads, trainable_variables),
       global_step=global_step)
@@ -169,7 +178,7 @@ def build_graph(lstm_depth=3, batch_size=32, num_embedding=32, num_hidden=128,
 
 
 def train(num_training_iterations, report_interval,
-          reduce_learning_rate_interval):
+          reduce_learning_rate_interval, gpu_auto_mixed_precision=False):
   """Trains a deep LSTM model on the Tiny Shakespeare dataset."""
 
   # Build the computation graph.
@@ -180,7 +189,8 @@ def train(num_training_iterations, report_interval,
       sample_length=FLAGS.sample_length, max_grad_norm=FLAGS.max_grad_norm,
       initial_learning_rate=FLAGS.learning_rate,
       reduce_learning_rate_multiplier=FLAGS.reduce_learning_rate_multiplier,
-      optimizer_epsilon=FLAGS.optimizer_epsilon)
+      optimizer_epsilon=FLAGS.optimizer_epsilon,
+      gpu_auto_mixed_precision=gpu_auto_mixed_precision)
 
   # Configure a checkpoint saver.
   saver_hook = _configure_saver(FLAGS.checkpoint_dir,
@@ -359,7 +369,8 @@ def main(unused_argv):
   train(
       num_training_iterations=FLAGS.num_training_iterations,
       report_interval=FLAGS.report_interval,
-      reduce_learning_rate_interval=FLAGS.reduce_learning_rate_interval)
+      reduce_learning_rate_interval=FLAGS.reduce_learning_rate_interval,
+      gpu_auto_mixed_precision=FLAGS.gpu_auto_mixed_precision)
 
 
 if __name__ == "__main__":

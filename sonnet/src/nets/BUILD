@@ -72,3 +72,28 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_library(
+    name = "resnet",
+    srcs = ["resnet.py"],
+    deps = [
+        "//sonnet/src:base",
+        "//sonnet/src:batch_norm",
+        "//sonnet/src:conv",
+        "//sonnet/src:initializers",
+        "//sonnet/src:linear",
+        "//sonnet/src:pad",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "resnet_test",
+    srcs = ["resnet_test.py"],
+    deps = [
+        ":resnet",
+        # pip: absl/testing:parameterized
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

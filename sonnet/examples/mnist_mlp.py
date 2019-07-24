@@ -19,6 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 # Dependency imports
 
 import numpy as np
@@ -38,10 +39,13 @@ tf.flags.DEFINE_integer("test_batch_size", 10000, "Batch size for test.")
 tf.flags.DEFINE_integer("test_every", 200,
                         "Interval, in train mini-batches, to run test pass.")
 tf.flags.DEFINE_integer("train_batch_size", 200, "Batch size for training.")
+tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False,
+                        "Enable GPU automatic mixed precision training")
 
 
 def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
-                   num_train_steps, report_every, test_every):
+                   num_train_steps, report_every, test_every,
+                   gpu_auto_mixed_precision=False):
   """Creates a basic MNIST model using Sonnet, then trains and evaluates it."""
 
   data_dict = dataset_mnist.get_data("mnist", train_batch_size, test_batch_size)
@@ -70,6 +74,17 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
       labels=train_labels, logits=train_logits)
   loss_avg = tf.reduce_mean(loss)
   optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+  env_enable_mixed_precision = (
+      os.environ.get("TF_ENABLE_AUTO_MIXED_PRECISION", default="0") == "1")
+  if env_enable_mixed_precision or gpu_auto_mixed_precision:
+    tf_version_list = tf.__version__.split(".")
+    if int(tf_version_list[0]) < 2:
+      if int(tf_version_list[1]) < 14:
+        raise RuntimeError(
+            "TensorFlow 1.14.0 or newer is required "
+            "for GPU automatic mixed precision training.")
+    optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(
+        optimizer)
   optimizer_step = optimizer.minimize(loss_avg)
 
   # As before, we make a second instance of our model in the graph, which shares
@@ -99,7 +114,8 @@ def train_and_eval(train_batch_size, test_batch_size, num_hidden, learning_rate,
 def main(unused_argv):
   train_and_eval(FLAGS.train_batch_size, FLAGS.test_batch_size,
                  FLAGS.num_hidden, FLAGS.learning_rate, FLAGS.num_train_steps,
-                 FLAGS.report_every, FLAGS.test_every)
+                 FLAGS.report_every, FLAGS.test_every,
+                 FLAGS.gpu_auto_mixed_precision)
 
 
 if __name__ == "__main__":

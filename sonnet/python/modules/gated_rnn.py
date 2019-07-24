@@ -1160,6 +1160,9 @@ class BatchNormLSTM(rnn_core.RNNCore):
             inputs, is_training, test_local_stats)
 
       if self._max_unique_stats > 1:
+        # NOTE: This could be quite a bit faster with `tf.switch_case` however
+        # that currently has bugs (bug: 136667318) when combined with
+        # tf.gradients and control flow (such as dynamic unroll).
         pred_fn_pairs = [(tf.equal(i, index), create_batch_norm)
                          for i in xrange(self._max_unique_stats - 1)]
         out = tf.case(pred_fn_pairs, create_batch_norm)

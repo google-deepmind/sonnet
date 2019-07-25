@@ -52,7 +52,7 @@ tf.flags.DEFINE_string("checkpoint_dir", "/tmp/tf/rnn_shakespeare",
 tf.flags.DEFINE_integer("checkpoint_interval", 500,
                         "Checkpointing step interval.")
 tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False,
-                        "Enable GPU automatic mixed precision training")
+                        "Enable GPU automatic mixed precision training. TensorFlow>=1.14 is required.")
 
 
 def _configure_saver(checkpoint_dir, checkpoint_interval):

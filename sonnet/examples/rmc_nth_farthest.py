@@ -26,6 +26,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import time
 # Dependency imports
 
@@ -51,6 +52,8 @@ flags.DEFINE_integer("num_objects", 4, "Number of objects per dataset sample.")
 flags.DEFINE_integer("num_features", 4, "Feature size per object.")
 flags.DEFINE_integer("epochs", 1000000, "Total training epochs.")
 flags.DEFINE_integer("log_stride", 100, "Iterations between reports.")
+tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False,
+                        "Enable GPU automatic mixed precision training. TensorFlow>=1.14 is required.")
 
 
 class SequenceModel(snt.AbstractModule):
@@ -90,7 +93,7 @@ class SequenceModel(snt.AbstractModule):
     return logits
 
 
-def build_and_train(iterations, log_stride, test=False):
+def build_and_train(iterations, log_stride, test=False, gpu_auto_mixed_precision=False):
   """Construct the data, model, loss and optimizer then train."""
 
   # Test mode settings.
@@ -170,6 +173,12 @@ def build_and_train(iterations, log_stride, test=False):
         FLAGS.min_learning_rate
     ])
     optimizer = tf.train.AdamOptimizer(learning_rate_op)
+    if os.environ.get('TF_ENABLE_AUTO_MIXED_PRECISION', default='0') == '1' or gpu_auto_mixed_precision:
+        tf_version_list = tf.__version__.split(".")
+        if int(tf_version_list[0]) < 2:
+            if int(tf_version_list[1]) < 14:
+                raise (RuntimeError("TensorFlow 1.14.0 or newer is required for automatic precision."))
+        optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
     train_loss, _ = loss_fn(inputs_train, labels_train)
     step_op = optimizer.minimize(train_loss, global_step=global_step)
 
@@ -203,7 +212,7 @@ def build_and_train(iterations, log_stride, test=False):
 
 
 def main(unused_argv):
-  build_and_train(FLAGS.epochs, FLAGS.log_stride)
+  build_and_train(FLAGS.epochs, FLAGS.log_stride, gpu_auto_mixed_precision=FLAGS.gpu_auto_mixed_precision)
 
 if __name__ == "__main__":
   tf.app.run()

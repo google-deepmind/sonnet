@@ -888,11 +888,11 @@ class LSTM(RNNCore):
         w_h_init([self._eff_hidden_size, 4 * self._hidden_size], dtype),
         name="w_h")
 
-    i, f, g, o = tf.split(
+    b_i, b_f, b_g, b_o = tf.split(
         self._b_init([4 * self._hidden_size], dtype),
         num_or_size_splits=4)
-    f += self._forget_bias
-    self.b = tf.Variable(tf.concat([i, f, g, o], axis=0), name="b")
+    b_f += self._forget_bias
+    self.b = tf.Variable(tf.concat([b_i, b_f, b_g, b_o], axis=0), name="b")
 
     if self._projection_size is None:
       self.projection = None
@@ -1009,11 +1009,11 @@ class UnrolledLSTM(UnrolledRNN):
         w_h_init([self._hidden_size, 4 * self._hidden_size], dtype),
         name="w_h")
 
-    i, f, g, o = tf.split(
+    b_i, b_f, b_g, b_o = tf.split(
         self._b_init([4 * self._hidden_size], dtype),
         num_or_size_splits=4)
-    f += self._forget_bias
-    self.b = tf.Variable(tf.concat([i, f, g, o], axis=0), name="b")
+    b_f += self._forget_bias
+    self.b = tf.Variable(tf.concat([b_i, b_f, b_g, b_o], axis=0), name="b")
 
 
 # TODO(b/133740216): consider upstreaming into TensorFlow.
@@ -1065,15 +1065,43 @@ def _specialize_per_device(api_name, specializations, default):
 
 
 def _fallback_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
-  """Fallback version of `UnrolledLSTM` which works on any device."""
+  """Fallback version of :class:`UnrolledLSTM` which works on any device."""
   return dynamic_unroll(
       functools.partial(_lstm_fn, w_i=w_i, w_h=w_h, b=b),
       input_sequence,
       initial_state)
 
 
+def _block_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
+  """Efficient CPU specialization of :class:`UnrolledLSTM`."""
+  w_peephole = tf.zeros(
+      tf.shape(initial_state.hidden)[1:],
+      dtype=initial_state.hidden.dtype)
+  # ``BlockLSTM`` uses igfo gate layout whereas Sonnet uses ifgo.
+  # TODO(slebedev): align BlockLSTM gate layout with Sonnet (and CuDNN-RNN).
+  w_ih_i, w_ih_f, w_ih_g, w_ih_o = tf.split(
+      tf.concat([w_i, w_h], axis=0),
+      num_or_size_splits=4,
+      axis=1)
+  b_i, b_f, b_g, b_o = tf.split(b, num_or_size_splits=4)
+  _, all_cell, _, _, _, _, all_hidden = tf.raw_ops.BlockLSTM(
+      seq_len_max=tf.cast(tf.shape(input_sequence)[0], tf.int64),
+      x=input_sequence,
+      cs_prev=initial_state.cell,
+      h_prev=initial_state.hidden,
+      w=tf.concat([w_ih_i, w_ih_g, w_ih_f, w_ih_o], axis=1),
+      wci=w_peephole,
+      wcf=w_peephole,
+      wco=w_peephole,
+      b=tf.concat([b_i, b_g, b_f, b_o], axis=0),
+      forget_bias=0.0,  # Already accounted for in the initializer.
+      cell_clip=-1.0,  # Disabled.
+      use_peephole=False)
+  return all_hidden, LSTMState(all_hidden[-1], all_cell[-1])
+
+
 def _cudnn_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
-  """GPU/CuDNN-RNN specialization of `UnrolledLSTM`."""
+  """GPU/CuDNN-RNN specialization of :class:`UnrolledLSTM`."""
   # Intuitively, concat/transpose is not free but we did not see
   # it significantly affecting performance in benchmarks.
   output_sequence, all_hidden, all_cell, _ = tf.raw_ops.CudnnRNN(
@@ -1094,11 +1122,11 @@ def _cudnn_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
 _specialized_unrolled_lstm = _specialize_per_device(
     "snt_unrolled_lstm",
     specializations={
-        "CPU": _fallback_unrolled_lstm,
+        "CPU": _block_unrolled_lstm,
         "GPU": _cudnn_unrolled_lstm,
         "TPU": _fallback_unrolled_lstm,
     },
-    default="CPU")
+    default="TPU")
 
 
 class _RecurrentDropoutWrapper(RNNCore):
@@ -1346,11 +1374,11 @@ class _ConvNDLSTM(RNNCore):
   @once.once
   def _initialize(self, inputs):
     dtype = _check_inputs_dtype(inputs, self._dtype)
-    i, f, g, o = tf.split(
+    b_i, b_f, b_g, b_o = tf.split(
         self._b_init([4 * self._output_channels], dtype),
         num_or_size_splits=4)
-    f += self._forget_bias
-    self.b = tf.Variable(tf.concat([i, f, g, o], axis=0), name="b")
+    b_f += self._forget_bias
+    self.b = tf.Variable(tf.concat([b_i, b_f, b_g, b_o], axis=0), name="b")
 
 
 class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring

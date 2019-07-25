@@ -25,6 +25,7 @@ import collections
 from absl.testing import parameterized
 import sonnet as snt
 from sonnet.src import test_utils
+from sonnet.src.nets import resnet
 import tensorflow as tf
 from typing import Callable, Tuple
 
@@ -164,6 +165,12 @@ BATCH_MODULES = (
         create=lambda: Training(snt.nets.Cifar10ConvNet()),
         shape=(BATCH_SIZE, 3, 3, 2)),
     ModuleDescriptor(
+        name="nets.ResNet50",
+        create=(
+            lambda: Training(resnet.ResNet([1, 1, 1, 1], 4,  # pylint: disable=g-long-lambda
+                                           {"decay_rate": 0.9, "eps": .1}))),
+        shape=(BATCH_SIZE, 3, 3, 2)),
+    ModuleDescriptor(
         name="nets.MLP",
         create=lambda: snt.nets.MLP([3, 4, 5]),
         shape=(BATCH_SIZE, 3)),
@@ -196,6 +203,9 @@ IGNORED_MODULES = {
 
     # Recurrent.
     snt.DeepRNN, snt.RNNCore, snt.TrainableState,
+
+    # Nets,
+    snt.nets.ResNet50,  # Smaller version tested via `resnet.ResNet`.
 }
 
 

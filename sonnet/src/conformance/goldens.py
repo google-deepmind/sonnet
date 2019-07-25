@@ -26,6 +26,7 @@ from absl.testing import parameterized
 import numpy as np
 import six
 import sonnet as snt
+from sonnet.src.nets import resnet
 import tensorflow as tf
 from typing import Text, Tuple, Sequence
 
@@ -435,6 +436,19 @@ class SumTest(AbstractGolden):
   input_spec = tf.TensorSpec([2, 2])
   num_variables = 1
   has_side_effects = True
+
+
+@_register_golden(snt.nets.ResNet50, "resnet50")
+class ResNet50(AbstractGolden):
+  create_module = (
+      lambda _: resnet.ResNet([1, 1, 1, 1], 9, {"decay_rate": 0.9, "eps": .1}))
+  input_spec = tf.TensorSpec([1, 8, 8, 3])
+  num_variables = 123
+  has_side_effects = True
+
+  def forward(self, module):
+    x = range_like(self.input_spec, start=1)
+    return module(x, is_training=True)
 
 
 @_register_golden(snt.nets.VectorQuantizer, "vqvae")

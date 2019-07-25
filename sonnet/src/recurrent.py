@@ -22,6 +22,7 @@ from __future__ import print_function
 import abc
 import collections
 import functools
+import uuid
 
 import six
 from sonnet.src import base
@@ -35,6 +36,7 @@ import tensorflow as tf
 
 # Required for specializing `UnrolledLSTM` per device.
 # pylint: disable=g-direct-tensorflow-import
+from tensorflow.python import context as context_lib
 from tensorflow.python.eager import function as function_lib
 
 # A temporary import until tree is open-sourced.
@@ -1015,40 +1017,48 @@ class UnrolledLSTM(UnrolledRNN):
 
 
 # TODO(b/133740216): consider upstreaming into TensorFlow.
-def _specialize_per_device(
-    unique_api_name,
-    specializations,
-    default,
-    **tf_function_kwargs):
+def _specialize_per_device(api_name, specializations, default):
   """Create a :tf:`function` specialized per-device.
 
   Args:
-    unique_api_name: Globally unique name of the function, e.g. ``"lstm"``.
+    api_name: Name of the function, e.g. ``"lstm"``.
     specializations: A mapping from device type (e.g. ``"CPU"`` or ``"TPU``)
       to a Python function with a specialized implementation for that
       device.
     default: Default device type to use (typically, ``"CPU"``).
-    **tf_function_kwargs: Additional keyword arguments to pass to
-      :tf:`function` when compiling specializations.
 
   Returns:
     A :tf:`function` which when called dispatches to the specialization
     for the current device.
   """
-  functions = {}
-  for device, specialization in specializations.items():
-    functions[device] = function_lib.defun_with_attributes(
-        specialization,
-        attributes={
-            "api_implements": unique_api_name,
-            "api_preferred_device": device},
-        **tf_function_kwargs)
-
-  # NOTE: tf.function is required to allow Grappler select a specialization.
-  @tf.function(autograph=False, **tf_function_kwargs)
   def wrapper(*args, **kwargs):
-    for function in functions.values():
-      function_lib.register(function, *args, **kwargs)
+    """Specialized {}.
+
+    In eager mode the specialization is chosen based on the current
+    device; in graph mode (inside tf.function) the choice is delegated
+    to the implementation selector pass in Grappler.
+
+    Args:
+      *args: Positional arguments to pass to the chosen specialization.
+      **kwargs: Keyword arguments to pass to the chosen specialization.
+    """.format(api_name)
+    ctx = context_lib.context()
+    if ctx.executing_eagerly():
+      specialization = (specializations.get(ctx.device_spec.device_type) or
+                        specializations[default])
+      return specialization(*args, **kwargs)
+
+    # Implementation selector requires a globally unique name for each
+    # .register() call.
+    unique_api_name = "{}_{}".format(api_name, uuid.uuid4())
+    functions = {}
+    for device, specialization in specializations.items():
+      functions[device] = function_lib.defun_with_attributes(
+          specialization,
+          attributes={
+              "api_implements": unique_api_name,
+              "api_preferred_device": device})
+      function_lib.register(functions[device], *args, **kwargs)
     return functions[default](*args, **kwargs)
 
   return wrapper

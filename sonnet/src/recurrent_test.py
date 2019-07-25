@@ -20,7 +20,6 @@ from __future__ import division
 from __future__ import print_function
 
 import itertools
-import unittest
 
 from absl.testing import parameterized
 import numpy as np
@@ -280,37 +279,66 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
     self.input_size = 2
     self.hidden_size = 16
 
-  @parameterized.parameters([1, 4])
-  def testComputationAgainstLSTM(self, num_steps):
-    input_sequence = tf.random.uniform(
-        [num_steps, self.batch_size, self.input_size])
-
-    unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
-    output_sequence, final_state = unrolled_lstm(
-        input_sequence,
-        unrolled_lstm.initial_state(self.batch_size))
-
-    lstm = recurrent.LSTM(self.hidden_size)
-    lstm._initialize(input_sequence[0])
-    lstm._w_i = unrolled_lstm._w_i
-    lstm._w_h = unrolled_lstm._w_h
-    lstm.b = unrolled_lstm.b
-    expected_output_sequence, expected_final_state = recurrent.dynamic_unroll(
-        lstm,
-        input_sequence,
-        lstm.initial_state(self.batch_size))
-
-    self.assertAllClose(output_sequence, expected_output_sequence)
-    self.assertAllClose(final_state.hidden, expected_final_state.hidden)
-    self.assertAllClose(final_state.cell, expected_final_state.cell)
-
-  @unittest.skip("b/134377706")
-  def testNumStepsPolymorphism(self):
+  @parameterized.parameters(itertools.product([1, 4], [True, False]))
+  def testComputationAgainstLSTM(self, num_steps, use_tf_function):
     unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
     initial_state = unrolled_lstm.initial_state(self.batch_size)
+
+    if use_tf_function:
+      # TODO(b/134377706): remove the wrapper once the bug is fixed.
+      # Currently implementation selector requires an explicit device block
+      # inside a tf.function to work.
+      @tf.function
+      def unrolled_lstm_fn(*args, **kwargs):
+        with tf.device("/device:{}:0".format(self.primary_device)):
+          return unrolled_lstm(*args, **kwargs)
+    else:
+      unrolled_lstm_fn = unrolled_lstm
+
+    input_sequence = tf.random.uniform(
+        [num_steps, self.batch_size, self.input_size])
+    output_sequence, final_state = unrolled_lstm_fn(
+        input_sequence,
+        initial_state)
+
+    with tf.device("/device:CPU:0"):  # Use CPU as the baseline.
+      lstm = recurrent.LSTM(self.hidden_size)
+      lstm._initialize(input_sequence[0])
+      lstm._w_i = unrolled_lstm._w_i
+      lstm._w_h = unrolled_lstm._w_h
+      lstm.b = unrolled_lstm.b
+      expected_output_sequence, expected_final_state = recurrent.dynamic_unroll(
+          lstm,
+          input_sequence,
+          lstm.initial_state(self.batch_size))
+
+    atol = 1e-2 if self.primary_device == "TPU" else 1e-6
+    self.assertAllClose(output_sequence, expected_output_sequence, atol=atol)
+    self.assertAllClose(
+        final_state.hidden,
+        expected_final_state.hidden,
+        atol=atol)
+    self.assertAllClose(final_state.cell, expected_final_state.cell, atol=atol)
+
+  @parameterized.parameters([True, False])
+  def testNumStepsPolymorphism(self, use_tf_function):
+    unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
+    initial_state = unrolled_lstm.initial_state(self.batch_size)
+
+    if use_tf_function:
+      # TODO(b/134377706): remove the wrapper once the bug is fixed.
+      # Currently implementation selector requires an explicit device block
+      # inside a tf.function to work.
+      @tf.function
+      def unrolled_lstm_fn(*args, **kwargs):
+        with tf.device("/device:%s:0" % self.primary_device):
+          return unrolled_lstm(*args, **kwargs)
+    else:
+      unrolled_lstm_fn = unrolled_lstm
+
     # Check that the same instance can be called with different `num_steps`.
     for num_steps in [1, 2, 4]:
-      output_sequence, _ = unrolled_lstm(
+      output_sequence, _ = unrolled_lstm_fn(
           tf.random.uniform([num_steps, self.batch_size, self.input_size]),
           initial_state)
       self.assertEqual(output_sequence.shape[0], num_steps)

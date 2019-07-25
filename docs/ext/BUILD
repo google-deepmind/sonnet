@@ -14,12 +14,10 @@ snt_py_library(
     ],
 )
 
-# TODO(b/135667439) Python 3 blocker: docutils internally is PY2 only.
 snt_py_test(
     name = "link_tf_api_test",
     srcs = ["link_tf_api_test.py"],
     gpu = False,
-    python_version = "PY2",
     tpu = False,
     deps = [
         ":link_tf_api",

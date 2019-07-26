@@ -5313,12 +5313,12 @@ Returns the Variable containing the weight matrix.
 
 1D convolutional LSTM.
 
-#### [`Conv1DLSTM.__init__(name='conv_1d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1409)<a id="Conv1DLSTM.__init__" />
+#### [`Conv1DLSTM.__init__(name='conv_1d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1412)<a id="Conv1DLSTM.__init__" />
 
 Construct Conv1DLSTM. See `snt.ConvLSTM` for more details.
 
 
-#### [`Conv1DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv1DLSTM.__call__" />
+#### [`Conv1DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1367)<a id="Conv1DLSTM.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -5340,7 +5340,7 @@ Subclasses must implement this method, which will be wrapped in a Template.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv1DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="Conv1DLSTM.convolutions" />
+#### [`Conv1DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1350)<a id="Conv1DLSTM.convolutions" />
 
 
 
@@ -5379,7 +5379,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1405)<a id="Conv1DLSTM.get_possible_initializer_keys" />
+#### [`Conv1DLSTM.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1408)<a id="Conv1DLSTM.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -5513,7 +5513,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="Conv1DLSTM.output_size" />
+#### [`Conv1DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1361)<a id="Conv1DLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -5523,7 +5523,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv1DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="Conv1DLSTM.state_size" />
+#### [`Conv1DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1354)<a id="Conv1DLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -5548,7 +5548,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv1DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="Conv1DLSTM.use_layer_norm" />
+#### [`Conv1DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1399)<a id="Conv1DLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 
@@ -6519,12 +6519,12 @@ Returns the Variable containing the weight matrix.
 
 2D convolutional LSTM.
 
-#### [`Conv2DLSTM.__init__(name='conv_2d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1423)<a id="Conv2DLSTM.__init__" />
+#### [`Conv2DLSTM.__init__(name='conv_2d_lstm', **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1426)<a id="Conv2DLSTM.__init__" />
 
 Construct Conv2DLSTM. See `snt.ConvLSTM` for more details.
 
 
-#### [`Conv2DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="Conv2DLSTM.__call__" />
+#### [`Conv2DLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1367)<a id="Conv2DLSTM.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -6546,7 +6546,7 @@ Subclasses must implement this method, which will be wrapped in a Template.
 Returns the subgraphs created by this module so far.
 
 
-#### [`Conv2DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="Conv2DLSTM.convolutions" />
+#### [`Conv2DLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1350)<a id="Conv2DLSTM.convolutions" />
 
 
 
@@ -6585,7 +6585,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1419)<a id="Conv2DLSTM.get_possible_initializer_keys" />
+#### [`Conv2DLSTM.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1422)<a id="Conv2DLSTM.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -6719,7 +6719,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="Conv2DLSTM.output_size" />
+#### [`Conv2DLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1361)<a id="Conv2DLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -6729,7 +6729,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`Conv2DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="Conv2DLSTM.state_size" />
+#### [`Conv2DLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1354)<a id="Conv2DLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -6754,7 +6754,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Conv2DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="Conv2DLSTM.use_layer_norm" />
+#### [`Conv2DLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1399)<a id="Conv2DLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 
@@ -9591,7 +9591,7 @@ Attributes:
   state_size: Integer indicating the size of state tensor.
   output_size: Integer indicating the size of the core output.
 
-#### [`GRU.__init__(hidden_size, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='gru')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1450)<a id="GRU.__init__" />
+#### [`GRU.__init__(hidden_size, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='gru')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1453)<a id="GRU.__init__" />
 
 Construct GRU.
 
@@ -9626,7 +9626,7 @@ Construct GRU.
     `GRU.get_possible_initializer_keys`.
 
 
-#### [`GRU.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1510)<a id="GRU.__call__" />
+#### [`GRU.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1513)<a id="GRU.__call__" />
 
 Connects the GRU module into the graph.
 
@@ -9695,7 +9695,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`GRU.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1489)<a id="GRU.get_possible_initializer_keys" />
+#### [`GRU.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1492)<a id="GRU.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -9837,7 +9837,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`GRU.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1590)<a id="GRU.output_size" />
+#### [`GRU.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1593)<a id="GRU.output_size" />
 
 Integer or TensorShape: size of outputs produced by this cell.
 
@@ -9847,7 +9847,7 @@ Integer or TensorShape: size of outputs produced by this cell.
 Returns the full name of the Module's variable scope.
 
 
-#### [`GRU.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1586)<a id="GRU.state_size" />
+#### [`GRU.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1589)<a id="GRU.state_size" />
 
 size(s) of state(s) used by this cell.
 
@@ -10235,7 +10235,7 @@ Attributes:
   state_size: Integer indicating the size of state tensor.
   output_size: Integer indicating the size of the core output.
 
-#### [`HighwayCore.__init__(hidden_size, num_layers, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='highwaycore')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1613)<a id="HighwayCore.__init__" />
+#### [`HighwayCore.__init__(hidden_size, num_layers, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='highwaycore')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1616)<a id="HighwayCore.__init__" />
 
 Construct a new Recurrent Highway core.
 
@@ -10271,7 +10271,7 @@ Construct a new Recurrent Highway core.
     `HighwayCore.get_possible_initializer_keys`.
 
 
-#### [`HighwayCore.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1689)<a id="HighwayCore.__call__" />
+#### [`HighwayCore.__call__(inputs, prev_state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1692)<a id="HighwayCore.__call__" />
 
 Connects the highway core module into the graph.
 
@@ -10334,7 +10334,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`HighwayCore.get_possible_initializer_keys(num_layers)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1661)<a id="HighwayCore.get_possible_initializer_keys" />
+#### [`HighwayCore.get_possible_initializer_keys(num_layers)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1664)<a id="HighwayCore.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -10478,7 +10478,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`HighwayCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1744)<a id="HighwayCore.output_size" />
+#### [`HighwayCore.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1747)<a id="HighwayCore.output_size" />
 
 Integer or TensorShape: size of outputs produced by this cell.
 
@@ -10488,7 +10488,7 @@ Integer or TensorShape: size of outputs produced by this cell.
 Returns the full name of the Module's variable scope.
 
 
-#### [`HighwayCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1740)<a id="HighwayCore.state_size" />
+#### [`HighwayCore.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1743)<a id="HighwayCore.state_size" />
 
 size(s) of state(s) used by this cell.
 
@@ -18267,7 +18267,7 @@ some more information needs to be provided in order to build the Graph.
 
 Basic fully connected vanilla RNN core.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f28f9594f28>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
+#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f8924ca1c80>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
 
 Construct a Basic RNN core.
 
@@ -18960,7 +18960,7 @@ Returns a tuple `tf.Variable`s in a scope for a given collection.
 Determines whether the given object has a variable scope.
 
 
-### [`highway_core_with_recurrent_dropout(hidden_size, num_layers, keep_prob=0.5, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1749)<a id="highway_core_with_recurrent_dropout" />
+### [`highway_core_with_recurrent_dropout(hidden_size, num_layers, keep_prob=0.5, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1752)<a id="highway_core_with_recurrent_dropout" />
 
 Highway core with recurrent dropout.
 
@@ -19631,7 +19631,7 @@ regardless of that `tf.Variable`'s shape.
 A pre-canned builder for the analytic kl divergence.
 
 
-### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f28f394db70>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f28f394df28>, kl_builder=<function stochastic_kl_builder at 0x7f28f3a770d0>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
+### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f891f083a60>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f891f083e18>, kl_builder=<function stochastic_kl_builder at 0x7f891f083f28>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
 
 Creates a custom getter which does Bayes by Backprop.
 
@@ -20891,7 +20891,7 @@ information about what variables are captured.
 
 A 2D Convolutional Network module.
 
-#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f28faadbc80>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
+#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f892486f9d8>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
 
 Constructs a `ConvNet2D` module.
 
@@ -21375,7 +21375,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f28faadbc80>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f892486f9d8>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -22137,7 +22137,7 @@ information about what variables are captured.
 
 A Multi-Layer perceptron module.
 
-#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f28faadbc80>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
+#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f892486f9d8>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
 
 Constructs an MLP module.
 
@@ -23342,7 +23342,7 @@ Returns a default initializer for the weights of a convolutional module.
 
 Convolutional LSTM.
 
-#### [`python.modules.gated_rnn.ConvLSTM.__init__(conv_ndims, input_shape, output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, legacy_bias_behaviour=True, forget_bias=1.0, initializers=None, partitioners=None, regularizers=None, use_layer_norm=False, custom_getter=None, name='conv_lstm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1225)<a id="python.modules.gated_rnn.ConvLSTM.__init__" />
+#### [`python.modules.gated_rnn.ConvLSTM.__init__(conv_ndims, input_shape, output_channels, kernel_shape, stride=1, rate=1, padding='SAME', use_bias=True, legacy_bias_behaviour=True, forget_bias=1.0, initializers=None, partitioners=None, regularizers=None, use_layer_norm=False, custom_getter=None, name='conv_lstm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1228)<a id="python.modules.gated_rnn.ConvLSTM.__init__" />
 
 Construct ConvLSTM.
 
@@ -23387,7 +23387,7 @@ Construct ConvLSTM.
     or if `input_shape` is incompatible with `conv_ndims`.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1364)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
+#### [`python.modules.gated_rnn.ConvLSTM.__call__(inputs, state)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1367)<a id="python.modules.gated_rnn.ConvLSTM.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -23409,7 +23409,7 @@ Subclasses must implement this method, which will be wrapped in a Template.
 Returns the subgraphs created by this module so far.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1347)<a id="python.modules.gated_rnn.ConvLSTM.convolutions" />
+#### [`python.modules.gated_rnn.ConvLSTM.convolutions`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1350)<a id="python.modules.gated_rnn.ConvLSTM.convolutions" />
 
 
 
@@ -23448,7 +23448,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys(conv_ndims, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1209)<a id="python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys" />
+#### [`python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys(conv_ndims, use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1212)<a id="python.modules.gated_rnn.ConvLSTM.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -23582,7 +23582,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1358)<a id="python.modules.gated_rnn.ConvLSTM.output_size" />
+#### [`python.modules.gated_rnn.ConvLSTM.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1361)<a id="python.modules.gated_rnn.ConvLSTM.output_size" />
 
 `tf.TensorShape` indicating the size of the core output.
 
@@ -23592,7 +23592,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1351)<a id="python.modules.gated_rnn.ConvLSTM.state_size" />
+#### [`python.modules.gated_rnn.ConvLSTM.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1354)<a id="python.modules.gated_rnn.ConvLSTM.state_size" />
 
 Tuple of `tf.TensorShape`s indicating the size of state tensors.
 
@@ -23617,7 +23617,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1396)<a id="python.modules.gated_rnn.ConvLSTM.use_layer_norm" />
+#### [`python.modules.gated_rnn.ConvLSTM.use_layer_norm`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/gated_rnn.py?l=1399)<a id="python.modules.gated_rnn.ConvLSTM.use_layer_norm" />
 
 Boolean indicating whether layer norm is enabled.
 

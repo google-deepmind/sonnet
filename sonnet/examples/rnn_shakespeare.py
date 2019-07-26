@@ -52,7 +52,8 @@ tf.flags.DEFINE_string("checkpoint_dir", "/tmp/tf/rnn_shakespeare",
 tf.flags.DEFINE_integer("checkpoint_interval", 500,
                         "Checkpointing step interval.")
 tf.flags.DEFINE_boolean("gpu_auto_mixed_precision", False,
-                        "Enable GPU automatic mixed precision training. TensorFlow>=1.14 is required.")
+                        "Enable GPU automatic mixed precision training. "
+                        "TensorFlow>=1.14 is required.")
 
 
 def _configure_saver(checkpoint_dir, checkpoint_interval):
@@ -153,11 +154,12 @@ def build_graph(lstm_depth=3, batch_size=32, num_embedding=32, num_hidden=128,
   # Define optimizer and training step.
   optimizer = tf.train.AdamOptimizer(
       learning_rate, epsilon=optimizer_epsilon)
-  if os.environ.get('TF_ENABLE_AUTO_MIXED_PRECISION', default='0') == '1' or gpu_auto_mixed_precision:
+  if os.environ.get("TF_ENABLE_AUTO_MIXED_PRECISION", default="0") == "1" \
+     or gpu_auto_mixed_precision:
       tf_version_list = tf.__version__.split(".")
       if int(tf_version_list[0]) < 2:
           if int(tf_version_list[1]) < 14:
-              raise(RuntimeError("TensorFlow 1.14.0 or newer is required for automatic precision."))
+              raise RuntimeError("TensorFlow>=1.14 is required for automatic precision.")
       optimizer = tf.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
   train_step = optimizer.apply_gradients(
       zip(grads, trainable_variables),

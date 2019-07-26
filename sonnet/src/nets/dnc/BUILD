@@ -55,6 +55,30 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "util",
+    srcs = ["util.py"],
+    deps = [
+        # pip: absl/logging
+        # pip: numpy
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "util_test",
+    srcs = ["util_test.py"],
+    main = "util_test.py",
+    deps = [
+        ":util",
+        # pip: absl/testing:parameterized
+        # pip: numpy
+        "//sonnet/src:linear",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
     name = "write",
     srcs = ["write.py"],
     deps = [

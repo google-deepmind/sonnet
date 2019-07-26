@@ -85,6 +85,23 @@ class TestCase(tf.test.TestCase):
   def device_types(self):
     return self._device_types
 
+  def get_atol(self):
+    """Returns a good tolerance for numerical closeness tests.
+
+    Any TPU matmuls go via bfloat16, so an assertAllClose which passes under
+    some constant small tolerance on CPU will generally fail on TPU. All test
+    cases can call get_atol to get an appropriate number.
+
+    TODO(mareynolds): assess these thresholds in detail.
+
+    Returns:
+      small float, eg 1e-4 on CPU/GPU, 5se-3 on TPU.
+    """
+    if self._on_tpu:
+      return 5e-3
+    else:
+      return 1e-4
+
 
 def find_all_sonnet_modules(
     root_python_module: types.ModuleType,

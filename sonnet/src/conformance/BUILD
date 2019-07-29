@@ -52,12 +52,11 @@ snt_py_test(
 snt_py_test(
     name = "distribute_test",
     srcs = ["distribute_test.py"],
-    gpu = False,
     deps = [
         ":goldens",
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
-        "//sonnet/src:replicator",
+        "//sonnet/src:replicator_test_utils",
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],

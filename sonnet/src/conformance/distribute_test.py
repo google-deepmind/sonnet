@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import parameterized
-from sonnet.src import replicator as snt_replicator
+from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
@@ -28,12 +28,12 @@ import tensorflow as tf
 
 class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
-  @goldens.all_goldens
-  def test_variable_creation_in_replica_context(self, golden):
-    if self.primary_device != "TPU":
-      self.skipTest("Requires TPU")
+  @test_utils.combined_named_parameters(goldens.named_goldens(),
+                                        replicator_utils.named_replicators())
+  def test_variable_creation_in_replica_context(self, golden, replicator_fn):
+    tf.random.set_seed(None)
+    replicator = replicator_fn()
 
-    replicator = snt_replicator.TpuReplicator()
     with replicator.scope():
       mod = golden.create_module()
 

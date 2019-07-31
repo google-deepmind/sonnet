@@ -394,6 +394,13 @@ class LSTMWithProjection(AbstractRNNGolden):
   num_variables = 4
 
 
+@_register_golden(snt.UnrolledLSTM, "unrolled_lstm_1")
+class UnrolledLSTM(AbstractRNNGolden):
+  create_module = lambda _: snt.UnrolledLSTM(hidden_size=1)
+  input_spec = tf.TensorSpec([1, 1, 128])
+  num_variables = 3
+
+
 @_register_golden(snt.VanillaRNN, "vanilla_rnn_8")
 class VanillaRNN(AbstractRNNGolden):
   create_module = lambda _: snt.VanillaRNN(hidden_size=8)

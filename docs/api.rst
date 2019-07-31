@@ -130,6 +130,12 @@ RNNCore
 .. autoclass:: RNNCore
    :members:
 
+UnrolledRNN
+~~~~~~~~~~~
+
+.. autoclass:: UnrolledRNN
+   :members:
+
 TrainableState
 ~~~~~~~~~~~~~~
 
@@ -175,6 +181,12 @@ lstm_with_recurrent_dropout
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: lstm_with_recurrent_dropout
+
+UnrolledLSTM
+~~~~~~~~~~~~
+
+.. autoclass:: UnrolledLSTM
+   :members:
 
 Conv1DLSTM
 ~~~~~~~~~~

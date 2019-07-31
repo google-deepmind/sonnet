@@ -45,12 +45,15 @@ class Training(Wrapped):
     return self.wrapped(x, is_training=True)
 
 
-class Core(Wrapped):
+class Recurrent(Wrapped):
 
   @snt.no_name_scope
   def __call__(self, x: tf.Tensor):
-    state = self.wrapped.initial_state(batch_size=tf.shape(x)[0])
-    return self.wrapped(x, state)
+    initial_state = self.wrapped.initial_state(batch_size=tf.shape(x)[0])
+    if isinstance(self.wrapped, snt.UnrolledRNN):
+      # The module expects TB...-shaped input as opposed to BT...
+      x = tf.transpose(x, [1, 0] +  list(range(2, x.shape.rank)))
+    return self.wrapped(x, initial_state)
 
 
 # TODO(tomhennigan) De-duplicate this, BATCH_MODULES and goldens.py.
@@ -76,10 +79,6 @@ BATCH_MODULES = (
         create=lambda: snt.Conv1D(3, 3),
         shape=(BATCH_SIZE, 2, 2)),
     ModuleDescriptor(
-        name="Conv1DLSTM",
-        create=lambda: Core(snt.Conv1DLSTM((2, 2), 3, 3)),
-        shape=(BATCH_SIZE, 2, 2)),
-    ModuleDescriptor(
         name="Conv1DTranspose",
         create=lambda: snt.Conv1DTranspose(3, 3),
         shape=(BATCH_SIZE, 2, 2)),
@@ -88,20 +87,12 @@ BATCH_MODULES = (
         create=lambda: snt.Conv2D(3, 3),
         shape=(BATCH_SIZE, 2, 2, 2)),
     ModuleDescriptor(
-        name="Conv2DLSTM",
-        create=lambda: Core(snt.Conv2DLSTM((2, 2, 2), 3, 3)),
-        shape=(BATCH_SIZE, 2, 2, 2)),
-    ModuleDescriptor(
         name="Conv2DTranspose",
         create=lambda: snt.Conv2DTranspose(3, 3),
         shape=(BATCH_SIZE, 2, 2, 2)),
     ModuleDescriptor(
         name="Conv3D",
         create=lambda: snt.Conv3D(3, 3),
-        shape=(BATCH_SIZE, 2, 2, 2, 2)),
-    ModuleDescriptor(
-        name="Conv3DLSTM",
-        create=lambda: Core(snt.Conv3DLSTM((2, 2, 2, 2), 3, 3)),
         shape=(BATCH_SIZE, 2, 2, 2, 2)),
     ModuleDescriptor(
         name="Conv3DTranspose",
@@ -121,10 +112,6 @@ BATCH_MODULES = (
         create=lambda: snt.Flatten(),
         shape=(BATCH_SIZE, 3, 3, 3)),
     ModuleDescriptor(
-        name="GRU",
-        create=lambda: Core(snt.GRU(1)),
-        shape=(BATCH_SIZE, 128)),
-    ModuleDescriptor(
         name="GroupNorm",
         create=lambda: snt.GroupNorm(2, True, True),
         shape=(BATCH_SIZE, 3, 4)),
@@ -132,10 +119,6 @@ BATCH_MODULES = (
         name="InstanceNorm",
         create=lambda: snt.InstanceNorm(True, True),
         shape=(BATCH_SIZE, 3, 2)),
-    ModuleDescriptor(
-        name="LSTM",
-        create=lambda: Core(snt.LSTM(1)),
-        shape=(BATCH_SIZE, 128)),
     ModuleDescriptor(
         name="LayerNorm",
         create=lambda: snt.LayerNorm(1, True, True),
@@ -148,10 +131,6 @@ BATCH_MODULES = (
         name="Sequential",
         create=lambda: snt.Sequential([lambda x: x]),
         shape=(BATCH_SIZE, 2, 2)),
-    ModuleDescriptor(
-        name="VanillaRNN",
-        create=lambda: Core(snt.VanillaRNN(8)),
-        shape=(BATCH_SIZE, 128)),
     ModuleDescriptor(
         name="nets.VectorQuantizer",
         create=lambda: Training(snt.nets.VectorQuantizer(4, 6, 0.25)),
@@ -174,6 +153,37 @@ BATCH_MODULES = (
         name="nets.MLP",
         create=lambda: snt.nets.MLP([3, 4, 5]),
         shape=(BATCH_SIZE, 3)),
+)
+
+RECURRENT_MODULES = (
+    ModuleDescriptor(
+        name="Conv1DLSTM",
+        create=lambda: Recurrent(snt.Conv1DLSTM((2, 2), 3, 3)),
+        shape=(BATCH_SIZE, 2, 2)),
+    ModuleDescriptor(
+        name="Conv2DLSTM",
+        create=lambda: Recurrent(snt.Conv2DLSTM((2, 2, 2), 3, 3)),
+        shape=(BATCH_SIZE, 2, 2, 2)),
+    ModuleDescriptor(
+        name="Conv3DLSTM",
+        create=lambda: Recurrent(snt.Conv3DLSTM((2, 2, 2, 2), 3, 3)),
+        shape=(BATCH_SIZE, 2, 2, 2, 2)),
+    ModuleDescriptor(
+        name="GRU",
+        create=lambda: Recurrent(snt.GRU(1)),
+        shape=(BATCH_SIZE, 128)),
+    ModuleDescriptor(
+        name="LSTM",
+        create=lambda: Recurrent(snt.LSTM(1)),
+        shape=(BATCH_SIZE, 128)),
+    ModuleDescriptor(
+        name="UnrolledLSTM",
+        create=lambda: Recurrent(snt.UnrolledLSTM(1)),
+        shape=(BATCH_SIZE, 1, 128)),
+    ModuleDescriptor(
+        name="VanillaRNN",
+        create=lambda: Recurrent(snt.VanillaRNN(8)),
+        shape=(BATCH_SIZE, 128)),
 )
 
 OPTIMIZER_MODULES = (
@@ -202,7 +212,7 @@ IGNORED_MODULES = {
     snt.BaseBatchNorm,  # Tested via `snt.BatchNorm`.
 
     # Recurrent.
-    snt.DeepRNN, snt.RNNCore, snt.TrainableState,
+    snt.DeepRNN, snt.RNNCore, snt.TrainableState, snt.UnrolledRNN,
 
     # Nets,
     snt.nets.ResNet50,  # Smaller version tested via `resnet.ResNet`.
@@ -219,11 +229,12 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_coverage(self):
     all_modules = frozenset(test_utils.find_all_sonnet_modules(snt, snt.Module))
-    tested_modules = {type(unwrap(d.create()))
-                      for d in BATCH_MODULES + OPTIMIZER_MODULES}
+    tested_modules = {
+        type(unwrap(d.create()))
+        for d in BATCH_MODULES + RECURRENT_MODULES + OPTIMIZER_MODULES}
     self.assertEmpty(all_modules - (tested_modules | IGNORED_MODULES))
 
-  @test_utils.combined_named_parameters(BATCH_MODULES,
+  @test_utils.combined_named_parameters(BATCH_MODULES + RECURRENT_MODULES,
                                         test_utils.named_bools("autograph"))
   def test_trace(
       self,
@@ -236,7 +247,7 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
     forward = tf.function(module, autograph=autograph)
     forward(tf.ones(input_shape, dtype=dtype))
 
-  @test_utils.combined_named_parameters(BATCH_MODULES,
+  @test_utils.combined_named_parameters(BATCH_MODULES + RECURRENT_MODULES,
                                         test_utils.named_bools("autograph"))
   def test_trace_batch_agnostic(
       self,

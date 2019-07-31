@@ -65,6 +65,8 @@ from sonnet.src.recurrent import LSTMState
 from sonnet.src.recurrent import RNNCore
 from sonnet.src.recurrent import static_unroll
 from sonnet.src.recurrent import TrainableState
+from sonnet.src.recurrent import UnrolledLSTM
+from sonnet.src.recurrent import UnrolledRNN
 from sonnet.src.recurrent import VanillaRNN
 from sonnet.src.reshape import flatten
 from sonnet.src.reshape import Flatten
@@ -112,6 +114,8 @@ __all__ = (
     "Sequential",
     "Sum",
     "TrainableState",
+    "UnrolledLSTM",
+    "UnrolledRNN",
     "VanillaRNN",
     "custom_variable_getter",
     "deep_rnn_with_residual_connections",

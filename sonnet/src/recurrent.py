@@ -68,10 +68,11 @@ class RNNCore(base.Module):
       prev_state: Previous core state.
 
     Returns:
-      outputs: An arbitrarily nested structure of shape [B, ...].
+      A tuple with two elements:
+      * **outputs** - An arbitrarily nested structure of shape [B, ...].
         Dimensions following the batch size could be different from that
         of `inputs`.
-      next_state: Next core state, must be of the same shape as the
+      * **next_state** - Next core state, must be of the same shape as the
         previous one.
     """
 
@@ -93,8 +94,8 @@ class RNNCore(base.Module):
 class UnrolledRNN(base.Module):
   """Base class for unrolled Recurrent Neural Networks.
 
-  This class is a generalization of `RNNCore` which operates on an
-  input sequence as opposed to a single time step.
+  This class is a generalization of :class:`RNNCore` which operates on
+  an input sequence as opposed to a single time step.
   """
 
   @abc.abstractmethod
@@ -103,15 +104,15 @@ class UnrolledRNN(base.Module):
 
     Args:
       input_sequence: An arbitrarily nested structure of shape
-        `[T, B, ...]` where T is the number of time steps and B is
+        [T, B, ...] where T is the number of time steps and B is
         the batch size.
       initial_state: Initial RNN state.
 
-    Returns:
-      output_sequence: An arbitrarily nested structure of shape
-        `[T, B, ...]`. Dimensions following the batch size could be
-        different from that of `inputs`.
-      final_state: Final RNN state, must be of the same shape as the
+    A tuple with two elements:
+      * **output_sequence** - An arbitrarily nested structure of tensors
+        of shape [T, B, ...]. Dimensions following the batch size could
+        be different from that of the ``input_sequence``.
+      * **final_state** - Final RNN state, must be of the same shape as the
         initial one.
     """
 
@@ -236,7 +237,7 @@ def static_unroll(
     input_sequence: An arbitrarily nested structure of tensors of shape
       ``[T, B, ...]`` where ``T`` is the number of time steps, and ``B`` is the
       batch size.
-    initial_state: initial state of the given core.
+    initial_state: An initial state of the given core.
     sequence_length: An optional tensor of shape ``[B]`` specifying the
       lengths of sequences within the (padded) batch.
 

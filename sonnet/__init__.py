@@ -148,6 +148,7 @@ from sonnet.python.modules.sequential import Sequential
 from sonnet.python.modules.spatial_transformer import AffineGridWarper
 from sonnet.python.modules.spatial_transformer import AffineWarpConstraints
 from sonnet.python.modules.spatial_transformer import GridWarper
+from sonnet.python.modules.spectral_normalization import wrap_with_spectral_norm
 from sonnet.python.modules.util import check_initializers
 from sonnet.python.modules.util import check_partitioners
 from sonnet.python.modules.util import check_regularizers

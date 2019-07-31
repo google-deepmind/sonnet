@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-from itertools import chain
+import itertools
 
 # Dependency imports
 import numpy as np
@@ -178,7 +178,7 @@ class AffineGridWarper(GridWarper):
         on the entries of a matrix defining an affine transformation in N
         dimensions, or an `AffineWarpConstraints` object. If the double list is
         passed, a numeric value bakes in a constraint on the corresponding
-        entry in the tranformation matrix, whereas `None` implies that the
+        entry in the transformation matrix, whereas `None` implies that the
         corresponding entry will be specified at run time.
       name: Name of module.
 
@@ -426,7 +426,7 @@ class AffineGridWarper(GridWarper):
           return tf.fill(constant_shape, tf.constant(constraint,
                                                      dtype=inputs.dtype))
 
-      constraints = chain.from_iterable(self.constraints)
+      constraints = itertools.chain.from_iterable(self.constraints)
       a, b, tx, c, d, ty = (get_variable(constr) for constr in constraints)
 
       det = a * d - b * c
@@ -472,7 +472,7 @@ class AffineWarpConstraints(object):
       constraints: A doubly-nested iterable of shape `[N, N+1]` defining
         constraints on the entries of a matrix that represents an affine
         transformation in `N` dimensions. A numeric value bakes in a constraint
-        on the corresponding entry in the tranformation matrix, whereas `None`
+        on the corresponding entry in the transformation matrix, whereas `None`
         implies that the corresponding entry will be specified at run time.
 
     Raises:

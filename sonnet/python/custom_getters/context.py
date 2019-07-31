@@ -76,7 +76,7 @@ class Context(object):
         tf.logging.info("Context: Fetching variable %s with %s getter.",
                         name, "default" if self._default_getter else "normal")
       if self._default_getter:
-        return self._default_getter(getter, *args, **kwargs)
+        return self._default_getter(getter, name, *args, **kwargs)
       else:
         return getter(name, *args, **kwargs)
 

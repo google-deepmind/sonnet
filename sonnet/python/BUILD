@@ -86,6 +86,7 @@ py_library(
         "modules/scale_gradient.py",
         "modules/sequential.py",
         "modules/spatial_transformer.py",
+        "modules/spectral_normalization.py",
     ],
     srcs_version = "PY2AND3",
     deps = [
@@ -170,6 +171,7 @@ module_tests = [
     ("scale_gradient_test", "", "small"),
     ("sequential_test", "", "small"),
     ("spatial_transformer_test", "", "small"),
+    ("spectral_normalization_test", "", "small"),
     ("util_test", "", "small"),
     ("vqvae_test", "nets/", "small"),
 ]

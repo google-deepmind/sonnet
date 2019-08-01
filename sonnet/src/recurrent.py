@@ -450,11 +450,11 @@ def _rnn_step(
   if sequence_length is not None:
     # Selectively propagate outputs/state to the not-yet-finished
     # sequences.
-    maybe_propagate = functools.partial(_safe_where, sequence_length <= t)
+    maybe_propagate = functools.partial(_safe_where, t < sequence_length)
     outputs = nest.map_structure(
         maybe_propagate,
-        prev_outputs,
-        outputs)
+        outputs,
+        prev_outputs)
     state = nest.map_structure(maybe_propagate, prev_state, state)
 
   return outputs, state

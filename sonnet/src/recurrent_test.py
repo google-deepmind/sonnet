@@ -838,10 +838,7 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
         initial_state,
         sequence_length=sequence_length)
 
-    for t, outputs in enumerate(output_sequence):
-      for b in range(self.batch_size):
-        if t and sequence_length[b] == t:
-          self.assertAllClose(outputs[t], outputs[t - 1])
+    self.assertConsistentWithLength(output_sequence, sequence_length)
 
   def testVariableLengthRange(self, use_tf_function, unroll_fn):
     if use_tf_function:
@@ -856,10 +853,18 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
         initial_state,
         sequence_length=sequence_length)
 
-    for t, outputs in enumerate(output_sequence):
+    self.assertConsistentWithLength(output_sequence, sequence_length)
+
+  def assertConsistentWithLength(self, output_sequence, sequence_length):
+    for t, _ in enumerate(output_sequence):
       for b in range(self.batch_size):
-        if t and sequence_length[b] == t:
-          self.assertAllClose(outputs[t], outputs[t - 1])
+        if tf.equal(sequence_length[b], t):
+          if t == 0:
+            self.assertAllEqual(tf.reduce_sum(output_sequence[t, b]), 0.0)
+          else:
+            self.assertAllClose(
+                output_sequence[t, b],
+                output_sequence[t - 1, b])
 
   def testVariableLengthAllFull(self, use_tf_function, unroll_fn):
     if use_tf_function:

@@ -109,12 +109,12 @@ class SpectralNormWrapper(base.AbstractModule):
     name = kwargs.get('name', 'sn') + '_wrapper'
     super(SpectralNormWrapper, self).__init__(name=name)
     # Our getter needs to be able to be disabled.
-    getter_with_update, getter_without_update = self.sn_getter(sn_kwargs)
+    getter_immediate_update, getter_deferred_update = self.sn_getter(sn_kwargs)
     w_getter = lambda g: util.custom_getter_router({'.*/w$': g}, lambda s: s)
-    getter_with_update = w_getter(getter_with_update)
-    getter_without_update = w_getter(getter_without_update)
+    getter_immediate_update = w_getter(getter_immediate_update)
+    getter_deferred_update = w_getter(getter_deferred_update)
     self._context_getter = context.Context(
-        getter_without_update, default_getter=getter_with_update)
+        getter_immediate_update, default_getter=getter_deferred_update)
     self.pow_iter_collection = pow_iter_collection
 
     # Let's construct our model.
@@ -130,19 +130,19 @@ class SpectralNormWrapper(base.AbstractModule):
 
   def sn_getter(self, spectral_norm_kwargs):
     """Returns a curried spectral normalization Custom Getter."""
-    def getter_with_update(getter, *args, **kwargs):
+    def getter_immediate_update(getter, *args, **kwargs):
       w = getter(*args, **kwargs)  # This is our variable.
       w_spectral_normalized = spectral_norm(
           w, update_collection=None, **spectral_norm_kwargs)['w_bar']
       return w_spectral_normalized
 
-    def getter_without_update(getter, *args, **kwargs):
+    def getter_deferred_update(getter, *args, **kwargs):
       w = getter(*args, **kwargs)  # This is our variable.
       w_spectral_normalized = spectral_norm(
           w, update_collection=self.pow_iter_collection,
           **spectral_norm_kwargs)['w_bar']
       return w_spectral_normalized
-    return getter_with_update, getter_without_update
+    return getter_immediate_update, getter_deferred_update
 
 
 def _l2_normalize(t, axis=None, eps=1e-12):
@@ -217,7 +217,7 @@ def spectral_norm(weight,
   if update_collection is None:
     u_assign_ops = [u0.assign(u0_)]
     with tf.control_dependencies(u_assign_ops):
-      w_mat = tf.identity(w_mat)
+      w_bar = tf.identity(w_bar)
   else:
     tf.add_to_collection(update_collection, u0.assign(u0_))
   return {'w_bar': w_bar, 'sigma': sigma, 'u0': u0}

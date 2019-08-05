@@ -49,6 +49,9 @@ class CoverageTest(test_utils.TestCase):
         snt.RNNCore,
         snt.Sequential,
         snt.UnrolledRNN,
+
+        # Tested via snt.nets.ResNet
+        snt.nets.ResNet50
     ])
 
     # Find all the snt.Module types reachable from `import sonnet as snt`

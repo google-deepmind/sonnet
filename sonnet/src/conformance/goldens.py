@@ -26,7 +26,6 @@ from absl.testing import parameterized
 import numpy as np
 import six
 import sonnet as snt
-from sonnet.src.nets import resnet
 import tensorflow as tf
 from typing import Text, Tuple, Sequence
 
@@ -445,12 +444,12 @@ class SumTest(AbstractGolden):
   has_side_effects = True
 
 
-@_register_golden(snt.nets.ResNet50, "resnet50")
-class ResNet50(AbstractGolden):
+@_register_golden(snt.nets.ResNet, "resnet50")
+class ResNet(AbstractGolden):
   create_module = (
-      lambda _: resnet.ResNet([1, 1, 1, 1], 9, {"decay_rate": 0.9, "eps": .1}))
+      lambda _: snt.nets.ResNet([1, 1, 1, 1], 9))
   input_spec = tf.TensorSpec([1, 8, 8, 3])
-  num_variables = 123
+  num_variables = 155
   has_side_effects = True
 
   def forward(self, module):

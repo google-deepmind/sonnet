@@ -186,7 +186,7 @@ class BlockGroup(base.Module):
                num_blocks,
                stride,
                bn_config,
-               resnet_v2=True,
+               resnet_v2=False,
                name=None):
     super(BlockGroup, self).__init__(name=name)
     self._channels = channels
@@ -222,8 +222,8 @@ class ResNet(base.Module):
   def __init__(self,
                blocks_per_group_list,
                num_classes,
-               bn_config,
-               resnet_v2=True,
+               bn_config=None,
+               resnet_v2=False,
                name=None):
     """Constructs a ResNet model.
 
@@ -232,12 +232,19 @@ class ResNet(base.Module):
         blocks created in each group.
       num_classes: The number of classes to classify the inputs into.
       bn_config: A dictionary of two elements, `decay_rate` and `eps` to be
-        passed on to the `BatchNorm` layers.
+        passed on to the `BatchNorm` layers. By default the `decay_rate` is
+        `0.9` and `eps` is `1e-5`.
       resnet_v2: Whether to use the v1 or v2 ResNet implementation. Defaults to
         True.
       name: Name of the module.
     """
     super(ResNet, self).__init__(name=name)
+    if resnet_v2:
+      raise NotImplementedError(
+          "The resnet v2 implementation doesn't currently converge, "
+          "please use v1 in the meantime")
+    if bn_config is None:
+      bn_config = {"decay_rate": 0.9, "eps": 1e-5}
     self._bn_config = bn_config
     self._resnet_v2 = resnet_v2
 
@@ -309,8 +316,8 @@ class ResNet50(ResNet):
 
   def __init__(self,
                num_classes,
-               bn_config,
-               resnet_v2=True,
+               bn_config=None,
+               resnet_v2=False,
                name=None):
     """Constructs a ResNet model.
 

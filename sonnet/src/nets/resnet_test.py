@@ -29,7 +29,7 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_simple(self):
     image = tf.random.normal([2, 64, 64, 3])
-    model = resnet.ResNet([1, 1, 1, 1], 10, {"decay_rate": 0.9, "eps": 1e-5})
+    model = resnet.ResNet([1, 1, 1, 1], 10)
 
     logits = model(image, is_training=True)
     self.assertIsNotNone(logits)
@@ -37,7 +37,7 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_tf_function(self):
     image = tf.random.normal([2, 64, 64, 3])
-    model = resnet.ResNet([1, 1, 1, 1], 10, {"decay_rate": 0.9, "eps": 1e-5})
+    model = resnet.ResNet([1, 1, 1, 1], 10,)
     f = tf.function(model)
 
     logits = f(image, is_training=True)

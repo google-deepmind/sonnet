@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from sonnet.src.nets.cifar10_convnet import Cifar10ConvNet
 from sonnet.src.nets.mlp import MLP
+from sonnet.src.nets.resnet import ResNet
 from sonnet.src.nets.resnet import ResNet50
 from sonnet.src.nets.vqvae import VectorQuantizer
 from sonnet.src.nets.vqvae import VectorQuantizerEMA
@@ -28,6 +29,7 @@ from sonnet.src.nets.vqvae import VectorQuantizerEMA
 __all__ = (
     "MLP",
     "Cifar10ConvNet",
+    "ResNet",
     "ResNet50",
     "VectorQuantizer",
     "VectorQuantizerEMA",

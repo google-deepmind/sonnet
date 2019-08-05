@@ -13,9 +13,11 @@ snt_py_library(
     name = "goldens",
     srcs = ["goldens.py"],
     deps = [
+        # pip: absl/testing:parameterized
         # pip: numpy
         # pip: six
         "//sonnet",
+        "//sonnet/src/nets:resnet",
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
@@ -34,6 +36,7 @@ snt_py_test(
 
 snt_py_test(
     name = "checkpoint_test",
+    timeout = "long",
     srcs = ["checkpoint_test.py"],
     data = [":checkpoints"],
     deps = [
@@ -75,6 +78,7 @@ snt_py_test(
 
 snt_py_test(
     name = "function_test",
+    timeout = "long",
     srcs = ["function_test.py"],
     deps = [
         # pip: absl/testing:parameterized
@@ -86,6 +90,7 @@ snt_py_test(
 
 snt_py_test(
     name = "goldens_test",
+    timeout = "long",
     srcs = ["goldens_test.py"],
     deps = [
         ":goldens",
@@ -97,6 +102,7 @@ snt_py_test(
 
 snt_py_test(
     name = "pickle_test",
+    timeout = "long",
     srcs = ["pickle_test.py"],
     deps = [
         ":goldens",
@@ -108,6 +114,7 @@ snt_py_test(
 
 snt_py_test(
     name = "saved_model_test",
+    timeout = "long",
     srcs = ["saved_model_test.py"],
     deps = [
         ":goldens",
@@ -121,6 +128,7 @@ snt_py_test(
 
 snt_py_test(
     name = "xla_test",
+    timeout = "long",
     srcs = ["xla_test.py"],
     deps = [
         ":goldens",

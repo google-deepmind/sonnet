@@ -434,6 +434,18 @@ Metric
 .. autoclass:: Metric
    :members:
 
+Mean
+~~~~~~
+
+.. autoclass:: Mean
+   :members:
+
+Sum
+~~~~~~
+
+.. autoclass:: Sum
+   :members:
+
 .. TODO(tomhennigan): rename to something more appropriate.
 
 Nets

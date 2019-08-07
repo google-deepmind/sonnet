@@ -217,11 +217,21 @@ Batch
 
 .. currentmodule:: sonnet
 
+reshape
+~~~~~~~
+
+.. autofunction:: reshape
+
 Reshape
 ~~~~~~~
 
 .. autoclass:: Reshape
    :members:
+
+flatten
+~~~~~~~
+
+.. autofunction:: flatten
 
 Flatten
 ~~~~~~~

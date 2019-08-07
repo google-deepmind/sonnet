@@ -18,6 +18,7 @@ snt_py_test(
     name = "link_tf_api_test",
     srcs = ["link_tf_api_test.py"],
     gpu = False,
+    tags = ["noasan"],  # TODO(b/139043523) Fix memory leak in numpy(?).
     tpu = False,
     deps = [
         ":link_tf_api",

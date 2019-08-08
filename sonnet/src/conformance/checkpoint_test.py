@@ -77,7 +77,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Save zeros into the checkpoint.
     self.assertNotEmpty(all_variables)
-    self.assertEqual(set(all_variables), set(module.variables))
+    self.assertEqual(all_variables, module.variables)
     for variable in all_variables:
       # TODO(tomhennigan) Perhaps limit the range/switch to random to avoid
       # overflow/underflow in the forward pass?

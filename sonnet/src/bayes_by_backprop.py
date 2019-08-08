@@ -41,6 +41,7 @@ import math
 from absl import logging
 import enum
 from sonnet.src import initializers
+from sonnet.src import utils
 import tensorflow as tf
 from tensorflow_probability import distributions as tfd
 from typing import Callable, Dict, NamedTuple, Optional, Text, Union
@@ -206,7 +207,7 @@ class BayesByBackprop(tf.Module):
     super(BayesByBackprop, self).__init__(name=name)
     self._posterior_builder = posterior_builder
     self._prior_builder = prior_builder
-    self._distributions = {}  # type: Dict[tf.Variable, Distributions]
+    self._distributions = {}  # type: Dict[utils.CompareById[tf.Variable], Distributions]
 
   def __call__(self, estimator_mode: EstimatorMode = EstimatorMode.SAMPLE):
     return PosteriorEstimator(owner=self, estimator_mode=estimator_mode)
@@ -217,7 +218,7 @@ class BayesByBackprop(tf.Module):
     if var.dtype not in _OK_DTYPES_FOR_BBB:
       raise ValueError("Disallowed data type: {}.".format(var.dtype))
 
-    dists = self._distributions.get(var)
+    dists = self._distributions.get(utils.CompareById(var))
     if dists is None:
       posterior = self._posterior_builder(var)
       prior = self._prior_builder(var)
@@ -228,13 +229,13 @@ class BayesByBackprop(tf.Module):
                 posterior.__class__.__name__))
 
       dists = Distributions(posterior, prior)
-      self._distributions[var] = dists
+      self._distributions[utils.CompareById(var)] = dists
 
     return dists
 
   def get_distributions(self, var: tf.Variable) -> Distributions:
     """Returns the distributions for the given variable."""
-    return self._distributions[var]
+    return self._distributions[utils.CompareById(var)]
 
 
 # KL cost estimator function.
@@ -251,7 +252,7 @@ class PosteriorEstimator(object):
   def __init__(self, owner: BayesByBackprop, estimator_mode: EstimatorMode):
     self._owner = owner
     self._estimator_mode = estimator_mode
-    self._estimates = {}  # type: Dict[tf.Variable, tf.Tensor]
+    self._estimates = {}  # type: Dict[utils.CompareById[tf.Variable], tf.Tensor]
 
   def __call__(self, var: tf.Variable) -> Union[tf.Variable, tf.Tensor]:
     """Returns the posterior estimate for the given variable."""
@@ -259,7 +260,7 @@ class PosteriorEstimator(object):
 
     posterior = self._owner.get_or_create_distributions(var).posterior
     estimate = _estimate(posterior, self._estimator_mode)
-    self._estimates[var] = estimate
+    self._estimates[utils.CompareById(var)] = estimate
     return estimate
 
   def get_total_kl_cost(
@@ -280,10 +281,9 @@ class PosteriorEstimator(object):
     Returns:
       A `Tensor` representing the total KL cost in the ELBO loss.
     """
-    if predicate is None:
-      estimates = self._estimates.items()
-    else:
-      estimates = (it for it in self._estimates.items() if predicate(it[0]))
+    estimates = ((v.wrapped, e) for v, e in self._estimates.items())
+    if predicate is not None:
+      estimates = (it for it in estimates if predicate(it[0]))
 
     kl_costs = []
     for var, estimate in estimates:

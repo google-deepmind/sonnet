@@ -297,6 +297,39 @@ class FormatVariablesTest(test_utils.TestCase):
       utils.log_variables([v2, v1])
 
 
+class NotHashable(object):
+
+  def __hash__(self):
+    raise ValueError("Not hashable")
+
+
+class CompareByIdTest(test_utils.TestCase):
+
+  def test_access(self):
+    original = NotHashable()
+    wrapped = utils.CompareById(original)
+    self.assertIs(wrapped.wrapped, original)
+
+  def test_hash(self):
+    original = NotHashable()
+    wrapped = utils.CompareById(original)
+    self.assertEqual(hash(wrapped), id(original))
+
+  def test_eq(self):
+    original1 = NotHashable()
+    original2 = NotHashable()
+    # Different wrappers pointing to the same object should be equal.
+    self.assertEqual(utils.CompareById(original1), utils.CompareById(original1))
+    # The original objet and the wrapped object should not be equal.
+    self.assertNotEqual(original1, utils.CompareById(original1))
+    # Similarly a different object should not be equal to a wrapped object.
+    self.assertNotEqual(original2, utils.CompareById(original1))
+    # None should also not compare.
+    self.assertNotEqual(None, utils.CompareById(original1))
+    # Different wrapped objects should not be equal.
+    self.assertNotEqual(utils.CompareById(original1),
+                        utils.CompareById(original2))
+
 if __name__ == "__main__":
   # tf.enable_v2_behavior()
   tf.test.main()

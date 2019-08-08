@@ -57,6 +57,7 @@ snt_py_library(
     srcs_version = "PY2AND3",
     deps = [
         ":initializers",
+        ":utils",
         # pip: absl/logging
         # pip: enum
         # pip: tensorflow

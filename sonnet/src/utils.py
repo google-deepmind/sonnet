@@ -29,7 +29,7 @@ from absl import logging
 import six
 from sonnet.src import initializers
 import tensorflow as tf
-from typing import Any, Callable, Dict, Sequence, Text, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Sequence, Text, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -242,3 +242,23 @@ def log_variables(variables):
   """
   for row in format_variables(variables, join_lines=False):
     logging.info(row)
+
+
+class CompareById(Generic[T]):
+  """Container providing hash/eq based on object id."""
+
+  def __init__(self, wrapped: T):
+    self.wrapped = wrapped
+
+  def __hash__(self):
+    # NOTE: `dict` has special casing to allow for hash values that are
+    # sequential ints (since `hash(i: int) -> i`) so the using `id` as a hash
+    # code (at least with `dict` and `set`) does not have a big performance
+    # penalty.
+    # https://github.com/python/cpython/blob/master/Objects/dictobject.c#L135
+    return id(self.wrapped)
+
+  def __eq__(self, other):
+    if other is None:
+      return False
+    return self.wrapped is getattr(other, "wrapped", None)

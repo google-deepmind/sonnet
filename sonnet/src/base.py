@@ -34,7 +34,8 @@ from typing import Any, Callable, Dict, Optional, Sequence, Text, Tuple, Type, T
 
 T = TypeVar("T")
 TFFunctionType = type(tf.function(lambda: None, autograph=False))  # pylint: disable=invalid-name
-APPLY_NAME_SCOPE = "_with_name_scope__"
+APPLY_NAME_SCOPE = "__snt_with_name_scope"
+ALLOW_EMPTY_RESULT = "__snt_allow_empty_result"
 
 
 def no_name_scope(method: T) -> T:
@@ -290,6 +291,36 @@ def with_name_scope(method: T) -> T:
     return wrap_with_name_scope(method)  # pylint: disable=no-value-for-parameter
 
 
+NO_VARIABLES_ERROR = """
+You have requested {} from a module that currently does not contain variables.
+Most Sonnet modules create variables the first time they are called with an
+input. You should refactor your code such that you request module variables
+after you pass an example input to the module.
+""".strip().replace("\n", " ")
+
+
+def allow_empty_variables(module: T) -> T:
+  """Allows ``{trainable_,}variables`` to return empty results.
+
+  >>> mod = snt.Module()
+  >>> mod.variables
+  Traceback (most recent call last):
+    ...
+  ValueError: ... pass an example input to the module.
+  >>> mod = snt.allow_empty_variables(mod)
+  >>> mod.variables
+  ()
+
+  Args:
+    module: A :class:`Module` instance or subclass to decorate.
+
+  Returns:
+    The input module or class.
+  """
+  setattr(module, ALLOW_EMPTY_RESULT, True)
+  return module
+
+
 class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   """Base class for Sonnet modules.
 
@@ -332,6 +363,64 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       # the subclass __init__ returns (this is implemented in ModuleMetaclass).
       self._ctor_name_scope = self.name_scope
       self._ctor_name_scope.__enter__()
+
+  @property
+  def variables(self):
+    r"""Sequence of :tf:`Variable`\ s owned by this module and it's submodules.
+
+    See :tf:`Module.variables` for implementation details.
+
+    NOTE: Most Sonnet modules create variables lazily (e.g. the first time they
+    are called). As such just after construction there are typically no
+    variables. To mitigate a common error (calling ``.variables`` or
+    ``.trainable_variables`` before any variables are created) these properties
+    will raise an exception if their result is empty. See
+    :func:`allow_empty_variables` if you want to suppress this error.
+
+    Returns:
+      A sequence of variables for the current module (sorted by attribute
+      name) followed by variables from all submodules recursively (breadth
+      first).
+    """
+    variables = super(Module, self).variables
+    if not variables and not getattr(self, ALLOW_EMPTY_RESULT, False):
+      # Raise a useful error if the collection is empty. Typically this
+      # indicates that the user has requested the property before the module has
+      # been connected. In many situations this can cause hard to diagnose
+      # problems (eg. if you are trying to copy the initial state from one
+      # module to another by zipping both module variables and assigning one to
+      # the other).
+      raise ValueError(NO_VARIABLES_ERROR.format("variables"))
+    return variables
+
+  @property
+  def trainable_variables(self):
+    r"""Sequence of :tf:`Variable`\ s owned by this module and it's submodules.
+
+    See :tf:`Module.trainable_variables` for implementation details.
+
+    NOTE: Most Sonnet modules create variables lazily (e.g. the first time they
+    are called). As such just after construction there are typically no
+    variables. To mitigate a common error (calling ``.variables`` or
+    ``.trainable_variables`` before any variables are created) these properties
+    will raise an exception if their result is empty. See
+    :func:`allow_empty_variables` if you want to suppress this error.
+
+    Returns:
+      A sequence of variables for the current module (sorted by attribute
+      name) followed by variables from all submodules recursively (breadth
+      first).
+    """
+    trainable_variables = super(Module, self).trainable_variables
+    if not trainable_variables and not getattr(self, ALLOW_EMPTY_RESULT, False):
+      # Raise a useful error if the collection is empty. Typically this
+      # indicates that the user has requested the property before the module has
+      # been connected. In many situations this can cause hard to diagnose
+      # problems (eg. if you are trying to copy the initial state from one
+      # module to another by zipping both module variables and assigning one to
+      # the other).
+      raise ValueError(NO_VARIABLES_ERROR.format("trainable_variables"))
+    return trainable_variables
 
 
 class Optimizer(Module):

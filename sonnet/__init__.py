@@ -27,6 +27,7 @@ from sonnet import pad
 from sonnet import regularizers
 from sonnet.src.axis_norm import InstanceNorm
 from sonnet.src.axis_norm import LayerNorm
+from sonnet.src.base import allow_empty_variables
 from sonnet.src.base import Module
 from sonnet.src.base import no_name_scope
 from sonnet.src.base import Optimizer
@@ -117,6 +118,7 @@ __all__ = (
     "UnrolledLSTM",
     "UnrolledRNN",
     "VanillaRNN",
+    "allow_empty_variables",
     "custom_variable_getter",
     "deep_rnn_with_residual_connections",
     "deep_rnn_with_skip_connections",

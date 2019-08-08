@@ -674,9 +674,9 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
     trainable_state = recurrent.TrainableState(
         tf.nest.map_structure(tf.ones, initial_values_shape))
 
-    self.assertEqual(
-        len(trainable_state.trainable_variables),
-        len(initial_values_shape))
+    if initial_values_shape:
+      self.assertEqual(
+          len(trainable_state.trainable_variables), len(initial_values_shape))
 
     initial_state = trainable_state(batch_size=42)
     for s, shape in zip(

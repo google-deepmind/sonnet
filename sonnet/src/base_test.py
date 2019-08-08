@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import abc
 
+from absl.testing import parameterized
 import six
 from sonnet.src import base
 from sonnet.src import test_utils
@@ -418,7 +419,7 @@ class ModuleOverridingNameScope(ReturnsNameScopeModule):
     return tf.name_scope("yolo/")
 
 
-class CommonErrorsTest(tf.test.TestCase):
+class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_not_calling_super_constructor(self):
     msg = ("Constructing a snt.Module without calling the super constructor is "
@@ -434,6 +435,29 @@ class CommonErrorsTest(tf.test.TestCase):
   def test_annotated_method_is_allowed(self):
     self.assertIsNotNone(
         CallsMethodBeforeSuperConstructorModule(allowed_method=True))
+
+  @parameterized.parameters("trainable_variables", "variables")
+  def test_requests_variables_before_they_exist(self, property_name):
+    mod = base.Module()
+    with self.assertRaisesRegexp(ValueError,
+                                 "module .* does not contain variables"):
+      getattr(mod, property_name)
+
+  @parameterized.parameters("trainable_variables", "variables")
+  def test_allow_empty_variables_instance(self, property_name):
+    mod = base.Module()
+    mod = base.allow_empty_variables(mod)
+    self.assertEmpty(getattr(mod, property_name))
+
+  @parameterized.parameters("trainable_variables", "variables")
+  def test_allow_empty_variables_class(self, property_name):
+    mod = NeverCreatesVariables()
+    self.assertEmpty(getattr(mod, property_name))
+
+
+@base.allow_empty_variables
+class NeverCreatesVariables(base.Module):
+  pass
 
 
 class ModuleWithFunctionAnnotatedCall(base.Module):

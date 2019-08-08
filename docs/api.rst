@@ -475,6 +475,30 @@ Cifar10ConvNet
 .. autoclass:: Cifar10ConvNet
    :members:
 
+ResNet
+~~~~~~~~~~~~~~
+
+.. autoclass:: ResNet
+   :members:
+
+ResNet50
+~~~~~~~~~~~~~~
+
+.. autoclass:: ResNet50
+   :members:
+
+VectorQuantizer
+~~~~~~~~~~~~~~
+
+.. autoclass:: VectorQuantizer
+   :members:
+
+VectorQuantizerEMA
+~~~~~~~~~~~~~~
+
+.. autoclass:: VectorQuantizerEMA
+   :members:
+
 References
 ----------
 

@@ -37,6 +37,11 @@ class SequentialTest(test_utils.TestCase, parameterized.TestCase):
     self.assertIs(net(value), value)
 
   @input_parameters
+  def test_empty_drops_varargs_varkwargs(self, value):
+    net = sequential.Sequential()
+    self.assertIs(net(value, object(), keyword=object()), value)
+
+  @input_parameters
   def test_identity_chain(self, value):
     net = sequential.Sequential([identity, identity, identity])
     self.assertIs(net(value), value)
@@ -44,6 +49,12 @@ class SequentialTest(test_utils.TestCase, parameterized.TestCase):
   def test_call(self):
     seq = sequential.Sequential([append_character(ch) for ch in "rocks!"])
     self.assertEqual(seq("Sonnet "), "Sonnet rocks!")
+
+  def test_varargs_varkwargs_to_call(self):
+    layer1 = lambda a, b, c: ((a + b + c), (c + b + a))
+    layer2 = lambda a: a[0] + "," + a[1]
+    net = sequential.Sequential([layer1, layer2])
+    self.assertEqual(net("a", "b", c="c"), "abc,cba")
 
 
 def identity(v):

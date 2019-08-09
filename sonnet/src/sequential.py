@@ -61,8 +61,12 @@ class Sequential(base.Module):
     super(Sequential, self).__init__(name=name)
     self._layers = list(layers) if layers is not None else []
 
-  def __call__(self, inputs):
+  def __call__(self, inputs, *args, **kwargs):
     outputs = inputs
-    for mod in self._layers:
-      outputs = mod(outputs)
+    for i, mod in enumerate(self._layers):
+      if i == 0:
+        # Pass additional arguments to the first layer.
+        outputs = mod(outputs, *args, **kwargs)
+      else:
+        outputs = mod(outputs)
     return outputs

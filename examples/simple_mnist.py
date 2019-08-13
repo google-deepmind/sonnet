@@ -32,7 +32,8 @@ def mnist(split, batch_size):
     images = ((tf.cast(images, tf.float32)  / 255.) - .5) * 2.
     return images, labels
 
-  dataset = tfds.load(name="mnist", split=split, as_supervised=True)
+  dataset = tfds.load(name="mnist", split=split, shuffle_files=split == "train",
+                      as_supervised=True)
   dataset = dataset.map(preprocess_dataset)
   dataset = dataset.shuffle(buffer_size=4 * batch_size)
   dataset = dataset.batch(batch_size)

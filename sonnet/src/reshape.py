@@ -26,75 +26,14 @@ from sonnet.src import once
 import tensorflow as tf
 
 
-def reshape(inputs, output_shape, preserve_dims=1, name="reshape"):
-  """Reshapes input Tensor, preserving the batch dimension.
-
-      >>> snt.reshape(
-      ...   tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=1)
-      <tf.Tensor: ... shape=(10, 12), ...>
-
-      >>> snt.reshape(
-      ...   tf.ones([10, 2, 2, 3]), output_shape=[-1], preserve_dims=2)
-      <tf.Tensor: ... shape=(10, 2, 6), ...>
-
-  Args:
-    inputs: A tensor of shape
-      ``[b_1, b_2, ..., b_preserve_dims, b_preserve_dims+1, ...]``.
-    output_shape: Shape to reshape the input tensor to while preserving its
-      first ``preserve_dims`` dimensions. When the special value -1 appears in
-      ``shape`` the corresponding size is automatically inferred. Note that -1
-      can only appear once in ``shape``. To flatten all non-batch dimensions,
-      :func:`flatten` can also be used.
-    preserve_dims: Number of leading dimensions that will not be reshaped. For
-      example, given an input tensor with shape ``[B, H, W, C, D]``, and
-      argument ``shape`` equal to ``(-1, D)``:
-
-      * ``preserve_dims=1`` returns a tensor with shape ``[B, H*W*C, D]``.
-      * ``preserve_dims=2`` returns a tensor with shape ``[B, H, W*C, D]``.
-      * ``preserve_dims=3`` returns a tensor with shape ``[B, H, W, C, D]``.
-      * ``preserve_dims=4`` returns a tensor with shape
-        ``[B, H, W, C, 1, D]``.
-      * ``preserve_dims>=5`` will throw an error on build unless ``D=1``.
-
-      The preserved dimensions can be unknown at building time.
-    name: Optional name scope used to help debugging.
-
-  Returns:
-    A tensor of shape
-      ``[b_1, b_2, ..., b_preserve_dims, b_reshape_1, b_reshape_2, ...]``,
-      with reshaping defined by the constructor ``shape`` parameter.
-
-  Raises:
-    ValueError: If ``output_shape`` is incompatible with shape of the
-      ``inputs``; or if ``output_shape`` contains more than one wildcard -1;
-      or if the ``inputs`` rank is less than ``preserved_dims``; or if
-      the ``inputs`` shape contains unknown, non-preserved dimensions
-      (except when the unknown dimension is the only non-preserved
-      dimension and doesn't actually need reshaping).
-  """
-  if preserve_dims <= 0:
-    raise ValueError("Argument preserve_dims should be >= 1.")
-
-  with tf.name_scope(name):
-    return _batch_reshape(inputs, output_shape, preserve_dims)
+def reshape(inputs, output_shape, preserve_dims=1, name=None):
+  """A shortcut for applying :class:`Reshape` to the ``inputs``."""
+  return Reshape(output_shape, preserve_dims, name=name)(inputs)
 
 
 def flatten(inputs, name="flatten"):
-  """Flattens the input tensor preserving only the batch dimension.
-
-      >>> snt.flatten(tf.ones([5, 3, 2, 2]))
-      <tf.Tensor: ... shape=(5, 12), ...>
-
-  Args:
-    inputs: An input tensor to flatten.
-    name: Optional name scope used to help debugging.
-
-  Returns:
-    A tensor corresponding to the input tensor but with all non-batch
-      dimensions flattened.
-  """
-  with tf.name_scope(name):
-    return _batch_reshape(inputs, output_shape=(-1,), preserve_dims=1)
+  """A shortcut for applying :class:`Flatten` to the ``inputs``."""
+  return Flatten(name=name)(inputs)
 
 
 def _extract_input_shape(inputs, preserve_dims=1) -> tf.TensorShape:

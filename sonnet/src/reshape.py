@@ -38,39 +38,39 @@ def reshape(inputs, output_shape, preserve_dims=1, name="reshape"):
       <tf.Tensor: ... shape=(10, 2, 6), ...>
 
   Args:
-    inputs: A Tensor of shape
-        ``[b_1, b_2, ..., b_preserve_dims, b_preserve_dims+1, ...]``.
-    output_shape: Shape to reshape the input Tensor to while preserving its
-        first ``preserve_dims`` dimensions. When the special value -1 appears in
-        ``shape`` the corresponding size is automatically inferred. Note that -1
-        can only appear once in ``shape``. To flatten all non-batch dimensions,
-        :func:`flatten` can also be used.
+    inputs: A tensor of shape
+      ``[b_1, b_2, ..., b_preserve_dims, b_preserve_dims+1, ...]``.
+    output_shape: Shape to reshape the input tensor to while preserving its
+      first ``preserve_dims`` dimensions. When the special value -1 appears in
+      ``shape`` the corresponding size is automatically inferred. Note that -1
+      can only appear once in ``shape``. To flatten all non-batch dimensions,
+      :func:`flatten` can also be used.
     preserve_dims: Number of leading dimensions that will not be reshaped. For
-        example, given an input :tf:`Tensor` with shape ``[B, H, W, C, D]``, and
-        argument ``shape`` equal to ``(-1, D)``:
-        * `preserve_dims=1` returns a :tf:`Tensor` with shape
-            ``[B, H*W*C, D]``.
-        * `preserve_dims=2` returns a :tf:`Tensor` with shape
-            ``[B, H, W*C, D]``.
-        * `preserve_dims=3` returns a :tf:`Tensor` with shape
-            ``[B, H, W, C, D]``.
-        * `preserve_dims=4` returns a :tf:`Tensor` with shape
-            ``[B, H, W, C, 1, D]``.
-        * ``preserve_dims>=5`` will throw an error on build unless ``D=1``.
-        The preserved dimensions can be unknown at building time.
+      example, given an input tensor with shape ``[B, H, W, C, D]``, and
+      argument ``shape`` equal to ``(-1, D)``:
+
+      * ``preserve_dims=1`` returns a tensor with shape ``[B, H*W*C, D]``.
+      * ``preserve_dims=2`` returns a tensor with shape ``[B, H, W*C, D]``.
+      * ``preserve_dims=3`` returns a tensor with shape ``[B, H, W, C, D]``.
+      * ``preserve_dims=4`` returns a tensor with shape
+        ``[B, H, W, C, 1, D]``.
+      * ``preserve_dims>=5`` will throw an error on build unless ``D=1``.
+
+      The preserved dimensions can be unknown at building time.
     name: Optional name scope used to help debugging.
 
   Returns:
-    A :tf:`Tensor` of shape
-        ``[b_1, b_2, ..., b_preserve_dims, b_reshape_1, b_reshape_2, ...]``,
-        with reshaping defined by the constructor ``shape`` parameter.
+    A tensor of shape
+      ``[b_1, b_2, ..., b_preserve_dims, b_reshape_1, b_reshape_2, ...]``,
+      with reshaping defined by the constructor ``shape`` parameter.
 
   Raises:
-    ValueError: If output shape is incompatible with input shape; or if
-        shape array contains non numeric entries; or if shape array contains
-        more than 1 wildcard -1; or if the input array contains unknown,
-        non-preserved dimensions (except when the unknown dimension is the
-        only non-preserved dimension and doesn't actually need reshaping).
+    ValueError: If ``output_shape`` is incompatible with shape of the
+      ``inputs``; or if ``output_shape`` contains more than one wildcard -1;
+      or if the ``inputs`` rank is less than ``preserved_dims``; or if
+      the ``inputs`` shape contains unknown, non-preserved dimensions
+      (except when the unknown dimension is the only non-preserved
+      dimension and doesn't actually need reshaping).
   """
   if preserve_dims <= 0:
     raise ValueError("Argument preserve_dims should be >= 1.")
@@ -80,7 +80,7 @@ def reshape(inputs, output_shape, preserve_dims=1, name="reshape"):
 
 
 def flatten(inputs, name="flatten"):
-  """Flattens the input :tf:`Tensor` preserving only the batch dimension.
+  """Flattens the input tensor preserving only the batch dimension.
 
       >>> snt.flatten(tf.ones([5, 3, 2, 2]))
       <tf.Tensor: ... shape=(5, 12), ...>
@@ -90,7 +90,7 @@ def flatten(inputs, name="flatten"):
     name: Optional name scope used to help debugging.
 
   Returns:
-    A :tf:`Tensor` corresponding to the input tensor but with all non-batch
+    A tensor corresponding to the input tensor but with all non-batch
       dimensions flattened.
   """
   with tf.name_scope(name):
@@ -98,23 +98,24 @@ def flatten(inputs, name="flatten"):
 
 
 def _extract_input_shape(inputs, preserve_dims=1) -> tf.TensorShape:
-  """Extracts the shape minus ignored dimensions from `inputs`.
+  """Extracts the shape minus ignored dimensions from ``inputs``.
 
+  ::
       >>> _extract_input_shape(tf.ones([1, 2, 3]))
       TensorShape([2, 3])
       >>> _extract_input_shape(tf.ones([1, 2, 3]), preserve_dims=2)
       TensorShape([3])
 
   Args:
-    inputs: A tf.Tensor whose shape should be extracted.
+    inputs: A tensor whose shape should be extracted.
     preserve_dims: Number of leading dimensions that will not be discarded.
 
   Returns:
-    A list with the preserved dimensions from the shape of `inputs`.
+    A list with the preserved dimensions from the shape of ``inputs``.
 
   Raises:
-    ValueError: If the number of dimensions in the input is not compatible with
-        preserve dims.
+    ValueError: If the number of dimensions in the input is not compatible
+      with ``preserve dims``.
   """
   input_shape = inputs.shape
   if input_shape.rank < preserve_dims:
@@ -175,19 +176,19 @@ def _infer_shape(output_shape, dimensions):
 class Reshape(base.Module):
   """Reshapes input Tensor, preserving the batch dimension.
 
-  For example, given an input Tensor with shape `[B, H, W, C, D]`:
+  For example, given an input tensor with shape ``[B, H, W, C, D]``::
 
       >>> B, H, W, C, D = range(1, 6)
       >>> x = tf.ones([B, H, W, C, D])
 
-  The default behavior when `output_shape` is (-1, D) is to flatten all
-  dimensions between `B` and `D`:
+  The default behavior when ``output_shape`` is ``(-1, D)`` is to flatten
+  all dimensions between ``B`` and ``D``::
 
       >>> mod = snt.Reshape(output_shape=(-1, D))
       >>> assert mod(x).shape == [B, H*W*C, D]
 
   You can change the number of preserved leading dimensions via
-  `preserve_dims`:
+  ``preserve_dims``::
 
       >>> mod = snt.Reshape(output_shape=(-1, D), preserve_dims=2)
       >>> assert mod(x).shape == [B, H, W*C, D]
@@ -200,19 +201,19 @@ class Reshape(base.Module):
   """
 
   def __init__(self, output_shape, preserve_dims=1, name=None):
-    """Constructs a Reshape module.
+    """Constructs a ``Reshape`` module.
 
     Args:
-      output_shape: Shape to reshape the input Tensor to while preserving its
-          first `preserve_dims` dimensions. When the special value -1
-          appears in `output_shape` the corresponding size is automatically
-          inferred. Note that -1 can only appear once in `output_shape`. To
-          flatten all non-batch dimensions use `snt.Flatten`.
+      output_shape: Shape to reshape the input tensor to while preserving
+        its first ``preserve_dims` dimensions. When the special value -1
+        appears in ``output_shape`` the corresponding size is automatically
+        inferred. Note that -1 can only appear once in ``output_shape``.
+        To flatten all non-batch dimensions use :class:`Flatten`.
       preserve_dims: Number of leading dimensions that will not be reshaped.
       name: Name of the module.
 
     Raises:
-      ValueError: If `preserve_dims <= 0`.
+      ValueError: If ``preserve_dims`` is not positive.
     """
     super(Reshape, self).__init__(name=name)
 
@@ -228,23 +229,24 @@ class Reshape(base.Module):
     self.input_shape = input_shape.as_list()
 
   def __call__(self, inputs):
-    """Reshapes `inputs`.
+    """Reshapes ``inputs``.
 
     Args:
-      inputs: A Tensor of shape
-          `[b_1, b_2, ..., b_preserve_dims, b_preserve_dims + 1, ...]`.
+      inputs: A tensor of shape
+        ``[b_1, b_2, ..., b_preserve_dims, b_preserve_dims + 1, ...]``.
 
     Returns:
-      A Tensor of shape
-          `[b_1, b_2, ..., b_preserve_dims, b_reshape_1, b_reshape_2, ...]`,
-          with reshaping defined by the constructor `shape` parameter.
+      A tensor of shape
+        ``[b_1, b_2, ..., b_preserve_dims, b_reshape_1, b_reshape_2, ...]``,
+        with reshaping defined by the constructor ``output_shape`` parameter.
 
     Raises:
-      ValueError: If output shape is incompatible with input shape; or if
-          shape array contains non numeric entries; or if shape array contains
-          more than 1 wildcard -1; or if the input array contains unknown,
-          non-preserved dimensions (except when the unknown dimension is the
-          only non-preserved dimension and doesn't actually need reshaping).
+      ValueError: If ``output_shape`` is incompatible with shape of the
+        ``inputs``; or if ``output_shape`` contains more than one wildcard -1;
+        or if the ``inputs`` rank is less than ``preserved_dims``; or if
+        the ``inputs`` shape contains unknown, non-preserved dimensions
+        (except when the unknown dimension is the only non-preserved
+        dimension and doesn't actually need reshaping).
     """
     self._initialize(inputs)
     return _batch_reshape(inputs,
@@ -265,15 +267,15 @@ class Reshape(base.Module):
 class Flatten(Reshape):
   """Flattens the input Tensor, preserving the batch dimension(s).
 
-  `Flatten` reshapes input tensors to combine all trailing dimensions apart
-  from the first. Additional leading dimensions can be preserved by setting the
-  `preserve_dims` parameter.
+  ``Flatten`` reshapes input tensors to combine all trailing dimensions
+  apart from the first. Additional leading dimensions can be preserved
+  by setting the ``preserve_dims`` parameter.
 
-  See `snt.Reshape` for more details.
+  See :class:`Reshape` for more details.
   """
 
   def __init__(self, preserve_dims=1, name=None):
-    """Constructs a Flatten module.
+    """Constructs a ``Flatten`` module.
 
     Args:
       preserve_dims: Number of leading dimensions that will not be reshaped.

@@ -1078,25 +1078,16 @@ def _block_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
   w_peephole = tf.zeros(
       tf.shape(initial_state.hidden)[1:],
       dtype=initial_state.hidden.dtype)
-  # ``BlockLSTM`` uses igfo gate layout whereas Sonnet uses ifgo.
-  # TODO(slebedev): align BlockLSTM gate layout with Sonnet (and CuDNN-RNN).
-  w_ih_i, w_ih_f, w_ih_g, w_ih_o = tf.split(
-      tf.concat([w_i, w_h], axis=0),
-      num_or_size_splits=4,
-      axis=1)
-  b_i, b_f, b_g, b_o = tf.split(b, num_or_size_splits=4)
-  _, all_cell, _, _, _, _, all_hidden = tf.raw_ops.BlockLSTM(
+  _, all_cell, _, _, _, _, all_hidden = tf.raw_ops.BlockLSTMV2(
       seq_len_max=tf.cast(tf.shape(input_sequence)[0], tf.int64),
       x=input_sequence,
       cs_prev=initial_state.cell,
       h_prev=initial_state.hidden,
-      w=tf.concat([w_ih_i, w_ih_g, w_ih_f, w_ih_o], axis=1),
+      w=tf.concat([w_i, w_h], axis=0),
       wci=w_peephole,
       wcf=w_peephole,
       wco=w_peephole,
-      b=tf.concat([b_i, b_g, b_f, b_o], axis=0),
-      forget_bias=0.0,  # Already accounted for in the initializer.
-      cell_clip=-1.0,  # Disabled.
+      b=b,
       use_peephole=False)
   return all_hidden, LSTMState(all_hidden[-1], all_cell[-1])
 

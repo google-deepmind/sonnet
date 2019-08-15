@@ -1,2 +1,2 @@
-tf-nightly-2.0-preview==2.0.0.dev20190731
+tf-nightly-2.0-preview==2.0.0.dev20190815
 tfp-nightly==0.8.0.dev20190717

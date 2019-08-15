@@ -107,7 +107,6 @@ class SpectralNormWrapper(base.AbstractModule):
       **kwargs: Construction-time  keyword arguments to the module.
     """
     name = kwargs.get('name', 'sn') + '_wrapper'
-    super(SpectralNormWrapper, self).__init__(name=name)
     # Our getter needs to be able to be disabled.
     getter_immediate_update, getter_deferred_update = self.sn_getter(sn_kwargs)
     w_getter = lambda g: util.custom_getter_router({'.*/w$': g}, lambda s: s)
@@ -116,9 +115,11 @@ class SpectralNormWrapper(base.AbstractModule):
     self._context_getter = context.Context(
         getter_immediate_update, default_getter=getter_deferred_update)
     self.pow_iter_collection = pow_iter_collection
+    super(SpectralNormWrapper, self).__init__(
+        name=name, custom_getter=self._context_getter)
 
     # Let's construct our model.
-    with tf.variable_scope('', custom_getter=self._context_getter):
+    with self._enter_variable_scope():
       self._module = module(*args, **kwargs)
 
   def _build(self, *args, **kwargs):

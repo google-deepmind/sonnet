@@ -25,10 +25,22 @@ import functools
 
 import numpy as np
 import sonnet as snt
+from sonnet.python.modules import base
+from sonnet.python.modules import basic
 from sonnet.python.modules import spectral_normalization
 import tensorflow as tf
 
 _ACCEPTABLE_ERROR = 1e-3
+
+
+class MinimalClass(base.AbstractModule):
+
+  def _build(self, input_):
+    sn_linear = spectral_normalization.wrap_with_spectral_norm(
+        basic.Linear, {'eps': 1e-4})
+    linear1 = sn_linear(16)
+    linear2 = sn_linear(16)
+    return linear1(input_), linear2(input_)
 
 
 class SpectralNormalizationTest(tf.test.TestCase):
@@ -87,6 +99,20 @@ class SpectralNormalizationTest(tf.test.TestCase):
         self.assertFalse(
             np.equal(original_sing_val_v, sing_val_v_explicit).all())
 
+  def test_conflicting_names_no_scope(self):
+    with tf.Graph().as_default():
+      sn_linear = spectral_normalization.wrap_with_spectral_norm(
+          basic.Linear, {'eps': 1e-4})
+      linear1 = sn_linear(16)
+      linear2 = sn_linear(16)
+      input_ = tf.zeros((48, 12))  # Random [batch, dim] shape.
+      linear1(input_)
+      linear2(input_)
+
+  def test_conflicting_names_with_enclosing_scope(self):
+    with tf.Graph().as_default():
+      input_ = tf.zeros((48, 12))  # Random [batch, dim] shape.
+      MinimalClass()(input_)
 
 if __name__ == '__main__':
   tf.test.main()

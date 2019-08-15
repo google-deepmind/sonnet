@@ -144,6 +144,8 @@
   * [`python.modules.layer_norm.create_beta_initializer`](sonnet.md#python.modules.layer_norm.create_beta_initializer)
   * [`python.modules.layer_norm.create_gamma_initializer`](sonnet.md#python.modules.layer_norm.create_gamma_initializer)
   * [`python.modules.rnn_core.with_doc`](sonnet.md#python.modules.rnn_core.with_doc)
+  * [`python.modules.spectral_normalization.spectral_norm`](sonnet.md#python.modules.spectral_normalization.spectral_norm)
+  * [`python.modules.spectral_normalization.SpectralNormWrapper`](sonnet.md#python.modules.spectral_normalization.SpectralNormWrapper)
   * [`python.modules.util.get_variable_scope_name`](sonnet.md#python.modules.util.get_variable_scope_name)
   * [`python.modules.util.name_for_callable`](sonnet.md#python.modules.util.name_for_callable)
   * [`python.modules.util.notify_about_new_variables`](sonnet.md#python.modules.util.notify_about_new_variables)
@@ -174,4 +176,5 @@
   * [`UnderspecifiedError`](sonnet.md#UnderspecifiedError)
   * [`VanillaRNN`](sonnet.md#VanillaRNN)
   * [`variable_map_items`](sonnet.md#variable_map_items)
+  * [`wrap_with_spectral_norm`](sonnet.md#wrap_with_spectral_norm)
 

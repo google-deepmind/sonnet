@@ -1030,7 +1030,7 @@ and `depth=D`, `{source,output}_shape=[H, W, D]`.
     on the entries of a matrix defining an affine transformation in N
     dimensions, or an `AffineWarpConstraints` object. If the double list is
     passed, a numeric value bakes in a constraint on the corresponding
-    entry in the tranformation matrix, whereas `None` implies that the
+    entry in the transformation matrix, whereas `None` implies that the
     corresponding entry will be specified at run time.
 * `name`: Name of module.
 
@@ -1338,7 +1338,7 @@ Creates a constraint definition for an affine transformation.
 * `constraints`: A doubly-nested iterable of shape `[N, N+1]` defining
     constraints on the entries of a matrix that represents an affine
     transformation in `N` dimensions. A numeric value bakes in a constraint
-    on the corresponding entry in the tranformation matrix, whereas `None`
+    on the corresponding entry in the transformation matrix, whereas `None`
     implies that the corresponding entry will be specified at run time.
 
 ##### Raises:
@@ -11444,7 +11444,7 @@ Return zero-filled state tensor(s).
 
 Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore.
 
-#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/python/ops/lstm_ops.py?l=307)<a id="LSTMBlockCell.__init__" />
+#### [`LSTMBlockCell.__init__(num_units, forget_bias=1.0, cell_clip=None, use_peephole=False, dtype=None, reuse=None, name='lstm_cell')`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/rnn/python/ops/lstm_ops.py?l=304)<a id="LSTMBlockCell.__init__" />
 
 Initialize the basic LSTM cell.
 
@@ -18267,7 +18267,7 @@ some more information needs to be provided in order to build the Graph.
 
 Basic fully connected vanilla RNN core.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f8924ca1c80>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
+#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f56eee6af28>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
 
 Construct a Basic RNN core.
 
@@ -19370,6 +19370,45 @@ list of `tf.Variable`s (in case of sliced variables).
   (string, tf.Variable) pairs.
 
 
+### [`wrap_with_spectral_norm(module_class, sn_kwargs=None, pow_iter_collection=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=37)<a id="wrap_with_spectral_norm" />
+
+Returns a constructor for the inner class with spectral normalization.
+
+This function accepts a Sonnet AbstractModule class as argument (the class,
+*not* an instance of that class) alongside an optional dictionary of keyword
+arguments for the spectral_norm function, and returns a constructor which can
+be treated identically to the constructor of the input class, but with
+spectral normalization applied to the weights created by the class.
+
+Internally, this is just a partially evaluated SpectralNormWrapper module.
+
+`pow_iter_collection`, if not None, is treated as the name of a TensorFlow
+global collection. Each time the module's weight matrix is accessed ops are
+built for performing one step of power iteration to approximate that weight's
+first singular follow and ops are created for saving this new approximation in
+an internal variable. At build-time the resulting object takes a special
+boolean 'enable_power_iteration' keyword argument. If this is True (the
+default), a control dependency on the operation for updating this internal
+variable is attached to the returned weight. Otherwise, the update is *not*
+attached as a control dependency, but an op is placed into the
+`pow_iter_collection` global collection which causes the internal variable to
+be updated. It is then up to the user to choose whether to run this update.
+
+##### Args:
+
+
+* `module_class`: A constructor/class reference for a Sonnet module you would
+      like to wrap and automatically apply spectral normalization.
+* `sn_kwargs`: Keyword arguments to be passed to the spectral_norm function
+      in addition to the weight tensor.
+* `pow_iter_collection`: The name of a global collection for potentially
+      storing ops for updating internal variables.
+
+##### Returns:
+
+  An snt.AbstractModule class representing the original with spectral norm.
+
+
 ### [`class custom_getters.Context`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/context.py?q=class:Context)<a id="custom_getters.Context" />
 
 Contextually switching a custom getter on.
@@ -19631,7 +19670,7 @@ regardless of that `tf.Variable`'s shape.
 A pre-canned builder for the analytic kl divergence.
 
 
-### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f891f083a60>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f891f083e18>, kl_builder=<function stochastic_kl_builder at 0x7f891f083f28>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
+### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f56e96c4840>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f56e96cbf28>, kl_builder=<function stochastic_kl_builder at 0x7f56e96d30d0>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
 
 Creates a custom getter which does Bayes by Backprop.
 
@@ -20891,7 +20930,7 @@ information about what variables are captured.
 
 A 2D Convolutional Network module.
 
-#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f892486f9d8>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
+#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f56eeda4e18>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
 
 Constructs a `ConvNet2D` module.
 
@@ -21375,7 +21414,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f892486f9d8>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f56eeda4e18>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -22137,7 +22176,7 @@ information about what variables are captured.
 
 A Multi-Layer perceptron module.
 
-#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f892486f9d8>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
+#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f56eeda4e18>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
 
 Constructs an MLP module.
 
@@ -24275,6 +24314,302 @@ Docstring is copied, including *args and **kwargs documentation.
 
   Decorated version of `wrapper_init` with documentation copied from
   `fn_with_doc_to_copy`.
+
+
+### [`class python.modules.spectral_normalization.SpectralNormWrapper`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?q=class:SpectralNormWrapper)<a id="python.modules.spectral_normalization.SpectralNormWrapper" />
+
+Wraps a Sonnet Module to selectively apply Spectral Normalization.
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.__init__(module, sn_kwargs, pow_iter_collection, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=80)<a id="python.modules.spectral_normalization.SpectralNormWrapper.__init__" />
+
+Constructs a wrapped Sonnet module with Spectral Normalization.
+
+The module expects a first argument which should be a Sonnet AbstractModule
+and a second argument which is a dictionary which is passed to the inner
+spectral_norm function as kwargs.
+
+When connecting this module to the graph,the argument 'pow_iter_collection'
+is treated specially for this wrapper (rather than for the _build
+method of the inner module). If pow_iter_collection is None (the default),
+the approximate first singular value for weights will *not* be updated based
+on the inputs passed at the given _build call. However an op for updating
+the singular value will be placed into the pow_iter_collection global
+collection.
+
+If pow_iter_collection is None or not passed, a control dependency on the
+update op will be applied to the output of the _build function. Regardless,
+the kwarg is deleted from the list of keywords passed to the inner module.
+
+##### Args:
+
+
+* `module`: A constructor/class reference for a Sonnet module you would like
+      to construct.
+* `sn_kwargs`: Keyword arguments to be passed to the spectral_norm function
+      in addition to the weight tensor.
+* `pow_iter_collection`: The name of a global collection for potentially
+      storing ops for updating internal variables.
+* `*args`: Construction-time arguments to the module.
+* `**kwargs`: Construction-time  keyword arguments to the module.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=124)<a id="python.modules.spectral_normalization.SpectralNormWrapper.__call__" />
+
+Add elements to the Graph, computing output Tensors from input Tensors.
+
+Subclasses must implement this method, which will be wrapped in a Template.
+
+##### Args:
+
+
+* `*args`: Input Tensors.
+* `**kwargs`: Additional Python flags controlling connection.
+
+##### Returns:
+
+  output Tensor(s).
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=479)<a id="python.modules.spectral_normalization.SpectralNormWrapper.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=391)<a id="python.modules.spectral_normalization.SpectralNormWrapper.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=386)<a id="python.modules.spectral_normalization.SpectralNormWrapper.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=503)<a id="python.modules.spectral_normalization.SpectralNormWrapper.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=640)<a id="python.modules.spectral_normalization.SpectralNormWrapper.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
+    variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=474)<a id="python.modules.spectral_normalization.SpectralNormWrapper.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=469)<a id="python.modules.spectral_normalization.SpectralNormWrapper.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=487)<a id="python.modules.spectral_normalization.SpectralNormWrapper.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=464)<a id="python.modules.spectral_normalization.SpectralNormWrapper.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=430)<a id="python.modules.spectral_normalization.SpectralNormWrapper.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=622)<a id="python.modules.spectral_normalization.SpectralNormWrapper.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=459)<a id="python.modules.spectral_normalization.SpectralNormWrapper.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.sn_getter(spectral_norm_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=131)<a id="python.modules.spectral_normalization.SpectralNormWrapper.sn_getter" />
+
+Returns a curried spectral normalization Custom Getter.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=604)<a id="python.modules.spectral_normalization.SpectralNormWrapper.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=438)<a id="python.modules.spectral_normalization.SpectralNormWrapper.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=585)<a id="python.modules.spectral_normalization.SpectralNormWrapper.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+
+### [`python.modules.spectral_normalization.spectral_norm(weight, num_iters=1, update_collection=None, eps=0.0001)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=166)<a id="python.modules.spectral_normalization.spectral_norm" />
+
+Spectral Weight Normalization.
+
+Applies first-singular-value spectral normalization to weight and returns a
+tensor equivalent to weight with spectral normalization applies. By default,
+it also updates an inner variable for keeping track of the spectral values of
+this weight matrix. If update_collection is not None, however, this function
+does not update the variable automatically, instead placing an op for this
+update in the 'update_collection' global collection.
+
+##### Args:
+
+
+* `weight`: The weight tensor which requires spectral normalization
+* `num_iters`: Number of SN iterations.
+* `update_collection`: The update collection for assigning persisted variable u.
+    If None, the function will update u0 during the forward pass. Otherwise if
+    the update_collection equals 'update_collection', it will put the
+    assignment in a collection defined by the user. Then the user will need to
+    run the assignment explicitly.
+* `eps`: numerical stability constant > 0.
+
+##### Returns:
+
+  A dictionary of:
+
+* `w_bar`: The normalized weight tensor
+* `sigma`: The estimated singular value for the weight tensor.
+* `u0`: The internal persisted variable.
 
 
 ### [`python.modules.util.get_variable_scope_name(value)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=40)<a id="python.modules.util.get_variable_scope_name" />

@@ -36,60 +36,6 @@ def flatten(inputs, name="flatten"):
   return Flatten(name=name)(inputs)
 
 
-def _extract_input_shape(inputs, preserve_dims=1) -> tf.TensorShape:
-  """Extracts the shape minus ignored dimensions from ``inputs``.
-
-  ::
-      >>> _extract_input_shape(tf.ones([1, 2, 3]))
-      TensorShape([2, 3])
-      >>> _extract_input_shape(tf.ones([1, 2, 3]), preserve_dims=2)
-      TensorShape([3])
-
-  Args:
-    inputs: A tensor whose shape should be extracted.
-    preserve_dims: Number of leading dimensions that will not be discarded.
-
-  Returns:
-    A list with the preserved dimensions from the shape of ``inputs``.
-
-  Raises:
-    ValueError: If the number of dimensions in the input is not compatible
-      with ``preserve dims``.
-  """
-  input_shape = inputs.shape
-  if input_shape.rank < preserve_dims:
-    raise ValueError("Input tensor has {} dimensions, should have at least "
-                     "as many as preserve_dims={}".format(
-                         len(input_shape), preserve_dims))
-  return input_shape[preserve_dims:]
-
-
-def _batch_reshape(inputs, output_shape, preserve_dims):
-  """See `reshape`."""
-  input_shape = _extract_input_shape(inputs, preserve_dims)
-
-  # Special-case of 1 non-preserved dimension, where no reshape is necessary.
-  # This is useful if the non-preserved dimension of `inputs` is unknown
-  # at build time.
-  if len(input_shape) == 1 and len(output_shape) == 1:
-    if output_shape[0] == -1 or output_shape[0] == input_shape[0]:
-      return inputs
-
-  if -1 in output_shape:
-    trailing_shape = _infer_shape(output_shape, input_shape)
-  else:
-    trailing_shape = output_shape
-
-  output_shape = tf.concat([tf.shape(inputs)[:preserve_dims], trailing_shape],
-                           axis=0)
-  output = tf.reshape(inputs, output_shape)
-
-  # Include as much static shape information as we can.
-  output.set_shape(inputs.shape[:preserve_dims] + trailing_shape)
-
-  return output
-
-
 def _infer_shape(output_shape, dimensions):
   """Replaces the -1 wildcard in the output shape vector.
 
@@ -164,8 +110,12 @@ class Reshape(base.Module):
 
   @once.once
   def _initialize(self, inputs):
-    input_shape = _extract_input_shape(inputs, self._preserve_dims)
-    self.input_shape = input_shape.as_list()
+    if inputs.shape.rank < self._preserve_dims:
+      raise ValueError("Input tensor has {} dimensions, should have at least "
+                       "as many as preserve_dims={}".format(
+                           inputs.shape.rank, self._preserve_dims))
+
+    self._input_shape = inputs.shape
 
   def __call__(self, inputs):
     """Reshapes ``inputs``.
@@ -188,9 +138,25 @@ class Reshape(base.Module):
         dimension and doesn't actually need reshaping).
     """
     self._initialize(inputs)
-    return _batch_reshape(inputs,
-                          output_shape=self._output_shape,
-                          preserve_dims=self._preserve_dims)
+
+    # Resolve the wildcard if any.
+    output_shape = tuple(self._output_shape)
+    if -1 in output_shape:
+      reshaped_shape = inputs.shape[self._preserve_dims:]
+      if reshaped_shape.is_fully_defined():
+        output_shape = _infer_shape(output_shape, reshaped_shape)
+
+    preserved_shape = inputs.shape[:self._preserve_dims]
+    if preserved_shape.is_fully_defined():
+      output = tf.reshape(
+          inputs,
+          tuple(preserved_shape) + output_shape)
+    else:
+      dynamic_preserved_shape = tf.shape(inputs)[:self._preserve_dims]
+      output = tf.reshape(
+          inputs,
+          tf.concat([dynamic_preserved_shape, output_shape], axis=0))
+    return output
 
   @base.no_name_scope
   def reversed(self, name=None):
@@ -198,7 +164,7 @@ class Reshape(base.Module):
     if name is None:
       name = self.name + "_reversed"
 
-    return Reshape(output_shape=self.input_shape,
+    return Reshape(output_shape=self._input_shape[self._preserve_dims:],
                    preserve_dims=self._preserve_dims,
                    name=name)
 

@@ -207,6 +207,15 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     flat = cf(tf.ones([8, 1, 2, 3]))
     self.assertEqual(flat.shape, [8, 1 * 2 * 3])
 
+  def testFlatten_unknownNonBatchSize(self):
+    mod = reshape.Flatten()
+    f = tf.function(mod)
+    inputs = tf.TensorSpec([8, None, None, 3], tf.float32)
+    cf = f.get_concrete_function(inputs)
+    self.assertEqual(cf.outputs[0].shape.as_list(), [8, None])
+    flat = cf(tf.ones([8, 1, 2, 3]))
+    self.assertEqual(flat.shape, [8, 1 * 2 * 3])
+
   @parameterized.parameters(1, 2, 3, 4)
   def testPreserveDimsOk(self, preserve_dims):
     in_shape = [10, 2, 3, 4]
@@ -249,6 +258,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     mod_r = mod.reversed()
     output_r = mod_r(output)
     self.assertEqual(output_r.shape, inputs.shape)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

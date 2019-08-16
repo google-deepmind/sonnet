@@ -18267,7 +18267,7 @@ some more information needs to be provided in order to build the Graph.
 
 Basic fully connected vanilla RNN core.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f56eee6af28>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
+#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f4f7cd3b158>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
 
 Construct a Basic RNN core.
 
@@ -19670,7 +19670,7 @@ regardless of that `tf.Variable`'s shape.
 A pre-canned builder for the analytic kl divergence.
 
 
-### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f56e96c4840>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f56e96cbf28>, kl_builder=<function stochastic_kl_builder at 0x7f56e96d30d0>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
+### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f4f77a1d6a8>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f4f77a27d08>, kl_builder=<function stochastic_kl_builder at 0x7f4f77a27e18>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
 
 Creates a custom getter which does Bayes by Backprop.
 
@@ -20930,7 +20930,7 @@ information about what variables are captured.
 
 A 2D Convolutional Network module.
 
-#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f56eeda4e18>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
+#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f4f7bedc048>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
 
 Constructs a `ConvNet2D` module.
 
@@ -21414,7 +21414,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f56eeda4e18>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f4f7bedc048>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -22176,7 +22176,7 @@ information about what variables are captured.
 
 A Multi-Layer perceptron module.
 
-#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f56eeda4e18>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
+#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f4f7bedc048>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
 
 Constructs an MLP module.
 
@@ -24353,7 +24353,7 @@ the kwarg is deleted from the list of keywords passed to the inner module.
 * `**kwargs`: Construction-time  keyword arguments to the module.
 
 
-#### [`python.modules.spectral_normalization.SpectralNormWrapper.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=124)<a id="python.modules.spectral_normalization.SpectralNormWrapper.__call__" />
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=125)<a id="python.modules.spectral_normalization.SpectralNormWrapper.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -24511,7 +24511,7 @@ information about what variables are captured.
 Returns the full name of the Module's variable scope.
 
 
-#### [`python.modules.spectral_normalization.SpectralNormWrapper.sn_getter(spectral_norm_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=131)<a id="python.modules.spectral_normalization.SpectralNormWrapper.sn_getter" />
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.sn_getter(spectral_norm_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=132)<a id="python.modules.spectral_normalization.SpectralNormWrapper.sn_getter" />
 
 Returns a curried spectral normalization Custom Getter.
 
@@ -24580,7 +24580,7 @@ information about what variables are captured.
 
 
 
-### [`python.modules.spectral_normalization.spectral_norm(weight, num_iters=1, update_collection=None, eps=0.0001)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=166)<a id="python.modules.spectral_normalization.spectral_norm" />
+### [`python.modules.spectral_normalization.spectral_norm(weight, num_iters=1, update_collection=None, eps=0.0001)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/spectral_normalization.py?l=167)<a id="python.modules.spectral_normalization.spectral_norm" />
 
 Spectral Weight Normalization.
 

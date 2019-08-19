@@ -76,11 +76,32 @@ snt_py_test(
     ],
 )
 
+snt_py_library(
+    name = "descriptors",
+    srcs = ["descriptors.py"],
+    deps = [
+        "//sonnet",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "descriptors_test",
+    srcs = ["descriptors_test.py"],
+    deps = [
+        ":descriptors",
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)
+
 snt_py_test(
     name = "function_test",
     timeout = "long",
     srcs = ["function_test.py"],
     deps = [
+        ":descriptors",
         # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:test_utils",

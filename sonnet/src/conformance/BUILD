@@ -161,3 +161,16 @@ snt_py_test(
         # tf: compiler/jit:xla_gpu_jit
     ],
 )
+
+snt_py_test(
+    name = "keras_test",
+    timeout = "long",
+    srcs = ["keras_test.py"],
+    deps = [
+        ":descriptors",
+        # pip: absl/testing:parameterized
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

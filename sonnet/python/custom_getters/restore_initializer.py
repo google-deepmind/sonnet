@@ -24,7 +24,7 @@ import tensorflow as tf
 
 
 def restore_initializer(filename, name_fn=None,
-                        collection=tf.GraphKeys.GLOBAL_VARIABLES):
+                        collection=tf.compat.v1.GraphKeys.GLOBAL_VARIABLES):
   """Custom getter to restore all variables with `snt.restore_initializer`.
 
   Args:
@@ -34,7 +34,7 @@ def restore_initializer(filename, name_fn=None,
       checkpoint.
     collection: Only set the restore initializer for variables in this
       collection. If `None`, it will attempt to restore all variables. By
-      default `tf.GraphKeys.GLOBAL_VARIABLES`.
+      default `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`.
 
   Returns:
     A restore_initializer custom getter, which is a function taking arguments
@@ -47,11 +47,11 @@ def restore_initializer(filename, name_fn=None,
     # Work out what collections this variable will go in.
     collections = kwargs["collections"]
     if collections is None:
-      collections = [tf.GraphKeys.GLOBAL_VARIABLES]
+      collections = [tf.compat.v1.GraphKeys.GLOBAL_VARIABLES]
 
     if (kwargs["trainable"]
-        and tf.GraphKeys.TRAINABLE_VARIABLES not in collections):
-      collections += [tf.GraphKeys.TRAINABLE_VARIABLES]
+        and tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES not in collections):
+      collections += [tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES]
 
     if collection is None or collection in collections:
       # We don't make use of the 'scope' argument for restore_initializer as we

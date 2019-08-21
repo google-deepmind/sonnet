@@ -728,3 +728,26 @@ snt_py_test(
         # pip: wrapt
     ],
 )
+
+snt_py_library(
+    name = "mixed_precision",
+    srcs = ["mixed_precision.py"],
+    deps = [
+        ":custom_getter",
+        ":utils",
+        # pip: contextlib2
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "mixed_precision_test",
+    srcs = ["mixed_precision_test.py"],
+    deps = [
+        ":base",
+        ":mixed_precision",
+        ":test_utils",
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
+    ],
+)

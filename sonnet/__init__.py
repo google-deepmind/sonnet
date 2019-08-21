@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from sonnet import distribute
 from sonnet import initializers
+from sonnet import mixed_precision
 from sonnet import nets
 from sonnet import optimizers
 from sonnet import pad

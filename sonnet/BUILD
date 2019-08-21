@@ -13,6 +13,7 @@ snt_py_library(
     deps = [
         ":distribute",
         ":initializers",
+        ":mixed_precision",
         ":nets",
         ":optimizers",
         ":pad",
@@ -53,6 +54,14 @@ snt_py_library(
     srcs = ["initializers.py"],
     deps = [
         "//sonnet/src:initializers",
+    ],
+)
+
+snt_py_library(
+    name = "mixed_precision",
+    srcs = ["mixed_precision.py"],
+    deps = [
+        "//sonnet/src:mixed_precision",
     ],
 )
 

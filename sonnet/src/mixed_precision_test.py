@@ -80,6 +80,20 @@ class MixedPrecisionClassTest(test_utils.TestCase):
     self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
     self.assertEqual(d.check_type(x, tf.float16).dtype, tf.float32)
 
+  def test_float16_mode_disable_class(self, test_class):
+    mixed_precision.enable(tf.float32)
+
+    x = tf.Variable([[1., 9.], [5., 0.]])
+    d = test_class(x)
+    d.check_type = mixed_precision.modes(
+        [tf.float32, tf.float16])(d.check_type)
+
+    mixed_precision.enable(tf.float16)
+    self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
+    self.assertEqual(d.check_type(x, tf.float16).dtype, tf.float32)
+    mixed_precision.disable()
+    self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
+
   def test_float16_mode_nested_eligible_class(self, test_class):
     mixed_precision.enable(tf.float32)
 
@@ -239,6 +253,21 @@ class MixedPrecisionClassTest(test_utils.TestCase):
       self.assertEqual(d.check_type(x, tf.float16).dtype, tf.float32)
 
     self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
+
+  def test_scoping_disable(self, test_class):
+    mixed_precision.enable(tf.float32)
+
+    x = tf.Variable([[1., 9.], [8., 9.]])
+    d = test_class(x)
+    d.check_type = mixed_precision.modes(
+        [tf.float32, tf.float16])(d.check_type)
+
+    with mixed_precision.scope(tf.float16):
+      self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
+      self.assertEqual(d.check_type(x, tf.float16).dtype, tf.float32)
+
+      mixed_precision.disable()
+      self.assertEqual(d.check_type(x, tf.float32).dtype, tf.float32)
 
 
 class MixedPrecisionTest(test_utils.TestCase):

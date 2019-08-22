@@ -41,6 +41,11 @@ def enable(dtype):
   _mixed_precision_mode = dtype
 
 
+def disable():
+  """Disable mixed precision training."""
+  enable(None)
+
+
 def _get_mixed_precision_mode():
   return _mixed_precision_mode
 

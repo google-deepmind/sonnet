@@ -38,7 +38,7 @@ import tensorflow as tf
 
 # Strings for TensorFlow convolution padding modes. See the following
 # documentation for an explanation of VALID versus SAME:
-# https://www.tensorflow.org/api_guides/python/nn#Convolution
+# https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 SAME = "SAME"
 VALID = "VALID"
 FULL = "FULL"
@@ -403,7 +403,7 @@ class _ConvND(base.AbstractModule):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           (up to size N).
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -881,7 +881,7 @@ class _ConvNDTranspose(base.AbstractModule):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels.
@@ -1293,7 +1293,7 @@ class Conv1D(_ConvND, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -1313,7 +1313,7 @@ class Conv1D(_ConvND, base.Transposable):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 1.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -1446,7 +1446,7 @@ class Conv1DTranspose(_ConvNDTranspose, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. Can be either a number or a
@@ -1665,7 +1665,7 @@ class Conv2D(_ConvND, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -1685,7 +1685,7 @@ class Conv2D(_ConvND, base.Transposable):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 2.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -1819,7 +1819,7 @@ class Conv2DTranspose(_ConvNDTranspose, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels.
@@ -1936,7 +1936,7 @@ class Conv3D(_ConvND, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -1956,7 +1956,7 @@ class Conv3D(_ConvND, base.Transposable):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 3.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -2086,7 +2086,7 @@ class Conv3DTranspose(_ConvNDTranspose, base.Transposable):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. `output_channels` can be
@@ -2196,7 +2196,7 @@ class InPlaneConv2D(_ConvND):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       kernel_shape: Iterable with 2 elements in the layout [filter_height,
@@ -2208,7 +2208,7 @@ class InPlaneConv2D(_ConvND):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 2.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -2338,7 +2338,7 @@ class DepthwiseConv2D(_ConvND):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       channel_multiplier: Number of channels to expand convolution to. Must be
@@ -2359,7 +2359,7 @@ class DepthwiseConv2D(_ConvND):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 2.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -2516,7 +2516,7 @@ class SeparableConv2D(_ConvND):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. Must be an integer.
@@ -2540,7 +2540,7 @@ class SeparableConv2D(_ConvND):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 2.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -2743,7 +2743,7 @@ class SeparableConv1D(_ConvND):
 
     See the following documentation for an explanation of VALID versus SAME
     padding modes:
-    https://www.tensorflow.org/api_guides/python/nn#Convolution
+    https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
     Args:
       output_channels: Number of output channels. Must be an integer.
@@ -2767,7 +2767,7 @@ class SeparableConv1D(_ConvND):
           `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
           of length 1.
           * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-            https://www.tensorflow.org/api_guides/python/nn#Convolution.
+            https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
           * snt.FULL pre- and post-pads with the maximum padding which does not
             result in a convolution over just padded elements.
           * snt.CAUSAL pre-pads to ensure that each output value only depends on

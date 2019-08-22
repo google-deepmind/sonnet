@@ -499,6 +499,31 @@ VectorQuantizerEMA
 .. autoclass:: VectorQuantizerEMA
    :members:
 
+Mixed Precision
+----
+
+.. automodule:: sonnet.mixed_precision
+
+modes
+~~~~~~~~~~~~~~~
+
+.. autofunction:: modes
+
+enable
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: enable
+
+disable
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: disable
+
+scope
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: scope
+
 References
 ----------
 

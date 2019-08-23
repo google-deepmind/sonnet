@@ -41,12 +41,9 @@ class OnceTest(parameterized.TestCase):
     self.assertEqual(r, [None])
 
   def test_always_returns_none(self):
-    @once.once
-    def f():
-      return "Hello, world!"
-
-    self.assertIsNone(f())
-    self.assertIsNone(f())
+    f = once.once(lambda: "Hello, world!")
+    with self.assertRaisesRegexp(ValueError, "snt.once .* cannot return"):
+      f()
 
   def test_does_not_cache_on_error(self):
     @once.once

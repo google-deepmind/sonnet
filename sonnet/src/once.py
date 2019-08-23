@@ -26,6 +26,11 @@ from sonnet.src import utils
 _ONCE_PROPERTY = "_snt_once"
 
 
+def _check_no_output(output):
+  if output is not None:
+    raise ValueError("@snt.once decorated functions cannot return values")
+
+
 def once(f):
   """Decorator which ensures a wrapped method is only ever run once.
 
@@ -75,7 +80,7 @@ def once(f):
     if instance is None:
       # NOTE: We can't use the weakset since you can't weakref None.
       if not wrapper.seen_none:
-        wrapped(*args, **kwargs)
+        _check_no_output(wrapped(*args, **kwargs))
         wrapper.seen_none = True
       return
 
@@ -86,7 +91,7 @@ def once(f):
       setattr(instance, _ONCE_PROPERTY, seen)
 
     if once_id not in seen:
-      wrapped(*args, **kwargs)
+      _check_no_output(wrapped(*args, **kwargs))
       seen.add(once_id)
 
   wrapper.seen_none = False

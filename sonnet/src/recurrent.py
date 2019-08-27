@@ -1110,15 +1110,16 @@ def _cudnn_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
       rnn_mode="lstm")
   return output_sequence, LSTMState(all_hidden[-1], all_cell[-1])
 
+_unrolled_lstm_impls = {
+    "GPU": _cudnn_unrolled_lstm,
+    "TPU": _fallback_unrolled_lstm,
+}
+# TODO(tomhennigan) Remove this check when TF 2.1 is released.
+if hasattr(tf.raw_ops, "BlockLSTMV2"):
+  _unrolled_lstm_impls["CPU"] = _block_unrolled_lstm
 
 _specialized_unrolled_lstm = _specialize_per_device(
-    "snt_unrolled_lstm",
-    specializations={
-        "CPU": _block_unrolled_lstm,
-        "GPU": _cudnn_unrolled_lstm,
-        "TPU": _fallback_unrolled_lstm,
-    },
-    default="TPU")
+    "snt_unrolled_lstm", specializations=_unrolled_lstm_impls, default="TPU")
 
 
 class _RecurrentDropoutWrapper(RNNCore):

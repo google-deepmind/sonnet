@@ -4837,7 +4837,7 @@ Constructs a Conv1D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -4859,7 +4859,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 1.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -5631,7 +5631,7 @@ Constructs a Conv1DTranspose module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -6042,7 +6042,7 @@ Constructs a Conv2D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -6064,7 +6064,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 2.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -6836,7 +6836,7 @@ Constructs a `Conv2DTranspose module`.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -7249,7 +7249,7 @@ Constructs a Conv3D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -7271,7 +7271,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 3.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -7732,7 +7732,7 @@ Constructs a `Conv3DTranspose` module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -8540,7 +8540,7 @@ Constructs a DepthwiseConv2D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -8563,7 +8563,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 2.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -10594,7 +10594,7 @@ Constructs an InPlaneConv2D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -10608,7 +10608,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 2.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -15621,7 +15621,7 @@ Constructs a SeparableConv1D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -15647,7 +15647,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 1.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -16107,7 +16107,7 @@ Constructs a SeparableConv2D module.
 
 See the following documentation for an explanation of VALID versus SAME
 padding modes:
-https://www.tensorflow.org/api_guides/python/nn#Convolution
+https://www.tensorflow.org/api_docs/python/tf/nn/convolution
 
 ##### Args:
 
@@ -16133,7 +16133,7 @@ https://www.tensorflow.org/api_guides/python/nn#Convolution
       `snt.CAUSAL`, `snt.REVERSE_CAUSAL`, or a sequence of these paddings
       of length 2.
       * snt.SAME and snt.VALID are explained in the Tensorflow docs at
-        https://www.tensorflow.org/api_guides/python/nn#Convolution.
+        https://www.tensorflow.org/api_docs/python/tf/nn/convolution.
       * snt.FULL pre- and post-pads with the maximum padding which does not
         result in a convolution over just padded elements.
       * snt.CAUSAL pre-pads to ensure that each output value only depends on
@@ -18267,7 +18267,7 @@ some more information needs to be provided in order to build the Graph.
 
 Basic fully connected vanilla RNN core.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7fdfb3d5e400>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
+#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f8f0616c8c8>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
 
 Construct a Basic RNN core.
 
@@ -19541,7 +19541,7 @@ Custom getter to restore all variables with `snt.restore_initializer`.
     checkpoint.
 * `collection`: Only set the restore initializer for variables in this
     collection. If `None`, it will attempt to restore all variables. By
-    default `tf.GraphKeys.GLOBAL_VARIABLES`.
+    default `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`.
 
 ##### Returns:
 
@@ -19670,7 +19670,7 @@ regardless of that `tf.Variable`'s shape.
 A pre-canned builder for the analytic kl divergence.
 
 
-### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7fdfae82dbf8>, prior_builder=<function fixed_gaussian_prior_builder at 0x7fdfae845268>, kl_builder=<function stochastic_kl_builder at 0x7fdfae845378>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
+### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f8f020f6950>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f8f020f6f28>, kl_builder=<function stochastic_kl_builder at 0x7f8f022650d0>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
 
 Creates a custom getter which does Bayes by Backprop.
 
@@ -20930,7 +20930,7 @@ information about what variables are captured.
 
 A 2D Convolutional Network module.
 
-#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7fdfb23782f0>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
+#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f8f07a472f0>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
 
 Constructs a `ConvNet2D` module.
 
@@ -21414,7 +21414,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7fdfb23782f0>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f8f07a472f0>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -22176,7 +22176,7 @@ information about what variables are captured.
 
 A Multi-Layer perceptron module.
 
-#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7fdfb23782f0>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
+#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f8f07a472f0>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
 
 Constructs an MLP module.
 

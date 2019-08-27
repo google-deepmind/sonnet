@@ -104,6 +104,22 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertEqual(model(tf.ones([1, 4])).shape, [1, 1])
 
+  @parameterized.named_parameters(*(BATCH_MODULES + RECURRENT_MODULES))
+  def test_symbolic_model(self, module_fn, input_shape, dtype):
+    module = module_fn()
+
+    inputs = tf.keras.Input(input_shape[1:], dtype=dtype)
+    layer = LayerAdapter(module=module, dtype=dtype)
+    output = layer(inputs)
+    model = tf.keras.Model(inputs=inputs, outputs=output)
+
+    example_input = tf.ones(input_shape, dtype=dtype)
+    # Check outputs are the same.
+    for m_y, l_y in zip(tf.nest.flatten(module(example_input)),
+                        tf.nest.flatten(model(example_input))):
+      self.assertEqual(m_y.shape, l_y.shape)
+      self.assertEqual(m_y.dtype, l_y.dtype)
+
   def test_keras_layer_inside_sonnet_module(self):
     mod = ModuleWithLayer()
     mod(tf.ones([1, 1]))

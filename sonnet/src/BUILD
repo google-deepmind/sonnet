@@ -751,3 +751,27 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_library(
+    name = "parallel_linear",
+    srcs = ["parallel_linear.py"],
+    deps = [
+        ":base",
+        ":initializers",
+        ":once",
+        ":utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "parallel_linear_test",
+    srcs = ["parallel_linear_test.py"],
+    deps = [
+        ":base",
+        ":linear",
+        ":parallel_linear",
+        ":test_utils",
+        # pip: tensorflow
+    ],
+)

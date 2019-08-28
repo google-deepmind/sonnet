@@ -120,6 +120,17 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(m_y.shape, l_y.shape)
       self.assertEqual(m_y.dtype, l_y.dtype)
 
+  def test_layer_adapter_custom_method(self):
+    module = ModuleWithCustomForward()
+
+    inputs = tf.keras.Input([], batch_size=1)
+    layer = LayerAdapter(module=module, method="forward")
+    output = layer(inputs)
+    model = tf.keras.Model(inputs=inputs, outputs=output)
+
+    self.assertEqual(model(tf.ones([])).numpy(), [2.])
+    self.assertEqual(model.trainable_variables, [module.w])
+
   def test_keras_layer_inside_sonnet_module(self):
     mod = ModuleWithLayer()
     mod(tf.ones([1, 1]))
@@ -154,9 +165,10 @@ class LayerAdapter(tf.keras.layers.Layer):
       []
   """
 
-  def __init__(self, module, dtype=tf.float32):
+  def __init__(self, module, method="__call__", dtype=tf.float32):
     super(LayerAdapter, self).__init__(dtype=dtype)
     self.module = module
+    self._module_call_method = getattr(module, method)
     self._output_shapes = None
 
   def _trace_and_initialize(self, input_shape):
@@ -164,7 +176,7 @@ class LayerAdapter(tf.keras.layers.Layer):
       # NOTE: We use a concrete function to ensure that weights are created and
       # initialized, but other stateful ops (e.g. updating weights) are not
       # triggered.
-      f = tf.function(self.module)
+      f = tf.function(self._module_call_method)
       cf = f.get_concrete_function(tf.TensorSpec(input_shape, self.dtype))
       self._output_shapes = cf.output_shapes
     return self._output_shapes
@@ -188,7 +200,7 @@ class LayerAdapter(tf.keras.layers.Layer):
     self._sonnet_weights = self.module.variables
 
   def call(self, inputs):
-    return self.module(inputs)
+    return self._module_call_method(inputs)
 
 
 class ModuleWithLayer(snt.Module):
@@ -211,6 +223,17 @@ class ModuleWithUpdateInCall(snt.Module):
     self._init(x)
     self.w.assign_add(tf.ones_like(self.w))
     return self.w.read_value()
+
+
+class ModuleWithCustomForward(snt.Module):
+
+  @snt.once
+  def _init(self, x):
+    self.w = tf.Variable(tf.ones(x.shape), name="w")
+
+  def forward(self, x):
+    self._init(x)
+    return x + self.w
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

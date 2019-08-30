@@ -52,6 +52,27 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "leaky_clip_by_value",
+    srcs = ["leaky_clip_by_value.py"],
+    deps = [
+        ":base",
+        # pip: numpy
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "leaky_clip_by_value_test",
+    srcs = ["leaky_clip_by_value_test.py"],
+    deps = [
+        ":leaky_clip_by_value",
+        ":test_utils",
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
     name = "bayes_by_backprop",
     srcs = ["bayes_by_backprop.py"],
     srcs_version = "PY2AND3",

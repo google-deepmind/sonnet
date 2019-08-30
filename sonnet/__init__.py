@@ -47,6 +47,7 @@ from sonnet.src.deferred import Deferred
 from sonnet.src.dropout import Dropout
 from sonnet.src.embed import Embed
 from sonnet.src.group_norm import GroupNorm
+from sonnet.src.leaky_clip_by_value import leaky_clip_by_value
 from sonnet.src.linear import Linear
 from sonnet.src.metrics import Mean
 from sonnet.src.metrics import Metric
@@ -132,6 +133,7 @@ __all__ = (
     "no_name_scope",
     "nets",
     "once",
+    "leaky_clip_by_value",
     "optimizers",
     "pad",
     "regularizers",

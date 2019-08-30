@@ -30,6 +30,7 @@ snt_py_library(
         "//sonnet/src:dropout",
         "//sonnet/src:embed",
         "//sonnet/src:group_norm",
+        "//sonnet/src:leaky_clip_by_value",
         "//sonnet/src:linear",
         "//sonnet/src:metrics",
         "//sonnet/src:moving_averages",

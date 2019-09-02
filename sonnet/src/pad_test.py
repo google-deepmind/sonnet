@@ -84,7 +84,7 @@ class PadTest(test_utils.TestCase, parameterized.TestCase):
                       dilations=rate, padding="VALID")
     y2 = tf.nn.conv1d(a, k, stride=stride, dilations=rate, padding="SAME")
     self.assertEqual(y1.shape, y2.shape)
-    self.assertAllEqual(y1.numpy(), y2.numpy())
+    self.assertAllClose(y1.numpy(), y2.numpy())
 
   @parameterized.parameters((1, 1, 1),
                             (3, 1, 1),

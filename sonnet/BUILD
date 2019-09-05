@@ -37,6 +37,7 @@ snt_py_library(
         "//sonnet/src:once",
         "//sonnet/src:recurrent",
         "//sonnet/src:reshape",
+        "//sonnet/src:scale_gradient",
         "//sonnet/src:sequential",
         "//sonnet/src:utils",
     ],

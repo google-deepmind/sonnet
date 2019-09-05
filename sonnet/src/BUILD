@@ -73,6 +73,27 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "scale_gradient",
+    srcs = ["scale_gradient.py"],
+    deps = [
+        ":base",
+        # pip: numpy
+        # pip: tensorflow
+    ],
+)
+
+snt_py_test(
+    name = "scale_gradient_test",
+    srcs = ["scale_gradient_test.py"],
+    deps = [
+        ":scale_gradient",
+        ":test_utils",
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
     name = "bayes_by_backprop",
     srcs = ["bayes_by_backprop.py"],
     srcs_version = "PY2AND3",

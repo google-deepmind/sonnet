@@ -75,6 +75,7 @@ from sonnet.src.reshape import flatten
 from sonnet.src.reshape import Flatten
 from sonnet.src.reshape import reshape
 from sonnet.src.reshape import Reshape
+from sonnet.src.scale_gradient import scale_gradient
 from sonnet.src.sequential import Sequential
 from sonnet.src.utils import format_variables
 from sonnet.src.utils import log_variables
@@ -137,6 +138,7 @@ __all__ = (
     "optimizers",
     "pad",
     "regularizers",
+    "scale_gradient",
     "static_unroll",
 )
 

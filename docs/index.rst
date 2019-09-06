@@ -19,8 +19,8 @@ Installation
 
 Install Sonnet by running::
 
-    $ pip install tf-nightly-gpu-2.0-preview
-    $ pip install git+https://github.com/deepmind/sonnet@v2
+    $ pip install "tensorflow-gpu>=2.0.0rc0" --pre
+    $ pip install "dm-sonnet>=2.0.0b0" --pre
 
 .. toctree::
    :caption: Guides

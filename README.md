@@ -4,7 +4,7 @@
 
 [**Documentation**](https://sonnet.readthedocs.io/) | [**Examples**](#examples)
 
-WARNING: Sonnet 2 is currently **alpha**. We would love to have you use it as an
+WARNING: Sonnet 2 is currently **beta**. We would love to have you use it as an
 early adopter and please let us know if things aren't working as you would
 expect.
 
@@ -46,12 +46,11 @@ notebook attached to a GPU or TPU.
 
 ## Installation
 
-Sonnet 2 is built for TensorFlow 2. To get started install the TensorFlow 2.0
-nightly preview and Sonnet 2 from source:
+To get started install TensorFlow 2.0 and Sonnet 2:
 
 ```shell
-$ pip install tf-nightly-gpu-2.0-preview
-$ pip install git+https://github.com/deepmind/sonnet@v2
+$ pip install tensorflow>=2 --pre
+$ pip install dm-sonnet>=2 --pre
 ```
 
 You can run the following to verify things installed correctly:

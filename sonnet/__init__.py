@@ -142,7 +142,7 @@ __all__ = (
     "static_unroll",
 )
 
-__version__ = "2.0.0a0"
+__version__ = "2.0.0b0"
 
 #  ________________________________________
 # / Please don't use symbols in `src` they \

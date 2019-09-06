@@ -1,5 +1,11 @@
 # Sonnet Changelog
 
+
+## Version 1.35 - Friday, 6 September 2019
+* Added Singular Value Normalization and SpectralNorm.
+* Added automatic mixed precision support in examples.
+* Compatibility fixes.
+
 ## Version 1.34 - Friday, 5 July 2019
 * Added tools for constrained optimisation as found in GECO, https://arxiv.org/abs/1810.00597
 * Added differentiable moving average.

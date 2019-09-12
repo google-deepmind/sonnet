@@ -344,7 +344,7 @@ snt_py_library(
 snt_py_test(
     name = "metrics_test",
     srcs = ["metrics_test.py"],
-    py3_tags = ["noasan"],
+    tags = ["noasan"],
     deps = [
         ":metrics",
         ":test_utils",
@@ -361,7 +361,7 @@ snt_py_library(
 snt_py_test(
     name = "once_test",
     srcs = ["once_test.py"],
-    py3_tags = ["noasan"],
+    tags = ["noasan"],
     deps = [
         ":once",
         # pip: absl/testing:absltest

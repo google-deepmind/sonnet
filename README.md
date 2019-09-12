@@ -43,7 +43,7 @@ The easiest way to try Sonnet is to use Google Colab which offers a free Python
 notebook attached to a GPU or TPU.
 
 - [Predicting MNIST with an MLP](https://colab.research.google.com/github/deepmind/sonnet/blob/v2/examples/mlp_on_mnist.ipynb)
-- [Training a Little GAN on MNIST](https://colab.research.google.com/github/deepmind/sonnet/blob/v2/examples/litte_gan_on_mnist.ipynb)
+- [Training a Little GAN on MNIST](https://colab.research.google.com/github/deepmind/sonnet/blob/v2/examples/little_gan_on_mnist.ipynb)
 - [Distributed training with `snt.distribute`](https://colab.research.google.com/github/deepmind/sonnet/blob/v2/examples/distributed_cifar10.ipynb)
 
 ## Installation

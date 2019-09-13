@@ -305,6 +305,7 @@ snt_py_test(
     deps = [
         ":batch_norm",
         ":initializers",
+        ":replicator",
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow

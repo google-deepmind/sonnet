@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import utils
 import tensorflow as tf
 
 
@@ -54,6 +55,7 @@ class Dropout(base.Module):
     self._noise_shape = noise_shape
     self._seed = seed
 
+  @utils.smart_autograph
   def __call__(self, x, is_training):
     if not is_training:
       return x

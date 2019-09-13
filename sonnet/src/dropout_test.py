@@ -59,6 +59,37 @@ class DropoutTest(test_utils.TestCase, parameterized.TestCase):
     y2 = mod(x, is_training=True)
     self.assertNotAllClose(y1, y2)
 
+  @parameterized.parameters(True, False)
+  def test_with_tf_function_with_booleans(self, autograph):
+    """tf.function compilation correctly handles if statement."""
+
+    layer = dropout.Dropout(rate=0.5)
+    layer = tf.function(layer, autograph=autograph)
+
+    inputs = tf.ones([2, 5, 3, 3, 3])
+    expected = tf.zeros_like(inputs)
+
+    for is_training in (True, False):
+      outputs = layer(inputs, is_training)
+      self.assertEqual(outputs.shape, expected.shape)
+
+  @parameterized.parameters(True, False)
+  def test_with_tf_function_with_variables(self, autograph):
+    """tf.function correctly handles if statement when argument is Variable."""
+
+    layer = dropout.Dropout(rate=0.5)
+    layer = tf.function(layer, autograph=autograph)
+
+    inputs = tf.ones([2, 5, 3, 3, 3])
+    expected = tf.zeros_like(inputs)
+    is_training_variable = tf.Variable(False, trainable=False)
+
+    for is_training in (True, False):
+      is_training_variable.assign(is_training)
+      outputs = layer(inputs, is_training_variable)
+      self.assertEqual(outputs.shape, expected.shape)
+
+
 if __name__ == "__main__":
   # tf.enable_v2_behavior()
   tf.test.main()

@@ -216,17 +216,51 @@ def _format_table(rows, join_lines=True):
   return "\n".join(output_rows) if join_lines else output_rows
 
 
+def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
+  """Renders the given shape/dtype as a short specification."""
+
+  format_map = {
+      tf.float16: "f16", tf.float32: "f32", tf.float64: "f64",
+      tf.bfloat16: "bf16",
+      tf.complex64: "c64", tf.complex128: "c128",
+      tf.uint8: "u8", tf.uint16: "u16", tf.uint32: "u32", tf.uint64: "u64",
+      tf.int8: "i8", tf.int16: "i16", tf.int32: "i32", tf.int64: "i64",
+      tf.qint8: "qi8", tf.qint16: "qi16", tf.qint32: "qi32",
+      tf.quint8: "qu8", tf.quint16: "qu16",
+  }
+
+  return "{dtype}[{shape}]".format(dtype=format_map.get(dtype, dtype.name),
+                                   shape=",".join(str(d) for d in shape))
+
+
+def _simple_device(var: tf.Variable):
+  device = tf.DeviceSpec.from_string(var.device)
+  if device.job == "localhost" and device.replica == 0 and device.task == 0:
+    if device.device_index == 0:
+      return device.device_type
+    else:
+      return "{} {}".format(device.device_type, device.device_index)
+  return device
+
+
+def _name_scope_then_rank(var: tf.Variable):
+  name_scope = "/".join(var.name.split("/")[:-1])
+  rank = len(var.shape)
+  return (name_scope, -rank, var.name)
+
+
 def format_variables(variables, join_lines=True):
   """Takes a collection of variables and formats it as a table."""
   rows = []
-  rows.append(("Variable", "Shape", "Type", "Trainable", "Device"))
-  for var in sorted(variables, key=lambda var: var.name):
+  header = ("Variable", "Spec", "Trainable", "Device")
+  rows.append(header)
+  rows.append(tuple("=" * len(c) for c in header))
+  for var in sorted(variables, key=_name_scope_then_rank):
     name = var.name.split(":")[0]  # Remove the ":0" suffix.
-    shape = "x".join(str(dim) for dim in var.shape)
-    dtype = repr(var.dtype).replace("tf.", "")
+    spec = _render_spec(var.shape, var.dtype)
     trainable = str(var.trainable)
-    device = str(var.device) if var.device else ""
-    rows.append((name, shape, dtype, trainable, device))
+    device = _simple_device(var)
+    rows.append((name, spec, trainable, device))
   return _format_table(rows, join_lines)
 
 

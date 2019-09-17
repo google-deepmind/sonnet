@@ -621,6 +621,7 @@ snt_py_library(
         ":initializers",
         # pip: absl/logging
         # pip: six
+        # pip: tabulate
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

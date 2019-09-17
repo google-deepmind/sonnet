@@ -28,6 +28,7 @@ import re
 from absl import logging
 import six
 from sonnet.src import initializers
+import tabulate
 import tensorflow as tf
 from typing import Any, Callable, Dict, Generic, Sequence, Text, Tuple, TypeVar, Union
 
@@ -206,16 +207,6 @@ def variable_like(
     return tf.Variable(initial_value, trainable=trainable, name=name)
 
 
-def _format_table(rows, join_lines=True):
-  format_str = ""
-  for col in range(len(rows[0])):
-    column_width = max(len(row[col]) for row in rows)
-    format_str += "{:<" + str(column_width) + "}  "
-
-  output_rows = (format_str.format(*row).strip() for row in rows)
-  return "\n".join(output_rows) if join_lines else output_rows
-
-
 def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
   """Renders the given shape/dtype as a short specification."""
 
@@ -249,19 +240,18 @@ def _name_scope_then_rank(var: tf.Variable):
   return (name_scope, -rank, var.name)
 
 
-def format_variables(variables, join_lines=True):
+def format_variables(variables, tablefmt="orgtbl"):
   """Takes a collection of variables and formats it as a table."""
   rows = []
-  header = ("Variable", "Spec", "Trainable", "Device")
-  rows.append(header)
-  rows.append(tuple("=" * len(c) for c in header))
   for var in sorted(variables, key=_name_scope_then_rank):
     name = var.name.split(":")[0]  # Remove the ":0" suffix.
     spec = _render_spec(var.shape, var.dtype)
     trainable = str(var.trainable)
     device = _simple_device(var)
     rows.append((name, spec, trainable, device))
-  return _format_table(rows, join_lines)
+  return tabulate.tabulate(rows,
+                           headers=("Variable", "Spec", "Trainable", "Device"),
+                           tablefmt=tablefmt)
 
 
 def log_variables(variables):
@@ -274,8 +264,8 @@ def log_variables(variables):
     variables: iterable of variables (e.g., `module.variables`, if `module` is a
       `snt.Module` instance).
   """
-  for row in format_variables(variables, join_lines=False):
-    logging.info(row)
+  for line in format_variables(variables).split("\n"):
+    logging.info(line)
 
 
 class CompareById(Generic[T]):

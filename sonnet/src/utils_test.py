@@ -29,10 +29,10 @@ import tensorflow as tf
 # We have a first "\" for the new line and one at the end. The rest is a direct
 # copy-paste of the ground truth output.
 _EXPECTED_FORMATTED_VARIABLE_LIST = ("""\
-Variable  Spec      Trainable  Device
-========  ====      =========  ======
-m1/v1     f32[3,4]  True       CPU
-m2/v2     i32[5]    False      CPU\
+| Variable   | Spec     | Trainable   | Device   |
+|------------+----------+-------------+----------|
+| m1/v1      | f32[3,4] | True        | CPU      |
+| m2/v2      | i32[5]   | False       | CPU      |\
 """)
 
 

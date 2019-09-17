@@ -271,6 +271,7 @@ snt_py_library(
         ":once",
         ":utils",
         # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

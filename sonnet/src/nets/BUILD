@@ -11,8 +11,10 @@ snt_py_library(
     srcs = ["mlp.py"],
     deps = [
         "//sonnet/src:base",
+        "//sonnet/src:initializers",
         "//sonnet/src:linear",
         # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

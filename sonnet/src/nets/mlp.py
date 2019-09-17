@@ -16,25 +16,29 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import initializers
 from sonnet.src import linear
+
 import tensorflow as tf
+from typing import Callable, Iterable, Optional, Text
 
 
 class MLP(base.Module):
-  """A Multi-Layer perceptron module."""
+  """A multi-layer perceptron module."""
 
   def __init__(self,
-               output_sizes,
-               w_init=None,
-               b_init=None,
-               with_bias=True,
-               activation=tf.nn.relu,
+               output_sizes: Iterable[int],
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               with_bias: bool = True,
+               activation: Callable[[tf.Tensor], tf.Tensor] = tf.nn.relu,
                dropout_rate=None,
-               activate_final=False,
-               name=None):
+               activate_final: bool = False,
+               name: Optional[Text] = None):
     """Constructs an MLP.
 
     Args:
@@ -73,7 +77,7 @@ class MLP(base.Module):
               with_bias=with_bias,
               name="linear_%d" % index))
 
-  def __call__(self, inputs, is_training=None):
+  def __call__(self, inputs: tf.Tensor, is_training=None) -> tf.Tensor:
     """Connects the module to some inputs.
 
     Args:
@@ -104,10 +108,12 @@ class MLP(base.Module):
 
     return inputs
 
-  def reverse(self, activate_final=None, name=None):
-    """Returns a new MLP which is the reverse of this MLP layer wise.
+  def reverse(self,
+              activate_final: Optional[bool] = None,
+              name: Optional[Text] = None) -> "MLP":
+    """Returns a new MLP which is the layer-wise reverse of this MLP.
 
-    NOTE: Since computing the reverse of an MLP requries knowing the input size
+    NOTE: Since computing the reverse of an MLP requires knowing the input size
     of each linear layer this method will fail if the module has not been called
     at least once. See `snt.Deferred` as a possible solution to this problem.
 
@@ -128,8 +134,8 @@ class MLP(base.Module):
 
     Returns:
       An MLP instance which is the reverse of the current instance. Note these
-      instances do not share weights and apart from being symetrical are not
-      coupled in any way.
+      instances do not share weights and, apart from being symmetric to each
+      other, are not coupled in any way.
     """
 
     if activate_final is None:

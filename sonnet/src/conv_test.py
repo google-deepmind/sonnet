@@ -107,8 +107,13 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.named_parameters(
       ("SamePaddingUseBias", True, "SAME"),
       ("SamePaddingNoBias", False, "SAME"),
+      ("samePaddingUseBias", True, "same"),
+      ("samePaddingNoBias", False, "same"),
       ("ValidPaddingNoBias", False, "VALID"),
-      ("ValidPaddingUseBias", True, "VALID"))
+      ("ValidPaddingUseBias", True, "VALID"),
+      ("validPaddingNoBias", False, "valid"),
+      ("validPaddingUseBias", True, "valid"),
+  )
   def testFunction(self, with_bias, padding):
     conv1 = conv.ConvND(
         num_spatial_dims=2,

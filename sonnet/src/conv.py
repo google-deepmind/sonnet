@@ -87,7 +87,7 @@ class ConvND(base.Module):
     self.rate = rate
 
     if isinstance(padding, six.string_types):
-      self.conv_padding = padding
+      self.conv_padding = padding.upper()
       self.padding_func = None
     else:
       self.conv_padding = "VALID"

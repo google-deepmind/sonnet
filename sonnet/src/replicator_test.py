@@ -21,6 +21,7 @@ from __future__ import print_function
 
 from absl import logging
 from absl.testing import parameterized
+from sonnet.src import initializers
 from sonnet.src import replicator as snt_replicator
 from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
@@ -137,6 +138,57 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     for component in v._values:
       for value in values:
         self.assertAllEqual(component.read_value(), value)
+
+  @parameterized.parameters(True, False)
+  def test_falls_back_to_graph(self, autograph):
+    init = FailsInEagerMode()
+    with snt_replicator.eager_initial_values():
+      value = tf.function(lambda: init([], tf.float32), autograph=autograph)()
+    self.assertEqual(value.numpy(), 1.)
+
+  @parameterized.parameters(True, False)
+  def test_requires_eager(self, autograph):
+    init = MyOnesInitializer()
+    with snt_replicator.eager_initial_values():
+      value = tf.function(lambda: init([], tf.float32), autograph=autograph)()
+    self.assertEqual(value.numpy(), 1.)
+
+  @parameterized.parameters(True, False)
+  def test_eager_variable_creator(self, autograph):
+    variables = [None, None]
+    eager_ones = tf.ones([])
+
+    def f():
+      if variables[0] is None:
+        graph_ones = tf.ones([])
+        # NOTE: `graph_ones` will be resolved by `tf.get_static_value`.
+        v1 = tf.Variable(graph_ones)
+        v2 = tf.Variable(eager_ones)
+        # Even though we're in a tf.function here, create_variables_eagerly
+        # should have popped us into an init_scope so we have eager variables.
+        with tf.init_scope():
+          self.assertEqual(v1.numpy(), 1.)
+          self.assertEqual(v2.numpy(), 1.)
+        variables[0] = v1
+        variables[1] = v2
+
+    with tf.variable_creator_scope(snt_replicator.create_variables_eagerly):
+      tf.function(f, autograph=autograph)()
+
+
+class MyOnesInitializer(initializers.Initializer):
+
+  def __call__(self, shape, dtype):
+    assert tf.executing_eagerly()
+    return tf.ones(shape, dtype)
+
+
+class FailsInEagerMode(initializers.Initializer):
+
+  def __call__(self, shape, dtype):
+    if tf.executing_eagerly():
+      raise ValueError("Eager mode")
+    return tf.ones(shape, dtype)
 
 
 def setUpModule():

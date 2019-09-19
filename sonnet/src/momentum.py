@@ -16,13 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class Momentum(base.Optimizer):
@@ -35,7 +39,11 @@ class Momentum(base.Optimizer):
     accumulated_momentum: Accumulated momentum for each parameter.
   """
 
-  def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
+  def __init__(self,
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               momentum: Union[types.FloatLike, tf.Variable],
+               use_nesterov: bool = False,
+               name: Optional[Text] = None):
     """Constructs a `Momentum` module.
 
     Args:
@@ -56,7 +64,8 @@ class Momentum(base.Optimizer):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters.
 
     By default it applies the momentum update rule for each update, parameter
@@ -72,9 +81,8 @@ class Momentum(base.Optimizer):
                                   learning_rate * momentum * accum_t)
 
     Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
+      updates: A list of updates to apply to parameters. Updates are often
+        gradients as returned by `tf.GradientTape.gradient`.
       parameters: A list of parameters. A parameter is a `tf.Variable`.
 
     Raises:
@@ -115,7 +123,11 @@ class Momentum(base.Optimizer):
 class FastMomentum(base.Optimizer):
   """SGD with Momentum module."""
 
-  def __init__(self, learning_rate, momentum, use_nesterov=False, name=None):
+  def __init__(self,
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               momentum: Union[types.FloatLike, tf.Variable],
+               use_nesterov: bool = False,
+               name: Optional[Text] = None):
     """Constructs a `Momentum` module."""
     super(FastMomentum, self).__init__(name)
     self.learning_rate = learning_rate
@@ -124,12 +136,13 @@ class FastMomentum(base.Optimizer):
     self.accumulated_momentum = []
 
   @once.once
-  def _initialize(self, parameters):
+  def _initialize(self, parameters: Sequence[tf.Variable]):
     with tf.name_scope("accumulated_momentum"):
       self.accumulated_momentum.extend(
           utils.variable_like(p, trainable=False) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters."""
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)

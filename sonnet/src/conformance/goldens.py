@@ -246,7 +246,7 @@ class GroupNorm(AbstractGolden):
 @_register_golden(snt.BaseBatchNorm, "base_batch_norm_1x2x2x3")
 class BaseBatchNorm(AbstractGolden):
   create_module = (
-      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))
+      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))  # pytype: disable=wrong-arg-types
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
@@ -258,7 +258,7 @@ class BaseBatchNorm(AbstractGolden):
 @_register_golden(snt.BaseBatchNorm, "base_batch_norm_scale_offset_1x2x2x3")
 class BaseBatchNormScaleOffset(AbstractGolden):
   create_module = (
-      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))
+      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))  # pytype: disable=wrong-arg-types
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 

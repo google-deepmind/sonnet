@@ -11,6 +11,7 @@ snt_py_library(
     srcs = ["base.py"],
     deps = [
         ":once",
+        ":types",
         ":utils",
         # pip: six
         # pip: tensorflow
@@ -34,6 +35,8 @@ snt_py_library(
     srcs = ["reshape.py"],
     deps = [
         ":base",
+        ":once",
+        ":types",
         # pip: numpy
         # pip: tensorflow
     ],
@@ -56,7 +59,6 @@ snt_py_library(
     srcs = ["leaky_clip_by_value.py"],
     deps = [
         ":base",
-        # pip: numpy
         # pip: tensorflow
     ],
 )
@@ -76,8 +78,7 @@ snt_py_library(
     name = "scale_gradient",
     srcs = ["scale_gradient.py"],
     deps = [
-        ":base",
-        # pip: numpy
+        ":types",
         # pip: tensorflow
     ],
 )
@@ -159,7 +160,6 @@ snt_py_library(
         ":once",
         ":utils",
         # pip: numpy
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -182,6 +182,7 @@ snt_py_library(
         ":base",
         ":initializers",
         ":once",
+        ":types",
         ":utils",
         # pip: numpy
         # pip: tensorflow
@@ -244,6 +245,7 @@ snt_py_library(
     name = "initializers",
     srcs = ["initializers.py"],
     deps = [
+        ":types",
         # pip: numpy
         # pip: six
         # pip: tensorflow
@@ -293,8 +295,10 @@ snt_py_library(
     deps = [
         ":base",
         ":initializers",
+        ":metrics",
         ":moving_averages",
         ":once",
+        ":types",
         ":utils",
         # pip: tensorflow
     ],
@@ -380,6 +384,7 @@ snt_py_library(
         ":initializers",
         ":linear",
         ":once",
+        ":types",
         ":utils",
         # pip: six
         # pip: tensorflow
@@ -402,7 +407,8 @@ snt_py_library(
     name = "regularizers",
     srcs = ["regularizers.py"],
     deps = [
-        ":utils",
+        ":types",
+        # pip: six
         # pip: tensorflow
     ],
 )
@@ -421,9 +427,7 @@ snt_py_test(
 snt_py_library(
     name = "sequential",
     srcs = ["sequential.py"],
-    deps = [
-        ":base",
-    ],
+    deps = [":base"],
 )
 
 snt_py_test(
@@ -444,6 +448,7 @@ snt_py_library(
         ":base",
         ":once",
         ":optimizer_utils",
+        ":types",
         ":utils",
         # pip: tensorflow
     ],
@@ -469,6 +474,7 @@ snt_py_library(
         ":base",
         ":once",
         ":optimizer_utils",
+        ":types",
         ":utils",
         # pip: tensorflow
     ],
@@ -494,6 +500,7 @@ snt_py_library(
         ":base",
         ":once",
         ":optimizer_utils",
+        ":types",
         ":utils",
         # pip: six
         # pip: tensorflow
@@ -519,6 +526,7 @@ snt_py_library(
     deps = [
         ":base",
         ":optimizer_utils",
+        ":types",
         # pip: tensorflow
     ],
 )
@@ -539,7 +547,11 @@ snt_py_test(
 snt_py_library(
     name = "optimizer_utils",
     srcs = ["optimizer_utils.py"],
-    deps = [":replicator"],
+    deps = [
+        ":replicator",
+        ":types",
+        # pip: tensorflow
+    ],
 )
 
 snt_py_library(
@@ -549,6 +561,7 @@ snt_py_library(
         ":base",
         ":initializers",
         ":once",
+        ":types",
         ":utils",
         # pip: six
         # pip: tensorflow
@@ -575,6 +588,7 @@ snt_py_library(
         ":base",
         ":initializers",
         ":once",
+        ":types",
         ":utils",
         # pip: six
         # pip: tensorflow
@@ -600,6 +614,7 @@ snt_py_library(
     deps = [
         ":metrics",
         ":once",
+        ":types",
         # pip: tensorflow
     ],
 )
@@ -659,6 +674,8 @@ snt_py_library(
     srcs = ["dropout.py"],
     deps = [
         ":base",
+        ":types",
+        ":utils",
         # pip: tensorflow
     ],
 )
@@ -682,6 +699,7 @@ snt_py_library(
         ":base",
         ":initializers",
         ":once",
+        ":types",
         ":utils",
         # pip: tensorflow
     ],
@@ -737,7 +755,7 @@ snt_py_library(
     deps = [
         ":base",
         ":initializers",
-        ":once",
+        ":types",
         # pip: tensorflow
     ],
 )
@@ -819,6 +837,16 @@ snt_py_test(
         ":linear",
         ":parallel_linear",
         ":test_utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
+    name = "types",
+    srcs = ["types.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        # pip: numpy
         # pip: tensorflow
     ],
 )

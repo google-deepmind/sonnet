@@ -22,20 +22,25 @@ from __future__ import print_function
 import numpy as np
 from sonnet.src import base
 from sonnet.src import once
+from sonnet.src import types
 import tensorflow as tf
+from typing import Optional, Sequence, Text
 
 
-def reshape(inputs, output_shape, preserve_dims=1, name=None):
+def reshape(inputs: tf.Tensor,
+            output_shape: types.ShapeLike,
+            preserve_dims: int = 1,
+            name: Optional[Text] = None) -> tf.Tensor:
   """A shortcut for applying :class:`Reshape` to the ``inputs``."""
   return Reshape(output_shape, preserve_dims, name=name)(inputs)
 
 
-def flatten(inputs, name="flatten"):
+def flatten(inputs: tf.Tensor, name: Text = "flatten") -> tf.Tensor:
   """A shortcut for applying :class:`Flatten` to the ``inputs``."""
   return Flatten(name=name)(inputs)
 
 
-def _infer_shape(output_shape, dimensions):
+def _infer_shape(output_shape: types.ShapeLike, dimensions: Sequence[int]):
   """Replaces the -1 wildcard in the output shape vector.
 
   This function infers the correct output shape given the input dimensions.
@@ -84,7 +89,10 @@ class Reshape(base.Module):
       >>> assert mod(x).shape == [B, H, W, C, 1, D]
   """
 
-  def __init__(self, output_shape, preserve_dims=1, name=None):
+  def __init__(self,
+               output_shape: types.ShapeLike,
+               preserve_dims: int = 1,
+               name: Optional[Text] = None):
     """Constructs a ``Reshape`` module.
 
     Args:
@@ -108,7 +116,7 @@ class Reshape(base.Module):
     self._preserve_dims = preserve_dims
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     if inputs.shape.rank < self._preserve_dims:
       raise ValueError("Input tensor has {} dimensions, should have at least "
                        "as many as preserve_dims={}".format(
@@ -116,7 +124,7 @@ class Reshape(base.Module):
 
     self._input_shape = inputs.shape
 
-  def __call__(self, inputs):
+  def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     """Reshapes ``inputs``.
 
     Args:
@@ -155,7 +163,7 @@ class Reshape(base.Module):
     return output
 
   @base.no_name_scope
-  def reversed(self, name=None):
+  def reversed(self, name: Optional[Text] = None) -> "Reshape":
     """Returns inverse batch reshape."""
     if name is None:
       name = self.name + "_reversed"
@@ -176,7 +184,7 @@ class Flatten(Reshape):
   See :class:`Reshape` for more details.
   """
 
-  def __init__(self, preserve_dims=1, name=None):
+  def __init__(self, preserve_dims: int = 1, name: Optional[Text] = None):
     """Constructs a ``Flatten`` module.
 
     Args:

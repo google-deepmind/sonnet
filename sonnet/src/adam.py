@@ -16,13 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class Adam(base.Optimizer):
@@ -42,11 +46,12 @@ class Adam(base.Optimizer):
 
   def __init__(
       self,
-      learning_rate,  # TODO(petebu): Consider a default here.
-      beta1=0.9,
-      beta2=0.999,
-      epsilon=1e-8,
-      name=None):
+      # TODO(petebu): Consider a default learning rate.
+      learning_rate: Union[types.FloatLike, tf.Variable],
+      beta1: Union[types.FloatLike, tf.Variable] = 0.9,
+      beta2: Union[types.FloatLike, tf.Variable] = 0.999,
+      epsilon: Union[types.FloatLike, tf.Variable] = 1e-8,
+      name: Optional[Text] = None):
     """Constructs an `Adam` module.
 
     Args:
@@ -67,14 +72,15 @@ class Adam(base.Optimizer):
     self.v = []
 
   @once.once
-  def _initialize(self, parameters):
+  def _initialize(self, parameters: Sequence[tf.Variable]):
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)
     with tf.name_scope("v"):
       self.v.extend(zero_var(p) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     r"""Applies updates to parameters.
 
     Applies the Adam update rule for each update, parameter pair:
@@ -89,10 +95,9 @@ class Adam(base.Optimizer):
         parameter <- parameter - learning_rate * scaled_update
 
     Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
+      updates: A list of updates to apply to parameters. Updates are often
+        gradients as returned by `tf.GradientTape.gradient`.
+      parameters: A list of parameters.
 
     Raises:
       ValueError: If `updates` and `parameters` are empty, have different
@@ -137,11 +142,12 @@ class FastAdam(base.Optimizer):
 
   def __init__(
       self,
-      learning_rate,  # TODO(petebu): Consider a default here.
-      beta1=0.9,
-      beta2=0.999,
-      epsilon=1e-8,
-      name=None):
+      # TODO(petebu): Consider a default learning rate.
+      learning_rate: Union[types.FloatLike, tf.Variable],
+      beta1: Union[types.FloatLike, tf.Variable] = 0.9,
+      beta2: Union[types.FloatLike, tf.Variable] = 0.999,
+      epsilon: Union[types.FloatLike, tf.Variable] = 1e-8,
+      name: Optional[Text] = None):
     """Constructs an `Adam` module."""
     super(FastAdam, self).__init__(name)
     self.learning_rate = learning_rate
@@ -153,14 +159,15 @@ class FastAdam(base.Optimizer):
     self.v = []
 
   @once.once
-  def _initialize(self, parameters):
+  def _initialize(self, parameters: Sequence[tf.Variable]):
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("m"):
       self.m.extend(zero_var(p) for p in parameters)
     with tf.name_scope("v"):
       self.v.extend(zero_var(p) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters."""
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)

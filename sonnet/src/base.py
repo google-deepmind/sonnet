@@ -27,6 +27,7 @@ import sys
 
 import six
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
 import tensorflow as tf
 from typing import Any, Callable, Dict, Optional, Sequence, Text, Tuple, Type, TypeVar
@@ -424,6 +425,7 @@ class Optimizer(Module):
   """Base class for Sonnet optimizers."""
 
   @abc.abstractmethod
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies `updates` to `parameters`."""
     pass

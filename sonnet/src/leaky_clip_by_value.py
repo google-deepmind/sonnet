@@ -20,10 +20,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+from typing import Optional, Text
 
 
 @tf.custom_gradient
-def leaky_clip_by_value(t, clip_value_min, clip_value_max, name=None):
+def leaky_clip_by_value(t: tf.Tensor,
+                        clip_value_min: tf.Tensor,
+                        clip_value_max: tf.Tensor,
+                        name: Optional[Text] = None):
   """Clips tensor values to a specified min and max.
 
   The gradient is set to zero when tensor values are already out of bound and

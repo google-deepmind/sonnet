@@ -16,11 +16,14 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import optimizer_utils
+from sonnet.src import types
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class SGD(base.Optimizer):
@@ -30,7 +33,9 @@ class SGD(base.Optimizer):
     learning_rate: Learning rate.
   """
 
-  def __init__(self, learning_rate, name=None):
+  def __init__(self,
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               name: Optional[Text] = None):
     """Constructs an `SGD` module.
 
     Args:
@@ -40,14 +45,14 @@ class SGD(base.Optimizer):
     super(SGD, self).__init__(name)
     self.learning_rate = learning_rate
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters.
 
     Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
+      updates: A list of updates to apply to parameters.  Updates are often
+        gradients as returned by `tf.GradientTape.gradient`.
+      parameters: A list of parameters.
 
     Raises:
       ValueError: If `updates` and `parameters` are empty, have different
@@ -69,12 +74,15 @@ class SGD(base.Optimizer):
 class FastSGD(base.Optimizer):
   """Stochastic Gradient Descent (SGD) module."""
 
-  def __init__(self, learning_rate, name=None):
+  def __init__(self,
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               name: Optional[Text] = None):
     """Constructs an `SGD` module."""
     super(FastSGD, self).__init__(name)
     self.learning_rate = learning_rate
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters."""
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)

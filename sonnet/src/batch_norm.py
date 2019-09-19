@@ -16,14 +16,19 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import initializers
+from sonnet.src import metrics
 from sonnet.src import moving_averages
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Text, Tuple
 
 
 class BaseBatchNorm(base.Module):
@@ -72,30 +77,26 @@ class BaseBatchNorm(base.Module):
   """
 
   def __init__(self,
-               create_scale,
-               create_offset,
-               moving_mean,
-               moving_variance,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               create_scale: bool,
+               create_offset: bool,
+               moving_mean: metrics.Metric,
+               moving_variance: metrics.Metric,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     """Constructs a ``BaseBatchNorm`` module.
 
     Args:
-      create_scale: ``bool`` representing whether to create a trainable scale
-        per channel applied after the normalization.
-      create_offset: ``bool`` representing whether to create a trainable offset
-        per channel applied after normalization and scaling.
-      moving_mean: An object which keeps track of the moving average of the mean
-        which can be used to normalize at test time. This object must have an
-        update method which takes a value and updates the internal state and a
-        value property which returns the current mean.
-      moving_variance: An object which keeps track of the moving average of the
-        variance which can be used to normalize at test time. This object must
-        have an update method which takes a value and updates the internal state
-        and a value property which returns the current variance.
+      create_scale: whether to create a trainable scale per channel applied
+        after the normalization.
+      create_offset: whether to create a trainable offset per channel applied
+        after normalization and scaling.
+      moving_mean: A metric which tracks the moving average of the mean which
+        can be used to normalize at test time.
+      moving_variance: A metric which tracks the moving average of the variance
+        which can be used to normalize at test time.
       eps: Small epsilon to avoid division by zero variance. Defaults to
         ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
@@ -129,21 +130,21 @@ class BaseBatchNorm(base.Module):
 
   @utils.smart_autograph
   def __call__(self,
-               inputs,
-               is_training,
-               test_local_stats=False,
-               scale=None,
-               offset=None):
+               inputs: tf.Tensor,
+               is_training: types.BoolLike,
+               test_local_stats: types.BoolLike = False,
+               scale: Optional[tf.Tensor] = None,
+               offset: Optional[tf.Tensor] = None):
     """Returns normalized inputs.
 
     Args:
       inputs: An n-D tensor of the data_format specified above on which the
         transformation is performed.
-      is_training: ``bool`` to indicate if the module should be connected in
-        training mode, meaning the moving averages are updated.
-      test_local_stats: ``bool`` to indicate if local batch statistics should be
-        used when ``is_training=False``. If not, moving averages are used. By
-        default ``False``.
+      is_training: Whether the module should be connected in training mode,
+        meaning the moving averages are updated.
+      test_local_stats: Whether local batch statistics should be used when
+        ``is_training=False``. If not, moving averages are used. By default
+        ``False``.
       scale: A tensor up to n-D. The shape of this tensor must be broadcastable
         to the shape of ``inputs``. This is the scale applied to the normalized
         inputs. This cannot be passed in if the module was constructed with
@@ -201,7 +202,7 @@ class BaseBatchNorm(base.Module):
     return out
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     input_shape = inputs.shape
     rank = len(input_shape)
     self._fused = (rank == 4 and self._channel_index == -1)
@@ -240,7 +241,8 @@ class BaseBatchNorm(base.Module):
       with tf.init_scope():
         self._fused_constant = tf.constant([])
 
-  def _moments(self, inputs, use_batch_stats):
+  def _moments(self, inputs: tf.Tensor,
+               use_batch_stats: types.BoolLike) -> Tuple[tf.Tensor, tf.Tensor]:
     if use_batch_stats:
       if self._fused:
         # The raw ops version of fused batch norm calculates the mean and
@@ -278,21 +280,21 @@ class BatchNorm(BaseBatchNorm):
   """
 
   def __init__(self,
-               create_scale,
-               create_offset,
-               decay_rate=0.999,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               create_scale: bool,
+               create_offset: bool,
+               decay_rate: float = 0.999,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     """Constructs a ``BatchNorm`` module.
 
     Args:
-      create_scale: ``bool`` representing whether to create a trainable scale
-        per channel applied after the normalization.
-      create_offset: ``bool`` representing whether to create a trainable offset
-        per channel applied after normalization and scaling.
+      create_scale: whether to create a trainable scale per channel applied
+        after the normalization.
+      create_offset: whether to create a trainable offset per channel applied
+        after normalization and scaling.
       decay_rate: Decay rate of the exponential moving averages of the mean and
         variance.
       eps: Small epsilon to avoid division by zero variance. Defaults to
@@ -338,22 +340,22 @@ class CrossReplicaBatchNorm(BaseBatchNorm):
   """
 
   def __init__(self,
-               create_scale,
-               create_offset,
-               moving_mean,
-               moving_variance,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               create_scale: bool,
+               create_offset: bool,
+               moving_mean: metrics.Metric,
+               moving_variance: metrics.Metric,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     """Constructs a ``BaseBatchNorm`` module.
 
     Args:
-      create_scale: ``bool`` representing whether to create a trainable scale
-        per channel applied after the normalization.
-      create_offset: ``bool`` representing whether to create a trainable offset
-        per channel applied after normalization and scaling.
+      create_scale: whether to create a trainable scale per channel applied
+        after the normalization.
+      create_offset: whether to create a trainable offset per channel applied
+        after normalization and scaling.
       moving_mean: An object which keeps track of the moving average of the mean
         which can be used to normalize at test time. This object must have an
         update method which takes a value and updates the internal state and a
@@ -385,14 +387,15 @@ class CrossReplicaBatchNorm(BaseBatchNorm):
         name=name)
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     super(CrossReplicaBatchNorm, self)._initialize(inputs)
 
     # Always use the unfused op here as mean/var are calculated before the op is
     # called so no speed-up is gained from the fused op
     self._fused = False
 
-  def _moments(self, inputs, use_batch_stats):
+  def _moments(self, inputs: tf.Tensor,
+               use_batch_stats: types.BoolLike) -> Tuple[tf.Tensor, tf.Tensor]:
     replica_context = tf.distribute.get_replica_context()
     if replica_context is None:
       raise TypeError(

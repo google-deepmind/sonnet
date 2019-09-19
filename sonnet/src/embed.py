@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
+
 """Embedding module."""
 
 from __future__ import absolute_import
@@ -23,47 +24,50 @@ import math
 
 from sonnet.src import base
 from sonnet.src import initializers
+from sonnet.src import types
+
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class Embed(base.Module):
   """Module for embedding tokens in a low-dimensional space."""
 
   def __init__(self,
-               vocab_size=None,
-               embed_dim=None,
-               existing_vocab=None,
-               densify_gradients=False,
-               initializer=None,
-               trainable=True,
-               dtype=tf.float32,
-               name=None):
+               vocab_size: Optional[int] = None,
+               embed_dim: Optional[int] = None,
+               existing_vocab: Optional[types.TensorLike] = None,
+               densify_gradients: bool = False,
+               initializer: Optional[initializers.Initializer] = None,
+               trainable: bool = True,
+               dtype: tf.DType = tf.float32,
+               name: Optional[Text] = None):
     """Constructs an Embed module.
 
     Args:
-      vocab_size: int. Number of unique tokens to embed. If not provided, an
-        existing vocabulary matrix from which vocab_size can be inferred must be
-        provided as existing_vocab.
-      embed_dim: int or None. Number of dimensions to assign to each embedding.
+      vocab_size: Number of unique tokens to embed. If not provided, an
+        existing vocabulary matrix from which vocab_size can be inferred must
+        be provided as existing_vocab.
+      embed_dim: Number of dimensions to assign to each embedding.
         If not specified, we use ``6 * sqrt(sqrt(vocab_size))``. If an existing
         vocabulary matrix initializes the module, this should not be provided as
         it will be inferred.
-      existing_vocab: a ``[vocab_size, embed_dim]`` vocabulary matrix. Will be
+      existing_vocab: A ``[vocab_size, embed_dim]`` vocabulary matrix. Will be
         converted to a tf.float32 tensor. If provided, neither or vocab_size or
         embed_dim should be provided as they are inferred.
-      densify_gradients: if True, we convert the embedding gradient from an
+      densify_gradients: If True, we convert the embedding gradient from an
         ``tf.IndexedSlices`` to a regular tensor before sending it back to the
         parameter server. This avoids excess computation on the parameter
-        server. Use this option for moderately sized embeddings, e.g., a
-        vocabulary size on the order of up to thousands. For embeddings larger
+        server. Use this option for moderately sized embeddings, e.g.,
+        a vocabulary size on the order of up to thousands. For embeddings larger
         than these, e.g. a vocabulary size on the order of tens or hundreds of
         thousands, set this to False.
-      initializer: Optional initializer for the embeddings. By default,
+      initializer: Initializer for the embeddings. By default,
         embeddings are initialized via a truncated normal distribution.
       trainable: if True, the embeddings will be updated during training. If
         False, they are fixed to their initial values.
-      dtype: the dtype to use for the embedding. Defaults to float32.
-      name: string. Name for this module.
+      dtype: The dtype to use for the embedding. Defaults to float32.
+      name: Name for this module.
 
     Raises:
       ValueError: if neither one of ``vocab_size`` or ``existing_vocab`` is
@@ -104,7 +108,7 @@ class Embed(base.Module):
     return tf.nn.embedding_lookup(embeddings, inputs)
 
 
-def embedding_dim(vocab_size):
+def embedding_dim(vocab_size: int):
   """Calculate a reasonable embedding size for a vocabulary.
 
   Rule of thumb is ``6 * sqrt(sqrt(vocab_size))``.
@@ -124,7 +128,7 @@ def embedding_dim(vocab_size):
 
 
 @tf.custom_gradient
-def dense_gradient(x):
+def dense_gradient(x: tf.Tensor):
   """Identity operation whose gradient is converted to a ``tf.Tensor``.
 
   >>> embedding = tf.Variable(tf.random.normal([3, 3]))
@@ -141,7 +145,6 @@ def dense_gradient(x):
   Returns:
     The input ``tf.Tensor`` and a dense identity gradient function.
   """
-
   def grad(dy):
     if isinstance(dy, tf.IndexedSlices):
       return tf.convert_to_tensor(dy)

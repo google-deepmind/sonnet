@@ -16,13 +16,16 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
 import collections
 import numpy as np
 import six
+from sonnet.src import types
 import tensorflow as tf
+from typing import Iterable, Mapping, Optional, Text, Union
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -30,7 +33,7 @@ class Initializer(object):
   """Initializer base class, all initializers must implement a call method."""
 
   @abc.abstractmethod
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     """Returns a tensor of the given ``shape`` and ``dtype``."""
     pass
 
@@ -38,7 +41,7 @@ class Initializer(object):
 class Zeros(Initializer):
   """Initializer that generates tensors initialized to 0."""
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_numerical_dtype(dtype)
     return tf.zeros(shape, dtype)
 
@@ -46,7 +49,7 @@ class Zeros(Initializer):
 class Ones(Initializer):
   """Initializer that generates tensors initialized to 1."""
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_numerical_dtype(dtype)
     return tf.ones(shape, dtype)
 
@@ -54,13 +57,13 @@ class Ones(Initializer):
 class Constant(Initializer):
   """Initializer that generates tensors initialized to the given value."""
 
-  def __init__(self, value):
+  def __init__(self, value: Union[float, int]):
     if not np.isscalar(value):
       raise TypeError("Invalid type for value: {} (expected scalar).".format(
           type(value)))
     self.value = value
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_numerical_dtype(dtype)
     value = tf.convert_to_tensor(self.value, dtype)
     return tf.fill(value=value, dims=shape)
@@ -73,7 +76,10 @@ class RandomUniform(Initializer):
   ``[minval, maxval)``.
   """
 
-  def __init__(self, minval=0, maxval=1, seed=None):
+  def __init__(self,
+               minval: types.FloatLike = 0,
+               maxval: types.FloatLike = 1,
+               seed: Optional[int] = None):
     """Constructs a random uniform initializer.
 
     Args:
@@ -81,13 +87,13 @@ class RandomUniform(Initializer):
         random values to generate. Defaults to ``0``.
       maxval: A python scalar or a scalar tensor. Upper bound of the range of
         random values to generate. Defaults to ``1``.
-      seed: ``int``, the seed used in the generation of random numbers.
+      seed: The seed used in the generation of random numbers.
     """
     self.minval = minval
     self.maxval = maxval
     self.seed = seed
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType):
     dtype = _as_numerical_dtype(dtype)
     return tf.random.uniform(
         shape=shape,
@@ -100,7 +106,10 @@ class RandomUniform(Initializer):
 class RandomNormal(Initializer):
   """Initializer that generates tensors with a normal distribution."""
 
-  def __init__(self, mean=0.0, stddev=1.0, seed=None):
+  def __init__(self,
+               mean: types.FloatLike = 0.0,
+               stddev: types.FloatLike = 1.0,
+               seed: Optional[int] = None):
     """Constructs a random normal initializer.
 
     Args:
@@ -108,13 +117,13 @@ class RandomNormal(Initializer):
         generate.
       stddev: A python scalar or a scalar tensor. Standard deviation of the
         random values to generate.
-      seed: ``int``, the seed used in the generation of random numbers.
+      seed: The seed used in the generation of random numbers.
     """
     self.mean = mean
     self.stddev = stddev
     self.seed = seed
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_floating_dtype(dtype)
     return tf.random.normal(
         shape=shape,
@@ -132,7 +141,10 @@ class TruncatedNormal(Initializer):
   recommended initializer for neural network weights and filters.
   """
 
-  def __init__(self, mean=0.0, stddev=1.0, seed=None):
+  def __init__(self,
+               mean: types.FloatLike = 0.0,
+               stddev: types.FloatLike = 1.0,
+               seed: Optional[int] = None):
     """Constructs a truncated normal initializer.
 
     Args:
@@ -140,13 +152,13 @@ class TruncatedNormal(Initializer):
         generate.
       stddev: A python scalar or a scalar tensor. Standard deviation of the
         random values to generate.
-      seed: ``int``, the seed used in the generation of random numbers.
+      seed: The seed used in the generation of random numbers.
     """
     self.mean = mean
     self.stddev = stddev
     self.seed = seed
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType):
     dtype = _as_floating_dtype(dtype)
     return tf.random.truncated_normal(
         shape=shape,
@@ -162,7 +174,7 @@ class Identity(Initializer):
   Constructs a 2D identity matrix or batches of these.
   """
 
-  def __init__(self, gain=1.0):
+  def __init__(self, gain: float = 1.0):
     """Constructs an identity initializer.
 
     Args:
@@ -170,7 +182,7 @@ class Identity(Initializer):
     """
     self.gain = gain
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_numerical_dtype(dtype)
     rank = shape.shape[0] if isinstance(shape, tf.Tensor) else len(shape)
     if rank < 2:
@@ -206,7 +218,7 @@ class Orthogonal(Initializer):
   The matrix is subsequently reshaped to give a tensor of the desired shape.
   """
 
-  def __init__(self, gain=1.0, seed=None):
+  def __init__(self, gain: float = 1.0, seed: Optional[int] = None):
     """Constructs an orthogonal initializer.
 
     Args:
@@ -216,7 +228,7 @@ class Orthogonal(Initializer):
     self.gain = gain
     self.seed = seed
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_floating_dtype(dtype)
     if len(shape) < 2:
       raise ValueError("The tensor to initialize must be "
@@ -280,10 +292,10 @@ class VarianceScaling(Initializer):
   """
 
   def __init__(self,
-               scale=1.0,
-               mode="fan_in",
-               distribution="truncated_normal",
-               seed=None):
+               scale: float = 1.0,
+               mode: Text = "fan_in",
+               distribution: Text = "truncated_normal",
+               seed: Optional[int] = None):
     """Constructs a variance scaling initalizer.
 
     Args:
@@ -309,7 +321,7 @@ class VarianceScaling(Initializer):
     self.distribution = distribution
     self.seed = seed
 
-  def __call__(self, shape, dtype):
+  def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_floating_dtype(dtype)
     scale = self.scale
     fan_in, fan_out = _compute_fans(shape)
@@ -337,7 +349,8 @@ class VarianceScaling(Initializer):
           shape=shape, minval=-limit, maxval=limit, dtype=dtype, seed=self.seed)
 
 
-def check_initializers(initializers, expected_keys):
+def check_initializers(initializers: Mapping[Text, Initializer],
+                       expected_keys: Iterable[Text]):
   """Checks a dictionary of initializers only contains the given keys."""
   if initializers is None:
     return {}
@@ -355,7 +368,7 @@ def check_initializers(initializers, expected_keys):
   return initializers
 
 
-def _compute_fans(shape):
+def _compute_fans(shape: types.ShapeLike):
   """Computes the number of input and output units for a weight shape.
 
   Args:
@@ -382,14 +395,14 @@ def _compute_fans(shape):
   return fan_in, fan_out
 
 
-def _as_floating_dtype(dtype):
+def _as_floating_dtype(dtype: tf.DType) -> tf.DType:
   dtype = tf.as_dtype(dtype)
   if dtype.is_floating:
     return dtype
   raise ValueError("Expected floating point type, got {}".format(dtype))
 
 
-def _as_numerical_dtype(dtype):
+def _as_numerical_dtype(dtype: tf.DType) -> tf.DType:
   dtype = tf.as_dtype(dtype)
   if dtype.is_floating or dtype.is_integer:
     return dtype

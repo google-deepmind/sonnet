@@ -16,13 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text
 
 
 class Bias(base.Module):
@@ -65,7 +69,11 @@ class Bias(base.Module):
       >>> assert tf.reduce_all(tf.equal(x, reconstructed_x))
   """
 
-  def __init__(self, output_size=None, bias_dims=None, b_init=None, name=None):
+  def __init__(self,
+               output_size: Optional[int] = None,
+               bias_dims: Optional[Sequence[int]] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               name: Optional[Text] = None):
     """Constructs a `Bias` module that supports broadcasting.
 
     Args:
@@ -73,9 +81,9 @@ class Bias(base.Module):
         `output_size` is left as `None`, the size will be directly inferred by
         the input.
       bias_dims: Sequence of which dimensions to retain from the input shape
-        when constructing the bias. The remaining dimensions will get
-        broadcasted over (given size of 1), and leading dimensions will be
-        removed completely. See class doc for examples.
+        when constructing the bias. The remaining dimensions will be broadcast
+        over (given size of 1), and leading dimensions will be removed
+        completely. See class doc for examples.
       b_init: Optional initializer for the bias. Default to zeros.
       name: Name of the module.
     """
@@ -100,7 +108,7 @@ class Bias(base.Module):
     self.input_size = input_size
     self.b = tf.Variable(self.b_init(bias_shape, inputs.dtype), name="b")
 
-  def __call__(self, inputs, multiplier=None):
+  def __call__(self, inputs: tf.Tensor, multiplier: types.FloatLike = None):
     """Adds bias to `inputs` and optionally multiplies by `multiplier`.
 
     Args:
@@ -121,20 +129,21 @@ class Bias(base.Module):
       return inputs + self.b
 
 
-def calculate_bias_shape(input_shape, bias_dims):
+def calculate_bias_shape(input_shape: types.ShapeLike,
+                         bias_dims: Sequence[int]):
   """Calculate `bias_shape` based on the `input_shape` and `bias_dims`.
 
   Args:
     input_shape: Shape of the input being passed into the module. The leading
-      dimension is the minibatch size.
+      dimension is the mini-batch size.
     bias_dims: The dimensions that bias should be applied over. The remaining
-      dimensions will get broadcasted over.
+      dimensions will be broadcast over.
 
   Returns:
     bias_shape: Tuple corresponding to the shape of bias Variable to create.
 
   Raises:
-    ValueError: If the user attempts to add bias over the minibatch dimension,
+    ValueError: If the user attempts to add bias over the mini-batch dimension,
         e.g. `bias_dims=[0]`.
   """
   input_rank = len(input_shape)

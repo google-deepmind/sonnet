@@ -29,7 +29,7 @@ import six
 from sonnet.src import initializers
 import tabulate
 import tensorflow as tf
-from typing import Any, Callable, Dict, Generic, Sequence, Text, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Optional, Sequence, Text, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -199,10 +199,10 @@ def getfullargspec(func):
     return inspect.getfullargspec(func)
 
 
-def variable_like(inputs,
-                  initializer=initializers.Zeros(),
-                  trainable=None,
-                  name=None):
+def variable_like(inputs: Union[tf.Tensor, tf.Variable],
+                  initializer: initializers.Initializer = initializers.Zeros(),
+                  trainable: Optional[bool] = None,
+                  name: Optional[Text] = None) -> tf.Variable:
   """Creates a new variable with the same shape/dtype/device as the input."""
   if trainable is None:
     trainable = getattr(inputs, "trainable", None)
@@ -243,7 +243,7 @@ def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
       shape=",".join(str(d) for d in shape))
 
 
-def _simple_device(var: tf.Variable):
+def _simple_device(var: tf.Variable) -> Text:
   device = tf.DeviceSpec.from_string(var.device)
   if device.job == "localhost" and device.replica == 0 and device.task == 0:
     if device.device_index == 0:
@@ -259,7 +259,8 @@ def _name_scope_then_rank(var: tf.Variable):
   return (name_scope, -rank, var.name)
 
 
-def format_variables(variables, tablefmt="orgtbl"):
+def format_variables(variables: Sequence[tf.Variable],
+                     tablefmt: Text = "orgtbl") -> Text:
   """Takes a collection of variables and formats it as a table."""
   rows = []
   for var in sorted(variables, key=_name_scope_then_rank):
@@ -274,7 +275,7 @@ def format_variables(variables, tablefmt="orgtbl"):
       tablefmt=tablefmt)
 
 
-def log_variables(variables):
+def log_variables(variables: Sequence[tf.Variable]):
   """Logs variable information.
 
   This function logs the name, shape, type, trainability, and device for a

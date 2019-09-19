@@ -16,14 +16,18 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import six
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import optimizer_utils
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class RMSProp(base.Optimizer):
@@ -60,12 +64,12 @@ class RMSProp(base.Optimizer):
   """
 
   def __init__(self,
-               learning_rate,
-               decay=0.9,
-               momentum=0.0,
-               epsilon=1e-10,
-               centered=False,
-               name=None):
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               decay: Union[types.FloatLike, tf.Variable] = 0.9,
+               momentum: Union[types.FloatLike, tf.Variable] = 0.0,
+               epsilon: Union[types.FloatLike, tf.Variable] = 1e-10,
+               centered: bool = False,
+               name: Optional[Text] = None):
     """Constructs an `RMSProp` module.
 
     Args:
@@ -90,7 +94,7 @@ class RMSProp(base.Optimizer):
     self.mg = []
 
   @once.once
-  def _initialize(self, parameters):
+  def _initialize(self, parameters: Sequence[tf.Variable]):
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)
@@ -100,14 +104,14 @@ class RMSProp(base.Optimizer):
       with tf.name_scope("mg"):
         self.mg.extend(zero_var(p) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters.
 
     Args:
-      updates: A list of updates to apply to parameters. An update can be a
-        `Tensor`, `IndexedSlice`, or `None`. Updates are often gradients, as
-        returned by `tf.GradientTape.gradient`.
-      parameters: A list of parameters. A parameter is a `tf.Variable`.
+      updates: A list of updates to apply to parameters. Updates are often
+        gradients as returned by `tf.GradientTape.gradient`.
+      parameters: A list of parameters.
 
     Raises:
       ValueError: If `updates` and `parameters` are empty, have different
@@ -158,12 +162,12 @@ class FastRMSProp(base.Optimizer):
   """RMSProp module."""
 
   def __init__(self,
-               learning_rate,
-               decay=0.9,
-               momentum=0.0,
-               epsilon=1e-10,
-               centered=False,
-               name=None):
+               learning_rate: Union[types.FloatLike, tf.Variable],
+               decay: Union[types.FloatLike, tf.Variable] = 0.9,
+               momentum: Union[types.FloatLike, tf.Variable] = 0.0,
+               epsilon: Union[types.FloatLike, tf.Variable] = 1e-10,
+               centered: bool = False,
+               name: Optional[Text] = None):
     """Constructs an `RMSProp` module."""
     super(FastRMSProp, self).__init__(name)
     self.learning_rate = learning_rate
@@ -176,7 +180,7 @@ class FastRMSProp(base.Optimizer):
     self.mg = []
 
   @once.once
-  def _initialize(self, parameters):
+  def _initialize(self, parameters: Sequence[tf.Variable]):
     zero_var = lambda p: utils.variable_like(p, trainable=False)
     with tf.name_scope("momentum"):
       self.mom.extend(zero_var(p) for p in parameters)
@@ -186,7 +190,8 @@ class FastRMSProp(base.Optimizer):
       with tf.name_scope("mg"):
         self.mg.extend(zero_var(p) for p in parameters)
 
-  def apply(self, updates, parameters):
+  def apply(self, updates: Sequence[types.ParameterUpdate],
+            parameters: Sequence[tf.Variable]):
     """Applies updates to parameters."""
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)

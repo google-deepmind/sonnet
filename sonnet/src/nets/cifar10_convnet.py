@@ -15,13 +15,18 @@
 """Convnet module for Cifar10 classification."""
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import batch_norm
 from sonnet.src import conv
+from sonnet.src import initializers
 from sonnet.src import linear
+from sonnet.src import types
+
 import tensorflow as tf
+from typing import Mapping, Optional, Sequence, Text
 
 
 class Cifar10ConvNet(base.Module):
@@ -33,11 +38,11 @@ class Cifar10ConvNet(base.Module):
   """
 
   def __init__(self,
-               num_classes=10,
-               w_init=None,
-               b_init=None,
-               data_format='NHWC',
-               output_channels=(
+               num_classes: int = 10,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = 'NHWC',
+               output_channels: Sequence[int] = (
                    64,
                    64,
                    128,
@@ -50,8 +55,8 @@ class Cifar10ConvNet(base.Module):
                    512,
                    512,
                ),
-               strides=(1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1),
-               name=None):
+               strides: Sequence[int] = (1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1),
+               name: Optional[Text] = None):
     super(Cifar10ConvNet, self).__init__(name=name)
     self._num_classes = num_classes
     self._data_format = data_format
@@ -87,7 +92,10 @@ class Cifar10ConvNet(base.Module):
         b_init=self._b_init,
         name='logits')
 
-  def __call__(self, inputs, is_training, test_local_stats=True):
+  def __call__(self,
+               inputs: tf.Tensor,
+               is_training: types.BoolLike,
+               test_local_stats: bool = True) -> Mapping[Text, tf.Tensor]:
     """Connects the module to some inputs.
 
     Args:

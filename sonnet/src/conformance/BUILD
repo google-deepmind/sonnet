@@ -17,7 +17,6 @@ snt_py_library(
         # pip: numpy
         # pip: six
         "//sonnet",
-        "//sonnet/src/nets:resnet",
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

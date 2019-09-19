@@ -16,9 +16,11 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
+from typing import Any, Callable, Iterable, Optional, Text
 
 
 class Sequential(base.Module):
@@ -56,7 +58,9 @@ class Sequential(base.Module):
       ...     return outputs
   """
 
-  def __init__(self, layers=None, name=None):
+  def __init__(self,
+               layers: Iterable[Callable[..., Any]] = None,
+               name: Optional[Text] = None):
     super(Sequential, self).__init__(name=name)
     self._layers = list(layers) if layers is not None else []
 

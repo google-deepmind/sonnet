@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Depthwise conv module."""
+
+"""Depth-wise convolutional module."""
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import numpy as np
@@ -23,45 +25,48 @@ from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class DepthwiseConv2D(base.Module):
-  """Spatial depthwise 2D convolution module, including bias.
+  """Spatial depth-wise 2D convolution module, including bias.
 
   This acts as a light wrapper around the TensorFlow ops
   `tf.nn.depthwise_conv2d`, abstracting away variable creation and sharing.
   """
 
   def __init__(self,
-               kernel_shape,
-               channel_multiplier=1,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NHWC",
-               name=None):
+               kernel_shape: Union[int, Sequence[int]],
+               channel_multiplier: int = 1,
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Text = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NHWC",
+               name: Optional[Text] = None):
     """Constructs a `DepthwiseConv2D` module.
 
     Args:
       kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
-        integer. `kernel_shape` will be expanded to define a kernel size in all
-        dimensions.
+        integer. `kernel_shape` will be expanded to define a kernel size in
+        all dimensions.
       channel_multiplier: Number of channels to expand convolution to. Must be
-        an integer. Must be > 0. When `channel_multiplier` is set to 1, apply a
-        different filter to each input channel producing one output channel per
-        input channel. Numbers larger than 1 cause multiple different filters to
-        be applied to each input channel, with their outputs being concatenated
-        together, producing `channel_multiplier` * `input_channels` output
-        channels.
+          an integer greater than 0. When `channel_multiplier` is 1, applies
+          a different filter to each input channel producing one output channel
+          per input channel. Numbers larger than 1 cause multiple different
+          filters to be applied to each input channel, with their outputs being
+          concatenated together, producing `channel_multiplier` *
+          `input_channels` output channels.
       stride: Sequence of strides (of length num_spatial_dims), or an integer.
         `stride` will be expanded to define stride in all dimensions.
       rate: Sequence of dilation rates (of length num_spatial_dims), or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds to
-        standard ND convolution, `rate > 1` corresponds to dilated convolution.
+        that is used to define dilation rate in all dimensions. 1 corresponds
+        to standard ND convolution, `rate > 1` corresponds to dilated
+        convolution.
       padding: Padding to apply to the input. This can either "SAME", "VALID".
       with_bias: Whether to include bias parameters. Default `True`.
       w_init: Optional initializer for the weights. By default the weights are
@@ -94,23 +99,23 @@ class DepthwiseConv2D(base.Module):
     elif b_init is not None:
       raise ValueError("When not using a bias the b_init must be None.")
 
-  def __call__(self, inputs):
+  def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     self._initialize(inputs)
 
-    outputs = tf.nn.depthwise_conv2d(
-        inputs,
-        self.w,
-        strides=self.stride,
-        dilations=self.rate,
-        padding=self.padding,
-        data_format=self.data_format)
+    outputs = tf.nn.depthwise_conv2d(inputs,
+                                     self.w,
+                                     strides=self.stride,
+                                     dilations=self.rate,
+                                     padding=self.padding,
+                                     data_format=self.data_format)
     if self.with_bias:
-      outputs = tf.nn.bias_add(outputs, self.b, data_format=self.data_format)
+      outputs = tf.nn.bias_add(outputs, self.b,
+                               data_format=self.data_format)
 
     return outputs
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     self.input_channels = inputs.shape[self._channel_index]
     if self.input_channels is None:
       raise ValueError("The number of input channels must be known.")

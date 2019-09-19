@@ -16,10 +16,13 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import replicator
+from sonnet.src import types
 import tensorflow as tf
+from typing import Sequence
 
 # Sonnet only supports a subset of distribution strategies since it makes use of
 # a simplified update model and replica local variables.
@@ -42,7 +45,8 @@ def check_distribution_strategy():
                                s.__name__ for s in _SUPPORTED_STRATEGIES)))
 
 
-def check_updates_parameters(updates, parameters):
+def check_updates_parameters(updates: Sequence[types.ParameterUpdate],
+                             parameters: Sequence[tf.Variable]):
   if len(updates) != len(parameters):
     raise ValueError("`updates` and `parameters` must be the same length.")
   if not parameters:
@@ -51,14 +55,14 @@ def check_updates_parameters(updates, parameters):
     raise ValueError("No updates provided for any parameter.")
 
 
-def check_same_dtype(update, parameter):
+def check_same_dtype(update: types.ParameterUpdate, parameter: tf.Variable):
   if update.dtype != parameter.dtype:
     raise ValueError(
         "DType of update {!r} is not equal to that of parameter {!r}".format(
             update, parameter))
 
 
-def deduplicate_indexed_slices(values, indices):
+def deduplicate_indexed_slices(values: tf.Tensor, indices: tf.Tensor):
   """Sums `values` associated with any non-unique `indices`.
 
   Args:

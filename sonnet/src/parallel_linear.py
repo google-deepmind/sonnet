@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import math
@@ -25,6 +26,7 @@ from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import utils
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class ParallelLinears(base.Module):
@@ -40,11 +42,11 @@ class ParallelLinears(base.Module):
   """
 
   def __init__(self,
-               output_size,
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               name=None):
+               output_size: int,
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               name: Optional[Text] = None):
     """Constructs a `ParallelLinear` module.
 
     Args:
@@ -68,7 +70,7 @@ class ParallelLinears(base.Module):
       raise ValueError("When not using a bias the b_init must be None.")
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     """Constructs parameters used by this module."""
     utils.assert_rank(inputs, 3)
 
@@ -95,7 +97,7 @@ class ParallelLinears(base.Module):
           self.b_init([num_linears, 1, self.output_size], inputs.dtype),
           name="b")
 
-  def __call__(self, inputs):
+  def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     self._initialize(inputs)
 
     outputs = tf.matmul(inputs, self.w)

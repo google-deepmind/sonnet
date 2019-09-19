@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import collections
@@ -24,8 +25,11 @@ import six
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class GroupNorm(base.Module):
@@ -68,28 +72,28 @@ class GroupNorm(base.Module):
   """
 
   def __init__(self,
-               groups,
-               axis=slice(1, None),
-               create_scale=True,
-               create_offset=True,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               groups: int,
+               axis: types.Axis = slice(1, None),
+               create_scale: bool = True,
+               create_offset: bool = True,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     """Constructs a ``GroupNorm`` module.
 
     Args:
-      groups: ``int`` representing the number of groups to divide the channels
-        by. The number of channels must be divisible by this.
+      groups: number of groups to divide the channels by. The number of channels
+        must be divisible by this.
       axis: ``int``, ``slice`` or sequence of ints representing the axes which
         should be normalized across. By default this is all but the first
         dimension. For time series data use `slice(2, None)` to average over the
         none Batch and Time data.
-      create_scale: ``bool`` representing whether to create a trainable scale
-        per channel applied after the normalization.
-      create_offset: ``bool`` representing whether to create a trainable offset
-        per channel applied after normalization and scaling.
+      create_scale: whether to create a trainable scale per channel applied
+        after the normalization.
+      create_offset: whether to create a trainable offset per channel applied
+        after normalization and scaling.
       eps: Small epsilon to add to the variance to avoid division by zero.
         Defaults to ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
@@ -133,7 +137,10 @@ class GroupNorm(base.Module):
     elif offset_init is not None:
       raise ValueError("Cannot set `offset_init` if `create_offset=False`.")
 
-  def __call__(self, inputs, scale=None, offset=None):
+  def __call__(self,
+               inputs: tf.Tensor,
+               scale: Optional[tf.Tensor] = None,
+               offset: Optional[tf.Tensor] = None):
     """Returns normalized inputs.
 
     Args:
@@ -186,7 +193,7 @@ class GroupNorm(base.Module):
     return outputs
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     """Setup of rank specific values."""
     self._rank = len(inputs.shape)
 

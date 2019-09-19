@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
@@ -24,13 +25,20 @@ from sonnet.src import conv
 from sonnet.src import initializers
 from sonnet.src import linear
 from sonnet.src import pad
+
 import tensorflow as tf
+from typing import Mapping, Optional, Sequence, Text, Union
 
 
 class BottleNeckBlockV1(base.Module):
-  """Bottleneck Block for a Resnet implementation."""
+  """Bottleneck Block for a ResNet implementation."""
 
-  def __init__(self, channels, stride, use_projection, bn_config, name=None):
+  def __init__(self,
+               channels: int,
+               stride: Union[int, Sequence[int]],
+               use_projection: bool,
+               bn_config: Mapping[Text, float],
+               name: Optional[Text] = None):
     super(BottleNeckBlockV1, self).__init__(name=name)
     self._channels = channels
     self._stride = stride
@@ -104,7 +112,12 @@ class BottleNeckBlockV1(base.Module):
 class BottleNeckBlockV2(base.Module):
   """Bottleneck Block for a Resnet implementation."""
 
-  def __init__(self, channels, stride, use_projection, bn_config, name=None):
+  def __init__(self,
+               channels: int,
+               stride: Union[int, Sequence[int]],
+               use_projection: bool,
+               bn_config: Mapping[Text, float],
+               name: Optional[Text] = None):
     super(BottleNeckBlockV2, self).__init__(name=name)
     self._channels = channels
     self._stride = stride
@@ -181,12 +194,12 @@ class BlockGroup(base.Module):
   """Higher level block for ResNet implementation."""
 
   def __init__(self,
-               channels,
-               num_blocks,
-               stride,
-               bn_config,
-               resnet_v2=False,
-               name=None):
+               channels: int,
+               num_blocks: int,
+               stride: Union[int, Sequence[int]],
+               bn_config: Mapping[Text, float],
+               resnet_v2: bool = False,
+               name: Optional[Text] = None):
     super(BlockGroup, self).__init__(name=name)
     self._channels = channels
     self._num_blocks = num_blocks
@@ -219,11 +232,11 @@ class ResNet(base.Module):
   """ResNet model."""
 
   def __init__(self,
-               blocks_per_group_list,
-               num_classes,
-               bn_config=None,
-               resnet_v2=False,
-               name=None):
+               blocks_per_group_list: Sequence[int],
+               num_classes: int,
+               bn_config: Optional[Mapping[Text, float]] = None,
+               resnet_v2: bool = False,
+               name: Optional[Text] = None):
     """Constructs a ResNet model.
 
     Args:
@@ -313,7 +326,11 @@ class ResNet(base.Module):
 class ResNet50(ResNet):
   """ResNet50 module."""
 
-  def __init__(self, num_classes, bn_config=None, resnet_v2=False, name=None):
+  def __init__(self,
+               num_classes: int,
+               bn_config: Optional[Mapping[Text, float]] = None,
+               resnet_v2: bool = False,
+               name: Optional[Text] = None):
     """Constructs a ResNet model.
 
     Args:

@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import collections
@@ -24,8 +25,11 @@ import six
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class LayerNorm(base.Module):
@@ -66,14 +70,14 @@ class LayerNorm(base.Module):
   """
 
   def __init__(self,
-               axis,
-               create_scale,
-               create_offset,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               axis: types.Axis,
+               create_scale: bool,
+               create_offset: bool,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     r"""Constructs an ``LayerNorm`` module.
 
     Args:
@@ -130,7 +134,10 @@ class LayerNorm(base.Module):
     elif offset_init is not None:
       raise ValueError("Cannot set `offset_init` if `create_offset=False`.")
 
-  def __call__(self, inputs, scale=None, offset=None):
+  def __call__(self,
+               inputs: tf.Tensor,
+               scale: Optional[tf.Tensor] = None,
+               offset: Optional[tf.Tensor] = None) -> tf.Tensor:
     """Returns normalized inputs.
 
     Args:
@@ -179,7 +186,7 @@ class LayerNorm(base.Module):
     return normalized
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     """Setup of rank specific values."""
     self._rank = len(inputs.shape)
 
@@ -221,13 +228,13 @@ class InstanceNorm(LayerNorm):
   """
 
   def __init__(self,
-               create_scale,
-               create_offset,
-               eps=1e-5,
-               scale_init=None,
-               offset_init=None,
-               data_format="channels_last",
-               name=None):
+               create_scale: bool,
+               create_offset: bool,
+               eps: types.FloatLike = 1e-5,
+               scale_init: Optional[initializers.Initializer] = None,
+               offset_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "channels_last",
+               name: Optional[Text] = None):
     """Constructs an ``InstanceNorm`` module.
 
     This method creates a module which normalizes over the spatial dimensions.

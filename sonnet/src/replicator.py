@@ -25,7 +25,7 @@ from sonnet.src import initializers
 import tensorflow as tf
 
 
-def make_replica_local_creator(tpu_strategy):
+def make_replica_local_creator(tpu_strategy: bool):
   """Makes a variable creator which creates replica local variables."""
 
   def _replica_local_creator(next_creator, **kwargs) -> tf.Variable:

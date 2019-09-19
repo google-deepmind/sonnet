@@ -16,37 +16,48 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import utils
+from typing import Callable, Sequence, Union
+
+Padding = Callable[[int], Sequence[int]]
+Paddings = Union[Padding, Sequence[Padding]]
 
 
-def valid(effective_kernel_size):  # pylint: disable=unused-argument
+def valid(effective_kernel_size: int):  # pylint: disable=unused-argument
   """No padding."""
   return [0, 0]
 
 
-def same(effective_kernel_size):
+def same(effective_kernel_size: int):
   """Pads such that the output size matches input size for stride=1."""
   return [(effective_kernel_size - 1) // 2, effective_kernel_size // 2]
 
 
-def full(effective_kernel_size):
+def full(effective_kernel_size: int):
   """Maximal padding whilst not convolving over just padded elements."""
   return [effective_kernel_size - 1, effective_kernel_size - 1]
 
 
-def causal(effective_kernel_size):
+def causal(effective_kernel_size: int):
   """Pre-padding such that output has no dependence on the future."""
   return [effective_kernel_size - 1, 0]
 
 
-def reverse_causal(effective_kernel_size):
+def reverse_causal(effective_kernel_size: int):
   """Post-padding such that output has no dependence on the past."""
   return [0, effective_kernel_size - 1]
 
 
-def create(padding, kernel, rate, n, channel_index):
+def create(
+    padding: Paddings,
+    kernel: Union[int, Sequence[int]],
+    rate: Union[int, Sequence[int]],
+    n: int,
+    channel_index: int,
+):
   """Generates the padding required for a given padding algorithm.
 
   Args:
@@ -72,11 +83,9 @@ def create(padding, kernel, rate, n, channel_index):
   # dilation rate. It's equal to kernel_size when rate == 1.
   effective_kernel_size = map(  # pylint: disable=deprecated-lambda
       lambda kernel, rate: (kernel - 1) * rate + 1,
-      utils.replicate(kernel, n, "kernel"),
-      utils.replicate(rate, n, "rate"))
+      utils.replicate(kernel, n, "kernel"), utils.replicate(rate, n, "rate"))
   paddings = map(  # pylint: disable=deprecated-lambda
-      lambda x, y: x(y),
-      utils.replicate(padding, n, "padding"),
+      lambda x, y: x(y), utils.replicate(padding, n, "padding"),
       effective_kernel_size)
   if channel_index == 1:  # N, C, ...
     paddings = [[0, 0], [0, 0]] + list(paddings)

@@ -36,8 +36,9 @@ snt_py_library(
         "//sonnet/src:base",
         "//sonnet/src:batch_norm",
         "//sonnet/src:conv",
+        "//sonnet/src:initializers",
         "//sonnet/src:linear",
-        "//sonnet/src:moving_averages",
+        "//sonnet/src:types",
         # pip: tensorflow
     ],
 )
@@ -61,6 +62,7 @@ snt_py_library(
         "//sonnet/src:base",
         "//sonnet/src:initializers",
         "//sonnet/src:moving_averages",
+        "//sonnet/src:types",
         # pip: tensorflow
     ],
 )

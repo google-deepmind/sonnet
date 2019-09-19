@@ -16,12 +16,15 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import abc
 
 import six
+from sonnet.src import types
 import tensorflow as tf
+from typing import Sequence
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -29,7 +32,7 @@ class Regularizer(object):
   """Base regularizer class."""
 
   @abc.abstractmethod
-  def __call__(self, tensors):
+  def __call__(self, tensors: Sequence[tf.Tensor]) -> tf.Tensor:
     """Apply a regularizer.
 
     Args:
@@ -48,7 +51,7 @@ class L1(Regularizer):
   <tf.Tensor: ...>
   """
 
-  def __init__(self, scale):
+  def __init__(self, scale: types.FloatLike):
     """Create an L1 regularizer.
 
     Args:
@@ -66,7 +69,7 @@ class L1(Regularizer):
 
   __str__ = __repr__
 
-  def __call__(self, tensors):
+  def __call__(self, tensors: Sequence[tf.Tensor]) -> tf.Tensor:
     """See base class."""
     if not tensors:
       return tf.zeros_like(self.scale)
@@ -82,7 +85,7 @@ class L2(Regularizer):
   <tf.Tensor: ...>
   """
 
-  def __init__(self, scale):
+  def __init__(self, scale: types.FloatLike):
     """Create an L2 regularizer.
 
     Args:
@@ -100,7 +103,7 @@ class L2(Regularizer):
 
   __str__ = __repr__
 
-  def __call__(self, tensors):
+  def __call__(self, tensors: Sequence[tf.Tensor]) -> tf.Tensor:
     """See base class."""
     if not tensors:
       return tf.zeros_like(self.scale)
@@ -137,7 +140,7 @@ class OffDiagonalOrthogonal(Regularizer):
       <tf.Tensor: ...>
   """
 
-  def __init__(self, scale):
+  def __init__(self, scale: types.FloatLike):
     """Create an off-diagonal orthogonal regularizer.
 
     Args:
@@ -154,7 +157,7 @@ class OffDiagonalOrthogonal(Regularizer):
 
   __str__ = __repr__
 
-  def __call__(self, tensors):
+  def __call__(self, tensors: Sequence[tf.Tensor]) -> tf.Tensor:
     """See base class."""
     if not tensors:
       return tf.zeros_like(self.scale)
@@ -169,7 +172,7 @@ class OffDiagonalOrthogonal(Regularizer):
     return self.scale * tf.add_n(acc)
 
 
-def _check_scale(scale):
+def _check_scale(scale: types.FloatLike) -> types.FloatLike:
   if scale < 0:
     raise ValueError("scale must be >=0")
   return scale

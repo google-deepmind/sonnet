@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Conv transpose module."""
+"""Transpose convolutional module."""
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import numpy as np
@@ -23,12 +24,15 @@ import numpy as np
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class ConvNDTranspose(base.Module):
-  """`ConvNDTranspose` module.
+  """An N-dimensional transpose convolutional module.
 
   Attributes:
      w: Weight variable. Note is `None` until module is connected.
@@ -38,31 +42,30 @@ class ConvNDTranspose(base.Module):
   """
 
   def __init__(self,
-               num_spatial_dims,
-               output_channels,
-               kernel_shape,
-               output_shape=None,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format=None,
-               name=None):
+               num_spatial_dims: int,
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               output_shape: Optional[types.ShapeLike] = None,
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Text = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Optional[Text] = None,
+               name: Optional[Text] = None):
     """Constructs a `ConvNDTranspose` module.
 
     Args:
-      num_spatial_dims: An integer, the number of spatial dimensions of the
-        input.
-      output_channels: An integer, The number of output channels.
+      num_spatial_dims: Number of spatial dimensions of the input.
+      output_channels: Number of output channels.
       kernel_shape: Sequence of integers (of length num_spatial_dims), or an
         integer representing kernel shape. `kernel_shape` will be expanded to
         define a kernel size in all dimensions.
       output_shape: Output shape of the spatial dimensions of a transpose
-        convolution. Can be either an integer or an iterable of integers or
-        `Dimension`s, or a `TensorShape` (of length num_spatial_dims). If a None
-        value is given, a default shape is automatically calculated.
+        convolution. Can be either an integer or an iterable of integers or a
+        `TensorShape` of length `num_spatial_dims`. If a `None` value is given,
+        a default shape is automatically calculated.
       stride: Sequence of integers (of length num_spatial_dims), or an integer.
         `stride` will be expanded to define stride in all dimensions.
       rate: Sequence of integers (of length num_spatial_dims), or integer that
@@ -114,8 +117,8 @@ class ConvNDTranspose(base.Module):
     output_shape = tf.concat([[tf.shape(inputs)[0]], self._output_shape], 0)
 
     outputs = tf.nn.conv_transpose(
-        inputs,
-        self.w,
+        input=inputs,
+        filters=self.w,
         output_shape=output_shape,
         strides=self._stride,
         padding=self._padding,
@@ -189,24 +192,24 @@ class ConvNDTranspose(base.Module):
 
 
 class Conv1DTranspose(ConvNDTranspose):
-  """`Conv1DTranspose` module."""
+  """A 1D transpose convolutional module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               output_shape=None,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               output_shape: Optional[types.ShapeLike] = None,
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Text = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NWC",
+               name: Optional[Text] = None):
     """Constructs a `Conv1DTranspose` module.
 
     Args:
-      output_channels: An integer, The number of output channels.
+      output_channels: Number of output channels.
       kernel_shape: Sequence of integers (of length 1), or an integer
         representing kernel shape. `kernel_shape` will be expanded to define a
         kernel size in all dimensions.
@@ -246,20 +249,20 @@ class Conv1DTranspose(ConvNDTranspose):
 
 
 class Conv2DTranspose(ConvNDTranspose):
-  """`Conv2DTranspose` module."""
+  """A 2D transpose convolutional module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               output_shape=None,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NHWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               output_shape: Optional[types.ShapeLike] = None,
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Text = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NHWC",
+               name: Optional[Text] = None):
     """Constructs a `Conv2DTranspose` module.
 
     Args:
@@ -303,20 +306,20 @@ class Conv2DTranspose(ConvNDTranspose):
 
 
 class Conv3DTranspose(ConvNDTranspose):
-  """`Conv3DTranspose` module."""
+  """A 3D transpose convolutional module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               output_shape=None,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NDHWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               output_shape: Optional[types.ShapeLike] = None,
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Text = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NDHWC",
+               name: Optional[Text] = None):
     """Constructs a `Conv3DTranspose` module.
 
     Args:

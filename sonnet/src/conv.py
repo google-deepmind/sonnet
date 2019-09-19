@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Conv module."""
+"""Convolutional modules."""
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 import numpy as np
@@ -27,23 +28,24 @@ from sonnet.src import once
 from sonnet.src import pad
 from sonnet.src import utils
 import tensorflow as tf
+from typing import Optional, Sequence, Text, Union
 
 
 class ConvND(base.Module):
-  """`ConvND` module."""
+  """A general N-dimensional convolutional module."""
 
   def __init__(self,
-               num_spatial_dims,
-               output_channels,
-               kernel_shape,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format=None,
-               name=None):
+               num_spatial_dims: int,
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Union[Text, pad.Paddings] = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Optional[Text] = None,
+               name: Optional[Text] = None):
     """Constructs a `ConvND` module.
 
     Args:
@@ -101,7 +103,7 @@ class ConvND(base.Module):
     elif b_init is not None:
       raise ValueError("When not using a bias the b_init must be None.")
 
-  def __call__(self, inputs):
+  def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     """Applies the defined convolution to the inputs.
 
     Args:
@@ -130,7 +132,7 @@ class ConvND(base.Module):
     return outputs
 
   @once.once
-  def _initialize(self, inputs):
+  def _initialize(self, inputs: tf.Tensor):
     """Constructs parameters used by this module."""
     utils.assert_rank(inputs, self._num_spatial_dims + 2)
     self.input_channels = inputs.shape[self._channel_index]
@@ -169,16 +171,16 @@ class Conv1D(ConvND):
   """``Conv1D`` module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Union[Text, pad.Paddings] = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NWC",
+               name: Optional[Text] = None):
     """Constructs a ``Conv1D`` module.
 
     Args:
@@ -223,16 +225,16 @@ class Conv2D(ConvND):
   """`Conv2D` module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NHWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Union[Text, pad.Paddings] = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NHWC",
+               name: Optional[Text] = None):
     """Constructs a ``Conv2D`` module.
 
     Args:
@@ -278,16 +280,16 @@ class Conv3D(ConvND):
   """`Conv3D` module."""
 
   def __init__(self,
-               output_channels,
-               kernel_shape,
-               stride=1,
-               rate=1,
-               padding="SAME",
-               with_bias=True,
-               w_init=None,
-               b_init=None,
-               data_format="NDHWC",
-               name=None):
+               output_channels: int,
+               kernel_shape: Union[int, Sequence[int]],
+               stride: Union[int, Sequence[int]] = 1,
+               rate: Union[int, Sequence[int]] = 1,
+               padding: Union[Text, pad.Paddings] = "SAME",
+               with_bias: bool = True,
+               w_init: Optional[initializers.Initializer] = None,
+               b_init: Optional[initializers.Initializer] = None,
+               data_format: Text = "NDHWC",
+               name: Optional[Text] = None):
     """Constructs a ``Conv3D`` module.
 
     Args:

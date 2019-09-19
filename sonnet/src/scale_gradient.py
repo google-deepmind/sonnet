@@ -12,18 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Tensorflow op that scales gradient for backwards pass."""
+"""TensorFlow op that scales gradient for backwards pass."""
 
 from __future__ import absolute_import
 from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+from sonnet.src import types
 import tensorflow as tf
+from typing import Tuple
 
 
 @tf.custom_gradient
-def scale_gradient(t, scale):
+def scale_gradient(
+    t: tf.Tensor, scale: types.FloatLike
+) -> Tuple[tf.Tensor, types.GradFn]:
   """Scales gradients for the backwards pass.
 
   Args:
@@ -34,7 +38,7 @@ def scale_gradient(t, scale):
     A Tensor same as input, with scaled backward gradient.
   """
 
-  def grad(dy):
+  def grad(dy: tf.Tensor) -> Tuple[tf.Tensor, None]:
     """Scaled gradient."""
     return scale * dy, None
 

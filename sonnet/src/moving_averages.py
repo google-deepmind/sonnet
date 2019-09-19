@@ -16,11 +16,15 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import metrics
 from sonnet.src import once
+from sonnet.src import types
+
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class ExponentialMovingAverage(metrics.Metric):
@@ -48,13 +52,13 @@ class ExponentialMovingAverage(metrics.Metric):
       value is passed.
   """
 
-  def __init__(self, decay, name=None):
+  def __init__(self, decay: types.FloatLike, name: Optional[Text] = None):
     """Creates a debiased moving average module.
 
     Args:
-      decay: Float, the decay to use. Note values close to 1 result in a slow
-        decay whereas values close to 0 result in faster decay, tracking the
-        input values more closely.
+      decay: The decay to use. Note values close to 1 result in a slow decay
+        whereas values close to 0 result in faster decay, tracking the input
+        values more closely.
       name: Name of the module.
     """
     super(ExponentialMovingAverage, self).__init__(name=name)
@@ -65,7 +69,7 @@ class ExponentialMovingAverage(metrics.Metric):
     self._hidden = None
     self.average = None
 
-  def update(self, value):
+  def update(self, value: tf.Tensor):
     """Applies EMA to the value given."""
     self.initialize(value)
 
@@ -76,7 +80,7 @@ class ExponentialMovingAverage(metrics.Metric):
     self.average.assign((self._hidden / (1. - tf.pow(self._decay, counter))))
 
   @property
-  def value(self):
+  def value(self) -> tf.Tensor:
     """Returns the current EMA."""
     return self.average.read_value()
 
@@ -87,7 +91,7 @@ class ExponentialMovingAverage(metrics.Metric):
     self.average.assign(0.)
 
   @once.once
-  def initialize(self, value):
+  def initialize(self, value: tf.Tensor):
     self._hidden = tf.Variable(
         tf.zeros_like(value), trainable=False, name="hidden")
     self.average = tf.Variable(

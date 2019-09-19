@@ -16,13 +16,16 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import moving_averages
+from sonnet.src import types
 
 import tensorflow as tf
+from typing import Text
 
 
 class VectorQuantizer(base.Module):
@@ -51,18 +54,17 @@ class VectorQuantizer(base.Module):
   """
 
   def __init__(self,
-               embedding_dim,
-               num_embeddings,
-               commitment_cost,
-               dtype=tf.float32,
-               name='vector_quantizer'):
+               embedding_dim: int,
+               num_embeddings: int,
+               commitment_cost: types.FloatLike,
+               dtype: tf.DType = tf.float32,
+               name: Text = 'vector_quantizer'):
     """Initializes a VQ-VAE module.
 
     Args:
-      embedding_dim: integer representing the dimensionality of the tensors in
-        the quantized space. Inputs to the modules must be in this format as
-        well.
-      num_embeddings: integer, the number of vectors in the quantized space.
+      embedding_dim: dimensionality of the tensors in the quantized space.
+        Inputs to the modules must be in this format as well.
+      num_embeddings: number of vectors in the quantized space.
       commitment_cost: scalar which controls the weighting of the loss terms
         (see equation 4 in the paper - this variable is Beta).
       dtype: dtype for the embeddings variable, defaults to tf.float32.

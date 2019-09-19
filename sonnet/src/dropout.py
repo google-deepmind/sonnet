@@ -12,15 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
+
 """Sonnet dropout modules."""
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from sonnet.src import base
+from sonnet.src import types
 from sonnet.src import utils
+
 import tensorflow as tf
+from typing import Optional, Text
 
 
 class Dropout(base.Module):
@@ -32,7 +37,11 @@ class Dropout(base.Module):
   from this paper by scaling activations at training time rather than test time.
   """
 
-  def __init__(self, rate, noise_shape=None, seed=None, name=None):
+  def __init__(self,
+               rate: types.FloatLike,
+               noise_shape: Optional[types.ShapeLike] = None,
+               seed: Optional[int] = None,
+               name: Optional[Text] = None):
     """Constructs a Dropout module.
 
     Args:
@@ -51,7 +60,7 @@ class Dropout(base.Module):
     self._seed = seed
 
   @utils.smart_autograph
-  def __call__(self, x, is_training):
+  def __call__(self, x: tf.Tensor, is_training: types.BoolLike) -> tf.Tensor:
     if not is_training:
       return x
 

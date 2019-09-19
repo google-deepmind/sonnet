@@ -86,9 +86,9 @@ class ExponentialMovingAverage(metrics.Metric):
 
   def reset(self):
     """Resets the EMA."""
-    self._counter.assign(0)
-    self._hidden.assign(0.)
-    self.average.assign(0.)
+    self._counter.assign(tf.zeros_like(self._counter))
+    self._hidden.assign(tf.zeros_like(self._hidden))
+    self.average.assign(tf.zeros_like(self.average))
 
   @once.once
   def initialize(self, value: tf.Tensor):

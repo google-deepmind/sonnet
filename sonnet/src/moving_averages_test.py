@@ -45,9 +45,19 @@ class ExponentialMovingAverageTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(ema(3.0).numpy(), 3.0, atol=1e-3, rtol=1e-5)
 
     ema.reset()
+    self.assertEqual(ema.value.shape, ())
     self.assertEqual(ema.value.numpy(), 0.0)
 
     self.assertAllClose(ema(3.0).numpy(), 3.0, atol=1e-3, rtol=1e-5)
+
+  def testResetVector(self):
+    ema = moving_averages.ExponentialMovingAverage(0.90)
+    random_input = tf.random.normal((1, 5))
+    ema(random_input)
+    ema.reset()
+    self.assertEqual(ema.value.shape, (1, 5))
+    self.assertAllClose(ema.value.numpy(), tf.zeros_like(random_input))
+    self.assertEqual(ema._counter.dtype, tf.int64)
 
   def testValueEqualsLatestUpdate(self):
     ema = moving_averages.ExponentialMovingAverage(0.50)

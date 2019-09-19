@@ -54,8 +54,8 @@ class ExponentialMovingAverage(metrics.Metric):
 
     Args:
       decay: Float, the decay to use. Note values close to 1 result in a slow
-        decay whereas values result in faster decay, tracking the input values
-        more closely.
+        decay whereas values close to 0 result in faster decay, tracking the
+        input values more closely.
       name: Name of the module.
     """
     super(ExponentialMovingAverage, self).__init__(name=name)

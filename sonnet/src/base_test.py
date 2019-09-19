@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.base."""
 
 from __future__ import absolute_import
@@ -39,13 +38,13 @@ class BaseTest(test_utils.TestCase):
     mod = WraptModule()
     scope_name, y = mod(3)
     self.assertEqual(scope_name, "wrapt_module/")
-    self.assertEqual(y, (3 ** 2) ** 2)
+    self.assertEqual(y, (3**2)**2)
 
   def testControlFlow(self):
     mod = ControlFlowModule()
     f = tf.function(mod).get_concrete_function(tf.TensorSpec([]))
     self.assertEqual(f(tf.constant(1.)).numpy(), 1.)
-    self.assertEqual(f(tf.constant(11.)).numpy(), 11. ** 2)
+    self.assertEqual(f(tf.constant(11.)).numpy(), 11.**2)
 
 
 class TestModuleNaming(tf.test.TestCase):
@@ -234,8 +233,7 @@ class AutoReprTest(tf.test.TestCase):
   def test_long_repr_multi_line(self):
     module = TakesSubmodules([TreeModule() for _ in range(6)], name="hai")
     self.assertEqual(
-        repr(module),
-        "\n".join([
+        repr(module), "\n".join([
             "TakesSubmodules(",
             "    submodules=[TreeModule(),",
             "                TreeModule(),",
@@ -316,14 +314,14 @@ def wrapt_decorator(method, instance, args, kwargs):
     raise ValueError("Expected instance to be non-null.")
 
   scope_name, y = method(*args, **kwargs)
-  return scope_name, y ** 2
+  return scope_name, y**2
 
 
 class WraptModule(base.Module):
 
   @wrapt_decorator
   def __call__(self, x):
-    return get_name_scope(), x ** 2
+    return get_name_scope(), x**2
 
 
 class ControlFlowModule(base.Module):
@@ -332,7 +330,7 @@ class ControlFlowModule(base.Module):
     if x < 10:
       return x
     else:
-      return x ** 2
+      return x**2
 
 
 class ErrorModuleError(Exception):
@@ -375,7 +373,7 @@ class AbstractModule(base.Module):
 class ConcreteModule(AbstractModule):
 
   def __call__(self, x):
-    return x ** 2, get_name_scope()
+    return x**2, get_name_scope()
 
 
 class TreeModule(base.Module):
@@ -586,6 +584,7 @@ class WildcardInit(base.Module):
   def __init__(self, a, b, *args, **kwargs):
     super(WildcardInit, self).__init__()
     del args, kwargs
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

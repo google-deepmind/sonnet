@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.batch_apply."""
 
 from __future__ import absolute_import
@@ -174,6 +173,7 @@ class AddOne(base.Module):
   def __call__(self, x):
     assert len(x.shape) == 2, "Requires rank 2 input."
     return x + 1.
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

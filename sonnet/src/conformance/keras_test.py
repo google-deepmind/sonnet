@@ -50,8 +50,9 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
     by_name = lambda c: sorted(c, key=lambda v: v.name)
     abstract = lambda v: (v.name, v.shape, v.dtype)
     for collection in ("variables", "trainable_variables"):
-      for m, l in zip(by_name(getattr(mod, collection)),
-                      by_name(getattr(layer, collection))):
+      for m, l in zip(
+          by_name(getattr(mod, collection)),
+          by_name(getattr(layer, collection))):
         self.assertEqual(abstract(m), abstract(l))
 
   @parameterized.named_parameters(*(BATCH_MODULES + RECURRENT_MODULES))
@@ -61,8 +62,9 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
     example_input = tf.ones(input_shape, dtype=dtype)
 
     # Check outputs are the same.
-    for m_y, l_y in zip(tf.nest.flatten(mod(example_input)),
-                        tf.nest.flatten(layer(example_input))):
+    for m_y, l_y in zip(
+        tf.nest.flatten(mod(example_input)),
+        tf.nest.flatten(layer(example_input))):
       self.assertEqual(m_y.shape, l_y.shape)
       self.assertEqual(m_y.dtype, l_y.dtype)
 
@@ -71,8 +73,8 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
 
     # Check that variables are the same.
     self.assertEqual(len(mod.variables), len(layer.variables))
-    self.assertEqual(len(mod.trainable_variables),
-                     len(layer.trainable_variables))
+    self.assertEqual(
+        len(mod.trainable_variables), len(layer.trainable_variables))
 
     # Check that Keras layer freezing works
     layer.trainable = False
@@ -90,9 +92,11 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(layer.module.w.numpy(), 0)
 
   def test_layer_with_model(self):
-    layers = [LayerAdapter(snt.Linear(3)),
-              LayerAdapter(snt.Linear(2)),
-              LayerAdapter(snt.Linear(1))]
+    layers = [
+        LayerAdapter(snt.Linear(3)),
+        LayerAdapter(snt.Linear(2)),
+        LayerAdapter(snt.Linear(1))
+    ]
 
     model = tf.keras.models.Sequential(layers)
     model.build([None, 4])
@@ -115,8 +119,9 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
 
     example_input = tf.ones(input_shape, dtype=dtype)
     # Check outputs are the same.
-    for m_y, l_y in zip(tf.nest.flatten(module(example_input)),
-                        tf.nest.flatten(model(example_input))):
+    for m_y, l_y in zip(
+        tf.nest.flatten(module(example_input)),
+        tf.nest.flatten(model(example_input))):
       self.assertEqual(m_y.shape, l_y.shape)
       self.assertEqual(m_y.dtype, l_y.dtype)
 
@@ -234,6 +239,7 @@ class ModuleWithCustomForward(snt.Module):
   def forward(self, x):
     self._init(x)
     return x + self.w
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

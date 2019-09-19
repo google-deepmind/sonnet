@@ -27,41 +27,41 @@ import tensorflow as tf
 
 class SegmentDimTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(([2], [7]), ([], [7]), ([2], []),
-                            ([2], [7, 11]), ([2, 11], [7]))
+  @parameterized.parameters(([2], [7]), ([], [7]), ([2], []), ([2], [7, 11]),
+                            ([2, 11], [7]))
   def testShape(self, initial_shape, final_shape):
     first_shape = tf.TensorShape([3, 3])
     second_shape = tf.TensorShape([5])
     segment_shapes = [first_shape, second_shape]
 
-    inputs_shape = (initial_shape +
-                    [first_shape.num_elements() +
-                     second_shape.num_elements()] +
-                    final_shape)
+    inputs_shape = (
+        initial_shape +
+        [first_shape.num_elements() + second_shape.num_elements()] +
+        final_shape)
 
     inputs = tf.random.uniform(inputs_shape)
-    first, second = util.segment_dim(inputs, dim=len(initial_shape),
-                                     shapes=segment_shapes)
+    first, second = util.segment_dim(
+        inputs, dim=len(initial_shape), shapes=segment_shapes)
     self.assertAllEqual(first.shape.as_list(),
                         initial_shape + first_shape.as_list() + final_shape)
     self.assertAllEqual(second.shape.as_list(),
                         initial_shape + second_shape.as_list() + final_shape)
 
-  @parameterized.parameters(([2], [7]), ([], [7]), ([2], []),
-                            ([2], [7, 11]), ([2, 11], [7]))
+  @parameterized.parameters(([2], [7]), ([], [7]), ([2], []), ([2], [7, 11]),
+                            ([2, 11], [7]))
   def testShapeNegative(self, initial_shape, final_shape):
     first_shape = tf.TensorShape([3, 3])
     second_shape = tf.TensorShape([5])
     segment_shapes = [first_shape, second_shape]
 
-    inputs_shape = (initial_shape +
-                    [first_shape.num_elements() +
-                     second_shape.num_elements()] +
-                    final_shape)
+    inputs_shape = (
+        initial_shape +
+        [first_shape.num_elements() + second_shape.num_elements()] +
+        final_shape)
 
     inputs = tf.random.uniform(inputs_shape)
-    first, second = util.segment_dim(inputs, dim=-len(final_shape) - 1,
-                                     shapes=segment_shapes)
+    first, second = util.segment_dim(
+        inputs, dim=-len(final_shape) - 1, shapes=segment_shapes)
     self.assertAllEqual(first.shape.as_list(),
                         initial_shape + first_shape.as_list() + final_shape)
     self.assertAllEqual(second.shape.as_list(),
@@ -136,12 +136,11 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     lin_b = linear.Linear(output_size, name='lin_b')
     input_a = tf.random.uniform([batch_size, input_size_a])
     input_b = tf.random.uniform([batch_size, input_size_b])
-    output = util.apply_linear(
-        (input_a, input_b), (lin_a, lin_b), activation=tf.nn.relu)
+    output = util.apply_linear((input_a, input_b), (lin_a, lin_b),
+                               activation=tf.nn.relu)
     expected_output = np.maximum(
-        0,
-        (np.matmul(input_a.numpy(), lin_a.w.numpy()) + lin_a.b.numpy() +
-         np.matmul(input_b.numpy(), lin_b.w.numpy()) + lin_b.b.numpy()))
+        0, (np.matmul(input_a.numpy(), lin_a.w.numpy()) + lin_a.b.numpy() +
+            np.matmul(input_b.numpy(), lin_b.w.numpy()) + lin_b.b.numpy()))
     self.assertAllClose(expected_output, output.numpy(), atol=self.get_atol())
 
   def testDifferentOutputSizeBreaks(self):
@@ -159,19 +158,20 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
       util.apply_linear((input_a, input_b), (lin_a, lin_b))
 
   @parameterized.parameters(
-      {'input_sizes': 4,
-       'module_hidden_sizes': (2, 3)},
-      {'input_sizes': (5, 7),
-       'module_hidden_sizes': 10},
-      )
+      {
+          'input_sizes': 4,
+          'module_hidden_sizes': (2, 3)
+      },
+      {
+          'input_sizes': (5, 7),
+          'module_hidden_sizes': 10
+      },
+  )
   def testNonMatchingStructureBreaks(self, input_sizes, module_hidden_sizes):
     batch_size = 16
     inputs = tf.nest.map_structure(
-        lambda size: tf.random.uniform([batch_size, size]),
-        input_sizes)
-    modules = tf.nest.map_structure(
-        linear.Linear,
-        module_hidden_sizes)
+        lambda size: tf.random.uniform([batch_size, size]), input_sizes)
+    modules = tf.nest.map_structure(linear.Linear, module_hidden_sizes)
 
     with self.assertRaisesRegexp(ValueError,
                                  'don\'t have the same nested structure'):
@@ -179,21 +179,23 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
       # Even when list length matches, len must be 2
-      {'input_sizes': [10] * 3,
-       'module_hidden_sizes': [3] * 3},
-      {'input_sizes': [1],
-       'module_hidden_sizes': [4]})
+      {
+          'input_sizes': [10] * 3,
+          'module_hidden_sizes': [3] * 3
+      },
+      {
+          'input_sizes': [1],
+          'module_hidden_sizes': [4]
+      })
   def testListMustBeLengthTwo(self, input_sizes, module_hidden_sizes):
     batch_size = 16
     inputs = tf.nest.map_structure(
-        lambda size: tf.random.uniform([batch_size, size]),
-        input_sizes)
-    modules = tf.nest.map_structure(
-        linear.Linear,
-        module_hidden_sizes)
+        lambda size: tf.random.uniform([batch_size, size]), input_sizes)
+    modules = tf.nest.map_structure(linear.Linear, module_hidden_sizes)
 
     with self.assertRaisesRegexp(AssertionError, 'must be length 2'):
       util.apply_linear(inputs, modules)
+
 
 if __name__ == '__main__':
   # tf.enable_v2_behavior()

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.nets.resnet."""
 
 from __future__ import absolute_import
@@ -37,7 +36,10 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_tf_function(self):
     image = tf.random.normal([2, 64, 64, 3])
-    model = resnet.ResNet([1, 1, 1, 1], 10,)
+    model = resnet.ResNet(
+        [1, 1, 1, 1],
+        10,
+    )
     f = tf.function(model)
 
     logits = f(image, is_training=True)
@@ -49,10 +51,10 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
   def test_error_incorrect_args(self, list_length):
     block_list = [i for i in range(list_length)]
     with self.assertRaisesRegexp(
-        ValueError,
-        "blocks_per_group_list` must be of length 4 not {}".format(list_length)
-        ):
+        ValueError, "blocks_per_group_list` must be of length 4 not {}".format(
+            list_length)):
       resnet.ResNet(block_list, 10, {"decay_rate": 0.9, "eps": 1e-5})
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

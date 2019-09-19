@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Conv module."""
 
 from __future__ import absolute_import
@@ -51,19 +50,18 @@ class ConvND(base.Module):
       num_spatial_dims: The number of spatial dimensions of the input.
       output_channels: The number of output channels.
       kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
-        integer. `kernel_shape` will be expanded to define a kernel size in
-        all dimensions.
+        integer. `kernel_shape` will be expanded to define a kernel size in all
+        dimensions.
       stride: Sequence of strides (of length num_spatial_dims), or an integer.
         `stride` will be expanded to define stride in all dimensions.
       rate: Sequence of dilation rates (of length num_spatial_dims), or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds
-        to standard ND convolution, `rate > 1` corresponds to dilated
-        convolution.
+        that is used to define dilation rate in all dimensions. 1 corresponds to
+        standard ND convolution, `rate > 1` corresponds to dilated convolution.
       padding: Padding to apply to the input. This can either "SAME", "VALID" or
         a callable or sequence of callables up to size N. Any callables must
         take a single integer argument equal to the effective kernel size and
-        return a list of two integers representing the padding before and
-        after. See snt.pad.* for more details and example functions.
+        return a list of two integers representing the padding before and after.
+        See snt.pad.* for more details and example functions.
       with_bias: Whether to include bias parameters. Default `True`.
       w_init: Optional initializer for the weights. By default the weights are
         initialized truncated random normal values with a standard deviation of
@@ -109,6 +107,7 @@ class ConvND(base.Module):
     Args:
       inputs: An ``N + 2`` rank :tf:`Tensor` of dtype :tf:`float16`,
         :tf:`bfloat16` or `tf.float32` to which the convolution is applied.
+
     Returns:
       An ``N + 2`` dimensional :tf:`Tensor` of shape
         ``[batch_size, output_dim_1, output_dim_2, ..., output_channels]``.
@@ -118,15 +117,15 @@ class ConvND(base.Module):
     if self.padding_func:
       inputs = tf.pad(inputs, self._padding)
 
-    outputs = tf.nn.convolution(inputs,
-                                self.w,
-                                strides=self.stride,
-                                padding=self.conv_padding,
-                                dilations=self.rate,
-                                data_format=self.data_format)
+    outputs = tf.nn.convolution(
+        inputs,
+        self.w,
+        strides=self.stride,
+        padding=self.conv_padding,
+        dilations=self.rate,
+        data_format=self.data_format)
     if self.with_bias:
-      outputs = tf.nn.bias_add(outputs, self.b,
-                               data_format=self.data_format)
+      outputs = tf.nn.bias_add(outputs, self.b, data_format=self.data_format)
 
     return outputs
 
@@ -141,15 +140,16 @@ class ConvND(base.Module):
 
     self.w = self._make_w()
     if self.with_bias:
-      self.b = tf.Variable(self.b_init((self.output_channels,), self._dtype),
-                           name="b")
+      self.b = tf.Variable(
+          self.b_init((self.output_channels,), self._dtype), name="b")
 
     if self.padding_func:
-      self._padding = pad.create(padding=self.padding_func,
-                                 kernel=self.kernel_shape,
-                                 rate=self.rate,
-                                 n=self._num_spatial_dims,
-                                 channel_index=self._channel_index)
+      self._padding = pad.create(
+          padding=self.padding_func,
+          kernel=self.kernel_shape,
+          rate=self.rate,
+          n=self._num_spatial_dims,
+          channel_index=self._channel_index)
 
   def _make_w(self):
     weight_shape = utils.replicate(self.kernel_shape, self._num_spatial_dims,
@@ -185,12 +185,11 @@ class Conv1D(ConvND):
       output_channels: The number of output channels.
       kernel_shape: Sequence of length 1, or an integer. ``kernel_shape`` will
         be expanded to define a kernel size in all dimensions.
-      stride: Sequence of strides of length 1, or an integer.
-        ``stride`` will be expanded to define stride in all dimensions.
-      rate: Sequence of dilation rates of length 1, or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds
-        to standard convolution, ``rate > 1`` corresponds to dilated
-        convolution.
+      stride: Sequence of strides of length 1, or an integer. ``stride`` will be
+        expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates of length 1, or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
       padding: Padding to apply to the input. This can be either ``SAME``,
         ``VALID`` or a callable or sequence of callables of size 1. Any
         callables must take a single integer argument equal to the effective
@@ -206,17 +205,18 @@ class Conv1D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv1D, self).__init__(num_spatial_dims=1,
-                                 output_channels=output_channels,
-                                 kernel_shape=kernel_shape,
-                                 stride=stride,
-                                 rate=rate,
-                                 padding=padding,
-                                 with_bias=with_bias,
-                                 w_init=w_init,
-                                 b_init=b_init,
-                                 data_format=data_format,
-                                 name=name)
+    super(Conv1D, self).__init__(
+        num_spatial_dims=1,
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride,
+        rate=rate,
+        padding=padding,
+        with_bias=with_bias,
+        w_init=w_init,
+        b_init=b_init,
+        data_format=data_format,
+        name=name)
 
 
 class Conv2D(ConvND):
@@ -237,15 +237,14 @@ class Conv2D(ConvND):
 
     Args:
       output_channels: The number of output channels.
-      kernel_shape: Sequence of kernel sizes (of length 2), or an
-        integer. ``kernel_shape`` will be expanded to define a kernel size in
-        all dimensions.
-      stride: Sequence of strides (of length 2), or an integer.
-        ``stride`` will be expanded to define stride in all dimensions.
-      rate: Sequence of dilation rates (of length 2), or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds
-        to standard convolution, ``rate > 1`` corresponds to dilated
-        convolution.
+      kernel_shape: Sequence of kernel sizes (of length 2), or an integer.
+        ``kernel_shape`` will be expanded to define a kernel size in all
+        dimensions.
+      stride: Sequence of strides (of length 2), or an integer. ``stride`` will
+        be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length 2), or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
       padding: Padding to apply to the input. This can either ``SAME``,
         ``VALID`` or a callable or sequence of callables of size 2. Any
         callables must take a single integer argument equal to the effective
@@ -261,17 +260,18 @@ class Conv2D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv2D, self).__init__(num_spatial_dims=2,
-                                 output_channels=output_channels,
-                                 kernel_shape=kernel_shape,
-                                 stride=stride,
-                                 rate=rate,
-                                 padding=padding,
-                                 with_bias=with_bias,
-                                 w_init=w_init,
-                                 b_init=b_init,
-                                 data_format=data_format,
-                                 name=name)
+    super(Conv2D, self).__init__(
+        num_spatial_dims=2,
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride,
+        rate=rate,
+        padding=padding,
+        with_bias=with_bias,
+        w_init=w_init,
+        b_init=b_init,
+        data_format=data_format,
+        name=name)
 
 
 class Conv3D(ConvND):
@@ -292,15 +292,14 @@ class Conv3D(ConvND):
 
     Args:
       output_channels: The number of output channels.
-      kernel_shape: Sequence of kernel sizes (of length 3), or an
-        integer. ``kernel_shape`` will be expanded to define a kernel size in
-        all dimensions.
-      stride: Sequence of strides (of length 3), or an integer.
-        `stride` will be expanded to define stride in all dimensions.
-      rate: Sequence of dilation rates (of length 3), or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds
-        to standard convolution, ``rate > 1`` corresponds to dilated
-        convolution.
+      kernel_shape: Sequence of kernel sizes (of length 3), or an integer.
+        ``kernel_shape`` will be expanded to define a kernel size in all
+        dimensions.
+      stride: Sequence of strides (of length 3), or an integer. `stride` will be
+        expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length 3), or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
       padding: Padding to apply to the input. This can either ``SAME``,
         ``VALID`` or a callable or sequence of callables up to size N. Any
         callables must take a single integer argument equal to the effective
@@ -316,14 +315,15 @@ class Conv3D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv3D, self).__init__(num_spatial_dims=3,
-                                 output_channels=output_channels,
-                                 kernel_shape=kernel_shape,
-                                 stride=stride,
-                                 rate=rate,
-                                 padding=padding,
-                                 with_bias=with_bias,
-                                 w_init=w_init,
-                                 b_init=b_init,
-                                 data_format=data_format,
-                                 name=name)
+    super(Conv3D, self).__init__(
+        num_spatial_dims=3,
+        output_channels=output_channels,
+        kernel_shape=kernel_shape,
+        stride=stride,
+        rate=rate,
+        padding=padding,
+        with_bias=with_bias,
+        w_init=w_init,
+        b_init=b_init,
+        data_format=data_format,
+        name=name)

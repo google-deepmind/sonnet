@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Trivial convnet learning MNIST."""
 
 from __future__ import absolute_import
@@ -27,13 +26,17 @@ import tensorflow_datasets as tfds
 
 def mnist(split, batch_size):
   """Returns a tf.data.Dataset with MNIST image/label pairs."""
+
   def preprocess_dataset(images, labels):
     # Mnist images are int8 [0, 255], we cast and rescale to float32 [-1, 1].
-    images = ((tf.cast(images, tf.float32)  / 255.) - .5) * 2.
+    images = ((tf.cast(images, tf.float32) / 255.) - .5) * 2.
     return images, labels
 
-  dataset = tfds.load(name="mnist", split=split, shuffle_files=split == "train",
-                      as_supervised=True)
+  dataset = tfds.load(
+      name="mnist",
+      split=split,
+      shuffle_files=split == "train",
+      as_supervised=True)
   dataset = dataset.map(preprocess_dataset)
   dataset = dataset.shuffle(buffer_size=4 * batch_size)
   dataset = dataset.batch(batch_size)
@@ -52,8 +55,8 @@ def train_step(model, optimizer, images, labels):
   """Runs a single training step of the model on the given input."""
   with tf.GradientTape() as tape:
     logits = model(images)
-    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels,
-                                                          logits=logits)
+    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        labels=labels, logits=logits)
     loss = tf.reduce_mean(loss)
   variables = model.trainable_variables
   gradients = tape.gradient(loss, variables)
@@ -84,8 +87,10 @@ def main(unused_argv):
   del unused_argv
 
   model = snt.Sequential([
-      snt.Conv2D(32, 3, 1), tf.nn.relu,
-      snt.Conv2D(32, 3, 1), tf.nn.relu,
+      snt.Conv2D(32, 3, 1),
+      tf.nn.relu,
+      snt.Conv2D(32, 3, 1),
+      tf.nn.relu,
       snt.Flatten(),
       snt.Linear(10),
   ])

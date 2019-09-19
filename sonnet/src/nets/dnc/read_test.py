@@ -47,13 +47,11 @@ class ReadTest(test_utils.TestCase):
     indices = np.random.randint(0, memory_size, size=num_reads)
     # One-hot representation
     read_weights = tf.constant(
-        np.expand_dims(np.eye(memory_size)[indices], axis=0),
-        dtype=tf.float32)
+        np.expand_dims(np.eye(memory_size)[indices], axis=0), dtype=tf.float32)
 
     read_values = read.read(mem, read_weights, squash_op=tf.identity)
-    self.assertAllClose(mem.numpy()[0, indices, :],
-                        read_values.numpy()[0, ...],
-                        atol=2e-3)
+    self.assertAllClose(
+        mem.numpy()[0, indices, :], read_values.numpy()[0, ...], atol=2e-3)
 
 
 if __name__ == '__main__':

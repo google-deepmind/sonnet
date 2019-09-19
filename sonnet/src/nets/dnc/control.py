@@ -51,8 +51,11 @@ class FeedForward(recurrent.RNNCore):
       s_t+1 <- s_t
   """
 
-  def __init__(self, hidden_size, activation=tf.nn.tanh,
-               dtype=tf.float32, name=None):
+  def __init__(self,
+               hidden_size,
+               activation=tf.nn.tanh,
+               dtype=tf.float32,
+               name=None):
     """Initializes the FeedForward Module.
 
     Args:
@@ -99,17 +102,19 @@ def deep_core(control_name,
     control_config: Dictionary containing the configuration for the modules.
     num_layers: Number of layers.
     skip_connections: Boolean that indicates whether to use skip connections.
-        See documenation for sonnet.DeepRnn in
-        //learning/deepmind/tensorflow/sonnet/python/modules/basic_rnn.py
-        for more information.
+      See documenation for sonnet.DeepRnn in
+      //learning/deepmind/tensorflow/sonnet/python/modules/basic_rnn.py for more
+      information.
     name: module name.
 
   Returns:
     Deep control module.
   """
   control_class = get_controller_ctor(control_name)
-  cores = [control_class(name='{}_{}'.format(control_name, i), **control_config)
-           for i in range(num_layers)]
+  cores = [
+      control_class(name='{}_{}'.format(control_name, i), **control_config)
+      for i in range(num_layers)
+  ]
   if skip_connections:
     return recurrent.deep_rnn_with_skip_connections(cores, name=name)
   else:

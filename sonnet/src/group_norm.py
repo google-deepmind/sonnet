@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Group normalization implementation for Sonnet."""
 
 from __future__ import absolute_import
@@ -68,9 +67,16 @@ class GroupNorm(base.Module):
       current offset.
   """
 
-  def __init__(self, groups, axis=slice(1, None), create_scale=True,
-               create_offset=True, eps=1e-5, scale_init=None, offset_init=None,
-               data_format="channels_last", name=None):
+  def __init__(self,
+               groups,
+               axis=slice(1, None),
+               create_scale=True,
+               create_offset=True,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
+               name=None):
     """Constructs a ``GroupNorm`` module.
 
     Args:
@@ -117,13 +123,13 @@ class GroupNorm(base.Module):
     self._create_offset = create_offset
 
     if self._create_scale:
-      self._scale_init = (scale_init if scale_init is not None
-                          else initializers.Ones())
+      self._scale_init = (
+          scale_init if scale_init is not None else initializers.Ones())
     elif scale_init is not None:
       raise ValueError("Cannot set `scale_init` if `create_scale=False`.")
     if self._create_offset:
-      self._offset_init = (offset_init if offset_init is not None
-                           else initializers.Zeros())
+      self._offset_init = (
+          offset_init if offset_init is not None else initializers.Zeros())
     elif offset_init is not None:
       raise ValueError("Cannot set `offset_init` if `create_offset=False`.")
 
@@ -159,19 +165,21 @@ class GroupNorm(base.Module):
       offset = self.offset
 
     if len(inputs.shape) != self._rank:
-      raise ValueError("The rank of the inputs cannot change between calls, the"
-                       " original call was rank={} but this call was rank={}."
-                       .format(self._rank, len(inputs.shape)))
+      raise ValueError(
+          "The rank of the inputs cannot change between calls, the"
+          " original call was rank={} but this call was rank={}.".format(
+              self._rank, len(inputs.shape)))
 
     inputs = tf.reshape(inputs, self._inputs_reshape)
     mean, var = tf.nn.moments(inputs, self._axis, keepdims=True)
 
-    normalized = tf.nn.batch_normalization(inputs,
-                                           mean=mean,
-                                           variance=var,
-                                           scale=None,
-                                           offset=None,
-                                           variance_epsilon=self._eps)
+    normalized = tf.nn.batch_normalization(
+        inputs,
+        mean=mean,
+        variance=var,
+        scale=None,
+        offset=None,
+        variance_epsilon=self._eps)
     outputs = tf.reshape(normalized, self._outputs_reshape)
     outputs = outputs * scale if scale is not None else outputs
     outputs = outputs + offset if offset is not None else outputs
@@ -192,17 +200,17 @@ class GroupNorm(base.Module):
     if self._channel_index == -1:
       params_shape = [inputs.shape[-1]]
     else:  # self._channel_index == 1
-      params_shape = [inputs.shape[1]] + [1]*(self._rank - 2)
+      params_shape = [inputs.shape[1]] + [1] * (self._rank - 2)
 
     if self._create_scale:
-      self.scale = tf.Variable(self._scale_init(params_shape, dtype),
-                               name="scale")
+      self.scale = tf.Variable(
+          self._scale_init(params_shape, dtype), name="scale")
     else:
       self.scale = None
 
     if self._create_offset:
-      self.offset = tf.Variable(self._offset_init(params_shape, dtype),
-                                name="offset")
+      self.offset = tf.Variable(
+          self._offset_init(params_shape, dtype), name="offset")
     else:
       self.offset = None
 
@@ -212,11 +220,12 @@ class GroupNorm(base.Module):
           "The number of channels must be divisible by the number of groups, "
           "was channels = {}, groups = {}".format(num_channels, self._groups))
     if self._channel_index == -1:
-      self._inputs_reshape = [-1] + list(inputs.shape[1:-1]) +[
-          self._groups, num_channels//self._groups]
-      self._axis = [a if a != self._rank-1 else a + 1 for a in self._axis]
+      self._inputs_reshape = [-1] + list(
+          inputs.shape[1:-1]) + [self._groups, num_channels // self._groups]
+      self._axis = [a if a != self._rank - 1 else a + 1 for a in self._axis]
     else:
       self._inputs_reshape = [-1] + [
-          self._groups, num_channels//self._groups] + list(inputs.shape[2:])
+          self._groups, num_channels // self._groups
+      ] + list(inputs.shape[2:])
       self._axis = [a if a == 0 else a + 1 for a in self._axis]
     self._outputs_reshape = [-1] + list(inputs.shape[1:])

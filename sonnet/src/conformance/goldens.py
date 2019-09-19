@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Golden test cases."""
 
 from __future__ import absolute_import
@@ -41,10 +40,12 @@ def all_goldens(test_method):
 
 
 def _register_golden(module_cls, golden_name):
+
   def registration_fn(golden_cls):
     _all_goldens.append((module_cls, golden_name, golden_cls))
     golden_cls.name = golden_name
     return golden_cls
+
   return registration_fn
 
 
@@ -73,8 +74,9 @@ def range_like(t, start=0):
     A `tf.Tensor` with sequential element values the same shape/dtype as `t`.
   """
   return tf.reshape(
-      tf.cast(tf.range(start, np.prod(t.shape, dtype=int) + start),
-              dtype=t.dtype),
+      tf.cast(
+          tf.range(start,
+                   np.prod(t.shape, dtype=int) + start), dtype=t.dtype),
       t.shape)
 
 
@@ -446,8 +448,7 @@ class SumTest(AbstractGolden):
 
 @_register_golden(snt.nets.ResNet, "resnet50")
 class ResNet(AbstractGolden):
-  create_module = (
-      lambda _: snt.nets.ResNet([1, 1, 1, 1], 9))
+  create_module = (lambda _: snt.nets.ResNet([1, 1, 1, 1], 9))
   input_spec = tf.TensorSpec([1, 8, 8, 3])
   num_variables = 155
   has_side_effects = True
@@ -517,6 +518,7 @@ class VectorQuantizerEMAEvalTest(AbstractGolden):
 
   num_variables = 7  # 1 embedding, then 2 EMAs each of which contain 3.
   has_side_effects = False  # only has side effects when is_training==True
+
 
 # pylint: enable=missing-docstring
 

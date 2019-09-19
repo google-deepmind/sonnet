@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Utils for Sonnet optimizers."""
 
 from __future__ import absolute_import
@@ -37,11 +36,10 @@ def check_distribution_strategy():
   if tf.distribute.has_strategy():
     strategy = tf.distribute.get_strategy()
     if not isinstance(strategy, _SUPPORTED_STRATEGIES):
-      raise ValueError(
-          "Sonnet optimizers are not compatible with `{}`. "
-          "Please use one of `{}` instead.".format(
-              strategy.__class__.__name__,
-              "`, `".join(s.__name__ for s in _SUPPORTED_STRATEGIES)))
+      raise ValueError("Sonnet optimizers are not compatible with `{}`. "
+                       "Please use one of `{}` instead.".format(
+                           strategy.__class__.__name__, "`, `".join(
+                               s.__name__ for s in _SUPPORTED_STRATEGIES)))
 
 
 def check_updates_parameters(updates, parameters):
@@ -74,6 +72,6 @@ def deduplicate_indexed_slices(values, indices):
     `values` slices associated with each unique index.
   """
   unique_indices, new_index_positions = tf.unique(indices)
-  summed_values = tf.math.unsorted_segment_sum(
-      values, new_index_positions, tf.shape(unique_indices)[0])
+  summed_values = tf.math.unsorted_segment_sum(values, new_index_positions,
+                                               tf.shape(unique_indices)[0])
   return (summed_values, unique_indices)

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.momentum."""
 
 from __future__ import absolute_import
@@ -74,10 +73,14 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
           self.primary_device))
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(learning_rate=3., momentum=0.9)
     # Step 1 of Momentum
     optimizer.apply(updates, parameters)
@@ -98,10 +101,14 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
           self.primary_device))
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(
         learning_rate=3., momentum=0.9, use_nesterov=True)
     # Step 1 of Momentum

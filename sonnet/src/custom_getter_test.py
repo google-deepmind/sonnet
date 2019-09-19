@@ -28,6 +28,7 @@ import tensorflow as tf
 class CustomVariableGetterTest(test_utils.TestCase):
 
   def testDoesNotModifyNonVariables(self):
+
     class MyModule(base.Module):
       v = tf.Variable(21.)
       d = {}

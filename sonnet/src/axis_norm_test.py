@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.axis_norm."""
 
 from __future__ import absolute_import
@@ -151,18 +150,15 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertEqual(test._channel_index, -1)
 
-  @parameterized.named_parameters(("String", "foo"),
-                                  ("ListString", ["foo"]))
+  @parameterized.named_parameters(("String", "foo"), ("ListString", ["foo"]))
   def testInvalidAxis(self, axis):
     with self.assertRaisesRegexp(
-        ValueError,
-        "`axis` should be an int, slice or iterable of ints."):
+        ValueError, "`axis` should be an int, slice or iterable of ints."):
       axis_norm.LayerNorm(axis, create_scale=False, create_offset=False)
 
   def testNoScaleAndInitProvided(self):
     with self.assertRaisesRegexp(
-        ValueError,
-        "Cannot set `scale_init` if `create_scale=False`."):
+        ValueError, "Cannot set `scale_init` if `create_scale=False`."):
       axis_norm.LayerNorm(
           3,
           create_scale=False,
@@ -171,8 +167,7 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testNoOffsetBetaInitProvided(self):
     with self.assertRaisesRegexp(
-        ValueError,
-        "Cannot set `offset_init` if `create_offset=False`."):
+        ValueError, "Cannot set `offset_init` if `create_offset=False`."):
       axis_norm.LayerNorm(
           3,
           create_scale=True,
@@ -183,8 +178,7 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
     layer = axis_norm.LayerNorm([2], create_scale=True, create_offset=False)
 
     with self.assertRaisesRegexp(
-        ValueError,
-        "Cannot pass `scale` at call time if `create_scale=True`."):
+        ValueError, "Cannot pass `scale` at call time if `create_scale=True`."):
       layer(tf.ones([2, 3, 4]), scale=tf.ones([4]))
 
   def testCreateOffsetAndOffsetProvided(self):
@@ -281,8 +275,8 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
     c_first_output = c_first_layer(inputs, scale, offset)
     c_first_output = tf.transpose(c_first_output, [0, 2, 3, 4, 1])
 
-    self.assertAllClose(c_last_output.numpy(), c_first_output.numpy(),
-                        atol=1e-5, rtol=1e-5)
+    self.assertAllClose(
+        c_last_output.numpy(), c_first_output.numpy(), atol=1e-5, rtol=1e-5)
 
   def test3DDataFormatAgnostic(self):
     c_last_layer = axis_norm.LayerNorm([1],
@@ -304,8 +298,8 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
     c_first_output = c_first_layer(inputs, scale, offset)
     c_first_output = tf.transpose(c_first_output, [0, 2, 1])
 
-    self.assertAllClose(c_last_output.numpy(), c_first_output.numpy(),
-                        atol=1e-5, rtol=1e-5)
+    self.assertAllClose(
+        c_last_output.numpy(), c_first_output.numpy(), atol=1e-5, rtol=1e-5)
 
   def testInstanceNormCorrectAxis(self):
     layer = axis_norm.InstanceNorm(create_scale=True, create_offset=True)
@@ -316,8 +310,8 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(layer._axis, (1, 2))
 
   def testInstanceNormCorrectNCW(self):
-    layer = axis_norm.InstanceNorm(create_scale=True, create_offset=True,
-                                   data_format="channels_first")
+    layer = axis_norm.InstanceNorm(
+        create_scale=True, create_offset=True, data_format="channels_first")
 
     inputs = tf.ones([3, 4, 5, 6])
     layer(inputs)

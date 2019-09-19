@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.conv_transpose."""
 
 from __future__ import absolute_import
@@ -31,8 +30,10 @@ import tensorflow as tf
 
 def create_constant_initializers(w, b, with_bias):
   if with_bias:
-    return {"w_init": lib_initializers.Constant(w),
-            "b_init": lib_initializers.Constant(b)}
+    return {
+        "w_init": lib_initializers.Constant(w),
+        "b_init": lib_initializers.Constant(b)
+    }
   else:
     return {"w_init": lib_initializers.Constant(w)}
 
@@ -44,16 +45,19 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(
         ValueError,
         "only support transpose convolution operations for num_spatial_dims"):
-      conv_transpose.ConvNDTranspose(num_spatial_dims=n, output_channels=1,
-                                     output_shape=None, kernel_shape=3,
-                                     data_format="NHWC")
+      conv_transpose.ConvNDTranspose(
+          num_spatial_dims=n,
+          output_channels=1,
+          output_shape=None,
+          kernel_shape=3,
+          data_format="NHWC")
 
   def testIncorrectPadding(self):
     with self.assertRaisesRegexp(
         TypeError,
         "ConvNDTranspose only takes string padding, please provide either"):
-      conv_transpose.ConvNDTranspose(2, output_channels=1, output_shape=None,
-                                     kernel_shape=3, padding=None)
+      conv_transpose.ConvNDTranspose(
+          2, output_channels=1, output_shape=None, kernel_shape=3, padding=None)
 
   @parameterized.parameters(*itertools.product(
       [True, False],  # with_bias
@@ -94,8 +98,10 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
     x = tf.TensorSpec([None, 5, 5, 3], dtype=tf.float32)
 
     c = conv_transpose.ConvNDTranspose(
-        num_spatial_dims=2, output_channels=2,
-        kernel_shape=3, data_format="NHWC")
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        data_format="NHWC")
     defun_conv = tf.function(c).get_concrete_function(x)
 
     out1 = defun_conv(tf.ones([3, 5, 5, 3]))
@@ -111,8 +117,10 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
     x = tf.TensorSpec([None, 3, 5, 5], dtype=tf.float32)
 
     c = conv_transpose.ConvNDTranspose(
-        num_spatial_dims=2, output_channels=2,
-        kernel_shape=3, data_format="NCHW")
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        data_format="NCHW")
     defun_conv = tf.function(c).get_concrete_function(x)
 
     out1 = defun_conv(tf.ones([3, 3, 5, 5]))
@@ -126,13 +134,14 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
     x = tf.TensorSpec([3, 3, 3, None], dtype=tf.float32)
 
     c = conv_transpose.ConvNDTranspose(
-        num_spatial_dims=2, output_channels=1,
-        kernel_shape=3, data_format="NHWC")
+        num_spatial_dims=2,
+        output_channels=1,
+        kernel_shape=3,
+        data_format="NHWC")
     defun_conv = tf.function(c, autograph=autograph)
 
-    with self.assertRaisesRegex(
-        ValueError,
-        "The number of input channels must be known"):
+    with self.assertRaisesRegex(ValueError,
+                                "The number of input channels must be known"):
       defun_conv.get_concrete_function(x)
 
 
@@ -140,9 +149,7 @@ class Conv2DTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingSame(self, with_bias):
-    expected_out = [[4, 6, 4],
-                    [6, 9, 6],
-                    [4, 6, 4]]
+    expected_out = [[4, 6, 4], [6, 9, 6], [4, 6, 4]]
     expected_out = np.asarray(expected_out, dtype=np.float32)
     if with_bias:
       expected_out += 1
@@ -164,11 +171,8 @@ class Conv2DTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingValid(self, with_bias):
-    expected_out = [[1, 2, 3, 2, 1],
-                    [2, 4, 6, 4, 2],
-                    [3, 6, 9, 6, 3],
-                    [2, 4, 6, 4, 2],
-                    [1, 2, 3, 2, 1]]
+    expected_out = [[1, 2, 3, 2, 1], [2, 4, 6, 4, 2], [3, 6, 9, 6, 3],
+                    [2, 4, 6, 4, 2], [1, 2, 3, 2, 1]]
     expected_out = np.asarray(expected_out, dtype=np.float32)
     if with_bias:
       expected_out += 1
@@ -253,9 +257,10 @@ class Conv3DTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingSame(self, with_bias):
-    expected_out = np.asarray(
-        [8, 12, 8, 12, 18, 12, 8, 12, 8, 12, 18, 12, 18, 27, 18,
-         12, 18, 12, 8, 12, 8, 12, 18, 12, 8, 12, 8]).reshape((3, 3, 3))
+    expected_out = np.asarray([
+        8, 12, 8, 12, 18, 12, 8, 12, 8, 12, 18, 12, 18, 27, 18, 12, 18, 12, 8,
+        12, 8, 12, 18, 12, 8, 12, 8
+    ]).reshape((3, 3, 3))
     if with_bias:
       expected_out += 1
 
@@ -276,15 +281,14 @@ class Conv3DTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingValid(self, with_bias):
-    expected_out = np.asarray([1, 2, 3, 2, 1, 2, 4, 6, 4, 2, 3, 6, 9, 6, 3, 2,
-                               4, 6, 4, 2, 1, 2, 3, 2, 1, 2, 4, 6, 4, 2, 4, 8,
-                               12, 8, 4, 6, 12, 18, 12, 6, 4, 8, 12, 8, 4, 2, 4,
-                               6, 4, 2, 3, 6, 9, 6, 3, 6, 12, 18, 12, 6, 9, 18,
-                               27, 18, 9, 6, 12, 18, 12, 6, 3, 6, 9, 6, 3, 2, 4,
-                               6, 4, 2, 4, 8, 12, 8, 4, 6, 12, 18, 12, 6, 4, 8,
-                               12, 8, 4, 2, 4, 6, 4, 2, 1, 2, 3, 2, 1, 2, 4, 6,
-                               4, 2, 3, 6, 9, 6, 3, 2, 4, 6, 4, 2, 1,
-                               2, 3, 2, 1.]).reshape((5, 5, 5))
+    expected_out = np.asarray([
+        1, 2, 3, 2, 1, 2, 4, 6, 4, 2, 3, 6, 9, 6, 3, 2, 4, 6, 4, 2, 1, 2, 3, 2,
+        1, 2, 4, 6, 4, 2, 4, 8, 12, 8, 4, 6, 12, 18, 12, 6, 4, 8, 12, 8, 4, 2,
+        4, 6, 4, 2, 3, 6, 9, 6, 3, 6, 12, 18, 12, 6, 9, 18, 27, 18, 9, 6, 12,
+        18, 12, 6, 3, 6, 9, 6, 3, 2, 4, 6, 4, 2, 4, 8, 12, 8, 4, 6, 12, 18, 12,
+        6, 4, 8, 12, 8, 4, 2, 4, 6, 4, 2, 1, 2, 3, 2, 1, 2, 4, 6, 4, 2, 3, 6, 9,
+        6, 3, 2, 4, 6, 4, 2, 1, 2, 3, 2, 1.
+    ]).reshape((5, 5, 5))
     if with_bias:
       expected_out += 1
 

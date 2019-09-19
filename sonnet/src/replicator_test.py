@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.replicator."""
 
 from __future__ import absolute_import
@@ -66,11 +65,11 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
       self.skipTest("No replicator supplied.")
     v = create_var(replicator)
     if isinstance(replicator, snt_replicator.TpuReplicator):
-      self.assertEqual(
-          tf.VariableSynchronization.AUTO, v.primary.synchronization)
+      self.assertEqual(tf.VariableSynchronization.AUTO,
+                       v.primary.synchronization)
     else:
-      self.assertEqual(
-          tf.VariableSynchronization.ON_READ, v.primary.synchronization)
+      self.assertEqual(tf.VariableSynchronization.ON_READ,
+                       v.primary.synchronization)
 
   @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())
@@ -197,9 +196,12 @@ def setUpModule():
   if len(gpus) == 1:
     logging.info("Splitting one physical GPU into two logical GPUs.")
     tf.config.experimental.set_virtual_device_configuration(
-        gpus[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024),
-         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+        gpus[0], [
+            tf.config.experimental.VirtualDeviceConfiguration(
+                memory_limit=1024),
+            tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)
+        ])
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests goldens cover all modules."""
 
 from __future__ import absolute_import
@@ -70,6 +69,7 @@ class CoverageTest(test_utils.TestCase):
 
     # Make sure everything is covered.
     self.assertEqual(tested_modules | no_checkpoint_whitelist, all_sonnet_types)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

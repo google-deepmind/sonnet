@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Configuration file for the Sphinx documentation builder."""
 
 # This file only contains a selection of the most common options. For a full
@@ -43,7 +42,6 @@ import sphinxcontrib.katex as katex
 project = 'Sonnet'
 copyright = '2019, DeepMind'  # pylint: disable=redefined-builtin
 author = 'Sonnet Contributors'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -96,18 +94,19 @@ html_favicon = '_static/favicon.ico'
 # -- Options for doctest -----------------------------------------------------
 
 doctest_test_doctest_blocks = 'true'
-doctest_global_setup = '''
+doctest_global_setup = """
 import tensorflow as tf
 import sonnet as snt
 
 # `TpuReplicator` cannot be constructed without a TPU, however it has exactly
 # the same API as `Replicator` so we can run doctests using that instead.
 snt.distribute.TpuReplicator = snt.distribute.Replicator
-'''
-doctest_default_flags = (doctest.ELLIPSIS
-                         | doctest.IGNORE_EXCEPTION_DETAIL
-                         | doctest.DONT_ACCEPT_TRUE_FOR_1
-                         | doctest.NORMALIZE_WHITESPACE)
+"""
+doctest_default_flags = (
+    doctest.ELLIPSIS
+    | doctest.IGNORE_EXCEPTION_DETAIL
+    | doctest.DONT_ACCEPT_TRUE_FOR_1
+    | doctest.NORMALIZE_WHITESPACE)
 
 # -- Options for katex ------------------------------------------------------
 
@@ -157,6 +156,5 @@ def linkcode_resolve(domain, info):
 
   # TODO(slebedev): support tags after we release an initial version.
   return 'https://github.com/deepmind/sonnet/blob/v2/sonnet/%s#L%d#L%d' % (
-      os.path.relpath(filename, start=os.path.dirname(snt.__file__)),
-      lineno,
-      lineno + len(source) - 1)
+      os.path.relpath(filename, start=os.path.dirname(
+          snt.__file__)), lineno, lineno + len(source) - 1)

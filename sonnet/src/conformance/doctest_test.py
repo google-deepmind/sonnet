@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Ensures that code samples in Sonnet are accurate."""
 
 from __future__ import absolute_import
@@ -55,10 +54,14 @@ class DoctestTest(test_utils.TestCase, parameterized.TestCase):
         module.__test__[name] = value
 
     num_failed, num_attempted = doctest.testmod(
-        module, optionflags=doctest.ELLIPSIS, extraglobs={"snt": snt, "tf": tf})
+        module, optionflags=doctest.ELLIPSIS, extraglobs={
+            "snt": snt,
+            "tf": tf
+        })
     if num_attempted == 0:
       self.skipTest("No doctests in %s" % module.__name__)
     self.assertEqual(num_failed, 0, "{} doctests failed".format(num_failed))
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

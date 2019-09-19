@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests using tf.saved_model and Sonnet."""
 
 from __future__ import absolute_import
@@ -80,6 +79,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
       self.assertEqual(a.name, b.name)
       self.assertEqual(a.device, b.device)
       self.assertAllEqual(a.read_value(), b.read_value())
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

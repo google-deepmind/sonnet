@@ -18,7 +18,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
@@ -36,7 +35,8 @@ class DescriptorsTest(test_utils.TestCase):
     all_modules = frozenset(test_utils.find_all_sonnet_modules(snt, snt.Module))
     tested_modules = {
         type(descriptors.unwrap(d.create()))
-        for d in BATCH_MODULES + RECURRENT_MODULES + OPTIMIZER_MODULES}
+        for d in BATCH_MODULES + RECURRENT_MODULES + OPTIMIZER_MODULES
+    }
     self.assertEmpty(all_modules - (tested_modules | IGNORED_MODULES))
 
 

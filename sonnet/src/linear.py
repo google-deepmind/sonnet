@@ -82,8 +82,8 @@ class Linear(base.Module):
         name="w")
 
     if self.with_bias:
-      self.b = tf.Variable(self.b_init([self.output_size], inputs.dtype),
-                           name="b")
+      self.b = tf.Variable(
+          self.b_init([self.output_size], inputs.dtype), name="b")
 
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     self._initialize(inputs)

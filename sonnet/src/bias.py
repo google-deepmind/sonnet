@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Bias module."""
 
 from __future__ import absolute_import
@@ -71,12 +70,12 @@ class Bias(base.Module):
 
     Args:
       output_size: Output size (output shape without batch dimension). If
-          `output_size` is left as `None`, the size will be directly inferred
-          by the input.
+        `output_size` is left as `None`, the size will be directly inferred by
+        the input.
       bias_dims: Sequence of which dimensions to retain from the input shape
-          when constructing the bias. The remaining dimensions will get
-          broadcasted over (given size of 1), and leading dimensions will be
-          removed completely. See class doc for examples.
+        when constructing the bias. The remaining dimensions will get
+        broadcasted over (given size of 1), and leading dimensions will be
+        removed completely. See class doc for examples.
       b_init: Optional initializer for the bias. Default to zeros.
       name: Name of the module.
     """
@@ -106,11 +105,11 @@ class Bias(base.Module):
 
     Args:
       inputs: A Tensor of size `[batch_size, input_size1, ...]`.
-      multiplier: A scalar or Tensor which the bias term is multiplied by
-        before adding it to `inputs`. Anything which works in the expression
-        `bias * multiplier` is acceptable here. This may be useful if you want
-        to add a bias in one place and subtract the same bias in another place
-        via `multiplier=-1`.
+      multiplier: A scalar or Tensor which the bias term is multiplied by before
+        adding it to `inputs`. Anything which works in the expression `bias *
+        multiplier` is acceptable here. This may be useful if you want to add a
+        bias in one place and subtract the same bias in another place via
+        `multiplier=-1`.
 
     Returns:
       A Tensor of size `[batch_size, input_size1, ...]`.
@@ -127,9 +126,9 @@ def calculate_bias_shape(input_shape, bias_dims):
 
   Args:
     input_shape: Shape of the input being passed into the module. The leading
-        dimension is the minibatch size.
+      dimension is the minibatch size.
     bias_dims: The dimensions that bias should be applied over. The remaining
-        dimensions will get broadcasted over.
+      dimensions will get broadcasted over.
 
   Returns:
     bias_shape: Tuple corresponding to the shape of bias Variable to create.

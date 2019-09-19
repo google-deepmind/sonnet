@@ -47,7 +47,7 @@ class Recurrent(Wrapped):
     initial_state = self.wrapped.initial_state(batch_size=tf.shape(x)[0])
     if isinstance(self.wrapped, snt.UnrolledRNN):
       # The module expects TB...-shaped input as opposed to BT...
-      x = tf.transpose(x, [1, 0] +  list(range(2, x.shape.rank)))
+      x = tf.transpose(x, [1, 0] + list(range(2, x.shape.rank)))
     return self.wrapped(x, initial_state)
 
 
@@ -58,8 +58,8 @@ def unwrap(module: snt.Module) -> snt.Module:
 
 
 # TODO(tomhennigan) De-duplicate this, BATCH_MODULES and goldens.py.
-ModuleDescriptor = collections.namedtuple(
-    "ModuleDescriptor", ["name", "create", "shape", "dtype"])
+ModuleDescriptor = collections.namedtuple("ModuleDescriptor",
+                                          ["name", "create", "shape", "dtype"])
 ModuleDescriptor.__new__.__defaults__ = (None, None, None, tf.float32)
 
 BATCH_SIZE = 8
@@ -71,9 +71,7 @@ BATCH_MODULES = (
         create=lambda: Training(snt.BatchNorm(True, True)),
         shape=(BATCH_SIZE, 2, 2, 3)),
     ModuleDescriptor(
-        name="Bias",
-        create=lambda: snt.Bias(),
-        shape=(BATCH_SIZE, 3, 3, 3)),
+        name="Bias", create=lambda: snt.Bias(), shape=(BATCH_SIZE, 3, 3, 3)),
     ModuleDescriptor(
         name="Conv1D",
         create=lambda: snt.Conv1D(3, 3),
@@ -124,9 +122,7 @@ BATCH_MODULES = (
         create=lambda: snt.LayerNorm(1, True, True),
         shape=(BATCH_SIZE, 3, 2)),
     ModuleDescriptor(
-        name="Linear",
-        create=lambda: snt.Linear(10),
-        shape=(BATCH_SIZE, 1)),
+        name="Linear", create=lambda: snt.Linear(10), shape=(BATCH_SIZE, 1)),
     ModuleDescriptor(
         name="Sequential",
         create=lambda: snt.Sequential([lambda x: x]),
@@ -201,16 +197,26 @@ OPTIMIZER_MODULES = (
 
 IGNORED_MODULES = {
     # Stateless or abstract.
-    snt.BatchApply, snt.Deferred, snt.Module, snt.Optimizer, snt.Reshape,
+    snt.BatchApply,
+    snt.Deferred,
+    snt.Module,
+    snt.Optimizer,
+    snt.Reshape,
 
     # Metrics.
-    snt.ExponentialMovingAverage, snt.Mean, snt.Metric, snt.Sum,
+    snt.ExponentialMovingAverage,
+    snt.Mean,
+    snt.Metric,
+    snt.Sum,
 
     # Normalization.
     snt.BaseBatchNorm,  # Tested via `snt.BatchNorm`.
 
     # Recurrent.
-    snt.DeepRNN, snt.RNNCore, snt.TrainableState, snt.UnrolledRNN,
+    snt.DeepRNN,
+    snt.RNNCore,
+    snt.TrainableState,
+    snt.UnrolledRNN,
 
     # Nets,
     snt.nets.ResNet50,  # Tested via `snt.nets.ResNet`.

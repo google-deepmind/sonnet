@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Replicator Distribution Strategy."""
 
 from __future__ import absolute_import
@@ -40,6 +39,7 @@ def make_replica_local_creator(tpu_strategy):
       if kwargs["trainable"] is None:
         kwargs["trainable"] = True
     return next_creator(**kwargs)
+
   return _replica_local_creator
 
 
@@ -75,8 +75,9 @@ def create_variables_eagerly(getter, initial_value, **kwargs):
 @contextlib.contextmanager
 def eager_initial_values():
   """Attempts to force all initializers to create eager tensors."""
-  all_initializers = {cls: cls.__call__
-                      for cls in initializers.Initializer.__subclasses__()}
+  all_initializers = {
+      cls: cls.__call__ for cls in initializers.Initializer.__subclasses__()
+  }
 
   def patched_call(self, shape, dtype):
     """Monkey-patched verison of `Initializer.__call__`."""
@@ -101,6 +102,7 @@ def eager_initial_values():
     # Restore
     for cls, orig_call in all_initializers.items():
       cls.__call__ = orig_call
+
 
 replica_local_creator = make_replica_local_creator(tpu_strategy=False)
 replica_local_creator_tpu = make_replica_local_creator(tpu_strategy=True)

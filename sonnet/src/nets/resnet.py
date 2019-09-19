@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """ResNet model for Sonnet."""
 
 from __future__ import absolute_import
@@ -314,11 +313,7 @@ class ResNet(base.Module):
 class ResNet50(ResNet):
   """ResNet50 module."""
 
-  def __init__(self,
-               num_classes,
-               bn_config=None,
-               resnet_v2=False,
-               name=None):
+  def __init__(self, num_classes, bn_config=None, resnet_v2=False, name=None):
     """Constructs a ResNet model.
 
     Args:

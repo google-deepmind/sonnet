@@ -27,9 +27,8 @@ import tensorflow as tf
 
 class CoreTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(
-      {'constructor': recurrent.LSTM},
-      {'constructor': recurrent.GRU})
+  @parameterized.parameters({'constructor': recurrent.LSTM},
+                            {'constructor': recurrent.GRU})
   def testShape(self, constructor):
     batch_size = 2
     hidden_size = 4
@@ -39,9 +38,8 @@ class CoreTest(test_utils.TestCase, parameterized.TestCase):
     prev_state = rnn.initial_state(batch_size=batch_size)
     output, next_state = rnn(inputs, prev_state)
 
-    tf.nest.map_structure(
-        lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
-        prev_state, next_state)
+    tf.nest.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
+                          prev_state, next_state)
     self.assertShapeEqual(np.zeros([batch_size, hidden_size]), output)
 
 
@@ -83,20 +81,29 @@ class FeedForwardTest(test_utils.TestCase):
 
 class DeepCore(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters(
-      {'control_name': 'LSTM', 'num_layers': 1},
-      {'control_name': 'LSTM', 'num_layers': 2},
-      {'control_name': 'GRU', 'num_layers': 1},
-      {'control_name': 'GRU', 'num_layers': 2})
+  @parameterized.parameters({
+      'control_name': 'LSTM',
+      'num_layers': 1
+  }, {
+      'control_name': 'LSTM',
+      'num_layers': 2
+  }, {
+      'control_name': 'GRU',
+      'num_layers': 1
+  }, {
+      'control_name': 'GRU',
+      'num_layers': 2
+  })
   def testShape(self, control_name, num_layers):
     batch_size = 5
     input_size = 3
     hidden_size = 7
     control_config = {'hidden_size': hidden_size}
     inputs = tf.random.uniform([batch_size, input_size])
-    rnn = control.deep_core(num_layers=num_layers,
-                            control_name=control_name,
-                            control_config=control_config)
+    rnn = control.deep_core(
+        num_layers=num_layers,
+        control_name=control_name,
+        control_config=control_config)
     prev_state = rnn.initial_state(batch_size=batch_size)
     output, next_state = rnn(inputs, prev_state)
 
@@ -104,10 +111,8 @@ class DeepCore(test_utils.TestCase, parameterized.TestCase):
     output_shape = np.ndarray((batch_size, num_layers * hidden_size))
     self.assertShapeEqual(output_shape, output)
 
-    tf.nest.map_structure(
-        lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
-        prev_state,
-        next_state)
+    tf.nest.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
+                          prev_state, next_state)
 
 
 if __name__ == '__main__':

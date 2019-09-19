@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for Bayes by Backprop custom getter."""
 
 from __future__ import absolute_import
@@ -34,8 +33,10 @@ def _softplus(x):
   return np.log(1.0 + np.exp(x))
 
 
-def _test_diag_gaussian_builder_builder(
-    initial_loc, initial_scale, dist_class=tfp.distributions.Normal):
+def _test_diag_gaussian_builder_builder(initial_loc,
+                                        initial_scale,
+                                        dist_class=tfp.distributions.Normal):
+
   def diagonal_gaussian_posterior_builder(var):
     name = var.name[:-2]  # Strip the ":0" suffix.
     parameter_shapes = dist_class.param_static_shapes(var.shape)
@@ -80,10 +81,9 @@ class BayesByBackpropTest(test_utils.TestCase):
     self.assertLen(bbb_getter._distributions, 1)
     posterior = bbb_getter.get_distributions(my_variables.v).posterior
 
-    self.assertAllClose(
-        [softplus_of_three, softplus_of_three],
-        self.evaluate(posterior.scale),
-        atol=1e-5)
+    self.assertAllClose([softplus_of_three, softplus_of_three],
+                        self.evaluate(posterior.scale),
+                        atol=1e-5)
 
   def test_sample_mode_is_stochastic_and_can_be_switched(self):
     softplus_of_twenty = _softplus(20.0)
@@ -143,6 +143,7 @@ class BayesByBackpropTest(test_utils.TestCase):
     mlp = lambda inputs: lin2(lin1(inputs))
 
     created_vars = []
+
     def record_created_vars(next_creator, **kwargs):
       var = next_creator(**kwargs)
       created_vars.append(var.name)
@@ -154,18 +155,12 @@ class BayesByBackpropTest(test_utils.TestCase):
         mlp(tf.constant(43., shape=input_shape))
 
     expected_vars = [
-        "lin1/w:0",
-        "lin1/b:0",
-        "lin2/w:0",
-        "lin2/b:0",
-        "bbb/posterior/loc/lin1/w:0",
-        "bbb/posterior/scale/lin1/w:0",
-        "bbb/posterior/loc/lin1/b:0",
-        "bbb/posterior/scale/lin1/b:0",
-        "bbb/posterior/loc/lin2/w:0",
-        "bbb/posterior/scale/lin2/w:0",
-        "bbb/posterior/loc/lin2/b:0",
-        "bbb/posterior/scale/lin2/b:0"]
+        "lin1/w:0", "lin1/b:0", "lin2/w:0", "lin2/b:0",
+        "bbb/posterior/loc/lin1/w:0", "bbb/posterior/scale/lin1/w:0",
+        "bbb/posterior/loc/lin1/b:0", "bbb/posterior/scale/lin1/b:0",
+        "bbb/posterior/loc/lin2/w:0", "bbb/posterior/scale/lin2/w:0",
+        "bbb/posterior/loc/lin2/b:0", "bbb/posterior/scale/lin2/b:0"
+    ]
 
     self.assertCountEqual(expected_vars, created_vars)
 

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Custom variable getter for Bayes by Backprop.
 
 Bayes by Backprop is an algorithm for learning a probability distribution
@@ -46,7 +45,6 @@ import tensorflow as tf
 from tensorflow_probability import distributions as tfd
 from typing import Callable, Dict, NamedTuple, Optional, Text, Union
 
-
 _OK_DTYPES_FOR_BBB = (tf.float16, tf.float32, tf.float64, tf.bfloat16)
 _OK_PZATION_TYPE = tfd.FULLY_REPARAMETERIZED
 
@@ -56,9 +54,8 @@ class EstimatorMode(enum.Enum):
   MEAN = "mean"
 
 
-Distributions = NamedTuple(
-    "Distributions",
-    [("posterior", tfd.Distribution), ("prior", tfd.Distribution)])
+Distributions = NamedTuple("Distributions", [("posterior", tfd.Distribution),
+                                             ("prior", tfd.Distribution)])
 
 
 def diagonal_gaussian_posterior_builder(
@@ -149,6 +146,7 @@ def adaptive_gaussian_prior_builder(
   # By default, we want to initialize `loc` with the same distribution as `var`.
   # As we cannot know `var`'s initializer, we simply copy the initial value.
   if loc_initializer is None:
+
     def init_from_var(shape, dtype):
       del shape, dtype  # Unused.
       var_init_val = _try_get_initial_value(var)
@@ -169,20 +167,16 @@ def adaptive_gaussian_prior_builder(
     return tfd.Normal(loc=loc, scale=tf.nn.softplus(scale), name=name)
 
 
-def stochastic_kl(
-    posterior: tfd.Distribution,
-    prior: tfd.Distribution,
-    sample: tf.Tensor) -> tf.Tensor:
+def stochastic_kl(posterior: tfd.Distribution, prior: tfd.Distribution,
+                  sample: tf.Tensor) -> tf.Tensor:
   """Ubiquitous stochastic KL estimator."""
   return tf.subtract(
       tf.reduce_sum(posterior.log_prob(sample)),
       tf.reduce_sum(prior.log_prob(sample)))
 
 
-def analytic_kl(
-    posterior: tfd.Distribution,
-    prior: tfd.Distribution,
-    sample: tf.Tensor) -> tf.Tensor:
+def analytic_kl(posterior: tfd.Distribution, prior: tfd.Distribution,
+                sample: tf.Tensor) -> tf.Tensor:
   """Analytic KL divergence."""
   del sample  # Unused.
   return tf.reduce_sum(tfd.kl_divergence(posterior, prior))
@@ -207,7 +201,8 @@ class BayesByBackprop(tf.Module):
     super(BayesByBackprop, self).__init__(name=name)
     self._posterior_builder = posterior_builder
     self._prior_builder = prior_builder
-    self._distributions = {}  # type: Dict[utils.CompareById[tf.Variable], Distributions]
+    self._distributions = {
+    }  # type: Dict[utils.CompareById[tf.Variable], Distributions]
 
   def __call__(self, estimator_mode: EstimatorMode = EstimatorMode.SAMPLE):
     return PosteriorEstimator(owner=self, estimator_mode=estimator_mode)
@@ -252,11 +247,13 @@ class PosteriorEstimator(object):
   def __init__(self, owner: BayesByBackprop, estimator_mode: EstimatorMode):
     self._owner = owner
     self._estimator_mode = estimator_mode
-    self._estimates = {}  # type: Dict[utils.CompareById[tf.Variable], tf.Tensor]
+    self._estimates = {
+    }  # type: Dict[utils.CompareById[tf.Variable], tf.Tensor]
 
   def __call__(self, var: tf.Variable) -> Union[tf.Variable, tf.Tensor]:
     """Returns the posterior estimate for the given variable."""
-    if not var.trainable: return var
+    if not var.trainable:
+      return var
 
     posterior = self._owner.get_or_create_distributions(var).posterior
     estimate = _estimate(posterior, self._estimator_mode)
@@ -275,8 +272,8 @@ class PosteriorEstimator(object):
     Args:
       kl_cost_fn: The KL function.
       name: A name for the tensor representing the total KL cost.
-      predicate: A callable dictating which variables are included.
-        If `None`, all variables are included.
+      predicate: A callable dictating which variables are included. If `None`,
+        all variables are included.
 
     Returns:
       A `Tensor` representing the total KL cost in the ELBO loss.

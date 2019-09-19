@@ -35,8 +35,8 @@ def segment_dim(inputs, dim, shapes):
 
   Args:
     inputs: `Tensor` to segment.
-    dim: dimension of the Tensor to operate on. Negative numbers count back
-        from the end of the dimensions.
+    dim: dimension of the Tensor to operate on. Negative numbers count back from
+      the end of the dimensions.
     shapes: list of TensorShapes of the output 'segments' to produce.
 
   Returns:
@@ -49,8 +49,10 @@ def segment_dim(inputs, dim, shapes):
   inputs_shape = inputs.shape
   ndims = inputs_shape.ndims
   dynamic_shape = tf.shape(inputs)
-  shape_as_list = [dynamic_shape[i] if s is None else s
-                   for i, s in enumerate(inputs_shape.as_list())]
+  shape_as_list = [
+      dynamic_shape[i] if s is None else s
+      for i, s in enumerate(inputs_shape.as_list())
+  ]
 
   if dim >= ndims or dim < -ndims:
     message = 'Invalid dims ({:d})'.format(dim)
@@ -81,8 +83,9 @@ def segment_dim(inputs, dim, shapes):
 def batch_invert_permutation(permutations):
   """Returns batched `tf.invert_permutation` for every row in `permutations`."""
   unpacked = tf.unstack(permutations)
-  inverses = [tf.math.invert_permutation(permutation)
-              for permutation in unpacked]
+  inverses = [
+      tf.math.invert_permutation(permutation) for permutation in unpacked
+  ]
   return tf.stack(inverses)
 
 
@@ -118,13 +121,20 @@ def apply_linear(inputs, linear_modules, activation=tf.identity):
   if isinstance(inputs, (tuple, list)):
     assert len(inputs) == len(linear_modules) == 2, (
         'if inputs is a list, must be length 2 and match length of linears')
-    return apply_split_linear(linear_modules[0], linear_modules[1],
-                              inputs[0], inputs[1], activation=activation)
+    return apply_split_linear(
+        linear_modules[0],
+        linear_modules[1],
+        inputs[0],
+        inputs[1],
+        activation=activation)
   else:
     return activation(linear_modules(inputs))
 
 
-def apply_split_linear(lin_module_1, lin_module_2, input1, input2,
+def apply_split_linear(lin_module_1,
+                       lin_module_2,
+                       input1,
+                       input2,
                        activation=None):
   """Returns a linear output of two inputs, run independently and summed."""
   output_1 = lin_module_1(input1)

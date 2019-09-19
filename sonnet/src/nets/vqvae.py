@@ -46,12 +46,16 @@ class VectorQuantizer(base.Module):
     embedding_dim: integer representing the dimensionality of the tensors in the
       quantized space. Inputs to the modules must be in this format as well.
     num_embeddings: integer, the number of vectors in the quantized space.
-    commitment_cost: scalar which controls the weighting of the loss terms
-      (see equation 4 in the paper - this variable is Beta).
+    commitment_cost: scalar which controls the weighting of the loss terms (see
+      equation 4 in the paper - this variable is Beta).
   """
 
-  def __init__(self, embedding_dim, num_embeddings, commitment_cost,
-               dtype=tf.float32, name='vector_quantizer'):
+  def __init__(self,
+               embedding_dim,
+               num_embeddings,
+               commitment_cost,
+               dtype=tf.float32,
+               name='vector_quantizer'):
     """Initializes a VQ-VAE module.
 
     Args:
@@ -71,8 +75,8 @@ class VectorQuantizer(base.Module):
 
     embedding_shape = [embedding_dim, num_embeddings]
     initializer = initializers.VarianceScaling(distribution='uniform')
-    self.embeddings = tf.Variable(initializer(embedding_shape, dtype),
-                                  name='embeddings')
+    self.embeddings = tf.Variable(
+        initializer(embedding_shape, dtype), name='embeddings')
 
   def __call__(self, inputs, is_training):
     """Connects the module to some inputs.
@@ -94,11 +98,12 @@ class VectorQuantizer(base.Module):
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 
-    distances = (tf.reduce_sum(flat_inputs ** 2, 1, keepdims=True)
-                 - 2 * tf.matmul(flat_inputs, self.embeddings)
-                 + tf.reduce_sum(self.embeddings ** 2, 0, keepdims=True))
+    distances = (
+        tf.reduce_sum(flat_inputs**2, 1, keepdims=True) -
+        2 * tf.matmul(flat_inputs, self.embeddings) +
+        tf.reduce_sum(self.embeddings**2, 0, keepdims=True))
 
-    encoding_indices = tf.argmax(- distances, 1)
+    encoding_indices = tf.argmax(-distances, 1)
     encodings = tf.one_hot(encoding_indices, self.num_embeddings)
 
     # NB: if your code crashes with a reshape error on the line below about a
@@ -109,15 +114,15 @@ class VectorQuantizer(base.Module):
     encoding_indices = tf.reshape(encoding_indices, tf.shape(inputs)[:-1])
     quantized = self.quantize(encoding_indices)
 
-    e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
-    q_latent_loss = tf.reduce_mean((quantized - tf.stop_gradient(inputs)) ** 2)
+    e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs)**2)
+    q_latent_loss = tf.reduce_mean((quantized - tf.stop_gradient(inputs))**2)
     loss = q_latent_loss + self.commitment_cost * e_latent_loss
 
     # Straight Through Estimator
     quantized = inputs + tf.stop_gradient(quantized - inputs)
     avg_probs = tf.reduce_mean(encodings, 0)
-    perplexity = tf.exp(- tf.reduce_sum(
-        avg_probs * tf.math.log(avg_probs + 1e-10)))
+    perplexity = tf.exp(-tf.reduce_sum(avg_probs *
+                                       tf.math.log(avg_probs + 1e-10)))
 
     return {
         'quantize': quantized,
@@ -170,8 +175,14 @@ class VectorQuantizerEMA(base.Module):
     epsilon: small float constant to avoid numerical instability.
   """
 
-  def __init__(self, embedding_dim, num_embeddings, commitment_cost, decay,
-               epsilon=1e-5, dtype=tf.float32, name='vector_quantizer_ema'):
+  def __init__(self,
+               embedding_dim,
+               num_embeddings,
+               commitment_cost,
+               decay,
+               epsilon=1e-5,
+               dtype=tf.float32,
+               name='vector_quantizer_ema'):
     """Initializes a VQ-VAE EMA module.
 
     Args:
@@ -181,8 +192,8 @@ class VectorQuantizerEMA(base.Module):
       num_embeddings: integer, the number of vectors in the quantized space.
       commitment_cost: scalar which controls the weighting of the loss terms
         (see equation 4 in the paper - this variable is Beta).
-      decay: float between 0 and 1, controls the speed of the Exponential
-        Moving Averages.
+      decay: float between 0 and 1, controls the speed of the Exponential Moving
+        Averages.
       epsilon: small constant to aid numerical stability, default 1e-5.
       dtype: dtype for the embeddings variable, defaults to tf.float32.
       name: name of the module.
@@ -231,11 +242,12 @@ class VectorQuantizerEMA(base.Module):
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 
-    distances = (tf.reduce_sum(flat_inputs ** 2, 1, keepdims=True)
-                 - 2 * tf.matmul(flat_inputs, self.embeddings)
-                 + tf.reduce_sum(self.embeddings ** 2, 0, keepdims=True))
+    distances = (
+        tf.reduce_sum(flat_inputs**2, 1, keepdims=True) -
+        2 * tf.matmul(flat_inputs, self.embeddings) +
+        tf.reduce_sum(self.embeddings**2, 0, keepdims=True))
 
-    encoding_indices = tf.argmax(- distances, 1)
+    encoding_indices = tf.argmax(-distances, 1)
     encodings = tf.one_hot(encoding_indices, self.num_embeddings)
 
     # NB: if your code crashes with a reshape error on the line below about a
@@ -245,7 +257,7 @@ class VectorQuantizerEMA(base.Module):
     # creates various other problems related to device placement / TPUs.
     encoding_indices = tf.reshape(encoding_indices, tf.shape(inputs)[:-1])
     quantized = self.quantize(encoding_indices)
-    e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs) ** 2)
+    e_latent_loss = tf.reduce_mean((tf.stop_gradient(quantized) - inputs)**2)
 
     if is_training:
       updated_ema_cluster_size = self.ema_cluster_size(
@@ -255,9 +267,8 @@ class VectorQuantizerEMA(base.Module):
       updated_ema_dw = self.ema_dw(dw)
 
       n = tf.reduce_sum(updated_ema_cluster_size)
-      updated_ema_cluster_size = (
-          (updated_ema_cluster_size + self.epsilon)
-          / (n + self.num_embeddings * self.epsilon) * n)
+      updated_ema_cluster_size = ((updated_ema_cluster_size + self.epsilon) /
+                                  (n + self.num_embeddings * self.epsilon) * n)
 
       normalised_updated_ema_w = (
           updated_ema_dw / tf.reshape(updated_ema_cluster_size, [1, -1]))
@@ -271,8 +282,8 @@ class VectorQuantizerEMA(base.Module):
     # Straight Through Estimator
     quantized = inputs + tf.stop_gradient(quantized - inputs)
     avg_probs = tf.reduce_mean(encodings, 0)
-    perplexity = tf.exp(- tf.reduce_sum(
-        avg_probs * tf.math.log(avg_probs + 1e-10)))
+    perplexity = tf.exp(-tf.reduce_sum(avg_probs *
+                                       tf.math.log(avg_probs + 1e-10)))
 
     return {
         'quantize': quantized,

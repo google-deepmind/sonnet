@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Generic axis normalization module."""
 
 from __future__ import absolute_import
@@ -66,17 +65,23 @@ class LayerNorm(base.Module):
       current offset.
   """
 
-  def __init__(self, axis, create_scale, create_offset, eps=1e-5,
-               scale_init=None, offset_init=None, data_format="channels_last",
+  def __init__(self,
+               axis,
+               create_scale,
+               create_offset,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
                name=None):
     r"""Constructs an ``LayerNorm`` module.
 
     Args:
       axis: An ``int``, ``slice`` or sequence of ``int``\s representing the axes
         which should be normalized across. Typical usages are: ``1`` or ``-1``
-        for normalization over just the channels and ``slice(1, None)``,
-        ``slice(2, None)`` for normalization over the spatial and channel
-        dimensions whilst avoiding the batch and/or time dimensions.
+          for normalization over just the channels and ``slice(1, None)``,
+          ``slice(2, None)`` for normalization over the spatial and channel
+          dimensions whilst avoiding the batch and/or time dimensions.
       create_scale: ``bool`` representing whether to create a trainable scale
         per channel applied after the normalization.
       create_offset: ``bool`` representing whether to create a trainable offset
@@ -115,13 +120,13 @@ class LayerNorm(base.Module):
     self._create_offset = create_offset
 
     if self._create_scale:
-      self._scale_init = (scale_init if scale_init is not None
-                          else initializers.Ones())
+      self._scale_init = (
+          scale_init if scale_init is not None else initializers.Ones())
     elif scale_init is not None:
       raise ValueError("Cannot set `scale_init` if `create_scale=False`.")
     if self._create_offset:
-      self._offset_init = (offset_init if offset_init is not None
-                           else initializers.Zeros())
+      self._offset_init = (
+          offset_init if offset_init is not None else initializers.Zeros())
     elif offset_init is not None:
       raise ValueError("Cannot set `offset_init` if `create_offset=False`.")
 
@@ -157,18 +162,20 @@ class LayerNorm(base.Module):
       offset = self.offset
 
     if len(inputs.shape) != self._rank:
-      raise ValueError("The rank of the inputs cannot change between calls, the"
-                       " original call was rank={} but this call was rank={}."
-                       .format(self._rank, len(inputs.shape)))
+      raise ValueError(
+          "The rank of the inputs cannot change between calls, the"
+          " original call was rank={} but this call was rank={}.".format(
+              self._rank, len(inputs.shape)))
 
     mean, var = tf.nn.moments(inputs, self._axis, keepdims=True)
 
-    normalized = tf.nn.batch_normalization(inputs,
-                                           mean=mean,
-                                           variance=var,
-                                           scale=scale,
-                                           offset=offset,
-                                           variance_epsilon=self._eps)
+    normalized = tf.nn.batch_normalization(
+        inputs,
+        mean=mean,
+        variance=var,
+        scale=scale,
+        offset=offset,
+        variance_epsilon=self._eps)
     return normalized
 
   @once.once
@@ -186,17 +193,17 @@ class LayerNorm(base.Module):
     if self._channel_index == -1:
       params_shape = [inputs.shape[-1]]
     else:  # self._channel_index == 1
-      params_shape = [inputs.shape[1]] + [1]*(self._rank - 2)
+      params_shape = [inputs.shape[1]] + [1] * (self._rank - 2)
 
     if self._create_scale:
-      self.scale = tf.Variable(self._scale_init(params_shape, dtype),
-                               name="scale")
+      self.scale = tf.Variable(
+          self._scale_init(params_shape, dtype), name="scale")
     else:
       self.scale = None
 
     if self._create_offset:
-      self.offset = tf.Variable(self._offset_init(params_shape, dtype),
-                                name="offset")
+      self.offset = tf.Variable(
+          self._offset_init(params_shape, dtype), name="offset")
     else:
       self.offset = None
 
@@ -213,8 +220,13 @@ class InstanceNorm(LayerNorm):
       current offset.
   """
 
-  def __init__(self, create_scale, create_offset, eps=1e-5,
-               scale_init=None, offset_init=None, data_format="channels_last",
+  def __init__(self,
+               create_scale,
+               create_offset,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
                name=None):
     """Constructs an ``InstanceNorm`` module.
 

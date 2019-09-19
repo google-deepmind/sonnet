@@ -59,4 +59,5 @@ def leaky_clip_by_value(t, clip_value_min, clip_value_max, name=None):
     )
     dy = tf.where(condition, zeros, dy)
     return dy, None, None
+
   return clip_t, grad

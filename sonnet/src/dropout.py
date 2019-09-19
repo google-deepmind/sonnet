@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Sonnet dropout modules."""
 
 from __future__ import absolute_import
@@ -33,11 +32,7 @@ class Dropout(base.Module):
   from this paper by scaling activations at training time rather than test time.
   """
 
-  def __init__(self,
-               rate,
-               noise_shape=None,
-               seed=None,
-               name=None):
+  def __init__(self, rate, noise_shape=None, seed=None, name=None):
     """Constructs a Dropout module.
 
     Args:

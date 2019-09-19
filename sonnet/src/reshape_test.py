@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.reshape."""
 from __future__ import absolute_import
 from __future__ import division
@@ -36,8 +35,7 @@ class ReshapeTest(test_utils.TestCase, parameterized.TestCase):
       (4, [B, H, W, C, 1, D]),
   )
   def testReshape(self, preserve_dims, expected_output_shape):
-    mod = reshape.Reshape(
-        output_shape=(-1, D), preserve_dims=preserve_dims)
+    mod = reshape.Reshape(output_shape=(-1, D), preserve_dims=preserve_dims)
     outputs = mod(tf.ones([B, H, W, C, D]))
     self.assertEqual(outputs.shape, expected_output_shape)
 

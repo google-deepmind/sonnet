@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Reshaping Sonnet modules."""
 
 from __future__ import absolute_import
@@ -89,10 +88,10 @@ class Reshape(base.Module):
     """Constructs a ``Reshape`` module.
 
     Args:
-      output_shape: Shape to reshape the input tensor to while preserving
-        its first ``preserve_dims` dimensions. When the special value -1
-        appears in ``output_shape`` the corresponding size is automatically
-        inferred. Note that -1 can only appear once in ``output_shape``.
+      output_shape: Shape to reshape the input tensor to while preserving its
+        first ``preserve_dims` dimensions. When the special value -1 appears in
+        ``output_shape`` the corresponding size is automatically inferred. Note
+        that -1 can only appear once in ``output_shape``.
         To flatten all non-batch dimensions use :class:`Flatten`.
       preserve_dims: Number of leading dimensions that will not be reshaped.
       name: Name of the module.
@@ -121,8 +120,8 @@ class Reshape(base.Module):
     """Reshapes ``inputs``.
 
     Args:
-      inputs: A tensor of shape
-        ``[b_1, b_2, ..., b_preserve_dims, b_preserve_dims + 1, ...]``.
+      inputs: A tensor of shape ``[b_1, b_2, ..., b_preserve_dims,
+        b_preserve_dims + 1, ...]``.
 
     Returns:
       A tensor of shape
@@ -148,14 +147,11 @@ class Reshape(base.Module):
 
     preserved_shape = inputs.shape[:self._preserve_dims]
     if preserved_shape.is_fully_defined():
-      output = tf.reshape(
-          inputs,
-          tuple(preserved_shape) + output_shape)
+      output = tf.reshape(inputs, tuple(preserved_shape) + output_shape)
     else:
       dynamic_preserved_shape = tf.shape(inputs)[:self._preserve_dims]
       output = tf.reshape(
-          inputs,
-          tf.concat([dynamic_preserved_shape, output_shape], axis=0))
+          inputs, tf.concat([dynamic_preserved_shape, output_shape], axis=0))
     return output
 
   @base.no_name_scope
@@ -164,9 +160,10 @@ class Reshape(base.Module):
     if name is None:
       name = self.name + "_reversed"
 
-    return Reshape(output_shape=self._input_shape[self._preserve_dims:],
-                   preserve_dims=self._preserve_dims,
-                   name=name)
+    return Reshape(
+        output_shape=self._input_shape[self._preserve_dims:],
+        preserve_dims=self._preserve_dims,
+        name=name)
 
 
 class Flatten(Reshape):

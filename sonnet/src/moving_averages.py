@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Exponential moving average for Sonnet."""
 
 from __future__ import absolute_import
@@ -60,8 +59,8 @@ class ExponentialMovingAverage(metrics.Metric):
     """
     super(ExponentialMovingAverage, self).__init__(name=name)
     self._decay = decay
-    self._counter = tf.Variable(0, trainable=False, dtype=tf.int64,
-                                name="counter")
+    self._counter = tf.Variable(
+        0, trainable=False, dtype=tf.int64, name="counter")
 
     self._hidden = None
     self.average = None
@@ -89,7 +88,7 @@ class ExponentialMovingAverage(metrics.Metric):
 
   @once.once
   def initialize(self, value):
-    self._hidden = tf.Variable(tf.zeros_like(value), trainable=False,
-                               name="hidden")
-    self.average = tf.Variable(tf.zeros_like(value), trainable=False,
-                               name="average")
+    self._hidden = tf.Variable(
+        tf.zeros_like(value), trainable=False, name="hidden")
+    self.average = tf.Variable(
+        tf.zeros_like(value), trainable=False, name="average")

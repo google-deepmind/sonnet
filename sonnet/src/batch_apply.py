@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Merges a number of leading dimensions of an input tensor to manipulate it."""
 
 from __future__ import absolute_import

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Padding module for Sonnet."""
 
 from __future__ import absolute_import
@@ -55,9 +54,9 @@ def create(padding, kernel, rate, n, channel_index):
       integer representing the effective kernel size (kernel size when the rate
       is 1) and return a list of two integers representing the padding before
       and padding after for that dimension.
-    kernel: int or list of ints of length n. The size of the kernel for
-      each dimension. If it is an int it will be replicated for the non channel
-      and batch dimensions.
+    kernel: int or list of ints of length n. The size of the kernel for each
+      dimension. If it is an int it will be replicated for the non channel and
+      batch dimensions.
     rate: int or list of ints of length n. The dilation rate for each dimension.
       If it is an int it will be replicated for the non channel and batch
       dimensions.
@@ -71,12 +70,14 @@ def create(padding, kernel, rate, n, channel_index):
   """
   # The effective kernel size includes any holes/gaps introduced by the
   # dilation rate. It's equal to kernel_size when rate == 1.
-  effective_kernel_size = map(lambda kernel, rate: (kernel - 1) * rate + 1,  # pylint: disable=deprecated-lambda
-                              utils.replicate(kernel, n, "kernel"),
-                              utils.replicate(rate, n, "rate"))
-  paddings = map(lambda x, y: x(y),  # pylint: disable=deprecated-lambda
-                 utils.replicate(padding, n, "padding"),
-                 effective_kernel_size)
+  effective_kernel_size = map(  # pylint: disable=deprecated-lambda
+      lambda kernel, rate: (kernel - 1) * rate + 1,
+      utils.replicate(kernel, n, "kernel"),
+      utils.replicate(rate, n, "rate"))
+  paddings = map(  # pylint: disable=deprecated-lambda
+      lambda x, y: x(y),
+      utils.replicate(padding, n, "padding"),
+      effective_kernel_size)
   if channel_index == 1:  # N, C, ...
     paddings = [[0, 0], [0, 0]] + list(paddings)
   else:  # channel_index == -1 N, ..., C

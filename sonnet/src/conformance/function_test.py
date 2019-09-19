@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Ensures that all Sonnet modules support ``tf.function``."""
 
 from __future__ import absolute_import
@@ -78,8 +77,9 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
     input_shape = (8,) + input_shape
     input_spec = tf.TensorSpec((None, None) + input_shape[2:], dtype=dtype)
     cf = forward.get_concrete_function(input_spec)
-    if isinstance(descriptors.unwrap(module.module),
-                  (snt.nets.VectorQuantizer, snt.nets.VectorQuantizerEMA)):
+    if isinstance(
+        descriptors.unwrap(module.module),
+        (snt.nets.VectorQuantizer, snt.nets.VectorQuantizerEMA)):
       # TODO(tomhennigan) Make VQ and VQ-EMA batch agnostic under BatchApply.
       return
     cf(tf.ones(input_shape, dtype=dtype))
@@ -115,8 +115,11 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
     if self.primary_device == "TPU":
       self.skipTest("IndexedSlices not supported on TPU.")
     parameters = [tf.Variable([[1.], [2.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1]))
+    ]
     optimizer = optimizer_fn()
     optimizer_apply = tf.function(optimizer.apply, autograph=autograph)
     optimizer_apply(updates, parameters)

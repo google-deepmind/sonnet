@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.regularizers."""
 
 from __future__ import absolute_import
@@ -29,10 +28,7 @@ class L1Test(test_utils.TestCase):
 
   def testAgainstNumPy(self):
     regularizer = regularizers.L1(0.01)
-    tensors = [
-        tf.random.uniform([42]),
-        tf.random.uniform([24])
-    ]
+    tensors = [tf.random.uniform([42]), tf.random.uniform([24])]
 
     def l1(scale, t):
       return scale * np.abs(t).sum()
@@ -53,10 +49,7 @@ class L2Test(test_utils.TestCase):
 
   def testAgainstNumPy(self):
     regularizer = regularizers.L2(0.01)
-    tensors = [
-        tf.random.uniform([42]),
-        tf.random.uniform([24])
-    ]
+    tensors = [tf.random.uniform([42]), tf.random.uniform([24])]
 
     def l2(scale, t):
       return scale * np.square(t).sum()
@@ -77,10 +70,7 @@ class OffDiagonalOrthogonalTest(test_utils.TestCase):
 
   def testAgainstNumPy(self):
     regularizer = regularizers.OffDiagonalOrthogonal(0.01)
-    tensors = [
-        tf.random.uniform([4, 2]),
-        tf.random.uniform([2, 4])
-    ]
+    tensors = [tf.random.uniform([4, 2]), tf.random.uniform([2, 4])]
 
     def odo(scale, t):
       t2 = np.square(np.dot(t.T, t))

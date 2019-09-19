@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Adaptive Moment Estimation (Adam) module."""
 
 from __future__ import absolute_import
@@ -41,12 +40,13 @@ class Adam(base.Optimizer):
     v: Accumulated v for each parameter.
   """
 
-  def __init__(self,
-               learning_rate,  # TODO(petebu): Consider a default here.
-               beta1=0.9,
-               beta2=0.999,
-               epsilon=1e-8,
-               name=None):
+  def __init__(
+      self,
+      learning_rate,  # TODO(petebu): Consider a default here.
+      beta1=0.9,
+      beta2=0.999,
+      epsilon=1e-8,
+      name=None):
     """Constructs an `Adam` module.
 
     Args:
@@ -113,11 +113,11 @@ class Adam(base.Optimizer):
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
-          sparse_m_update = (beta1 * m.sparse_read(indices) +
-                             (1. - beta1) * update)
+          sparse_m_update = (
+              beta1 * m.sparse_read(indices) + (1. - beta1) * update)
           m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
-          sparse_v_update = (beta2 * v.sparse_read(indices) +
-                             (1. - beta2) * tf.square(update))
+          sparse_v_update = (
+              beta2 * v.sparse_read(indices) + (1. - beta2) * tf.square(update))
           v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
           debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
           debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))
@@ -135,12 +135,13 @@ class Adam(base.Optimizer):
 class FastAdam(base.Optimizer):
   """Adaptive Moment Estimation (Adam) module."""
 
-  def __init__(self,
-               learning_rate,  # TODO(petebu): Consider a default here.
-               beta1=0.9,
-               beta2=0.999,
-               epsilon=1e-8,
-               name=None):
+  def __init__(
+      self,
+      learning_rate,  # TODO(petebu): Consider a default here.
+      beta1=0.9,
+      beta2=0.999,
+      epsilon=1e-8,
+      name=None):
     """Constructs an `Adam` module."""
     super(FastAdam, self).__init__(name)
     self.learning_rate = learning_rate
@@ -176,11 +177,11 @@ class FastAdam(base.Optimizer):
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
-          sparse_m_update = (beta1 * m.sparse_read(indices) +
-                             (1. - beta1) * update)
+          sparse_m_update = (
+              beta1 * m.sparse_read(indices) + (1. - beta1) * update)
           m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
-          sparse_v_update = (beta2 * v.sparse_read(indices) +
-                             (1. - beta2) * tf.square(update))
+          sparse_v_update = (
+              beta2 * v.sparse_read(indices) + (1. - beta2) * tf.square(update))
           v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
           debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
           debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))

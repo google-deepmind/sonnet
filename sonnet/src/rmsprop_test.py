@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.rmsprop."""
 
 from __future__ import absolute_import
@@ -71,10 +70,14 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
           self.primary_device))
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(learning_rate=3.)
     # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
@@ -95,10 +98,14 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
           self.primary_device))
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(learning_rate=3., centered=True)
     # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
@@ -135,8 +142,11 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
     decay = tf.Variable(0.9, dtype=dtype)
     momentum = tf.Variable(0.0, dtype=dtype)
     epsilon = tf.Variable(1e-7, dtype=dtype)
-    optimizer = self.make_optimizer(learning_rate=learning_rate, decay=decay,
-                                    momentum=momentum, epsilon=epsilon)
+    optimizer = self.make_optimizer(
+        learning_rate=learning_rate,
+        decay=decay,
+        momentum=momentum,
+        epsilon=epsilon)
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])

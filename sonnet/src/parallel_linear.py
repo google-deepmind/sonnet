@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Parallel linear module."""
 
 from __future__ import absolute_import
@@ -88,7 +87,8 @@ class ParallelLinears(base.Module):
 
     self.w = tf.Variable(
         self.w_init([num_linears, self.input_size, self.output_size],
-                    inputs.dtype), name="w")
+                    inputs.dtype),
+        name="w")
 
     if self.with_bias:
       self.b = tf.Variable(

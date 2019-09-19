@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Utilities for using Sonnet with TensorFlow Distribution Strategy."""
 
 from __future__ import absolute_import

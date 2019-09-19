@@ -31,8 +31,7 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(ValueError, "b_init must not be set"):
       mlp.MLP([1], with_bias=False, b_init=object())
 
-  @parameterized.parameters(
-      itertools.product((1, 2, 3), (0.1, 0.0, None)))
+  @parameterized.parameters(itertools.product((1, 2, 3), (0.1, 0.0, None)))
   def test_submodules(self, num_layers, dropout_rate):
     mod = mlp.MLP([1] * num_layers, dropout_rate=dropout_rate)
     self.assertLen(mod.submodules, num_layers)

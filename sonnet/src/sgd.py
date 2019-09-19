@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Stochastic Gradient Descent module."""
 
 from __future__ import absolute_import
@@ -84,10 +83,8 @@ class FastSGD(base.Optimizer):
         optimizer_utils.check_same_dtype(update, parameter)
         learning_rate = tf.cast(self.learning_rate, update.dtype)
         if isinstance(update, tf.IndexedSlices):
-          parameter.scatter_nd_sub(
-              update.indices, update.values * learning_rate)
+          parameter.scatter_nd_sub(update.indices,
+                                   update.values * learning_rate)
         else:
           tf.raw_ops.ResourceApplyGradientDescent(
-              var=parameter.handle,
-              alpha=learning_rate,
-              delta=update)
+              var=parameter.handle, alpha=learning_rate, delta=update)

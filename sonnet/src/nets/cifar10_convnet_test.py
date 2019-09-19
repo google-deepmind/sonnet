@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.nets.cifar10_convnet."""
 
 from __future__ import absolute_import
@@ -39,13 +38,11 @@ class ModelTest(parameterized.TestCase, test_utils.TestCase):
         'The length of `output_channels` and `strides` must be equal.'):
       cifar10_convnet.Cifar10ConvNet(strides=(1, 2, 3), output_channels=(1,))
 
-  @parameterized.parameters(
-      {'batch_size': 1},
-      {'batch_size': 4},
-      {'batch_size': 128})
+  @parameterized.parameters({'batch_size': 1}, {'batch_size': 4},
+                            {'batch_size': 128})
   def testModelForwards(self, batch_size):
-    image_batch = tf.constant(np.random.randn(batch_size, 24, 24, 3),
-                              dtype=tf.float32)
+    image_batch = tf.constant(
+        np.random.randn(batch_size, 24, 24, 3), dtype=tf.float32)
 
     convnet = cifar10_convnet.Cifar10ConvNet()
     output = convnet(image_batch, is_training=True)
@@ -55,13 +52,11 @@ class ModelTest(parameterized.TestCase, test_utils.TestCase):
     # mean pooling, before the linear.
     self.assertLen(output['activations'], 12)
 
-  @parameterized.parameters(
-      {'batch_size': 1},
-      {'batch_size': 4},
-      {'batch_size': 128})
+  @parameterized.parameters({'batch_size': 1}, {'batch_size': 4},
+                            {'batch_size': 128})
   def testModelForwardsFunction(self, batch_size):
-    image_batch = tf.constant(np.random.randn(batch_size, 24, 24, 3),
-                              dtype=tf.float32)
+    image_batch = tf.constant(
+        np.random.randn(batch_size, 24, 24, 3), dtype=tf.float32)
 
     convnet = cifar10_convnet.Cifar10ConvNet()
     convnet_function = tf.function(convnet)

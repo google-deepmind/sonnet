@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.batch_norm."""
 
 from __future__ import absolute_import
@@ -35,8 +34,10 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testSimpleTraining(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False)
 
     inputs = tf.ones([2, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -48,8 +49,11 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testSimpleTrainingNCHW(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format="NCHW")
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format="NCHW")
 
     inputs = tf.ones([2, 5, 3, 3])
     scale = tf.constant(0.5, shape=(5, 1, 1))
@@ -61,8 +65,10 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testSimpleTraining3D(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False)
 
     inputs = tf.ones([2, 3, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -74,8 +80,11 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testSimpleTraining3DNCDHW(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format="NCDHW")
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format="NCDHW")
 
     inputs = tf.ones([2, 5, 3, 3, 3])
     scale = tf.constant(0.5, shape=(5, 1, 1, 1))
@@ -87,8 +96,11 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testNoScaleAndOffset(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format="NHWC")
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format="NHWC")
 
     inputs = tf.ones([2, 5, 3, 3, 3])
     outputs = layer(inputs, True)
@@ -101,8 +113,11 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       # TODO(tamaranorman) enable on TPU
 
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format="NHWC")
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format="NHWC")
     layer = tf.function(layer, autograph=autograph)
 
     inputs = tf.ones([2, 5, 3, 3, 3])
@@ -116,8 +131,8 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       outputs = layer(inputs, is_training, use_batch_stats)
       self.assertAllEqual(outputs, expected1)
 
-      outputs = layer(inputs, is_training, use_batch_stats,
-                      scale=scale, offset=offset)
+      outputs = layer(
+          inputs, is_training, use_batch_stats, scale=scale, offset=offset)
       self.assertAllEqual(outputs, expected2)
 
   @parameterized.parameters(True, False)
@@ -127,8 +142,11 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       # TODO(tamaranorman) enable on TPU
 
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format="NHWC")
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format="NHWC")
     layer = tf.function(layer, autograph=autograph)
 
     inputs = tf.ones([2, 5, 3, 3, 3])
@@ -143,8 +161,10 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testUsingTestStats(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False)
 
     inputs = tf.ones([2, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -158,8 +178,10 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   def testIsTrainingFalseFirstCall(self):
     layer = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False)
     inputs = tf.ones([2, 3, 3, 5])
     outputs = layer(inputs, False)
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 0.0))
@@ -170,42 +192,52 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
         ValueError,
         "Unable to extract channel information from '{}'".format(data_format)):
       batch_norm.BaseBatchNorm(
-          moving_mean=TestMetric(), moving_variance=TestMetric(),
-          create_scale=False, create_offset=False,
+          moving_mean=TestMetric(),
+          moving_variance=TestMetric(),
+          create_scale=False,
+          create_offset=False,
           data_format=data_format)
 
   @parameterized.parameters("NCHW", "NCW", "channels_first")
   def testValidDataFormatChannelsFirst(self, data_format):
     test = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format=data_format)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format=data_format)
 
     self.assertEqual(test._channel_index, 1)
 
   @parameterized.parameters("NHWC", "NWC", "channels_last")
   def testValidDataFormatChannelsLast(self, data_format):
     test = batch_norm.BaseBatchNorm(
-        moving_mean=TestMetric(), moving_variance=TestMetric(),
-        create_scale=False, create_offset=False, data_format=data_format)
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=False,
+        create_offset=False,
+        data_format=data_format)
 
     self.assertEqual(test._channel_index, -1)
 
   def testNoScaleAndInitProvided(self):
     with self.assertRaisesRegexp(
-        ValueError,
-        "Cannot set `scale_init` if `create_scale=False`"):
+        ValueError, "Cannot set `scale_init` if `create_scale=False`"):
       batch_norm.BaseBatchNorm(
-          moving_mean=TestMetric(), moving_variance=TestMetric(),
-          create_scale=False, create_offset=True,
+          moving_mean=TestMetric(),
+          moving_variance=TestMetric(),
+          create_scale=False,
+          create_offset=True,
           scale_init=initializers.Ones())
 
   def testNoOffsetBetaInitProvided(self):
     with self.assertRaisesRegexp(
-        ValueError,
-        "Cannot set `offset_init` if `create_offset=False`"):
+        ValueError, "Cannot set `offset_init` if `create_offset=False`"):
       batch_norm.BaseBatchNorm(
-          moving_mean=TestMetric(), moving_variance=TestMetric(),
-          create_scale=True, create_offset=False,
+          moving_mean=TestMetric(),
+          moving_variance=TestMetric(),
+          create_scale=True,
+          create_offset=False,
           offset_init=initializers.Zeros())
 
 
@@ -226,8 +258,8 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
   # TODO(tamaranorman) add a TpuReplicator test
 
   def testDefaultReplicaContext(self):
-    layer = batch_norm.CrossReplicaBatchNorm(False, False,
-                                             TestMetric(), TestMetric())
+    layer = batch_norm.CrossReplicaBatchNorm(False, False, TestMetric(),
+                                             TestMetric())
 
     inputs = tf.ones([2, 3, 3, 5])
     scale = tf.constant(0.5, shape=(5,))
@@ -248,8 +280,8 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     with strategy.scope():
       mean_metric = TestMetric()
       var_metric = TestMetric()
-      layer = batch_norm.CrossReplicaBatchNorm(False, False,
-                                               mean_metric, var_metric)
+      layer = batch_norm.CrossReplicaBatchNorm(False, False, mean_metric,
+                                               var_metric)
 
     scale = tf.constant(0.5, shape=(5,))
     offset = tf.constant(2.0, shape=(5,))
@@ -300,9 +332,12 @@ def setUpModule():
   if len(gpus) == 1:
     logging.info("Splitting one physical GPU into two logical GPUs.")
     tf.config.experimental.set_virtual_device_configuration(
-        gpus[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024),
-         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+        gpus[0], [
+            tf.config.experimental.VirtualDeviceConfiguration(
+                memory_limit=1024),
+            tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)
+        ])
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

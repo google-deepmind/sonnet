@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Embedding module."""
 
 from __future__ import absolute_import
@@ -43,8 +42,8 @@ class Embed(base.Module):
 
     Args:
       vocab_size: int. Number of unique tokens to embed. If not provided, an
-        existing vocabulary matrix from which vocab_size can be inferred must
-        be provided as existing_vocab.
+        existing vocabulary matrix from which vocab_size can be inferred must be
+        provided as existing_vocab.
       embed_dim: int or None. Number of dimensions to assign to each embedding.
         If not specified, we use ``6 * sqrt(sqrt(vocab_size))``. If an existing
         vocabulary matrix initializes the module, this should not be provided as
@@ -55,8 +54,8 @@ class Embed(base.Module):
       densify_gradients: if True, we convert the embedding gradient from an
         ``tf.IndexedSlices`` to a regular tensor before sending it back to the
         parameter server. This avoids excess computation on the parameter
-        server. Use this option for moderately sized embeddings, e.g.,
-        a vocabulary size on the order of up to thousands. For embeddings larger
+        server. Use this option for moderately sized embeddings, e.g., a
+        vocabulary size on the order of up to thousands. For embeddings larger
         than these, e.g. a vocabulary size on the order of tens or hundreds of
         thousands, set this to False.
       initializer: Optional initializer for the embeddings. By default,
@@ -142,6 +141,7 @@ def dense_gradient(x):
   Returns:
     The input ``tf.Tensor`` and a dense identity gradient function.
   """
+
   def grad(dy):
     if isinstance(dy, tf.IndexedSlices):
       return tf.convert_to_tensor(dy)

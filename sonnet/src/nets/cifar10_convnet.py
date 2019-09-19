@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Convnet module for Cifar10 classification."""
 from __future__ import absolute_import
 from __future__ import division
@@ -39,7 +38,17 @@ class Cifar10ConvNet(base.Module):
                b_init=None,
                data_format='NHWC',
                output_channels=(
-                   64, 64, 128, 128, 128, 256, 256, 256, 512, 512, 512,
+                   64,
+                   64,
+                   128,
+                   128,
+                   128,
+                   256,
+                   256,
+                   256,
+                   512,
+                   512,
+                   512,
                ),
                strides=(1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1),
                name=None):
@@ -64,18 +73,19 @@ class Cifar10ConvNet(base.Module):
             w_init=self._w_init,
             b_init=self._b_init,
             data_format=self._data_format,
-            name='conv_2d_{}'.format(i))
-        for i in range(self._num_layers))
+            name='conv_2d_{}'.format(i)) for i in range(self._num_layers))
     self._bn_modules = list(
         batch_norm.BatchNorm(  # pylint: disable=g-complex-comprehension
-            create_offset=True, create_scale=False,
+            create_offset=True,
+            create_scale=False,
             decay_rate=0.999,
             data_format=self._data_format,
-            name='batch_norm_{}'.format(i))
-        for i in range(self._num_layers))
+            name='batch_norm_{}'.format(i)) for i in range(self._num_layers))
     self._logits_module = linear.Linear(
-        self._num_classes, w_init=self._w_init,
-        b_init=self._b_init, name='logits')
+        self._num_classes,
+        w_init=self._w_init,
+        b_init=self._b_init,
+        name='logits')
 
   def __call__(self, inputs, is_training, test_local_stats=True):
     """Connects the module to some inputs.
@@ -83,11 +93,11 @@ class Cifar10ConvNet(base.Module):
     Args:
       inputs: A Tensor of size [batch_size, input_height, input_width,
         input_channels], representing a batch of input images.
-      is_training: Boolean to indicate to `snt.BatchNorm` if we are
-        currently training.
+      is_training: Boolean to indicate to `snt.BatchNorm` if we are currently
+        training.
       test_local_stats: Boolean to indicate to `snt.BatchNorm` if batch
-        normalization should  use local batch statistics at test time.
-        By default `True`.
+        normalization should  use local batch statistics at test time. By
+        default `True`.
 
     Returns:
       A dictionary containing two items:
@@ -113,7 +123,4 @@ class Cifar10ConvNet(base.Module):
 
     logits = self._logits_module(flat_output)
 
-    return {
-        'logits': logits,
-        'activations': activations
-    }
+    return {'logits': logits, 'activations': activations}

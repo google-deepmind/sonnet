@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Mixed Precision Decorator for Sonnet 2."""
 from __future__ import absolute_import
 from __future__ import division
@@ -94,6 +93,7 @@ def modes(valid_types):
     for mixed precision.
   """
   mp_id = uuid.uuid4()
+
   @utils.decorator
   def _wrapper(f, instance, args, kwargs):
     """Decorator to cast inputs and outputs for mixed precision.
@@ -167,4 +167,3 @@ def scope(dtype: tf.DType):
     yield
   finally:
     enable(old_mode)
-

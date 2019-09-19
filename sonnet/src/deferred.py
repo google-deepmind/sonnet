@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Enables module construction to be deferred."""
 
 from __future__ import absolute_import
@@ -108,8 +107,8 @@ class Deferred(base.Module):
       if self._target is not None:
         return getattr(self._target, name)
 
-    raise AttributeError(
-        "'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
+    raise AttributeError("'%s' object has no attribute '%s'" %
+                         (self.__class__.__name__, name))
 
   def __setattr__(self, name, value):
     if name != "_target" and hasattr(self, "_target"):
@@ -128,6 +127,8 @@ class Deferred(base.Module):
 
 
 def _materialize_then_call(module, method_name):
+
   def wrapped(*args, **kwargs):
     return getattr(module.target, method_name)(*args, **kwargs)
+
   return wrapped

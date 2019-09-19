@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests checkpointing with Sonnet."""
 
 from __future__ import absolute_import
@@ -39,8 +38,7 @@ class TestCheckpoint(object):
       root = absltest.get_default_test_tmpdir()
     else:
       root = os.path.join(
-          "sonnet/src/conformance/checkpoints/",
-          golden.name)
+          "sonnet/src/conformance/checkpoints/", golden.name)
     self._root = root
     self._prefix = os.path.join(self._root, "checkpoint")
     self._checkpoint = tf.train.Checkpoint(**kwargs)
@@ -59,9 +57,11 @@ class TestCheckpoint(object):
 
 def with_soft_placement(f):
   """Wraps `f` such that it runs with soft device placement."""
+
   def wrapper(*a, **k):
     with tf.device(None):
       return f(*a, **k)
+
   return wrapper
 
 
@@ -92,15 +92,14 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     # Check restored values match the saved values.
     checkpoint.restore_latest(assert_consumed=True)
     for variable in all_variables:
-      self.assertAllClose(variable.read_value(), goldens.range_like(variable),
-                          msg=variable.name)
+      self.assertAllClose(
+          variable.read_value(),
+          goldens.range_like(variable),
+          msg=variable.name)
 
     # Test the output from the module remains stable.
     if golden.deterministic:
-      tf.nest.map_structure(
-          self.assertAllClose,
-          golden.forward(module),
-          old_y)
+      tf.nest.map_structure(self.assertAllClose, golden.forward(module), old_y)
 
   @goldens.all_goldens
   def test_save_then_load_new_instance(self, golden):
@@ -122,15 +121,15 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Assert the parameters in both modules are the same.
     for variable in variables_2:
-      self.assertAllClose(variable.read_value(), goldens.range_like(variable),
-                          msg=variable.name)
+      self.assertAllClose(
+          variable.read_value(),
+          goldens.range_like(variable),
+          msg=variable.name)
 
     # Assert the output from both modules are the same.
     if golden.deterministic:
-      tf.nest.map_structure(
-          self.assertAllClose,
-          golden.forward(module_1),
-          golden.forward(module_2))
+      tf.nest.map_structure(self.assertAllClose, golden.forward(module_1),
+                            golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_on_create(self, golden):
@@ -152,15 +151,12 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
     variables_2 = golden.create_all_variables(module_2)
     status.assert_consumed()
     for var1, var2 in zip(variables_1, variables_2):
-      self.assertAllEqual(var1.read_value(), var2.read_value(),
-                          msg=var1.name)
+      self.assertAllEqual(var1.read_value(), var2.read_value(), msg=var1.name)
 
     # Assert the output from both modules is the same.
     if golden.deterministic:
-      tf.nest.map_structure(
-          self.assertAllClose,
-          golden.forward(module_1),
-          golden.forward(module_2))
+      tf.nest.map_structure(self.assertAllClose, golden.forward(module_1),
+                            golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_golden(self, golden):
@@ -172,8 +168,10 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
       variable.assign(tf.zeros_like(variable))
     checkpoint.restore_latest(assert_consumed=True)
     for variable in variables:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
-                          msg=variable.name)
+      self.assertAllEqual(
+          variable.read_value(),
+          goldens.range_like(variable),
+          msg=variable.name)
 
 
 class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
@@ -199,8 +197,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       per_replica = replicator.experimental_run_v2(
           lambda: golden.forward(module))
       return tf.nest.map_structure(
-          lambda args: tf.stack(replicator.unwrap(args), axis=0),
-          per_replica)
+          lambda args: tf.stack(replicator.unwrap(args), axis=0), per_replica)
 
     if use_function:
       forward = tf.function(forward)
@@ -233,15 +230,13 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
     for index, variable in enumerate(variables):
       # Parameters should be restored to their previous values.
-      self.assertAllEqual(variable.read_value(),
-                          goldens.range_like(variable, start=index),
-                          msg=variable.name)
+      self.assertAllEqual(
+          variable.read_value(),
+          goldens.range_like(variable, start=index),
+          msg=variable.name)
 
     if golden.deterministic:
-      tf.nest.map_structure(
-          self.assertAllEqual,
-          forward(),
-          before_save_ys)
+      tf.nest.map_structure(self.assertAllEqual, forward(), before_save_ys)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())
@@ -254,8 +249,10 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
     checkpoint = TestCheckpoint(golden=golden, module=module)
     checkpoint.restore_latest(assert_consumed=True)
     for variable in variables:
-      self.assertAllEqual(variable.read_value(), goldens.range_like(variable),
-                          msg=variable.name)
+      self.assertAllEqual(
+          variable.read_value(),
+          goldens.range_like(variable),
+          msg=variable.name)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators(),
@@ -287,8 +284,8 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
     checkpoint.restore_latest(assert_consumed=True)
 
     for normal, distributed in zip(normal_variables, replicator_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value(),
-                          msg=normal.name)
+      self.assertAllEqual(
+          normal.read_value(), distributed.read_value(), msg=normal.name)
 
     if golden.deterministic:
 
@@ -303,10 +300,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
       y_before = run_forward(module)
       y_after = run_forward(module2)
-      tf.nest.map_structure(
-          self.assertAllEqual,
-          y_before,
-          y_after)
+      tf.nest.map_structure(self.assertAllEqual, y_before, y_after)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())
@@ -332,8 +326,8 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       replicator_variables = module.variables
 
     for normal, distributed in zip(normal_variables, replicator_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value(),
-                          msg=normal.name)
+      self.assertAllEqual(
+          normal.read_value(), distributed.read_value(), msg=normal.name)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators(),
@@ -380,8 +374,8 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
     replicator_variables = module.variables
     for normal, distributed in zip(normal_variables, replicator_variables):
-      self.assertAllEqual(normal.read_value(), distributed.read_value(),
-                          msg=normal.name)
+      self.assertAllEqual(
+          normal.read_value(), distributed.read_value(), msg=normal.name)
 
 
 def setUpModule():
@@ -390,9 +384,12 @@ def setUpModule():
   if len(gpus) == 1:
     logging.info("Splitting one physical GPU into two logical GPUs.")
     tf.config.experimental.set_virtual_device_configuration(
-        gpus[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024),
-         tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)])
+        gpus[0], [
+            tf.config.experimental.VirtualDeviceConfiguration(
+                memory_limit=1024),
+            tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)
+        ])
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

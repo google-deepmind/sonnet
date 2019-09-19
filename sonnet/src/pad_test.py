@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.pad."""
 
 from __future__ import absolute_import
@@ -39,8 +38,8 @@ class PadTest(test_utils.TestCase, parameterized.TestCase):
     a = pad.create([pad.causal, pad.full, pad.full], [3, 2, 3], [1], 3, -1)
     self.assertEqual(a, [[0, 0], [2, 0], [1, 1], [2, 2], [0, 0]])
 
-  @parameterized.parameters((2, [2, 2]), (3, [4, 4, 4, 4]),
-                            ([2, 2], 3), ([4, 4, 4, 4], 3))
+  @parameterized.parameters((2, [2, 2]), (3, [4, 4, 4, 4]), ([2, 2], 3),
+                            ([4, 4, 4, 4], 3))
   def test_padding_incorrect_input(self, kernel_size, rate):
     with self.assertRaisesRegexp(
         TypeError,
@@ -67,40 +66,28 @@ class PadTest(test_utils.TestCase, parameterized.TestCase):
     a = pad.create(pad.reverse_causal, 4, 3, 2, -1)
     self.assertEqual(a, [[0, 0], [0, 9], [0, 9], [0, 0]])
 
-  @parameterized.parameters((1, 1, 1),
-                            (3, 1, 1),
-                            (1, 3, 1),
-                            (1, 1, 3),
-                            (3, 3, 1),
-                            (3, 1, 3),
-                            (1, 3, 3),
-                            (3, 3, 3))
+  @parameterized.parameters((1, 1, 1), (3, 1, 1), (1, 3, 1), (1, 1, 3),
+                            (3, 3, 1), (3, 1, 3), (1, 3, 3), (3, 3, 3))
   def test_same_padding(self, kernel_size, stride, rate):
     a = tf.random.normal([2, 4, 3])
     k = tf.random.normal([kernel_size, 3, 4])
     padding = pad.create(pad.same, kernel_size, rate, 1, -1)
     a_padded = tf.pad(a, padding)
-    y1 = tf.nn.conv1d(a_padded, k, stride=stride,
-                      dilations=rate, padding="VALID")
+    y1 = tf.nn.conv1d(
+        a_padded, k, stride=stride, dilations=rate, padding="VALID")
     y2 = tf.nn.conv1d(a, k, stride=stride, dilations=rate, padding="SAME")
     self.assertEqual(y1.shape, y2.shape)
     self.assertAllClose(y1.numpy(), y2.numpy())
 
-  @parameterized.parameters((1, 1, 1),
-                            (3, 1, 1),
-                            (1, 3, 1),
-                            (1, 1, 3),
-                            (3, 3, 1),
-                            (3, 1, 3),
-                            (1, 3, 3),
-                            (3, 3, 3))
+  @parameterized.parameters((1, 1, 1), (3, 1, 1), (1, 3, 1), (1, 1, 3),
+                            (3, 3, 1), (3, 1, 3), (1, 3, 3), (3, 3, 3))
   def test_valid_padding(self, kernel_size, stride, rate):
     a = tf.random.normal([2, 8, 3])
     k = tf.random.normal([kernel_size, 3, 4])
     padding = pad.create(pad.valid, kernel_size, rate, 1, -1)
     a_padded = tf.pad(a, padding)
-    y1 = tf.nn.conv1d(a_padded, k, stride=stride,
-                      dilations=rate, padding="VALID")
+    y1 = tf.nn.conv1d(
+        a_padded, k, stride=stride, dilations=rate, padding="VALID")
     y2 = tf.nn.conv1d(a, k, stride=stride, dilations=rate, padding="VALID")
     self.assertAllEqual(y1.numpy(), y2.numpy())
 

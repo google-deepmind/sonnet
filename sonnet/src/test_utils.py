@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Test utilities for Sonnet 2."""
 
 from __future__ import absolute_import
@@ -118,8 +117,7 @@ def find_all_sonnet_modules(
 
 
 def find_sonnet_python_modules(
-    root_module: types.ModuleType,
-) -> Sequence[Tuple[Text, types.ModuleType]]:
+    root_module: types.ModuleType,) -> Sequence[Tuple[Text, types.ModuleType]]:
   """Returns `(name, module)` for all Sonnet submodules under `root_module`."""
   modules = set([(root_module.__name__, root_module)])
   visited = set()
@@ -156,7 +154,7 @@ def combined_named_parameters(*parameters):
 
   Args:
     *parameters: A sequence of parameters that will be combined and be passed
-        into ``parameterized.named_parameters``.
+      into ``parameterized.named_parameters``.
 
   Returns:
     A test generator to be handled by ``parameterized.TestGeneratorMetaclass``.

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Base Sonnet module."""
 
 from __future__ import absolute_import
@@ -92,9 +91,7 @@ class ModuleMetaclass(abc.ABCMeta):
         # can trigger the descriptor binding them to the class.
         methods.append(key)
 
-    clsdict.setdefault(
-        "__repr__",
-        lambda module: module._auto_repr)  # pylint: disable=protected-access
+    clsdict.setdefault("__repr__", lambda module: module._auto_repr)  # pylint: disable=protected-access
 
     cls = super(ModuleMetaclass, mcs).__new__(mcs, name, bases, clsdict)
 

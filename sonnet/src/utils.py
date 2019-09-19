@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Utils for Sonnet."""
 
 from __future__ import absolute_import
@@ -58,35 +57,43 @@ def _is_object(f: Any) -> bool:
 
 # TODO(b/123870292) Remove this and use wrapt.decorator when supported by TF.
 def decorator(
-    decorator_fn: Callable[[T, Any, Sequence[Any], Dict[Text, Any]], Any],
-) -> T:
+    decorator_fn: Callable[[T, Any, Sequence[Any], Dict[Text, Any]],
+                           Any],) -> T:
   """Returns a wrapt style decorator."""
+
   @functools.wraps(decorator_fn)
   def _decorator(f):
     """Wraps f such that it returns the result of applying decorator_fn."""
     if _is_object(f):
+
       @functools.wraps(f.__call__)
       def _decorate_object(*args, **kwargs):
         return decorator_fn(f.__call__, f, args, kwargs)
+
       return _decorate_object
 
     if inspect.ismethod(f):
+
       @functools.wraps(f)
       def _decorate_bound_method(*args, **kwargs):
         return decorator_fn(f, f.__self__, args, kwargs)
+
       return _decorate_bound_method
 
     argspec = getfullargspec(f)
     if argspec.args and argspec.args[0] == "self":
+
       @functools.wraps(f)
       def _decorate_unbound_method(self, *args, **kwargs):
         bound_method = f.__get__(self, self.__class__)  # pytype: disable=attribute-error
         return decorator_fn(bound_method, self, args, kwargs)
+
       return _decorate_unbound_method
 
     @functools.wraps(f)
     def _decorate_fn(*args, **kwargs):
       return decorator_fn(f, None, args, kwargs)
+
     return _decorate_fn
 
   return _decorator
@@ -192,11 +199,10 @@ def getfullargspec(func):
     return inspect.getfullargspec(func)
 
 
-def variable_like(
-    inputs,
-    initializer=initializers.Zeros(),
-    trainable=None,
-    name=None):
+def variable_like(inputs,
+                  initializer=initializers.Zeros(),
+                  trainable=None,
+                  name=None):
   """Creates a new variable with the same shape/dtype/device as the input."""
   if trainable is None:
     trainable = getattr(inputs, "trainable", None)
@@ -211,17 +217,30 @@ def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
   """Renders the given shape/dtype as a short specification."""
 
   format_map = {
-      tf.float16: "f16", tf.float32: "f32", tf.float64: "f64",
+      tf.float16: "f16",
+      tf.float32: "f32",
+      tf.float64: "f64",
       tf.bfloat16: "bf16",
-      tf.complex64: "c64", tf.complex128: "c128",
-      tf.uint8: "u8", tf.uint16: "u16", tf.uint32: "u32", tf.uint64: "u64",
-      tf.int8: "i8", tf.int16: "i16", tf.int32: "i32", tf.int64: "i64",
-      tf.qint8: "qi8", tf.qint16: "qi16", tf.qint32: "qi32",
-      tf.quint8: "qu8", tf.quint16: "qu16",
+      tf.complex64: "c64",
+      tf.complex128: "c128",
+      tf.uint8: "u8",
+      tf.uint16: "u16",
+      tf.uint32: "u32",
+      tf.uint64: "u64",
+      tf.int8: "i8",
+      tf.int16: "i16",
+      tf.int32: "i32",
+      tf.int64: "i64",
+      tf.qint8: "qi8",
+      tf.qint16: "qi16",
+      tf.qint32: "qi32",
+      tf.quint8: "qu8",
+      tf.quint16: "qu16",
   }
 
-  return "{dtype}[{shape}]".format(dtype=format_map.get(dtype, dtype.name),
-                                   shape=",".join(str(d) for d in shape))
+  return "{dtype}[{shape}]".format(
+      dtype=format_map.get(dtype, dtype.name),
+      shape=",".join(str(d) for d in shape))
 
 
 def _simple_device(var: tf.Variable):
@@ -249,9 +268,10 @@ def format_variables(variables, tablefmt="orgtbl"):
     trainable = str(var.trainable)
     device = _simple_device(var)
     rows.append((name, spec, trainable, device))
-  return tabulate.tabulate(rows,
-                           headers=("Variable", "Spec", "Trainable", "Device"),
-                           tablefmt=tablefmt)
+  return tabulate.tabulate(
+      rows,
+      headers=("Variable", "Spec", "Trainable", "Device"),
+      tablefmt=tablefmt)
 
 
 def log_variables(variables):

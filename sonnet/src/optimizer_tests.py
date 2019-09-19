@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Common tests for Sonnet optimizers."""
 
 from __future__ import absolute_import
@@ -53,8 +52,8 @@ class OptimizerTestBase(test_utils.TestCase):
     parameters = [tf.Variable(1.), tf.Variable(2.)]
     updates = [None, None]
     optimizer = self.make_optimizer()
-    with self.assertRaisesRegexp(
-        ValueError, "No updates provided for any parameter"):
+    with self.assertRaisesRegexp(ValueError,
+                                 "No updates provided for any parameter"):
       optimizer.apply(updates, parameters)
 
   def testInconsistentDTypes(self):
@@ -75,6 +74,7 @@ class OptimizerTestBase(test_utils.TestCase):
         ValueError,
         "Sonnet optimizers are not compatible with `MirroredStrategy`"):
       strategy.experimental_run_v2(lambda: optimizer.apply(updates, parameters))
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Depthwise conv module."""
 
 from __future__ import absolute_import
@@ -49,21 +48,20 @@ class DepthwiseConv2D(base.Module):
 
     Args:
       kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
-        integer. `kernel_shape` will be expanded to define a kernel size in
-        all dimensions.
+        integer. `kernel_shape` will be expanded to define a kernel size in all
+        dimensions.
       channel_multiplier: Number of channels to expand convolution to. Must be
-          an integer. Must be > 0. When `channel_multiplier` is set to 1, apply
-          a different filter to each input channel producing one output channel
-          per input channel. Numbers larger than 1 cause multiple different
-          filters to be applied to each input channel, with their outputs being
-          concatenated together, producing `channel_multiplier` *
-          `input_channels` output channels.
+        an integer. Must be > 0. When `channel_multiplier` is set to 1, apply a
+        different filter to each input channel producing one output channel per
+        input channel. Numbers larger than 1 cause multiple different filters to
+        be applied to each input channel, with their outputs being concatenated
+        together, producing `channel_multiplier` * `input_channels` output
+        channels.
       stride: Sequence of strides (of length num_spatial_dims), or an integer.
         `stride` will be expanded to define stride in all dimensions.
       rate: Sequence of dilation rates (of length num_spatial_dims), or integer
-        that is used to define dilation rate in all dimensions. 1 corresponds
-        to standard ND convolution, `rate > 1` corresponds to dilated
-        convolution.
+        that is used to define dilation rate in all dimensions. 1 corresponds to
+        standard ND convolution, `rate > 1` corresponds to dilated convolution.
       padding: Padding to apply to the input. This can either "SAME", "VALID".
       with_bias: Whether to include bias parameters. Default `True`.
       w_init: Optional initializer for the weights. By default the weights are
@@ -99,15 +97,15 @@ class DepthwiseConv2D(base.Module):
   def __call__(self, inputs):
     self._initialize(inputs)
 
-    outputs = tf.nn.depthwise_conv2d(inputs,
-                                     self.w,
-                                     strides=self.stride,
-                                     dilations=self.rate,
-                                     padding=self.padding,
-                                     data_format=self.data_format)
+    outputs = tf.nn.depthwise_conv2d(
+        inputs,
+        self.w,
+        strides=self.stride,
+        dilations=self.rate,
+        padding=self.padding,
+        data_format=self.data_format)
     if self.with_bias:
-      outputs = tf.nn.bias_add(outputs, self.b,
-                               data_format=self.data_format)
+      outputs = tf.nn.bias_add(outputs, self.b, data_format=self.data_format)
 
     return outputs
 

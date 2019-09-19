@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.adam."""
 
 from __future__ import absolute_import
@@ -55,10 +54,14 @@ class AdamTest(optimizer_tests.OptimizerTestBase):
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
     tf_parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(learning_rate=0.001)
     # FastAdam doesn't use a raw_op for IndexedSlices so compare against Keras
     tf_optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
@@ -96,7 +99,8 @@ class AdamTest(optimizer_tests.OptimizerTestBase):
     self.assertAlmostEqual(0.1, optimizer.learning_rate.numpy())
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.899, 1.899], [2.899, 3.899]],
-                        [x.numpy() for x in parameters], rtol=1e-4)
+                        [x.numpy() for x in parameters],
+                        rtol=1e-4)
 
   def testHyperParamDTypeConversion(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
@@ -110,7 +114,8 @@ class AdamTest(optimizer_tests.OptimizerTestBase):
         learning_rate=learning_rate, beta1=beta1, beta2=beta2, epsilon=epsilon)
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.999, 1.999], [2.999, 3.999]],
-                        [x.numpy() for x in parameters], rtol=1e-4)
+                        [x.numpy() for x in parameters],
+                        rtol=1e-4)
 
   def testAuxVariablesColocatedWithOriginal(self):
     optimizer = self.make_optimizer(learning_rate=0.001)

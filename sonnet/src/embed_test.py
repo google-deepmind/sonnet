@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.embed."""
 
 from __future__ import absolute_import
@@ -85,6 +84,7 @@ class EmbedTest(test_utils.TestCase, parameterized.TestCase):
     e = embed.Embed(1, name="my_embedding")
     self.assertEqual(e.name, "my_embedding")
     self.assertEqual(e.embeddings.name, "my_embedding/embeddings:0")
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

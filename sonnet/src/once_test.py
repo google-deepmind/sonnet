@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.once."""
 
 from __future__ import absolute_import
@@ -46,6 +45,7 @@ class OnceTest(parameterized.TestCase):
       f()
 
   def test_does_not_cache_on_error(self):
+
     @once.once
     def f():
       raise ValueError
@@ -66,6 +66,7 @@ class OnceTest(parameterized.TestCase):
     self.assertEqual(o2.call_count, 1)
 
   def test_method_does_not_cache_on_error(self):
+
     class Dummy(object):
 
       @once.once
@@ -105,8 +106,7 @@ class OnceTest(parameterized.TestCase):
     self.assertEqual(r, [None])
 
   @parameterized.named_parameters(
-      ("lambda", lambda: lambda: None),
-      ("function", lambda: nop),
+      ("lambda", lambda: lambda: None), ("function", lambda: nop),
       ("method", lambda: NoOpCallable().nop),
       ("special_method", lambda: NoOpCallable().__call__),
       ("object", lambda: NoOpCallable()))  # pylint: disable=unnecessary-lambda
@@ -134,6 +134,7 @@ class Counter(object):
   @once.once
   def increment(self):
     self.call_count += 1
+
 
 if __name__ == "__main__":
   absltest.main()

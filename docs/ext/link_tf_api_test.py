@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for ``:tf:`` Sphinx role."""
 
 from __future__ import absolute_import
@@ -35,8 +34,7 @@ class LinkTfApiTest(absltest.TestCase):
   def test_link_to_top_level(self):
     self.assertEqual(
         link_tf_api.tf_doc_url("function"), DOC_BASE_URL + "/function")
-    self.assertEqual(
-        link_tf_api.tf_doc_url("Module"), DOC_BASE_URL + "/Module")
+    self.assertEqual(link_tf_api.tf_doc_url("Module"), DOC_BASE_URL + "/Module")
 
   def test_link_to_nested_package(self):
     self.assertEqual(

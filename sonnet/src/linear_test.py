@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.linear."""
 
 from __future__ import absolute_import
@@ -99,10 +98,10 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testFunction(self, with_bias):
-    linear_1 = linear.Linear(3, with_bias=with_bias,
-                             w_init=tf.ones_initializer())
-    linear_2 = linear.Linear(3, with_bias=with_bias,
-                             w_init=tf.ones_initializer())
+    linear_1 = linear.Linear(
+        3, with_bias=with_bias, w_init=tf.ones_initializer())
+    linear_2 = linear.Linear(
+        3, with_bias=with_bias, w_init=tf.ones_initializer())
     defun_linear = tf.function(linear_2)
 
     iterations = 5
@@ -137,12 +136,10 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     defun_linear = tf.function(l)
 
     with self.assertRaisesRegex(
-        ValueError,
-        "Input size must be specified at module build time."):
+        ValueError, "Input size must be specified at module build time."):
       defun_linear.get_concrete_function(x)
 
-  @parameterized.named_parameters(
-      ("1D", [1]), ("3D", [1, 2, 3]))
+  @parameterized.named_parameters(("1D", [1]), ("3D", [1, 2, 3]))
   def testIncorrectDims(self, shape):
     l = linear.Linear(3)
     with self.assertRaisesRegex(ValueError, "Shape .* must have rank 2"):

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests pickling Sonnet modules."""
 
 from __future__ import absolute_import
@@ -49,6 +48,7 @@ class PickleTest(test_utils.TestCase, parameterized.TestCase):
       y1 = golden.forward(m1)
       y2 = golden.forward(m2)
       tf.nest.map_structure(self.assertAllEqual, y1, y2)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Initializers for Sonnet."""
 
 from __future__ import absolute_import
@@ -57,9 +56,8 @@ class Constant(Initializer):
 
   def __init__(self, value):
     if not np.isscalar(value):
-      raise TypeError(
-          "Invalid type for value: {} (expected scalar).".
-          format(type(value)))
+      raise TypeError("Invalid type for value: {} (expected scalar).".format(
+          type(value)))
     self.value = value
 
   def __call__(self, shape, dtype):
@@ -106,8 +104,8 @@ class RandomNormal(Initializer):
     """Constructs a random normal initializer.
 
     Args:
-      mean: A python scalar or a scalar tensor. Mean of the random values
-        to generate.
+      mean: A python scalar or a scalar tensor. Mean of the random values to
+        generate.
       stddev: A python scalar or a scalar tensor. Standard deviation of the
         random values to generate.
       seed: ``int``, the seed used in the generation of random numbers.
@@ -138,8 +136,8 @@ class TruncatedNormal(Initializer):
     """Constructs a truncated normal initializer.
 
     Args:
-      mean: A python scalar or a scalar tensor. Mean of the random values
-        to generate.
+      mean: A python scalar or a scalar tensor. Mean of the random values to
+        generate.
       stddev: A python scalar or a scalar tensor. Standard deviation of the
         random values to generate.
       seed: ``int``, the seed used in the generation of random numbers.
@@ -181,8 +179,11 @@ class Identity(Initializer):
     elif rank == 2:
       initializer = tf.eye(num_rows=shape[0], num_columns=shape[1], dtype=dtype)
     else:  # rank > 2
-      initializer = tf.eye(num_rows=shape[-2], num_columns=shape[-1],
-                           batch_shape=shape[:-2], dtype=dtype)
+      initializer = tf.eye(
+          num_rows=shape[-2],
+          num_columns=shape[-1],
+          batch_shape=shape[:-2],
+          dtype=dtype)
     return self.gain * initializer
 
 
@@ -226,8 +227,10 @@ class Orthogonal(Initializer):
     for dim in shape[:-1]:
       num_rows *= dim
     num_cols = shape[-1]
-    flat_shape = [tf.maximum(num_cols, num_rows),
-                  tf.minimum(num_cols, num_rows)]
+    flat_shape = [
+        tf.maximum(num_cols, num_rows),
+        tf.minimum(num_cols, num_rows)
+    ]
 
     # Generate a random matrix
     a = tf.random.normal(flat_shape, dtype=dtype, seed=self.seed)
@@ -299,8 +302,7 @@ class VarianceScaling(Initializer):
     if mode not in {"fan_in", "fan_out", "fan_avg"}:
       raise ValueError("Invalid `mode` argument:", mode)
     distribution = distribution.lower()
-    if distribution not in {"uniform", "truncated_normal",
-                            "normal"}:
+    if distribution not in {"uniform", "truncated_normal", "normal"}:
       raise ValueError("Invalid `distribution` argument:", distribution)
     self.scale = scale
     self.mode = mode
@@ -324,27 +326,15 @@ class VarianceScaling(Initializer):
       distribution_stddev = .87962566103423978
       stddev = tf.sqrt(scale) / distribution_stddev
       return tf.random.truncated_normal(
-          shape=shape,
-          mean=0.0,
-          stddev=stddev,
-          dtype=dtype,
-          seed=self.seed)
+          shape=shape, mean=0.0, stddev=stddev, dtype=dtype, seed=self.seed)
     elif self.distribution == "normal":
       stddev = tf.sqrt(scale)
       return tf.random.normal(
-          shape=shape,
-          mean=0.0,
-          stddev=stddev,
-          dtype=dtype,
-          seed=self.seed)
+          shape=shape, mean=0.0, stddev=stddev, dtype=dtype, seed=self.seed)
     else:  # self.distribution == "uniform"
       limit = tf.sqrt(3.0 * scale)
       return tf.random.uniform(
-          shape=shape,
-          minval=-limit,
-          maxval=limit,
-          dtype=dtype,
-          seed=self.seed)
+          shape=shape, minval=-limit, maxval=limit, dtype=dtype, seed=self.seed)
 
 
 def check_initializers(initializers, expected_keys):
@@ -357,11 +347,10 @@ def check_initializers(initializers, expected_keys):
 
   extra_keys = frozenset(initializers) - frozenset(expected_keys)
   if extra_keys:
-    raise KeyError(
-        "Invalid initializer keys {}, initializers can only "
-        "be provided for {}".format(
-            ", ".join(map(repr, extra_keys)),
-            ", ".join(map(repr, expected_keys))))
+    raise KeyError("Invalid initializer keys {}, initializers can only "
+                   "be provided for {}".format(
+                       ", ".join(map(repr, extra_keys)),
+                       ", ".join(map(repr, expected_keys))))
 
   return initializers
 
@@ -404,5 +393,5 @@ def _as_numerical_dtype(dtype):
   dtype = tf.as_dtype(dtype)
   if dtype.is_floating or dtype.is_integer:
     return dtype
-  raise ValueError("Expected integer or floating point type, got {}".
-                   format(dtype))
+  raise ValueError(
+      "Expected integer or floating point type, got {}".format(dtype))

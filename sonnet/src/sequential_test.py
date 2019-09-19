@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.sequential."""
 
 from __future__ import absolute_import
@@ -24,9 +23,8 @@ from sonnet.src import sequential
 from sonnet.src import test_utils
 import tensorflow as tf
 
-
-input_parameters = parameterized.parameters(
-    object(), ([[[1.]]],), ({1, 2, 3},), None, "str", 1)
+input_parameters = parameterized.parameters(object(), ([[[1.]]],), ({1, 2, 3},),
+                                            None, "str", 1)
 
 
 class SequentialTest(test_utils.TestCase, parameterized.TestCase):
@@ -63,6 +61,7 @@ def identity(v):
 
 def append_character(c):
   return lambda v: v + c
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

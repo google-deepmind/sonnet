@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Regularizers for Sonnet."""
 
 from __future__ import absolute_import
@@ -72,8 +71,7 @@ class L1(Regularizer):
     if not tensors:
       return tf.zeros_like(self.scale)
 
-    return self.scale * tf.add_n(
-        [tf.reduce_sum(tf.abs(t)) for t in tensors])
+    return self.scale * tf.add_n([tf.reduce_sum(tf.abs(t)) for t in tensors])
 
 
 class L2(Regularizer):
@@ -107,8 +105,7 @@ class L2(Regularizer):
     if not tensors:
       return tf.zeros_like(self.scale)
 
-    return self.scale * tf.add_n(
-        [tf.reduce_sum(tf.square(t)) for t in tensors])
+    return self.scale * tf.add_n([tf.reduce_sum(tf.square(t)) for t in tensors])
 
 
 class OffDiagonalOrthogonal(Regularizer):

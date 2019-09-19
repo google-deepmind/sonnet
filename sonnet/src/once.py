@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Utility to run functions and methods once."""
 
 from __future__ import absolute_import

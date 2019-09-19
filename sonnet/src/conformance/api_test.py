@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for Sonnet's public API."""
 
 from __future__ import absolute_import
@@ -35,6 +34,7 @@ class PublicSymbolsTest(test_utils.TestCase):
     for _ in range(2):
       mysnt = reload(mysnt)
       self.assertFalse(hasattr(mysnt, "src"))
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

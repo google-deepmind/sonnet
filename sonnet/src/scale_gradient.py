@@ -33,8 +33,9 @@ def scale_gradient(t, scale):
   Returns:
     A Tensor same as input, with scaled backward gradient.
   """
+
   def grad(dy):
     """Scaled gradient."""
-    return scale*dy, None
-  return t, grad
+    return scale * dy, None
 
+  return t, grad

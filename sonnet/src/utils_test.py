@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.utils."""
 
 from __future__ import absolute_import
@@ -38,37 +37,29 @@ _EXPECTED_FORMATTED_VARIABLE_LIST = ("""\
 
 class ReplicateTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.named_parameters(
-      ("Int", 42),
-      ("Callable", lambda a: a))
+  @parameterized.named_parameters(("Int", 42), ("Callable", lambda a: a))
   def testSingleValue(self, value):
     result = utils.replicate(value, 3, "value")
     self.assertLen(result, 3)
     self.assertAllEqual(result, (value,) * 3)
 
-  @parameterized.named_parameters(
-      ("Int", 42),
-      ("String", "foo"),
-      ("Callable", lambda a: a))
+  @parameterized.named_parameters(("Int", 42), ("String", "foo"),
+                                  ("Callable", lambda a: a))
   def testListLengthOne(self, value):
     result = utils.replicate([value], 3, "value")
     self.assertLen(result, 3)
     self.assertAllEqual(result, (value,) * 3)
 
-  @parameterized.named_parameters(
-      ("Int", 42),
-      ("String", "foo"),
-      ("Callable", lambda a: a))
+  @parameterized.named_parameters(("Int", 42), ("String", "foo"),
+                                  ("Callable", lambda a: a))
   def testTupleLengthN(self, value):
     v = (value,) * 3
     result = utils.replicate(v, 3, "value")
     self.assertLen(result, 3)
     self.assertAllEqual(result, (value,) * 3)
 
-  @parameterized.named_parameters(
-      ("Int", 42),
-      ("String", "foo"),
-      ("Callable", lambda a: a))
+  @parameterized.named_parameters(("Int", 42), ("String", "foo"),
+                                  ("Callable", lambda a: a))
   def testListLengthN(self, value):
     v = list((value,) * 3)
     result = utils.replicate(v, 3, "value")
@@ -86,10 +77,11 @@ class ReplicateTest(test_utils.TestCase, parameterized.TestCase):
 class DecoratorTest(test_utils.TestCase):
 
   def test_callable_object(self):
+
     class MyObject(object):
 
       def __call__(self, x, y):
-        return x ** y
+        return x**y
 
     @utils.decorator
     def double(wrapped, instance, args, kwargs):
@@ -98,18 +90,20 @@ class DecoratorTest(test_utils.TestCase):
 
     o = MyObject()
     f = double(o)  # pylint: disable=no-value-for-parameter
-    self.assertEqual(f(3, y=4), 2 * (3 ** 4))
+    self.assertEqual(f(3, y=4), 2 * (3**4))
 
   def test_function(self):
+
     @utils.decorator
     def double(wrapped, instance, args, kwargs):
       self.assertIsNone(instance)
       return 2 * wrapped(*args, **kwargs)
 
-    f = double(lambda x, y: x ** y)  # pylint: disable=no-value-for-parameter
-    self.assertEqual(f(3, 4), 2 * (3 ** 4))
+    f = double(lambda x, y: x**y)  # pylint: disable=no-value-for-parameter
+    self.assertEqual(f(3, 4), 2 * (3**4))
 
   def test_unbound_method(self):
+
     @utils.decorator
     def double(wrapped, instance, args, kwargs):
       self.assertIs(instance, o)
@@ -119,12 +113,13 @@ class DecoratorTest(test_utils.TestCase):
 
       @double
       def f(self, x, y):
-        return x ** y
+        return x**y
 
     o = MyObject()
-    self.assertEqual(o.f(3, 4), 2 * (3 ** 4))
+    self.assertEqual(o.f(3, 4), 2 * (3**4))
 
   def test_bound_method(self):
+
     @utils.decorator
     def double(wrapped, instance, args, kwargs):
       self.assertIs(instance, o)
@@ -133,10 +128,10 @@ class DecoratorTest(test_utils.TestCase):
     class MyObject(object):
 
       def f(self, x, y):
-        return x ** y
+        return x**y
 
     o = MyObject()
-    self.assertEqual(double(o.f)(3, 4), 2 * (3 ** 4))  # pylint: disable=no-value-for-parameter
+    self.assertEqual(double(o.f)(3, 4), 2 * (3**4))  # pylint: disable=no-value-for-parameter
 
 
 class ChannelIndexTest(test_utils.TestCase, parameterized.TestCase):
@@ -189,6 +184,7 @@ class AssertRankTest(test_utils.TestCase, parameterized.TestCase):
 class SmartAutographTest(test_utils.TestCase):
 
   def test_smart_ag(self):
+
     def foo(x):
       if x > 0:
         y = x * x
@@ -211,15 +207,17 @@ class SmartAutographTest(test_utils.TestCase):
 
 class VariableLikeTest(test_utils.TestCase, parameterized.TestCase):
 
-  @parameterized.parameters([lambda: tf.constant([0., 1.]),
-                             lambda: tf.Variable([0., 1.])])
+  @parameterized.parameters(
+      [lambda: tf.constant([0., 1.]), lambda: tf.Variable([0., 1.])])
   def test_copies_shape(self, a):
     a = a()
     b = utils.variable_like(a)
     self.assertEqual(a.shape, b.shape)
 
-  @parameterized.parameters([lambda: tf.constant(1, dtype=tf.int64),
-                             lambda: tf.Variable(1, dtype=tf.int64)])
+  @parameterized.parameters([
+      lambda: tf.constant(1, dtype=tf.int64),
+      lambda: tf.Variable(1, dtype=tf.int64)
+  ])
   def test_copies_dtype(self, a):
     a = a()
     b = utils.variable_like(a)
@@ -283,18 +281,18 @@ class FormatVariablesTest(test_utils.TestCase):
       with tf.name_scope("m1"):
         v1 = tf.Variable(tf.zeros([3, 4]), name="v1")
       with tf.name_scope("m2"):
-        v2 = tf.Variable(tf.zeros([5], dtype=tf.int32), trainable=False,
-                         name="v2")
-      self.assertEqual(utils.format_variables([v2, v1]),
-                       _EXPECTED_FORMATTED_VARIABLE_LIST)
+        v2 = tf.Variable(
+            tf.zeros([5], dtype=tf.int32), trainable=False, name="v2")
+      self.assertEqual(
+          utils.format_variables([v2, v1]), _EXPECTED_FORMATTED_VARIABLE_LIST)
 
   def test_log_variables(self):
     with tf.device("/device:CPU:0"):
       with tf.name_scope("m1"):
         v1 = tf.Variable(tf.zeros([3, 4]), name="v1")
       with tf.name_scope("m2"):
-        v2 = tf.Variable(tf.zeros([5], dtype=tf.int32), trainable=False,
-                         name="v2")
+        v2 = tf.Variable(
+            tf.zeros([5], dtype=tf.int32), trainable=False, name="v2")
       utils.log_variables([v2, v1])
 
 
@@ -328,8 +326,9 @@ class CompareByIdTest(test_utils.TestCase):
     # None should also not compare.
     self.assertNotEqual(None, utils.CompareById(original1))
     # Different wrapped objects should not be equal.
-    self.assertNotEqual(utils.CompareById(original1),
-                        utils.CompareById(original2))
+    self.assertNotEqual(
+        utils.CompareById(original1), utils.CompareById(original2))
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

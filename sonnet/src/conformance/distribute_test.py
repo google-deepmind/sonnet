@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests Sonnet and TF Distribution Strategy."""
 
 from __future__ import absolute_import
@@ -54,6 +53,7 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
       first_replica = per_replica[0]
       for nth_replica in per_replica[1:]:
         self.assertAllEqual(first_replica, nth_replica)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

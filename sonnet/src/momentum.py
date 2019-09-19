@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """SGD with Momentum module."""
 
 from __future__ import absolute_import
@@ -85,8 +84,8 @@ class Momentum(base.Optimizer):
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
-    for update, parameter, momentum in zip(
-        updates, parameters, self.accumulated_momentum):
+    for update, parameter, momentum in zip(updates, parameters,
+                                           self.accumulated_momentum):
       if update is not None:
         optimizer_utils.check_same_dtype(update, parameter)
         lr = tf.cast(self.learning_rate, update.dtype)
@@ -98,11 +97,13 @@ class Momentum(base.Optimizer):
           momentum.scatter_update(
               tf.IndexedSlices(sparse_momentum_update, indices))
           if self.use_nesterov:
-            parameter.scatter_sub(tf.IndexedSlices(
-                (lr * update) + (lr * mu * sparse_momentum_update), indices))
+            parameter.scatter_sub(
+                tf.IndexedSlices(
+                    (lr * update) + (lr * mu * sparse_momentum_update),
+                    indices))
           else:
-            parameter.scatter_sub(tf.IndexedSlices(
-                lr * sparse_momentum_update, indices))
+            parameter.scatter_sub(
+                tf.IndexedSlices(lr * sparse_momentum_update, indices))
         else:
           momentum.assign((mu * momentum) + update)
           if self.use_nesterov:

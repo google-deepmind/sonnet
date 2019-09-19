@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """RMSProp module."""
 
 from __future__ import absolute_import
@@ -60,8 +59,13 @@ class RMSProp(base.Optimizer):
     mg: Accumulated mg for each parameter.
   """
 
-  def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
-               centered=False, name=None):
+  def __init__(self,
+               learning_rate,
+               decay=0.9,
+               momentum=0.0,
+               epsilon=1e-10,
+               centered=False,
+               name=None):
     """Constructs an `RMSProp` module.
 
     Args:
@@ -123,12 +127,13 @@ class RMSProp(base.Optimizer):
         if isinstance(update, tf.IndexedSlices):
           update, indices = optimizer_utils.deduplicate_indexed_slices(
               update.values, update.indices)
-          sparse_ms_update = (tf.square(update) * (1. - decay) +
-                              ms.sparse_read(indices) * decay)
+          sparse_ms_update = (
+              tf.square(update) * (1. - decay) +
+              ms.sparse_read(indices) * decay)
           ms.scatter_update(tf.IndexedSlices(sparse_ms_update, indices))
           if self.centered:
-            sparse_mg_update = (update * (1. - decay) +
-                                mg.sparse_read(indices) * decay)
+            sparse_mg_update = (
+                update * (1. - decay) + mg.sparse_read(indices) * decay)
             mg.scatter_update(tf.IndexedSlices(sparse_mg_update, indices))
             denominator = (
                 sparse_ms_update - tf.square(sparse_mg_update) + epsilon)
@@ -152,8 +157,13 @@ class RMSProp(base.Optimizer):
 class FastRMSProp(base.Optimizer):
   """RMSProp module."""
 
-  def __init__(self, learning_rate, decay=0.9, momentum=0.0, epsilon=1e-10,
-               centered=False, name=None):
+  def __init__(self,
+               learning_rate,
+               decay=0.9,
+               momentum=0.0,
+               epsilon=1e-10,
+               centered=False,
+               name=None):
     """Constructs an `RMSProp` module."""
     super(FastRMSProp, self).__init__(name)
     self.learning_rate = learning_rate

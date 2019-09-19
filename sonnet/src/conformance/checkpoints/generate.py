@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Binary to generate golden checkpoint tests."""
 
 from __future__ import absolute_import
@@ -30,10 +29,9 @@ import tensorflow as tf
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string(
-    "golden_dir",
-    "sonnet/src/conformance/checkpoints/",
-    "Directory where golden files are to be found.")
+flags.DEFINE_string("golden_dir",
+                    "sonnet/src/conformance/checkpoints/",
+                    "Directory where golden files are to be found.")
 flags.DEFINE_string("filter", ".*", "Filter to a specific golden by name.")
 flags.DEFINE_bool("regenerate", False,
                   "Whether to regnerate existing checkpoints.")
@@ -92,6 +90,7 @@ def main(unused_argv):
       file_prefix = os.path.join(checkpoint_dir, "checkpoint")
       logging.info("Saving to checkpoint %s.", file_prefix)
       checkpoint.save(file_prefix=file_prefix)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.recurrent."""
 
 from __future__ import absolute_import
@@ -42,32 +41,28 @@ class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
     inputs = self.evaluate(
         tf.random.uniform([self.batch_size, self.input_size]))
     core = recurrent.VanillaRNN(
-        hidden_size=self.hidden_size,
-        activation=tf.tanh)
+        hidden_size=self.hidden_size, activation=tf.tanh)
     prev_state = self.evaluate(core.initial_state(self.batch_size))
 
     core_fn = tf.function(core) if use_tf_function else core
     outputs, next_state = core_fn(tf.convert_to_tensor(inputs), prev_state)
 
     expected_output = np.tanh(
-        inputs.dot(self.evaluate(core.input_to_hidden))
-        + prev_state.dot(self.evaluate(core.hidden_to_hidden))
-        + self.evaluate(core._b))
+        inputs.dot(self.evaluate(core.input_to_hidden)) +
+        prev_state.dot(self.evaluate(core.hidden_to_hidden)) +
+        self.evaluate(core._b))
 
     atol = 3e-2 if self.primary_device == "TPU" else 1e-6
     self.assertAllClose(outputs, expected_output, atol=atol)
     self.assertAllClose(next_state, expected_output, atol=atol)
 
   def testDtypeMismatch(self):
-    core = recurrent.VanillaRNN(
-        hidden_size=self.hidden_size,
-        dtype=tf.bfloat16)
+    core = recurrent.VanillaRNN(hidden_size=self.hidden_size, dtype=tf.bfloat16)
     inputs = tf.random.uniform([self.batch_size, self.input_size])
     prev_state = core.initial_state(self.batch_size)
     self.assertIs(prev_state.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       core(inputs, prev_state)
 
   def testInitialization(self):
@@ -108,9 +103,8 @@ class DeepRNNTest(test_utils.TestCase, parameterized.TestCase):
     expected_outputs = inputs
     expected_next_state = list(prev_state)
     for idx, l in enumerate(core._layers):
-      expected_outputs, expected_next_state[idx] = l(
-          expected_outputs,
-          prev_state[idx])
+      expected_outputs, expected_next_state[idx] = l(expected_outputs,
+                                                     prev_state[idx])
 
     self.assertAllClose(outputs, expected_outputs)
     self.assertAllClose(next_state, tuple(expected_next_state))
@@ -143,15 +137,15 @@ class DeepRNNTest(test_utils.TestCase, parameterized.TestCase):
     core = recurrent.deep_rnn_with_skip_connections([
         recurrent.VanillaRNN(hidden_size=self.hidden_size),
         recurrent.VanillaRNN(hidden_size=2 * self.hidden_size)
-    ], concat_final_output=False)
+    ],
+                                                    concat_final_output=False)
     prev_state = self.evaluate(core.initial_state(self.batch_size))
 
     core_fn = tf.function(core) if use_tf_function else core
     outputs, _ = core_fn(tf.convert_to_tensor(inputs), prev_state)
 
-    self.assertEqual(
-        outputs.shape,
-        tf.TensorShape([self.batch_size, 2 * self.hidden_size]))
+    self.assertEqual(outputs.shape,
+                     tf.TensorShape([self.batch_size, 2 * self.hidden_size]))
 
   def testWithConnectionsValidation(self):
     with self.assertRaisesRegexp(ValueError, "to be instances of RNNCore"):
@@ -168,15 +162,10 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
     self.input_size = 2
     self.hidden_size = 16
 
-  @parameterized.parameters(itertools.product(
-      [False, True],
-      [None, 4],
-      [0.0, 1.0]))
-  def testComputationAgainstNumPy(
-      self,
-      use_tf_function,
-      projection_size,
-      forget_bias):
+  @parameterized.parameters(
+      itertools.product([False, True], [None, 4], [0.0, 1.0]))
+  def testComputationAgainstNumPy(self, use_tf_function, projection_size,
+                                  forget_bias):
     inputs = self.evaluate(
         tf.random.uniform([self.batch_size, self.input_size]))
     core = recurrent.LSTM(
@@ -208,16 +197,13 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(expected_cell, next_state.cell, atol=atol)
 
   def testDtypeMismatch(self):
-    core = recurrent.LSTM(
-        hidden_size=self.hidden_size,
-        dtype=tf.bfloat16)
+    core = recurrent.LSTM(hidden_size=self.hidden_size, dtype=tf.bfloat16)
     inputs = tf.random.uniform([self.batch_size, self.input_size])
     prev_state = core.initial_state(self.batch_size)
     self.assertIs(prev_state.hidden.dtype, tf.bfloat16)
     self.assertIs(prev_state.cell.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       core(inputs, prev_state)
 
   def testInitialization(self):
@@ -244,14 +230,12 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
 
     train_core, test_core = recurrent.lstm_with_recurrent_dropout(
         self.hidden_size, dropout=rate)
-    [_, train_output], _ = recurrent.dynamic_unroll(
-        train_core,
-        inputs,
-        train_core.initial_state(self.batch_size))
-    [_, test_output], _ = recurrent.dynamic_unroll(
-        test_core,
-        inputs,
-        test_core.initial_state(self.batch_size))
+    [_, train_output
+    ], _ = recurrent.dynamic_unroll(train_core, inputs,
+                                    train_core.initial_state(self.batch_size))
+    [_, test_output
+    ], _ = recurrent.dynamic_unroll(test_core, inputs,
+                                    test_core.initial_state(self.batch_size))
 
     almost_zero = rate == 1e-6
     if almost_zero:
@@ -264,9 +248,8 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
           0.001)
 
   def testRecurrentDropoutInvalid(self):
-    with self.assertRaisesRegex(
-        ValueError,
-        r"dropout must be in the range \[0, 1\).+"):
+    with self.assertRaisesRegex(ValueError,
+                                r"dropout must be in the range \[0, 1\).+"):
       recurrent.lstm_with_recurrent_dropout(self.hidden_size, -1)
 
 
@@ -297,9 +280,8 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
     input_sequence = tf.random.uniform(
         [num_steps, self.batch_size, self.input_size])
-    output_sequence, final_state = unrolled_lstm_fn(
-        input_sequence,
-        initial_state)
+    output_sequence, final_state = unrolled_lstm_fn(input_sequence,
+                                                    initial_state)
 
     with tf.device("/device:CPU:0"):  # Use CPU as the baseline.
       lstm = recurrent.LSTM(self.hidden_size)
@@ -308,16 +290,12 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
       lstm._w_h = unrolled_lstm._w_h
       lstm.b = unrolled_lstm.b
       expected_output_sequence, expected_final_state = recurrent.dynamic_unroll(
-          lstm,
-          input_sequence,
-          lstm.initial_state(self.batch_size))
+          lstm, input_sequence, lstm.initial_state(self.batch_size))
 
     atol = 1e-2 if self.primary_device == "TPU" else 1e-6
     self.assertAllClose(output_sequence, expected_output_sequence, atol=atol)
     self.assertAllClose(
-        final_state.hidden,
-        expected_final_state.hidden,
-        atol=atol)
+        final_state.hidden, expected_final_state.hidden, atol=atol)
     self.assertAllClose(final_state.cell, expected_final_state.cell, atol=atol)
 
   @parameterized.parameters([True, False])
@@ -345,15 +323,13 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def testDtypeMismatch(self):
     unrolled_lstm = recurrent.UnrolledLSTM(
-        hidden_size=self.hidden_size,
-        dtype=tf.bfloat16)
+        hidden_size=self.hidden_size, dtype=tf.bfloat16)
     input_sequence = tf.random.uniform([1, self.batch_size, self.input_size])
     initial_state = unrolled_lstm.initial_state(self.batch_size)
     self.assertIs(initial_state.hidden.dtype, tf.bfloat16)
     self.assertIs(initial_state.cell.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       unrolled_lstm(input_sequence, initial_state)
 
   def testInitialization(self):
@@ -381,9 +357,10 @@ class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
     self.input_channels = 3
     self.output_channels = 5
 
-  @parameterized.parameters(itertools.product(
-      [False, True],
-      [recurrent.Conv1DLSTM, recurrent.Conv2DLSTM, recurrent.Conv3DLSTM]))
+  @parameterized.parameters(
+      itertools.product(
+          [False, True],
+          [recurrent.Conv1DLSTM, recurrent.Conv2DLSTM, recurrent.Conv3DLSTM]))
   def testComputationAgainstNumPy(self, use_tf_function, core_cls):
     if core_cls is recurrent.Conv1DLSTM:
       num_spatial_dims = 1
@@ -393,15 +370,11 @@ class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
       assert core_cls is recurrent.Conv3DLSTM
       num_spatial_dims = 3
 
-    input_shape = (
-        (self.batch_size,) + (self.input_size,) * num_spatial_dims +
-        (self.input_channels,))
+    input_shape = ((self.batch_size,) + (self.input_size,) * num_spatial_dims +
+                   (self.input_channels,))
 
     inputs = self.evaluate(tf.random.uniform(input_shape))
-    core = core_cls(
-        input_shape[1:],
-        self.output_channels,
-        kernel_shape=1)
+    core = core_cls(input_shape[1:], self.output_channels, kernel_shape=1)
     prev_state = self.evaluate(core.initial_state(self.batch_size))
 
     core_fn = tf.function(core) if use_tf_function else core
@@ -431,9 +404,8 @@ class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def testDtypeMismatch(self):
     num_spatial_dims = 1
-    input_shape = (
-        (self.batch_size,) + (self.input_size,) * num_spatial_dims +
-        (self.input_channels,))
+    input_shape = ((self.batch_size,) + (self.input_size,) * num_spatial_dims +
+                   (self.input_channels,))
 
     core = recurrent.Conv1DLSTM(
         input_shape[1:],
@@ -445,15 +417,13 @@ class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
     self.assertIs(prev_state.hidden.dtype, tf.bfloat16)
     self.assertIs(prev_state.cell.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       core(inputs, prev_state)
 
   def testInitialization(self):
     num_spatial_dims = 1
-    input_shape = (
-        (self.batch_size,) + (self.input_size,) * num_spatial_dims +
-        (self.input_channels,))
+    input_shape = ((self.batch_size,) + (self.input_size,) * num_spatial_dims +
+                   (self.input_channels,))
 
     inputs = tf.random.uniform(input_shape)
     core = recurrent.Conv1DLSTM(
@@ -495,9 +465,7 @@ class GRUTest(test_utils.TestCase, parameterized.TestCase):
 
     z = expit(inputs.dot(w_iz) + prev_state.dot(w_hz) + b_z)
     r = expit(inputs.dot(w_ir) + prev_state.dot(w_hr) + b_r)
-    a = np.tanh(inputs.dot(w_ia)
-                + (r * prev_state).dot(w_ha)
-                + b_a)
+    a = np.tanh(inputs.dot(w_ia) + (r * prev_state).dot(w_ha) + b_a)
     expected_state = (1 - z) * prev_state + z * a
 
     atol = 1e-2 if self.primary_device == "TPU" else 1e-6
@@ -505,15 +473,12 @@ class GRUTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(self.evaluate(next_state), expected_state, atol=atol)
 
   def testDtypeMismatch(self):
-    core = recurrent.GRU(
-        hidden_size=self.hidden_size,
-        dtype=tf.bfloat16)
+    core = recurrent.GRU(hidden_size=self.hidden_size, dtype=tf.bfloat16)
     inputs = tf.random.uniform([self.batch_size, self.input_size])
     prev_state = core.initial_state(self.batch_size)
     self.assertIs(prev_state.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       core(inputs, prev_state)
 
   def testInitialization(self):
@@ -569,36 +534,28 @@ class CuDNNGRUTest(test_utils.TestCase, parameterized.TestCase):
       w_iz, w_ir, w_ia = tf.split(w_i, num_or_size_splits=3, axis=1)
       w_hz, w_hr, w_ha = tf.split(w_h, num_or_size_splits=3, axis=1)
       b_z, b_r, b_a = tf.split(cudnn_gru.b, num_or_size_splits=3)
-      z = tf.sigmoid(tf.matmul(inputs, w_iz)
-                     + tf.matmul(prev_state, w_hz)
-                     + b_z)
-      r = tf.sigmoid(tf.matmul(inputs, w_ir)
-                     + tf.matmul(prev_state, w_hr)
-                     + b_r)
-      a = tf.tanh(tf.matmul(inputs, w_ia)
-                  + r * tf.matmul(prev_state, w_ha)
-                  + b_a)
+      z = tf.sigmoid(
+          tf.matmul(inputs, w_iz) + tf.matmul(prev_state, w_hz) + b_z)
+      r = tf.sigmoid(
+          tf.matmul(inputs, w_ir) + tf.matmul(prev_state, w_hr) + b_r)
+      a = tf.tanh(
+          tf.matmul(inputs, w_ia) + r * tf.matmul(prev_state, w_ha) + b_a)
       next_state = (1 - z) * a + z * prev_state
       return next_state, next_state
 
     expected_outputs, expected_final_state = recurrent.dynamic_unroll(
-        cudnn_compatible_gru_fn,
-        inputs,
-        prev_state)
+        cudnn_compatible_gru_fn, inputs, prev_state)
 
     self.assertAllClose(outputs, expected_outputs)
     self.assertAllClose(states[-1], expected_final_state)
 
   def testDtypeMismatch(self):
-    core = recurrent.CuDNNGRU(
-        hidden_size=self.hidden_size,
-        dtype=tf.bfloat16)
+    core = recurrent.CuDNNGRU(hidden_size=self.hidden_size, dtype=tf.bfloat16)
     inputs = tf.random.uniform([1, self.batch_size, self.input_size])
     prev_state = core.initial_state(self.batch_size)
     self.assertIs(prev_state.dtype, tf.bfloat16)
     with self.assertRaisesRegex(
-        TypeError,
-        "inputs must have dtype tf.bfloat16, got tf.float32"):
+        TypeError, "inputs must have dtype tf.bfloat16, got tf.float32"):
       core(inputs, prev_state)
 
   def testInitialization(self):
@@ -641,10 +598,7 @@ class Counter(recurrent.RNNCore):
     return inputs * (h + t), (t + self.one, h)
 
   def initial_state(self, batch_size):
-    return (
-        tf.cast(0.0, tf.float32),
-        tf.zeros([batch_size, self._hidden_size])
-    )
+    return (tf.cast(0.0, tf.float32), tf.zeros([batch_size, self._hidden_size]))
 
 
 class Replicate(recurrent.RNNCore):
@@ -666,9 +620,15 @@ class Replicate(recurrent.RNNCore):
 class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters([
-      {"initial_values_shape": []},
-      {"initial_values_shape": tf.TensorShape([42])},
-      {"initial_values_shape": (tf.TensorShape([4]), tf.TensorShape([2]))},
+      {
+          "initial_values_shape": []
+      },
+      {
+          "initial_values_shape": tf.TensorShape([42])
+      },
+      {
+          "initial_values_shape": (tf.TensorShape([4]), tf.TensorShape([2]))
+      },
   ])
   def testUnmasked(self, initial_values_shape):
     trainable_state = recurrent.TrainableState(
@@ -680,23 +640,20 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
 
     initial_state = trainable_state(batch_size=42)
     for s, shape in zip(
-        tf.nest.flatten(initial_state),
-        tf.nest.flatten(initial_values_shape)):
+        tf.nest.flatten(initial_state), tf.nest.flatten(initial_values_shape)):
       self.assertEqual(s.shape, tf.TensorShape([42] + shape.as_list()))
 
   def testMasked(self):
     mask = (True, False)
-    trainable_state = recurrent.TrainableState(
-        (tf.zeros([16]), tf.zeros([3])),
-        mask)
+    trainable_state = recurrent.TrainableState((tf.zeros([16]), tf.zeros([3])),
+                                               mask)
 
     for var in trainable_state.trainable_variables:
       var.assign_add(tf.ones_like(var))
 
     initial_state = trainable_state(batch_size=42)
     for s, trainable in zip(
-        tf.nest.flatten(initial_state),
-        tf.nest.flatten(mask)):
+        tf.nest.flatten(initial_state), tf.nest.flatten(mask)):
       if trainable:
         self.assertNotAllClose(s, tf.zeros_like(s))
       else:
@@ -706,15 +663,26 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
     core = recurrent.LSTM(hidden_size=16)
     trainable_state = recurrent.TrainableState.for_core(core)
     self.assertAllClose(
-        trainable_state(batch_size=42),
-        core.initial_state(batch_size=42))
+        trainable_state(batch_size=42), core.initial_state(batch_size=42))
 
 
 @parameterized.parameters([
-    {"use_tf_function": False, "unroll_fn": recurrent.dynamic_unroll},
-    {"use_tf_function": False, "unroll_fn": recurrent.static_unroll},
-    {"use_tf_function": True, "unroll_fn": recurrent.dynamic_unroll},
-    {"use_tf_function": True, "unroll_fn": recurrent.static_unroll},
+    {
+        "use_tf_function": False,
+        "unroll_fn": recurrent.dynamic_unroll
+    },
+    {
+        "use_tf_function": False,
+        "unroll_fn": recurrent.static_unroll
+    },
+    {
+        "use_tf_function": True,
+        "unroll_fn": recurrent.dynamic_unroll
+    },
+    {
+        "use_tf_function": True,
+        "unroll_fn": recurrent.static_unroll
+    },
 ])
 class UnrollTest(test_utils.TestCase, parameterized.TestCase):
 
@@ -732,17 +700,13 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
 
     initial_state = _, h = self.core.initial_state(self.batch_size)
     input_sequence = tf.random.uniform([self.num_steps, self.batch_size, 1])
-    output_sequence, final_state = unroll_fn(
-        self.core,
-        input_sequence,
-        initial_state)
+    output_sequence, final_state = unroll_fn(self.core, input_sequence,
+                                             initial_state)
 
     self.assertAllClose(
         output_sequence,
         [inputs * (h + t) for t, inputs in enumerate(input_sequence)])
-    self.assertAllClose(
-        final_state,
-        (tf.cast(self.num_steps, tf.float32), h))
+    self.assertAllClose(final_state, (tf.cast(self.num_steps, tf.float32), h))
 
   def testNestedInputs(self, use_tf_function, unroll_fn):
     if use_tf_function:
@@ -752,15 +716,14 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
     input_sequence = tf.random.uniform([self.num_steps, self.batch_size, 1])
     output_sequence, final_state = unroll_fn(
         lambda inputs, prev_state: self.core(inputs["x"]["y"], prev_state),
-        {"x": {"y": input_sequence}},
-        initial_state)
+        {"x": {
+            "y": input_sequence
+        }}, initial_state)
 
     self.assertAllClose(
         output_sequence,
         [inputs * (h + t) for t, inputs in enumerate(input_sequence)])
-    self.assertAllClose(
-        final_state,
-        (tf.cast(self.num_steps, tf.float32), h))
+    self.assertAllClose(final_state, (tf.cast(self.num_steps, tf.float32), h))
 
   def testNestedOutputs(self, use_tf_function, unroll_fn):
     if use_tf_function:
@@ -770,18 +733,14 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
     core = Replicate(self.core, num_replicas)
     initial_state = _, h = core.initial_state(self.batch_size)
     input_sequence = tf.random.uniform([self.num_steps, self.batch_size, 1])
-    output_sequence, final_state = unroll_fn(
-        core,
-        input_sequence,
-        initial_state)
+    output_sequence, final_state = unroll_fn(core, input_sequence,
+                                             initial_state)
 
     expected_outputs = [
         inputs * (h + t) for t, inputs in enumerate(input_sequence)
     ]
     self.assertAllClose(output_sequence, (expected_outputs,) * num_replicas)
-    self.assertAllClose(
-        final_state,
-        (tf.cast(self.num_steps, tf.float32), h))
+    self.assertAllClose(final_state, (tf.cast(self.num_steps, tf.float32), h))
 
   def testEmptyOutputs(self, use_tf_function, unroll_fn):
     if use_tf_function:
@@ -792,9 +751,7 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
 
     input_sequence = tf.random.uniform([self.num_steps, self.batch_size, 1])
     (_, empty), unused_final_state = unroll_fn(
-        core_fn,
-        input_sequence,
-        initial_state=tf.constant(0.0))
+        core_fn, input_sequence, initial_state=tf.constant(0.0))
 
     self.assertEqual(empty.shape, tf.TensorShape([self.num_steps, 0]))
 
@@ -805,9 +762,8 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
     initial_state = self.core.initial_state(self.batch_size)
     input_sequence = tf.random.uniform([0, self.batch_size])
 
-    with self.assertRaisesRegex(
-        ValueError,
-        "must have at least a single time step"):
+    with self.assertRaisesRegex(ValueError,
+                                "must have at least a single time step"):
       unroll_fn(self.core, input_sequence, initial_state)
 
   def testInconsistentSteps(self, use_tf_function, unroll_fn):
@@ -815,21 +771,19 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
       unroll_fn = tf.function(unroll_fn)
 
     initial_state = self.core.initial_state(self.batch_size)
-    input_sequence = (
-        tf.random.uniform([1, self.batch_size]),
-        tf.random.uniform([2, self.batch_size]))
+    input_sequence = (tf.random.uniform([1, self.batch_size]),
+                      tf.random.uniform([2, self.batch_size]))
 
-    with self.assertRaisesRegex(
-        ValueError,
-        "must have consistent number of time steps"):
+    with self.assertRaisesRegex(ValueError,
+                                "must have consistent number of time steps"):
       unroll_fn(self.core, input_sequence, initial_state)
 
   def testVariableLengthOneZeroLength(self, use_tf_function, unroll_fn):
     if use_tf_function:
       unroll_fn = tf.function(unroll_fn)
 
-    sequence_length = tf.constant(
-        [0] + [self.num_steps] * (self.batch_size - 1))
+    sequence_length = tf.constant([0] + [self.num_steps] *
+                                  (self.batch_size - 1))
     initial_state = self.core.initial_state(self.batch_size)
     input_sequence = tf.random.uniform([self.num_steps, self.batch_size, 1])
     output_sequence, _ = unroll_fn(
@@ -862,9 +816,8 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
           if t == 0:
             self.assertAllEqual(tf.reduce_sum(output_sequence[t, b]), 0.0)
           else:
-            self.assertAllClose(
-                output_sequence[t, b],
-                output_sequence[t - 1, b])
+            self.assertAllClose(output_sequence[t, b], output_sequence[t - 1,
+                                                                       b])
 
   def testVariableLengthAllFull(self, use_tf_function, unroll_fn):
     if use_tf_function:
@@ -878,9 +831,7 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
         initial_state,
         sequence_length=tf.constant([self.num_steps] * self.batch_size))
     expected_output_sequence, expected_final_state = unroll_fn(
-        self.core,
-        input_sequence,
-        initial_state)
+        self.core, input_sequence, initial_state)
     self.assertAllClose(output_sequence, expected_output_sequence)
     self.assertAllClose(final_state, expected_final_state)
 

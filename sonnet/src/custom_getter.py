@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Custom getter for module members."""
 from __future__ import absolute_import
 from __future__ import division
@@ -23,7 +22,6 @@ import contextlib
 from sonnet.src import base
 import tensorflow as tf
 from typing import Any, Callable, ContextManager, Iterable, Optional, Type
-
 
 _DEFAULT_CLASSES = [base.Module]
 
@@ -65,11 +63,11 @@ def _custom_getter(
 
   Args:
     getter: A callable to apply to each element of the class members.
-    classes: The classes in which the getter is applied.
-      If `None`, defaults to `set(o.__class__ for o in instances)`.
-      If `classes and `instances` are both `None`, defaults to `[Module]`.
-    instances: The instances in which the getter is applied.
-      If `None`, the getter will apply in all instances of `classes`.
+    classes: The classes in which the getter is applied. If `None`, defaults to
+      `set(o.__class__ for o in instances)`. If `classes and `instances` are
+      both `None`, defaults to `[Module]`.
+    instances: The instances in which the getter is applied. If `None`, the
+      getter will apply in all instances of `classes`.
 
   Returns:
     A context manager in which the custom getter is active.
@@ -139,15 +137,16 @@ def custom_variable_getter(
 
   Args:
     getter: A callable to apply to each variable of the class.
-    classes: The classes in which the getter is applied.
-      If `None`, defaults to `set(o.__class__ for o in instances)`.
-      If `classes and `instances` are both `None`, defaults to `[Module]`.
-    instances: The instances in which the getter is applied.
-      If `None`, the getter will apply in all instances of `classes`.
+    classes: The classes in which the getter is applied. If `None`, defaults to
+      `set(o.__class__ for o in instances)`. If `classes and `instances` are
+      both `None`, defaults to `[Module]`.
+    instances: The instances in which the getter is applied. If `None`, the
+      getter will apply in all instances of `classes`.
 
   Returns:
     A context manager in which the custom getter is active.
   """
+
   def wrapped_getter(x):
     x_flat = tf.nest.flatten(x)
     if any(_is_variable(it) for it in x_flat):
@@ -155,6 +154,7 @@ def custom_variable_getter(
           x, [getter(it) if _is_variable(it) else it for it in x_flat])
     else:
       return x
+
   return _custom_getter(wrapped_getter, classes=classes, instances=instances)
 
 

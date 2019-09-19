@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.sgd."""
 
 from __future__ import absolute_import
@@ -44,10 +43,14 @@ class SGDTest(optimizer_tests.OptimizerTestBase):
       self.skipTest("IndexedSlices not supported on TPU.")
 
     parameters = [tf.Variable([[1.], [2.]]), tf.Variable([[3.], [4.]])]
-    updates = [tf.IndexedSlices(tf.constant([0.1], shape=[1, 1]),
-                                tf.constant([0]), tf.constant([2, 1])),
-               tf.IndexedSlices(tf.constant([0.01], shape=[1, 1]),
-                                tf.constant([1]), tf.constant([2, 1]))]
+    updates = [
+        tf.IndexedSlices(
+            tf.constant([0.1], shape=[1, 1]), tf.constant([0]),
+            tf.constant([2, 1])),
+        tf.IndexedSlices(
+            tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
+            tf.constant([2, 1]))
+    ]
     optimizer = self.make_optimizer(learning_rate=3.)
     optimizer.apply(updates, parameters)
     self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())

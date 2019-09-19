@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.conv."""
 
 from __future__ import absolute_import
@@ -30,8 +29,10 @@ import tensorflow as tf
 
 def create_constant_initializers(w, b, with_bias):
   if with_bias:
-    return {"w_init": initializers.Constant(w),
-            "b_init": initializers.Constant(b)}
+    return {
+        "w_init": initializers.Constant(w),
+        "b_init": initializers.Constant(b)
+    }
   else:
     return {"w_init": initializers.Constant(w)}
 
@@ -66,18 +67,28 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
     with self.assertRaisesRegexp(
         ValueError,
         "We only support convoltion operations for num_spatial_dims=1, 2 or 3"):
-      conv.ConvND(num_spatial_dims=n, output_channels=1,
-                  kernel_shape=3, data_format="NHWC")
+      conv.ConvND(
+          num_spatial_dims=n,
+          output_channels=1,
+          kernel_shape=3,
+          data_format="NHWC")
 
   def testInitializerKeysInvalidWithoutBias(self):
     with self.assertRaisesRegexp(ValueError, "b_init must be None"):
-      conv.ConvND(num_spatial_dims=2, output_channels=1,
-                  kernel_shape=3, data_format="NHWC",
-                  with_bias=False, b_init=tf.zeros_initializer())
+      conv.ConvND(
+          num_spatial_dims=2,
+          output_channels=1,
+          kernel_shape=3,
+          data_format="NHWC",
+          with_bias=False,
+          b_init=tf.zeros_initializer())
 
   def testIncorrectRankInput(self):
-    c = conv.ConvND(num_spatial_dims=2, output_channels=1,
-                    kernel_shape=3, data_format="NHWC")
+    c = conv.ConvND(
+        num_spatial_dims=2,
+        output_channels=1,
+        kernel_shape=3,
+        data_format="NHWC")
     with self.assertRaisesRegex(ValueError, "Shape .* must have rank 4"):
       c(tf.ones([2, 4, 4]))
 
@@ -147,8 +158,11 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
   def testUnknownBatchSizeNHWC(self):
     x = tf.TensorSpec([None, 5, 5, 3], dtype=tf.float32)
 
-    c = conv.ConvND(num_spatial_dims=2, output_channels=2,
-                    kernel_shape=3, data_format="NHWC")
+    c = conv.ConvND(
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        data_format="NHWC")
     defun_conv = tf.function(c).get_concrete_function(x)
 
     out1 = defun_conv(tf.ones([3, 5, 5, 3]))
@@ -162,8 +176,11 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
       self.skipTest("NCHW not supported on CPU")
 
     x = tf.TensorSpec([None, 3, 5, 5], dtype=tf.float32)
-    c = conv.ConvND(num_spatial_dims=2, output_channels=2,
-                    kernel_shape=3, data_format="NCHW")
+    c = conv.ConvND(
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        data_format="NCHW")
     defun_conv = tf.function(c).get_concrete_function(x)
 
     out1 = defun_conv(tf.ones([3, 3, 5, 5]))
@@ -176,20 +193,25 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
   def testUnknownChannels(self, autograph):
     x = tf.TensorSpec([3, 3, 3, None], dtype=tf.float32)
 
-    c = conv.ConvND(num_spatial_dims=2, output_channels=1,
-                    kernel_shape=3, data_format="NHWC")
+    c = conv.ConvND(
+        num_spatial_dims=2,
+        output_channels=1,
+        kernel_shape=3,
+        data_format="NHWC")
     defun_conv = tf.function(c, autograph=autograph)
 
-    with self.assertRaisesRegex(
-        ValueError,
-        "The number of input channels must be known"):
+    with self.assertRaisesRegex(ValueError,
+                                "The number of input channels must be known"):
       defun_conv.get_concrete_function(x)
 
   def testUnknownSpatialDims(self):
     x = tf.TensorSpec([3, None, None, 3], dtype=tf.float32)
 
-    c = conv.ConvND(num_spatial_dims=2, output_channels=1,
-                    kernel_shape=3, data_format="NHWC")
+    c = conv.ConvND(
+        num_spatial_dims=2,
+        output_channels=1,
+        kernel_shape=3,
+        data_format="NHWC")
     defun_conv = tf.function(c).get_concrete_function(x)
 
     out = defun_conv(tf.ones([3, 5, 5, 3]))
@@ -207,11 +229,8 @@ class Conv2DTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingSame(self, with_bias):
-    expected_out = [[4, 6, 6, 6, 4],
-                    [6, 9, 9, 9, 6],
-                    [6, 9, 9, 9, 6],
-                    [6, 9, 9, 9, 6],
-                    [4, 6, 6, 6, 4]]
+    expected_out = [[4, 6, 6, 6, 4], [6, 9, 9, 9, 6], [6, 9, 9, 9, 6],
+                    [6, 9, 9, 9, 6], [4, 6, 6, 6, 4]]
     conv1 = conv.Conv2D(
         output_channels=1,
         kernel_shape=3,
@@ -232,9 +251,7 @@ class Conv2DTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingValid(self, with_bias):
-    expected_out = [[9, 9, 9],
-                    [9, 9, 9],
-                    [9, 9, 9]]
+    expected_out = [[9, 9, 9], [9, 9, 9], [9, 9, 9]]
     conv1 = conv.Conv2D(
         output_channels=1,
         kernel_shape=3,
@@ -303,17 +320,15 @@ class Conv3DTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingSame(self, with_bias):
-    expected_out = np.asarray([9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 13, 19, 19,
-                               19, 13, 13, 19, 19, 19, 13, 9, 13, 13, 13, 9, 13,
-                               19, 19, 19, 13, 19, 28, 28, 28, 19, 19, 28, 28,
-                               28, 19, 19, 28, 28, 28, 19, 13, 19, 19, 19, 13,
-                               13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19, 28,
-                               28, 28, 19, 19, 28, 28, 28, 19, 13, 19, 19, 19,
-                               13, 13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19,
-                               28, 28, 28, 19, 19, 28, 28, 28, 19, 13, 19, 19,
-                               19, 13, 9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 13,
-                               19, 19, 19, 13, 13, 19, 19, 19, 13, 9, 13, 13,
-                               13, 9]).reshape((5, 5, 5))
+    expected_out = np.asarray([
+        9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 13, 19, 19, 19, 13, 13, 19, 19,
+        19, 13, 9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19,
+        28, 28, 28, 19, 19, 28, 28, 28, 19, 13, 19, 19, 19, 13, 13, 19, 19, 19,
+        13, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19, 13, 19,
+        19, 19, 13, 13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19,
+        19, 28, 28, 28, 19, 13, 19, 19, 19, 13, 9, 13, 13, 13, 9, 13, 19, 19,
+        19, 13, 13, 19, 19, 19, 13, 13, 19, 19, 19, 13, 9, 13, 13, 13, 9
+    ]).reshape((5, 5, 5))
     if not with_bias:
       expected_out -= 1
 
@@ -333,10 +348,10 @@ class Conv3DTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def testComputationPaddingValid(self, with_bias):
-    expected_out = np.asarray(
-        [28, 28, 28, 28, 28, 28, 28, 28, 28,
-         28, 28, 28, 28, 28, 28, 28, 28, 28,
-         28, 28, 28, 28, 28, 28, 28, 28, 28]).reshape((3, 3, 3))
+    expected_out = np.asarray([
+        28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+        28, 28, 28, 28, 28, 28, 28, 28, 28
+    ]).reshape((3, 3, 3))
     if not with_bias:
       expected_out -= 1
 
@@ -353,6 +368,7 @@ class Conv3DTest(test_utils.TestCase, parameterized.TestCase):
     out = tf.squeeze(out, axis=(0, 4))
 
     self.assertAllClose(self.evaluate(out), expected_out)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

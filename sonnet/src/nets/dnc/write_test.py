@@ -64,12 +64,16 @@ class EraseRowsTest(test_utils.TestCase):
     erased_mem_np = erased_mem.numpy()
 
     # Rows specified in indices should have been erased.
-    self.assertAllClose(erased_mem_np[0, indices_np, :],
-                        np.zeros((num_writes, word_size)), atol=2e-3)
+    self.assertAllClose(
+        erased_mem_np[0, indices_np, :],
+        np.zeros((num_writes, word_size)),
+        atol=2e-3)
 
     # Other rows should not have been erased.
-    self.assertAllClose(erased_mem_np[0, excluded_indices_np, :],
-                        mem_np[0, excluded_indices_np, :], atol=2e-3)
+    self.assertAllClose(
+        erased_mem_np[0, excluded_indices_np, :],
+        mem_np[0, excluded_indices_np, :],
+        atol=2e-3)
 
     # Write with reset weights zero'd out and nothing should change.
     self.assertAllEqual(not_erased_mem.numpy(), mem_np)
@@ -104,8 +108,7 @@ class EraseTest(test_utils.TestCase):
     excluded_indices = perm[num_writes:]
     # One-hot representation
     write_address = tf.constant(
-        np.expand_dims(np.eye(memory_size)[indices], axis=0),
-        dtype=tf.float32)
+        np.expand_dims(np.eye(memory_size)[indices], axis=0), dtype=tf.float32)
     reset_weights = tf.ones([1, num_writes, word_size])
     erased_mem = write.erase(mem, write_address, reset_weights)
     not_erased_mem = write.erase(mem, write_address, reset_weights * 0.)
@@ -114,12 +117,16 @@ class EraseTest(test_utils.TestCase):
     not_erased_mem_np = not_erased_mem.numpy()
 
     # Rows specified in indices should have been erased.
-    self.assertAllClose(erased_mem_np[0, indices, :],
-                        np.zeros((num_writes, word_size)), atol=2e-3)
+    self.assertAllClose(
+        erased_mem_np[0, indices, :],
+        np.zeros((num_writes, word_size)),
+        atol=2e-3)
 
     # Other rows should not have been erased.
-    self.assertAllClose(erased_mem_np[0, excluded_indices, :],
-                        mem_np[0, excluded_indices, :], atol=2e-3)
+    self.assertAllClose(
+        erased_mem_np[0, excluded_indices, :],
+        mem_np[0, excluded_indices, :],
+        atol=2e-3)
 
     # Write with reset weights zero'd out and nothing should change.
     self.assertAllEqual(not_erased_mem_np, mem_np)
@@ -159,11 +166,11 @@ class EraseAndWriteTest(test_utils.TestCase):
     reset_weights = tf.ones((batch_size, num_writes, word_size), 1)
     write_values = tf.random.uniform([batch_size, num_writes, word_size])
 
-    written_mem = write.erase_and_write(
-        mem, write_address, reset_weights, write_values)
+    written_mem = write.erase_and_write(mem, write_address, reset_weights,
+                                        write_values)
 
-    self.assertAllClose(written_mem.numpy()[0, indices, :],
-                        write_values.numpy()[0], atol=2e-3)
+    self.assertAllClose(
+        written_mem.numpy()[0, indices, :], write_values.numpy()[0], atol=2e-3)
 
 
 class AdditiveWriteTest(test_utils.TestCase):
@@ -193,8 +200,7 @@ class AdditiveWriteTest(test_utils.TestCase):
     indices = np.random.permutation(memory_size)[:num_writes]
     # One-hot representation
     write_address = tf.constant(
-        np.expand_dims(np.eye(memory_size)[indices], axis=0),
-        dtype=tf.float32)
+        np.expand_dims(np.eye(memory_size)[indices], axis=0), dtype=tf.float32)
     write_values = tf.random.uniform([1, num_writes, word_size])
     write_values_np = write_values.numpy()
 
@@ -205,8 +211,10 @@ class AdditiveWriteTest(test_utils.TestCase):
     not_written_mem_np = not_written_mem.numpy()
 
     # Check values have been correctly written
-    self.assertAllClose(written_mem.numpy()[0, indices, :],
-                        write_values_np[0] + mem_np[0, indices, :], atol=2e-3)
+    self.assertAllClose(
+        written_mem.numpy()[0, indices, :],
+        write_values_np[0] + mem_np[0, indices, :],
+        atol=2e-3)
     # Check all other values in the memory are still what they started as
     written_mem_copy = written_mem_np.copy()
     written_mem_copy[0, indices, :] -= write_values_np[0]

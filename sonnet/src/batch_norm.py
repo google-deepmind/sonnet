@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Batch normalization module."""
 
 from __future__ import absolute_import
@@ -72,9 +71,16 @@ class BaseBatchNorm(base.Module):
       offset after the module is connected for the first time.
   """
 
-  def __init__(self, create_scale, create_offset, moving_mean, moving_variance,
-               eps=1e-5, scale_init=None, offset_init=None,
-               data_format="channels_last", name=None):
+  def __init__(self,
+               create_scale,
+               create_offset,
+               moving_mean,
+               moving_variance,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
+               name=None):
     """Constructs a ``BaseBatchNorm`` module.
 
     Args:
@@ -122,8 +128,12 @@ class BaseBatchNorm(base.Module):
     self._offset_init = offset_init or initializers.Zeros()
 
   @utils.smart_autograph
-  def __call__(self, inputs, is_training, test_local_stats=False,
-               scale=None, offset=None):
+  def __call__(self,
+               inputs,
+               is_training,
+               test_local_stats=False,
+               scale=None,
+               offset=None):
     """Returns normalized inputs.
 
     Args:
@@ -131,9 +141,9 @@ class BaseBatchNorm(base.Module):
         transformation is performed.
       is_training: ``bool`` to indicate if the module should be connected in
         training mode, meaning the moving averages are updated.
-      test_local_stats: ``bool`` to indicate if local batch statistics should
-        be used when ``is_training=False``. If not, moving averages are used.
-        By default ``False``.
+      test_local_stats: ``bool`` to indicate if local batch statistics should be
+        used when ``is_training=False``. If not, moving averages are used. By
+        default ``False``.
       scale: A tensor up to n-D. The shape of this tensor must be broadcastable
         to the shape of ``inputs``. This is the scale applied to the normalized
         inputs. This cannot be passed in if the module was constructed with
@@ -177,12 +187,13 @@ class BaseBatchNorm(base.Module):
           data_format=self._fused_data_format)
 
     else:
-      out = tf.nn.batch_normalization(inputs,
-                                      mean=mean,
-                                      variance=variance,
-                                      scale=scale,
-                                      offset=offset,
-                                      variance_epsilon=self._eps)
+      out = tf.nn.batch_normalization(
+          inputs,
+          mean=mean,
+          variance=variance,
+          scale=scale,
+          offset=offset,
+          variance_epsilon=self._eps)
 
     if is_training:
       self._update_statistics(mean, variance)
@@ -218,14 +229,12 @@ class BaseBatchNorm(base.Module):
     self.scale = tf.Variable(
         self._scale_init(params_shape, dtype),
         name="scale",
-        trainable=self._create_scale
-    )
+        trainable=self._create_scale)
 
     self.offset = tf.Variable(
         self._offset_init(params_shape, dtype),
         name="offset",
-        trainable=self._create_offset
-    )
+        trainable=self._create_offset)
 
     if self._fused:
       with tf.init_scope():
@@ -268,9 +277,15 @@ class BatchNorm(BaseBatchNorm):
       offset after the module is connected for the first time.
   """
 
-  def __init__(self, create_scale, create_offset, decay_rate=0.999,
-               eps=1e-5, scale_init=None, offset_init=None,
-               data_format="channels_last", name=None):
+  def __init__(self,
+               create_scale,
+               create_offset,
+               decay_rate=0.999,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
+               name=None):
     """Constructs a ``BatchNorm`` module.
 
     Args:
@@ -278,8 +293,8 @@ class BatchNorm(BaseBatchNorm):
         per channel applied after the normalization.
       create_offset: ``bool`` representing whether to create a trainable offset
         per channel applied after normalization and scaling.
-      decay_rate: Decay rate of the exponential moving averages of the mean
-        and variance.
+      decay_rate: Decay rate of the exponential moving averages of the mean and
+        variance.
       eps: Small epsilon to avoid division by zero variance. Defaults to
         ``1e-5``.
       scale_init: Optional initializer for the scale variable. Can only be set
@@ -322,9 +337,16 @@ class CrossReplicaBatchNorm(BaseBatchNorm):
       offset after the module is connected for the first time.
   """
 
-  def __init__(self, create_scale, create_offset, moving_mean, moving_variance,
-               eps=1e-5, scale_init=None, offset_init=None,
-               data_format="channels_last", name=None):
+  def __init__(self,
+               create_scale,
+               create_offset,
+               moving_mean,
+               moving_variance,
+               eps=1e-5,
+               scale_init=None,
+               offset_init=None,
+               data_format="channels_last",
+               name=None):
     """Constructs a ``BaseBatchNorm`` module.
 
     Args:
@@ -384,8 +406,8 @@ class CrossReplicaBatchNorm(BaseBatchNorm):
       # file a bug with your use-case.
       mean = tf.reduce_mean(inputs, self._axis, keepdims=True)
       mean = replica_context.all_reduce("MEAN", mean)
-      mean_of_squares = tf.reduce_mean(tf.square(inputs), self._axis,
-                                       keepdims=True)
+      mean_of_squares = tf.reduce_mean(
+          tf.square(inputs), self._axis, keepdims=True)
       mean_of_squares = replica_context.all_reduce("MEAN", mean_of_squares)
       mean_squared = tf.square(mean)
       var = mean_of_squares - mean_squared

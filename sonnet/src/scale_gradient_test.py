@@ -28,16 +28,16 @@ import tensorflow as tf
 class ScaleGradientTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
-      *itertools.product([-1.0, 0.0, 1.0], [-0.5, 0.0, 0.5, 2.0])
-  )
+      *itertools.product([-1.0, 0.0, 1.0], [-0.5, 0.0, 0.5, 2.0]))
   def test_scale(self, t_, scale):
     t = tf.Variable([t_])
     with tf.GradientTape() as tape:
       y = scale_gradient.scale_gradient(t, scale)
       output = y * y
     grad = tape.gradient(output, t)
-    self.assertAllEqual(grad.numpy(), [2*t_*scale])
+    self.assertAllEqual(grad.numpy(), [2 * t_ * scale])
     self.assertAllEqual(output.numpy(), [t_**2])
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

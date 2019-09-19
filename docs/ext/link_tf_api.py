@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Reference TensorFlow API symbols.
 
 This extension allows to reference TensorFlow API symbols using the
@@ -40,7 +39,6 @@ from typing import Tuple
 from tensorflow.python.util import tf_export
 
 __version__ = "0.1"
-
 
 # TODO(slebedev): make the version configurable or infer from ``tf``?
 TF_VERSION = "2.0"
@@ -80,17 +78,13 @@ def tf_role_fn(
   xref = nodes.literal(rawtext, typ + "." + text, classes=["xref"])
   if not canonical_url:
     warning = (
-        "unable to expand :%s:`%s`; symbol is not exported by TensorFlow."
-        % (typ, text))
+        "unable to expand :%s:`%s`; symbol is not exported by TensorFlow." %
+        (typ, text))
     inliner.reporter.warning(warning, line=lineno)
     return [xref], []
   else:
     node = nodes.reference(
-        rawtext,
-        "",
-        xref,
-        internal=False,
-        refuri=canonical_url)
+        rawtext, "", xref, internal=False, refuri=canonical_url)
     return [node], []
 
 

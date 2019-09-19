@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.bias."""
 
 from __future__ import absolute_import
@@ -80,6 +79,7 @@ class BiasTest(test_utils.TestCase):
     mod = bias.Bias(b_init=ones_initializer)
     out = mod(tf.ones([1, 1]), multiplier=-1)
     self.assertAllEqual(tf.reduce_sum(out), 0)
+
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

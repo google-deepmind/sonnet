@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet.v2.src.depthwise_conv."""
 
 from __future__ import absolute_import
@@ -30,8 +29,10 @@ import tensorflow as tf
 
 def create_constant_initializers(w, b, with_bias):
   if with_bias:
-    return {"w_init": initializers.Constant(w),
-            "b_init": initializers.Constant(b)}
+    return {
+        "w_init": initializers.Constant(w),
+        "b_init": initializers.Constant(b)
+    }
   else:
     return {"w_init": initializers.Constant(w)}
 
@@ -41,8 +42,11 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
   def testInitializerKeysInvalidWithoutBias(self):
     with self.assertRaisesRegexp(ValueError, "b_init must be None"):
       depthwise_conv.DepthwiseConv2D(
-          channel_multiplier=1, kernel_shape=3, data_format="NHWC",
-          with_bias=False, b_init=tf.zeros_initializer())
+          channel_multiplier=1,
+          kernel_shape=3,
+          data_format="NHWC",
+          with_bias=False,
+          b_init=tf.zeros_initializer())
 
   @parameterized.parameters(tf.float32, tf.float64)
   def testDefaultInitializers(self, dtype):
@@ -50,10 +54,7 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
       self.skipTest("Double precision not supported on TPU.")
 
     conv1 = depthwise_conv.DepthwiseConv2D(
-        kernel_shape=16,
-        stride=1,
-        padding="VALID",
-        data_format="NHWC")
+        kernel_shape=16, stride=1, padding="VALID", data_format="NHWC")
 
     out = conv1(tf.random.normal([8, 64, 64, 1], dtype=dtype))
 
@@ -65,11 +66,10 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
     err = 0.2 if self.primary_device == "TPU" else 0.1
     self.assertNear(out.numpy().std(), 0.87, err=err)
 
-  @parameterized.named_parameters(
-      ("SamePaddingUseBias", True, "SAME"),
-      ("SamePaddingNoBias", False, "SAME"),
-      ("ValidPaddingNoBias", False, "VALID"),
-      ("ValidPaddingUseBias", True, "VALID"))
+  @parameterized.named_parameters(("SamePaddingUseBias", True, "SAME"),
+                                  ("SamePaddingNoBias", False, "SAME"),
+                                  ("ValidPaddingNoBias", False, "VALID"),
+                                  ("ValidPaddingUseBias", True, "VALID"))
   def testFunction(self, with_bias, padding):
     conv1 = depthwise_conv.DepthwiseConv2D(
         channel_multiplier=1,
@@ -151,14 +151,11 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
         channel_multiplier=1, kernel_shape=3, data_format="NHWC")
     defun_conv = tf.function(c, autograph=autograph)
 
-    with self.assertRaisesRegex(
-        ValueError,
-        "The number of input channels must be known"):
+    with self.assertRaisesRegex(ValueError,
+                                "The number of input channels must be known"):
       defun_conv.get_concrete_function(x)
 
-  @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
   def testComputationSame(self, with_bias):
     conv1 = depthwise_conv.DepthwiseConv2D(
         channel_multiplier=1,
@@ -169,10 +166,8 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
         **create_constant_initializers(1.0, 1.0, with_bias))
 
     out = conv1(tf.ones([1, 5, 5, 1]))
-    expected_out = np.array([[5, 7, 7, 7, 5],
-                             [7, 10, 10, 10, 7],
-                             [7, 10, 10, 10, 7],
-                             [7, 10, 10, 10, 7],
+    expected_out = np.array([[5, 7, 7, 7, 5], [7, 10, 10, 10, 7],
+                             [7, 10, 10, 10, 7], [7, 10, 10, 10, 7],
                              [5, 7, 7, 7, 5]])
     if not with_bias:
       expected_out -= 1
@@ -180,9 +175,7 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(out.shape, [1, 5, 5, 1])
     self.assertAllClose(np.reshape(out.numpy(), [5, 5]), expected_out)
 
-  @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
   def testComputationValid(self, with_bias):
     conv1 = depthwise_conv.DepthwiseConv2D(
         channel_multiplier=1,
@@ -193,18 +186,14 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
         **create_constant_initializers(1.0, 1.0, with_bias))
 
     out = conv1(tf.ones([1, 5, 5, 1]))
-    expected_out = np.array([[10, 10, 10],
-                             [10, 10, 10],
-                             [10, 10, 10]])
+    expected_out = np.array([[10, 10, 10], [10, 10, 10], [10, 10, 10]])
     if not with_bias:
       expected_out -= 1
 
     self.assertEqual(out.shape, [1, 3, 3, 1])
     self.assertAllClose(np.reshape(out.numpy(), [3, 3]), expected_out)
 
-  @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
   def testComputationValidMultiChannel(self, with_bias):
     conv1 = depthwise_conv.DepthwiseConv2D(
         channel_multiplier=1,
@@ -221,13 +210,14 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertAllClose(np.reshape(out.numpy(), [3, 3, 3]), expected_out)
 
-  @parameterized.named_parameters(
-      ("WithBias", True),
-      ("WithoutBias", False))
+  @parameterized.named_parameters(("WithBias", True), ("WithoutBias", False))
   def testSharing(self, with_bias):
     """Sharing is working."""
     conv1 = depthwise_conv.DepthwiseConv2D(
-        channel_multiplier=3, kernel_shape=3, stride=1, padding="SAME",
+        channel_multiplier=3,
+        kernel_shape=3,
+        stride=1,
+        padding="SAME",
         with_bias=with_bias)
 
     x = np.random.randn(1, 5, 5, 1)

@@ -35,6 +35,7 @@ from sonnet.src.batch_apply import BatchApply
 from sonnet.src.batch_norm import BaseBatchNorm
 from sonnet.src.batch_norm import BatchNorm
 from sonnet.src.bias import Bias
+from sonnet.src.build import build
 from sonnet.src.conv import Conv1D
 from sonnet.src.conv import Conv2D
 from sonnet.src.conv import Conv3D
@@ -121,6 +122,7 @@ __all__ = (
     "UnrolledRNN",
     "VanillaRNN",
     "allow_empty_variables",
+    "build",
     "custom_variable_getter",
     "deep_rnn_with_residual_connections",
     "deep_rnn_with_skip_connections",

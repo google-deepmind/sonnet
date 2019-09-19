@@ -178,12 +178,10 @@ class LayerAdapter(tf.keras.layers.Layer):
 
   def _trace_and_initialize(self, input_shape):
     if self._output_shapes is None:
-      # NOTE: We use a concrete function to ensure that weights are created and
-      # initialized, but other stateful ops (e.g. updating weights) are not
-      # triggered.
-      f = tf.function(self._module_call_method)
-      cf = f.get_concrete_function(tf.TensorSpec(input_shape, self.dtype))
-      self._output_shapes = cf.output_shapes
+      self._output_shapes = tf.nest.map_structure(
+          lambda spec: spec.shape if spec is not None else spec,
+          snt.build(self, tf.TensorSpec(input_shape, self.dtype)))
+
     return self._output_shapes
 
   def compute_output_shape(self, input_shape):

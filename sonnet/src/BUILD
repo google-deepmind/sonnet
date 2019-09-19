@@ -31,6 +31,27 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "build",
+    srcs = ["build.py"],
+    deps = [
+        # pip: numpy
+        # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
+    ],
+)
+
+snt_py_test(
+    name = "build_test",
+    srcs = ["build_test.py"],
+    deps = [
+        ":build",
+        ":test_utils",
+        # pip: absl/testing:parameterized
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
     name = "reshape",
     srcs = ["reshape.py"],
     deps = [

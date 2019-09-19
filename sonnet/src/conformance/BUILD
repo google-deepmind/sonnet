@@ -173,3 +173,16 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_test(
+    name = "build_test",
+    timeout = "long",
+    srcs = ["build_test.py"],
+    deps = [
+        ":descriptors",
+        # pip: absl/testing:parameterized
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

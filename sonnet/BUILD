@@ -23,6 +23,7 @@ snt_py_library(
         "//sonnet/src:batch_apply",
         "//sonnet/src:batch_norm",
         "//sonnet/src:bias",
+        "//sonnet/src:build",
         "//sonnet/src:conv",
         "//sonnet/src:conv_transpose",
         "//sonnet/src:custom_getter",

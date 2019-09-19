@@ -54,7 +54,9 @@ class DoctestTest(test_utils.TestCase, parameterized.TestCase):
         module.__test__[name] = value
 
     num_failed, num_attempted = doctest.testmod(
-        module, optionflags=doctest.ELLIPSIS, extraglobs={
+        module,
+        optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE,
+        extraglobs={
             "snt": snt,
             "tf": tf
         })

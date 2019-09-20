@@ -14,5 +14,6 @@ py_binary(
         "//sonnet",
         # pip: tensorflow
         # pip: tensorflow_datasets
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )

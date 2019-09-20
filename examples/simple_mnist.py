@@ -16,15 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from absl import app
 import sonnet as snt
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from typing import Dict, Text
 
 
-def mnist(split, batch_size):
+def mnist(split: Text, batch_size: int) -> tf.data.Dataset:
   """Returns a tf.data.Dataset with MNIST image/label pairs."""
 
   def preprocess_dataset(images, labels):
@@ -51,7 +53,12 @@ def mnist(split, batch_size):
   return dataset
 
 
-def train_step(model, optimizer, images, labels):
+def train_step(
+    model: snt.Module,
+    optimizer: snt.Optimizer,
+    images: tf.Tensor,
+    labels: tf.Tensor,
+) -> tf.Tensor:
   """Runs a single training step of the model on the given input."""
   with tf.GradientTape() as tape:
     logits = model(images)
@@ -65,7 +72,11 @@ def train_step(model, optimizer, images, labels):
 
 
 @tf.function
-def train_epoch(model, optimizer, dataset):
+def train_epoch(
+    model: snt.Module,
+    optimizer: snt.Optimizer,
+    dataset: tf.data.Dataset,
+) -> tf.Tensor:
   loss = 0.
   for images, labels in dataset:
     loss = train_step(model, optimizer, images, labels)
@@ -73,7 +84,11 @@ def train_epoch(model, optimizer, dataset):
 
 
 @tf.function
-def test_accuracy(model, dataset):
+def test_accuracy(
+    model: snt.Module,
+    dataset: tf.data.Dataset,
+) -> Dict[Text, tf.Tensor]:
+  """Computes accuracy on the test set."""
   correct, total = 0, 0
   for images, labels in dataset:
     preds = tf.argmax(model(images), axis=1)

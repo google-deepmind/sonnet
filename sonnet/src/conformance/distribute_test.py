@@ -16,13 +16,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
+# from __future__ import google_type_annotations
 from __future__ import print_function
 
 from absl.testing import parameterized
+import sonnet as snt
 from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
+from sonnet.src.conformance import descriptors
 from sonnet.src.conformance import goldens
 import tensorflow as tf
+from typing import Callable, Tuple
 
 
 class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
@@ -47,13 +51,42 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
     self.assertLen(variables_per_replica, golden.num_variables)
 
-    # Check all variables have the same value on each replica.
-    for per_replica in variables_per_replica:
-      per_replica = replicator.experimental_local_results(per_replica)
-      first_replica = per_replica[0]
-      for nth_replica in per_replica[1:]:
-        self.assertAllEqual(first_replica, nth_replica)
+    for per_replica_variable in variables_per_replica:
+      self.assertSameValuePerReplica(replicator, per_replica_variable)
 
+  def assertSameValuePerReplica(self, replicator, per_replica):
+    per_replica = replicator.experimental_local_results(per_replica)
+    first_replica = per_replica[0]
+    for nth_replica in per_replica[1:]:
+      self.assertAllEqual(first_replica, nth_replica)
+
+  @test_utils.combined_named_parameters(descriptors.RNN_CORES,
+                                        test_utils.named_bools("dynamic"),
+                                        replicator_utils.named_replicators())
+  def test_unroll(
+      self,
+      core_fn: Callable[[], snt.RNNCore],
+      input_shape: Tuple[int],
+      dtype: tf.DType,
+      dynamic: bool,
+      replicator_fn: tf.distribute.Strategy,
+  ):
+    replicator = replicator_fn()
+    with replicator.scope():
+      core = core_fn()
+
+    def forward():
+      unroll = snt.dynamic_unroll if dynamic else snt.static_unroll
+      sequence = tf.ones((1,) + input_shape, dtype)
+      state = core.initial_state(input_shape[0])
+      return unroll(core, sequence, state)
+
+    # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
+    with tf.device(None):
+      out_sequence, final_state = replicator.experimental_run_v2(forward)
+
+    self.assertSameValuePerReplica(replicator, out_sequence)
+    self.assertSameValuePerReplica(replicator, final_state)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

@@ -23,6 +23,7 @@ import collections
 
 import sonnet as snt
 import tensorflow as tf
+from typing import Callable, Union
 
 
 class Wrapped(snt.Module):
@@ -41,14 +42,25 @@ class Training(Wrapped):
 
 
 class Recurrent(Wrapped):
+  """Unrolls a recurrent module."""
+
+  def __init__(self,
+               module: Union[snt.RNNCore, snt.UnrolledRNN],
+               unroller=None):
+    super(Recurrent, self).__init__(module)
+    self.unroller = unroller
 
   @snt.no_name_scope
   def __call__(self, x: tf.Tensor):
     initial_state = self.wrapped.initial_state(batch_size=tf.shape(x)[0])
     if isinstance(self.wrapped, snt.UnrolledRNN):
+      assert self.unroller is None
       # The module expects TB...-shaped input as opposed to BT...
       x = tf.transpose(x, [1, 0] + list(range(2, x.shape.rank)))
-    return self.wrapped(x, initial_state)
+      return self.wrapped(x, initial_state)
+    else:
+      x = tf.expand_dims(x, axis=0)
+      return self.unroller(self.wrapped, x, initial_state)
 
 
 def unwrap(module: snt.Module) -> snt.Module:
@@ -149,36 +161,69 @@ BATCH_MODULES = (
         shape=(BATCH_SIZE, 3)),
 )
 
-RECURRENT_MODULES = (
+RNN_CORES = (
     ModuleDescriptor(
         name="Conv1DLSTM",
-        create=lambda: Recurrent(snt.Conv1DLSTM((2, 2), 3, 3)),
+        create=lambda: snt.Conv1DLSTM((2, 2), 3, 3),
         shape=(BATCH_SIZE, 2, 2)),
     ModuleDescriptor(
         name="Conv2DLSTM",
-        create=lambda: Recurrent(snt.Conv2DLSTM((2, 2, 2), 3, 3)),
+        create=lambda: snt.Conv2DLSTM((2, 2, 2), 3, 3),
         shape=(BATCH_SIZE, 2, 2, 2)),
     ModuleDescriptor(
         name="Conv3DLSTM",
-        create=lambda: Recurrent(snt.Conv3DLSTM((2, 2, 2, 2), 3, 3)),
+        create=lambda: snt.Conv3DLSTM((2, 2, 2, 2), 3, 3),
         shape=(BATCH_SIZE, 2, 2, 2, 2)),
     ModuleDescriptor(
         name="GRU",
-        create=lambda: Recurrent(snt.GRU(1)),
+        create=lambda: snt.GRU(1),
         shape=(BATCH_SIZE, 128)),
     ModuleDescriptor(
         name="LSTM",
-        create=lambda: Recurrent(snt.LSTM(1)),
+        create=lambda: snt.LSTM(1),
         shape=(BATCH_SIZE, 128)),
-    ModuleDescriptor(
-        name="UnrolledLSTM",
-        create=lambda: Recurrent(snt.UnrolledLSTM(1)),
-        shape=(BATCH_SIZE, 1, 128)),
     ModuleDescriptor(
         name="VanillaRNN",
-        create=lambda: Recurrent(snt.VanillaRNN(8)),
+        create=lambda: snt.VanillaRNN(8),
         shape=(BATCH_SIZE, 128)),
 )
+
+UNROLLED_RNN_CORES = (
+    ModuleDescriptor(
+        name="UnrolledLSTM",
+        create=lambda: snt.UnrolledLSTM(1),
+        shape=(BATCH_SIZE, 1, 128)),
+)
+
+
+def recurrent_factory(
+    create_core: Callable[[], snt.RNNCore],
+    unroller,
+) -> Callable[[], Recurrent]:
+  return lambda: Recurrent(create_core(), unroller)
+
+
+def unroll_descriptors(descriptors, unroller=None):
+  """Returns `Recurrent` wrapped descriptors with the given unroller applied."""
+  out = []
+  for name, create, shape, dtype in descriptors:
+    if unroller is None:
+      name = "Recurrent({})".format(name)
+    else:
+      name = "Recurrent({}, {})".format(name, unroller.__name__)
+    out.append(
+        ModuleDescriptor(name=name,
+                         create=recurrent_factory(create, unroller),
+                         shape=shape,
+                         dtype=dtype))
+  return tuple(out)
+
+
+RECURRENT_MODULES = (
+    unroll_descriptors(RNN_CORES, snt.dynamic_unroll) +
+    unroll_descriptors(RNN_CORES, snt.static_unroll) +
+    unroll_descriptors(UNROLLED_RNN_CORES))
+
 
 OPTIMIZER_MODULES = (
     ModuleDescriptor(

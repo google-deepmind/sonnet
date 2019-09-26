@@ -297,6 +297,7 @@ class _ListWrapper(object):
 
 # TODO(slebedev): core can be core_fn: Callable[[I, S], Tuple[O, S]].
 # TODO(slebedev): explain sequence_length with ASCII art?
+@utils.smart_autograph
 def dynamic_unroll(
     core,
     input_sequence,  # time-major.

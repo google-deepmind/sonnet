@@ -55,12 +55,15 @@ snt_py_test(
     name = "distribute_test",
     srcs = ["distribute_test.py"],
     deps = [
+        ":descriptors",
         ":goldens",
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
+        "//sonnet",
         "//sonnet/src:replicator_test_utils",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -81,6 +84,7 @@ snt_py_library(
     deps = [
         "//sonnet",
         # pip: tensorflow
+        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

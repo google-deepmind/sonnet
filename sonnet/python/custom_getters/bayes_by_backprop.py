@@ -493,9 +493,10 @@ def _produce_posterior_estimate(posterior_dist, posterior_estimate_mode,
       return posterior_dist.mean()
 
   if hasattr(posterior_dist, "last_sample"):
-    cases = {conds[0]: results[0], conds[1]: results[1], conds[2]: results[2]}
+    cases = [(conds[0], results[0]), (conds[1], results[1]),
+             (conds[2], results[2])]
   else:
-    cases = {conds[0]: results[0], conds[1]: results[1]}
+    cases = [(conds[0], results[0]), (conds[1], results[1])]
   z_sample = tf.case(
       cases,
       exclusive=True,

@@ -18,10 +18,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet.src.batch_norm import CrossReplicaBatchNorm
 from sonnet.src.replicator import Replicator
 from sonnet.src.replicator import TpuReplicator
 
 __all__ = (
     "Replicator",
     "TpuReplicator",
+    "CrossReplicaBatchNorm",
 )

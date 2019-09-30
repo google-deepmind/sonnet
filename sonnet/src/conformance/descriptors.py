@@ -109,6 +109,13 @@ BATCH_MODULES = (
         create=lambda: snt.Conv3DTranspose(3, 3),
         shape=(BATCH_SIZE, 2, 2, 2, 2)),
     ModuleDescriptor(
+        name="CrossReplicaBatchNorm",
+        create=lambda: Training(snt.distribute.CrossReplicaBatchNorm(  # pylint: disable=g-long-lambda
+            True, True,
+            snt.ExponentialMovingAverage(0.9),
+            snt.ExponentialMovingAverage(0.9))),
+        shape=(BATCH_SIZE, 2, 2, 3)),
+    ModuleDescriptor(
         name="Dropout",
         create=lambda: Training(snt.Dropout(0.5)),
         shape=(BATCH_SIZE, 3, 3)),

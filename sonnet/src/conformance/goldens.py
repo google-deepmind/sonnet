@@ -313,6 +313,19 @@ class BatchNormTraining(AbstractGolden):
     return module(x, is_training=True)
 
 
+@_register_golden(snt.distribute.CrossReplicaBatchNorm,
+                  "cross_replica_batch_norm_1x2x2x3")
+class CrossReplicaBatchNorm(AbstractGolden):
+  create_module = (
+      lambda _: snt.BaseBatchNorm(True, False, FooMetric(), FooMetric()))
+  input_spec = tf.TensorSpec([1, 2, 2, 3])
+  num_variables = 2
+
+  def forward(self, module):
+    x = range_like(self.input_spec, start=1)
+    return module(x, is_training=False, test_local_stats=True)
+
+
 @_register_golden(snt.Dropout, "dropout")
 class DropoutVariableRate(AbstractGolden):
   create_module = lambda _: snt.Dropout(rate=tf.Variable(0.5))
@@ -523,8 +536,14 @@ class VectorQuantizerEMAEvalTest(AbstractGolden):
 # pylint: enable=missing-docstring
 
 
-class FooMetric(object):
+class FooMetric(snt.Metric):
   """Used for testing a class which uses Metrics."""
 
   def initialize(self, x):
+    pass
+
+  def reset(self):
+    pass
+
+  def update(self, x):
     pass

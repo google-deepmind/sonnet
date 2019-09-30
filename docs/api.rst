@@ -113,9 +113,17 @@ BatchNorm
 .. autoclass:: BatchNorm
    :members:
 
+CrossReplicaBatchNorm
+~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: sonnet.distribute
+.. autoclass:: CrossReplicaBatchNorm
+   :members:
+
 GroupNorm
 ~~~~~~~~~
 
+.. currentmodule:: sonnet
 .. autoclass:: GroupNorm
    :members:
 
@@ -494,39 +502,39 @@ ResNet50
    :members:
 
 VectorQuantizer
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. autoclass:: VectorQuantizer
    :members:
 
 VectorQuantizerEMA
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: VectorQuantizerEMA
    :members:
 
 Mixed Precision
-----
+---------------
 
 .. automodule:: sonnet.mixed_precision
 
 modes
-~~~~~~~~~~~~~~~
+~~~~~
 
 .. autofunction:: modes
 
 enable
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
 
 .. autofunction:: enable
 
 disable
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
 
 .. autofunction:: disable
 
 scope
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~
 
 .. autofunction:: scope
 

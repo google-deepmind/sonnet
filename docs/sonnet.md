@@ -18267,7 +18267,7 @@ some more information needs to be provided in order to build the Graph.
 
 Basic fully connected vanilla RNN core.
 
-#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh at 0x7f61d43e86a8>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
+#### [`VanillaRNN.__init__(hidden_size, activation=<function tanh>, initializers=None, partitioners=None, regularizers=None, name='vanilla_rnn')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py?l=71)<a id="VanillaRNN.__init__" />
 
 Construct a Basic RNN core.
 
@@ -19670,7 +19670,7 @@ regardless of that `tf.Variable`'s shape.
 A pre-canned builder for the analytic kl divergence.
 
 
-### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder at 0x7f61cff7eb70>, prior_builder=<function fixed_gaussian_prior_builder at 0x7f61cff7ef28>, kl_builder=<function stochastic_kl_builder at 0x7f61cff8d0d0>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
+### [`custom_getters.bayes_by_backprop.bayes_by_backprop_getter(posterior_builder=<function diagonal_gaussian_posterior_builder>, prior_builder=<function fixed_gaussian_prior_builder>, kl_builder=<function stochastic_kl_builder>, sampling_mode_tensor=None, fresh_noise_per_connection=True, keep_control_dependencies=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/custom_getters/bayes_by_backprop.py?l=263)<a id="custom_getters.bayes_by_backprop.bayes_by_backprop_getter" />
 
 Creates a custom getter which does Bayes by Backprop.
 
@@ -20930,7 +20930,7 @@ information about what variables are captured.
 
 A 2D Convolutional Network module.
 
-#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu at 0x7f61d4005268>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
+#### [`nets.ConvNet2D.__init__(output_channels, kernel_shapes, strides, paddings, rates=(1,), activation=<function relu>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=None, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=51)<a id="nets.ConvNet2D.__init__" />
 
 Constructs a `ConvNet2D` module.
 
@@ -21414,7 +21414,7 @@ information about what variables are captured.
 
 A 2D Transpose-Convolutional Network module.
 
-#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu at 0x7f61d4005268>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
+#### [`nets.ConvNet2DTranspose.__init__(output_channels, output_shapes, kernel_shapes, strides, paddings, activation=<function relu>, activate_final=False, normalization_ctor=None, normalization_kwargs=None, normalize_final=None, initializers=None, partitioners=None, regularizers=None, use_batch_norm=False, use_bias=True, batch_norm_config=None, data_format='NHWC', custom_getter=None, name='conv_net_2d_transpose')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/convnet.py?l=718)<a id="nets.ConvNet2DTranspose.__init__" />
 
 Constructs a `ConvNetTranspose2D` module.
 
@@ -22176,7 +22176,7 @@ information about what variables are captured.
 
 A Multi-Layer perceptron module.
 
-#### [`nets.MLP.__init__(output_sizes, activation=<function relu at 0x7f61d4005268>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
+#### [`nets.MLP.__init__(output_sizes, activation=<function relu>, activate_final=False, initializers=None, partitioners=None, regularizers=None, use_bias=True, use_dropout=False, custom_getter=None, name='mlp')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/mlp.py?l=35)<a id="nets.MLP.__init__" />
 
 Constructs an MLP module.
 

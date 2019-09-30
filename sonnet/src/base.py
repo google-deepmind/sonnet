@@ -22,6 +22,7 @@ from __future__ import print_function
 import abc
 import functools
 import inspect
+import os
 import pprint
 import sys
 
@@ -271,12 +272,17 @@ def wrap_with_name_scope_no_exception(
 
 def with_name_scope(method: T) -> T:
   """Patches the given method so it enters the modules name scope."""
-  if not getattr(method, APPLY_NAME_SCOPE, True):
+  if os.environ.get("SNT_MODULE_NAME_SCOPES", "").lower() in ("0", "false"):
+    # For debugging purposes name scoping can be disabled using the environment
+    # variable `SNT_MODULE_NAME_SCOPES` (note: this does not apply to __init__).
+    # This can help to make stack traces shallower and should have no
+    # behavioural effect (unless your code relies on string variable names).
+    return method
+  elif not getattr(method, APPLY_NAME_SCOPE, True):
     # The function has been annotated to say that no autoscoping should be
     # applied, so do not patch it.
     return method
-
-  if isinstance(method, TFFunctionType):
+  elif isinstance(method, TFFunctionType):
     # Autograph cannot convert functions that have try/catch.
     method._decorate(wrap_with_name_scope_no_exception)  # pylint: disable=protected-access
     return method

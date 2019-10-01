@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import itertools
+import unittest
 
 from absl.testing import parameterized
 import numpy as np
@@ -850,6 +851,55 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
     # Scalars always get updates (to match `tf.nn.*_rnn` behavior).
     self.assertAllClose(final_state[0], self.num_steps)
     self.assertAllClose(final_state[1], initial_state[1])
+
+
+class UnknownStepsUnrollTest(test_utils.TestCase):
+
+  def setUp(self):
+    super(UnknownStepsUnrollTest, self).setUp()
+
+    self.num_steps = 5
+    self.batch_size = 3
+    self.hidden_size = 2
+    self.core = Counter(self.hidden_size)
+
+  def testStaticUnroll(self):
+
+    def do_unroll(input_sequence):
+      initial_state = self.core.initial_state(self.batch_size)
+      return recurrent.static_unroll(self.core, input_sequence, initial_state)
+
+    with self.assertRaisesRegex(
+        ValueError, "must have a statically known number of time steps"):
+      tf.function(do_unroll).get_concrete_function(
+          tf.TensorSpec([None, None, 1]))
+
+  def testDynamicUnroll(self):
+
+    def do_unroll(input_sequence):
+      initial_state = self.core.initial_state(self.batch_size)
+      return recurrent.dynamic_unroll(self.core, input_sequence, initial_state)
+
+    cf = tf.function(do_unroll).get_concrete_function(
+        tf.TensorSpec([None, None, 1]))
+    output_sequence, unused_final_state = cf(
+        tf.random.uniform([self.num_steps, self.batch_size, 1]))
+    self.assertEqual(output_sequence.shape[0], self.num_steps)
+
+  @unittest.skip("b/141910613")
+  def testDynamicUnrollInconsistentSteps(self):
+
+    def do_unroll(*input_sequence):
+      return recurrent.dynamic_unroll(lambda inputs, _: inputs, input_sequence,
+                                      ())
+
+    cf = tf.function(do_unroll).get_concrete_function(
+        tf.TensorSpec([None, None, 1]), tf.TensorSpec([None, None, 1]))
+    with self.assertRaisesRegex(tf.errors.InvalidArgumentError,
+                                "must have consistent number of time steps"):
+      cf(
+          tf.random.uniform([self.num_steps, self.batch_size, 1]),
+          tf.random.uniform([self.num_steps + 1, self.batch_size, 1]))
 
 
 if __name__ == "__main__":

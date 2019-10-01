@@ -256,9 +256,13 @@ def static_unroll(
       * **final_state** - Core state at time step ``T``.
 
   Raises:
-    ValueError: If ``input_sequence`` is empty.
+    ValueError: If ``input_sequence`` is empty or its leading dimension is
+      not known statically.
   """
   num_steps, input_tas = _unstack_input_sequence(input_sequence)
+  if not isinstance(num_steps, six.integer_types):
+    raise ValueError(
+        "input_sequence must have a statically known number of time steps")
 
   outputs = None
   state = initial_state
@@ -408,13 +412,22 @@ def _unstack_input_sequence(input_sequence):
     ValueError: If tensors in ``input_sequence`` have inconsistent number
       of steps or the number of steps is 0.
   """
-  all_num_steps = {i.shape[0] for i in nest.flatten(input_sequence)}
+  flat_input_sequence = nest.flatten(input_sequence)
+  all_num_steps = {i.shape[0] for i in flat_input_sequence}
   if len(all_num_steps) > 1:
     raise ValueError(
         "input_sequence tensors must have consistent number of time steps")
   [num_steps] = all_num_steps
   if num_steps == 0:
     raise ValueError("input_sequence must have at least a single time step")
+  elif num_steps is None:
+    # Number of steps is not known statically, fall back to dynamic shape.
+    num_steps = tf.shape(flat_input_sequence[0])[0]
+    # TODO(b/141910613): uncomment when the bug is fixed.
+    # for i in flat_input_sequence[1:]:
+    #   tf.debugging.assert_equal(
+    #       tf.shape(i)[0], num_steps,
+    #       "input_sequence tensors must have consistent number of time steps")
 
   input_tas = nest.map_structure(
       lambda i: tf.TensorArray(i.dtype, num_steps).unstack(i), input_sequence)

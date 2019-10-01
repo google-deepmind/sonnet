@@ -148,6 +148,15 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
     self.assertLen(mod.variables, 2)
     self.assertLen(mod.trainable_variables, 2)
 
+  def test_to_config(self):
+    mod = LayerAdapter(ModuleWithLayer())
+    with self.assertRaises(NotImplementedError):
+      mod.to_config()
+
+  def test_from_config(self):
+    with self.assertRaises(NotImplementedError):
+      LayerAdapter.from_config(None)
+
 
 # TODO(tomhennigan) Make this part of the public API?
 class LayerAdapter(tf.keras.layers.Layer):
@@ -175,6 +184,13 @@ class LayerAdapter(tf.keras.layers.Layer):
     self.module = module
     self._module_call_method = getattr(module, method)
     self._output_shapes = None
+
+  @classmethod
+  def from_config(cls, config):
+    raise NotImplementedError
+
+  def to_config(self):
+    raise NotImplementedError
 
   def _trace_and_initialize(self, input_shape):
     if self._output_shapes is None:

@@ -338,7 +338,7 @@ class ResNet50(ResNet):
       bn_config: A dictionary of two elements, `decay_rate` and `eps` to be
         passed on to the `BatchNorm` layers.
       resnet_v2: Whether to use the v1 or v2 ResNet implementation. Defaults to
-        True.
+        False.
       name: Name of the module.
     """
     super(ResNet50, self).__init__([3, 4, 6, 3],

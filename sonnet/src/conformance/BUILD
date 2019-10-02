@@ -190,3 +190,15 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_test(
+    name = "copy_test",
+    timeout = "long",
+    srcs = ["copy_test.py"],
+    deps = [
+        ":goldens",
+        # pip: absl/testing:parameterized
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

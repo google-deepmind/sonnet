@@ -32,7 +32,6 @@ import six
 import tensorflow as tf
 import wrapt
 
-from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.ops import variable_scope as variable_scope_ops  # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.util import tf_inspect  # pylint: disable=g-direct-tensorflow-import
 
@@ -911,9 +910,7 @@ def to_snake_case(camel_case):
   return underscored.strip("_").lower()
 
 
-@function.Defun(
-    python_grad_func=lambda x, dy: tf.convert_to_tensor(dy),
-    shape_func=lambda op: [op.inputs[0].get_shape()])
+@tf.custom_gradient
 def convert_gradient_to_tensor(x):
   """Identity operation whose gradient is converted to a `Tensor`.
 
@@ -931,7 +928,7 @@ def convert_gradient_to_tensor(x):
   Returns:
     The input `Tensor`.
   """
-  return x
+  return x, tf.convert_to_tensor
 
 
 def sort_by_name(variables):
@@ -1137,4 +1134,3 @@ def remove_unsupported_kwargs(module_or_fn, all_kwargs_dict):
       kwarg: value for kwarg, value in all_kwargs_dict.items()
       if supports_kwargs(module_or_fn, kwarg) != NOT_SUPPORTED
   }
-

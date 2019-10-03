@@ -97,6 +97,7 @@ py_library(
         # numpy dep,
         # six dep,
         # tensorflow dep,
+        # tensorflow_probability dep,
         # wrapt dep,
     ],
 )

@@ -31,6 +31,7 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import scale_gradient
 
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import
 
@@ -293,7 +294,7 @@ def _squared_softplus(x):
 
 
 def _inv_squared_softplus(x):
-  return tf.contrib.distributions.softplus_inverse(tf.sqrt(x))
+  return tfp.distributions.softplus_inverse(tf.sqrt(x))
 
 
 def _parametrize(x, rate=1.0):

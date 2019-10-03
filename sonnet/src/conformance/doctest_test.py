@@ -51,7 +51,11 @@ class DoctestTest(test_utils.TestCase, parameterized.TestCase):
     for name in module.__all__:
       value = getattr(module, name)
       if not inspect.ismodule(value):
-        module.__test__[name] = value
+        if (inspect.isclass(value) or isinstance(value, str) or
+            inspect.isfunction(value) or inspect.ismethod(value)):
+          module.__test__[name] = value
+        elif hasattr(value, "__doc__"):
+          module.__test__[name] = value.__doc__
 
     num_failed, num_attempted = doctest.testmod(
         module,

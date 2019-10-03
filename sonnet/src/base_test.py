@@ -297,6 +297,38 @@ class AbcTest(tf.test.TestCase):
     self.assertEqual(mod.foo(), True)
 
 
+class CustomGradientTest(test_utils.TestCase):
+
+  def test_custom_gradient(self):
+    if tf.version.GIT_VERSION != "unknown":
+      # TODO(tomhennigan) Enable this once TF 2.0.1 comes out.
+      self.skipTest("Requires TF > 2.0.0")
+
+    mod = ZeroGradModule()
+    with tf.GradientTape() as tape:
+      y = mod(2.)
+    g = tape.gradient(y, mod.w)
+    self.assertAllEqual(g, tf.zeros([2, 2]))
+
+
+class ZeroGradModule(base.Module):
+
+  @tf.custom_gradient
+  def __call__(self, x):
+    if not hasattr(self, "w"):
+      self.w = tf.Variable(tf.ones([2, 2]), name="w")
+
+    with tf.GradientTape() as tape:
+      y = tf.reduce_sum(self.w ** x)
+    dw = tape.gradient(y, self.w)
+
+    def grad(dy, variables=None):
+      assert variables
+      return dy * 0, [dw * 0]
+
+    return y, grad
+
+
 class LambdaModule(base.Module):
 
   def __call__(self, x):

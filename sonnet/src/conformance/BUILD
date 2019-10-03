@@ -202,3 +202,15 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_test(
+    name = "tensorflow1_test",
+    timeout = "long",
+    srcs = ["tensorflow1_test.py"],
+    deps = [
+        # pip: absl/testing:parameterized
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

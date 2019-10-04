@@ -19,46 +19,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow.python.framework import function
 
 tfe = tf.contrib.eager
 
 
-def _scale_gradient_op(dtype):
-  """Create an op that scales gradients using a Defun.
-
-  The tensorflow Defun decorator creates an op and tensorflow caches these ops
-  automatically according to `func_name`. Using a Defun decorator twice with the
-  same `func_name` does not create a new op, instead the cached op is used.
-
-  This method produces a new op the first time it is called with a given `dtype`
-  argument, and then uses the cached op each time it is called after that with
-  the same `dtype`. The scale value is given as an argument for the forward pass
-  method so that it can be used in the backwards pass.
-
-  Args:
-    dtype: the dtype of the net whose gradient is being scaled.
-
-  Returns:
-    The op that scales gradients.
-  """
-
-  def scale_gradient_backward(op, grad):
-    scale = op.inputs[1]
-    scaled_grad = grad * scale
-    return scaled_grad, None
-
-  # Note that if the forward pass implementation involved the creation of ops,
-  # _scale_gradient_op would require some memoization mechanism.
-  def scale_gradient_forward(x, scale):
-    del scale  # Unused.
-    return x
-
-  func_name = "ScaleGradient_{}".format(dtype.name)
-  return function.Defun(
-      dtype, dtype,
-      python_grad_func=scale_gradient_backward,
-      func_name=func_name)(scale_gradient_forward)
+@tf.custom_gradient
+def _scale_gradient(x, scale):
+  grad = lambda dy: (dy * scale, None)
+  return x, grad
 
 
 def scale_gradient(net, scale, name="scale_gradient"):
@@ -105,9 +73,6 @@ def scale_gradient(net, scale, name="scale_gradient"):
     with tf.name_scope(name, "scale_gradient", values=[net]):
       dtype = net.dtype.base_dtype  # Convert ref dtypes to regular dtypes.
       scale_tensor = tf.convert_to_tensor(scale, dtype=dtype)
-
-      scale_gradient_op = _scale_gradient_op(dtype)
-      output = scale_gradient_op(net, scale_tensor)
-      output.set_shape(net.get_shape())
+      output = _scale_gradient(net, scale_tensor)
 
     return output

@@ -47,7 +47,7 @@ class ScaleGradientTest(parameterized.TestCase, tf.test.TestCase):
       if scale == 1.0:
         self.assertEqual(y.op.type, "Identity")
       else:
-        self.assertEqual(y.op.type, "ScaleGradient_float32")
+        self.assertEqual(y.op.type, "IdentityN")
 
       with self.test_session() as sess:
         dydx_, y_ = sess.run([dydx, y], feed_dict={x: [x_]})

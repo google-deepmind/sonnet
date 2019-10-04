@@ -19,44 +19,13 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow.python.framework import function
 
 
-def _clip_gradient_op(dtype):
-  """Create an op that clips gradients using a Defun.
-
-  The tensorflow Defun decorator creates an op and tensorflow caches these op
-  automatically according to `func_name`. Using a Defun decorator twice with the
-  same `func_name` does not create a new op, instead the cached op is used.
-
-  This method produces a new op the first time it is called with a given `dtype`
-  argument, and then uses the cached op each time it is called after that with
-  the same `dtype`. The min and max clip values are given as arguments for the
-  forward pass method so that they can be used in the backwards pass.
-
-  Args:
-    dtype: the dtype of the net whose gradient is being clipped.
-
-  Returns:
-    The op that clips gradients.
-  """
-
-  def clip_gradient_backward(op, grad):
-    clip_value_min = op.inputs[1]
-    clip_value_max = op.inputs[2]
-    clipped_grad = tf.clip_by_value(grad, clip_value_min, clip_value_max)
-    return clipped_grad, None, None
-
-  def clip_gradient_forward(x, clip_value_min, clip_value_max):
-    del clip_value_min  # Unused.
-    del clip_value_max  # Unused.
-    return x
-
-  func_name = "ClipGradient_{}".format(dtype.name)
-  return function.Defun(
-      dtype, dtype, dtype,
-      python_grad_func=clip_gradient_backward,
-      func_name=func_name)(clip_gradient_forward)
+@tf.custom_gradient
+def _clip_gradient(x, clip_value_min, clip_value_max):
+  def grad(dy):
+    return tf.clip_by_value(dy, clip_value_min, clip_value_max), None, None
+  return x, grad
 
 
 def clip_gradient(net, clip_value_min, clip_value_max, name=None):
@@ -87,8 +56,6 @@ def clip_gradient(net, clip_value_min, clip_value_max, name=None):
     min_tensor = tf.convert_to_tensor(clip_value_min, dtype=dtype)
     max_tensor = tf.convert_to_tensor(clip_value_max, dtype=dtype)
 
-    clip_gradient_op = _clip_gradient_op(dtype)
-    output = clip_gradient_op(net, min_tensor, max_tensor)
-    output.set_shape(net.get_shape())
+    output = _clip_gradient(net, min_tensor, max_tensor)
 
   return output

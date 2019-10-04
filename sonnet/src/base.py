@@ -296,33 +296,53 @@ def with_name_scope(method: T) -> T:
 
 
 NO_VARIABLES_ERROR = """
-You have requested {} from a module that currently does not contain variables.
+{module!r} does not currently contain any {property}.
+
 Most Sonnet modules create variables the first time they are called with an
-input. You should refactor your code such that you request module variables
-after you pass an example input to the module.
-""".strip().replace("\n", " ")
+input and requesting variables before this typically indicates a coding error.
+
+You should refactor your code such that you request module variables after you
+pass an example input to the module. For example:
+
+    module = {module!r}
+    output = module(input)
+    params = module.{property}
+
+If the module is stateless consider using `snt.allow_empty_variables(module)` to
+suppress this error:
+
+    module = {module!r}
+    snt.allow_empty_variables(module)
+    params = module.{property}
+
+You can annotate your own subclasses directly if you prefer:
+
+    @snt.allow_empty_variables
+    class MyStatelessModule(snt.Module):
+      pass
+""".strip()
 
 
-def allow_empty_variables(module: T) -> T:
+def allow_empty_variables(module_or_cls: T) -> T:
   """Allows ``{trainable_,}variables`` to return empty results.
 
   >>> mod = snt.Module()
   >>> mod.variables
   Traceback (most recent call last):
     ...
-  ValueError: ... pass an example input to the module.
+  ValueError: ... pass an example input to the module...
   >>> mod = snt.allow_empty_variables(mod)
   >>> mod.variables
   ()
 
   Args:
-    module: A :class:`Module` instance or subclass to decorate.
+    module_or_cls: A :class:`Module` instance or subclass to decorate.
 
   Returns:
     The input module or class.
   """
-  setattr(module, ALLOW_EMPTY_RESULT, True)
-  return module
+  setattr(module_or_cls, ALLOW_EMPTY_RESULT, True)
+  return module_or_cls
 
 
 def assert_tf2():
@@ -404,7 +424,8 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       # problems (eg. if you are trying to copy the initial state from one
       # module to another by zipping both module variables and assigning one to
       # the other).
-      raise ValueError(NO_VARIABLES_ERROR.format("variables"))
+      raise ValueError(
+          NO_VARIABLES_ERROR.format(module=self, property="variables"))
     return variables
 
   @property
@@ -433,7 +454,9 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       # problems (eg. if you are trying to copy the initial state from one
       # module to another by zipping both module variables and assigning one to
       # the other).
-      raise ValueError(NO_VARIABLES_ERROR.format("trainable_variables"))
+      raise ValueError(
+          NO_VARIABLES_ERROR.format(module=self,
+                                    property="trainable_variables"))
     return trainable_variables
 
 

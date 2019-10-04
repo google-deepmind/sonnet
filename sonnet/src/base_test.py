@@ -468,9 +468,12 @@ class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters("trainable_variables", "variables")
   def test_requests_variables_before_they_exist(self, property_name):
-    mod = base.Module()
-    with self.assertRaisesRegexp(ValueError,
-                                 "module .* does not contain variables"):
+    class MyModule(base.Module):
+      pass
+
+    mod = MyModule()
+    err = "MyModule.* does not currently contain any {}".format(property_name)
+    with self.assertRaisesRegexp(ValueError, err):
       getattr(mod, property_name)
 
   @parameterized.parameters("trainable_variables", "variables")

@@ -217,12 +217,19 @@ class VariableNamingTest(tf.test.TestCase):
 class AutoReprTest(tf.test.TestCase):
 
   def test_order_matches_argspec(self):
-    module = RecursiveModule(trainable=False, depth=1)
-    self.assertEqual(repr(module), "RecursiveModule(depth=1, trainable=False)")
+    module = RecursiveModule(trainable=False, depth=2)
+    self.assertEqual(repr(module), "RecursiveModule(depth=2, trainable=False)")
 
   def test_defaults_ignored(self):
     module = RecursiveModule(1)
     self.assertEqual(repr(module), "RecursiveModule(depth=1)")
+
+  def test_does_not_fail_with_hostile_input(self):
+    r = RaisesOnEquality()
+    self.assertFalse(r.equality_checked)
+    module = NoopModule(r)
+    self.assertEqual(repr(module), "NoopModule(a=hostile)")
+    self.assertTrue(r.equality_checked)
 
   def test_args_are_repred(self):
     module = TreeModule(name="TreeModule")
@@ -486,6 +493,29 @@ class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
   def test_allow_empty_variables_class(self, property_name):
     mod = NeverCreatesVariables()
     self.assertEmpty(getattr(mod, property_name))
+
+
+class NoopModule(base.Module):
+
+  def __init__(self, a=None):
+    super(NoopModule, self).__init__()
+    self.a = a
+
+
+class RaisesOnEquality(object):
+
+  equality_checked = False
+
+  def __repr__(self):
+    return "hostile"
+
+  def __eq__(self, other):
+    self.equality_checked = True
+    raise ValueError("== not supported")
+
+  def __ne__(self, other):
+    self.equality_checked = True
+    raise ValueError("!= not supported")
 
 
 @base.allow_empty_variables

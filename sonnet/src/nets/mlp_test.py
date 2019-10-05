@@ -149,6 +149,13 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
     mod(tf.ones([1, 1]), is_training=(is_training if use_dropout else None))
     self.assertEqual(activation.count, 2)
 
+  def test_repr(self):
+    mod = mlp.MLP([1, 2, 3])
+    for index, linear in enumerate(mod.submodules):
+      self.assertEqual(
+          repr(linear),
+          "Linear(output_size={}, name='linear_{}')".format(index + 1, index))
+
 
 def reversed_mlp(**kwargs):
   mod = mlp.MLP([2, 3, 4], **kwargs)

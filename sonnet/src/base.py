@@ -154,18 +154,31 @@ class ModuleMetaclass(abc.ABCMeta):
     return module
 
 
+def safe_compare(a, b):
+  try:
+    return a == b
+  except:  # pylint: disable=bare-except
+    # Some equality checks might be buggy (e.g. `tf.Tensor == None`), in those
+    # cases be defensive and assume `a != b`.
+    return False
+
+
 def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
   """Derives a `__repr__` from constructor arguments of a given class.
 
       >>> class Foo(object):
-      ...   def __init__(self, x, y=42):
+      ...   def __init__(self, x=None, y=42):
       ...      pass
       ...
+
       >>> auto_repr(Foo, "x")
       "Foo(x='x')"
 
-      >>> auto_repr(Foo, "x", 21)
+      >>> auto_repr(Foo, "x", y=21)
       "Foo(x='x', y=21)"
+
+      >>> auto_repr(Foo, None, 42)
+      Foo()
 
   Args:
     cls: a class to derive `__repr__` for.
@@ -183,7 +196,13 @@ def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
   arg_names.extend(n for n in argspec.args if n in kwargs)
   arg_values = inspect.getcallargs(cls.__init__, None, *args, **kwargs)
 
-  names_and_values = [(name + "=", arg_values[name]) for name in arg_names]
+  # Extract default parameter values.
+  defaults = argspec.defaults or ()
+  defaults = dict(zip(argspec.args[-len(defaults):], defaults))
+  is_default = lambda n, v: (n in defaults and safe_compare(v, defaults[n]))
+
+  names_and_values = [(name + "=", arg_values[name]) for name in arg_names
+                      if not is_default(name, arg_values[name])]
   # Add varargs.
   names_and_values.extend(("", arg) for arg in args[len(argspec.args) - 1:])
   # Add varkwargs.

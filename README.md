@@ -4,8 +4,8 @@
 
 [**Documentation**](https://sonnet.readthedocs.io/) | [**Examples**](#examples)
 
-WARNING: Sonnet 2 is currently **beta**. We would love to have you use it as an
-early adopter and please let us know if things aren't working as you would
+:warning: Sonnet 2 is currently **beta**. We would love to have you use it as
+an early adopter and please let us know if things aren't working as you would
 expect.
 
 Sonnet is a library built on top of [TensorFlow 2](https://www.tensorflow.org/)

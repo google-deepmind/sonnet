@@ -154,12 +154,14 @@ class ModuleMetaclass(abc.ABCMeta):
     return module
 
 
-def safe_compare(a, b):
+def safe_compare(a, b) -> bool:
   try:
-    return a == b
+    return bool(a == b)
   except:  # pylint: disable=bare-except
     # Some equality checks might be buggy (e.g. `tf.Tensor == None`), in those
-    # cases be defensive and assume `a != b`.
+    # cases be defensive and assume `a != b`. Note that an exception is also
+    # thrown when a and b are ndarrays of >1 element.
+    # TODO(tomhennigan) We could be smarter about comparing ndarrays.
     return False
 
 

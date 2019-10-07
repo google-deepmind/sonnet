@@ -21,6 +21,7 @@ from __future__ import print_function
 import abc
 
 from absl.testing import parameterized
+import numpy as np
 import six
 from sonnet.src import base
 from sonnet.src import test_utils
@@ -259,6 +260,20 @@ class AutoReprTest(tf.test.TestCase):
     # special case `__init__(a, *args)` and not render names preceding *args
     # but this is unlikely to be common in the ctor.
     self.assertEqual(repr(module), "WildcardInit(a=1, b=2, 3, foo='bar')")
+
+  def test_repr_non_bool_equality(self):
+    class FooModule(base.Module):
+
+      def __init__(self, a=((-1., -1.))):
+        super(FooModule, self).__init__()
+
+    # auto_repr tests default values for equality. In numpy (and TF2) equality
+    # is tested elementwise so the return value of `==` is an ndarray which we
+    # then attempt to reduce to a boolean.
+    foo = FooModule(a=np.array([[2., 2.]]))
+    self.assertEqual(repr(foo), "FooModule(a=array([[2., 2.]]))")
+    foo = FooModule(a=np.array([[-1., -1.]]))
+    self.assertEqual(repr(foo), "FooModule(a=array([[-1., -1.]]))")
 
 
 class ForwardMethodsTest(tf.test.TestCase):

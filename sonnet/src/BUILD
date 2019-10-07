@@ -25,6 +25,7 @@ snt_py_test(
     deps = [
         ":base",
         ":test_utils",
+        # pip: numpy
         # pip: tensorflow
         # pip: wrapt
     ],

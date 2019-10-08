@@ -1005,13 +1005,18 @@ def _specialize_per_device(api_name, specializations, default):
     A :tf:`function` which when called dispatches to the specialization
     for the current device.
   """
+  # Cached to avoid redundant ``ModuleWrapper.__getattribute__`` calls.
+  list_logical_devices = tf.config.experimental.list_logical_devices
 
   def wrapper(*args, **kwargs):
     """Specialized {}.
 
     In eager mode the specialization is chosen based on the current
-    device; in graph mode (inside tf.function) the choice is delegated
-    to the implementation selector pass in Grappler.
+    device context or, if no device context is active, on availability
+    of a GPU.
+
+    In graph mode (inside tf.function) the choice is delegated to the
+    implementation selector pass in Grappler.
 
     Args:
       *args: Positional arguments to pass to the chosen specialization.
@@ -1019,9 +1024,13 @@ def _specialize_per_device(api_name, specializations, default):
     """.format(api_name)
     ctx = context_lib.context()
     if ctx.executing_eagerly():
-      specialization = (
-          specializations.get(ctx.device_spec.device_type) or
-          specializations[default])
+      device = ctx.device_spec.device_type
+      if device is None:
+        # Soft-placement will never implicitly place an op an a TPU, so
+        # we only need to consider CPU/GPU.
+        device = "GPU" if list_logical_devices("GPU") else "CPU"
+
+      specialization = specializations.get(device) or specializations[default]
       return specialization(*args, **kwargs)
 
     # Implementation selector requires a globally unique name for each

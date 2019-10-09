@@ -136,56 +136,50 @@ class BottleNeckBlockV2(base.Module):
           padding=pad.same,
           name="shortcut_conv")
 
-    self._layers = []
-    conv_0 = conv.Conv2D(
+    self._conv_0 = conv.Conv2D(
         output_channels=channels // 4,
         kernel_shape=1,
         stride=1,
         with_bias=False,
         padding=pad.same,
         name="conv_0")
-    self._layers.append(
-        [conv_0,
-         batch_norm.BatchNorm(name="batchnorm_0", **batchnorm_args)])
 
-    conv_1 = conv.Conv2D(
+    self._bn_0 = batch_norm.BatchNorm(name="batchnorm_0", **batchnorm_args)
+
+    self._conv_1 = conv.Conv2D(
         output_channels=channels // 4,
         kernel_shape=3,
         stride=stride,
         with_bias=False,
         padding=pad.same,
         name="conv_1")
-    self._layers.append(
-        [conv_1,
-         batch_norm.BatchNorm(name="batchnorm_1", **batchnorm_args)])
 
-    conv_2 = conv.Conv2D(
+    self._bn_1 = batch_norm.BatchNorm(name="batchnorm_1", **batchnorm_args)
+
+    self._conv_2 = conv.Conv2D(
         output_channels=channels,
         kernel_shape=1,
         stride=1,
         with_bias=False,
         padding=pad.same,
         name="conv_2")
-    batchnorm_2 = batch_norm.BatchNorm(
-        name="batchnorm_2", scale_init=initializers.Zeros(), **batchnorm_args)
-    self._layers.append([conv_2, batchnorm_2])
+
+    self._bn_2 = batch_norm.BatchNorm(name="batchnorm_2",
+                                      scale_init=initializers.Zeros(),
+                                      **batchnorm_args)
 
   def __call__(self, inputs, is_training):
     net = inputs
-    net = self._layers[0][1](net, is_training=is_training)
-    net = tf.nn.relu(net)
+    shortcut = inputs
 
-    if self._use_projection:
-      shortcut = self._proj_conv(net)
-    else:
-      shortcut = inputs
-
-    net = self._layers[0][0](net)
-
-    for conv_layer, batchnorm_layer in self._layers[1:]:
-      net = batchnorm_layer(net, is_training=is_training)
+    for i, (conv_i, bn_i) in enumerate(((self._conv_0, self._bn_0),
+                                        (self._conv_1, self._bn_1),
+                                        (self._conv_2, self._bn_2))):
+      net = bn_i(net, is_training=is_training)
       net = tf.nn.relu(net)
-      net = conv_layer(net)
+      if i == 0 and self._use_projection:
+        shortcut = self._proj_conv(net)
+      net = conv_i(net)
 
     return net + shortcut
 
@@ -227,6 +221,9 @@ class BlockGroup(base.Module):
       net = block(net, is_training=is_training)
     return net
 
+# Override to allow us to test ResNet v2.
+TESTONLY_ENABLE_RESNET_V2 = False
+
 
 class ResNet(base.Module):
   """ResNet model."""
@@ -251,7 +248,7 @@ class ResNet(base.Module):
       name: Name of the module.
     """
     super(ResNet, self).__init__(name=name)
-    if resnet_v2:
+    if resnet_v2 and not TESTONLY_ENABLE_RESNET_V2:
       raise NotImplementedError(
           "The resnet v2 implementation doesn't currently converge, "
           "please use v1 in the meantime")

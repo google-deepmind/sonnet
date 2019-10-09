@@ -26,19 +26,26 @@ import tensorflow as tf
 
 class ResnetTest(test_utils.TestCase, parameterized.TestCase):
 
-  def test_simple(self):
+  def setUp(self):
+    super(ResnetTest, self).setUp()
+    resnet.TESTONLY_ENABLE_RESNET_V2 = True
+
+  @parameterized.parameters(True, False)
+  def test_simple(self, resnet_v2):
     image = tf.random.normal([2, 64, 64, 3])
-    model = resnet.ResNet([1, 1, 1, 1], 10)
+    model = resnet.ResNet([1, 1, 1, 1], 10, resnet_v2=resnet_v2)
 
     logits = model(image, is_training=True)
     self.assertIsNotNone(logits)
     self.assertEqual(logits.shape, [2, 10])
 
-  def test_tf_function(self):
+  @parameterized.parameters(True, False)
+  def test_tf_function(self, resnet_v2):
     image = tf.random.normal([2, 64, 64, 3])
     model = resnet.ResNet(
         [1, 1, 1, 1],
         10,
+        resnet_v2=resnet_v2,
     )
     f = tf.function(model)
 
@@ -55,6 +62,10 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
             list_length)):
       resnet.ResNet(block_list, 10, {"decay_rate": 0.9, "eps": 1e-5})
 
+  def test_v2_throws(self):
+    resnet.TESTONLY_ENABLE_RESNET_V2 = False
+    with self.assertRaisesRegexp(NotImplementedError, "please use v1"):
+      resnet.ResNet([1, 1, 1, 1], 10, resnet_v2=True)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

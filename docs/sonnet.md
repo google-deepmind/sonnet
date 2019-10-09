@@ -18713,7 +18713,7 @@ to modules inside modules) that must satisfy the same constraints.
     `regularizers` is not a Mapping.
 
 
-### [`clip_gradient(net, clip_value_min, clip_value_max, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/clip_gradient.py?l=62)<a id="clip_gradient" />
+### [`clip_gradient(net, clip_value_min, clip_value_max, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/clip_gradient.py?l=31)<a id="clip_gradient" />
 
 Clips respective gradients of a given tensor.
 
@@ -19214,7 +19214,7 @@ class FooModule(snt.AbstractModule):
   The wrapped method.
 
 
-### [`scale_gradient(net, scale, name='scale_gradient')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/scale_gradient.py?l=64)<a id="scale_gradient" />
+### [`scale_gradient(net, scale, name='scale_gradient')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/scale_gradient.py?l=32)<a id="scale_gradient" />
 
 Scales gradients for the backwards pass.
 

@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import sonnet as snt
-from sonnet.examples import simple_mnist
+from examples import simple_mnist
 from sonnet.src import test_utils
 import tensorflow as tf
 
@@ -42,19 +42,10 @@ class SimpleMnistTest(test_utils.TestCase):
         (tf.random.normal([2, 8, 8, 1]),
          tf.ones([2], dtype=tf.int64))).batch(2).repeat(4)
 
-    loss = simple_mnist.train_epoch(model, optimizer, dataset)
+    for _ in range(3):
+      loss = simple_mnist.train_epoch(model, optimizer, dataset)
     self.assertEqual(loss.shape, [])
     self.assertEqual(loss.dtype, tf.float32)
-
-  def test_get_dataset(self):
-    dataset = simple_mnist.mnist("train", 4)
-
-    batch = next(iter(dataset))
-
-    self.assertEqual(batch[0].shape, [4, 28, 28, 1])
-    self.assertEqual(batch[1].shape, [4])
-    self.assertEqual(batch[0].dtype, tf.float32)
-    self.assertEqual(batch[1].dtype, tf.int64)
 
   def test_test_accuracy(self):
     model = snt.Sequential([

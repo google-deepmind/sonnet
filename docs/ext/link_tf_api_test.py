@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import absltest
-from sonnet.docs.ext import link_tf_api
+from docs.ext import link_tf_api
 import tensorflow as tf
 
 DOC_BASE_URL = "https://www.tensorflow.org/versions/r2.0/api_docs/python/tf"

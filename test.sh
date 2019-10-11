@@ -41,7 +41,7 @@ python3 -c 'import tensorflow as tf; print(tf.__version__)'
 bazel test --jobs=${N_JOBS} --test_timeout 300,450,1200,3600 \
     --build_tests_only --test_output=errors \
     --cache_test_results=no \
-    -- //sonnet/...
+    -- //...
 
 # Test docs still build.
 cd docs/

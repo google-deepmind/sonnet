@@ -193,7 +193,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     inputs = tf.ones([batch_size] + in_shape)
     mod = reshape.Flatten()
     output = mod(inputs)
-    flattened_size = np.prod(in_shape)
+    flattened_size = np.prod(in_shape, dtype=int)
     self.assertEqual(output.shape, [batch_size, flattened_size])
 
   def testFlatten_unknownBatchSize(self):
@@ -221,7 +221,8 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     mod = reshape.Flatten(preserve_dims=preserve_dims)
     output = mod(inputs)
     flattened_shape = (
-        in_shape[:preserve_dims] + [np.prod(in_shape[preserve_dims:])])
+        in_shape[:preserve_dims] +
+        [np.prod(in_shape[preserve_dims:], dtype=int)])
     self.assertEqual(output.shape, flattened_shape)
 
   @parameterized.parameters(5, 6, 7, 10)

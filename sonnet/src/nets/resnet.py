@@ -244,7 +244,7 @@ class ResNet(base.Module):
         passed on to the `BatchNorm` layers. By default the `decay_rate` is
         `0.9` and `eps` is `1e-5`.
       resnet_v2: Whether to use the v1 or v2 ResNet implementation. Defaults to
-        True.
+        False.
       name: Name of the module.
     """
     super(ResNet, self).__init__(name=name)

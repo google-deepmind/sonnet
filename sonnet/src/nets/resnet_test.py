@@ -55,12 +55,22 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllEqual(model(image, is_training=True).numpy(), logits.numpy())
 
   @parameterized.parameters(3, 5)
-  def test_error_incorrect_args(self, list_length):
+  def test_error_incorrect_args_block_list(self, list_length):
     block_list = [i for i in range(list_length)]
     with self.assertRaisesRegexp(
         ValueError, "blocks_per_group_list` must be of length 4 not {}".format(
             list_length)):
       resnet.ResNet(block_list, 10, {"decay_rate": 0.9, "eps": 1e-5})
+
+  @parameterized.parameters(3, 5)
+  def test_error_incorrect_args_channel_list(self, list_length):
+    channel_list = [i for i in range(list_length)]
+    with self.assertRaisesRegexp(
+        ValueError,
+        "channels_per_group_list` must be of length 4 not {}".format(
+            list_length)):
+      resnet.ResNet([1, 1, 1, 1], 10, {"decay_rate": 0.9, "eps": 1e-5},
+                    channels_per_group_list=channel_list)
 
   def test_v2_throws(self):
     resnet.TESTONLY_ENABLE_RESNET_V2 = False

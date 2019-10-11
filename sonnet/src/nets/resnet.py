@@ -233,6 +233,7 @@ class ResNet(base.Module):
                num_classes: int,
                bn_config: Optional[Mapping[Text, float]] = None,
                resnet_v2: bool = False,
+               channels_per_group_list: Sequence[int] = (256, 512, 1024, 2048),
                name: Optional[Text] = None):
     """Constructs a ResNet model.
 
@@ -245,6 +246,8 @@ class ResNet(base.Module):
         `0.9` and `eps` is `1e-5`.
       resnet_v2: Whether to use the v1 or v2 ResNet implementation. Defaults to
         False.
+      channels_per_group_list: A sequence of length 4 that indicates the number
+        of channels used for each block in each group.
       name: Name of the module.
     """
     super(ResNet, self).__init__(name=name)
@@ -263,6 +266,13 @@ class ResNet(base.Module):
           "`blocks_per_group_list` must be of length 4 not {}".format(
               len(blocks_per_group_list)))
     self._blocks_per_group_list = blocks_per_group_list
+
+    # Number of channels in each group for ResNet.
+    if len(channels_per_group_list) != 4:
+      raise ValueError(
+          "`channels_per_group_list` must be of length 4 not {}".format(
+              len(channels_per_group_list)))
+    self._channels_per_group_list = channels_per_group_list
 
     self._initial_conv = conv.Conv2D(
         output_channels=64,
@@ -283,7 +293,7 @@ class ResNet(base.Module):
     for i in range(4):
       self._block_groups.append(
           BlockGroup(
-              channels=256 * 2**i,
+              channels=self._channels_per_group_list[i],
               num_blocks=self._blocks_per_group_list[i],
               stride=strides[i],
               bn_config=bn_config,

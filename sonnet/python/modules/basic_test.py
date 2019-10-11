@@ -1034,7 +1034,7 @@ class BatchReshapeTest(tf.test.TestCase, parameterized.TestCase):
     inputs = tf.ones(dtype=tf.float32, shape=[batch_size] + in_shape)
     mod = snt.BatchReshape(shape=out_size)
     output = mod(inputs)
-    flattened_shape = np.prod(in_shape)
+    flattened_shape = np.prod(in_shape, dtype=int)
     self.assertEqual(output.get_shape(), [batch_size, flattened_shape])
 
   def testUnknown(self):
@@ -1046,7 +1046,7 @@ class BatchReshapeTest(tf.test.TestCase, parameterized.TestCase):
     inputs = tf.placeholder(tf.float32, shape=[batch_size] + in_shape)
     mod = snt.BatchReshape(shape=out_size)
     output = mod(inputs)
-    flattened_shape = np.prod(in_shape)
+    flattened_shape = np.prod(in_shape, dtype=int)
     self.assertEqual(output.get_shape().as_list(),
                      [batch_size, flattened_shape])
 
@@ -1203,7 +1203,7 @@ class BatchFlattenTest(tf.test.TestCase, parameterized.TestCase):
     inputs = tf.ones(dtype=tf.float32, shape=[batch_size] + in_shape)
     mod = snt.BatchFlatten()
     output = mod(inputs)
-    flattened_size = np.prod(in_shape)
+    flattened_size = np.prod(in_shape, dtype=int)
     self.assertEqual(output.get_shape(), [batch_size, flattened_size])
 
   @parameterized.parameters(1, 2, 3, 4)
@@ -1213,7 +1213,7 @@ class BatchFlattenTest(tf.test.TestCase, parameterized.TestCase):
     mod = snt.BatchFlatten(preserve_dims=preserve_dims)
     output = mod(inputs)
     flattened_shape = (in_shape[:preserve_dims] +
-                       [np.prod(in_shape[preserve_dims:])])
+                       [np.prod(in_shape[preserve_dims:], dtype=int)])
     self.assertEqual(output.get_shape(), flattened_shape)
 
   @parameterized.parameters(5, 6, 7, 10)
@@ -1275,7 +1275,7 @@ class FlattenTrailingDimensionsTest(tf.test.TestCase, parameterized.TestCase):
     for dim_from in xrange(1, len(shape)):
       mod = snt.FlattenTrailingDimensions(dim_from)
       output = mod(inputs)
-      trailing = np.prod(shape[dim_from:])
+      trailing = np.prod(shape[dim_from:], dtype=int)
       self.assertEqual(output.get_shape().as_list(),
                        shape[:dim_from] + [trailing])
 
@@ -1840,7 +1840,7 @@ class MergeDimsTest(tf.test.TestCase, parameterized.TestCase):
       merged_shape = merged_tensor.get_shape()
       self.assertEqual(original_shape.ndims - (size - 1),
                        merged_shape.ndims)
-      self.assertEqual(np.prod(original_shape[start:start + size]),
+      self.assertEqual(np.prod(original_shape[start:start + size], dtype=int),
                        merged_shape[start])
       self.assertEqual(original_shape.num_elements(),
                        merged_shape.num_elements())

@@ -68,7 +68,8 @@ def merge_leading_dims(array_or_tensor, n_dims=2):
 
   if tensor_shape_static.is_fully_defined():
     new_shape = (
-        [np.prod(tensor_shape_list[:n_dims])] + tensor_shape_list[n_dims:])
+        [np.prod(tensor_shape_list[:n_dims], dtype=int)] +
+        tensor_shape_list[n_dims:])
 
     return tf.reshape(tensor, new_shape)
 
@@ -80,7 +81,7 @@ def merge_leading_dims(array_or_tensor, n_dims=2):
   result = tf.reshape(tensor, new_size)
 
   if all(value is not None for value in tensor_shape_list[:n_dims]):
-    merged_leading_size = np.prod(tensor_shape_list[:n_dims])
+    merged_leading_size = np.prod(tensor_shape_list[:n_dims], dtype=int)
   else:
     merged_leading_size = None
   # We need to set the result size of this, as otherwise we won't be able to
@@ -768,9 +769,9 @@ class BatchReshape(base.AbstractModule, base.Transposable):
       Tuple of non-batch output dimensions.
     """
     # Size of input
-    n = np.prod(dimensions)
+    n = np.prod(dimensions, dtype=int)
     # Size of output where defined
-    m = np.prod(abs(np.array(self._shape)))
+    m = np.prod(abs(np.array(self._shape)), dtype=int)
     # Replace wildcard
     v = np.array(self._shape)
     v[v == -1] = n // m
@@ -1329,7 +1330,7 @@ class MergeDims(base.AbstractModule):
     if None in middle:
       middle = [None]
     else:
-      middle = [np.prod(middle)]
+      middle = [np.prod(middle, dtype=int)]
     static_shape = initial + middle + final
 
     if static_shape.count(None) + static_shape.count(0) <= 1:

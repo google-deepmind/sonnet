@@ -742,6 +742,7 @@ snt_py_library(
     srcs = ["replicator.py"],
     deps = [
         ":initializers",
+        # pip: absl/logging
         # pip: contextlib2
         # pip: tensorflow
     ],

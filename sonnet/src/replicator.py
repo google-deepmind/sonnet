@@ -25,22 +25,15 @@ from sonnet.src import initializers
 import tensorflow as tf
 
 
-def make_replica_local_creator(tpu_strategy: bool):
-  """Makes a variable creator which creates replica local variables."""
-
-  def _replica_local_creator(next_creator, **kwargs) -> tf.Variable:
-    """Variable creator that by default creates replica local variables."""
-    if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
-      if not tpu_strategy:
-        # TODO(b/138116230) remove this when sync on read variables work on TPU.
-        kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
-      if kwargs["aggregation"] == tf.VariableAggregation.NONE:
-        kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
-      if kwargs["trainable"] is None:
-        kwargs["trainable"] = True
-    return next_creator(**kwargs)
-
-  return _replica_local_creator
+def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
+  """Variable creator that by default creates replica local variables."""
+  if kwargs["synchronization"] == tf.VariableSynchronization.AUTO:
+    kwargs["synchronization"] = tf.VariableSynchronization.ON_READ
+    if kwargs["aggregation"] == tf.VariableAggregation.NONE:
+      kwargs["aggregation"] = tf.VariableAggregation.ONLY_FIRST_REPLICA
+    if kwargs["trainable"] is None:
+      kwargs["trainable"] = True
+  return next_creator(**kwargs)
 
 
 def _is_eager_tensor(t: tf.Tensor):
@@ -102,10 +95,6 @@ def eager_initial_values():
     # Restore
     for cls, orig_call in all_initializers.items():
       cls.__call__ = orig_call
-
-
-replica_local_creator = make_replica_local_creator(tpu_strategy=False)
-replica_local_creator_tpu = make_replica_local_creator(tpu_strategy=True)
 
 
 class Replicator(tf.distribute.MirroredStrategy):
@@ -204,7 +193,7 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
   def scope(self):
     with contextlib.ExitStack() as stack:
       stack.enter_context(super(TpuReplicator, self).scope())
-      stack.enter_context(tf.variable_creator_scope(replica_local_creator_tpu))
+      stack.enter_context(tf.variable_creator_scope(replica_local_creator))
 
       # The two hacks below enable a large speedup when initializing TPUs (on
       # a 4x4 slice startup for ResNet50 goes from 42m -> 2m).

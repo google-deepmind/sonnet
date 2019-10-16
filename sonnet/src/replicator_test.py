@@ -64,12 +64,8 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     if replicator is None:
       self.skipTest("No replicator supplied.")
     v = create_var(replicator)
-    if isinstance(replicator, snt_replicator.TpuReplicator):
-      self.assertEqual(tf.VariableSynchronization.AUTO,
-                       v.primary.synchronization)
-    else:
-      self.assertEqual(tf.VariableSynchronization.ON_READ,
-                       v.primary.synchronization)
+    self.assertEqual(tf.VariableSynchronization.ON_READ,
+                     v.primary.synchronization)
 
   @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())

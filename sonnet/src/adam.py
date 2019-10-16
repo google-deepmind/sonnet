@@ -29,6 +29,16 @@ import tensorflow as tf
 from typing import Optional, Sequence, Text, Union
 
 
+def adam_update(update, learning_rate, beta1, beta2, epsilon, step, m, v):
+  """Computes the 'ADAM' update for a single parameter."""
+  m = beta1 * m + (1. - beta1) * update
+  v = beta2 * v + (1. - beta2) * tf.square(update)
+  debiased_m = m / (1. - tf.pow(beta1, step))
+  debiased_v = v / (1. - tf.pow(beta2, step))
+  update = learning_rate * debiased_m / (tf.sqrt(debiased_v) + epsilon)
+  return update, m, v
+
+
 class Adam(base.Optimizer):
   """Adaptive Moment Estimation (Adam) module.
 
@@ -107,34 +117,37 @@ class Adam(base.Optimizer):
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
     self.step.assign_add(1)
-    for update, parameter, m, v in zip(updates, parameters, self.m, self.v):
-      if update is not None:
-        optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype)
-        beta1 = tf.cast(self.beta1, update.dtype)
-        beta2 = tf.cast(self.beta2, update.dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype)
-        step = tf.cast(self.step, update.dtype)
-        if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
-          sparse_m_update = (
-              beta1 * m.sparse_read(indices) + (1. - beta1) * update)
-          m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
-          sparse_v_update = (
-              beta2 * v.sparse_read(indices) + (1. - beta2) * tf.square(update))
-          v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
-          debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
-          debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))
-          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
-          parameter.scatter_sub(tf.IndexedSlices(adam_update, indices))
-        else:
-          m.assign((beta1 * m) + (1. - beta1) * update)
-          v.assign((beta2 * v) + (1. - beta2) * tf.square(update))
-          debiased_m = m / (1. - tf.pow(beta1, step))
-          debiased_v = v / (1. - tf.pow(beta2, step))
-          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
-          parameter.assign_sub(adam_update)
+    for update, param, m_var, v_var in zip(updates, parameters, self.m, self.v):
+      if update is None:
+        continue
+
+      optimizer_utils.check_same_dtype(update, param)
+      learning_rate = tf.cast(self.learning_rate, update.dtype)
+      beta1 = tf.cast(self.beta1, update.dtype)
+      beta2 = tf.cast(self.beta2, update.dtype)
+      epsilon = tf.cast(self.epsilon, update.dtype)
+      step = tf.cast(self.step, update.dtype)
+
+      if isinstance(update, tf.IndexedSlices):
+        # Sparse read our state.
+        update, indices = optimizer_utils.deduplicate_indexed_slices(update)
+        m = m_var.sparse_read(indices)
+        v = v_var.sparse_read(indices)
+
+        # Compute and apply a sparse update to our parameter and state.
+        update, m, v = adam_update(update, learning_rate, beta1, beta2, epsilon,
+                                   step, m, v)
+        param.scatter_sub(tf.IndexedSlices(update, indices))
+        m_var.scatter_update(tf.IndexedSlices(m, indices))
+        v_var.scatter_update(tf.IndexedSlices(v, indices))
+
+      else:
+        # Compute and apply a dense update to our parameter and state.
+        update, m, v = adam_update(update, learning_rate, beta1, beta2, epsilon,
+                                   step, m_var, v_var)
+        param.assign_sub(update)
+        m_var.assign(m)
+        v_var.assign(v)
 
 
 class FastAdam(base.Optimizer):
@@ -182,8 +195,7 @@ class FastAdam(base.Optimizer):
         epsilon = tf.cast(self.epsilon, update.dtype)
         step = tf.cast(self.step, update.dtype)
         if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
+          update, indices = optimizer_utils.deduplicate_indexed_slices(update)
           sparse_m_update = (
               beta1 * m.sparse_read(indices) + (1. - beta1) * update)
           m.scatter_update(tf.IndexedSlices(sparse_m_update, indices))
@@ -192,8 +204,8 @@ class FastAdam(base.Optimizer):
           v.scatter_update(tf.IndexedSlices(sparse_v_update, indices))
           debiased_m = sparse_m_update / (1. - tf.pow(beta1, step))
           debiased_v = sparse_v_update / (1. - tf.pow(beta2, step))
-          adam_update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
-          parameter.scatter_sub(tf.IndexedSlices(adam_update, indices))
+          update = lr * debiased_m / (tf.sqrt(debiased_v) + epsilon)
+          parameter.scatter_sub(tf.IndexedSlices(update, indices))
         else:
           beta1_power = tf.pow(beta1, step)
           beta2_power = tf.pow(beta2, step)

@@ -30,6 +30,18 @@ import tensorflow as tf
 from typing import Optional, Sequence, Text, Union
 
 
+def rmsprop_update(update, decay, learning_rate, epsilon, mu, mom, ms, mg):
+  """Computes a single RMSProp update."""
+  ms = tf.square(update) * (1. - decay) + ms * decay
+  if mg is not None:  # centered
+    mg = update * (1. - decay) + mg * decay
+    denominator = ms - tf.square(mg) + epsilon
+  else:
+    denominator = ms + epsilon
+  mom = (mu * mom) + (learning_rate * update * tf.math.rsqrt(denominator))
+  return mom, ms, mg
+
+
 class RMSProp(base.Optimizer):
   """RMSProp module.
 
@@ -120,42 +132,42 @@ class RMSProp(base.Optimizer):
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
-    for update, parameter, mom, ms, mg in six.moves.zip_longest(
+    for update, parameter, mom_var, ms_var, mg_var in six.moves.zip_longest(
         updates, parameters, self.mom, self.ms, self.mg):
-      if update is not None:
-        optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype)
-        decay = tf.cast(self.decay, update.dtype)
-        mu = tf.cast(self.momentum, update.dtype)
-        epsilon = tf.cast(self.epsilon, update.dtype)
-        if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
-          sparse_ms_update = (
-              tf.square(update) * (1. - decay) +
-              ms.sparse_read(indices) * decay)
-          ms.scatter_update(tf.IndexedSlices(sparse_ms_update, indices))
-          if self.centered:
-            sparse_mg_update = (
-                update * (1. - decay) + mg.sparse_read(indices) * decay)
-            mg.scatter_update(tf.IndexedSlices(sparse_mg_update, indices))
-            denominator = (
-                sparse_ms_update - tf.square(sparse_mg_update) + epsilon)
-          else:
-            denominator = sparse_ms_update + epsilon
-          sparse_mom_update = (mu * mom.sparse_read(indices)) + (
-              lr * update * tf.math.rsqrt(denominator))
-          mom.scatter_update(tf.IndexedSlices(sparse_mom_update, indices))
-          parameter.scatter_sub(tf.IndexedSlices(sparse_mom_update, indices))
-        else:
-          ms.assign(tf.square(update) * (1. - decay) + ms * decay)
-          if self.centered:
-            mg.assign(update * (1. - decay) + mg * decay)
-            denominator = ms - tf.square(mg) + epsilon
-          else:
-            denominator = ms + epsilon
-          mom.assign((mu * mom) + (lr * update * tf.math.rsqrt(denominator)))
-          parameter.assign_sub(mom)
+      if update is None:
+        continue
+
+      optimizer_utils.check_same_dtype(update, parameter)
+      learning_rate = tf.cast(self.learning_rate, update.dtype)
+      decay = tf.cast(self.decay, update.dtype)
+      mu = tf.cast(self.momentum, update.dtype)
+      epsilon = tf.cast(self.epsilon, update.dtype)
+
+      if isinstance(update, tf.IndexedSlices):
+        # Sparse read our state.
+        update, indices = optimizer_utils.deduplicate_indexed_slices(update)
+        ms = ms_var.sparse_read(indices)
+        mg = mg_var.sparse_read(indices) if self.centered else None
+        mom = mom_var.sparse_read(indices)
+
+        # Compute and apply a sparse update to our parameter and state.
+        mom, ms, mg = rmsprop_update(update, decay, learning_rate, epsilon, mu,
+                                     mom, ms, mg)
+        parameter.scatter_sub(tf.IndexedSlices(mom, indices))
+        mom_var.scatter_update(tf.IndexedSlices(mom, indices))
+        ms_var.scatter_update(tf.IndexedSlices(ms, indices))
+        if self.centered:
+          mg_var.scatter_update(tf.IndexedSlices(mg, indices))
+
+      else:
+        # Compute and apply a dense update to our parameters and state.
+        mom, ms, mg = rmsprop_update(update, decay, learning_rate, epsilon, mu,
+                                     mom_var, ms_var, mg_var)
+        parameter.assign_sub(mom)
+        mom_var.assign(mom)
+        ms_var.assign(ms)
+        if self.centered:
+          mg_var.assign(mg)
 
 
 class FastRMSProp(base.Optimizer):
@@ -205,8 +217,7 @@ class FastRMSProp(base.Optimizer):
         momentum = tf.cast(self.momentum, update.dtype)
         epsilon = tf.cast(self.epsilon, update.dtype)
         if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
+          update, indices = optimizer_utils.deduplicate_indexed_slices(update)
           if self.centered:
             tf.raw_ops.ResourceSparseApplyCenteredRMSProp(
                 var=parameter.handle,

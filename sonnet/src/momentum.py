@@ -29,6 +29,16 @@ import tensorflow as tf
 from typing import Optional, Sequence, Text, Union
 
 
+def momentum_update(update, learning_rate, mu, momentum, use_nesterov):
+  """Computes a momentum update for a single parameter."""
+  momentum = (mu * momentum) + update
+  if use_nesterov:
+    update = (learning_rate * update) + (learning_rate * mu * momentum)
+  else:
+    update = learning_rate * momentum
+  return update, momentum
+
+
 class Momentum(base.Optimizer):
   """SGD with Momentum module.
 
@@ -92,32 +102,32 @@ class Momentum(base.Optimizer):
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
-    for update, parameter, momentum in zip(updates, parameters,
+    for update, param, momentum_var in zip(updates, parameters,
                                            self.accumulated_momentum):
-      if update is not None:
-        optimizer_utils.check_same_dtype(update, parameter)
-        lr = tf.cast(self.learning_rate, update.dtype)
-        mu = tf.cast(self.momentum, update.dtype)
-        if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
-          sparse_momentum_update = (mu * momentum.sparse_read(indices)) + update
-          momentum.scatter_update(
-              tf.IndexedSlices(sparse_momentum_update, indices))
-          if self.use_nesterov:
-            parameter.scatter_sub(
-                tf.IndexedSlices(
-                    (lr * update) + (lr * mu * sparse_momentum_update),
-                    indices))
-          else:
-            parameter.scatter_sub(
-                tf.IndexedSlices(lr * sparse_momentum_update, indices))
-        else:
-          momentum.assign((mu * momentum) + update)
-          if self.use_nesterov:
-            parameter.assign_sub((lr * update) + (lr * mu * momentum))
-          else:
-            parameter.assign_sub(lr * momentum)
+      if update is None:
+        continue
+
+      optimizer_utils.check_same_dtype(update, param)
+      learning_rate = tf.cast(self.learning_rate, update.dtype)
+      mu = tf.cast(self.momentum, update.dtype)
+
+      if isinstance(update, tf.IndexedSlices):
+        # Sparse read our state.
+        update, indices = optimizer_utils.deduplicate_indexed_slices(update)
+        momentum = momentum_var.sparse_read(indices)
+
+        # Compute and apply a sparse update to our parameter and state.
+        update, momentum = momentum_update(update, learning_rate, mu, momentum,
+                                           self.use_nesterov)
+        momentum_var.scatter_update(tf.IndexedSlices(momentum, indices))
+        param.scatter_sub(tf.IndexedSlices(update, indices))
+
+      else:
+        # Compute and apply a dense update.
+        update, momentum = momentum_update(update, learning_rate, mu,
+                                           momentum_var, self.use_nesterov)
+        momentum_var.assign(momentum)
+        param.assign_sub(update)
 
 
 class FastMomentum(base.Optimizer):
@@ -154,8 +164,7 @@ class FastMomentum(base.Optimizer):
         learning_rate = tf.cast(self.learning_rate, update.dtype)
         momentum = tf.cast(self.momentum, update.dtype)
         if isinstance(update, tf.IndexedSlices):
-          update, indices = optimizer_utils.deduplicate_indexed_slices(
-              update.values, update.indices)
+          update, indices = optimizer_utils.deduplicate_indexed_slices(update)
           tf.raw_ops.ResourceSparseApplyMomentum(
               var=parameter.handle,
               accum=accumulated_momentum.handle,

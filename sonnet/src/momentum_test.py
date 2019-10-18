@@ -25,12 +25,12 @@ import tensorflow as tf
 
 class MomentumTest(optimizer_tests.OptimizerTestBase):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
     if "momentum" not in kwargs:
       kwargs["momentum"] = 0.9
-    return momentum.Momentum(*args, **kwargs)
+    return momentum.Momentum(**kwargs)
 
   def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
@@ -131,6 +131,9 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
     momentum_coeff = tf.Variable(0.9)
     optimizer = self.make_optimizer(
         learning_rate=learning_rate, momentum=momentum_coeff)
+    if optimizer_tests.is_tf_optimizer(optimizer):
+      self.skipTest("TF SGD optimizer doesn't support variable learning rate.")
+
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
                         [x.numpy() for x in parameters])
@@ -156,20 +159,26 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
 
   def testAuxVariablesColocatedWithOriginal(self):
     optimizer = self.make_optimizer(learning_rate=0.1, momentum=0.9)
+    if optimizer_tests.is_tf_optimizer(optimizer):
+      self.skipTest("TF slot variables are in a different location.")
+
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
     optimizer.apply([tf.constant(0.1)], [var])
     self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
 
 
-class FastMomentumTest(MomentumTest):
+class ReferenceMomentumTest(MomentumTest):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
     if "momentum" not in kwargs:
       kwargs["momentum"] = 0.9
-    return momentum.FastMomentum(*args, **kwargs)
+    if "use_nesterov" in kwargs:
+      kwargs["nesterov"] = kwargs["use_nesterov"]
+      del kwargs["use_nesterov"]
+    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.SGD(**kwargs))
 
 
 if __name__ == "__main__":

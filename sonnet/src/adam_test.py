@@ -25,10 +25,10 @@ import tensorflow as tf
 
 class AdamTest(optimizer_tests.OptimizerTestBase):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.001
-    return adam.Adam(*args, **kwargs)
+    return adam.Adam(**kwargs)
 
   def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
@@ -63,8 +63,9 @@ class AdamTest(optimizer_tests.OptimizerTestBase):
             tf.constant([2, 1]))
     ]
     optimizer = self.make_optimizer(learning_rate=0.001)
-    # FastAdam doesn't use a raw_op for IndexedSlices so compare against Keras
-    tf_optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+
+    # Compare against TF optimizer.
+    tf_optimizer = tf.optimizers.Adam(learning_rate=0.001)
     # Step 1 of Adam
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.999], [2.0]], parameters[0].numpy())
@@ -126,12 +127,12 @@ class AdamTest(optimizer_tests.OptimizerTestBase):
     self.assertEqual(optimizer.v[0].device, var.device)
 
 
-class FastAdamTest(optimizer_tests.OptimizerTestBase):
+class ReferenceAdamTest(optimizer_tests.OptimizerTestBase):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.001
-    return adam.FastAdam(*args, **kwargs)
+    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.Adam(**kwargs))
 
 
 if __name__ == "__main__":

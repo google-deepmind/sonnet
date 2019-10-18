@@ -81,12 +81,12 @@ class SGDTest(optimizer_tests.OptimizerTestBase):
                         [x.numpy() for x in parameters])
 
 
-class FastSGDTest(SGDTest):
+class ReferenceSGDTest(SGDTest):
 
   def make_optimizer(self, *args, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 3.
-    return sgd.FastSGD(*args, **kwargs)
+    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.SGD(**kwargs))
 
 
 if __name__ == "__main__":

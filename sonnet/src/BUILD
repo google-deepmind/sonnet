@@ -464,6 +464,17 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "optimizer_tests",
+    testonly = 1,
+    srcs = ["optimizer_tests.py"],
+    deps = [
+        ":base",
+        ":test_utils",
+        # pip: tensorflow
+    ],
+)
+
+snt_py_library(
     name = "adam",
     srcs = ["adam.py"],
     deps = [
@@ -478,13 +489,10 @@ snt_py_library(
 
 snt_py_test(
     name = "adam_test",
-    srcs = [
-        "adam_test.py",
-        "optimizer_tests.py",
-    ],
+    srcs = ["adam_test.py"],
     deps = [
         ":adam",
-        ":test_utils",
+        ":optimizer_tests",
         # pip: tensorflow
     ],
 )
@@ -504,13 +512,10 @@ snt_py_library(
 
 snt_py_test(
     name = "momentum_test",
-    srcs = [
-        "momentum_test.py",
-        "optimizer_tests.py",
-    ],
+    srcs = ["momentum_test.py"],
     deps = [
         ":momentum",
-        ":test_utils",
+        ":optimizer_tests",
         # pip: tensorflow
     ],
 )
@@ -531,11 +536,9 @@ snt_py_library(
 
 snt_py_test(
     name = "rmsprop_test",
-    srcs = [
-        "optimizer_tests.py",
-        "rmsprop_test.py",
-    ],
+    srcs = ["rmsprop_test.py"],
     deps = [
+        ":optimizer_tests",
         ":rmsprop",
         ":test_utils",
         # pip: tensorflow
@@ -555,13 +558,10 @@ snt_py_library(
 
 snt_py_test(
     name = "sgd_test",
-    srcs = [
-        "optimizer_tests.py",
-        "sgd_test.py",
-    ],
+    srcs = ["sgd_test.py"],
     deps = [
+        ":optimizer_tests",
         ":sgd",
-        ":test_utils",
         # pip: tensorflow
     ],
 )

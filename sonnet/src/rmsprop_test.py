@@ -25,10 +25,10 @@ import tensorflow as tf
 
 class RMSPropTest(optimizer_tests.OptimizerTestBase):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
-    return rmsprop.RMSProp(*args, **kwargs)
+    return rmsprop.RMSProp(**kwargs)
 
   def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
@@ -81,16 +81,16 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
     optimizer = self.make_optimizer(learning_rate=3.)
     # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-8.486831], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-5.486784]], parameters[1].numpy())
+    self.assertAllClose([[-8.486831], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-5.486784]], parameters[1].numpy(), rtol=1e-4)
     # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-15.369301], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-12.369237]], parameters[1].numpy())
+    self.assertAllClose([[-15.369301], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-12.369237]], parameters[1].numpy(), rtol=1e-4)
     # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-21.132141], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-18.132067]], parameters[1].numpy())
+    self.assertAllClose([[-21.132141], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-18.132067]], parameters[1].numpy(), rtol=1e-4)
 
   def testSparseCentered(self):
     if self.primary_device in ("GPU", "TPU"):
@@ -109,16 +109,16 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
     optimizer = self.make_optimizer(learning_rate=3., centered=True)
     # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-8.999999], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-5.999944]], parameters[1].numpy())
+    self.assertAllClose([[-8.999999], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-5.999944]], parameters[1].numpy(), rtol=1e-4)
     # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-16.64719], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-13.647109]], parameters[1].numpy())
+    self.assertAllClose([[-16.64719], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-13.647109]], parameters[1].numpy(), rtol=1e-4)
     # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-23.396709], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [-20.39661]], parameters[1].numpy())
+    self.assertAllClose([[-23.396709], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-20.39661]], parameters[1].numpy(), rtol=1e-4)
 
   def testVariableHyperParams(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
@@ -147,12 +147,18 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
         decay=decay,
         momentum=momentum,
         epsilon=epsilon)
+    if optimizer_tests.is_tf_optimizer(optimizer):
+      self.skipTest("TF optimizers don't support automatic casting.")
+
     optimizer.apply(updates, parameters)
     self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
 
   def testAuxVariablesColocatedWithOriginal(self):
     optimizer = self.make_optimizer(learning_rate=0.1)
+    if optimizer_tests.is_tf_optimizer(optimizer):
+      self.skipTest("Aux vars are in a different location for TF optimizers.")
+
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
     optimizer.apply([tf.constant(0.1)], [var])
@@ -160,12 +166,12 @@ class RMSPropTest(optimizer_tests.OptimizerTestBase):
     self.assertEqual(optimizer.ms[0].device, var.device)
 
 
-class FastRMSPropTest(RMSPropTest):
+class ReferenceRMSPropTest(RMSPropTest):
 
-  def make_optimizer(self, *args, **kwargs):
+  def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
-    return rmsprop.FastRMSProp(*args, **kwargs)
+    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.RMSprop(**kwargs))
 
 
 if __name__ == "__main__":

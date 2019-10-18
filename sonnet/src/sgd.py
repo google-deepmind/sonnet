@@ -69,30 +69,3 @@ class SGD(base.Optimizer):
               tf.IndexedSlices(update.values * learning_rate, update.indices))
         else:
           parameter.assign_sub(update * learning_rate)
-
-
-class FastSGD(base.Optimizer):
-  """Stochastic Gradient Descent (SGD) module."""
-
-  def __init__(self,
-               learning_rate: Union[types.FloatLike, tf.Variable],
-               name: Optional[Text] = None):
-    """Constructs an `SGD` module."""
-    super(FastSGD, self).__init__(name)
-    self.learning_rate = learning_rate
-
-  def apply(self, updates: Sequence[types.ParameterUpdate],
-            parameters: Sequence[tf.Variable]):
-    """Applies updates to parameters."""
-    optimizer_utils.check_distribution_strategy()
-    optimizer_utils.check_updates_parameters(updates, parameters)
-    for update, parameter in zip(updates, parameters):
-      if update is not None:
-        optimizer_utils.check_same_dtype(update, parameter)
-        learning_rate = tf.cast(self.learning_rate, update.dtype)
-        if isinstance(update, tf.IndexedSlices):
-          parameter.scatter_nd_sub(update.indices,
-                                   update.values * learning_rate)
-        else:
-          tf.raw_ops.ResourceApplyGradientDescent(
-              var=parameter.handle, alpha=learning_rate, delta=update)

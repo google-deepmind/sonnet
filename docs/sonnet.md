@@ -650,7 +650,7 @@ information about what variables are captured.
 
 AddBias module.
 
-#### [`AddBias.__init__(output_shape=None, bias_dims=None, initializers=None, partitioners=None, regularizers=None, name='add')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=510)<a id="AddBias.__init__" />
+#### [`AddBias.__init__(output_shape=None, bias_dims=None, initializers=None, partitioners=None, regularizers=None, name='add')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=511)<a id="AddBias.__init__" />
 
 Constructs an AddBias module that supports broadcasting.
 
@@ -731,7 +731,7 @@ reconstructed_input = bias(hidden4)
 * `TypeError`: If any of the given regularizers are not callable.
 
 
-#### [`AddBias.__call__(inputs, multiplier=1)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=603)<a id="AddBias.__call__" />
+#### [`AddBias.__call__(inputs, multiplier=1)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=604)<a id="AddBias.__call__" />
 
 Connects the Add module into the graph, with input Tensor `inputs`.
 
@@ -761,7 +761,7 @@ Connects the Add module into the graph, with input Tensor `inputs`.
       untransposed module has not been built.
 
 
-#### [`AddBias.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=674)<a id="AddBias.b" />
+#### [`AddBias.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=675)<a id="AddBias.b" />
 
 Returns the Variable containing the bias.
 
@@ -862,7 +862,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`AddBias.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=689)<a id="AddBias.input_shape" />
+#### [`AddBias.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=690)<a id="AddBias.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -941,7 +941,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`AddBias.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=696)<a id="AddBias.transpose" />
+#### [`AddBias.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=697)<a id="AddBias.transpose" />
 
 Returns transposed `AddBias` module.
 
@@ -1703,7 +1703,7 @@ and then the internal module can be applied. The result of that operation is
 reshaped such that its first dimensions are split to match the leading
 dimensions of the input.
 
-#### [`BatchApply.__init__(module_or_op, n_dims=2, input_example_index=0, name='batch_apply')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1036)<a id="BatchApply.__init__" />
+#### [`BatchApply.__init__(module_or_op, n_dims=2, input_example_index=0, name='batch_apply')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1037)<a id="BatchApply.__init__" />
 
 Constructor of the module.
 
@@ -1725,7 +1725,7 @@ Constructor of the module.
 * `ValueError`: If n_dims is not greater than zero.
 
 
-#### [`BatchApply.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1063)<a id="BatchApply.__call__" />
+#### [`BatchApply.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1064)<a id="BatchApply.__call__" />
 
 Connects the BatchApply module into the graph.
 
@@ -1954,7 +1954,7 @@ information about what variables are captured.
 
 Flattens the input Tensor, preserving the batch dimension(s).
 
-#### [`BatchFlatten.__init__(preserve_dims=1, name='batch_flatten')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=880)<a id="BatchFlatten.__init__" />
+#### [`BatchFlatten.__init__(preserve_dims=1, name='batch_flatten')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=881)<a id="BatchFlatten.__init__" />
 
 Constructs a BatchFlatten module.
 
@@ -1975,7 +1975,7 @@ Constructs a BatchFlatten module.
 * `name`: Name of the module.
 
 
-#### [`BatchFlatten.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="BatchFlatten.__call__" />
+#### [`BatchFlatten.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=780)<a id="BatchFlatten.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -2088,7 +2088,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchFlatten.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchFlatten.input_shape" />
+#### [`BatchFlatten.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=863)<a id="BatchFlatten.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -2167,7 +2167,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchFlatten.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="BatchFlatten.transpose" />
+#### [`BatchFlatten.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=869)<a id="BatchFlatten.transpose" />
 
 Returns transpose batch reshape.
 
@@ -3516,7 +3516,7 @@ information about what variables are captured.
 
 Reshapes input Tensor, preserving the batch dimension.
 
-#### [`BatchReshape.__init__(shape, preserve_dims=1, name='batch_reshape')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=719)<a id="BatchReshape.__init__" />
+#### [`BatchReshape.__init__(shape, preserve_dims=1, name='batch_reshape')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=720)<a id="BatchReshape.__init__" />
 
 Constructs a BatchReshape module.
 
@@ -3552,7 +3552,7 @@ Constructs a BatchReshape module.
 * `ValueError`: If `preserve_dims <= 0`.
 
 
-#### [`BatchReshape.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="BatchReshape.__call__" />
+#### [`BatchReshape.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=780)<a id="BatchReshape.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -3665,7 +3665,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchReshape.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="BatchReshape.input_shape" />
+#### [`BatchReshape.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=863)<a id="BatchReshape.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -3744,7 +3744,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchReshape.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="BatchReshape.transpose" />
+#### [`BatchReshape.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=869)<a id="BatchReshape.transpose" />
 
 Returns transpose batch reshape.
 
@@ -4568,7 +4568,7 @@ then almost no signal will be received from the first Tensor. This class works
 around this problem by using a weight matrix with relatively larger
 coefficients for the first Tensor than for the second one.
 
-#### [`ConcatLinear.__init__(output_size, use_bias=True, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='concat_linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=393)<a id="ConcatLinear.__init__" />
+#### [`ConcatLinear.__init__(output_size, use_bias=True, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='concat_linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=394)<a id="ConcatLinear.__init__" />
 
 Constructs a ConcatLinear module.
 
@@ -4601,7 +4601,7 @@ Constructs a ConcatLinear module.
 * `name`: Name of the module.
 
 
-#### [`ConcatLinear.__call__(inputs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=436)<a id="ConcatLinear.__call__" />
+#### [`ConcatLinear.__call__(inputs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=437)<a id="ConcatLinear.__call__" />
 
 Connects the module into the graph.
 
@@ -9312,7 +9312,7 @@ tried to wire together incompatible modules, etc.
 
 Flattens trailing dimensions of a Tensor.
 
-#### [`FlattenTrailingDimensions.__init__(dim_from, name='batch_dim_from')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=904)<a id="FlattenTrailingDimensions.__init__" />
+#### [`FlattenTrailingDimensions.__init__(dim_from, name='batch_dim_from')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=905)<a id="FlattenTrailingDimensions.__init__" />
 
 Constructs a FlattenTrailingDimensions module.
 
@@ -9340,7 +9340,7 @@ Equivalent to BatchFlatten(preserve_dims=dim_from, name=name).
 * `ValueError`: If `dim_from <= 0`.
 
 
-#### [`FlattenTrailingDimensions.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=779)<a id="FlattenTrailingDimensions.__call__" />
+#### [`FlattenTrailingDimensions.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=780)<a id="FlattenTrailingDimensions.__call__" />
 
 Connects the module into the graph, with input Tensor `inputs`.
 
@@ -9453,7 +9453,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`FlattenTrailingDimensions.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=862)<a id="FlattenTrailingDimensions.input_shape" />
+#### [`FlattenTrailingDimensions.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=863)<a id="FlattenTrailingDimensions.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -9532,7 +9532,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`FlattenTrailingDimensions.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=868)<a id="FlattenTrailingDimensions.transpose" />
+#### [`FlattenTrailingDimensions.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=869)<a id="FlattenTrailingDimensions.transpose" />
 
 Returns transpose batch reshape.
 
@@ -12083,7 +12083,7 @@ information about what variables are captured.
 
 Linear module, optionally including bias.
 
-#### [`Linear.__init__(output_size, use_bias=True, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=137)<a id="Linear.__init__" />
+#### [`Linear.__init__(output_size, use_bias=True, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='linear')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=138)<a id="Linear.__init__" />
 
 Constructs a Linear module.
 
@@ -12124,7 +12124,7 @@ Constructs a Linear module.
     are not callable.
 
 
-#### [`Linear.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=197)<a id="Linear.__call__" />
+#### [`Linear.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=198)<a id="Linear.__call__" />
 
 Connects the Linear module into the graph, with input Tensor `inputs`.
 
@@ -12151,7 +12151,7 @@ batch size may differ for each connection.
       previous inputs.
 
 
-#### [`Linear.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=281)<a id="Linear.b" />
+#### [`Linear.b`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=282)<a id="Linear.b" />
 
 Returns the Variable containing the bias.
 
@@ -12167,7 +12167,7 @@ Returns the Variable containing the bias.
 * `AttributeError`: If the module does not use bias.
 
 
-#### [`Linear.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=326)<a id="Linear.clone" />
+#### [`Linear.clone(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=327)<a id="Linear.clone" />
 
 Returns a cloned `Linear` module.
 
@@ -12221,7 +12221,7 @@ information.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Linear.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=193)<a id="Linear.get_possible_initializer_keys" />
+#### [`Linear.get_possible_initializer_keys(use_bias=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=194)<a id="Linear.get_possible_initializer_keys" />
 
 Returns the keys the dictionary of variable initializers may contain.
 
@@ -12269,17 +12269,17 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`Linear.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=306)<a id="Linear.has_bias" />
+#### [`Linear.has_bias`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=307)<a id="Linear.has_bias" />
 
 Returns `True` if bias Variable is present in the module.
 
 
-#### [`Linear.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=311)<a id="Linear.initializers" />
+#### [`Linear.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=312)<a id="Linear.initializers" />
 
 Returns the initializers dictionary.
 
 
-#### [`Linear.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=346)<a id="Linear.input_shape" />
+#### [`Linear.input_shape`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=347)<a id="Linear.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
@@ -12333,17 +12333,17 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Linear.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=299)<a id="Linear.output_size" />
+#### [`Linear.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=300)<a id="Linear.output_size" />
 
 Returns the module output size.
 
 
-#### [`Linear.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=316)<a id="Linear.partitioners" />
+#### [`Linear.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=317)<a id="Linear.partitioners" />
 
 Returns the partitioners dictionary.
 
 
-#### [`Linear.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=321)<a id="Linear.regularizers" />
+#### [`Linear.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=322)<a id="Linear.regularizers" />
 
 Returns the regularizers dictionary.
 
@@ -12373,7 +12373,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Linear.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=353)<a id="Linear.transpose" />
+#### [`Linear.transpose(name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=354)<a id="Linear.transpose" />
 
 Returns transposed `Linear` module.
 
@@ -12431,7 +12431,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`Linear.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=267)<a id="Linear.w" />
+#### [`Linear.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=268)<a id="Linear.w" />
 
 Returns the Variable containing the weight matrix.
 
@@ -12468,7 +12468,7 @@ x = [tf.random_uniform(shape=[5, 5]), [tf.random_uniform(shape=[3, 3, 3])]]
 output = MergeDims(start=0, size=2)(x)
 ```
 
-#### [`MergeDims.__init__(start, size, name='merge_dims')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1296)<a id="MergeDims.__init__" />
+#### [`MergeDims.__init__(start, size, name='merge_dims')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1297)<a id="MergeDims.__init__" />
 
 Constructs the MergeDims module.
 
@@ -12485,7 +12485,7 @@ Constructs the MergeDims module.
 * `ValueError`: If `size` is not strictly greater than 1.
 
 
-#### [`MergeDims.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1354)<a id="MergeDims.__call__" />
+#### [`MergeDims.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1355)<a id="MergeDims.__call__" />
 
 Connects the MergeDims module into the graph.
 
@@ -15365,7 +15365,7 @@ output = snt.SelectInput(
 ==> (input0, (input1, (input2,)))
 ```
 
-#### [`SelectInput.__init__(idx, name='select_input')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1413)<a id="SelectInput.__init__" />
+#### [`SelectInput.__init__(idx, name='select_input')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1414)<a id="SelectInput.__init__" />
 
 Module constructor.
 
@@ -15383,7 +15383,7 @@ Module constructor.
 * `TypeError`: If `idx` is not an list, tuple or integer.
 
 
-#### [`SelectInput.__call__(*inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1447)<a id="SelectInput.__call__" />
+#### [`SelectInput.__call__(*inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1448)<a id="SelectInput.__call__" />
 
 Connects the module into the graph.
 
@@ -17168,7 +17168,7 @@ output = SliceByDim(dims=[1], begin=[0], size=[x.get_shape()[1].value//2])(x)
 output = SliceByDim(dims=[1, 3], begin=[0, 0], size=[12, 24])(x)
 ```
 
-#### [`SliceByDim.__init__(dims, begin, size, name='slice_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1136)<a id="SliceByDim.__init__" />
+#### [`SliceByDim.__init__(dims, begin, size, name='slice_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1137)<a id="SliceByDim.__init__" />
 
 Constructs the `SliceByDim` module.
 
@@ -17192,7 +17192,7 @@ Constructs the `SliceByDim` module.
       different from the size of `dims`.
 
 
-#### [`SliceByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1167)<a id="SliceByDim.__call__" />
+#### [`SliceByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1168)<a id="SliceByDim.__call__" />
 
 Connects the SliceByDim module into the graph.
 
@@ -17447,7 +17447,7 @@ output = TileByDim(dims=[1], multiples=[2])(x)
 output = TileByDim(dims=[1, 3], multiples=[2, 4])(x)
 ```
 
-#### [`TileByDim.__init__(dims, multiples, name='tile_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1230)<a id="TileByDim.__init__" />
+#### [`TileByDim.__init__(dims, multiples, name='tile_by_dim')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1231)<a id="TileByDim.__init__" />
 
 Constructs the `TileByDim` module.
 
@@ -17466,7 +17466,7 @@ Constructs the `TileByDim` module.
       `multiples` is different from the size of `dims`.
 
 
-#### [`TileByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1252)<a id="TileByDim.__call__" />
+#### [`TileByDim.__call__(inputs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1253)<a id="TileByDim.__call__" />
 
 Connects the `TileByDim` module into the graph.
 
@@ -17944,7 +17944,7 @@ information about what variables are captured.
 
 Provides learnable parameter Tensor.
 
-#### [`TrainableVariable.__init__(shape, dtype=tf.float32, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='trainable_variable')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=937)<a id="TrainableVariable.__init__" />
+#### [`TrainableVariable.__init__(shape, dtype=tf.float32, initializers=None, partitioners=None, regularizers=None, custom_getter=None, name='trainable_variable')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=938)<a id="TrainableVariable.__init__" />
 
 Constructs a TrainableVariable module.
 
@@ -17977,7 +17977,7 @@ Constructs a TrainableVariable module.
 * `TypeError`: If any of the given regularizers are not callable.
 
 
-#### [`TrainableVariable.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=983)<a id="TrainableVariable.__call__" />
+#### [`TrainableVariable.__call__()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=984)<a id="TrainableVariable.__call__" />
 
 Connects the TrainableTensor module into the graph.
 
@@ -18190,7 +18190,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`TrainableVariable.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1001)<a id="TrainableVariable.w" />
+#### [`TrainableVariable.w`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=1002)<a id="TrainableVariable.w" />
 
 Returns the Variable containing the weights Tensor.
 
@@ -19247,7 +19247,7 @@ is `1.0`, this op reduces to `tf.identity`.
 * `ValueError`: If `net` dtype is non-float and `scale` is not zero or one.
 
 
-### [`split_leading_dim(tensor, inputs, n_dims=2)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=92)<a id="split_leading_dim" />
+### [`split_leading_dim(tensor, inputs, n_dims=2)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=93)<a id="split_leading_dim" />
 
 Split the first dimension of a tensor.
 
@@ -23293,7 +23293,7 @@ Alias for field number 1
 
 
 
-### [`python.modules.basic.calculate_bias_shape(input_shape, bias_dims)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=464)<a id="python.modules.basic.calculate_bias_shape" />
+### [`python.modules.basic.calculate_bias_shape(input_shape, bias_dims)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=465)<a id="python.modules.basic.calculate_bias_shape" />
 
 Calculate `bias_shape` based on the `input_shape` and `bias_dims`.
 
@@ -23317,12 +23317,12 @@ Calculate `bias_shape` based on the `input_shape` and `bias_dims`.
       e.g. `bias_dims=[0]`.
 
 
-### [`python.modules.basic.create_bias_initializer(unused_bias_shape, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=129)<a id="python.modules.basic.create_bias_initializer" />
+### [`python.modules.basic.create_bias_initializer(unused_bias_shape, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=130)<a id="python.modules.basic.create_bias_initializer" />
 
 Returns a default initializer for the biases of a linear/AddBias module.
 
 
-### [`python.modules.basic.create_linear_initializer(input_size, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=123)<a id="python.modules.basic.create_linear_initializer" />
+### [`python.modules.basic.create_linear_initializer(input_size, dtype=tf.float32)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic.py?l=124)<a id="python.modules.basic.create_linear_initializer" />
 
 Returns a default initializer for weights of a linear module.
 

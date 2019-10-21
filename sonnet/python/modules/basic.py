@@ -68,8 +68,7 @@ def merge_leading_dims(array_or_tensor, n_dims=2):
 
   if tensor_shape_static.is_fully_defined():
     new_shape = (
-        [np.prod(tensor_shape_list[:n_dims], dtype=int)] +
-        tensor_shape_list[n_dims:])
+        [np.prod(tensor_shape_list[:n_dims])] + tensor_shape_list[n_dims:])
 
     return tf.reshape(tensor, new_shape)
 
@@ -81,7 +80,7 @@ def merge_leading_dims(array_or_tensor, n_dims=2):
   result = tf.reshape(tensor, new_size)
 
   if all(value is not None for value in tensor_shape_list[:n_dims]):
-    merged_leading_size = np.prod(tensor_shape_list[:n_dims], dtype=int)
+    merged_leading_size = np.prod(tensor_shape_list[:n_dims])
   else:
     merged_leading_size = None
   # We need to set the result size of this, as otherwise we won't be able to
@@ -142,8 +141,21 @@ class Linear(base.AbstractModule, base.Transposable):
                partitioners=None,
                regularizers=None,
                custom_getter=None,
+               allow_many_batch_dims=False,
                name="linear"):
-    """Constructs a Linear module.
+    """Constructs a linear module.
+
+    Linear map from `[batch_size, input_size]` -> `[batch_size, output_size]`.
+
+    One can also use this for inputs with multiple batch dimensions, by setting
+    `allow_many_batch_dims=True`. Then this maps
+
+      `[batch_dim_1, ..., batch_dim_{n-1}, input_size]` ->
+        `[batch_dim_1, ..., batch_dim_{n-1}, output_size]`.
+
+    In allow_many_batch_dims mode, this operation is equivalent to flattening
+    the n-1 leading dimensions of the input and applying a 2-D linear. However
+    it avoids the flatten and reshape operation.
 
     Args:
       output_size: Output dimensionality. `output_size` can be either an integer
@@ -169,6 +181,12 @@ class Linear(base.AbstractModule, base.Transposable):
         custom getters inside the module. If a dictionary, the keys
         correspond to regexes to match variable names. See the `tf.get_variable`
         documentation for information about the custom_getter API.
+      allow_many_batch_dims: If true, enables the use of a batched matmul over
+        higher-dimensional inputs. The linear is applied to the final dimension.
+        Namely instead of a `[batch_size, dim]` 2-D input, one can have a
+        `[batch_dim_1, batch_dim_2, ..., batch_dim_{N-1}, input_size]` N-D
+        input which will be mapped to a N-D
+        `[batch_dim_1, batch_dim_2, ..., batch_dim_{N-1}, output_size]` output.
       name: Name of the module.
 
     Raises:
@@ -183,6 +201,7 @@ class Linear(base.AbstractModule, base.Transposable):
     self._input_shape = None
     self._w = None
     self._b = None
+    self._allow_many_batch_dims = allow_many_batch_dims
     self.possible_keys = self.get_possible_initializer_keys(use_bias=use_bias)
     self._initializers = util.check_initializers(
         initializers, self.possible_keys)
@@ -198,53 +217,63 @@ class Linear(base.AbstractModule, base.Transposable):
   def _build(self, inputs):
     """Connects the Linear module into the graph, with input Tensor `inputs`.
 
+    Linear maps the final dimension.
+
     If this is not the first time the module has been connected to the graph,
     the Tensor provided here must have the same final dimension, in order for
     the existing variables to be the correct size for the multiplication. The
     batch size may differ for each connection.
 
     Args:
-      inputs: A 2D Tensor of size [batch_size, input_size].
+      inputs: A N-D Tensor of size [dim_1, ..., dim_{N-1}, input_size].
 
     Returns:
-      A 2D Tensor of size [batch_size, output_size].
+      A N-D Tensor of size [dim_1, ..., dim_{N-1}, output_size].
 
     Raises:
       base.IncompatibleShapeError: If the input is not a 2-D `Tensor` with
-          the size of the second dimension specified.
+          the size of the second dimension specified and `allow_many_batch_dims`
+          is set to False.
       base.IncompatibleShapeError: If reconnecting an already connected module
           into the graph, and the shape of the input is not compatible with
           previous inputs.
     """
     input_shape = tuple(inputs.get_shape().as_list())
 
-    if len(input_shape) != 2:
+    if len(input_shape) != 2 and not self._allow_many_batch_dims:
       raise base.IncompatibleShapeError(
-          "{}: rank of shape must be 2 not: {}".format(
-              self.scope_name, len(input_shape)))
+          "{}: rank of shape must be 2 not: {}. To apply a batched linear "
+          "over higher-dimensional inputs, set `allow_many_batch_dims=True`"
+          .format(self.scope_name, len(input_shape)))
 
-    if input_shape[1] is None:
+    input_size = input_shape[-1]
+    if input_size is None:
       raise base.IncompatibleShapeError(
           "{}: Input size must be specified at module build time".format(
               self.scope_name))
 
-    if self._input_shape is not None and input_shape[1] != self._input_shape[1]:
-      raise base.IncompatibleShapeError(
-          "{}: Input shape must be [batch_size, {}] not: [batch_size, {}]"
-          .format(self.scope_name, self._input_shape[1], input_shape[1]))
+    if self._input_shape is not None and (input_size != self._input_shape[-1]):
+      if len(self._input_shape) > 2:
+        raise base.IncompatibleShapeError(
+            "{}: Input shape must be [..., {}] not: [..., {}]"
+            .format(self.scope_name, self._input_shape[-1], input_size))
+      else:
+        raise base.IncompatibleShapeError(
+            "{}: Input shape must be [B, {}] not [B, {}]"
+            .format(self.scope_name, self._input_shape[-1], input_size))
 
     self._input_shape = input_shape
     dtype = inputs.dtype
 
     if "w" not in self._initializers:
-      self._initializers["w"] = create_linear_initializer(self._input_shape[1],
+      self._initializers["w"] = create_linear_initializer(input_size,
                                                           dtype)
 
     if "b" not in self._initializers and self._use_bias:
-      self._initializers["b"] = create_bias_initializer(self._input_shape[1],
+      self._initializers["b"] = create_bias_initializer(input_size,
                                                         dtype)
 
-    weight_shape = (self._input_shape[1], self.output_size)
+    weight_shape = (input_size, self.output_size)
     self._w = tf.get_variable("w",
                               shape=weight_shape,
                               dtype=dtype,
@@ -363,7 +392,7 @@ class Linear(base.AbstractModule, base.Transposable):
     """
     if name is None:
       name = self.module_name + "_transpose"
-    return Linear(output_size=lambda: self.input_shape[1],
+    return Linear(output_size=lambda: self.input_shape[-1],
                   use_bias=self._use_bias,
                   initializers=self._initializers,
                   partitioners=self._partitioners,
@@ -769,9 +798,9 @@ class BatchReshape(base.AbstractModule, base.Transposable):
       Tuple of non-batch output dimensions.
     """
     # Size of input
-    n = np.prod(dimensions, dtype=int)
+    n = np.prod(dimensions)
     # Size of output where defined
-    m = np.prod(abs(np.array(self._shape)), dtype=int)
+    m = np.prod(abs(np.array(self._shape)))
     # Replace wildcard
     v = np.array(self._shape)
     v[v == -1] = n // m
@@ -1330,7 +1359,7 @@ class MergeDims(base.AbstractModule):
     if None in middle:
       middle = [None]
     else:
-      middle = [np.prod(middle, dtype=int)]
+      middle = [np.prod(middle)]
     static_shape = initial + middle + final
 
     if static_shape.count(None) + static_shape.count(0) <= 1:

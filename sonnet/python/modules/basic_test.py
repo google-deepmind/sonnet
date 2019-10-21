@@ -30,15 +30,14 @@ from sonnet.python.modules import basic
 from sonnet.python.ops import nest
 import tensorflow as tf
 
-from tensorflow.python.client import device_lib
-from tensorflow.python.ops import init_ops
-from tensorflow.python.ops import variables
+from tensorflow.python.client import device_lib  # pylint: disable=g-direct-tensorflow-import
+from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
 def _test_initializer(mu=0.0, sigma=1.0, dtype=tf.float32):
   """Custom initializer for Linear tests."""
   def _initializer(shape,
-                   dtype=init_ops._assert_float_dtype(dtype),
+                   dtype=dtype,
                    partition_info=None):  # pylint: disable=unused-argument
     random_normal_tensor = np.asarray(np.random.randn(*shape)) * sigma + mu
     return random_normal_tensor.astype(dtype.as_numpy_dtype())
@@ -207,6 +206,55 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
       self.assertAllClose(
           result,
           output_data,
+          atol=tolerance_map[dtype],
+          rtol=tolerance_map[dtype])
+
+  @parameterized.named_parameters(
+      ("WithBias", True),
+      ("WithoutBias", False))
+  def testBatchedComputation(self, use_bias):
+    np.random.seed(self.seed)
+    types = (tf.float16, tf.float32, tf.float64)
+    tol = (1e-1, 1e-6, 1e-9)
+
+    tolerance_map = dict(zip(types, tol))
+
+    for dtype in types:
+      # With random data, check the TF calculation matches the Numpy version.
+      input_data = np.random.randn(
+          self.batch_size, self.batch_size, self.in_size)
+      flat_input_data = np.reshape(
+          input_data, [self.batch_size * self.batch_size, self.in_size])
+      input_data = input_data.astype(dtype.as_numpy_dtype)
+      inputs = tf.constant(input_data)
+
+      if use_bias:
+        initializers = {"w": _test_initializer(), "b": _test_initializer()}
+      else:
+        initializers = {"w": _test_initializer()}
+
+      lin = snt.Linear(output_size=self.out_size, use_bias=use_bias,
+                       allow_many_batch_dims=True, initializers=initializers)
+      output = lin(inputs)
+
+      self.evaluate(tf.global_variables_initializer())
+
+      if use_bias:
+        output_data, w, b = self.evaluate([output, lin.w, lin.b])
+      else:
+        output_data, w = self.evaluate([output, lin.w])
+
+      if use_bias:
+        result = (np.dot(flat_input_data, w.astype(dtype.as_numpy_dtype)) +
+                  b.astype(dtype.as_numpy_dtype))
+      else:
+        result = np.dot(flat_input_data, w.astype(dtype.as_numpy_dtype))
+      result = np.reshape(
+          result, [self.batch_size, self.batch_size, self.out_size])
+
+      self.assertAllClose(
+          output_data,
+          result,
           atol=tolerance_map[dtype],
           rtol=tolerance_map[dtype])
 

@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Sonnet optimizers built for TensorFlow 2."""
+"""Sonnet optimizers built for TensorFlow 2.
+
+All optimizers implement the `snt.Optimizer` interface.
+"""
 
 from __future__ import absolute_import
 from __future__ import division

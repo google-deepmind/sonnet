@@ -84,10 +84,10 @@ snt_py_library(
     name = "optimizers",
     srcs = ["optimizers.py"],
     deps = [
-        "//sonnet/src:adam",
-        "//sonnet/src:momentum",
-        "//sonnet/src:rmsprop",
-        "//sonnet/src:sgd",
+        "//sonnet/src/optimizers:adam",
+        "//sonnet/src/optimizers:momentum",
+        "//sonnet/src/optimizers:rmsprop",
+        "//sonnet/src/optimizers:sgd",
     ],
 )
 

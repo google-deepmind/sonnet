@@ -12,59 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Tests for sonnet.v2.src.momentum."""
+"""Tests for sonnet.v2.src.rmsprop."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from sonnet.src import momentum
-from sonnet.src import optimizer_tests
+from sonnet.src.optimizers import optimizer_tests
+from sonnet.src.optimizers import rmsprop
 import tensorflow as tf
 
 
-class MomentumTest(optimizer_tests.OptimizerTestBase):
+class RMSPropTest(optimizer_tests.OptimizerTestBase):
 
   def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
-    if "momentum" not in kwargs:
-      kwargs["momentum"] = 0.9
-    return momentum.Momentum(**kwargs)
+    return rmsprop.RMSProp(**kwargs)
 
   def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
-    optimizer = self.make_optimizer(learning_rate=0.1, momentum=0.9)
-    # Step 1 of Momentum
+    optimizer = self.make_optimizer(learning_rate=0.1)
+    # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
+    self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
-    # Step 2 of Momentum
+    # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-0.45, 0.55], [2.13, 3.13]],
+    self.assertAllClose([[0.454357, 1.454357], [2.454357, 3.454357]],
                         [x.numpy() for x in parameters])
-    # Step 3 of Momentum
+    # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-1.805, -0.805], [1.317, 2.317]],
+    self.assertAllClose([[0.262262, 1.262262], [2.262262, 3.262262]],
                         [x.numpy() for x in parameters])
 
-  def testDenseNesterov(self):
+  def testDenseCentered(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
-    optimizer = self.make_optimizer(
-        learning_rate=0.1, momentum=0.9, use_nesterov=True)
-    # Step 1 of Momentum
+    optimizer = self.make_optimizer(learning_rate=0.1, centered=True)
+    # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.05, 1.05], [2.43, 3.43]],
+    self.assertAllClose([[0.666667, 1.666667], [2.666667, 3.666667]],
                         [x.numpy() for x in parameters])
-    # Step 2 of Momentum
+    # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-1.305, -0.305], [1.617, 2.617]],
+    self.assertAllClose([[0.41176, 1.41176], [2.41176, 3.41176]],
                         [x.numpy() for x in parameters])
-    # Step 3 of Momentum
+    # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-3.0245, -2.0245], [0.5853, 1.5853]],
+    self.assertAllClose([[0.186776, 1.186776], [2.186776, 3.186776]],
                         [x.numpy() for x in parameters])
 
   def testSparse(self):
@@ -81,21 +78,21 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
             tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
             tf.constant([2, 1]))
     ]
-    optimizer = self.make_optimizer(learning_rate=3., momentum=0.9)
-    # Step 1 of Momentum
+    optimizer = self.make_optimizer(learning_rate=3.)
+    # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[1.0 - 3.0 * 0.1], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [4.0 - 3.0 * 0.01]], parameters[1].numpy())
-    # Step 2 of Momentum
+    self.assertAllClose([[-8.486831], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-5.486784]], parameters[1].numpy(), rtol=1e-4)
+    # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.7 - 3.0 * 0.19], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [3.97 - 3.0 * 0.019]], parameters[1].numpy())
-    # Step 3 of Momentum
+    self.assertAllClose([[-15.369301], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-12.369237]], parameters[1].numpy(), rtol=1e-4)
+    # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.13 - 3.0 * 0.271], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [3.913 - 3.0 * 0.0271]], parameters[1].numpy())
+    self.assertAllClose([[-21.132141], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-18.132067]], parameters[1].numpy(), rtol=1e-4)
 
-  def testSparseNesterov(self):
+  def testSparseCentered(self):
     if self.primary_device in ("GPU", "TPU"):
       self.skipTest("IndexedSlices not supported on {}.".format(
           self.primary_device))
@@ -109,40 +106,32 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
             tf.constant([0.01], shape=[1, 1]), tf.constant([1]),
             tf.constant([2, 1]))
     ]
-    optimizer = self.make_optimizer(
-        learning_rate=3., momentum=0.9, use_nesterov=True)
-    # Step 1 of Momentum
+    optimizer = self.make_optimizer(learning_rate=3., centered=True)
+    # Step 1 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.43], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [3.943]], parameters[1].numpy())
-    # Step 2 of Momentum
+    self.assertAllClose([[-8.999999], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-5.999944]], parameters[1].numpy(), rtol=1e-4)
+    # Step 2 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-0.383], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [3.8617]], parameters[1].numpy())
-    # Step 3 of Momentum
+    self.assertAllClose([[-16.64719], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-13.647109]], parameters[1].numpy(), rtol=1e-4)
+    # Step 3 of RMSProp
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[-1.4147], [2.0]], parameters[0].numpy())
-    self.assertAllClose([[3.0], [3.75853]], parameters[1].numpy())
+    self.assertAllClose([[-23.396709], [2.0]], parameters[0].numpy(), rtol=1e-4)
+    self.assertAllClose([[3.0], [-20.39661]], parameters[1].numpy(), rtol=1e-4)
 
   def testVariableHyperParams(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
     learning_rate = tf.Variable(0.1)
-    momentum_coeff = tf.Variable(0.9)
-    optimizer = self.make_optimizer(
-        learning_rate=learning_rate, momentum=momentum_coeff)
-    if optimizer_tests.is_tf_optimizer(optimizer):
-      self.skipTest("TF SGD optimizer doesn't support variable learning rate.")
-
+    optimizer = self.make_optimizer(learning_rate=learning_rate)
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
+    self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
     learning_rate.assign(0.01)
-    momentum_coeff.assign(0.09)
     self.assertAlmostEqual(0.01, optimizer.learning_rate.numpy())
-    self.assertAlmostEqual(0.09, optimizer.momentum.numpy())
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.4455, 1.4455], [2.6673, 3.6673]],
+    self.assertAllClose([[0.660831, 1.660831], [2.660831, 3.660831]],
                         [x.numpy() for x in parameters])
 
   def testHyperParamDTypeConversion(self):
@@ -150,35 +139,39 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
     updates = [tf.constant([5., 5.]), tf.constant([3., 3.])]
     dtype = tf.float32 if self.primary_device == "TPU" else tf.float64
     learning_rate = tf.Variable(0.1, dtype=dtype)
-    momentum_coeff = tf.Variable(0.9, dtype=dtype)
+    decay = tf.Variable(0.9, dtype=dtype)
+    momentum = tf.Variable(0.0, dtype=dtype)
+    epsilon = tf.Variable(1e-7, dtype=dtype)
     optimizer = self.make_optimizer(
-        learning_rate=learning_rate, momentum=momentum_coeff)
+        learning_rate=learning_rate,
+        decay=decay,
+        momentum=momentum,
+        epsilon=epsilon)
+    if optimizer_tests.is_tf_optimizer(optimizer):
+      self.skipTest("TF optimizers don't support automatic casting.")
+
     optimizer.apply(updates, parameters)
-    self.assertAllClose([[0.5, 1.5], [2.7, 3.7]],
+    self.assertAllClose([[0.683772, 1.683772], [2.683772, 3.683772]],
                         [x.numpy() for x in parameters])
 
   def testAuxVariablesColocatedWithOriginal(self):
-    optimizer = self.make_optimizer(learning_rate=0.1, momentum=0.9)
+    optimizer = self.make_optimizer(learning_rate=0.1)
     if optimizer_tests.is_tf_optimizer(optimizer):
-      self.skipTest("TF slot variables are in a different location.")
+      self.skipTest("Aux vars are in a different location for TF optimizers.")
 
     with tf.device("CPU:0"):
       var = tf.Variable(1.0)
     optimizer.apply([tf.constant(0.1)], [var])
-    self.assertEqual(optimizer.accumulated_momentum[0].device, var.device)
+    self.assertEqual(optimizer.mom[0].device, var.device)
+    self.assertEqual(optimizer.ms[0].device, var.device)
 
 
-class ReferenceMomentumTest(MomentumTest):
+class ReferenceRMSPropTest(RMSPropTest):
 
   def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
-    if "momentum" not in kwargs:
-      kwargs["momentum"] = 0.9
-    if "use_nesterov" in kwargs:
-      kwargs["nesterov"] = kwargs["use_nesterov"]
-      del kwargs["use_nesterov"]
-    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.SGD(**kwargs))
+    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.RMSprop(**kwargs))
 
 
 if __name__ == "__main__":

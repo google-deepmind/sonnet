@@ -139,9 +139,9 @@ snt_py_test(
         ":bayes_by_backprop",
         ":custom_getter",
         ":linear",
-        ":sgd",
         ":test_utils",
         # pip: numpy
+        "//sonnet/src/optimizers:sgd",
         # pip: tensorflow
         # pip: tensorflow_probability
     ],
@@ -459,119 +459,6 @@ snt_py_test(
         ":sequential",
         ":test_utils",
         # pip: absl/testing:parameterized
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "optimizer_tests",
-    testonly = 1,
-    srcs = ["optimizer_tests.py"],
-    deps = [
-        ":base",
-        ":test_utils",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "adam",
-    srcs = ["adam.py"],
-    deps = [
-        ":base",
-        ":once",
-        ":optimizer_utils",
-        ":types",
-        ":utils",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_test(
-    name = "adam_test",
-    srcs = ["adam_test.py"],
-    deps = [
-        ":adam",
-        ":optimizer_tests",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "momentum",
-    srcs = ["momentum.py"],
-    deps = [
-        ":base",
-        ":once",
-        ":optimizer_utils",
-        ":types",
-        ":utils",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_test(
-    name = "momentum_test",
-    srcs = ["momentum_test.py"],
-    deps = [
-        ":momentum",
-        ":optimizer_tests",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "rmsprop",
-    srcs = ["rmsprop.py"],
-    deps = [
-        ":base",
-        ":once",
-        ":optimizer_utils",
-        ":types",
-        ":utils",
-        # pip: six
-        # pip: tensorflow
-    ],
-)
-
-snt_py_test(
-    name = "rmsprop_test",
-    srcs = ["rmsprop_test.py"],
-    deps = [
-        ":optimizer_tests",
-        ":rmsprop",
-        ":test_utils",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "sgd",
-    srcs = ["sgd.py"],
-    deps = [
-        ":base",
-        ":optimizer_utils",
-        ":types",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_test(
-    name = "sgd_test",
-    srcs = ["sgd_test.py"],
-    deps = [
-        ":optimizer_tests",
-        ":sgd",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "optimizer_utils",
-    srcs = ["optimizer_utils.py"],
-    deps = [
-        ":replicator",
-        ":types",
         # pip: tensorflow
     ],
 )

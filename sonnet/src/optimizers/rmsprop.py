@@ -20,11 +20,12 @@ from __future__ import division
 from __future__ import print_function
 
 import six
+
 from sonnet.src import base
 from sonnet.src import once
-from sonnet.src import optimizer_utils
 from sonnet.src import types
 from sonnet.src import utils
+from sonnet.src.optimizers import optimizer_utils
 
 import tensorflow as tf
 from typing import Optional, Sequence, Text, Union

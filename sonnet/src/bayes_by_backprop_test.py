@@ -23,8 +23,8 @@ from sonnet.src import base
 from sonnet.src import bayes_by_backprop as bbb
 from sonnet.src import custom_getter
 from sonnet.src import linear
-from sonnet.src import sgd
 from sonnet.src import test_utils
+from sonnet.src.optimizers import sgd
 import tensorflow as tf
 import tensorflow_probability as tfp
 

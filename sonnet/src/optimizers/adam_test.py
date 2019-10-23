@@ -18,8 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from sonnet.src import adam
-from sonnet.src import optimizer_tests
+from sonnet.src.optimizers import adam
+from sonnet.src.optimizers import optimizer_tests
 import tensorflow as tf
 
 

@@ -21,10 +21,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from sonnet.src.adam import Adam
-from sonnet.src.momentum import Momentum
-from sonnet.src.rmsprop import RMSProp
-from sonnet.src.sgd import SGD
+from sonnet.src.optimizers.adam import Adam
+from sonnet.src.optimizers.momentum import Momentum
+from sonnet.src.optimizers.rmsprop import RMSProp
+from sonnet.src.optimizers.sgd import SGD
 
 __all__ = (
     "Adam",

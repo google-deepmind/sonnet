@@ -35,7 +35,6 @@ snt_py_library(
     name = "build",
     srcs = ["build.py"],
     deps = [
-        # pip: numpy
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
@@ -80,7 +79,6 @@ snt_py_library(
     name = "leaky_clip_by_value",
     srcs = ["leaky_clip_by_value.py"],
     deps = [
-        ":base",
         # pip: tensorflow
     ],
 )
@@ -400,6 +398,11 @@ snt_py_test(
 snt_py_library(
     name = "recurrent",
     srcs = ["recurrent.py"],
+    tags = [
+        "ignore_for_dep=third_party.tensorflow.python.context",
+        "ignore_for_dep=third_party.tensorflow.python.eager.function",
+        "ignore_for_dep=third_party.tensorflow.python.util.nest",
+    ],
     deps = [
         ":base",
         ":conv",
@@ -570,9 +573,7 @@ snt_py_library(
     testonly = 1,
     srcs = ["test_utils.py"],
     deps = [
-        ":base",
         # pip: absl/testing:parameterized
-        # pip: numpy
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

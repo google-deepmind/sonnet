@@ -13,7 +13,6 @@ snt_py_library(
     name = "control",
     srcs = ["control.py"],
     deps = [
-        # pip: six
         "//sonnet/src:linear",
         "//sonnet/src:recurrent",
         # pip: tensorflow
@@ -59,7 +58,6 @@ snt_py_library(
     name = "util",
     srcs = ["util.py"],
     deps = [
-        # pip: absl/logging
         # pip: numpy
         # pip: tensorflow
     ],

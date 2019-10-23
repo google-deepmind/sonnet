@@ -1,8 +1,10 @@
+load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
+
 package(default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"])
 
 licenses(["notice"])  # Apache 2.0 License
 
-load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
+exports_files(["LICENSE"])
 
 snt_py_library(
     name = "link_tf_api",

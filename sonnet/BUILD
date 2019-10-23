@@ -1,10 +1,10 @@
+load("//sonnet/src:build_defs.bzl", "snt_py_library")
+
 package(default_visibility = ["//visibility:private"])
 
 licenses(["notice"])  # Apache 2.0 License
 
 exports_files(["LICENSE"])
-
-load("//sonnet/src:build_defs.bzl", "snt_py_library")
 
 snt_py_library(
     name = "sonnet",

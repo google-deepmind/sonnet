@@ -1,3 +1,5 @@
+load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
+
 package(
     default_testonly = True,
     default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"],
@@ -6,8 +8,6 @@ package(
 licenses(["notice"])  # Apache 2.0 License
 
 exports_files(["LICENSE"])
-
-load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
 snt_py_library(
     name = "goldens",

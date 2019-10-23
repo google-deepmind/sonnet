@@ -398,11 +398,6 @@ snt_py_test(
 snt_py_library(
     name = "recurrent",
     srcs = ["recurrent.py"],
-    tags = [
-        "ignore_for_dep=third_party.tensorflow.python.context",
-        "ignore_for_dep=third_party.tensorflow.python.eager.function",
-        "ignore_for_dep=third_party.tensorflow.python.util.nest",
-    ],
     deps = [
         ":base",
         ":conv",

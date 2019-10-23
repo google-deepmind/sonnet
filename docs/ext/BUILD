@@ -9,9 +9,6 @@ exports_files(["LICENSE"])
 snt_py_library(
     name = "link_tf_api",
     srcs = ["link_tf_api.py"],
-    tags = [
-        "ignore_for_dep=third_party.tensorflow.python.util.tf_export",
-    ],
     deps = [
         # pip: docutils
         # pip: six

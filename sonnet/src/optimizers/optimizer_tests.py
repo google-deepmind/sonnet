@@ -19,6 +19,10 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+import itertools
+
+from absl.testing import parameterized
+import numpy as np
 from sonnet.src import base
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -112,6 +116,71 @@ class OptimizerTestBase(test_utils.TestCase):
       strategy.experimental_run_v2(lambda: optimizer.apply(updates, parameters))
 
 
-if __name__ == "__main__":
-  # tf.enable_v2_behavior()
-  tf.test.main()
+# NOTE: Avoiding ABCMeta because of metaclass conflict.
+class AbstractFuzzTest(test_utils.TestCase, parameterized.TestCase):
+  """Tests TF and Sonnet run concurrently produce equivalent output."""
+
+  num_steps = 100
+
+  def _make_tf(self, learning_rate, momentum, use_nesterov):
+    raise NotImplementedError()
+
+  def _make_snt(self, learning_rate, momentum, use_nesterov):
+    raise NotImplementedError()
+
+  def assertEqualParameters(self, seed, config):
+    tf_opt = self._make_tf(**config)
+    snt_opt = self._make_snt(**config)
+
+    # TODO(tomhennigan) Add sparse data.
+    data = _generate_dense_data(seed, self.num_steps)
+    tf_params = _apply_optimizer(data, tf_opt)
+    snt_params = _apply_optimizer(data, snt_opt)
+    assert tf_params and len(tf_params) == len(snt_params)
+
+    tol = 1e-4 if self.primary_device == "TPU" else 1e-5
+    for step, (tf_param, snt_param) in enumerate(zip(tf_params, snt_params)):
+      msg = "TF and Sonnet diverged at step {}".format(step)
+      self.assertAllClose(tf_param, snt_param, atol=tol, msg=msg)
+
+
+def _generate_dense_data(seed, num_steps):
+  """Generates deterministic random parameters and gradients."""
+  # Use numpy random since it is deterministic (unlike TF).
+  np.random.seed(seed=seed)
+  params = [
+      np.random.normal(size=(10, 10, 10)).astype(np.float32),
+      np.random.normal(size=(10, 10)).astype(np.float32),
+      np.random.normal(size=(10,)).astype(np.float32),
+  ]
+  per_step_grads = []
+  for _ in range(num_steps):
+    per_step_grads.append([
+        np.random.normal(size=(10, 10, 10)).astype(np.float32),
+        np.random.normal(size=(10, 10)).astype(np.float32),
+        np.random.normal(size=(10,)).astype(np.float32),
+    ])
+  return params, per_step_grads
+
+
+def _apply_optimizer(data, apply_fn):
+  params, per_step_grads = data
+  params = [tf.Variable(p, name="rank{}".format(len(p.shape))) for p in params]
+  per_step_grads = tf.nest.map_structure(tf.convert_to_tensor, per_step_grads)
+  param_vals = []
+  assert per_step_grads
+  for grads in per_step_grads:
+    apply_fn(grads, params)
+    param_vals.append([p.numpy() for p in params])
+  return param_vals
+
+
+def named_product(**config):
+  keys = list(config.keys())
+  values = list(config.values())
+  configs = []
+  for val in itertools.product(*values):
+    config = dict(zip(keys, val))
+    name = ",".join("{}={}".format(k, v) for k, v in config.items())
+    configs.append((name, config))
+  return configs

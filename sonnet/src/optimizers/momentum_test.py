@@ -18,9 +18,35 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from sonnet.src.optimizers import momentum
+from sonnet.src import test_utils
+from sonnet.src.optimizers import momentum as momentum_lib
 from sonnet.src.optimizers import optimizer_tests
 import tensorflow as tf
+
+SEEDS = (("_seed={}".format(seed), seed) for seed in (28, 2, 90))
+CONFIGS = optimizer_tests.named_product(learning_rate=(0.1, 0.01, 0.001),
+                                        momentum=(0.9, 0.5, 0.2),
+                                        use_nesterov=(True, False))
+
+
+class ComparisonTest(optimizer_tests.AbstractFuzzTest):
+  """Ensures Sonnet optimizers have equivalent behavior to TensorFlow."""
+
+  def _make_tf(self, learning_rate, momentum, use_nesterov):
+    optimizer = tf.optimizers.SGD(learning_rate=learning_rate,
+                                  momentum=momentum,
+                                  nesterov=use_nesterov)
+    return lambda g, p: optimizer.apply_gradients(zip(g, p))
+
+  def _make_snt(self, learning_rate, momentum, use_nesterov):
+    optimizer = momentum_lib.Momentum(learning_rate=learning_rate,
+                                      momentum=momentum,
+                                      use_nesterov=use_nesterov)
+    return optimizer.apply
+
+  @test_utils.combined_named_parameters(SEEDS, CONFIGS)
+  def testComparingSonnetAndTensorFlow(self, seed, config):
+    self.assertEqualParameters(seed, config)
 
 
 class MomentumTest(optimizer_tests.OptimizerTestBase):
@@ -30,7 +56,7 @@ class MomentumTest(optimizer_tests.OptimizerTestBase):
       kwargs["learning_rate"] = 0.1
     if "momentum" not in kwargs:
       kwargs["momentum"] = 0.9
-    return momentum.Momentum(**kwargs)
+    return momentum_lib.Momentum(**kwargs)
 
   def testDense(self):
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]

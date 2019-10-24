@@ -33,7 +33,7 @@ def momentum_update(update, learning_rate, mu, momentum, use_nesterov):
   """Computes a momentum update for a single parameter."""
   momentum = (mu * momentum) + update
   if use_nesterov:
-    update = (learning_rate * update) + (learning_rate * mu * momentum)
+    update = learning_rate * ((mu * momentum) + update)
   else:
     update = learning_rate * momentum
   return update, momentum

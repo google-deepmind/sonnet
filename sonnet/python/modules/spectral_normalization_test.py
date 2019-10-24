@@ -57,53 +57,17 @@ class SpectralNormalizationTest(tf.test.TestCase):
   def test_spectral_norm_creates_variables(self):
     with tf.Graph().as_default():
       ones_weight = 4 * tf.eye(8, 8)
-      fake_var_name = ones_weight.name.split('/')[-1].split(':')[0]
       pre_spec_norm_vars = tf.global_variables()
       _ = spectral_normalization.spectral_norm(ones_weight)
       post_spec_norm_vars = tf.global_variables()
       self.assertEmpty(pre_spec_norm_vars)
       self.assertLen(post_spec_norm_vars, 1)
-      self.assertEqual(
-          post_spec_norm_vars[0].name.split('/')[-1], '%s_u0:0' % fake_var_name)
-
-  def test_weight_pattern_creates_matching_normal_variables(self):
-    with tf.Graph().as_default():
-      x_input = tf.random_uniform(shape=[8, 16], dtype=tf.float32)
-      sn_weight_linear = spectral_normalization.wrap_with_spectral_norm(
-          basic.Linear, {'eps': 1e-4})(16)
-      _ = sn_weight_linear(x_input)
-      all_vars = tf.global_variables()
-      var_names = set(v.name.split('/')[-1] for v in all_vars)
-      self.assertLen(all_vars, 3)
-      self.assertEqual(var_names, set(['w:0', 'b:0', 'w_u0:0']))
-
-  def test_weight_pattern_creates_matching_unusual_variables(self):
-    with tf.Graph().as_default():
-      x_input = tf.random_uniform(shape=[8, 16], dtype=tf.float32)
-      sn_weight_linear = spectral_normalization.wrap_with_spectral_norm(
-          basic.Linear, {'eps': 1e-4}, weight_pattern='.*/b$')(16)
-      _ = sn_weight_linear(x_input)
-      all_vars = tf.global_variables()
-      var_names = set(v.name.split('/')[-1] for v in all_vars)
-      self.assertLen(all_vars, 3)
-      self.assertEqual(var_names, set(['w:0', 'b:0', 'b_u0:0']))
-
-  def test_weight_pattern_creates_matching_no_variables(self):
-    with tf.Graph().as_default():
-      x_input = tf.random_uniform(shape=[8, 16], dtype=tf.float32)
-      sn_weight_linear = spectral_normalization.wrap_with_spectral_norm(
-          basic.Linear, {'eps': 1e-4}, weight_pattern='.*/notavariable$')(16)
-      _ = sn_weight_linear(x_input)
-      all_vars = tf.global_variables()
-      var_names = set(v.name.split('/')[-1] for v in all_vars)
-      self.assertLen(all_vars, 2)
-      self.assertEqual(var_names, set(['w:0', 'b:0']))
+      self.assertEqual(post_spec_norm_vars[0].name.split('/')[-1], 'u0:0')
 
   def test_wrapper_creates_variables(self):
     with tf.Graph().as_default():
       SNLinear = functools.partial(  # pylint: disable=invalid-name
-          spectral_normalization.SpectralNormWrapper,
-          snt.Linear, {}, None, None)
+          spectral_normalization.SpectralNormWrapper, snt.Linear, {}, None)
       input_ = tf.zeros((8, 8), dtype=tf.float32)
       linear_layer_with_sn = SNLinear(16)
       _ = linear_layer_with_sn(input_)
@@ -114,7 +78,7 @@ class SpectralNormalizationTest(tf.test.TestCase):
     with tf.Graph().as_default():
       SNLinear = functools.partial(  # pylint: disable=invalid-name
           spectral_normalization.SpectralNormWrapper, snt.Linear, {},
-          'POWER_ITERATION_OPS', None)
+          'POWER_ITERATION_OPS')
       input_ = tf.zeros((8, 8), dtype=tf.float32)
       linear_layer_with_sn = SNLinear(16)
       output_update = linear_layer_with_sn(input_)

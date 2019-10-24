@@ -36,8 +36,7 @@ import tensorflow as tf
 
 def wrap_with_spectral_norm(module_class,
                             sn_kwargs=None,
-                            pow_iter_collection=None,
-                            weight_pattern=None):
+                            pow_iter_collection=None):
   """Returns a constructor for the inner class with spectral normalization.
 
   This function accepts a Sonnet AbstractModule class as argument (the class,
@@ -67,24 +66,18 @@ def wrap_with_spectral_norm(module_class,
         in addition to the weight tensor.
     pow_iter_collection: The name of a global collection for potentially
         storing ops for updating internal variables.
-    weight_pattern: A string interpreted as a regex pattern which is used
-        to match against variables to decide whether or not to apply spectral
-        norm to their construction. If None, this defaults to a pattern which
-        applies spectral norm to variables named 'w'.
   Returns:
     An snt.AbstractModule class representing the original with spectral norm.
   """
   sn_kwargs = sn_kwargs or {}
   return functools.partial(
-      SpectralNormWrapper, module_class, sn_kwargs, pow_iter_collection,
-      weight_pattern)
+      SpectralNormWrapper, module_class, sn_kwargs, pow_iter_collection)
 
 
 class SpectralNormWrapper(base.AbstractModule):
   """Wraps a Sonnet Module to selectively apply Spectral Normalization."""
 
-  def __init__(self, module, sn_kwargs, pow_iter_collection,
-               weight_pattern, *args, **kwargs):
+  def __init__(self, module, sn_kwargs, pow_iter_collection, *args, **kwargs):
     """Constructs a wrapped Sonnet module with Spectral Normalization.
 
     The module expects a first argument which should be a Sonnet AbstractModule
@@ -110,19 +103,13 @@ class SpectralNormWrapper(base.AbstractModule):
           in addition to the weight tensor.
       pow_iter_collection: The name of a global collection for potentially
           storing ops for updating internal variables.
-      weight_pattern: A string interpreted as a regex pattern which is used
-        to match against variables to decide whether or not to apply spectral
-        norm to their construction. If None, this defaults to a pattern which
-        applies spectral norm to variables named 'w'.
       *args: Construction-time arguments to the module.
       **kwargs: Construction-time  keyword arguments to the module.
     """
     name = kwargs.get('name', 'sn') + '_wrapper'
-    weight_pattern = weight_pattern or '.*/w$'
     # Our getter needs to be able to be disabled.
     getter_immediate_update, getter_deferred_update = self.sn_getter(sn_kwargs)
-    w_getter = (
-        lambda g: util.custom_getter_router({weight_pattern: g}, lambda s: s))
+    w_getter = lambda g: util.custom_getter_router({'.*/w$': g}, lambda s: s)
     getter_immediate_update = w_getter(getter_immediate_update)
     getter_deferred_update = w_getter(getter_deferred_update)
     self._context_getter = context.Context(
@@ -208,9 +195,8 @@ def spectral_norm(weight,
   """
   w_shape = weight.shape.as_list()
   w_mat = tf.reshape(weight, [-1, w_shape[-1]])
-  weight_name = weight.name.split('/')[-1].split(':')[0]
   u0 = tf.get_variable(
-      weight_name + '_u0', [1, w_shape[-1]],
+      'u0', [1, w_shape[-1]],
       initializer=tf.truncated_normal_initializer(),
       trainable=False)
   u0_ = u0

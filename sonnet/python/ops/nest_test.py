@@ -166,13 +166,20 @@ class NestTest(tf.test.TestCase):
     self.assertEqual(structure, unflattened)
 
   def testPackIterableAs_notIterableError(self):
-    with self.assertRaisesRegexp(TypeError,
-                                 "flat_sequence must be a sequence"):
+    # NOTE(taylorrobie): The second pattern is for version compatibility.
+    with self.assertRaisesRegexp(
+        TypeError,
+        "(Attempted to pack value:\n  bye\ninto a sequence, but found "
+        "incompatible type `<(type|class) 'str'>` instead.)|"
+        "(flat_sequence must be a sequence)"):
       nest.pack_iterable_as("hi", "bye")
 
   def testPackIterableAs_scalarStructureError(self):
+    # NOTE(taylorrobie): The second pattern is for version compatibility.
     with self.assertRaisesRegexp(
-        ValueError, r"Structure is a scalar but len\(flat_sequence\) == 2 > 1"):
+        ValueError,
+        "(nest cannot guarantee that it is safe to map one to the other.)|"
+        "(Structure is a scalar)"):
       nest.pack_iterable_as("hi", ["bye", "twice"])
 
   def testPackIterableAs_wrongLengthsError(self):

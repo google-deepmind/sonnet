@@ -73,8 +73,7 @@ class FeedForwardTest(test_utils.TestCase):
 
     expected_output = np.dot(inputs.numpy(), weight.numpy()) + bias.numpy()
 
-    # TODO(mareynolds) revisit these thresholds.
-    self.assertAllClose(output.numpy(), expected_output, atol=5e-3)
+    self.assertAllClose(output.numpy(), expected_output, atol=1e-2)
     # State should remain at dummy value.
     self.assertAllClose(prev_state.numpy(), next_state.numpy(), atol=5e-3)
 

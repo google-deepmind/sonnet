@@ -23,7 +23,6 @@ snt_py_test(
     name = "control_test",
     srcs = ["control_test.py"],
     main = "control_test.py",
-    tpu = False,  # TODO(b/141052797): Test is flaky on TPU.
     deps = [
         ":control",
         # pip: absl/testing:parameterized

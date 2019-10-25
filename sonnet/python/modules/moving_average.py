@@ -52,9 +52,9 @@ class MovingAverage(base.AbstractModule):
                        "but is {}.".format(decay))
     self._decay = decay
     if local:
-      self._collection = tf.GraphKeys.LOCAL_VARIABLES
+      self._collection = tf.compat.v1.GraphKeys.LOCAL_VARIABLES
     else:
-      self._collection = tf.GraphKeys.GLOBAL_VARIABLES
+      self._collection = tf.compat.v1.GraphKeys.GLOBAL_VARIABLES
 
   def reset(self):
     return tf.group(

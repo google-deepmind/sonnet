@@ -123,7 +123,8 @@ test_predictions = linear_regression_module(test_data)
 # ...
 
 # Get the regularization losses and add them together.
-graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+graph_regularizers = tf.get_collection(
+    tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
 total_regularization_loss = tf.reduce_sum(graph_regularizers)
 
 # ...

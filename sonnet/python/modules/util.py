@@ -59,14 +59,15 @@ def get_variable_scope_name(value):
     raise ValueError("Not a variable scope: {}".format(value))
 
 
-def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
+def get_variables_in_scope(
+    scope, collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
   """Returns a tuple `tf.Variable`s in a scope for a given collection.
 
   Args:
     scope: `tf.VariableScope` or string to retrieve variables from.
     collection: Collection to restrict query to. By default this is
-        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-        variables such as moving averages.
+        `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+        include non-trainable variables such as moving averages.
 
   Returns:
     A tuple of `tf.Variable` objects.
@@ -82,8 +83,8 @@ def get_variables_in_scope(scope, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
   return tuple(tf.get_collection(collection, scope_name))
 
 
-def get_variables_in_module(module,
-                            collection=tf.GraphKeys.TRAINABLE_VARIABLES):
+def get_variables_in_module(
+    module, collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
   """Returns tuple of `tf.Variable`s declared inside an `snt.Module`.
 
   Note that this operates by searching the variable scope a module contains,
@@ -93,8 +94,8 @@ def get_variables_in_module(module,
   Args:
     module: `snt.Module` instance to query the scope of.
     collection: Collection to restrict query to. By default this is
-      `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-      variables such as moving averages.
+      `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+      include non-trainable variables such as moving averages.
 
   Returns:
     A tuple of `tf.Variable` objects.
@@ -369,10 +370,11 @@ def custom_getter_router(custom_getter_map, name_fn):
   return _custom_getter
 
 
-def get_normalized_variable_map(scope_or_module,
-                                collection=tf.GraphKeys.GLOBAL_VARIABLES,
-                                context=None,
-                                group_sliced_variables=True):
+def get_normalized_variable_map(
+    scope_or_module,
+    collection=tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
+    context=None,
+    group_sliced_variables=True):
   """Builds map of `tf.Variable`s in scope or module with normalized names.
 
   The names of the variables are normalized to remove the scope prefix.
@@ -380,8 +382,8 @@ def get_normalized_variable_map(scope_or_module,
   Args:
     scope_or_module: Scope or module to build map from.
     collection: Collection to restrict query to. By default this is
-        `tf.Graphkeys.GLOBAL_VARIABLES`, which includes non-trainable variables
-        such as moving averages.
+        `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`, which includes
+        non-trainable variables such as moving averages.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix. By default `None`, which means
         `context=scope`.
@@ -426,7 +428,7 @@ def get_normalized_variable_map(scope_or_module,
   return var_map
 
 
-def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
+def get_saver(scope, collections=(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,),  # pylint: disable=redefined-outer-name
               context=None, **kwargs):
   """Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
@@ -437,8 +439,9 @@ def get_saver(scope, collections=(tf.GraphKeys.GLOBAL_VARIABLES,),  # pylint: di
   Args:
     scope: Scope or module. Variables within will be saved or restored.
     collections: Sequence of collections of variables to restrict
-        `tf.train.Saver` to. By default this is `tf.GraphKeys.GLOBAL_VARIABLES`
-        which includes moving averages variables as well as trainable variables.
+        `tf.train.Saver` to. By default this is
+        `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES` which includes moving
+        averages variables as well as trainable variables.
     context: Scope or module, identical to or parent of `scope`. If given, this
         will be used as the stripped prefix.
     **kwargs: Extra keyword arguments to pass to tf.train.Saver.
@@ -498,9 +501,10 @@ def _get_vars_to_collections(variables):
     for collection_name in list(graph.collections):
       entries = set(entry for entry in graph.get_collection(collection_name)
                     if isinstance(entry, tf.Variable))
-      # For legacy reasons, tf.GraphKeys.GLOBAL_VARIABLES == "variables".
+      # For legacy reasons,
+      #    tf.compat.v1.GraphKeys.GLOBAL_VARIABLES == "variables".
       # Correcting for this here, to avoid confusion.
-      if collection_name == tf.GraphKeys.GLOBAL_VARIABLES:
+      if collection_name == tf.compat.v1.GraphKeys.GLOBAL_VARIABLES:
         collection_name = "global_variables"
       for var in entries.intersection(variables):
         var_to_collections[var].append(collection_name)

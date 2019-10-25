@@ -258,7 +258,8 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
       net = snt.BatchNorm()(net, is_training=True)
 
     saver1 = snt.get_saver(s1)
-    saver2 = snt.get_saver(s1, collections=(tf.GraphKeys.TRAINABLE_VARIABLES,))
+    saver2 = snt.get_saver(s1, collections=(
+        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,))
 
     self.assertIsInstance(saver1, tf.train.Saver)
     self.assertIsInstance(saver2, tf.train.Saver)

@@ -388,7 +388,8 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
                      regularizers={"w": w_regularizer, "b": b_regularizer})
     lin(inputs)
 
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     self.assertLen(regularizers, 2)
     if not tf.executing_eagerly():
       self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
@@ -406,13 +407,13 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
     all_vars = tf.trainable_variables()
     linear_vars = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES,
+        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
         scope=linear.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES,
+        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES,
+        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(linear.output_size, clone1.output_size)
@@ -646,7 +647,8 @@ class AddBiasTest(tf.test.TestCase, parameterized.TestCase):
       self.evaluate(tf.global_variables_initializer())
       output_data, output_subtract_data, b = self.evaluate(
           [output, output_subtract, add.b])
-      regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+      regularizers = tf.get_collection(
+          tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
       if not tf.executing_eagerly():
         self.assertRegexpMatches(regularizers[0].name, ".*l2_regularizer.*")
       if not bias_shape:  # Scalar bias.
@@ -901,7 +903,8 @@ class TrainableVariableTest(tf.test.TestCase, parameterized.TestCase):
         name=variable_name, shape=[1], regularizers={"w": w_regularizer})
     var()
 
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     if tf.executing_eagerly():
       # Tensor name is not supported in eager mode.
       self.assertLen(regularizers, 1)

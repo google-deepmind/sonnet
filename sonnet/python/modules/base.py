@@ -635,7 +635,8 @@ class AbstractModule(object):
     """
     return tuple(v for v in self.variables if not v.trainable)
 
-  def get_variables(self, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
+  def get_variables(self,
+                    collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
     """Returns tuple of `tf.Variable`s declared inside this module.
 
     Note that this operates by searching this module's variable scope,
@@ -647,8 +648,8 @@ class AbstractModule(object):
 
     Args:
       collection: Collection to restrict query to. By default this is
-        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-        variables such as moving averages.
+        `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+        include non-trainable variables such as moving averages.
 
     Returns:
       A tuple of `tf.Variable` objects.
@@ -672,7 +673,8 @@ class AbstractModule(object):
       return util.get_variables_in_scope(
           self.variable_scope, collection=collection)
 
-  def get_all_variables(self, collection=tf.GraphKeys.TRAINABLE_VARIABLES):
+  def get_all_variables(self,
+                        collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
     """Returns all `tf.Variable`s used when the module is connected.
 
     See the documentation for `AbstractModule._capture_variables()` for more
@@ -680,8 +682,8 @@ class AbstractModule(object):
 
     Args:
       collection: Collection to restrict query to. By default this is
-        `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-        variables such as moving averages.
+        `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+        include non-trainable variables such as moving averages.
 
     Returns:
       A sorted (by variable name) tuple of `tf.Variable` objects.

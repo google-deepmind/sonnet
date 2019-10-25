@@ -21,7 +21,6 @@ from __future__ import print_function
 
 from absl.testing import parameterized
 import numpy as np
-
 import sonnet as snt
 from sonnet.python.modules.nets import dilation
 
@@ -211,7 +210,8 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
         regularizers={"w": w_regularizer, "b": b_regularizer})
     dilation_mod(tf.convert_to_tensor(self._images))
 
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
 
     # There are two regularizers per level
     layers_number = 8

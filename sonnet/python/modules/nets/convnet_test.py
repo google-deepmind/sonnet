@@ -357,7 +357,8 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     input_to_net = tf.random_normal(dtype=tf.float32, shape=(1, 100, 100, 3))
     model(input_to_net)
 
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     expected_num_regularizers = 3 * (2 if use_bias else 1)
     self.assertLen(regularizers, expected_num_regularizers)
     if not tf.executing_eagerly():

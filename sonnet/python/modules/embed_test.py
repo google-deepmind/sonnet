@@ -163,7 +163,8 @@ class EmbedTest(parameterized.TestCase, tf.test.TestCase):
         regularizers={"embeddings": regularizer})
     embed(tf.convert_to_tensor(self._ids))
 
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
 
   def testProperties(self):

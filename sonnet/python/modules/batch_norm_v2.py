@@ -112,12 +112,13 @@ class BatchNormV2(base.AbstractModule):
 
   For example, to run the updates manually:
 
-      bn = BatchNormV2(update_ops_collection=tf.GraphKeys.UPDATE_OPS)
+      bn = BatchNormV2(update_ops_collection=tf.compat.v1.GraphKeys.UPDATE_OPS)
       train_net = bn(train_inputs, is_training=True)
 
       ...
 
-      update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+      update_ops = tf.group(*tf.get_collection(
+          tf.compat.v1.GraphKeys.UPDATE_OPS))
       train_op = tf.group(train_op, update_ops)
 
   Then, whenever `train_op` is run so also are the moving average update ops.
@@ -235,8 +236,8 @@ class BatchNormV2(base.AbstractModule):
         dtype=stat_dtype,
         shape=(self._num_channels,),
         collections=[
-            tf.GraphKeys.MOVING_AVERAGE_VARIABLES,
-            tf.GraphKeys.GLOBAL_VARIABLES,
+            tf.compat.v1.GraphKeys.MOVING_AVERAGE_VARIABLES,
+            tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
         ],
         initializer=self._initializers[self.MOVING_MEAN],
         trainable=False)
@@ -248,8 +249,8 @@ class BatchNormV2(base.AbstractModule):
         dtype=stat_dtype,
         shape=(self._num_channels,),
         collections=[
-            tf.GraphKeys.MOVING_AVERAGE_VARIABLES,
-            tf.GraphKeys.GLOBAL_VARIABLES,
+            tf.compat.v1.GraphKeys.MOVING_AVERAGE_VARIABLES,
+            tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
         ],
         initializer=self._initializers[self.MOVING_VARIANCE],
         trainable=False)

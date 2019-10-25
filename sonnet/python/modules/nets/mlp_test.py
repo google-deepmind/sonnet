@@ -193,7 +193,8 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
                        regularizers=regularizers, use_dropout=use_dropout)
     mlp(inputs)
 
-    graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    graph_regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     self.assertEqual(len(graph_regularizers), 3 * (2 if use_bias else 1))
     if not tf.executing_eagerly():
       self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")

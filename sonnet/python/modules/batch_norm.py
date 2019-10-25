@@ -93,7 +93,7 @@ class BatchNorm(base.AbstractModule):
 
   You can either update the moving averages automatically by setting
   `update_ops_collection=None` or by running the ops in the given collection,
-  by default tf.GraphKeys.UPDATE_OPS.
+  by default tf.compat.v1.GraphKeys.UPDATE_OPS.
 
   For example, to run the updates automatically:
 
@@ -111,7 +111,8 @@ class BatchNorm(base.AbstractModule):
 
       ...
 
-      update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+      update_ops = tf.group(*tf.get_collection(
+          tf.compat.v1.GraphKeys.UPDATE_OPS))
       train_op = tf.group(train_op, update_ops)
 
   Then, whenever `train_op` is run so also are the moving average update ops.
@@ -173,7 +174,7 @@ class BatchNorm(base.AbstractModule):
         moving average update ops to. If `None`, we instead add the update ops
         as control dependencies of the output of the module. This may result in
         some slowdown, as the feed-forward of the network is now blocked. By
-        default, `tf.GraphKeys.UPDATE_OPS`.
+        default, `tf.compat.v1.GraphKeys.UPDATE_OPS`.
       fused: Use nn.fused_batch_norm if True, nn.batch_normalization otherwise.
       name: Name of the module.
 
@@ -223,8 +224,8 @@ class BatchNorm(base.AbstractModule):
         dtype=stat_dtype,
         shape=self._mean_shape,
         collections=[
-            tf.GraphKeys.MOVING_AVERAGE_VARIABLES,
-            tf.GraphKeys.GLOBAL_VARIABLES,
+            tf.compat.v1.GraphKeys.MOVING_AVERAGE_VARIABLES,
+            tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
         ],
         initializer=self._initializers[self.MOVING_MEAN],
         trainable=False)
@@ -236,8 +237,8 @@ class BatchNorm(base.AbstractModule):
         dtype=stat_dtype,
         shape=self._mean_shape,
         collections=[
-            tf.GraphKeys.MOVING_AVERAGE_VARIABLES,
-            tf.GraphKeys.GLOBAL_VARIABLES,
+            tf.compat.v1.GraphKeys.MOVING_AVERAGE_VARIABLES,
+            tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
         ],
         initializer=self._initializers[self.MOVING_VARIANCE],
         trainable=False)

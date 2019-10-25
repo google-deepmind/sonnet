@@ -519,7 +519,8 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     wrapped_lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that we have regularization losses.
-    num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+    num_reg_losses = len(tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES))
     if use_batch_norm_h or use_batch_norm_x:
       self.assertEqual(num_reg_losses, len(keys) + 1)
     else:
@@ -969,7 +970,8 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     lstm(inputs, (prev_hidden, prev_cell))
 
     # Test that we have regularization losses.
-    num_reg_losses = len(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+    num_reg_losses = len(tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES))
     num_reg_losses_expected = len(lstm.convolutions) * len(keys)
     if use_bias and not legacy_bias_behaviour:
       # Bias is not applied to hidden
@@ -1292,8 +1294,8 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
     gru(inputs, state)
 
     # Test that we have regularization losses.
-    self.assertLen(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES),
-                   len(keys))
+    self.assertLen(tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES), len(keys))
 
 
 # @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes

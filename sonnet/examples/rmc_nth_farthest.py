@@ -157,7 +157,8 @@ def build_and_train(iterations, log_stride, test=False):
         dtype=tf.int64,
         initializer=tf.zeros_initializer(),
         trainable=False,
-        collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
+        collections=[tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
+                     tf.compat.v1.GraphKeys.GLOBAL_STEP])
 
     # Create the optimizer.
     learning_rate_op = tf.reduce_max([

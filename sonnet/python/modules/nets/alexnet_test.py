@@ -157,8 +157,8 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
     net(inputs1, keep_prob1, is_training=True)
     net(inputs2, keep_prob2, is_training=True)
 
-    self.assertEqual(len(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)),
-                     7 * 2)
+    self.assertLen(tf.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES),
+                   7 * 2)
 
     model_variables = net.get_variables()
     self.assertEqual(len(model_variables), 7 * 2)
@@ -195,7 +195,8 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
     inputs = tf.ones(dtype=tf.float32, shape=[1] + input_shape)
     alex_net(inputs)
 
-    graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    graph_regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
 
     alex_net_conv_layers = len(alex_net.conv_modules)
     self.assertEqual(len(graph_regularizers), 2 * alex_net_conv_layers)

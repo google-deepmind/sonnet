@@ -233,7 +233,8 @@ class VanillaRNNTest(tf.test.TestCase):
                                  hidden_size=self.hidden_size,
                                  regularizers=valid_regularizers)
     vanilla_rnn(inputs, prev_state)
-    regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     self.assertEqual(len(regularizers), 2)
 
 

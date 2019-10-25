@@ -145,7 +145,8 @@ def build_graph(lstm_depth=3, batch_size=32, num_embedding=32, num_hidden=128,
       dtype=tf.int64,
       initializer=tf.zeros_initializer(),
       trainable=False,
-      collections=[tf.GraphKeys.GLOBAL_VARIABLES, tf.GraphKeys.GLOBAL_STEP])
+      collections=[tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
+                   tf.compat.v1.GraphKeys.GLOBAL_STEP])
 
   # Define optimizer and training step.
   optimizer = tf.train.AdamOptimizer(

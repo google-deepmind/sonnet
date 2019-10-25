@@ -108,7 +108,8 @@ class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
     core.initial_state(batch_size, dtype=tf.float32, trainable=trainable,
                        trainable_regularizers=trainable_regularizers)
 
-    graph_regularizers = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    graph_regularizers = tf.get_collection(
+        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
     if not trainable:
       self.assertFalse(graph_regularizers)
     else:

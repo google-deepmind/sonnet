@@ -423,8 +423,8 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
         "simple_submodule/w:0",
     ], all_variable_names)
 
-    self.assertEmpty(
-        module.get_all_variables(collection=tf.GraphKeys.LOCAL_VARIABLES))
+    self.assertEmpty(module.get_all_variables(
+        collection=tf.compat.v1.GraphKeys.LOCAL_VARIABLES))
 
     # Create another ModuleWithSubmodules with the same submodules
     module = ModuleWithSubmodules(
@@ -449,15 +449,15 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     ], all_variable_names)
 
   @parameterized.parameters(
-      [lambda m: m.get_all_variables(tf.GraphKeys.LOCAL_VARIABLES),
+      [lambda m: m.get_all_variables(tf.compat.v1.GraphKeys.LOCAL_VARIABLES),
        lambda m: m.non_trainable_variables])
   def testGetAllLocalVariables(self, get_non_trainable_variables):
     def local_custom_getter(getter, *args, **kwargs):
       kwargs["trainable"] = False
       if "collections" in kwargs and kwargs["collections"] is not None:
-        kwargs["collections"] += [tf.GraphKeys.LOCAL_VARIABLES]
+        kwargs["collections"] += [tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
       else:
-        kwargs["collections"] = [tf.GraphKeys.LOCAL_VARIABLES]
+        kwargs["collections"] = [tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
       return getter(*args, **kwargs)
 
     inputs = tf.ones(dtype=tf.float32, shape=[10, 10])

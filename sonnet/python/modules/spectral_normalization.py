@@ -193,6 +193,9 @@ def spectral_norm(weight,
       sigma: The estimated singular value for the weight tensor.
       u0: The internal persisted variable.
   """
+  original_dtype = weight.dtype
+  weight = tf.cast(weight, tf.float32)
+
   w_shape = weight.shape.as_list()
   w_mat = tf.reshape(weight, [-1, w_shape[-1]])
   u0 = tf.get_variable(
@@ -221,4 +224,8 @@ def spectral_norm(weight,
       w_bar = tf.identity(w_bar)
   else:
     tf.add_to_collection(update_collection, u0.assign(u0_))
-  return {'w_bar': w_bar, 'sigma': sigma, 'u0': u0}
+  return {
+      'w_bar': tf.cast(w_bar, original_dtype),
+      'sigma': tf.cast(sigma, original_dtype),
+      'u0': tf.cast(u0, original_dtype)
+  }

@@ -54,6 +54,16 @@ class SpectralNormalizationTest(tf.test.TestCase):
         _, sigma_v = sess.run([ones_weight, sigma])
         self.assertLess(abs(4.0 - sigma_v), _ACCEPTABLE_ERROR)
 
+  def test_raw_spectral_norm_bfloat16(self):
+    with tf.Graph().as_default():
+      ones_weight = 4 * tf.eye(8, 8, dtype=tf.bfloat16)
+      sigma = spectral_normalization.spectral_norm(ones_weight)['sigma']
+      with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        _, sigma_v = sess.run([ones_weight, sigma])
+        self.assertEqual(tf.bfloat16, sigma_v.dtype)
+        self.assertLess(abs(4.0 - float(sigma_v)), _ACCEPTABLE_ERROR)
+
   def test_spectral_norm_creates_variables(self):
     with tf.Graph().as_default():
       ones_weight = 4 * tf.eye(8, 8)
@@ -98,6 +108,18 @@ class SpectralNormalizationTest(tf.test.TestCase):
             np.equal(sing_val_v_implicit, sing_val_v_explicit).all())
         self.assertFalse(
             np.equal(original_sing_val_v, sing_val_v_explicit).all())
+
+  def test_update_sn_compatible_with_bfloat16(self):
+    with tf.Graph().as_default():
+      SNLinear = functools.partial(  # pylint: disable=invalid-name
+          spectral_normalization.SpectralNormWrapper, snt.Linear, {},
+          'POWER_ITERATION_OPS')
+      input_ = tf.zeros((8, 8), dtype=tf.float32)
+      linear_layer_with_sn = SNLinear(16)
+      output_update = linear_layer_with_sn(input_)
+      with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        sess.run(output_update)
 
   def test_conflicting_names_no_scope(self):
     with tf.Graph().as_default():

@@ -111,7 +111,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`ACTCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="ACTCore.get_all_variables" />
+#### [`ACTCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="ACTCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -122,8 +122,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -165,8 +165,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -456,7 +456,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AbstractModule.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="AbstractModule.get_all_variables" />
+#### [`AbstractModule.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="AbstractModule.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -467,8 +467,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -510,8 +510,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -790,7 +790,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AddBias.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="AddBias.get_all_variables" />
+#### [`AddBias.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="AddBias.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -801,8 +801,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -844,8 +844,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1085,7 +1085,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AffineGridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="AffineGridWarper.get_all_variables" />
+#### [`AffineGridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="AffineGridWarper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1096,8 +1096,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1139,8 +1139,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1493,7 +1493,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`AttentiveRead.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="AttentiveRead.get_all_variables" />
+#### [`AttentiveRead.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="AttentiveRead.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1504,8 +1504,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1547,8 +1547,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1760,7 +1760,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchApply.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchApply.get_all_variables" />
+#### [`BatchApply.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchApply.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -1771,8 +1771,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -1814,8 +1814,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2016,7 +2016,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchFlatten.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchFlatten.get_all_variables" />
+#### [`BatchFlatten.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchFlatten.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -2027,8 +2027,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2070,8 +2070,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2258,7 +2258,7 @@ batch statistics.
 
 You can either update the moving averages automatically by setting
 `update_ops_collection=None` or by running the ops in the given collection,
-by default tf.GraphKeys.UPDATE_OPS.
+by default tf.compat.v1.GraphKeys.UPDATE_OPS.
 
 For example, to run the updates automatically:
 
@@ -2276,7 +2276,8 @@ For example, to run the updates manually:
 
     ...
 
-    update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+    update_ops = tf.group(*tf.get_collection(
+        tf.compat.v1.GraphKeys.UPDATE_OPS))
     train_op = tf.group(train_op, update_ops)
 
 Then, whenever `train_op` is run so also are the moving average update ops.
@@ -2291,7 +2292,7 @@ Some batch normalization caveats:
     the batch. This can exhibit itself as a higher test score with
     `test_local_stats=True` than `test_local_stats=False`.
 
-#### [`BatchNorm.__init__(axis=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection='update_ops', fused=False, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=138)<a id="BatchNorm.__init__" />
+#### [`BatchNorm.__init__(axis=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection='update_ops', fused=False, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=139)<a id="BatchNorm.__init__" />
 
 Constructs a BatchNorm module.
 
@@ -2328,7 +2329,7 @@ indices to reduce over with `axis`.
     moving average update ops to. If `None`, we instead add the update ops
     as control dependencies of the output of the module. This may result in
     some slowdown, as the feed-forward of the network is now blocked. By
-    default, `tf.GraphKeys.UPDATE_OPS`.
+    default, `tf.compat.v1.GraphKeys.UPDATE_OPS`.
 * `fused`: Use nn.fused_batch_norm if True, nn.batch_normalization otherwise.
 * `name`: Name of the module.
 
@@ -2343,7 +2344,7 @@ indices to reduce over with `axis`.
     are not callable.
 
 
-#### [`BatchNorm.__call__(input_batch, is_training, test_local_stats=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=480)<a id="BatchNorm.__call__" />
+#### [`BatchNorm.__call__(input_batch, is_training, test_local_stats=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=481)<a id="BatchNorm.__call__" />
 
 Connects the BatchNorm module into the graph.
 
@@ -2369,7 +2370,7 @@ Connects the BatchNorm module into the graph.
   base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.
 
 
-#### [`BatchNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=581)<a id="BatchNorm.beta" />
+#### [`BatchNorm.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=582)<a id="BatchNorm.beta" />
 
 
 
@@ -2389,12 +2390,12 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=591)<a id="BatchNorm.gamma" />
+#### [`BatchNorm.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=592)<a id="BatchNorm.gamma" />
 
 
 
 
-#### [`BatchNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchNorm.get_all_variables" />
+#### [`BatchNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchNorm.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -2405,8 +2406,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2448,8 +2449,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2466,7 +2467,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=559)<a id="BatchNorm.initializers" />
+#### [`BatchNorm.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=560)<a id="BatchNorm.initializers" />
 
 
 
@@ -2495,12 +2496,12 @@ Returns the last subgraph created by this module.
 Returns the name of the Module.
 
 
-#### [`BatchNorm.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=571)<a id="BatchNorm.moving_mean" />
+#### [`BatchNorm.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=572)<a id="BatchNorm.moving_mean" />
 
 
 
 
-#### [`BatchNorm.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=576)<a id="BatchNorm.moving_variance" />
+#### [`BatchNorm.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=577)<a id="BatchNorm.moving_variance" />
 
 
 
@@ -2530,12 +2531,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=563)<a id="BatchNorm.partitioners" />
+#### [`BatchNorm.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=564)<a id="BatchNorm.partitioners" />
 
 
 
 
-#### [`BatchNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=567)<a id="BatchNorm.regularizers" />
+#### [`BatchNorm.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm.py?l=568)<a id="BatchNorm.regularizers" />
 
 
 
@@ -2800,7 +2801,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchNormLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchNormLSTM.get_all_variables" />
+#### [`BatchNormLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchNormLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -2811,8 +2812,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -2877,8 +2878,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3176,12 +3177,13 @@ penalty.
 
 For example, to run the updates manually:
 
-    bn = BatchNormV2(update_ops_collection=tf.GraphKeys.UPDATE_OPS)
+    bn = BatchNormV2(update_ops_collection=tf.compat.v1.GraphKeys.UPDATE_OPS)
     train_net = bn(train_inputs, is_training=True)
 
     ...
 
-    update_ops = tf.group(*tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+    update_ops = tf.group(*tf.get_collection(
+        tf.compat.v1.GraphKeys.UPDATE_OPS))
     train_op = tf.group(train_op, update_ops)
 
 Then, whenever `train_op` is run so also are the moving average update ops.
@@ -3196,7 +3198,7 @@ Some batch normalization caveats:
     the batch. This can exhibit itself as a higher test score with
     `test_local_stats=True` than `test_local_stats=False`.
 
-#### [`BatchNormV2.__init__(data_format=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection=None, fused=True, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=156)<a id="BatchNormV2.__init__" />
+#### [`BatchNormV2.__init__(data_format=None, offset=True, scale=False, decay_rate=0.999, eps=0.001, initializers=None, partitioners=None, regularizers=None, update_ops_collection=None, fused=True, name='batch_norm')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=157)<a id="BatchNormV2.__init__" />
 
 Constructs a BatchNormV2 module.
 
@@ -3247,7 +3249,7 @@ additional elements of the minibatch.
 * `ValueError`: If `data_format` is invalid.
 
 
-#### [`BatchNormV2.__call__(input_batch, is_training, test_local_stats=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=505)<a id="BatchNormV2.__call__" />
+#### [`BatchNormV2.__call__(input_batch, is_training, test_local_stats=False)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=506)<a id="BatchNormV2.__call__" />
 
 Connects the BatchNormV2 module into the graph.
 
@@ -3272,7 +3274,7 @@ Connects the BatchNormV2 module into the graph.
   base.NotSupportedError: If `input_batch` has data type of `tf.bfloat16`.
 
 
-#### [`BatchNormV2.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=625)<a id="BatchNormV2.beta" />
+#### [`BatchNormV2.beta`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=626)<a id="BatchNormV2.beta" />
 
 
 
@@ -3292,12 +3294,12 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchNormV2.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=635)<a id="BatchNormV2.gamma" />
+#### [`BatchNormV2.gamma`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=636)<a id="BatchNormV2.gamma" />
 
 
 
 
-#### [`BatchNormV2.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchNormV2.get_all_variables" />
+#### [`BatchNormV2.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchNormV2.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3308,8 +3310,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3351,8 +3353,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3369,7 +3371,7 @@ connected to.
 Returns the Graph instance which the module is connected to, or None.
 
 
-#### [`BatchNormV2.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=603)<a id="BatchNormV2.initializers" />
+#### [`BatchNormV2.initializers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=604)<a id="BatchNormV2.initializers" />
 
 
 
@@ -3398,12 +3400,12 @@ Returns the last subgraph created by this module.
 Returns the name of the Module.
 
 
-#### [`BatchNormV2.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=615)<a id="BatchNormV2.moving_mean" />
+#### [`BatchNormV2.moving_mean`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=616)<a id="BatchNormV2.moving_mean" />
 
 
 
 
-#### [`BatchNormV2.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=620)<a id="BatchNormV2.moving_variance" />
+#### [`BatchNormV2.moving_variance`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=621)<a id="BatchNormV2.moving_variance" />
 
 
 
@@ -3433,12 +3435,12 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`BatchNormV2.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=607)<a id="BatchNormV2.partitioners" />
+#### [`BatchNormV2.partitioners`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=608)<a id="BatchNormV2.partitioners" />
 
 
 
 
-#### [`BatchNormV2.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=611)<a id="BatchNormV2.regularizers" />
+#### [`BatchNormV2.regularizers`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/batch_norm_v2.py?l=612)<a id="BatchNormV2.regularizers" />
 
 
 
@@ -3593,7 +3595,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BatchReshape.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BatchReshape.get_all_variables" />
+#### [`BatchReshape.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BatchReshape.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3604,8 +3606,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3647,8 +3649,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3865,7 +3867,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`BidirectionalRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="BidirectionalRNN.get_all_variables" />
+#### [`BidirectionalRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="BidirectionalRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -3876,8 +3878,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -3919,8 +3921,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -4275,7 +4277,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`CausalConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="CausalConv1D.get_all_variables" />
+#### [`CausalConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="CausalConv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -4286,8 +4288,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -4329,8 +4331,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -4635,7 +4637,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ConcatLinear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="ConcatLinear.get_all_variables" />
+#### [`ConcatLinear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="ConcatLinear.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -4646,8 +4648,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -4689,8 +4691,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5017,7 +5019,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv1D.get_all_variables" />
+#### [`Conv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5028,8 +5030,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5071,8 +5073,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5355,7 +5357,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv1DLSTM.get_all_variables" />
+#### [`Conv1DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv1DLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5366,8 +5368,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5409,8 +5411,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5765,7 +5767,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv1DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv1DTranspose.get_all_variables" />
+#### [`Conv1DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv1DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -5776,8 +5778,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -5819,8 +5821,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -6223,7 +6225,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv2D.get_all_variables" />
+#### [`Conv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -6234,8 +6236,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -6277,8 +6279,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -6561,7 +6563,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv2DLSTM.get_all_variables" />
+#### [`Conv2DLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv2DLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -6572,8 +6574,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -6615,8 +6617,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -6972,7 +6974,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv2DTranspose.get_all_variables" />
+#### [`Conv2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv2DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -6983,8 +6985,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -7026,8 +7028,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -7427,7 +7429,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv3D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv3D.get_all_variables" />
+#### [`Conv3D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv3D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -7438,8 +7440,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -7481,8 +7483,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -7868,7 +7870,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Conv3DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Conv3DTranspose.get_all_variables" />
+#### [`Conv3DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Conv3DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -7879,8 +7881,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -7922,8 +7924,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -8269,7 +8271,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`DeepRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="DeepRNN.get_all_variables" />
+#### [`DeepRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="DeepRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -8280,8 +8282,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -8323,8 +8325,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -8718,7 +8720,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`DepthwiseConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="DepthwiseConv2D.get_all_variables" />
+#### [`DepthwiseConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="DepthwiseConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -8729,8 +8731,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -8772,8 +8774,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9104,7 +9106,7 @@ Returns the Variable containing embeddings.
       graph yet, meaning the variables do not exist.
 
 
-#### [`Embed.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Embed.get_all_variables" />
+#### [`Embed.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Embed.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9115,8 +9117,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9158,8 +9160,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9381,7 +9383,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`FlattenTrailingDimensions.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="FlattenTrailingDimensions.get_all_variables" />
+#### [`FlattenTrailingDimensions.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="FlattenTrailingDimensions.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9392,8 +9394,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9435,8 +9437,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9671,7 +9673,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`GRU.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="GRU.get_all_variables" />
+#### [`GRU.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="GRU.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -9682,8 +9684,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -9733,8 +9735,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10013,7 +10015,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`GridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="GridWarper.get_all_variables" />
+#### [`GridWarper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="GridWarper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -10024,8 +10026,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10067,8 +10069,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10310,7 +10312,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`HighwayCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="HighwayCore.get_all_variables" />
+#### [`HighwayCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="HighwayCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -10321,8 +10323,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10374,8 +10376,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10755,7 +10757,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`InPlaneConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="InPlaneConv2D.get_all_variables" />
+#### [`InPlaneConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="InPlaneConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -10766,8 +10768,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -10809,8 +10811,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11160,7 +11162,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="LSTM.get_all_variables" />
+#### [`LSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="LSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -11171,8 +11173,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11227,8 +11229,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11500,7 +11502,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`LSTMBlockCell.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="LSTMBlockCell.get_all_variables" />
+#### [`LSTMBlockCell.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="LSTMBlockCell.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -11511,8 +11513,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11554,8 +11556,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11874,7 +11876,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`LayerNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="LayerNorm.get_all_variables" />
+#### [`LayerNorm.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="LayerNorm.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -11885,8 +11887,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -11928,8 +11930,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12218,7 +12220,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Linear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Linear.get_all_variables" />
+#### [`Linear.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Linear.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12229,8 +12231,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12272,8 +12274,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12541,7 +12543,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`MergeDims.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="MergeDims.get_all_variables" />
+#### [`MergeDims.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="MergeDims.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12552,8 +12554,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12595,8 +12597,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12790,7 +12792,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ModelRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="ModelRNN.get_all_variables" />
+#### [`ModelRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="ModelRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -12801,8 +12803,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -12844,8 +12846,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13054,7 +13056,7 @@ Return zero-filled state tensor(s).
 
 Module wrapping a function provided by the user.
 
-#### [`Module.__init__(build, custom_getter=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=764)<a id="Module.__init__" />
+#### [`Module.__init__(build, custom_getter=None, name=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=766)<a id="Module.__init__" />
 
 Constructs a module with a given build function.
 
@@ -13120,7 +13122,7 @@ outputs = model(inputs)
 * `TypeError`: If a given `custom_getter` is not callable.
 
 
-#### [`Module.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=831)<a id="Module.__call__" />
+#### [`Module.__call__(*args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=833)<a id="Module.__call__" />
 
 Forwards call to the passed-in build function.
 
@@ -13140,7 +13142,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Module.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Module.get_all_variables" />
+#### [`Module.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Module.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -13151,8 +13153,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13194,8 +13196,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13390,7 +13392,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`MovingAverage.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="MovingAverage.get_all_variables" />
+#### [`MovingAverage.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="MovingAverage.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -13401,8 +13403,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13444,8 +13446,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13812,7 +13814,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`RNNCellWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="RNNCellWrapper.get_all_variables" />
+#### [`RNNCellWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="RNNCellWrapper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -13823,8 +13825,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -13866,8 +13868,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14165,7 +14167,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`RNNCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="RNNCore.get_all_variables" />
+#### [`RNNCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="RNNCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14176,8 +14178,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14219,8 +14221,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14502,7 +14504,7 @@ Returns boolean indicating whether this module is defun wrapped.
 Returns the forget gate Tensor.
 
 
-#### [`RelationalMemory.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="RelationalMemory.get_all_variables" />
+#### [`RelationalMemory.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="RelationalMemory.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14513,8 +14515,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14556,8 +14558,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14825,7 +14827,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Residual.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Residual.get_all_variables" />
+#### [`Residual.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Residual.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -14836,8 +14838,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -14879,8 +14881,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15088,7 +15090,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`ResidualCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="ResidualCore.get_all_variables" />
+#### [`ResidualCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="ResidualCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15099,8 +15101,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15142,8 +15144,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15439,7 +15441,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SelectInput.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="SelectInput.get_all_variables" />
+#### [`SelectInput.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="SelectInput.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15450,8 +15452,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15493,8 +15495,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15832,7 +15834,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SeparableConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="SeparableConv1D.get_all_variables" />
+#### [`SeparableConv1D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="SeparableConv1D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -15843,8 +15845,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -15886,8 +15888,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -16318,7 +16320,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SeparableConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="SeparableConv2D.get_all_variables" />
+#### [`SeparableConv2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="SeparableConv2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16329,8 +16331,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -16372,8 +16374,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -16672,7 +16674,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`Sequential.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="Sequential.get_all_variables" />
+#### [`Sequential.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="Sequential.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16683,8 +16685,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -16896,7 +16898,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SkipConnectionCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="SkipConnectionCore.get_all_variables" />
+#### [`SkipConnectionCore.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="SkipConnectionCore.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -16907,8 +16909,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -16950,8 +16952,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17248,7 +17250,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`SliceByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="SliceByDim.get_all_variables" />
+#### [`SliceByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="SliceByDim.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -17259,8 +17261,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17302,8 +17304,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17516,7 +17518,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TileByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="TileByDim.get_all_variables" />
+#### [`TileByDim.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="TileByDim.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -17527,8 +17529,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17570,8 +17572,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17771,7 +17773,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TrainableInitialState.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="TrainableInitialState.get_all_variables" />
+#### [`TrainableInitialState.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="TrainableInitialState.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -17782,8 +17784,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -17825,8 +17827,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18022,7 +18024,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`TrainableVariable.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="TrainableVariable.get_all_variables" />
+#### [`TrainableVariable.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="TrainableVariable.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -18033,8 +18035,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18076,8 +18078,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18254,12 +18256,12 @@ the correct value once linear is given an input.
 Notice that linear_transpose's output_size value does not need to be defined
 until the module is connected to the graph.
 
-#### [`Transposable.input_shape()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=756)<a id="Transposable.input_shape" />
+#### [`Transposable.input_shape()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=758)<a id="Transposable.input_shape" />
 
 Returns shape of input `Tensor` passed at last call to `build`.
 
 
-#### [`Transposable.transpose(name=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=744)<a id="Transposable.transpose" />
+#### [`Transposable.transpose(name=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=746)<a id="Transposable.transpose" />
 
 Builds and returns transposed version of module.
 
@@ -18367,7 +18369,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`VanillaRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="VanillaRNN.get_all_variables" />
+#### [`VanillaRNN.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="VanillaRNN.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -18378,8 +18380,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18421,8 +18423,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18647,7 +18649,7 @@ Return zero-filled state tensor(s).
 
 
 
-### [`check_initializers(initializers, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=141)<a id="check_initializers" />
+### [`check_initializers(initializers, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=142)<a id="check_initializers" />
 
 Checks the given initializers.
 
@@ -18676,7 +18678,7 @@ to modules inside modules) that must satisfy the same constraints.
     `initializers` is not a Mapping.
 
 
-### [`check_partitioners(partitioners, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=182)<a id="check_partitioners" />
+### [`check_partitioners(partitioners, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=183)<a id="check_partitioners" />
 
 Checks the given partitioners.
 
@@ -18705,7 +18707,7 @@ to modules inside modules) that must satisfy the same constraints.
     `partitioners` is not a Mapping.
 
 
-### [`check_regularizers(regularizers, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=223)<a id="check_regularizers" />
+### [`check_regularizers(regularizers, keys)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=224)<a id="check_regularizers" />
 
 Checks the given regularizers.
 
@@ -18761,7 +18763,7 @@ limit values.
 * `ValueError`: If `net` dtype is non-float.
 
 
-### [`count_variables_by_type(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=631)<a id="count_variables_by_type" />
+### [`count_variables_by_type(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=635)<a id="count_variables_by_type" />
 
 Returns a dict mapping dtypes to number of variables and scalars.
 
@@ -18777,7 +18779,7 @@ Returns a dict mapping dtypes to number of variables and scalars.
     'num_variables'.
 
 
-### [`custom_getter_router(custom_getter_map, name_fn)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=301)<a id="custom_getter_router" />
+### [`custom_getter_router(custom_getter_map, name_fn)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=302)<a id="custom_getter_router" />
 
 Creates a custom getter than matches requests to dict of custom getters.
 
@@ -18814,17 +18816,17 @@ before matching.
 * `TypeError`: If an entry in `custom_getter_map` is not a callable function.
 
 
-### [`deprecation_warning(deprecation_message)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=968)<a id="deprecation_warning" />
+### [`deprecation_warning(deprecation_message)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=972)<a id="deprecation_warning" />
 
 Log a warning message the user is using deprecated functionality.
 
 
-### [`format_variable_map(variable_map, join_lines=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=551)<a id="format_variable_map" />
+### [`format_variable_map(variable_map, join_lines=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=555)<a id="format_variable_map" />
 
 Takes a key-to-variable map and formats it as a table.
 
 
-### [`format_variables(variables, join_lines=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=535)<a id="format_variables" />
+### [`format_variables(variables, join_lines=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=539)<a id="format_variables" />
 
 Takes a collection of variables and formats it as a table.
 
@@ -18878,7 +18880,7 @@ correctly.
       constraint and a parametrization function is also provided.
 
 
-### [`get_normalized_variable_map(scope_or_module, collection='variables', context=None, group_sliced_variables=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=372)<a id="get_normalized_variable_map" />
+### [`get_normalized_variable_map(scope_or_module, collection='variables', context=None, group_sliced_variables=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=373)<a id="get_normalized_variable_map" />
 
 Builds map of `tf.Variable`s in scope or module with normalized names.
 
@@ -18889,8 +18891,8 @@ The names of the variables are normalized to remove the scope prefix.
 
 * `scope_or_module`: Scope or module to build map from.
 * `collection`: Collection to restrict query to. By default this is
-      `tf.Graphkeys.GLOBAL_VARIABLES`, which includes non-trainable variables
-      such as moving averages.
+      `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`, which includes
+      non-trainable variables such as moving averages.
 * `context`: Scope or module, identical to or parent of `scope`. If given, this
       will be used as the stripped prefix. By default `None`, which means
       `context=scope`.
@@ -18909,7 +18911,7 @@ The names of the variables are normalized to remove the scope prefix.
 * `ValueError`: If `context` is given but is not a proper prefix of `scope`.
 
 
-### [`get_saver(scope, collections=('variables',), context=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=429)<a id="get_saver" />
+### [`get_saver(scope, collections=('variables',), context=None, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=431)<a id="get_saver" />
 
 Builds a `tf.train.Saver` for the scope or module, with normalized names.
 
@@ -18922,8 +18924,9 @@ module using a complementary `tf.train.Saver` object.
 
 * `scope`: Scope or module. Variables within will be saved or restored.
 * `collections`: Sequence of collections of variables to restrict
-      `tf.train.Saver` to. By default this is `tf.GraphKeys.GLOBAL_VARIABLES`
-      which includes moving averages variables as well as trainable variables.
+      `tf.train.Saver` to. By default this is
+      `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES` which includes moving
+      averages variables as well as trainable variables.
 * `context`: Scope or module, identical to or parent of `scope`. If given, this
       will be used as the stripped prefix.
 * `**kwargs`: Extra keyword arguments to pass to tf.train.Saver.
@@ -18933,7 +18936,7 @@ module using a complementary `tf.train.Saver` object.
     A `tf.train.Saver` object for Variables in the scope or module.
 
 
-### [`get_variables_in_module(module, collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=85)<a id="get_variables_in_module" />
+### [`get_variables_in_module(module, collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=86)<a id="get_variables_in_module" />
 
 Returns tuple of `tf.Variable`s declared inside an `snt.Module`.
 
@@ -18946,8 +18949,8 @@ used inside this module.
 
 * `module`: `snt.Module` instance to query the scope of.
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -18968,15 +18971,15 @@ Returns a tuple `tf.Variable`s in a scope for a given collection.
 
 * `scope`: `tf.VariableScope` or string to retrieve variables from.
 * `collection`: Collection to restrict query to. By default this is
-      `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-      variables such as moving averages.
+      `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+      include non-trainable variables such as moving averages.
 
 ##### Returns:
 
   A tuple of `tf.Variable` objects.
 
 
-### [`has_variable_scope(obj)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=457)<a id="has_variable_scope" />
+### [`has_variable_scope(obj)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=460)<a id="has_variable_scope" />
 
 Determines whether the given object has a variable scope.
 
@@ -19000,7 +19003,7 @@ Highway core with recurrent dropout.
   same highway core without recurrent dropout.
 
 
-### [`log_variables(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=566)<a id="log_variables" />
+### [`log_variables(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=570)<a id="log_variables" />
 
 Logs variable information.
 
@@ -19108,7 +19111,7 @@ with snt.observe_connections(logging_observer):
 * `None`: just yields control to the inner context.
 
 
-### [`parse_string_to_constructor(ctor_string)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=983)<a id="parse_string_to_constructor" />
+### [`parse_string_to_constructor(ctor_string)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=987)<a id="parse_string_to_constructor" />
 
 Returns a callable which corresponds to the constructor string.
 
@@ -19136,7 +19139,7 @@ remain serializable where necessary.
   Callable constructor which corresponds to `ctor_string`.
 
 
-### [`remove_unsupported_kwargs(module_or_fn, all_kwargs_dict)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1101)<a id="remove_unsupported_kwargs" />
+### [`remove_unsupported_kwargs(module_or_fn, all_kwargs_dict)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1105)<a id="remove_unsupported_kwargs" />
 
 Removes any kwargs not supported by `module_or_fn` from `all_kwargs_dict`.
 
@@ -19171,7 +19174,7 @@ function if in doubt.
   empty dict.
 
 
-### [`reuse_variables(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=661)<a id="reuse_variables" />
+### [`reuse_variables(method)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=665)<a id="reuse_variables" />
 
 Wraps an arbitrary method so it does variable sharing.
 
@@ -19284,7 +19287,7 @@ Split the first dimension of a tensor.
   The input tensor, with its first dimension split.
 
 
-### [`summarize_variables(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=596)<a id="summarize_variables" />
+### [`summarize_variables(variables=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=600)<a id="summarize_variables" />
 
 Logs a summary of variable information.
 
@@ -19305,7 +19308,7 @@ is logged, along with a warning.
     (in the default graph) are summarized.
 
 
-### [`supports_kwargs(module_or_fn, kwargs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1038)<a id="supports_kwargs" />
+### [`supports_kwargs(module_or_fn, kwargs_list)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=1042)<a id="supports_kwargs" />
 
 Determines whether the provided callable supports all the kwargs.
 
@@ -19374,7 +19377,7 @@ The trainable variables are created with the same shapes as the elements of
 * `ValueError`: if the user passes regularizers that are not functions.
 
 
-### [`variable_map_items(variable_map)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=472)<a id="variable_map_items" />
+### [`variable_map_items(variable_map)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=475)<a id="variable_map_items" />
 
 Yields an iterator over (string, variable) pairs in the variable map.
 
@@ -20067,7 +20070,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNet.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.AlexNet.get_all_variables" />
+#### [`nets.AlexNet.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.AlexNet.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -20078,8 +20081,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -20121,8 +20124,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -20394,7 +20397,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNetFull.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.AlexNetFull.get_all_variables" />
+#### [`nets.AlexNetFull.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.AlexNetFull.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -20405,8 +20408,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -20448,8 +20451,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -20721,7 +20724,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.AlexNetMini.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.AlexNetMini.get_all_variables" />
+#### [`nets.AlexNetMini.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.AlexNetMini.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -20732,8 +20735,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -20775,8 +20778,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -21096,7 +21099,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.ConvNet2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.ConvNet2D.get_all_variables" />
+#### [`nets.ConvNet2D.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.ConvNet2D.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -21107,8 +21110,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -21150,8 +21153,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -21579,7 +21582,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.ConvNet2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.ConvNet2DTranspose.get_all_variables" />
+#### [`nets.ConvNet2DTranspose.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.ConvNet2DTranspose.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -21590,8 +21593,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -21633,8 +21636,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22003,7 +22006,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.Dilation.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.Dilation.get_all_variables" />
+#### [`nets.Dilation.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.Dilation.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -22014,8 +22017,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22057,8 +22060,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22301,7 +22304,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`nets.MLP.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.MLP.get_all_variables" />
+#### [`nets.MLP.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.MLP.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -22312,8 +22315,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22355,8 +22358,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22663,7 +22666,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`nets.VectorQuantizer.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.VectorQuantizer.get_all_variables" />
+#### [`nets.VectorQuantizer.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.VectorQuantizer.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -22674,8 +22677,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22717,8 +22720,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -22972,7 +22975,7 @@ Returns boolean indicating whether this module is defun wrapped.
 
 
 
-#### [`nets.VectorQuantizerEMA.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="nets.VectorQuantizerEMA.get_all_variables" />
+#### [`nets.VectorQuantizerEMA.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="nets.VectorQuantizerEMA.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -22983,8 +22986,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -23026,8 +23029,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -23484,7 +23487,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`python.modules.gated_rnn.ConvLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="python.modules.gated_rnn.ConvLSTM.get_all_variables" />
+#### [`python.modules.gated_rnn.ConvLSTM.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="python.modules.gated_rnn.ConvLSTM.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -23495,8 +23498,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -23538,8 +23541,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -23795,7 +23798,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables" />
+#### [`python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="python.modules.gated_rnn.RecurrentDropoutWrapper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -23806,8 +23809,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -23849,8 +23852,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -24081,7 +24084,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`python.modules.gated_rnn.ZoneoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="python.modules.gated_rnn.ZoneoutWrapper.get_all_variables" />
+#### [`python.modules.gated_rnn.ZoneoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="python.modules.gated_rnn.ZoneoutWrapper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -24092,8 +24095,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -24135,8 +24138,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -24406,7 +24409,7 @@ Wraps this modules call method in a callable graph function.
 Returns boolean indicating whether this module is defun wrapped.
 
 
-#### [`python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=677)<a id="python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables" />
+#### [`python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=678)<a id="python.modules.spectral_normalization.SpectralNormWrapper.get_all_variables" />
 
 Returns all `tf.Variable`s used when the module is connected.
 
@@ -24417,8 +24420,8 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -24460,8 +24463,8 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.Graphkeys.TRAINABLE_VARIABLES`, which doesn't include non-trainable
-    variables such as moving averages.
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
 
 ##### Returns:
 
@@ -24653,7 +24656,7 @@ Returns the name of the variable scope indicated by the given value.
 * `ValueError`: If `value` does not identify a variable scope.
 
 
-### [`python.modules.util.name_for_callable(func)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=882)<a id="python.modules.util.name_for_callable" />
+### [`python.modules.util.name_for_callable(func)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=886)<a id="python.modules.util.name_for_callable" />
 
 Returns a module name for a callable or `None` if no name can be found.
 
@@ -24682,12 +24685,12 @@ within the variable creator stack.
   `None` - used for contextmanager API.
 
 
-### [`python.modules.util.sort_by_name(variables)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=934)<a id="python.modules.util.sort_by_name" />
+### [`python.modules.util.sort_by_name(variables)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=938)<a id="python.modules.util.sort_by_name" />
 
 Returns a tuple of `variables` sorted ascending by name.
 
 
-### [`python.modules.util.to_snake_case(camel_case)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=898)<a id="python.modules.util.to_snake_case" />
+### [`python.modules.util.to_snake_case(camel_case)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/util.py?l=902)<a id="python.modules.util.to_snake_case" />
 
 Returns a CamelCase string as a snake_case string.
 

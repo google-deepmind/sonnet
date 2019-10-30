@@ -334,10 +334,6 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
                                         test_utils.named_bools("use_function"))
   def test_restore_on_create_in_replica_context(self, golden, replicator_fn,
                                                 use_function):
-    if self.primary_device != "CPU":
-      self.skipTest("Currently not working as expected on multiple devices")
-      # TODO(b/134376796) renable this once bug is fixed
-
     replicator = self.replicator_or_skip(replicator_fn, use_function)
 
     # Save a checkpoint from a non-distributed model.
@@ -372,10 +368,11 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       for next_replica in result_iter:
         self.assertAllEqual(first_replica, next_replica)
 
-    replicator_variables = module.variables
-    for normal, distributed in zip(normal_variables, replicator_variables):
-      self.assertAllEqual(
-          normal.read_value(), distributed.read_value(), msg=normal.name)
+    if not golden.has_side_effects:
+      replicator_variables = module.variables
+      for normal, distributed in zip(normal_variables, replicator_variables):
+        self.assertAllClose(
+            normal.read_value(), distributed.read_value(), msg=normal.name)
 
 
 def setUpModule():

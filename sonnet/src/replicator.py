@@ -195,10 +195,4 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
       stack.enter_context(super(TpuReplicator, self).scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
 
-      # The two hacks below enable a large speedup when initializing TPUs (on
-      # a 4x4 slice startup for ResNet50 goes from 42m -> 2m).
-      # TODO(tomhennigan) Remove these workarounds.
-      stack.enter_context(tf.variable_creator_scope(create_variables_eagerly))
-      stack.enter_context(eager_initial_values())
-
       yield

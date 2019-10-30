@@ -119,6 +119,7 @@ snt_py_library(
     srcs = ["bayes_by_backprop.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":base",
         ":initializers",
         ":utils",
         # pip: absl/logging

@@ -289,6 +289,7 @@ def log_variables(variables: Sequence[tf.Variable]):
     logging.info(line)
 
 
+@functools.total_ordering
 class CompareById(Generic[T]):
   """Container providing hash/eq based on object id."""
 
@@ -307,3 +308,6 @@ class CompareById(Generic[T]):
     if other is None:
       return False
     return self.wrapped is getattr(other, "wrapped", None)
+
+  def __lt__(self, other):
+    return id(self.wrapped) < id(getattr(other, "wrapped", None))

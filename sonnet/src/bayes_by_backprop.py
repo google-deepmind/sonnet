@@ -40,6 +40,7 @@ import math
 
 from absl import logging
 import enum
+from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import utils
 import tensorflow as tf
@@ -191,8 +192,7 @@ def analytic_kl(
 DistributionBuilder = Callable[[tf.Variable], tfd.Distribution]
 
 
-# TODO(b/134743802): Change to `snt.Module`. Remove explicit name scope below.
-class BayesByBackprop(tf.Module):
+class BayesByBackprop(base.Module):
   """A Bayes by Backprop custom variable getter builder.
 
   See module docs for usage example.
@@ -212,7 +212,6 @@ class BayesByBackprop(tf.Module):
   def __call__(self, estimator_mode: EstimatorMode = EstimatorMode.SAMPLE):
     return PosteriorEstimator(owner=self, estimator_mode=estimator_mode)
 
-  @tf.Module.with_name_scope
   def get_or_create_distributions(self, var: tf.Variable) -> Distributions:
     """Returns distributions for the given variable (creating, as needed)."""
     if var.dtype not in _OK_DTYPES_FOR_BBB:

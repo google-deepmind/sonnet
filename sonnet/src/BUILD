@@ -625,8 +625,6 @@ snt_py_library(
     name = "replicator",
     srcs = ["replicator.py"],
     deps = [
-        ":initializers",
-        # pip: absl/logging
         # pip: contextlib2
         # pip: tensorflow
     ],
@@ -636,8 +634,6 @@ snt_py_test(
     name = "replicator_test",
     srcs = ["replicator_test.py"],
     deps = [
-        ":initializers",
-        ":replicator",
         ":replicator_test_utils",
         ":test_utils",
         # pip: tensorflow

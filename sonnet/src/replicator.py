@@ -19,9 +19,7 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-from absl import logging
 import contextlib
-from sonnet.src import initializers
 import tensorflow as tf
 
 
@@ -34,67 +32,6 @@ def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
     if kwargs["trainable"] is None:
       kwargs["trainable"] = True
   return next_creator(**kwargs)
-
-
-def _is_eager_tensor(t: tf.Tensor):
-  try:
-    t.op  # pylint: disable=pointless-statement
-    return False
-  except:  # pylint: disable=bare-except
-    return True
-
-
-def create_variables_eagerly(getter, initial_value, **kwargs):
-  """Attempts to force variable creation to be eager."""
-  eager_initial_value = None
-
-  if isinstance(initial_value, tf.Tensor):
-    if _is_eager_tensor(initial_value):
-      eager_initial_value = initial_value
-    else:
-      # Try to compute the static value (e.g. if the user used `tf.ones`).
-      eager_initial_value = tf.get_static_value(initial_value)
-
-  if eager_initial_value is not None:
-    # If we have an eager initial value we can create variables in eager mode.
-    with tf.init_scope():
-      return getter(initial_value=eager_initial_value, **kwargs)
-
-  else:
-    # Fall back to creating in whatever context we're in with user input.
-    return getter(initial_value=initial_value, **kwargs)
-
-
-@contextlib.contextmanager
-def eager_initial_values():
-  """Attempts to force all initializers to create eager tensors."""
-  all_initializers = {
-      cls: cls.__call__ for cls in initializers.Initializer.__subclasses__()
-  }
-
-  def patched_call(self, shape, dtype):
-    """Monkey-patched verison of `Initializer.__call__`."""
-    cls = type(self)
-    orig_call = all_initializers[cls]
-    try:
-      with tf.init_scope():
-        return orig_call(self, shape, dtype)
-    except:  # pylint: disable=bare-except
-      if not tf.executing_eagerly():
-        logging.exception(
-            "Failed to create initial value eagerly for %s shape=%s dtype=%s",
-            type(self).__name__, shape, dtype)
-      return orig_call(self, shape, dtype)
-
-  try:
-    for cls in all_initializers:
-      cls.__call__ = patched_call
-    yield
-
-  finally:
-    # Restore
-    for cls, orig_call in all_initializers.items():
-      cls.__call__ = orig_call
 
 
 class Replicator(tf.distribute.MirroredStrategy):
@@ -139,8 +76,9 @@ class Replicator(tf.distribute.MirroredStrategy):
 
   @contextlib.contextmanager
   def scope(self):
-    parent_scope = super(Replicator, self).scope()
-    with parent_scope, tf.variable_creator_scope(replica_local_creator):
+    with contextlib.ExitStack() as stack:
+      stack.enter_context(super(Replicator, self).scope())
+      stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
 
 
@@ -170,10 +108,10 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
   communicate between replicas:
 
       >>> def forward():
-      ...   # Compute a random output on each GPU.
+      ...   # Compute a random output on each TPU.
       ...   x = tf.random.normal([8, 28 * 28])
       ...   y = mod(x)
-      ...   # Synchronize the value of `y` between all GPUs.
+      ...   # Synchronize the value of `y` between all TPUs.
       ...   ctx = tf.distribute.get_replica_context()
       ...   y = ctx.all_reduce("mean", y)
       ...   return y
@@ -194,5 +132,4 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
     with contextlib.ExitStack() as stack:
       stack.enter_context(super(TpuReplicator, self).scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
-
       yield

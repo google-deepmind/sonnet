@@ -331,7 +331,6 @@ snt_py_test(
     deps = [
         ":batch_norm",
         ":initializers",
-        ":replicator",
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow
@@ -618,37 +617,6 @@ snt_py_test(
         ":bias",
         ":test_utils",
         # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "replicator",
-    srcs = ["replicator.py"],
-    deps = [
-        # pip: contextlib2
-        # pip: tensorflow
-    ],
-)
-
-snt_py_test(
-    name = "replicator_test",
-    srcs = ["replicator_test.py"],
-    deps = [
-        ":replicator_test_utils",
-        ":test_utils",
-        # pip: tensorflow
-    ],
-)
-
-snt_py_library(
-    name = "replicator_test_utils",
-    testonly = 1,
-    srcs = ["replicator_test_utils.py"],
-    deps = [
-        ":replicator",
-        # pip: absl/logging
-        # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

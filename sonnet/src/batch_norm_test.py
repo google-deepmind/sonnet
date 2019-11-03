@@ -19,13 +19,11 @@ from __future__ import division
 from __future__ import print_function
 
 import itertools
-from absl import logging
 
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import batch_norm
 from sonnet.src import initializers
-from sonnet.src import replicator
 from sonnet.src import test_utils
 import tensorflow as tf
 
@@ -254,56 +252,6 @@ class BatchNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
 
 
-class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
-  # TODO(tamaranorman) add a TpuReplicator test
-
-  def testDefaultReplicaContext(self):
-    layer = batch_norm.CrossReplicaBatchNorm(False, False, TestMetric(),
-                                             TestMetric())
-
-    inputs = tf.ones([2, 3, 3, 5])
-    scale = tf.constant(0.5, shape=(5,))
-    offset = tf.constant(2.0, shape=(5,))
-
-    outputs = layer(inputs, True, scale=scale, offset=offset).numpy()
-    self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
-
-  def testWithMultipleDevicesMirrored(self):
-    if self.primary_device == "CPU":
-      self.skipTest("No devices to mirror across.")
-    elif self.primary_device == "GPU":
-      devices = tf.config.experimental.list_logical_devices("GPU")
-    else:
-      devices = tf.config.experimental.list_logical_devices("TPU")
-
-    strategy = replicator.Replicator([device.name for device in devices])
-    with strategy.scope():
-      mean_metric = TestMetric()
-      var_metric = TestMetric()
-      layer = batch_norm.CrossReplicaBatchNorm(False, False, mean_metric,
-                                               var_metric)
-
-    scale = tf.constant(0.5, shape=(5,))
-    offset = tf.constant(2.0, shape=(5,))
-
-    def foo():
-      inputs = tf.random.normal([2, 3, 3, 5])
-      outputs = layer(inputs, True, False, scale, offset)
-      return inputs, outputs
-
-    inputs, outputs = strategy.experimental_run_v2(foo)
-    self.assertAllEqual(mean_metric.value.values[0].numpy(),
-                        mean_metric.value.values[1].numpy())
-    self.assertAllEqual(var_metric.value.values[0].numpy(),
-                        var_metric.value.values[1].numpy())
-    mean = mean_metric.value.values[0]
-    var = var_metric.value.values[0]
-
-    for inp, out in zip(inputs.values, outputs.values):
-      expected_out = (inp - mean) * tf.math.rsqrt(var + 1e-5) * scale + offset
-      self.assertAllClose(out, expected_out)
-
-
 class TestMetric(object):
 
   def __init__(self):
@@ -324,20 +272,6 @@ class TestMetric(object):
   def initialize(self, x):
     self._foo = tf.Variable(x)
     self._built = True
-
-
-def setUpModule():
-  # If a physical GPU is available make sure TF sees at least two.
-  gpus = tf.config.experimental.list_physical_devices(device_type="GPU")
-  if len(gpus) == 1:
-    logging.info("Splitting one physical GPU into two logical GPUs.")
-    tf.config.experimental.set_virtual_device_configuration(
-        gpus[0], [
-            tf.config.experimental.VirtualDeviceConfiguration(
-                memory_limit=1024),
-            tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1024)
-        ])
-
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

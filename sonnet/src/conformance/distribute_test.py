@@ -21,10 +21,10 @@ from __future__ import print_function
 
 from absl.testing import parameterized
 import sonnet as snt
-from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
 from sonnet.src.conformance import goldens
+from sonnet.src.distribute import replicator_test_utils as replicator_utils
 import tensorflow as tf
 from typing import Callable, Tuple
 

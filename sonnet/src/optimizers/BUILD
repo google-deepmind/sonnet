@@ -113,8 +113,8 @@ snt_py_library(
     name = "optimizer_utils",
     srcs = ["optimizer_utils.py"],
     deps = [
-        "//sonnet/src:replicator",
         "//sonnet/src:types",
+        "//sonnet/src/distribute:replicator",
         # pip: tensorflow
     ],
 )

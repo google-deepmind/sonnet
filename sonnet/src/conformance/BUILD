@@ -44,9 +44,9 @@ snt_py_test(
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
         "//sonnet",
-        "//sonnet/src:replicator",
-        "//sonnet/src:replicator_test_utils",
         "//sonnet/src:test_utils",
+        "//sonnet/src/distribute:replicator",
+        "//sonnet/src/distribute:replicator_test_utils",
         # pip: tensorflow
     ],
 )
@@ -60,8 +60,8 @@ snt_py_test(
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
         "//sonnet",
-        "//sonnet/src:replicator_test_utils",
         "//sonnet/src:test_utils",
+        "//sonnet/src/distribute:replicator_test_utils",
         # pip: tensorflow
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],

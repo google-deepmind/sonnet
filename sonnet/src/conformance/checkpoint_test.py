@@ -23,10 +23,10 @@ import os
 from absl import logging
 from absl.testing import absltest
 from absl.testing import parameterized
-from sonnet.src import replicator as snt_replicator
-from sonnet.src import replicator_test_utils as replicator_utils
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
+from sonnet.src.distribute import replicator as snt_replicator
+from sonnet.src.distribute import replicator_test_utils as replicator_utils
 import tensorflow as tf
 
 

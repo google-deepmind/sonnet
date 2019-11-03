@@ -22,7 +22,7 @@ from __future__ import print_function
 import unittest
 
 from absl import logging
-from sonnet.src import replicator as snt_replicator
+from sonnet.src.distribute import replicator as snt_replicator
 import tensorflow as tf
 from typing import Callable, Sequence, Text, Tuple
 

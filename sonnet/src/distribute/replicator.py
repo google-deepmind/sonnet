@@ -108,10 +108,10 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
   communicate between replicas:
 
       >>> def forward():
-      ...   # Compute a random output on each TPU.
+      ...   # Compute a random output on each GPU.
       ...   x = tf.random.normal([8, 28 * 28])
       ...   y = mod(x)
-      ...   # Synchronize the value of `y` between all TPUs.
+      ...   # Synchronize the value of `y` between all GPUs.
       ...   ctx = tf.distribute.get_replica_context()
       ...   y = ctx.all_reduce("mean", y)
       ...   return y

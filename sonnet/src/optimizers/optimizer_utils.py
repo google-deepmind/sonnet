@@ -19,8 +19,8 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-from sonnet.src import replicator
 from sonnet.src import types
+from sonnet.src.distribute import replicator
 import tensorflow as tf
 from typing import Sequence
 

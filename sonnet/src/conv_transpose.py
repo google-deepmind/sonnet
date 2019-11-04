@@ -156,13 +156,13 @@ class ConvNDTranspose(base.Module):
 
   def _make_w(self):
     """Makes and returns the variable representing the weight."""
-    weight_shape = utils.replicate(self._kernel_shape, self._num_spatial_dims,
+    kernel_shape = utils.replicate(self._kernel_shape, self._num_spatial_dims,
                                    "kernel_shape")
-    weight_shape = weight_shape + (self._output_channels, self.input_channels)
+    weight_shape = kernel_shape + (self._output_channels, self.input_channels)
 
     if self._w_init is None:
       # See https://arxiv.org/abs/1502.03167v3.
-      fan_in_shape = weight_shape[:-1]
+      fan_in_shape = kernel_shape + (self.input_channels,)
       stddev = 1 / np.sqrt(np.prod(fan_in_shape))
       self._w_init = initializers.TruncatedNormal(stddev=stddev)
 

@@ -144,6 +144,30 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
                                 "The number of input channels must be known"):
       defun_conv.get_concrete_function(x)
 
+  @parameterized.parameters(
+      (1, (3,), 128, 5, "NWC"),
+      (2, (4, 4), 64, 3, "NHWC"),
+      (3, (4, 4, 4), 64, 3, "NDHWC"))
+  def testInitializerVariance(self, num_spatial_dims, kernel_shape,
+                              in_channels, output_channels, data_format):
+    inputs = tf.random.uniform([16] + ([32] * num_spatial_dims) + [in_channels])
+
+    c = conv_transpose.ConvNDTranspose(
+        num_spatial_dims=num_spatial_dims,
+        kernel_shape=kernel_shape,
+        output_channels=output_channels,
+        data_format=data_format)
+    c(inputs)
+
+    actual_std = c.w.numpy().std()
+    expected_std = 1 / (np.sqrt(np.prod(kernel_shape + (in_channels,))))
+
+    # This ratio of the error compared to the expected std might be somewhere
+    # around 0.15 normally. We check it is not > 0.5, as that would indicate
+    # something seriously wrong (ie the previous buggy initialization).
+    rel_diff = np.abs(actual_std - expected_std) / expected_std
+    self.assertLess(rel_diff, 0.5)
+
 
 class Conv2DTransposeTest(test_utils.TestCase, parameterized.TestCase):
 

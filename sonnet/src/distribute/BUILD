@@ -38,7 +38,9 @@ snt_py_library(
     name = "replicator",
     srcs = ["replicator.py"],
     deps = [
+        # pip: absl/logging
         # pip: contextlib2
+        "//sonnet/src:initializers",
         # pip: tensorflow
     ],
 )
@@ -47,7 +49,9 @@ snt_py_test(
     name = "replicator_test",
     srcs = ["replicator_test.py"],
     deps = [
+        ":replicator",
         ":replicator_test_utils",
+        "//sonnet/src:initializers",
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],

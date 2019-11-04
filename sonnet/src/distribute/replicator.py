@@ -19,7 +19,9 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+from absl import logging
 import contextlib
+from sonnet.src import initializers
 import tensorflow as tf
 
 
@@ -132,4 +134,71 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
     with contextlib.ExitStack() as stack:
       stack.enter_context(super(TpuReplicator, self).scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
+
+      # The two hacks below enable a large speedup when initializing TPUs (on
+      # a 4x4 slice startup for ResNet50 goes from 42m -> 2m).
+      # TODO(b/141243467) Remove these workarounds.
+      stack.enter_context(tf.variable_creator_scope(create_variables_eagerly))
+      stack.enter_context(eager_initial_values())
+
       yield
+
+
+def _is_eager_tensor(t: tf.Tensor):
+  try:
+    t.op  # pylint: disable=pointless-statement
+    return False
+  except:  # pylint: disable=bare-except
+    return True
+
+
+def create_variables_eagerly(getter, initial_value, **kwargs):
+  """Attempts to force variable creation to be eager."""
+  eager_initial_value = None
+
+  if isinstance(initial_value, tf.Tensor):
+    if _is_eager_tensor(initial_value):
+      eager_initial_value = initial_value
+    else:
+      # Try to compute the static value (e.g. if the user used `tf.ones`).
+      eager_initial_value = tf.get_static_value(initial_value)
+
+  if eager_initial_value is not None:
+    # If we have an eager initial value we can create variables in eager mode.
+    with tf.init_scope():
+      return getter(initial_value=eager_initial_value, **kwargs)
+
+  else:
+    # Fall back to creating in whatever context we're in with user input.
+    return getter(initial_value=initial_value, **kwargs)
+
+
+@contextlib.contextmanager
+def eager_initial_values():
+  """Attempts to force all initializers to create eager tensors."""
+  all_initializers = {cls: cls.__call__
+                      for cls in initializers.Initializer.__subclasses__()}
+
+  def patched_call(self, shape, dtype):
+    """Monkey-patched verison of `Initializer.__call__`."""
+    cls = type(self)
+    orig_call = all_initializers[cls]
+    try:
+      with tf.init_scope():
+        return orig_call(self, shape, dtype)
+    except:  # pylint: disable=bare-except
+      if not tf.executing_eagerly():
+        logging.exception(
+            "Failed to create initial value eagerly for %s shape=%s dtype=%s",
+            type(self).__name__, shape, dtype)
+      return orig_call(self, shape, dtype)
+
+  try:
+    for cls in all_initializers:
+      cls.__call__ = patched_call
+    yield
+
+  finally:
+    # Restore
+    for cls, orig_call in all_initializers.items():
+      cls.__call__ = orig_call

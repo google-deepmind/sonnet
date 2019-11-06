@@ -214,3 +214,16 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+snt_py_test(
+    name = "optimizer_test",
+    timeout = "long",
+    srcs = ["optimizer_test.py"],
+    deps = [
+        ":descriptors",
+        # pip: absl/testing:parameterized
+        "//sonnet",
+        "//sonnet/src:test_utils",
+        # pip: tensorflow
+    ],
+)

@@ -294,7 +294,11 @@ def _squared_softplus(x):
 
 
 def _inv_squared_softplus(x):
-  return tfp.distributions.softplus_inverse(tf.sqrt(x))
+  # Support TFP 0.7 (which has `tfp.distributions.softplus_inverse`) and
+  # TFP 0.8.0+ (where `softplus_inverse` was moved to `tfp.math`).
+  softplus_inverse = (getattr(tfp.math, 'softplus_inverse', None) or
+                      getattr(tfp.distributions, 'softplus_inverse', None))
+  return softplus_inverse(tf.sqrt(x))
 
 
 def _parametrize(x, rate=1.0):
@@ -378,5 +382,3 @@ def _constrain_to_range(x, min_value, max_value, name='constrain_to_range'):
     output.set_shape(x.get_shape())
 
   return output
-
-

@@ -104,6 +104,7 @@ from sonnet.python.modules.batch_norm_v2 import BatchNormV2
 from sonnet.python.modules.clip_gradient import clip_gradient
 from sonnet.python.modules.conv import CAUSAL
 from sonnet.python.modules.conv import CausalConv1D
+from sonnet.python.modules.conv import CONSTANT_PADDING
 from sonnet.python.modules.conv import Conv1D
 from sonnet.python.modules.conv import Conv1DTranspose
 from sonnet.python.modules.conv import Conv2D
@@ -113,10 +114,12 @@ from sonnet.python.modules.conv import Conv3DTranspose
 from sonnet.python.modules.conv import DepthwiseConv2D
 from sonnet.python.modules.conv import FULL
 from sonnet.python.modules.conv import InPlaneConv2D
+from sonnet.python.modules.conv import REFLECT_PADDING
 from sonnet.python.modules.conv import REVERSE_CAUSAL
 from sonnet.python.modules.conv import SAME
 from sonnet.python.modules.conv import SeparableConv1D
 from sonnet.python.modules.conv import SeparableConv2D
+from sonnet.python.modules.conv import SYMMETRIC_PADDING
 from sonnet.python.modules.conv import VALID
 from sonnet.python.modules.embed import Embed
 from sonnet.python.modules.gated_rnn import BatchNormLSTM

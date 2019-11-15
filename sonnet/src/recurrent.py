@@ -38,14 +38,14 @@ import tensorflow as tf
 
 from typing import Optional, Sequence, Text, Tuple, Union
 
-# Required for specializing `UnrolledLSTM` per device.
 # pylint: disable=g-direct-tensorflow-import
+# Required for specializing `UnrolledLSTM` per device.
 from tensorflow.python import context as context_lib
 from tensorflow.python.eager import function as function_lib
 
 # A temporary import until tree is open-sourced.
-# pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.util import nest
+# pylint: enable=g-direct-tensorflow-import
 
 
 @six.add_metaclass(abc.ABCMeta)

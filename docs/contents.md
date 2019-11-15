@@ -117,7 +117,6 @@
   * [`OptimizationConstraints`](sonnet.md#OptimizationConstraints)
   * [`ParentNotBuiltError`](sonnet.md#ParentNotBuiltError)
   * [`parse_string_to_constructor`](sonnet.md#parse_string_to_constructor)
-  * [`protos.module_pb2._b`](sonnet.md#protos.module_pb2._b)
   * [`protos.module_pb2.NestedData`](sonnet.md#protos.module_pb2.NestedData)
   * [`protos.module_pb2.SonnetModule`](sonnet.md#protos.module_pb2.SonnetModule)
   * [`python.modules.attention.AttentionOutput`](sonnet.md#python.modules.attention.AttentionOutput)

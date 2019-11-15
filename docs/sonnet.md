@@ -23233,11 +23233,6 @@ A ProtocolMessage
 A ProtocolMessage
 
 
-### [`protos.module_pb2._b(x)`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?l=6)<a id="protos.module_pb2._b" />
-
-
-
-
 ### [`class python.modules.attention.AttentionOutput`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/attention.py?q=class:AttentionOutput)<a id="python.modules.attention.AttentionOutput" />
 
 AttentionOutput(read, weights, weight_logits)

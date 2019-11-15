@@ -1071,7 +1071,7 @@ class BatchNormLSTM(rnn_core.RNNCore):
               initializers=trainable_initializers,
               regularizers=trainable_regularizers,
               name=self._initial_state_scope(name))
-        return (state[0], state[1], tf.constant(0, dtype=tf.int32))
+        return state[0], state[1], tf.constant(0, dtype=tf.int32)
 
   @property
   def state_size(self):
@@ -1356,7 +1356,7 @@ class ConvLSTM(rnn_core.RNNCore):
     """Tuple of `tf.TensorShape`s indicating the size of state tensors."""
     hidden_size = tf.TensorShape(
         self._input_shape[:-1] + (self._output_channels,))
-    return (hidden_size, hidden_size)
+    return hidden_size, hidden_size
 
   @property
   def output_size(self):

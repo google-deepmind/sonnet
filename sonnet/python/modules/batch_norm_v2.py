@@ -320,7 +320,7 @@ class BatchNormV2(base.AbstractModule):
       return update_mean_op, update_variance_op
 
     def build_no_ops():
-      return (tf.no_op(), tf.no_op())
+      return tf.no_op(), tf.no_op()
 
     # Only make the ops if we know that `is_training=True`, or the value of
     # `is_training` is unknown.
@@ -331,7 +331,7 @@ class BatchNormV2(base.AbstractModule):
           build_update_ops,
           build_no_ops,
       )
-      return (update_mean_op, update_variance_op)
+      return update_mean_op, update_variance_op
     else:
       return None
 

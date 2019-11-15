@@ -472,7 +472,7 @@ class _ConvND(base.AbstractModule):
 
     # The following is for backwards-compatibility from when we used to accept
     # N-strides of the form [1, ..., 1].
-    if (isinstance(stride, collections.Iterable) and
+    if (isinstance(stride, collections.Sequence) and
         len(stride) == len(data_format)):
       self._stride = tuple(stride)[1:-1]
     else:
@@ -961,7 +961,7 @@ class _ConvNDTranspose(base.AbstractModule):
       raise ValueError("`kernel_shape` cannot be None.")
     self._kernel_shape = _fill_and_verify_parameter_shape(kernel_shape, self._n,
                                                           "kernel")
-    if (isinstance(stride, collections.Iterable) and
+    if (isinstance(stride, collections.Sequence) and
         len(stride) == len(data_format)):
       if self._data_format.startswith("N") and self._data_format.endswith("C"):
         if not stride[0] == stride[-1] == 1:
@@ -1153,6 +1153,8 @@ class _ConvNDTranspose(base.AbstractModule):
       out_shape_tuple = out_channels + out_shape
     elif self._data_format.startswith("N") and self._data_format.endswith("C"):
       out_shape_tuple = out_shape + out_channels
+    else:
+      raise ValueError("Unsupported data format: {}".format(self._data_format))
 
     output_shape = tf.concat([batch_size, out_shape_tuple], 0)
     return output_shape
@@ -1180,6 +1182,8 @@ class _ConvNDTranspose(base.AbstractModule):
     elif self._data_format.startswith("N") and self._data_format.endswith("C"):
       output_shape_value = ((batch_size_value,) + self.output_shape +
                             (self.output_channels,))
+    else:
+      raise ValueError("Unsupported data format: {}".format(self._data_format))
     outputs.set_shape(output_shape_value)
     return outputs
 

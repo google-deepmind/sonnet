@@ -538,8 +538,7 @@ def _format_device(var):
 
 def format_variables(variables, join_lines=True):
   """Takes a collection of variables and formats it as a table."""
-  rows = []
-  rows.append(("Variable", "Shape", "Type", "Collections", "Device"))
+  rows = [("Variable", "Shape", "Type", "Collections", "Device")]
   var_to_collections = _get_vars_to_collections(variables)
   for var in sorted(variables, key=lambda var: var.op.name):
     if var.get_shape().is_fully_defined():
@@ -554,8 +553,7 @@ def format_variables(variables, join_lines=True):
 
 def format_variable_map(variable_map, join_lines=True):
   """Takes a key-to-variable map and formats it as a table."""
-  rows = []
-  rows.append(("Key", "Variable", "Shape", "Type", "Collections", "Device"))
+  rows = [("Key", "Variable", "Shape", "Type", "Collections", "Device")]
   var_to_collections = _get_vars_to_collections(variable_map)
 
   sort_key = lambda item: (item[0], item[1].name)
@@ -949,7 +947,7 @@ def notify_about_new_variables(callback):
   within the variable creator stack.
 
       >>> variables = []
-      >>> with notify_about_variables(variables.append):
+      >>> with notify_about_new_variables(variables.append):
       ...   v = tf.Variable(1.0, name='v')
       ...   w = tf.get_variable('w', [])
       >>> assert variables == [v, w]

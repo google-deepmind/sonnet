@@ -193,6 +193,10 @@ def spectral_norm(weight,
       sigma: The estimated singular value for the weight tensor.
       u0: The internal persisted variable.
   """
+  if num_iters < 1:
+    raise ValueError('num_iters must be a positive integer. {} given.'.format(
+        num_iters))
+
   original_dtype = weight.dtype
   weight = tf.cast(weight, tf.float32)
 

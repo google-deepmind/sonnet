@@ -174,10 +174,11 @@ class AbstractModule(object):
     else:
       self._custom_getter = custom_getter
 
-    self._template = tf.make_template(name,
-                                      self._build_wrapper,
-                                      create_scope_now_=True,
-                                      custom_getter_=self._custom_getter)
+    self._template = tf.compat.v1.make_template(
+        name,
+        self._build_wrapper,
+        create_scope_now_=True,
+        custom_getter_=self._custom_getter)
 
     self._original_name = name
     self._unique_name = self._template.variable_scope.name.split("/")[-1]

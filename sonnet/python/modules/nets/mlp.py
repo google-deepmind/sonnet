@@ -26,7 +26,10 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import util
 
 import tensorflow as tf
+
+# pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.layers import utils
+# pylint: enable=g-direct-tensorflow-import
 
 
 class MLP(base.AbstractModule, base.Transposable):
@@ -130,6 +133,7 @@ class MLP(base.AbstractModule, base.Transposable):
     # the module is created in some default graph, and connected to a capturing
     # graph in order to turn it into a graph function).
     with self._enter_variable_scope(check_same_graph=False):
+      # pylint: disable=g-complex-comprehension
       self._layers = [basic.Linear(self._output_sizes[i],
                                    name="linear_{}".format(i),
                                    initializers=self._initializers,
@@ -137,6 +141,7 @@ class MLP(base.AbstractModule, base.Transposable):
                                    regularizers=self._regularizers,
                                    use_bias=self.use_bias)
                       for i in xrange(self._num_layers)]
+      # pylint: enable=g-complex-comprehension
 
   @classmethod
   def get_possible_initializer_keys(cls, use_bias=True):
@@ -168,7 +173,7 @@ class MLP(base.AbstractModule, base.Transposable):
               is_training, true_fn=lambda: dropout_keep_prob,
               false_fn=lambda: tf.constant(1.0)
           )
-          net = tf.nn.dropout(net, keep_prob=keep_prob)
+          net = tf.nn.dropout(net, rate=1-keep_prob)
         net = self._activation(net)
 
     return net

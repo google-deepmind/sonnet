@@ -569,7 +569,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     std_dev = np.std(output_np, axis=1)
     # High tolerance - summing across big images, this normalization is fairly
     # approximate.
-    self.assertAllClose(mean, np.zeros_like(mean), atol=2e-2)
+    self.assertAllClose(mean, np.zeros_like(mean), atol=3e-2)
     self.assertAllClose(std_dev, np.ones_like(std_dev), atol=2e-2)
 
   @parameterized.parameters(

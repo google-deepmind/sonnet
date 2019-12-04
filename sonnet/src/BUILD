@@ -115,38 +115,6 @@ snt_py_test(
 )
 
 snt_py_library(
-    name = "bayes_by_backprop",
-    srcs = ["bayes_by_backprop.py"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":base",
-        ":initializers",
-        ":utils",
-        # pip: absl/logging
-        # pip: enum
-        # pip: tensorflow
-        # pip: tensorflow_probability
-        # https://github.com/google/pytype/blob/master/2.7_patches/
-    ],
-)
-
-snt_py_test(
-    name = "bayes_by_backprop_test",
-    srcs = ["bayes_by_backprop_test.py"],
-    deps = [
-        ":base",
-        ":bayes_by_backprop",
-        ":custom_getter",
-        ":linear",
-        ":test_utils",
-        # pip: numpy
-        "//sonnet/src/optimizers:sgd",
-        # pip: tensorflow
-        # pip: tensorflow_probability
-    ],
-)
-
-snt_py_library(
     name = "conv",
     srcs = ["conv.py"],
     deps = [

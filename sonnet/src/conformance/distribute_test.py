@@ -24,6 +24,7 @@ import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
 from sonnet.src.conformance import goldens
+from sonnet.src.distribute import replicator as snt_replicator
 from sonnet.src.distribute import replicator_test_utils as replicator_utils
 import tensorflow as tf
 from typing import Callable, Tuple
@@ -75,15 +76,22 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     with replicator.scope():
       core = core_fn()
 
-    def forward():
-      unroll = snt.dynamic_unroll if dynamic else snt.static_unroll
-      sequence = tf.ones((1,) + input_shape, dtype)
-      state = core.initial_state(input_shape[0])
-      return unroll(core, sequence, state)
+    def step_fn():
+      def forward():
+        unroll = snt.dynamic_unroll if dynamic else snt.static_unroll
+        sequence = tf.ones((1,) + input_shape, dtype)
+        state = core.initial_state(input_shape[0])
+        return unroll(core, sequence, state)
+
+      return replicator.experimental_run_v2(forward)
+
+    # TpuReplicator doesn't support pure eager mode.
+    if isinstance(replicator, snt_replicator.TpuReplicator):
+      step_fn = tf.function(step_fn)
 
     # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
     with tf.device(None):
-      out_sequence, final_state = replicator.experimental_run_v2(forward)
+      out_sequence, final_state = step_fn()
 
     self.assertSameValuePerReplica(replicator, out_sequence)
     self.assertSameValuePerReplica(replicator, final_state)

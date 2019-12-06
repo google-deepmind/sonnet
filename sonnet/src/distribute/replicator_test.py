@@ -43,7 +43,15 @@ class TrainableVariable(object):
 
 def _create_variable_in_replica_context(replicator):
   o = TrainableVariable()
-  replicator.experimental_run_v2(o)
+
+  def create_var():
+    replicator.experimental_run_v2(o)
+
+  # TpuReplicator doesn't support pure eager mode.
+  if isinstance(replicator, snt_replicator.TpuReplicator):
+    create_var = tf.function(create_var)
+
+  create_var()
   return o.v
 
 
@@ -112,6 +120,9 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
       # NOTE: Explicitly not running inside replicator.scope (fn should handle).
       update_fn()
     else:
+      # TpuReplicator doesn't support pure eager mode.
+      if isinstance(replicator, snt_replicator.TpuReplicator):
+        update_fn = tf.function(update_fn)
       replicator.experimental_run_v2(update_fn)
     for component in v._values:
       self.assertAllEqual(component.read_value(), tf.ones_like(component))
@@ -128,7 +139,12 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     if cross_replica:
       values = [v.read_value()]
     else:
-      values = replicator.experimental_run_v2(v.read_value)
+      # TpuReplicator doesn't support pure eager mode.
+      if isinstance(replicator, snt_replicator.TpuReplicator):
+        read_value_fn = tf.function(v.read_value)
+      else:
+        read_value_fn = v.read_value
+      values = replicator.experimental_run_v2(read_value_fn)
       values = replicator.experimental_local_results(values)
     for component in v._values:
       for value in values:

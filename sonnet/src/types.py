@@ -39,7 +39,7 @@ ShapeLike = Union[int, Sequence[int], tf.TensorShape]
 
 # Note that this is effectively treated as `Any`; see b/109648354.
 TensorNest = Union[TensorLike, Iterable['TensorNest'],
-                   Mapping[Text, 'TensorNest'],]
+                   Mapping[Text, 'TensorNest'],]  # pytype: disable=not-supported-yet
 
 ActivationFn = Callable[[TensorLike], TensorLike]
 Axis = Union[int, slice, Sequence[int]]

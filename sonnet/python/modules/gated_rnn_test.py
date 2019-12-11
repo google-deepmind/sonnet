@@ -27,6 +27,8 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib import rnn as contrib_rnn
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
@@ -77,7 +79,7 @@ def _get_possible_initializer_keys(use_peepholes, use_batch_norm_h,
     return snt.LSTM.get_possible_initializer_keys(use_peepholes)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
@@ -562,9 +564,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
         use_batch_norm_c=True)
 
     def connect(training):
-      static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
-          cell.with_batch_norm_control(is_training=training,
-                                       test_local_stats=test_local_stats),
+      static_output_unpacked, _ = contrib_rnn.static_rnn(
+          cell.with_batch_norm_control(
+              is_training=training, test_local_stats=test_local_stats),
           static_inputs,
           initial_state=cell.initial_state(batch_size, tf.float32))
 
@@ -610,8 +612,9 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     cell = snt.LSTM(hidden_size=hidden_size)
 
-    static_output_unpacked, _ = tf.contrib.rnn.static_rnn(
-        cell, static_inputs,
+    static_output_unpacked, _ = contrib_rnn.static_rnn(
+        cell,
+        static_inputs,
         initial_state=cell.initial_state(batch_size, tf.float32))
 
     dynamic_output, _ = tf.nn.dynamic_rnn(
@@ -799,7 +802,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(named_init_state[1].name, "bar/state_cell_tiled:0")
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
@@ -1149,7 +1152,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
     self.evaluate(train_op)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class GRUTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
@@ -1298,7 +1301,7 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
         tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES), len(keys))
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
@@ -1401,7 +1404,7 @@ class HighwayCoreTest(tf.test.TestCase, parameterized.TestCase):
     self.assertAllClose(state_data, state_ex)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):

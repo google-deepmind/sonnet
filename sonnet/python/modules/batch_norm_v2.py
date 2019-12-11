@@ -31,6 +31,7 @@ from sonnet.python.modules import conv
 from sonnet.python.modules import util
 
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
 
 # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.layers import utils
@@ -278,7 +279,7 @@ class BatchNormV2(base.AbstractModule):
             tf.cast(self._moving_variance, input_dtype),
         )
 
-    mean, variance = tf.contrib.framework.smart_cond(
+    mean, variance = contrib_framework.smart_cond(
         use_batch_stats,
         build_batch_stats,
         build_moving_stats,
@@ -326,7 +327,7 @@ class BatchNormV2(base.AbstractModule):
     # `is_training` is unknown.
     is_training_const = utils.constant_value(is_training)
     if is_training_const is None or is_training_const:
-      update_mean_op, update_variance_op = tf.contrib.framework.smart_cond(
+      update_mean_op, update_variance_op = contrib_framework.smart_cond(
           is_training,
           build_update_ops,
           build_no_ops,
@@ -396,7 +397,7 @@ class BatchNormV2(base.AbstractModule):
           is_training=False,
           **common_args)
 
-    batch_norm_op, mean, variance = tf.contrib.framework.smart_cond(
+    batch_norm_op, mean, variance = contrib_framework.smart_cond(
         use_batch_stats, use_batch_stats_fused_batch_norm,
         moving_average_fused_batch_norm)
 

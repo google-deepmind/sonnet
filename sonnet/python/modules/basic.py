@@ -31,8 +31,9 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import util
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 
 def merge_leading_dims(array_or_tensor, n_dims=2):

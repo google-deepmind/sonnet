@@ -25,8 +25,9 @@ import itertools
 from absl.testing import parameterized
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
-tfe = tf.contrib.eager
+tfe = contrib_eager
 
 
 class ScaleGradientTest(parameterized.TestCase, tf.test.TestCase):

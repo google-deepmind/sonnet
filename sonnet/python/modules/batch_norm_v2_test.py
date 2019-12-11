@@ -26,6 +26,7 @@ from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
 
 
 def _add_fused_and_unknown_batch_params(test_case_parameters):
@@ -459,7 +460,7 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
   def testInvalidInitializerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
       snt.BatchNormV2(
-          initializers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          initializers={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Initializer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -468,7 +469,7 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
   def testInvalidPartitionerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid partitioner keys.*"):
       snt.BatchNormV2(
-          partitioners={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          partitioners={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Partitioner for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -477,7 +478,7 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
   def testInvalidRegularizationParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
       snt.BatchNormV2(
-          regularizers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          regularizers={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Regularizer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -531,9 +532,9 @@ class BatchNormV2Test(parameterized.TestCase, tf.test.TestCase):
   def testRegularizersInRegularizationLosses(self, offset, scale):
     regularizers = {}
     if offset:
-      regularizers["beta"] = tf.contrib.layers.l1_regularizer(scale=0.5)
+      regularizers["beta"] = contrib_layers.l1_regularizer(scale=0.5)
     if scale:
-      regularizers["gamma"] = tf.contrib.layers.l2_regularizer(scale=0.5)
+      regularizers["gamma"] = contrib_layers.l2_regularizer(scale=0.5)
 
     inputs_shape = [10, 10]
     inputs = tf.placeholder(tf.float32, shape=[None] + inputs_shape)

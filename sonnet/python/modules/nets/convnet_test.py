@@ -30,10 +30,12 @@ import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
 
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
@@ -138,7 +140,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
           kernel_shapes=self.kernel_shapes,
           strides=self.strides,
           paddings=self.paddings,
-          regularizers={"not_w": tf.contrib.layers.l1_regularizer(scale=0.5)})
+          regularizers={"not_w": contrib_layers.l1_regularizer(scale=0.5)})
 
     with self.assertRaisesRegexp(TypeError,
                                  "Regularizer for 'w' is not a callable "
@@ -342,10 +344,12 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     else:
       module = snt.nets.ConvNet2D
     if use_bias:
-      regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5),
-                      "b": tf.contrib.layers.l2_regularizer(scale=0.5)}
+      regularizers = {
+          "w": contrib_layers.l1_regularizer(scale=0.5),
+          "b": contrib_layers.l2_regularizer(scale=0.5)
+      }
     else:
-      regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5)}
+      regularizers = {"w": contrib_layers.l1_regularizer(scale=0.5)}
 
     model = module(output_channels=self.output_channels,
                    kernel_shapes=self.kernel_shapes,
@@ -591,7 +595,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
           **conv_kwargs)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class ConvNet2DTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
@@ -868,7 +872,7 @@ class ConvNet2DTest(parameterized.TestCase, tf.test.TestCase):
     _ = mod(input_, is_training=True)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class ConvNet2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
@@ -1127,7 +1131,7 @@ class ConvNet2DTransposeTest(parameterized.TestCase, tf.test.TestCase):
       self.assertIsNotNone(tensor)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class DefunTest(parameterized.TestCase, tf.test.TestCase):
 
   @parameterized.named_parameters(
@@ -1141,7 +1145,7 @@ class DefunTest(parameterized.TestCase, tf.test.TestCase):
                    strides=[1],
                    paddings=[snt.SAME])
 
-    model = tf.contrib.eager.defun(model)
+    model = contrib_eager.defun(model)
     input_to_net = tf.random_normal([1, 100, 100, 3])
     output = model(input_to_net)
     self.assertListEqual(output.shape.as_list(), [1, 100, 100, 4])

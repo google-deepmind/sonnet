@@ -85,7 +85,6 @@ py_library(
     deps = [
         # numpy dep,
         "//sonnet",
-        # tensorflow dep,
     ],
 )
 
@@ -109,8 +108,6 @@ py_library(
         # six dep,
         "//sonnet",
         "//sonnet/python:custom_getters",
-        # tensorflow dep,
-        # tensorflow_probability dep,
     ],
 )
 

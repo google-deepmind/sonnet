@@ -50,6 +50,8 @@ from sonnet.python.modules import layer_norm
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
+from tensorflow.contrib import rnn as contrib_rnn
 
 
 LSTMState = collections.namedtuple("LSTMState", ("hidden", "cell"))
@@ -386,7 +388,7 @@ class RecurrentDropoutWrapper(rnn_core.RNNCore):
         return len(self._dropout_state_size) - 1
       return None
 
-    self._dropout_indexes = tf.contrib.framework.nest.map_structure(
+    self._dropout_indexes = contrib_framework.nest.map_structure(
         set_dropout_state_size, keep_probs, core.state_size)
 
   def _build(self, inputs, prev_state):
@@ -395,7 +397,7 @@ class RecurrentDropoutWrapper(rnn_core.RNNCore):
 
     # Dropout masks are generated via tf.nn.dropout so they actually include
     # rescaling: the mask value is 1/keep_prob if no dropout is applied.
-    next_core_state = tf.contrib.framework.nest.map_structure(
+    next_core_state = contrib_framework.nest.map_structure(
         lambda i, state: state if i is None else state * dropout_masks[i],
         self._dropout_indexes, next_core_state)
 
@@ -415,9 +417,10 @@ class RecurrentDropoutWrapper(rnn_core.RNNCore):
       if index is not None:
         ones = tf.ones_like(state, dtype=dtype)
         dropout_masks[index] = tf.nn.dropout(ones, keep_prob=keep_prob)
-    tf.contrib.framework.nest.map_structure(
-        set_dropout_mask,
-        self._dropout_indexes, core_initial_state, self._keep_probs)
+
+    contrib_framework.nest.map_structure(set_dropout_mask,
+                                         self._dropout_indexes,
+                                         core_initial_state, self._keep_probs)
 
     return core_initial_state, dropout_masks
 
@@ -493,8 +496,9 @@ class ZoneoutWrapper(rnn_core.RNNCore):
       else:
         return prev_s * (1 - keep_prob) + next_s * keep_prob
 
-    next_state = tf.contrib.framework.nest.map_structure(
-        apply_zoneout, self._keep_probs, next_state, prev_state)
+    next_state = contrib_framework.nest.map_structure(apply_zoneout,
+                                                      self._keep_probs,
+                                                      next_state, prev_state)
 
     return output, next_state
 
@@ -1774,7 +1778,7 @@ def highway_core_with_recurrent_dropout(
 class LSTMBlockCell(rnn_core.RNNCellWrapper):
   """Wraps the TensorFlow LSTMBlockCell as a Sonnet RNNCore."""
 
-  @rnn_core.with_doc(tf.contrib.rnn.LSTMBlockCell.__init__)
+  @rnn_core.with_doc(contrib_rnn.LSTMBlockCell.__init__)
   def __init__(self, *args, **kwargs):
-    super(LSTMBlockCell, self).__init__(tf.contrib.rnn.LSTMBlockCell,
-                                        *args, **kwargs)
+    super(LSTMBlockCell, self).__init__(contrib_rnn.LSTMBlockCell, *args,
+                                        **kwargs)

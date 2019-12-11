@@ -25,8 +25,11 @@ import mock
 import numpy as np
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
+from tensorflow.contrib import layers as contrib_layers
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 BATCH_SIZE = 5
 MASK_TUPLE = (True, (False, True))
@@ -37,7 +40,7 @@ _state_size_element = 6
 
 # Use patch to instantiate RNNCore
 @mock.patch.multiple(snt.RNNCore, __abstractmethods__=set())
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
@@ -100,7 +103,7 @@ class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
     snt.RNNCore.state_size = state_size
     flat_state_size = nest.flatten(state_size)
     core = snt.RNNCore(name="dummy_core")
-    flat_regularizer = ([tf.contrib.layers.l1_regularizer(scale=0.5)] *
+    flat_regularizer = ([contrib_layers.l1_regularizer(scale=0.5)] *
                         len(flat_state_size))
     trainable_regularizers = nest.pack_sequence_as(
         structure=state_size, flat_sequence=flat_regularizer)
@@ -120,7 +123,7 @@ class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
               graph_regularizers[i].name, ".*l1_regularizer.*")
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class TrainableInitialState(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters((True, MASK_TUPLE), (True, None), (False, False),

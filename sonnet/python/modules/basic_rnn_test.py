@@ -28,11 +28,13 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib import rnn as contrib_rnn
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class VanillaRNNTest(tf.test.TestCase):
 
   def setUp(self):
@@ -238,7 +240,7 @@ class VanillaRNNTest(tf.test.TestCase):
     self.assertEqual(len(regularizers), 2)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
 
   def testShape(self):
@@ -346,7 +348,7 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
                     "`snt.RNNCore`s, which is not supported"):
       snt.DeepRNN(cores, name="deep_rnn", skip_connections=True)
 
-    cells = [tf.contrib.rnn.BasicLSTMCell(5), tf.contrib.rnn.BasicLSTMCell(5)]
+    cells = [contrib_rnn.BasicLSTMCell(5), contrib_rnn.BasicLSTMCell(5)]
     with self.assertRaisesRegexp(
         ValueError, "skip_connections are enabled but not all cores are "
         "`snt.RNNCore`s, which is not supported"):
@@ -678,7 +680,7 @@ class DeepRNNTest(tf.test.TestCase, parameterized.TestCase):
                     "so inferred output size", first_call_args[0])
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class ModelRNNTest(tf.test.TestCase):
 
   def setUp(self):
@@ -724,7 +726,7 @@ class ModelRNNTest(tf.test.TestCase):
       snt.ModelRNN(np.array([42]))
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class BidirectionalRNNTest(tf.test.TestCase):
 
   toy_out = collections.namedtuple("toy_out", ("out_one", "out_two"))

@@ -27,10 +27,12 @@ import numpy as np
 import sonnet as snt
 
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variables
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
 
   def testCalcMinSize(self):
@@ -177,7 +179,7 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
   def testInvalidRegularizationParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
       snt.nets.AlexNetMini(
-          regularizers={"not_w": tf.contrib.layers.l1_regularizer(scale=0.5)})
+          regularizers={"not_w": contrib_layers.l1_regularizer(scale=0.5)})
 
     err = "Regularizer for 'w' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -185,8 +187,10 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
           regularizers={"w": tf.zeros([1, 2, 3])})
 
   def testRegularizersInRegularizationLosses(self):
-    regularizers = {"w": tf.contrib.layers.l1_regularizer(scale=0.5),
-                    "b": tf.contrib.layers.l2_regularizer(scale=0.5)}
+    regularizers = {
+        "w": contrib_layers.l1_regularizer(scale=0.5),
+        "b": contrib_layers.l2_regularizer(scale=0.5)
+    }
 
     alex_net = snt.nets.AlexNetMini(
         regularizers=regularizers, name="alexnet1")

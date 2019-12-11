@@ -28,8 +28,10 @@ from sonnet.python.modules import pondering_rnn
 from sonnet.python.modules import rnn_core
 
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 
 _VALUES_A = [1., np.array([2, 3.5]), np.array([[-1., -1.], [0., 2.]])]
@@ -73,7 +75,7 @@ class Output2DCore(rnn_core.RNNCore):
     pass
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class ACTCoreTest(tf.test.TestCase, parameterized.TestCase):
 
   def _test_nested(self, tensor, values_expected):

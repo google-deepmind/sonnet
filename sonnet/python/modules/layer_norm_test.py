@@ -27,6 +27,7 @@ from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables
 
@@ -114,7 +115,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
   def testInvalidInitializerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
       snt.LayerNorm(
-          initializers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          initializers={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Initializer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -123,7 +124,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
   def testInvalidPartitionerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid partitioner keys.*"):
       snt.LayerNorm(
-          partitioners={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          partitioners={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Partitioner for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -132,7 +133,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
   def testInvalidRegularizationParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
       snt.LayerNorm(
-          regularizers={"not_gamma": tf.contrib.layers.l1_regularizer(0.5)})
+          regularizers={"not_gamma": contrib_layers.l1_regularizer(0.5)})
 
     err = "Regularizer for 'gamma' is not a callable function"
     with self.assertRaisesRegexp(TypeError, err):
@@ -159,8 +160,8 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
 
   def testRegularizersInRegularizationLosses(self):
     regularizers = {
-        "gamma": tf.contrib.layers.l1_regularizer(scale=0.5),
-        "beta": tf.contrib.layers.l2_regularizer(scale=0.5),
+        "gamma": contrib_layers.l1_regularizer(scale=0.5),
+        "beta": contrib_layers.l2_regularizer(scale=0.5),
     }
 
     inputs = tf.placeholder(tf.float32, shape=[None, 10])

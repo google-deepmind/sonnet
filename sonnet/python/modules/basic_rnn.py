@@ -32,8 +32,9 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 
 def _get_flat_core_sizes(cores):

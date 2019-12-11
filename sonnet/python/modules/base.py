@@ -50,6 +50,7 @@ from sonnet.python.modules.base_errors import NotSupportedError
 from sonnet.python.modules.base_errors import NotInitializedError
 from sonnet.python.modules.base_errors import DifferentGraphError
 from sonnet.python.modules.base_errors import ModuleInfoError
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 # pylint: enable=g-bad-import-order
 # pylint: enable=unused-import
 
@@ -391,7 +392,7 @@ class AbstractModule(object):
     """Wraps this modules call method in a callable graph function."""
     if not self._defun_wrapped:
       self._defun_wrapped = True
-      self._call = tf.contrib.eager.defun(self._call)
+      self._call = contrib_eager.defun(self._call)
 
   def __call__(self, *args, **kwargs):
     return self._call(*args, **kwargs)

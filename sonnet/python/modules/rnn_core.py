@@ -34,11 +34,12 @@ from sonnet.python.modules import base
 from sonnet.python.modules import basic
 import tensorflow as tf
 import wrapt
+from tensorflow.contrib import framework as contrib_framework
 
 # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.ops import rnn_cell_impl
 # pylint: enable=g-direct-tensorflow-import
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 
 def _single_learnable_state(state, state_id=0, learnable=True):

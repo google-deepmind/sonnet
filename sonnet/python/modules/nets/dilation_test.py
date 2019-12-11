@@ -25,9 +25,11 @@ import sonnet as snt
 from sonnet.python.modules.nets import dilation
 
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class IdentityKernelInitializerTest(tf.test.TestCase,
                                     parameterized.TestCase):
 
@@ -56,7 +58,7 @@ class IdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
                                          parameterized.TestCase):
 
@@ -90,7 +92,7 @@ class NoisyIdentityKernelInitializerTest(tf.test.TestCase,
       it.iternext()
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class DilationTest(tf.test.TestCase, parameterized.TestCase):
 
   def setUpWithNumOutputClasses(self, num_output_classes, depth=None):
@@ -189,7 +191,7 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
     self.assertEqual(type(self._module.conv_modules), list)
 
   def testInvalidRegularizationParameters(self):
-    regularizer = tf.contrib.layers.l1_regularizer(scale=0.5)
+    regularizer = contrib_layers.l1_regularizer(scale=0.5)
     with self.assertRaisesRegexp(KeyError, "Invalid regularizer keys.*"):
       self.setUpWithNumOutputClasses(1)
       snt.nets.Dilation(num_output_classes=self._num_output_classes,
@@ -202,8 +204,8 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
                         regularizers={"w": tf.zeros([1, 2, 3])})
 
   def testRegularizersInRegularizationLosses(self):
-    w_regularizer = tf.contrib.layers.l1_regularizer(scale=0.5)
-    b_regularizer = tf.contrib.layers.l2_regularizer(scale=0.5)
+    w_regularizer = contrib_layers.l1_regularizer(scale=0.5)
+    b_regularizer = contrib_layers.l2_regularizer(scale=0.5)
     self.setUpWithNumOutputClasses(1)
     dilation_mod = snt.nets.Dilation(
         num_output_classes=self._num_output_classes,

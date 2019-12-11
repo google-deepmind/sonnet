@@ -22,8 +22,9 @@ from __future__ import print_function
 from sonnet.python.modules import base
 from sonnet.python.modules import rnn_core
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 
 
 class Residual(base.AbstractModule):

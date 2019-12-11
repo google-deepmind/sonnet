@@ -40,8 +40,9 @@ from sonnet.examples import ptb_reader
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
 import tensorflow as tf
 import tensorflow_probability as tfp
+from tensorflow.contrib import framework as contrib_framework
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 FLAGS = tf.flags.FLAGS
 
 # Data settings.

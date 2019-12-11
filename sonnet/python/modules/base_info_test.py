@@ -26,8 +26,9 @@ from sonnet.python.modules import base
 from sonnet.python.modules import base_info
 from sonnet.python.modules import basic
 import tensorflow as tf
+from tensorflow.contrib import framework as contrib_framework
 
-nest = tf.contrib.framework.nest
+nest = contrib_framework.nest
 logging = tf.logging
 
 THIS_MODULE = "__main__"

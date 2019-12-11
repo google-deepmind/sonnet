@@ -28,6 +28,7 @@ import numpy as np
 import sonnet as snt
 from sonnet.python.modules import conv
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
 
@@ -685,8 +686,8 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithBias", True),
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
-    regularizers = create_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+    regularizers = create_regularizers(use_bias,
+                                       contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.Conv2D(
         output_channels=1,
@@ -1669,8 +1670,8 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithBias", True),
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
-    regularizers = create_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+    regularizers = create_regularizers(use_bias,
+                                       contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.Conv1D(
         output_channels=1,
@@ -2648,8 +2649,8 @@ class DepthwiseConv2DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithBias", True),
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
-    regularizers = create_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+    regularizers = create_regularizers(use_bias,
+                                       contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.DepthwiseConv2D(
         channel_multiplier=3,
@@ -3013,7 +3014,7 @@ class SeparableConv2DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_separable_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+        use_bias, contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.SeparableConv2D(
         output_channels=3,
@@ -3445,7 +3446,7 @@ class SeparableConv1DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
     regularizers = create_separable_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+        use_bias, contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.SeparableConv1D(
         output_channels=3,
@@ -3882,8 +3883,8 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
       ("WithBias", True),
       ("WithoutBias", False))
   def testRegularizersInRegularizationLosses(self, use_bias):
-    regularizers = create_regularizers(
-        use_bias, tf.contrib.layers.l1_regularizer(scale=0.5))
+    regularizers = create_regularizers(use_bias,
+                                       contrib_layers.l1_regularizer(scale=0.5))
 
     conv1 = snt.Conv3D(
         output_channels=1,

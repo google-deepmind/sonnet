@@ -18,11 +18,7 @@ py_library(
     ],
     data = ["//sonnet/protos:module_pb2"],
     srcs_version = "PY2AND3",
-    deps = [
-        ":util",
-        # tensorflow dep,
-        # wrapt dep,
-    ],
+    deps = [":util"],
 )
 
 py_library(
@@ -33,7 +29,6 @@ py_library(
         ":base",
         ":nest",
         ":util",
-        # tensorflow dep,
     ],
 )
 
@@ -94,11 +89,6 @@ py_library(
         ":basic",
         ":nest",
         ":util",
-        # numpy dep,
-        # six dep,
-        # tensorflow dep,
-        # tensorflow_probability dep,
-        # wrapt dep,
     ],
 )
 
@@ -118,9 +108,6 @@ py_library(
     name = "nest",
     srcs = ["ops/nest.py"],
     srcs_version = "PY2AND3",
-    deps = [
-        # tensorflow dep,
-    ],
 )
 
 py_library(

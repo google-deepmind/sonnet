@@ -30,6 +30,8 @@ import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
 import tensorflow as tf
+from tensorflow.contrib import layers as contrib_layers
+from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variable_scope as variable_scope_ops
 
 # We have a first "\" for the new line and one at the end. The rest is a direct
@@ -344,8 +346,8 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
   def testCheckRegularizers(self):
     regularizers = {
-        "key_a": tf.contrib.layers.l1_regularizer(scale=0.5),
-        "key_c": tf.contrib.layers.l2_regularizer(scale=0.5),
+        "key_a": contrib_layers.l1_regularizer(scale=0.5),
+        "key_c": contrib_layers.l2_regularizer(scale=0.5),
     }
     keys = ["key_a", "key_b"]
     self.assertRaisesRegexp(KeyError,
@@ -370,8 +372,8 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
                             keys=keys)
 
     regularizers["key_b"] = {
-        "key_c": tf.contrib.layers.l1_regularizer(scale=0.5),
-        "key_d": tf.contrib.layers.l2_regularizer(scale=0.5),
+        "key_c": contrib_layers.l1_regularizer(scale=0.5),
+        "key_d": contrib_layers.l2_regularizer(scale=0.5),
     }
     snt.check_regularizers(regularizers=regularizers, keys=keys)
 
@@ -390,7 +392,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
     with self.assertRaisesRegexp(TypeError, "Expected a dict"):
       snt.LSTM(hidden_size=42, partitioners=partitioners)
 
-    regularizers = tf.contrib.layers.l1_regularizer(scale=0.5)
+    regularizers = contrib_layers.l1_regularizer(scale=0.5)
     with self.assertRaisesRegexp(TypeError, "Expected a dict"):
       snt.GRU(hidden_size=108, regularizers=regularizers)
 
@@ -996,7 +998,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
       self.assertEqual(obj1.last_connected_subgraph.inputs, {})
       self.assertIs(obj1.last_connected_subgraph.outputs, obj1_a_outputs)
 
-  @tf.contrib.eager.run_test_in_graph_and_eager_modes
+  @contrib_eager.run_test_in_graph_and_eager_modes
   def test_container_not_supported_in_eager(self):
     if not tf.executing_eagerly():
       self.skipTest("Skipping test in graph mode.")
@@ -1006,7 +1008,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
                                  ".* not supported in eager mode .*"):
       container.method_with_reuse()
 
-  @tf.contrib.eager.run_test_in_graph_and_eager_modes
+  @contrib_eager.run_test_in_graph_and_eager_modes
   def test_variable_reuse_defun(self):
     if not tf.executing_eagerly():
       self.skipTest("Skipping test in graph mode.")
@@ -1025,7 +1027,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
     a, module.a = module.a, None
 
     # Now do the same but inside a defun.
-    tf.contrib.eager.defun(module.assign_a)()
+    contrib_eager.defun(module.assign_a)()
     defun_a = module.a
 
     # In and out of the `defun` we should get literally the same object for `a`.
@@ -1034,7 +1036,7 @@ class ReuseVarsTest(parameterized.TestCase, tf.test.TestCase):
   @parameterized.parameters([True, False])
   def test_defun(self, connect_defun_first):
     raw_module = ReuseVarsTest.ModuleReuse([])
-    defun_module = tf.contrib.eager.defun(raw_module)
+    defun_module = contrib_eager.defun(raw_module)
 
     if connect_defun_first:
       defun_result = defun_module(tf.zeros([]))
@@ -1103,7 +1105,7 @@ class NameFunctionTest(tf.test.TestCase):
     self.assertEqual(name, expected)
 
 
-# @tf.contrib.eager.run_all_tests_in_graph_and_eager_modes
+@contrib_eager.run_all_tests_in_graph_and_eager_modes
 class TestNotifyAboutVariables(parameterized.TestCase, tf.test.TestCase):
 
   def testNoVariables(self):

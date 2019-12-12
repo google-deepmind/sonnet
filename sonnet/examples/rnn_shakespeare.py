@@ -24,7 +24,6 @@ from __future__ import print_function
 import sonnet as snt
 from sonnet.examples import dataset_shakespeare
 import tensorflow as tf
-from tensorflow.contrib import rnn as contrib_rnn
 
 
 FLAGS = tf.flags.FLAGS
@@ -310,7 +309,7 @@ class TextModel(snt.AbstractModule):
           initial_state=initial_state)
     else:
       rnn_input_sequence = tf.unstack(input_sequence)
-      output, final_state = contrib_rnn.static_rnn(
+      output, final_state = tf.nn.static_rnn(
           cell=self._core,
           inputs=rnn_input_sequence,
           initial_state=initial_state)

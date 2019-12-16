@@ -24,6 +24,7 @@ import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
 import tensorflow as tf
+import tree
 
 BATCH_MODULES = descriptors.BATCH_MODULES
 RECURRENT_MODULES = descriptors.RECURRENT_MODULES
@@ -40,10 +41,10 @@ class BuildTest(test_utils.TestCase, parameterized.TestCase):
     module = module_fn()
     build_output_spec = snt.build(module, tf.TensorSpec(input_shape, dtype))
     actual_output = module(tf.ones(input_shape, dtype))
-    actual_output_spec = tf.nest.map_structure(
+    actual_output_spec = tree.map_structure(
         if_present(lambda t: tf.TensorSpec(t.shape, t.dtype)), actual_output)
-    tf.nest.map_structure(self.assertCompatible,
-                          build_output_spec, actual_output_spec)
+    tree.map_structure(self.assertCompatible, build_output_spec,
+                       actual_output_spec)
 
   def assertCompatible(self, a: tf.TensorSpec, b: tf.TensorSpec):
     self.assertTrue(a.shape.is_compatible_with(b.shape))

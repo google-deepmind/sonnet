@@ -24,6 +24,7 @@ from absl.testing import parameterized
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
+import tree
 
 
 class XLATest(test_utils.TestCase, parameterized.TestCase):
@@ -53,7 +54,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      tf.nest.map_structure(
+      tree.map_structure(
           functools.partial(self.assertAllClose, atol=atol), out, xla_out)
 
   @goldens.all_goldens
@@ -74,7 +75,7 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
     if golden.deterministic and not golden.has_side_effects:
       out = golden.forward(mod)
-      tf.nest.map_structure(
+      tree.map_structure(
           functools.partial(self.assertAllClose, atol=atol), out, xla_out)
 
 

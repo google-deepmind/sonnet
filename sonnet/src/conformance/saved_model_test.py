@@ -26,6 +26,7 @@ import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
+import tree
 
 
 class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
@@ -73,7 +74,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       # The output from both the saved and restored model should be close.
       y1 = saved_model.inference(x)
-      tf.nest.map_structure(self.assertAllEqual, y1, y2)
+      tree.map_structure(self.assertAllEqual, y1, y2)
 
     for a, b in zip(v1, v2):
       self.assertEqual(a.name, b.name)

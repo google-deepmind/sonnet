@@ -14,6 +14,7 @@ snt_py_library(
         "//sonnet/src:base",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

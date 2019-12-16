@@ -23,6 +23,7 @@ from sonnet.src import linear
 from sonnet.src import test_utils
 from sonnet.src.nets.dnc import util
 import tensorflow as tf
+import tree
 
 
 class SegmentDimTest(test_utils.TestCase, parameterized.TestCase):
@@ -169,9 +170,9 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
   )
   def testNonMatchingStructureBreaks(self, input_sizes, module_hidden_sizes):
     batch_size = 16
-    inputs = tf.nest.map_structure(
+    inputs = tree.map_structure(
         lambda size: tf.random.uniform([batch_size, size]), input_sizes)
-    modules = tf.nest.map_structure(linear.Linear, module_hidden_sizes)
+    modules = tree.map_structure(linear.Linear, module_hidden_sizes)
 
     with self.assertRaisesRegexp(ValueError,
                                  'don\'t have the same nested structure'):
@@ -189,9 +190,9 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
       })
   def testListMustBeLengthTwo(self, input_sizes, module_hidden_sizes):
     batch_size = 16
-    inputs = tf.nest.map_structure(
+    inputs = tree.map_structure(
         lambda size: tf.random.uniform([batch_size, size]), input_sizes)
-    modules = tf.nest.map_structure(linear.Linear, module_hidden_sizes)
+    modules = tree.map_structure(linear.Linear, module_hidden_sizes)
 
     with self.assertRaisesRegexp(AssertionError, 'must be length 2'):
       util.apply_linear(inputs, modules)

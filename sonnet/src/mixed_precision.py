@@ -24,6 +24,7 @@ import contextlib
 from sonnet.src import custom_getter
 from sonnet.src import utils
 import tensorflow as tf
+import tree
 
 # TODO(loreno): Make this a thread local variable
 _mixed_precision_mode = None
@@ -57,7 +58,7 @@ def _maybe_cast_element(x, dtype):
 
 
 def _maybe_cast_structure(x, dtype: tf.DType):
-  return tf.nest.map_structure(lambda x: _maybe_cast_element(x, dtype), x)
+  return tree.map_structure(lambda x: _maybe_cast_element(x, dtype), x)
 
 
 def _cast_call(f, new_dtype, args, kwargs):

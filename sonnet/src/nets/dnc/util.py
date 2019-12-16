@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+import tree
 
 
 def segment_dim(inputs, dim, shapes):
@@ -117,7 +118,7 @@ def apply_linear(inputs, linear_modules, activation=tf.identity):
   Returns:
     output Tensor from one / both linear modules.
   """
-  tf.nest.assert_same_structure(inputs, linear_modules)
+  tree.assert_same_structure(inputs, linear_modules)
   if isinstance(inputs, (tuple, list)):
     assert len(inputs) == len(linear_modules) == 2, (
         'if inputs is a list, must be length 2 and match length of linears')

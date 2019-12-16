@@ -35,6 +35,7 @@ from sonnet.src import utils
 
 import tensorflow.compat.v1 as tf1
 import tensorflow as tf
+import tree
 
 from typing import Optional, Sequence, Text, Tuple, Union
 
@@ -42,9 +43,6 @@ from typing import Optional, Sequence, Text, Tuple, Union
 # Required for specializing `UnrolledLSTM` per device.
 from tensorflow.python import context as context_lib
 from tensorflow.python.eager import function as function_lib
-
-# A temporary import until tree is open-sourced.
-from tensorflow.python.util import nest
 # pylint: enable=g-direct-tensorflow-import
 
 
@@ -160,7 +158,7 @@ class TrainableState(base.Module):
     Returns:
       A `TrainableState`.
     """
-    initial_values = nest.map_structure(lambda s: tf.squeeze(s, axis=0),
+    initial_values = tree.map_structure(lambda s: tf.squeeze(s, axis=0),
                                         core.initial_state(batch_size=1))
     return cls(initial_values, mask, name)
 
@@ -179,30 +177,38 @@ class TrainableState(base.Module):
     """
     super(TrainableState, self).__init__(name)
 
-    flat_initial_values = nest.flatten_with_joined_string_paths(initial_values)
+    flat_initial_values = tree.flatten_with_path(initial_values)
     if mask is None:
       flat_mask = [True] * len(flat_initial_values)
     else:
-      nest.assert_same_structure(initial_values, mask)
-      flat_mask = nest.flatten(mask)
+      tree.assert_same_structure(initial_values, mask)
+      flat_mask = tree.flatten(mask)
 
     flat_template = []
     for (path, initial_value), trainable in zip(flat_initial_values, flat_mask):
       # `"state"` is only used if initial_values is not nested.
-      name = path or "state"
+      name = "/".join(map(str, path)) or "state"
       flat_template.append(
           tf.Variable(
               tf.expand_dims(initial_value, axis=0),
               trainable=trainable,
               name=name))
 
-    self._template = nest.pack_sequence_as(initial_values, flat_template)
+    self._template = tree.unflatten_as(initial_values, flat_template)
 
   def __call__(self, batch_size: int) -> types.TensorNest:
     """Returns a trainable state for the given batch size."""
-    return nest.map_structure(
+    template = self._template
+    try:
+      # Unwrap a trackable data structure added by tf.Checkpointable.
+      # TODO(b/146325332): Remove this once the bug is fixed.
+      template = template.__wrapped__
+    except AttributeError:
+      pass
+
+    return tree.map_structure(
         lambda s: tf.tile(s, [batch_size] + [1] * (s.shape.rank - 1)),
-        self._template)
+        template)
 
 
 def static_unroll(
@@ -276,12 +282,12 @@ def static_unroll(
         prev_outputs=outputs,
         prev_state=state)
     if t == 0:
-      output_accs = nest.map_structure(lambda o: _ListWrapper([o]), outputs)
+      output_accs = tree.map_structure(lambda o: _ListWrapper([o]), outputs)
     else:
-      nest.map_structure(lambda acc, o: acc.data.append(o), output_accs,
+      tree.map_structure(lambda acc, o: acc.data.append(o), output_accs,
                          outputs)
 
-  output_sequence = nest.map_structure(lambda acc: tf.stack(acc.data),
+  output_sequence = tree.map_structure(lambda acc: tf.stack(acc.data),
                                        output_accs)
   return output_sequence, state
 
@@ -289,7 +295,7 @@ def static_unroll(
 class _ListWrapper(object):
   """A wrapper hiding a list from `nest`.
 
-  This allows to use `nest.map_structure` without recursing into the
+  This allows to use `tree.map_structure` without recursing into the
   wrapped list.
   """
 
@@ -369,7 +375,7 @@ def dynamic_unroll(
       t=0,
       prev_outputs=None,
       prev_state=initial_state)
-  output_tas = nest.map_structure(
+  output_tas = tree.map_structure(
       lambda o: tf.TensorArray(o.dtype, num_steps).write(0, o), outputs)
 
   # AutoGraph converts a for loop over `tf.range` to `tf.while_loop`.
@@ -386,10 +392,10 @@ def dynamic_unroll(
         t,
         prev_outputs=outputs,
         prev_state=state)
-    output_tas = nest.map_structure(
+    output_tas = tree.map_structure(
         lambda ta, o, _t=t: ta.write(_t, o), output_tas, outputs)
 
-  output_sequence = nest.map_structure(tf.TensorArray.stack, output_tas)
+  output_sequence = tree.map_structure(tf.TensorArray.stack, output_tas)
   return output_sequence, state
 
 
@@ -412,7 +418,7 @@ def _unstack_input_sequence(input_sequence):
     ValueError: If tensors in ``input_sequence`` have inconsistent number
       of steps or the number of steps is 0.
   """
-  flat_input_sequence = nest.flatten(input_sequence)
+  flat_input_sequence = tree.flatten(input_sequence)
   all_num_steps = {i.shape[0] for i in flat_input_sequence}
   if len(all_num_steps) > 1:
     raise ValueError(
@@ -429,7 +435,7 @@ def _unstack_input_sequence(input_sequence):
     #       tf.shape(i)[0], num_steps,
     #       "input_sequence tensors must have consistent number of time steps")
 
-  input_tas = nest.map_structure(
+  input_tas = tree.map_structure(
       lambda i: tf.TensorArray(i.dtype, num_steps).unstack(i), input_sequence)
   return num_steps, input_tas
 
@@ -447,19 +453,19 @@ def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
 def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
   """Performs a single RNN step optionally accounting for variable length."""
   outputs, state = core(
-      nest.map_structure(lambda i: i.read(t), input_tas), prev_state)
+      tree.map_structure(lambda i: i.read(t), input_tas), prev_state)
 
   if prev_outputs is None:
     assert t == 0
-    prev_outputs = nest.map_structure(tf.zeros_like, outputs)
+    prev_outputs = tree.map_structure(tf.zeros_like, outputs)
 
   # TODO(slebedev): do not go into this block if t < min_len.
   if sequence_length is not None:
     # Selectively propagate outputs/state to the not-yet-finished
     # sequences.
     maybe_propagate = functools.partial(_safe_where, t < sequence_length)
-    outputs = nest.map_structure(maybe_propagate, outputs, prev_outputs)
-    state = nest.map_structure(maybe_propagate, prev_state, state)
+    outputs = tree.map_structure(maybe_propagate, outputs, prev_outputs)
+    state = tree.map_structure(maybe_propagate, prev_state, state)
 
   return outputs, state
 
@@ -582,7 +588,7 @@ class _LegacyDeepRNN(RNNCore):
     concat = lambda *args: tf.concat(args, axis=-1)
     for idx, layer in enumerate(self._layers):
       if self._skip_connections and idx > 0:
-        current_inputs = nest.map_structure(concat, inputs, current_inputs)
+        current_inputs = tree.map_structure(concat, inputs, current_inputs)
 
       if isinstance(layer, RNNCore):
         current_inputs, next_state = layer(current_inputs,
@@ -596,7 +602,7 @@ class _LegacyDeepRNN(RNNCore):
         outputs.append(current_inputs)
 
     if self._skip_connections and self._concat_final_output_if_skip:
-      outputs = nest.map_structure(concat, *outputs)
+      outputs = tree.map_structure(concat, *outputs)
     else:
       outputs = current_inputs
 
@@ -693,7 +699,7 @@ class _ResidualWrapper(RNNCore):
   def __call__(self, inputs: types.TensorNest, prev_state: types.TensorNest):
     """See base class."""
     outputs, next_state = self._base_core(inputs, prev_state)
-    residual = nest.map_structure(lambda i, o: i + o, inputs, outputs)
+    residual = tree.map_structure(lambda i, o: i + o, inputs, outputs)
     return residual, next_state
 
   def initial_state(self, batch_size, **kwargs):
@@ -1137,7 +1143,7 @@ class _RecurrentDropoutWrapper(RNNCore):
 
   def __call__(self, inputs, prev_state):
     prev_core_state, dropout_masks = prev_state
-    prev_core_state = nest.map_structure(
+    prev_core_state = tree.map_structure(
         lambda s, mask: s  # pylint: disable=g-long-lambda
         if mask is None else s * mask,
         prev_core_state,
@@ -1154,7 +1160,7 @@ class _RecurrentDropoutWrapper(RNNCore):
       else:
         return tf.nn.dropout(tf.ones_like(s), rate=rate, seed=self._seed)
 
-    dropout_masks = nest.map_structure(maybe_dropout, core_initial_state,
+    dropout_masks = tree.map_structure(maybe_dropout, core_initial_state,
                                        self._rates)
     return core_initial_state, dropout_masks
 

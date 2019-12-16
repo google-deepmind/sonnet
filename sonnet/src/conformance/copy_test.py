@@ -25,6 +25,7 @@ from absl.testing import parameterized
 from sonnet.src import test_utils
 from sonnet.src.conformance import goldens
 import tensorflow as tf
+import tree
 
 
 class CopyTest(test_utils.TestCase, parameterized.TestCase):
@@ -48,7 +49,7 @@ class CopyTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       y1 = golden.forward(m1)
       y2 = golden.forward(m2)
-      tf.nest.map_structure(self.assertAllEqual, y1, y2)
+      tree.map_structure(self.assertAllEqual, y1, y2)
 
 if __name__ == "__main__":
   # tf.enable_v2_behavior()

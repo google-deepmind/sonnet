@@ -24,6 +24,7 @@ import numpy as np
 from sonnet.src import test_utils
 from sonnet.src.nets import vqvae
 import tensorflow as tf
+import tree
 
 
 class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
@@ -52,7 +53,7 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
     # Output shape is correct
     self.assertEqual(vq_output['quantize'].shape, inputs.shape)
 
-    vq_output_np = tf.nest.map_structure(lambda t: t.numpy(), vq_output)
+    vq_output_np = tree.map_structure(lambda t: t.numpy(), vq_output)
     embeddings_np = vqvae_module.embeddings.numpy()
 
     self.assertEqual(embeddings_np.shape,

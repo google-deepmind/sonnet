@@ -26,6 +26,7 @@ import numpy as np
 from sonnet.src import base
 from sonnet.src import test_utils
 import tensorflow as tf
+import tree
 
 
 class WrappedTFOptimizer(base.Optimizer):
@@ -166,7 +167,7 @@ def _generate_dense_data(seed, num_steps):
 def _apply_optimizer(data, apply_fn):
   params, per_step_grads = data
   params = [tf.Variable(p, name="rank{}".format(len(p.shape))) for p in params]
-  per_step_grads = tf.nest.map_structure(tf.convert_to_tensor, per_step_grads)
+  per_step_grads = tree.map_structure(tf.convert_to_tensor, per_step_grads)
   param_vals = []
   assert per_step_grads
   for grads in per_step_grads:

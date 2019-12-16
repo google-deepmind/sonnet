@@ -74,6 +74,7 @@ snt_py_test(
         ":vqvae",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

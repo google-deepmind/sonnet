@@ -22,6 +22,7 @@ from __future__ import print_function
 import numpy as np
 from sonnet.src import base
 import tensorflow as tf
+import tree
 from typing import Any, Optional, Sequence, Text, Union
 
 
@@ -64,8 +65,8 @@ class BatchApply(base.Module):
 
     # Merge leading dimensions of inputs.
     # Example: [T, B, N] -> [T*B, N]
-    args = tf.nest.map_structure(merge, args)
-    kwargs = tf.nest.map_structure(merge, kwargs)
+    args = tree.map_structure(merge, args)
+    kwargs = tree.map_structure(merge, kwargs)
 
     # Compute merged output.
     # Example: [T*B, O]
@@ -73,14 +74,14 @@ class BatchApply(base.Module):
 
     # Split leading dimensions of output to match input.
     # Example: [T*B, O] -> [T, B, O]
-    return tf.nest.map_structure(split, outputs)
+    return tree.map_structure(split, outputs)
 
 
 def first_leaf(args, kwargs) -> Optional[Any]:
-  flat_args = tf.nest.flatten(args)
+  flat_args = tree.flatten(args)
   if flat_args:
     return flat_args[0]
-  flat_kwargs = tf.nest.flatten(kwargs)
+  flat_kwargs = tree.flatten(kwargs)
   if flat_kwargs:
     return flat_kwargs[0]
   return None

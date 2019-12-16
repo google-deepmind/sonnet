@@ -27,6 +27,7 @@ from sonnet.src import initializers
 from sonnet.src import recurrent
 from sonnet.src import test_utils
 import tensorflow as tf
+import tree
 
 
 class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
@@ -633,7 +634,7 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
   ])
   def testUnmasked(self, initial_values_shape):
     trainable_state = recurrent.TrainableState(
-        tf.nest.map_structure(tf.ones, initial_values_shape))
+        tree.map_structure(tf.ones, initial_values_shape))
 
     if initial_values_shape:
       self.assertEqual(
@@ -641,7 +642,7 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
 
     initial_state = trainable_state(batch_size=42)
     for s, shape in zip(
-        tf.nest.flatten(initial_state), tf.nest.flatten(initial_values_shape)):
+        tree.flatten(initial_state), tree.flatten(initial_values_shape)):
       self.assertEqual(s.shape, tf.TensorShape([42] + shape.as_list()))
 
   def testMasked(self):
@@ -653,8 +654,7 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
       var.assign_add(tf.ones_like(var))
 
     initial_state = trainable_state(batch_size=42)
-    for s, trainable in zip(
-        tf.nest.flatten(initial_state), tf.nest.flatten(mask)):
+    for s, trainable in zip(tree.flatten(initial_state), tree.flatten(mask)):
       if trainable:
         self.assertNotAllClose(s, tf.zeros_like(s))
       else:

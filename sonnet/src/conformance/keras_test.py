@@ -24,6 +24,7 @@ import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
 import tensorflow as tf
+import tree
 
 BATCH_MODULES = descriptors.BATCH_MODULES
 RECURRENT_MODULES = descriptors.RECURRENT_MODULES
@@ -63,8 +64,7 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
 
     # Check outputs are the same.
     for m_y, l_y in zip(
-        tf.nest.flatten(mod(example_input)),
-        tf.nest.flatten(layer(example_input))):
+        tree.flatten(mod(example_input)), tree.flatten(layer(example_input))):
       self.assertEqual(m_y.shape, l_y.shape)
       self.assertEqual(m_y.dtype, l_y.dtype)
 
@@ -120,8 +120,8 @@ class KerasTest(test_utils.TestCase, parameterized.TestCase):
     example_input = tf.ones(input_shape, dtype=dtype)
     # Check outputs are the same.
     for m_y, l_y in zip(
-        tf.nest.flatten(module(example_input)),
-        tf.nest.flatten(model(example_input))):
+        tree.flatten(module(example_input)),
+        tree.flatten(model(example_input))):
       self.assertEqual(m_y.shape, l_y.shape)
       self.assertEqual(m_y.dtype, l_y.dtype)
 
@@ -194,7 +194,7 @@ class LayerAdapter(tf.keras.layers.Layer):
 
   def _trace_and_initialize(self, input_shape):
     if self._output_shapes is None:
-      self._output_shapes = tf.nest.map_structure(
+      self._output_shapes = tree.map_structure(
           lambda spec: spec.shape if spec is not None else spec,
           snt.build(self, tf.TensorSpec(input_shape, self.dtype)))
 

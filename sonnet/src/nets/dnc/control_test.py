@@ -23,6 +23,7 @@ from sonnet.src import recurrent
 from sonnet.src import test_utils
 from sonnet.src.nets.dnc import control
 import tensorflow as tf
+import tree
 
 
 class CoreTest(test_utils.TestCase, parameterized.TestCase):
@@ -38,8 +39,8 @@ class CoreTest(test_utils.TestCase, parameterized.TestCase):
     prev_state = rnn.initial_state(batch_size=batch_size)
     output, next_state = rnn(inputs, prev_state)
 
-    tf.nest.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
-                          prev_state, next_state)
+    tree.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
+                       prev_state, next_state)
     self.assertShapeEqual(np.zeros([batch_size, hidden_size]), output)
 
 
@@ -110,8 +111,8 @@ class DeepCore(test_utils.TestCase, parameterized.TestCase):
     output_shape = np.ndarray((batch_size, num_layers * hidden_size))
     self.assertShapeEqual(output_shape, output)
 
-    tf.nest.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
-                          prev_state, next_state)
+    tree.map_structure(lambda t1, t2: self.assertEqual(t1.shape, t2.shape),
+                       prev_state, next_state)
 
 
 if __name__ == '__main__':

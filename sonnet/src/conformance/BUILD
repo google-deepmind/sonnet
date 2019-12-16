@@ -48,6 +48,7 @@ snt_py_test(
         "//sonnet/src/distribute:replicator",
         "//sonnet/src/distribute:replicator_test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -133,6 +134,7 @@ snt_py_test(
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -147,6 +149,7 @@ snt_py_test(
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -160,6 +163,7 @@ snt_py_test(
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
         # tf: compiler/jit:xla_cpu_jit
         # tf: compiler/jit:xla_gpu_jit
     ],
@@ -175,6 +179,7 @@ snt_py_test(
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -200,6 +205,7 @@ snt_py_test(
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

@@ -30,6 +30,7 @@ snt_py_test(
         # pip: six
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -59,6 +60,7 @@ snt_py_library(
     deps = [
         # pip: numpy
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -73,6 +75,7 @@ snt_py_test(
         "//sonnet/src:linear",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

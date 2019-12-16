@@ -21,6 +21,7 @@ from __future__ import print_function
 import contextlib
 from sonnet.src import base
 import tensorflow as tf
+import tree
 from typing import Any, Callable, ContextManager, Iterable, Optional, Type
 
 _DEFAULT_CLASSES = [base.Module]
@@ -148,9 +149,9 @@ def custom_variable_getter(
   """
 
   def wrapped_getter(x):
-    x_flat = tf.nest.flatten(x)
+    x_flat = tree.flatten(x)
     if any(_is_variable(it) for it in x_flat):
-      return tf.nest.pack_sequence_as(
+      return tree.unflatten_as(
           x, [getter(it) if _is_variable(it) else it for it in x_flat])
     else:
       return x

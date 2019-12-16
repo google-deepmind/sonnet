@@ -22,6 +22,7 @@ from sonnet.src import base
 from sonnet.src import mixed_precision
 from sonnet.src import test_utils
 import tensorflow as tf
+import tree
 
 
 class DummyVar(base.Module, test_utils.TestCase):
@@ -39,7 +40,7 @@ class DummyVar(base.Module, test_utils.TestCase):
 
   def check_type_structure(self, _, dtype):
     # pylint: disable=g-generic-assert
-    tf.nest.map_structure(lambda y: self.assertTrue(y.dtype == dtype), self.x)
+    tree.map_structure(lambda y: self.assertTrue(y.dtype == dtype), self.x)
     return self.x
 
   def runTest(self):
@@ -57,7 +58,7 @@ class DummyInput(test_utils.TestCase):
     return x
 
   def check_type_structure(self, x, dtype):
-    tf.nest.map_structure(lambda y: self.assertEqual(y.dtype, dtype), x)
+    tree.map_structure(lambda y: self.assertEqual(y.dtype, dtype), x)
     return x
 
   def runTest(self):
@@ -106,7 +107,7 @@ class MixedPrecisionClassTest(test_utils.TestCase):
     d.check_type_structure = mixed_precision.modes([tf.float32, tf.float16])(
         d.check_type_structure)
 
-    self.assertTrue(tf.nest.is_nested(z))
+    self.assertTrue(tree.is_nested(z))
     mixed_precision.enable(tf.float16)
 
     first_run = d.check_type_structure(z, tf.float32)

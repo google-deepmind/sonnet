@@ -28,6 +28,7 @@ from sonnet.src.conformance import goldens
 from sonnet.src.distribute import replicator as snt_replicator
 from sonnet.src.distribute import replicator_test_utils as replicator_utils
 import tensorflow as tf
+import tree
 
 
 class TestCheckpoint(object):
@@ -99,7 +100,7 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Test the output from the module remains stable.
     if golden.deterministic:
-      tf.nest.map_structure(self.assertAllClose, golden.forward(module), old_y)
+      tree.map_structure(self.assertAllClose, golden.forward(module), old_y)
 
   @goldens.all_goldens
   def test_save_then_load_new_instance(self, golden):
@@ -128,8 +129,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Assert the output from both modules are the same.
     if golden.deterministic:
-      tf.nest.map_structure(self.assertAllClose, golden.forward(module_1),
-                            golden.forward(module_2))
+      tree.map_structure(self.assertAllClose, golden.forward(module_1),
+                         golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_on_create(self, golden):
@@ -155,8 +156,8 @@ class GoldenCheckpointsTest(test_utils.TestCase, parameterized.TestCase):
 
     # Assert the output from both modules is the same.
     if golden.deterministic:
-      tf.nest.map_structure(self.assertAllClose, golden.forward(module_1),
-                            golden.forward(module_2))
+      tree.map_structure(self.assertAllClose, golden.forward(module_1),
+                         golden.forward(module_2))
 
   @goldens.all_goldens
   def test_restore_golden(self, golden):
@@ -196,7 +197,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
     def forward():
       per_replica = replicator.experimental_run_v2(
           lambda: golden.forward(module))
-      return tf.nest.map_structure(
+      return tree.map_structure(
           lambda args: tf.stack(replicator.unwrap(args), axis=0), per_replica)
 
     if use_function:
@@ -236,7 +237,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
           msg=variable.name)
 
     if golden.deterministic:
-      tf.nest.map_structure(self.assertAllEqual, forward(), before_save_ys)
+      tree.map_structure(self.assertAllEqual, forward(), before_save_ys)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())
@@ -300,7 +301,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
 
       y_before = run_forward(module)
       y_after = run_forward(module2)
-      tf.nest.map_structure(self.assertAllEqual, y_before, y_after)
+      tree.map_structure(self.assertAllEqual, y_before, y_after)
 
   @test_utils.combined_named_parameters(goldens.named_goldens(),
                                         replicator_utils.named_replicators())

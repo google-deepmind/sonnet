@@ -36,6 +36,7 @@ snt_py_library(
     srcs = ["build.py"],
     deps = [
         # pip: tensorflow
+        # pip: tree
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -48,6 +49,7 @@ snt_py_test(
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -196,6 +198,7 @@ snt_py_library(
         ":base",
         # pip: contextlib2
         # pip: tensorflow
+        # pip: tree
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -376,6 +379,7 @@ snt_py_library(
         ":utils",
         # pip: six
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -388,6 +392,7 @@ snt_py_test(
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -617,6 +622,7 @@ snt_py_library(
         ":base",
         # pip: numpy
         # pip: tensorflow
+        # pip: tree
         # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
@@ -641,6 +647,7 @@ snt_py_library(
         ":utils",
         # pip: contextlib2
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -653,6 +660,7 @@ snt_py_test(
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

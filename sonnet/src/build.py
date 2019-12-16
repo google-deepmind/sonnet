@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+import tree
 from typing import Any, Callable
 
 
@@ -70,5 +71,5 @@ def build(
   # NOTE: We use a concrete function to ensure that weights are created and
   # initialized, but other stateful ops (e.g. updating weights) are not.
   cf = f.get_concrete_function(*args, **kwargs)
-  return tf.nest.map_structure(_maybe_tensor_spec,
-                               cf.output_shapes, cf.output_dtypes)
+  return tree.map_structure(_maybe_tensor_spec, cf.output_shapes,
+                            cf.output_dtypes)

@@ -265,7 +265,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
     }
 
     if "mask" in module_kwargs:
-      np_dtype = inputs.dtype.as_numpy_dtype()
+      np_dtype = inputs.dtype.as_numpy_dtype
       module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
 
     convolution = module(partitioners=partitioners, **module_kwargs)
@@ -295,7 +295,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
     inputs = tf.placeholder(dtype, input_shape)
 
     if "mask" in module_kwargs:
-      np_dtype = dtype.as_numpy_dtype()
+      np_dtype = dtype.as_numpy_dtype
       module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
 
     with tf.variable_scope("scope"):
@@ -378,7 +378,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
     inputs = tf.placeholder(tf.float32, (10,) * (num_input_dims + 2))
 
     if "mask" in module_kwargs:
-      np_dtype = inputs.dtype.as_numpy_dtype()
+      np_dtype = inputs.dtype.as_numpy_dtype
       module_kwargs["mask"] = module_kwargs["mask"].astype(np_dtype)
 
     conv_mod1 = module(**module_kwargs)

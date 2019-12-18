@@ -43,7 +43,7 @@ def _test_initializer(mu=0.0, sigma=1.0, dtype=tf.float32):
                    dtype=dtype,
                    partition_info=None):  # pylint: disable=unused-argument
     random_normal_tensor = np.asarray(np.random.randn(*shape)) * sigma + mu
-    return random_normal_tensor.astype(dtype.as_numpy_dtype())
+    return random_normal_tensor.astype(dtype.as_numpy_dtype)
   return _initializer
 
 

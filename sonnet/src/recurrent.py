@@ -198,17 +198,9 @@ class TrainableState(base.Module):
 
   def __call__(self, batch_size: int) -> types.TensorNest:
     """Returns a trainable state for the given batch size."""
-    template = self._template
-    try:
-      # Unwrap a trackable data structure added by tf.Checkpointable.
-      # TODO(b/146325332): Remove this once the bug is fixed.
-      template = template.__wrapped__
-    except AttributeError:
-      pass
-
     return tree.map_structure(
         lambda s: tf.tile(s, [batch_size] + [1] * (s.shape.rank - 1)),
-        template)
+        self._template)
 
 
 def static_unroll(

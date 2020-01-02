@@ -164,9 +164,9 @@ class BottleNeckBlockV2(base.Module):
         padding=pad.same,
         name="conv_2")
 
-    self._bn_2 = batch_norm.BatchNorm(name="batchnorm_2",
-                                      scale_init=initializers.Zeros(),
-                                      **batchnorm_args)
+    # NOTE: Some implementations of ResNet50 v2 suggest initializing gamma/scale
+    # here to zeros.
+    self._bn_2 = batch_norm.BatchNorm(name="batchnorm_2", **batchnorm_args)
 
   def __call__(self, inputs, is_training):
     net = inputs
@@ -221,9 +221,6 @@ class BlockGroup(base.Module):
       net = block(net, is_training=is_training)
     return net
 
-# Override to allow us to test ResNet v2.
-TESTONLY_ENABLE_RESNET_V2 = False
-
 
 class ResNet(base.Module):
   """ResNet model."""
@@ -251,10 +248,6 @@ class ResNet(base.Module):
       name: Name of the module.
     """
     super(ResNet, self).__init__(name=name)
-    if resnet_v2 and not TESTONLY_ENABLE_RESNET_V2:
-      raise NotImplementedError(
-          "The resnet v2 implementation doesn't currently converge, "
-          "please use v1 in the meantime")
     if bn_config is None:
       bn_config = {"decay_rate": 0.9, "eps": 1e-5}
     self._bn_config = bn_config

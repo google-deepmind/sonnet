@@ -72,6 +72,7 @@ py_library(
         "modules/nets/convnet.py",
         "modules/nets/dilation.py",
         "modules/nets/mlp.py",
+        "modules/nets/transformer.py",
         "modules/nets/vqvae.py",
         "modules/optimization_constraints.py",
         "modules/pondering_rnn.py",
@@ -226,6 +227,18 @@ py_test(
     srcs_version = "PY2AND3",
     deps = [
         ":initializers",
+        # numpy dep,
+        "//sonnet",
+        # tensorflow dep,
+    ],
+)
+
+py_test(
+    name = "transformer_test",
+    size = "large",
+    srcs = ["modules/nets/transformer_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
         # numpy dep,
         "//sonnet",
         # tensorflow dep,

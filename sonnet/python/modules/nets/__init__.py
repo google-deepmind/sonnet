@@ -28,5 +28,8 @@ from sonnet.python.modules.nets.dilation import Dilation
 from sonnet.python.modules.nets.dilation import identity_kernel_initializer
 from sonnet.python.modules.nets.dilation import noisy_identity_kernel_initializer
 from sonnet.python.modules.nets.mlp import MLP
+from sonnet.python.modules.nets.transformer import future_mask
+from sonnet.python.modules.nets.transformer import TransformerTower
+from sonnet.python.modules.nets.transformer import TransformerXL
 from sonnet.python.modules.nets.vqvae import VectorQuantizer
 from sonnet.python.modules.nets.vqvae import VectorQuantizerEMA

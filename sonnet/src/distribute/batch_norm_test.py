@@ -28,7 +28,8 @@ import tensorflow as tf
 
 
 class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
-  # TODO(tamaranorman) add a TpuReplicator test
+  # Avoid running tests inside a `with tf.device("TPU:0"):` block.
+  ENTER_PRIMARY_DEVICE = False
 
   def testDefaultReplicaContext(self):
     layer = batch_norm.CrossReplicaBatchNorm(False, False, TestMetric(),
@@ -75,6 +76,33 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     for inp, out in zip(inputs.values, outputs.values):
       expected_out = (inp - mean) * tf.math.rsqrt(var + 1e-5) * scale + offset
       self.assertAllClose(out, expected_out)
+
+  def testWithTpuStrategy(self):
+    if self.primary_device != "TPU":
+      self.skipTest("TPU strategy only runs on TPU's")
+
+    strategy = replicator.TpuReplicator()
+    with strategy.scope():
+      mean_metric = TestMetric()
+      var_metric = TestMetric()
+      layer = batch_norm.CrossReplicaBatchNorm(False, False,
+                                               mean_metric, var_metric)
+    scale = tf.constant(0.5, shape=(5,))
+    offset = tf.constant(2.0, shape=(5,))
+
+    @tf.function
+    def run():
+      def compute():
+        inputs = tf.ones([2, 3, 3, 5])
+        layer(inputs, True, False, scale, offset)
+
+      strategy.experimental_run_v2(compute)
+    run()
+
+    self.assertAllEqual(mean_metric.value.values[0].numpy(),
+                        mean_metric.value.values[1].numpy())
+    self.assertAllEqual(var_metric.value.values[0].numpy(),
+                        var_metric.value.values[1].numpy())
 
 
 class TestMetric(object):

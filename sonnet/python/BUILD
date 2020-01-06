@@ -174,7 +174,6 @@ module_tests = [
         # absl/testing:parameterized dep,
         # numpy dep,
         "//sonnet",
-        # tensorflow dep,
     ],
 ) for test_name, test_subdir, test_size in module_tests]
 

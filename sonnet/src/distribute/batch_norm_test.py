@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Tests for sonnet.v2.src.batch_norm."""
+"""Tests for sonnet.v2.src.distribute.batch_norm."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -94,15 +94,23 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     def run():
       def compute():
         inputs = tf.ones([2, 3, 3, 5])
-        layer(inputs, True, False, scale, offset)
+        outputs = layer(inputs, True, False, scale, offset)
+        return inputs, outputs
 
-      strategy.experimental_run_v2(compute)
-    run()
+      return strategy.experimental_run_v2(compute)
+    inputs, outputs = run()
 
     self.assertAllEqual(mean_metric.value.values[0].numpy(),
                         mean_metric.value.values[1].numpy())
     self.assertAllEqual(var_metric.value.values[0].numpy(),
                         var_metric.value.values[1].numpy())
+
+    mean = mean_metric.value.values[0]
+    var = var_metric.value.values[0]
+
+    for inp, out in zip(inputs.values, outputs.values):
+      expected_out = (inp - mean) * tf.math.rsqrt(var + 1e-5) * scale + offset
+      self.assertAllClose(out, expected_out)
 
 
 class TestMetric(object):

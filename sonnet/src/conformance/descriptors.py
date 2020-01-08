@@ -270,6 +270,9 @@ IGNORED_MODULES = {
     snt.TrainableState,
     snt.UnrolledRNN,
 
-    # Nets,
-    snt.nets.ResNet50,  # Tested via `snt.nets.ResNet`.
+    # Tested via `snt.nets.ResNet`.
+    snt.nets.ResNet50,
+    snt.nets.resnet.BottleNeckBlockV1,
+    snt.nets.resnet.BottleNeckBlockV2,
+    snt.nets.resnet.BlockGroup,
 }

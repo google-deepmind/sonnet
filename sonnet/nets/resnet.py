@@ -12,24 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Common network architectures implemented as Sonnet modules."""
+"""ResNet components."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from sonnet.src.nets.cifar10_convnet import Cifar10ConvNet
-from sonnet.src.nets.mlp import MLP
-from sonnet.src.nets.resnet import ResNet
-from sonnet.src.nets.resnet import ResNet50
-from sonnet.src.nets.vqvae import VectorQuantizer
-from sonnet.src.nets.vqvae import VectorQuantizerEMA
+from sonnet.src.nets.resnet import BlockGroup
+from sonnet.src.nets.resnet import BottleNeckBlockV1
+from sonnet.src.nets.resnet import BottleNeckBlockV2
 
 __all__ = (
-    "MLP",
-    "Cifar10ConvNet",
-    "ResNet",
-    "ResNet50",
-    "VectorQuantizer",
-    "VectorQuantizerEMA",
+    "BlockGroup",
+    "BottleNeckBlockV1",
+    "BottleNeckBlockV2",
 )

@@ -14,10 +14,10 @@ snt_py_library(
         ":distribute",
         ":initializers",
         ":mixed_precision",
-        ":nets",
         ":optimizers",
         ":pad",
         ":regularizers",
+        "//sonnet/nets",
         "//sonnet/src:axis_norm",
         "//sonnet/src:base",
         "//sonnet/src:batch_apply",
@@ -66,17 +66,6 @@ snt_py_library(
     srcs = ["mixed_precision.py"],
     deps = [
         "//sonnet/src:mixed_precision",
-    ],
-)
-
-snt_py_library(
-    name = "nets",
-    srcs = ["nets.py"],
-    deps = [
-        "//sonnet/src/nets:cifar10_convnet",
-        "//sonnet/src/nets:mlp",
-        "//sonnet/src/nets:resnet",
-        "//sonnet/src/nets:vqvae",
     ],
 )
 

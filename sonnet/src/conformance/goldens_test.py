@@ -50,7 +50,10 @@ class CoverageTest(test_utils.TestCase):
         snt.UnrolledRNN,
 
         # Tested via snt.nets.ResNet
-        snt.nets.ResNet50
+        snt.nets.ResNet50,
+        snt.nets.resnet.BottleNeckBlockV1,
+        snt.nets.resnet.BottleNeckBlockV2,
+        snt.nets.resnet.BlockGroup
     ])
 
     # Find all the snt.Module types reachable from `import sonnet as snt`

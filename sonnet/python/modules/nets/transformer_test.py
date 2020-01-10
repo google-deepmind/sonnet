@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Tests for sonnet transformer."""
 
 from __future__ import absolute_import
@@ -49,6 +48,28 @@ class TransformerTowerTest(tf.test.TestCase):
     with self.test_session() as sess:
       sess.run(tf.global_variables_initializer())
       sess.run(output)
+
+  def test_invalid_input(self):
+    batch_size = 8
+    window_size = 15
+    value_size = 6
+    num_heads = 16
+    # invalid input size because it is odd
+    input_size = num_heads * value_size + 1
+    output_size = 128
+    invalid_inputs = tf.random_normal([batch_size, window_size, input_size])
+    transformer = snt.nets.TransformerTower(
+        value_size=value_size,
+        num_heads=num_heads,
+        num_layers=3,
+        causal=False,
+        shared_attention=False,
+        output_size=output_size,
+        use_relative_positions=False,
+        mlp_hidden_sizes=tuple([64]))
+
+    with self.assertRaises(ValueError):
+      transformer(invalid_inputs)
 
 
 class TransformerXLTest(tf.test.TestCase):

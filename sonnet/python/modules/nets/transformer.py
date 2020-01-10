@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-
 """Implementation of Transformer networks.
 
 Size glossary:
@@ -209,6 +208,9 @@ def get_position_encodings(sequence_length,
                            max_timescale=10000.,
                            min_timescale=2.0):
   """Creates sinusoidal encodings of shape [1, N + M, D]."""
+  # NOTE: when not using relative position encodings, min_timescale must be 2.0
+  # and hidden_size must be an even number. Otherwise, the dimensions do not
+  # match.
   pos_seq = tf.range(sequence_length - 1, -1, -1.0)
   if clamp_value > 0:
     pos_seq = tf.minimum(pos_seq, clamp_value)
@@ -217,6 +219,12 @@ def get_position_encodings(sequence_length,
   sinusoid_inp = tf.einsum('i,j->ij', pos_seq, inv_freq)
   pos_emb = tf.concat([tf.sin(sinusoid_inp), tf.cos(sinusoid_inp)], -1)
   pos_emb = tf.expand_dims(pos_emb, 0)
+
+  output_dim = pos_emb.get_shape().as_list()[-1]
+  if output_dim != hidden_size:
+    raise ValueError(
+        'position embedding dimension ({}) does not match that of the input ({}).'
+        .format(output_dim, hidden_size))
   return pos_emb
 
 

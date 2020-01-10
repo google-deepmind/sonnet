@@ -22609,6 +22609,594 @@ information about what variables are captured.
 
 
 
+### [`class nets.TransformerTower`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?q=class:TransformerTower)<a id="nets.TransformerTower" />
+
+Transformer tower.
+
+Deep residual network using blocks of attention and MLPs, specified in
+Vaswani et al. 2017.
+
+#### [`nets.TransformerTower.__init__(value_size, num_heads, num_layers, causal=True, key_size=None, shared_attention=False, output_size=None, mlp_hidden_sizes=(1024,), dropout_rate=0.1, use_relative_positions=True, clamp_time_range=0, same_attention_length=False, layer_norm='input', name='transformer_tower')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=371)<a id="nets.TransformerTower.__init__" />
+
+Initializes TransformerTower.
+
+##### Args:
+
+
+* `value_size`: dimensionality of values per-head.
+* `num_heads`: number of attention heads.
+* `num_layers`: number of transformer blocks, where each block contains a
+    multi-head attention layer and an MLP.
+* `causal`: if True, applies a causal mask.
+* `key_size`: optional dimensionality of key size. If unspecified then it is
+    set to `value_size`.
+* `shared_attention`: if True, attention params are shared across all layers.
+* `output_size`: if set, the desired output dimensionality. By default the
+    output size is `value_size` x `num_heads`.
+* `mlp_hidden_sizes`: tuple containing dimensionality of mlp layer(s). If
+    multiple values are specified, the mlp contains multiple layers for each
+    transformer block.
+* `dropout_rate`: dropout rate applied to hidden activations, attention, and
+    positional encodings.
+* `use_relative_positions`: if False, applies absolute positional encodings.
+    If true, uses relative positional encodings from Dai et al. 2019.
+* `clamp_time_range`: clamps max temporal positional encoding if specified.
+* `same_attention_length`: if True, attention is masked to ensure each
+    position in the sequence contains the same length of attention.
+* `layer_norm`: Where to apply layer-norm in Transformer block. Can be one of
+    'input' (Vaswani et al. 2017), 'output', or 'both'.
+* `name`: name of variable scope.
+
+
+#### [`nets.TransformerTower.__call__(inputs, state=None, condition=None, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=460)<a id="nets.TransformerTower.__call__" />
+
+Calculates multi-layer self attention and mlp transformation.
+
+##### Args:
+
+
+* `inputs`: Tensor of shape [batch_size, num_steps, dim_size].
+* `state`: optional tensor of shape [batch_size, memory_size, dim_size].
+* `condition`: optional tensor to condition on. The shape is shape
+    [batch_size, dim_size].
+* `is_training`: If true, dropout is applied.
+
+##### Returns:
+
+
+* `output`: tensor of shape [batch_size, num_steps, output_dim_size].
+* `state`: list of length `num_layers` containing AttentionState tuples.
+
+
+#### [`nets.TransformerTower.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=481)<a id="nets.TransformerTower.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`nets.TransformerTower.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=393)<a id="nets.TransformerTower.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`nets.TransformerTower.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=388)<a id="nets.TransformerTower.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`nets.TransformerTower.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=680)<a id="nets.TransformerTower.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=505)<a id="nets.TransformerTower.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`nets.TransformerTower.get_sublayers(is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=438)<a id="nets.TransformerTower.get_sublayers" />
+
+
+
+
+#### [`nets.TransformerTower.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=642)<a id="nets.TransformerTower.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=476)<a id="nets.TransformerTower.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`nets.TransformerTower.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=471)<a id="nets.TransformerTower.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`nets.TransformerTower.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="nets.TransformerTower.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=466)<a id="nets.TransformerTower.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`nets.TransformerTower.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=432)<a id="nets.TransformerTower.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`nets.TransformerTower.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=624)<a id="nets.TransformerTower.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=461)<a id="nets.TransformerTower.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`nets.TransformerTower.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=606)<a id="nets.TransformerTower.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=440)<a id="nets.TransformerTower.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerTower.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=587)<a id="nets.TransformerTower.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+
+### [`class nets.TransformerXL`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?q=class:TransformerXL)<a id="nets.TransformerXL" />
+
+Transformer with memory of past activations (dai et al. 2019).
+
+The TransformerXL can be used in two modes:
+
+* batched, i.e. when chunk_size > 0. Here the model expects 3D input of size
+  `[batch_size, chunk_size, input_dim]`. In practice, the input chunk size
+  can be of varying (but statically defined) shape.
+* single-step, i.e. when chunk_size = 0. Here the model expects 2D input
+  `[batch_size, input_dim]`.
+
+#### [`nets.TransformerXL.__init__(core_config, memory_size, chunk_size, name='transformer_xl')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=543)<a id="nets.TransformerXL.__init__" />
+
+Constructs TransformerXL graph.
+
+##### Args:
+
+
+* `core_config`: dictionary with TransformerTower config.
+* `memory_size`: size of memory.
+* `chunk_size`: expected chunk size of inputs, if greater than zero inputs are
+    of size [batch_size, chunk_size, input_dim]. If equal to zero inputs are
+    of size [batch_size, input_dim].
+* `name`: name of variable scope.
+
+
+#### [`nets.TransformerXL.__call__(inputs, prev_state, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=572)<a id="nets.TransformerXL.__call__" />
+
+Add elements to the Graph, computing output Tensors from input Tensors.
+
+Subclasses must implement this method, which will be wrapped in a Template.
+
+##### Args:
+
+
+* `*args`: Input Tensors.
+* `**kwargs`: Additional Python flags controlling connection.
+
+##### Returns:
+
+  output Tensor(s).
+
+
+#### [`nets.TransformerXL.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=481)<a id="nets.TransformerXL.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`nets.TransformerXL.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=393)<a id="nets.TransformerXL.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`nets.TransformerXL.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=388)<a id="nets.TransformerXL.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`nets.TransformerXL.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=680)<a id="nets.TransformerXL.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=505)<a id="nets.TransformerXL.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`nets.TransformerXL.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=642)<a id="nets.TransformerXL.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=476)<a id="nets.TransformerXL.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`nets.TransformerXL.initial_state(batch_size, dtype=tf.float32, trainable=False, trainable_initializers=None, trainable_regularizers=None, name=None, **unused_kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=204)<a id="nets.TransformerXL.initial_state" />
+
+Builds the default start state for an RNNCore.
+
+##### Args:
+
+
+* `batch_size`: An int, or scalar int32 Tensor representing the batch size.
+* `dtype`: The data type to use for the state.
+* `trainable`: Boolean that indicates whether to learn the initial state.
+    Note that intializers and regularizers will be ignored if
+    `trainable=False`.
+* `trainable_initializers`: An initializer function or nested structure of
+      functions with same structure as the `state_size` property of the
+      core, to be used as initializers of the initial state variable.
+* `trainable_regularizers`: Optional regularizer function or nested structure
+    of functions with the same structure as the `state_size` property of the
+    core, to be used as regularizers of the initial state variable. As a
+    default, no regularizers are used. A regularizer should be a function
+    that takes a single `Tensor` as an input and returns a scalar `Tensor`
+    output, e.g. the L1 and L2 regularizers in `tf.contrib.layers`.
+* `name`: Optional string used to prefix the initial state variable names, in
+      the case of a trainable initial state. If not provided, defaults to
+      the name of the module.
+
+##### Returns:
+
+  A tensor or nested tuple of tensors with same structure and shape as the
+  `state_size` property of the core.
+
+##### Raises:
+
+
+* `ValueError`: if the user passes initializers that are not functions.
+* `ValueError`: if the user passes regularizers that are not functions.
+
+
+#### [`nets.TransformerXL.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=471)<a id="nets.TransformerXL.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`nets.TransformerXL.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="nets.TransformerXL.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=466)<a id="nets.TransformerXL.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`nets.TransformerXL.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=432)<a id="nets.TransformerXL.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`nets.TransformerXL.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=624)<a id="nets.TransformerXL.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=606)<a id="nets.TransformerXL.output_size" />
+
+Integer or TensorShape: size of outputs produced by this cell.
+
+
+#### [`nets.TransformerXL.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=461)<a id="nets.TransformerXL.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`nets.TransformerXL.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=601)<a id="nets.TransformerXL.state_size" />
+
+size(s) of state(s) used by this cell.
+
+It can be represented by an Integer, a TensorShape or a tuple of Integers
+or TensorShapes.
+
+
+#### [`nets.TransformerXL.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=606)<a id="nets.TransformerXL.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=440)<a id="nets.TransformerXL.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=587)<a id="nets.TransformerXL.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.TransformerXL.zero_state(batch_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/rnn_core.py?l=260)<a id="nets.TransformerXL.zero_state" />
+
+Return zero-filled state tensor(s).
+
+##### Args:
+
+
+* `batch_size`: int, float, or unit Tensor representing the batch size.
+* `dtype`: the data type to use for the state.
+
+##### Returns:
+
+  If `state_size` is an int or TensorShape, then the return value is a
+  `N-D` tensor of shape `[batch_size x state_size]` filled with zeros.
+
+  If `state_size` is a nested list or tuple, then the return value is
+  a nested list or tuple (of the same structure) of `2-D` tensors with
+  the shapes `[batch_size x s]` for each s in `state_size`.
+
+
+
 ### [`class nets.VectorQuantizer`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/vqvae.py?q=class:VectorQuantizer)<a id="nets.VectorQuantizer" />
 
 Sonnet module representing the VQ-VAE layer.
@@ -23216,6 +23804,11 @@ information about what variables are captured.
 
 
 
+### [`nets.future_mask(chunk_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=147)<a id="nets.future_mask" />
+
+Creates attention mask to ensure an element i cannot attend to j > i.
+
+
 ### [`nets.identity_kernel_initializer(shape, dtype=tf.float32, partition_info=None)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/dilation.py?l=74)<a id="nets.identity_kernel_initializer" />
 
 An initializer for constructing identity convolution kernels.
@@ -23266,6 +23859,623 @@ is "spread out" across multiple copies of the input.
 ##### Returns:
 
   Initializer function for building a noisy identity kernel.
+
+
+### [`class nets.transformer.AttentionState`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?q=class:AttentionState)<a id="nets.transformer.AttentionState" />
+
+AttentionState(queries, keys, values, logits, weights, embeddings, read_words)
+
+#### `nets.transformer.AttentionState.embeddings`<a id="nets.transformer.AttentionState.embeddings" />
+
+Alias for field number 5
+
+
+#### `nets.transformer.AttentionState.keys`<a id="nets.transformer.AttentionState.keys" />
+
+Alias for field number 1
+
+
+#### `nets.transformer.AttentionState.logits`<a id="nets.transformer.AttentionState.logits" />
+
+Alias for field number 3
+
+
+#### `nets.transformer.AttentionState.queries`<a id="nets.transformer.AttentionState.queries" />
+
+Alias for field number 0
+
+
+#### `nets.transformer.AttentionState.read_words`<a id="nets.transformer.AttentionState.read_words" />
+
+Alias for field number 6
+
+
+#### `nets.transformer.AttentionState.values`<a id="nets.transformer.AttentionState.values" />
+
+Alias for field number 2
+
+
+#### `nets.transformer.AttentionState.weights`<a id="nets.transformer.AttentionState.weights" />
+
+Alias for field number 4
+
+
+
+### [`class nets.transformer.MultiheadAttention`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?q=class:MultiheadAttention)<a id="nets.transformer.MultiheadAttention" />
+
+Implements multi-head attention with optional state context.
+
+#### [`nets.transformer.MultiheadAttention.__init__(value_size, key_size, num_heads, mask=None, scaling=True, positional_encodings=None, use_relative_positions=False, init_std=2.0, name='multihead_attention')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=226)<a id="nets.transformer.MultiheadAttention.__init__" />
+
+Creates a MultiheadAttention module.
+
+##### Args:
+
+
+* `value_size`: V parameter. See size glossary in class docstring.
+* `key_size`: K parameter. See size glossary in class docstring.
+* `num_heads`: The number of independent queries per timestep.
+* `mask`: Optional mask to attention logits. This can prevent attending to
+    future positions or unused memory slots.
+* `scaling`: Whether to scale the attention logits.
+* `positional_encodings`: Either None (none given) or a tuple of
+    `(key_positional_encodings, query_positional_encodings)`.
+* `use_relative_positions`: If True then relative positions are incorporated,
+    vs absolute, into the attention logits. This is done exactly as
+    described in the TransformerXL, Dai et al. 2019.
+* `init_std`: scaling of standard deviation for weight matrices init.
+* `name`: Name of module.
+
+
+#### [`nets.transformer.MultiheadAttention.__call__(inputs, is_training, query_inputs=None, state=None, dropout_keep_prob=0.5)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=282)<a id="nets.transformer.MultiheadAttention.__call__" />
+
+Add elements to the Graph, computing output Tensors from input Tensors.
+
+Subclasses must implement this method, which will be wrapped in a Template.
+
+##### Args:
+
+
+* `*args`: Input Tensors.
+* `**kwargs`: Additional Python flags controlling connection.
+
+##### Returns:
+
+  output Tensor(s).
+
+
+#### [`nets.transformer.MultiheadAttention.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=481)<a id="nets.transformer.MultiheadAttention.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`nets.transformer.MultiheadAttention.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=393)<a id="nets.transformer.MultiheadAttention.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`nets.transformer.MultiheadAttention.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=388)<a id="nets.transformer.MultiheadAttention.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`nets.transformer.MultiheadAttention.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=680)<a id="nets.transformer.MultiheadAttention.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=505)<a id="nets.transformer.MultiheadAttention.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`nets.transformer.MultiheadAttention.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=642)<a id="nets.transformer.MultiheadAttention.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=476)<a id="nets.transformer.MultiheadAttention.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`nets.transformer.MultiheadAttention.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=471)<a id="nets.transformer.MultiheadAttention.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`nets.transformer.MultiheadAttention.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="nets.transformer.MultiheadAttention.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=466)<a id="nets.transformer.MultiheadAttention.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`nets.transformer.MultiheadAttention.multihead_linear(inputs, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=270)<a id="nets.transformer.MultiheadAttention.multihead_linear" />
+
+
+
+
+#### [`nets.transformer.MultiheadAttention.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=432)<a id="nets.transformer.MultiheadAttention.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`nets.transformer.MultiheadAttention.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=624)<a id="nets.transformer.MultiheadAttention.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=461)<a id="nets.transformer.MultiheadAttention.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`nets.transformer.MultiheadAttention.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=606)<a id="nets.transformer.MultiheadAttention.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=440)<a id="nets.transformer.MultiheadAttention.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.MultiheadAttention.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=587)<a id="nets.transformer.MultiheadAttention.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+
+### [`class nets.transformer.ResidualDropoutWrapper`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?q=class:ResidualDropoutWrapper)<a id="nets.transformer.ResidualDropoutWrapper" />
+
+Wrapper class that applies residual connections, dropout and layer norm.
+
+By default applies a relu to the module output before the other operations.
+
+#### [`nets.transformer.ResidualDropoutWrapper.__init__(layer, dropout_rate, layer_norm='input', name='residual_dropout_wrapper')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=116)<a id="nets.transformer.ResidualDropoutWrapper.__init__" />
+
+Performs the initialisation necessary for all AbstractModule instances.
+
+Every subclass of AbstractModule must begin their constructor with a call to
+this constructor, i.e.
+
+`super(MySubModule, self).__init__(custom_getter=custom_getter, name=name)`.
+
+If you instantiate sub-modules in __init__ you must create them within the
+`_enter_variable_scope` context manager to ensure they are in the module's
+variable scope. Alternatively, instantiate sub-modules in `_build`.
+
+##### Args:
+
+  _sentinel: Variable that only carries a non-None value if `__init__` was
+      called without named parameters. If this is the case, a deprecation
+      warning is issued in form of a `ValueError`.
+
+* `custom_getter`: Callable or dictionary of callables to use as
+    custom getters inside the module. If a dictionary, the keys
+    correspond to regexes to match variable names. See the `tf.get_variable`
+    documentation for information about the custom_getter API.
+* `name`: Name of this module. Used to construct the Templated build function.
+      If `None` the module's class name is used (converted to snake case).
+
+##### Raises:
+
+
+* `TypeError`: If `name` is not a string.
+* `TypeError`: If a given `custom_getter` is not callable.
+* `ValueError`: If `__init__` was called without named arguments.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.__call__(inputs, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=126)<a id="nets.transformer.ResidualDropoutWrapper.__call__" />
+
+Add elements to the Graph, computing output Tensors from input Tensors.
+
+Subclasses must implement this method, which will be wrapped in a Template.
+
+##### Args:
+
+
+* `*args`: Input Tensors.
+* `**kwargs`: Additional Python flags controlling connection.
+
+##### Returns:
+
+  output Tensor(s).
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.connected_subgraphs`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=481)<a id="nets.transformer.ResidualDropoutWrapper.connected_subgraphs" />
+
+Returns the subgraphs created by this module so far.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.defun()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=393)<a id="nets.transformer.ResidualDropoutWrapper.defun" />
+
+Wraps this modules call method in a callable graph function.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.defun_wrapped`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=388)<a id="nets.transformer.ResidualDropoutWrapper.defun_wrapped" />
+
+Returns boolean indicating whether this module is defun wrapped.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.get_all_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=680)<a id="nets.transformer.ResidualDropoutWrapper.get_all_variables" />
+
+Returns all `tf.Variable`s used when the module is connected.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.get_possible_initializer_keys()`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=505)<a id="nets.transformer.ResidualDropoutWrapper.get_possible_initializer_keys" />
+
+Returns the keys the dictionary of variable initializers may contain.
+
+This provides the user with a way of knowing the initializer keys that are
+available without having to instantiate a sonnet module. Subclasses may
+override this class method if they need additional arguments to determine
+what initializer keys may be provided.
+
+##### Returns:
+
+  Set with strings corresponding to the strings that may be passed to the
+      constructor.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.get_variables(collection='trainable_variables')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=642)<a id="nets.transformer.ResidualDropoutWrapper.get_variables" />
+
+Returns tuple of `tf.Variable`s declared inside this module.
+
+Note that this operates by searching this module's variable scope,
+and so does not know about any modules that were constructed elsewhere but
+used inside this module.
+
+This method explicitly re-enters the Graph which this module has been
+connected to.
+
+##### Args:
+
+
+* `collection`: Collection to restrict query to. By default this is
+    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    include non-trainable variables such as moving averages.
+
+##### Returns:
+
+  A tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.graph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=476)<a id="nets.transformer.ResidualDropoutWrapper.graph" />
+
+Returns the Graph instance which the module is connected to, or None.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.is_connected`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=471)<a id="nets.transformer.ResidualDropoutWrapper.is_connected" />
+
+Returns true iff the Module been connected to the Graph at least once.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.last_connected_subgraph`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=489)<a id="nets.transformer.ResidualDropoutWrapper.last_connected_subgraph" />
+
+Returns the last subgraph created by this module.
+
+##### Returns:
+
+  The last connected subgraph.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.module_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=466)<a id="nets.transformer.ResidualDropoutWrapper.module_name" />
+
+Returns the name of the Module.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.name_scopes`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=432)<a id="nets.transformer.ResidualDropoutWrapper.name_scopes" />
+
+Returns a tuple of all name_scopes generated by this module.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.non_trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=624)<a id="nets.transformer.ResidualDropoutWrapper.non_trainable_variables" />
+
+All **non-trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.scope_name`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=461)<a id="nets.transformer.ResidualDropoutWrapper.scope_name" />
+
+Returns the full name of the Module's variable scope.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.trainable_variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=606)<a id="nets.transformer.ResidualDropoutWrapper.trainable_variables" />
+
+All **trainable** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.variable_scope`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=440)<a id="nets.transformer.ResidualDropoutWrapper.variable_scope" />
+
+Returns the variable_scope declared by the module.
+
+It is valid for library users to access the internal templated
+variable_scope, but only makes sense to do so after connection. Therefore we
+raise an error here if the variable_scope is requested before connection.
+
+The only case where it does make sense to access the variable_scope before
+connection is to get the post-uniquification name, which we support using
+the separate .scope_name property.
+
+##### Returns:
+
+
+* `variable_scope`: `tf.VariableScope` instance of the internal `tf.Template`.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+#### [`nets.transformer.ResidualDropoutWrapper.variables`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/base.py?l=587)<a id="nets.transformer.ResidualDropoutWrapper.variables" />
+
+**All** `tf.Variable`s used when the module is connected.
+
+This property does not rely on global collections and should generally be
+preferred vs. `get_variables` and `get_all_variables`.
+
+See the documentation for `AbstractModule._capture_variables()` for more
+information about what variables are captured.
+
+##### Returns:
+
+  A sorted (by variable name) tuple of `tf.Variable` objects.
+
+##### Raises:
+
+
+* `NotConnectedError`: If the module is not connected to the Graph.
+
+
+
+### [`nets.transformer.create_mask(inputs, state, equal_window)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=157)<a id="nets.transformer.create_mask" />
+
+Creates mask for future sequence positions.
+
+##### Args:
+
+
+* `inputs`: inputs tensor of shape [B, N, D]
+* `state`: optional tensor of shape [B, M, D]
+* `equal_window`: if True, then each activation has an equally-sized attention
+    window of length 'M'. This only makes sense if a state is given.
+
+##### Returns:
+
+  Float tensor of shape [1, 1, N, N + M], to be summed with logits.
+
+
+### [`nets.transformer.default_mlp(hidden_sizes, activate_final=False, init_std=2.0, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=194)<a id="nets.transformer.default_mlp" />
+
+Standard batch-applied MLP for transformer modules.
+
+
+### [`nets.transformer.get_position_encodings(sequence_length, hidden_size, clamp_value, max_timescale=10000.0, min_timescale=2.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=206)<a id="nets.transformer.get_position_encodings" />
+
+Creates sinusoidal encodings of shape [1, N + M, D].
+
+
+### [`nets.transformer.rel_shift(position_logits)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=55)<a id="nets.transformer.rel_shift" />
+
+Shifting of logits for relative attention.
+
+##### Args:
+
+
+* `position_logits`: A tensor of shape [B, H, N, N + M].
+
+##### Returns:
+
+  The shifted logits. Example, for input (H=1, B=1):
+    [5, 4, 3, 2, 1]
+    [5, 4, 3, 2, 1]
+    [5, 4, 3, 2, 1]
+    [5, 4, 3, 2, 1]
+    [5, 4, 3, 2, 1]
+
+  the function outputs:
+    [1, 0, 5, 4, 3]
+    [2, 1, 0, 5, 4]
+    [3, 2, 1, 0, 5]
+    [4, 3, 2, 1, 0]
+    [5, 4, 3, 2, 1]
+
+##### Raises:
+
+  ValueError if position_logits is not 4D.
+
+
+* `Note`: this is not an exact shift as the upper triangle is non-zero. This
+works as intended in the causally-masked case. If this is used with un-masked
+attention, we'd want these to also be zero.
 
 
 ### [`class protos.module_pb2.NestedData`](https://github.com/deepmind/sonnet/blob/master/sonnet/protos/module_pb2.py?q=class:NestedData)<a id="protos.module_pb2.NestedData" />

@@ -22616,7 +22616,7 @@ Transformer tower.
 Deep residual network using blocks of attention and MLPs, specified in
 Vaswani et al. 2017.
 
-#### [`nets.TransformerTower.__init__(value_size, num_heads, num_layers, causal=True, key_size=None, shared_attention=False, output_size=None, mlp_hidden_sizes=(1024,), dropout_rate=0.1, use_relative_positions=True, clamp_time_range=0, same_attention_length=False, layer_norm='input', name='transformer_tower')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=371)<a id="nets.TransformerTower.__init__" />
+#### [`nets.TransformerTower.__init__(value_size, num_heads, num_layers, causal=True, key_size=None, shared_attention=False, output_size=None, mlp_hidden_sizes=(1024,), dropout_rate=0.1, use_relative_positions=True, clamp_time_range=0, same_attention_length=False, layer_norm='input', name='transformer_tower')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=379)<a id="nets.TransformerTower.__init__" />
 
 Initializes TransformerTower.
 
@@ -22648,7 +22648,7 @@ Initializes TransformerTower.
 * `name`: name of variable scope.
 
 
-#### [`nets.TransformerTower.__call__(inputs, state=None, condition=None, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=460)<a id="nets.TransformerTower.__call__" />
+#### [`nets.TransformerTower.__call__(inputs, state=None, condition=None, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=468)<a id="nets.TransformerTower.__call__" />
 
 Calculates multi-layer self attention and mlp transformation.
 
@@ -22722,7 +22722,7 @@ what initializer keys may be provided.
       constructor.
 
 
-#### [`nets.TransformerTower.get_sublayers(is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=438)<a id="nets.TransformerTower.get_sublayers" />
+#### [`nets.TransformerTower.get_sublayers(is_training)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=446)<a id="nets.TransformerTower.get_sublayers" />
 
 
 
@@ -22890,7 +22890,7 @@ The TransformerXL can be used in two modes:
 * single-step, i.e. when chunk_size = 0. Here the model expects 2D input
   `[batch_size, input_dim]`.
 
-#### [`nets.TransformerXL.__init__(core_config, memory_size, chunk_size, name='transformer_xl')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=543)<a id="nets.TransformerXL.__init__" />
+#### [`nets.TransformerXL.__init__(core_config, memory_size, chunk_size, name='transformer_xl')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=551)<a id="nets.TransformerXL.__init__" />
 
 Constructs TransformerXL graph.
 
@@ -22905,7 +22905,7 @@ Constructs TransformerXL graph.
 * `name`: name of variable scope.
 
 
-#### [`nets.TransformerXL.__call__(inputs, prev_state, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=572)<a id="nets.TransformerXL.__call__" />
+#### [`nets.TransformerXL.__call__(inputs, prev_state, is_training=True)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=580)<a id="nets.TransformerXL.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -23095,7 +23095,7 @@ information about what variables are captured.
 * `NotConnectedError`: If the module is not connected to the Graph.
 
 
-#### [`nets.TransformerXL.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=606)<a id="nets.TransformerXL.output_size" />
+#### [`nets.TransformerXL.output_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=614)<a id="nets.TransformerXL.output_size" />
 
 Integer or TensorShape: size of outputs produced by this cell.
 
@@ -23105,7 +23105,7 @@ Integer or TensorShape: size of outputs produced by this cell.
 Returns the full name of the Module's variable scope.
 
 
-#### [`nets.TransformerXL.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=601)<a id="nets.TransformerXL.state_size" />
+#### [`nets.TransformerXL.state_size`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=609)<a id="nets.TransformerXL.state_size" />
 
 size(s) of state(s) used by this cell.
 
@@ -23804,7 +23804,7 @@ information about what variables are captured.
 
 
 
-### [`nets.future_mask(chunk_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=147)<a id="nets.future_mask" />
+### [`nets.future_mask(chunk_size, dtype)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=146)<a id="nets.future_mask" />
 
 Creates attention mask to ensure an element i cannot attend to j > i.
 
@@ -23905,7 +23905,7 @@ Alias for field number 4
 
 Implements multi-head attention with optional state context.
 
-#### [`nets.transformer.MultiheadAttention.__init__(value_size, key_size, num_heads, mask=None, scaling=True, positional_encodings=None, use_relative_positions=False, init_std=2.0, name='multihead_attention')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=226)<a id="nets.transformer.MultiheadAttention.__init__" />
+#### [`nets.transformer.MultiheadAttention.__init__(value_size, key_size, num_heads, mask=None, scaling=True, positional_encodings=None, use_relative_positions=False, init_std=2.0, name='multihead_attention')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=234)<a id="nets.transformer.MultiheadAttention.__init__" />
 
 Creates a MultiheadAttention module.
 
@@ -23927,7 +23927,7 @@ Creates a MultiheadAttention module.
 * `name`: Name of module.
 
 
-#### [`nets.transformer.MultiheadAttention.__call__(inputs, is_training, query_inputs=None, state=None, dropout_keep_prob=0.5)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=282)<a id="nets.transformer.MultiheadAttention.__call__" />
+#### [`nets.transformer.MultiheadAttention.__call__(inputs, is_training, query_inputs=None, state=None, dropout_keep_prob=0.5)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=290)<a id="nets.transformer.MultiheadAttention.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -24055,7 +24055,7 @@ Returns the last subgraph created by this module.
 Returns the name of the Module.
 
 
-#### [`nets.transformer.MultiheadAttention.multihead_linear(inputs, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=270)<a id="nets.transformer.MultiheadAttention.multihead_linear" />
+#### [`nets.transformer.MultiheadAttention.multihead_linear(inputs, name)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=278)<a id="nets.transformer.MultiheadAttention.multihead_linear" />
 
 
 
@@ -24160,7 +24160,7 @@ Wrapper class that applies residual connections, dropout and layer norm.
 
 By default applies a relu to the module output before the other operations.
 
-#### [`nets.transformer.ResidualDropoutWrapper.__init__(layer, dropout_rate, layer_norm='input', name='residual_dropout_wrapper')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=116)<a id="nets.transformer.ResidualDropoutWrapper.__init__" />
+#### [`nets.transformer.ResidualDropoutWrapper.__init__(layer, dropout_rate, layer_norm='input', name='residual_dropout_wrapper')`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=115)<a id="nets.transformer.ResidualDropoutWrapper.__init__" />
 
 Performs the initialisation necessary for all AbstractModule instances.
 
@@ -24194,7 +24194,7 @@ variable scope. Alternatively, instantiate sub-modules in `_build`.
 * `ValueError`: If `__init__` was called without named arguments.
 
 
-#### [`nets.transformer.ResidualDropoutWrapper.__call__(inputs, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=126)<a id="nets.transformer.ResidualDropoutWrapper.__call__" />
+#### [`nets.transformer.ResidualDropoutWrapper.__call__(inputs, *args, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=125)<a id="nets.transformer.ResidualDropoutWrapper.__call__" />
 
 Add elements to the Graph, computing output Tensors from input Tensors.
 
@@ -24416,7 +24416,7 @@ information about what variables are captured.
 
 
 
-### [`nets.transformer.create_mask(inputs, state, equal_window)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=157)<a id="nets.transformer.create_mask" />
+### [`nets.transformer.create_mask(inputs, state, equal_window)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=156)<a id="nets.transformer.create_mask" />
 
 Creates mask for future sequence positions.
 
@@ -24433,17 +24433,17 @@ Creates mask for future sequence positions.
   Float tensor of shape [1, 1, N, N + M], to be summed with logits.
 
 
-### [`nets.transformer.default_mlp(hidden_sizes, activate_final=False, init_std=2.0, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=194)<a id="nets.transformer.default_mlp" />
+### [`nets.transformer.default_mlp(hidden_sizes, activate_final=False, init_std=2.0, **kwargs)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=193)<a id="nets.transformer.default_mlp" />
 
 Standard batch-applied MLP for transformer modules.
 
 
-### [`nets.transformer.get_position_encodings(sequence_length, hidden_size, clamp_value, max_timescale=10000.0, min_timescale=2.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=206)<a id="nets.transformer.get_position_encodings" />
+### [`nets.transformer.get_position_encodings(sequence_length, hidden_size, clamp_value, max_timescale=10000.0, min_timescale=2.0)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=205)<a id="nets.transformer.get_position_encodings" />
 
 Creates sinusoidal encodings of shape [1, N + M, D].
 
 
-### [`nets.transformer.rel_shift(position_logits)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=55)<a id="nets.transformer.rel_shift" />
+### [`nets.transformer.rel_shift(position_logits)`](https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/nets/transformer.py?l=54)<a id="nets.transformer.rel_shift" />
 
 Shifting of logits for relative attention.
 

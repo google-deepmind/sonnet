@@ -77,12 +77,12 @@ def _cast_call(f, new_dtype, args, kwargs):
 def modes(valid_types):
   """Decorate a function to cast inputs/outputs to different precision.
 
-      >>> snt.Linear.__call__ = snt.mixed_precision.modes(
-      ...   [tf.float32, tf.float16])(snt.Linear.__call__)
-      >>> mod = snt.Linear(10)
-      >>> snt.mixed_precision.enable(tf.float16)
-      >>> y = mod(tf.ones([1, 1]))  # First call will be done in F32.
-      >>> y = mod(tf.ones([1, 1]))  # MatMul/Add will be done in F16.
+      snt.Linear.__call__ = snt.mixed_precision.modes(
+        [tf.float32, tf.float16])(snt.Linear.__call__)
+      mod = snt.Linear(10)
+      snt.mixed_precision.enable(tf.float16)
+      y = mod(tf.ones([1, 1]))  # First call will be done in F32.
+      y = mod(tf.ones([1, 1]))  # MatMul/Add will be done in F16.
 
   Args:
     valid_types: Collection of types that the function being decorated is legal

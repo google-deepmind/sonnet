@@ -455,8 +455,8 @@ def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
   if sequence_length is not None:
     # Selectively propagate outputs/state to the not-yet-finished
     # sequences.
-    maybe_propagate = functools.partial(_safe_where, t < sequence_length)
-    outputs = tree.map_structure(maybe_propagate, outputs, prev_outputs)
+    maybe_propagate = functools.partial(_safe_where, t >= sequence_length)
+    outputs = tree.map_structure(maybe_propagate, prev_outputs, outputs)
     state = tree.map_structure(maybe_propagate, prev_state, state)
 
   return outputs, state

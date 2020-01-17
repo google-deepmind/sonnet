@@ -21,7 +21,7 @@ from __future__ import print_function
 from sonnet.python.modules import base
 
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from tensorflow.python.training import moving_averages
 

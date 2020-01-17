@@ -23,7 +23,7 @@ from __future__ import print_function
 from absl.testing import parameterized
 import numpy as np
 from sonnet.python.modules import relational_memory
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class RelationalMemoryTest(parameterized.TestCase, tf.test.TestCase):

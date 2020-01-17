@@ -24,7 +24,7 @@ from __future__ import print_function
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables
@@ -165,7 +165,7 @@ class EmbedTest(parameterized.TestCase, tf.test.TestCase):
     embed(tf.convert_to_tensor(self._ids))
 
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
 
   def testProperties(self):

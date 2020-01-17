@@ -23,7 +23,7 @@ import collections
 import six
 from sonnet.protos import module_pb2
 from sonnet.python.modules import base_errors
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.python.framework import ops
 
 logging = tf.logging

@@ -28,7 +28,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
 from sonnet.python.modules import basic
 from sonnet.python.ops import nest
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib import nn as contrib_nn
 from tensorflow.contrib.eager.python import tfe as contrib_eager
@@ -392,7 +392,7 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
     lin(inputs)
 
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertLen(regularizers, 2)
     if not tf.executing_eagerly():
       self.assertRegexpMatches(regularizers[0].name, ".*l1_regularizer.*")
@@ -410,13 +410,13 @@ class LinearTest(tf.test.TestCase, parameterized.TestCase):
 
     all_vars = tf.trainable_variables()
     linear_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=linear.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(linear.output_size, clone1.output_size)
@@ -651,7 +651,7 @@ class AddBiasTest(tf.test.TestCase, parameterized.TestCase):
       output_data, output_subtract_data, b = self.evaluate(
           [output, output_subtract, add.b])
       regularizers = tf.get_collection(
-          tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+          tf.GraphKeys.REGULARIZATION_LOSSES)
       if not tf.executing_eagerly():
         self.assertRegexpMatches(regularizers[0].name, ".*l2_regularizer.*")
       if not bias_shape:  # Scalar bias.
@@ -907,7 +907,7 @@ class TrainableVariableTest(tf.test.TestCase, parameterized.TestCase):
     var()
 
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     if tf.executing_eagerly():
       # Tensor name is not supported in eager mode.
       self.assertLen(regularizers, 1)

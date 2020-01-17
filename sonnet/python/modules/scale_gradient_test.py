@@ -24,7 +24,7 @@ import itertools
 # Dependency imports
 from absl.testing import parameterized
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
 tfe = contrib_eager

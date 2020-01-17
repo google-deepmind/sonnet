@@ -21,7 +21,7 @@ from __future__ import print_function
 # Dependency imports
 from absl.testing import parameterized
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def _suffix_custom_getter(getter, name, *args, **kwargs):
@@ -40,7 +40,7 @@ class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
 
     # Create a module within the scope of an 'override args' custom getter.
     local_custom_getter = custom_getter_fn(
-        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       local_linear = snt.Linear(10)
 
@@ -62,7 +62,7 @@ class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
     # Create a module with an 'override args' custom getter, within the scope
     # of another custom getter.
     local_custom_getter = custom_getter_fn(
-        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=_suffix_custom_getter):
       local_linear = snt.Linear(10, custom_getter=local_custom_getter)
 
@@ -83,7 +83,7 @@ class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
     # Create a module with a custom getter, within the scope of an
     # 'override args' custom getter.
     local_custom_getter = custom_getter_fn(
-        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       local_linear = snt.Linear(10, custom_getter=_suffix_custom_getter)
 
@@ -99,11 +99,11 @@ class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
   def testExplicitArgOverridden(self):
     # Create a variable within the scope of an 'override args' custom getter.
     local_custom_getter = snt.custom_getters.override_args(
-        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       # Explicitly specify an arg that disagrees with the custom getter.
       v = tf.get_variable("v", (), collections=[
-          tf.compat.v1.GraphKeys.GLOBAL_VARIABLES])
+          tf.GraphKeys.GLOBAL_VARIABLES])
 
     # The custom getter should win.
     self.assertIn(v, tf.local_variables())
@@ -112,11 +112,11 @@ class OverrideArgsTest(parameterized.TestCase, tf.test.TestCase):
   def testExplicitArgNotOverridden(self):
     # Create a variable within an 'override default args' custom getter.
     local_custom_getter = snt.custom_getters.override_default_args(
-        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+        collections=[tf.GraphKeys.LOCAL_VARIABLES])
     with tf.variable_scope("", custom_getter=local_custom_getter):
       # Explicitly specify an arg that disagrees with the custom getter.
       v = tf.get_variable("v", (), collections=[
-          tf.compat.v1.GraphKeys.GLOBAL_VARIABLES])
+          tf.GraphKeys.GLOBAL_VARIABLES])
 
     # The custom getter should honour the explicitly specified arg.
     self.assertIn(v, tf.global_variables())

@@ -24,7 +24,7 @@ from absl.testing import parameterized
 import mock
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import framework as contrib_framework
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
@@ -112,7 +112,7 @@ class RNNCoreTest(tf.test.TestCase, parameterized.TestCase):
                        trainable_regularizers=trainable_regularizers)
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     if not trainable:
       self.assertFalse(graph_regularizers)
     else:

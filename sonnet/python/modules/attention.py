@@ -26,7 +26,7 @@ import collections
 import numpy as np
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 # Result of AttentiveRead._build(). See docstring therein for details.

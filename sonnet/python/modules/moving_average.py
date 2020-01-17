@@ -20,7 +20,7 @@ from __future__ import print_function
 
 # Dependency imports
 from sonnet.python.modules import base
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.training import moving_averages  # pylint: disable=g-direct-tensorflow-import
@@ -52,9 +52,9 @@ class MovingAverage(base.AbstractModule):
                        "but is {}.".format(decay))
     self._decay = decay
     if local:
-      self._collection = tf.compat.v1.GraphKeys.LOCAL_VARIABLES
+      self._collection = tf.GraphKeys.LOCAL_VARIABLES
     else:
-      self._collection = tf.compat.v1.GraphKeys.GLOBAL_VARIABLES
+      self._collection = tf.GraphKeys.GLOBAL_VARIABLES
 
   def reset(self):
     return tf.group(

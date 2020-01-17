@@ -27,7 +27,7 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import layer_norm
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules.nets import mlp
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class RelationalMemory(rnn_core.RNNCore):

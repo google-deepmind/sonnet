@@ -30,7 +30,7 @@ from sonnet.python.modules import optimization_constraints
 from sonnet.python.modules import scale_gradient
 
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class OptimizationConstrainsTest(tf.test.TestCase, parameterized.TestCase):

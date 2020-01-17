@@ -60,7 +60,7 @@ import random
 from enum import Enum
 import numpy as np
 import six
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 _SOS = "~"  # Start of sequence symbol
 _EOS = "!"  # End of sequence symbol

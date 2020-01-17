@@ -23,7 +23,7 @@ from __future__ import print_function
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables
@@ -162,7 +162,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
       # Before updating the moving_mean the results are off.
       self.assertBetween(np.max(np.abs(np.zeros([7, 6]) - out_v)), 2, 5)
 
-      sess.run(tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)))
+      sess.run(tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS)))
 
       # After updating the moving_mean the results are better.
       out_v = sess.run(out1)
@@ -208,10 +208,10 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     with tf.name_scope("net2"):
       bn(inputs, is_training=True)
 
-    update_ops_1 = tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS,
+    update_ops_1 = tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS,
                                            "net1"))
     self.assertEqual(len(update_ops_1), 2)
-    update_ops_2 = tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS,
+    update_ops_2 = tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS,
                                            "net2"))
     self.assertEqual(len(update_ops_2), 2)
 
@@ -247,7 +247,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     out2 = bn(inputs, is_training=False, test_local_stats=True)
     out3 = bn(inputs, is_training=False, test_local_stats=False)
 
-    update_ops = tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS))
+    update_ops = tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS))
     self.assertEqual(len(update_ops), 2)
 
     with tf.control_dependencies(update_ops):
@@ -279,7 +279,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
           out3_)
 
   @parameterized.named_parameters(
-      ("UseUpdateCollection", tf.compat.v1.GraphKeys.UPDATE_OPS),
+      ("UseUpdateCollection", tf.GraphKeys.UPDATE_OPS),
       ("UseDifferentUpdateCollection", "my_update_ops"),
       ("UseControlDependencies", None),
   )
@@ -366,10 +366,10 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     bn(inputs2, is_training=False)
 
     self.assertLen(tf.get_collection(
-        tf.compat.v1.GraphKeys.GLOBAL_VARIABLES), 4)
+        tf.GraphKeys.GLOBAL_VARIABLES), 4)
 
     # We should have one set of update ops
-    update_ops = tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     self.assertEqual(len(update_ops), 2)
 
   def testUpdatesInsideCond(self):
@@ -401,7 +401,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
 
       # Tensors are not accessible outside the tf.cond()
       with self.assertRaisesRegexp(ValueError, "Operation"):
-        sess.run(tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)))
+        sess.run(tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS)))
 
   def testVariableBatchSize(self):
     """Check the inputs batch_size can change."""
@@ -416,7 +416,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
              test_local_stats=False)
 
     init = tf.global_variables_initializer()
-    update_ops = tuple(tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS))
+    update_ops = tuple(tf.get_collection(tf.GraphKeys.UPDATE_OPS))
 
     with self.test_session() as sess:
       sess.run(init)
@@ -511,7 +511,7 @@ class BatchNormTest(parameterized.TestCase, tf.test.TestCase):
     bn(inputs, is_training=True)
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     if not offset and not scale:
       self.assertFalse(graph_regularizers)
     if offset and not scale:

@@ -30,7 +30,7 @@ import numpy as np
 from sonnet.python.modules import basic
 from sonnet.python.modules import scale_gradient
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import tensorflow_probability as tfp
 
 from tensorflow.python.framework import function  # pylint: disable=g-direct-tensorflow-import

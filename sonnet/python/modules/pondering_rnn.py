@@ -27,7 +27,7 @@ import functools
 from sonnet.python.modules import basic
 from sonnet.python.modules import rnn_core
 from sonnet.python.ops import nest
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def _nested_add(nested_a, nested_b):

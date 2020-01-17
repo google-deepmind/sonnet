@@ -22,7 +22,7 @@ from __future__ import print_function
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
@@ -198,7 +198,7 @@ class MLPTest(parameterized.TestCase, tf.test.TestCase):
     mlp(inputs)
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertEqual(len(graph_regularizers), 3 * (2 if use_bias else 1))
     if not tf.executing_eagerly():
       self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")

@@ -33,7 +33,7 @@ import six
 
 import sonnet as snt
 from sonnet.examples import learn_to_execute
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 FLAGS = flags.FLAGS

@@ -21,7 +21,7 @@ from __future__ import print_function
 # Dependency imports
 from absl.testing import parameterized
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 _CONV_NET_2D_KWARGS = {
     "output_channels": [16, 16],

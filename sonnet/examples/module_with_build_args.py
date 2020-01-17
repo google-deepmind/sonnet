@@ -35,7 +35,7 @@ from __future__ import print_function
 
 # Dependency imports
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def custom_build(inputs, is_training, keep_prob):
@@ -65,7 +65,7 @@ def main(unused_argv):
                                               keep_prob=tf.constant(1.0))
   loss = tf.nn.l2_loss(targets - train_model_outputs)
   # Ensure the moving averages for the BatchNorm modules are updated.
-  update_ops = tf.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+  update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
   with tf.control_dependencies(update_ops):
     train_step = tf.train.GradientDescentOptimizer(learning_rate=1e-3).minimize(
         loss)

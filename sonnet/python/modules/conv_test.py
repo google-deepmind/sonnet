@@ -27,7 +27,7 @@ from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
 from sonnet.python.modules import conv
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
@@ -317,7 +317,7 @@ class SharedConvTest(parameterized.TestCase, tf.test.TestCase):
         use_bias=use_bias)
     self.assertIn(len(supposed_variables), [1, 2, 3])
 
-    graph_variables = tf.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES)
+    graph_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     self.assertEqual(len(graph_variables), len(supposed_variables))
     conv_variables = conv_mod.get_variables()
     self.assertEqual(len(conv_variables), len(supposed_variables))
@@ -699,7 +699,7 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [1, 10, 10, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
@@ -987,13 +987,13 @@ class Conv2DTest(parameterized.TestCase, tf.test.TestCase):
 
     all_vars = tf.trainable_variables()
     net_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=net.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(net.output_channels, clone1.output_channels)
@@ -1682,7 +1682,7 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [1, 10, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
@@ -1872,13 +1872,13 @@ class Conv1DTest(parameterized.TestCase, tf.test.TestCase):
 
     all_vars = tf.trainable_variables()
     net_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=net.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(net.output_channels, clone1.output_channels)
@@ -2390,13 +2390,13 @@ class CausalConv1DTest(parameterized.TestCase, tf.test.TestCase):
 
     all_vars = tf.trainable_variables()
     net_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=net.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(net.output_channels, clone1.output_channels)
@@ -2662,7 +2662,7 @@ class DepthwiseConv2DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [1, 10, 10, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
@@ -3027,7 +3027,7 @@ class SeparableConv2DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [10, 10, 1, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
     if use_bias:
@@ -3459,7 +3459,7 @@ class SeparableConv1DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [10, 1, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
     if use_bias:
@@ -3896,7 +3896,7 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
     conv1(tf.placeholder(tf.float32, [1, 10, 10, 10, 2]))
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     if use_bias:
       self.assertRegexpMatches(graph_regularizers[1].name, ".*l1_regularizer.*")
@@ -4180,13 +4180,13 @@ class Conv3DTest(parameterized.TestCase, tf.test.TestCase):
 
     all_vars = tf.trainable_variables()
     net_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=net.variable_scope.name + "/")
     clone1_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone1.variable_scope.name + "/")
     clone2_vars = tf.get_collection(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
+        tf.GraphKeys.TRAINABLE_VARIABLES,
         scope=clone2.variable_scope.name + "/")
 
     self.assertEqual(net.output_channels, clone1.output_channels)

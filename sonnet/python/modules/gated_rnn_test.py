@@ -26,7 +26,7 @@ from absl.testing import parameterized
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import rnn as contrib_rnn
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
@@ -522,7 +522,7 @@ class LSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     # Test that we have regularization losses.
     num_reg_losses = len(tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES))
+        tf.GraphKeys.REGULARIZATION_LOSSES))
     if use_batch_norm_h or use_batch_norm_x:
       self.assertEqual(num_reg_losses, len(keys) + 1)
     else:
@@ -974,7 +974,7 @@ class ConvLSTMTest(tf.test.TestCase, parameterized.TestCase):
 
     # Test that we have regularization losses.
     num_reg_losses = len(tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES))
+        tf.GraphKeys.REGULARIZATION_LOSSES))
     num_reg_losses_expected = len(lstm.convolutions) * len(keys)
     if use_bias and not legacy_bias_behaviour:
       # Bias is not applied to hidden
@@ -1298,7 +1298,7 @@ class GRUTest(tf.test.TestCase, parameterized.TestCase):
 
     # Test that we have regularization losses.
     self.assertLen(tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES), len(keys))
+        tf.GraphKeys.REGULARIZATION_LOSSES), len(keys))
 
 
 @contrib_eager.run_all_tests_in_graph_and_eager_modes

@@ -29,7 +29,7 @@ import numpy as np
 import six
 from sonnet.python.modules import base
 from sonnet.python.modules.base_errors import NotSupportedError
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
 tfe = contrib_eager
@@ -425,7 +425,7 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     ], all_variable_names)
 
     self.assertEmpty(module.get_all_variables(
-        collection=tf.compat.v1.GraphKeys.LOCAL_VARIABLES))
+        collection=tf.GraphKeys.LOCAL_VARIABLES))
 
     # Create another ModuleWithSubmodules with the same submodules
     module = ModuleWithSubmodules(
@@ -450,15 +450,15 @@ class AbstractModuleTest(parameterized.TestCase, tf.test.TestCase):
     ], all_variable_names)
 
   @parameterized.parameters(
-      [lambda m: m.get_all_variables(tf.compat.v1.GraphKeys.LOCAL_VARIABLES),
+      [lambda m: m.get_all_variables(tf.GraphKeys.LOCAL_VARIABLES),
        lambda m: m.non_trainable_variables])
   def testGetAllLocalVariables(self, get_non_trainable_variables):
     def local_custom_getter(getter, *args, **kwargs):
       kwargs["trainable"] = False
       if "collections" in kwargs and kwargs["collections"] is not None:
-        kwargs["collections"] += [tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
+        kwargs["collections"] += [tf.GraphKeys.LOCAL_VARIABLES]
       else:
-        kwargs["collections"] = [tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
+        kwargs["collections"] = [tf.GraphKeys.LOCAL_VARIABLES]
       return getter(*args, **kwargs)
 
     inputs = tf.ones(dtype=tf.float32, shape=[10, 10])

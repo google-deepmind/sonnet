@@ -28,7 +28,7 @@ import sonnet as snt
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import spectral_normalization
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 _ACCEPTABLE_ERROR = 1e-3
 

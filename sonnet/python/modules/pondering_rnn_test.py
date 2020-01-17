@@ -27,7 +27,7 @@ from sonnet.python.modules import gated_rnn
 from sonnet.python.modules import pondering_rnn
 from sonnet.python.modules import rnn_core
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import framework as contrib_framework
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 

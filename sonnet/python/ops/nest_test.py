@@ -26,7 +26,7 @@ import collections
 import numpy as np
 import six
 from sonnet.python.ops import nest
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 typekw = "class" if six.PY3 else "type"
 

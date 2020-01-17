@@ -22,7 +22,7 @@ from __future__ import print_function
 # Dependency imports
 import numpy as np
 from sonnet.python.modules import block_matrix
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def create_input(size, batch_size=1):

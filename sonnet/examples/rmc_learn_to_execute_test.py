@@ -21,7 +21,7 @@ from __future__ import print_function
 import sonnet as snt
 from sonnet.examples import learn_to_execute
 from sonnet.examples import rmc_learn_to_execute
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class RMCLearnTest(tf.test.TestCase):

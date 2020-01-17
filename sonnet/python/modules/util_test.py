@@ -29,7 +29,7 @@ import mock
 import numpy as np
 import sonnet as snt
 import sonnet.python.modules.util as util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variable_scope as variable_scope_ops
@@ -261,7 +261,7 @@ class UtilTest(parameterized.TestCase, tf.test.TestCase):
 
     saver1 = snt.get_saver(s1)
     saver2 = snt.get_saver(s1, collections=(
-        tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,))
+        tf.GraphKeys.TRAINABLE_VARIABLES,))
 
     self.assertIsInstance(saver1, tf.train.Saver)
     self.assertIsInstance(saver2, tf.train.Saver)

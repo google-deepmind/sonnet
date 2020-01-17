@@ -20,11 +20,11 @@ from __future__ import division
 from __future__ import print_function
 
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def restore_initializer(filename, name_fn=None,
-                        collection=tf.compat.v1.GraphKeys.GLOBAL_VARIABLES):
+                        collection=tf.GraphKeys.GLOBAL_VARIABLES):
   """Custom getter to restore all variables with `snt.restore_initializer`.
 
   Args:
@@ -34,7 +34,7 @@ def restore_initializer(filename, name_fn=None,
       checkpoint.
     collection: Only set the restore initializer for variables in this
       collection. If `None`, it will attempt to restore all variables. By
-      default `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`.
+      default `tf.GraphKeys.GLOBAL_VARIABLES`.
 
   Returns:
     A restore_initializer custom getter, which is a function taking arguments
@@ -47,11 +47,11 @@ def restore_initializer(filename, name_fn=None,
     # Work out what collections this variable will go in.
     collections = kwargs["collections"]
     if collections is None:
-      collections = [tf.compat.v1.GraphKeys.GLOBAL_VARIABLES]
+      collections = [tf.GraphKeys.GLOBAL_VARIABLES]
 
     if (kwargs["trainable"]
-        and tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES not in collections):
-      collections += [tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES]
+        and tf.GraphKeys.TRAINABLE_VARIABLES not in collections):
+      collections += [tf.GraphKeys.TRAINABLE_VARIABLES]
 
     if collection is None or collection in collections:
       # We don't make use of the 'scope' argument for restore_initializer as we

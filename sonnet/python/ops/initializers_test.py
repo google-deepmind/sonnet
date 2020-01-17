@@ -30,7 +30,7 @@ from sonnet.python.modules import conv
 from sonnet.python.modules.nets import convnet
 from sonnet.python.ops import initializers
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def _checkpoint():

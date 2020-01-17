@@ -23,7 +23,7 @@ import collections
 import mock
 import six
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class SequentialTest(tf.test.TestCase):

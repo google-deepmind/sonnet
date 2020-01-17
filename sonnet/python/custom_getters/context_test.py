@@ -20,7 +20,7 @@ from __future__ import print_function
 
 # Dependency imports
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def _suffix_getter(getter, name, *args, **kwargs):

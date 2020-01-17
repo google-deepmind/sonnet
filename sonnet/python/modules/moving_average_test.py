@@ -23,7 +23,7 @@ from __future__ import print_function
 from absl.testing import parameterized
 from six.moves import range
 from sonnet.python.modules import moving_average
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class MovingAverageTest(parameterized.TestCase, tf.test.TestCase):

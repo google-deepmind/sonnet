@@ -31,7 +31,7 @@ import functools
 from sonnet.python.custom_getters import context
 from sonnet.python.modules import base
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def wrap_with_spectral_norm(module_class,

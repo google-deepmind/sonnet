@@ -36,7 +36,7 @@ import contextlib2
 import six
 from sonnet.python.modules import base_info
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import wrapt
 
 # Import error class from base_errors for backward compatibility.
@@ -175,7 +175,7 @@ class AbstractModule(object):
     else:
       self._custom_getter = custom_getter
 
-    self._template = tf.compat.v1.make_template(
+    self._template = tf.make_template(
         name,
         self._build_wrapper,
         create_scope_now_=True,
@@ -638,7 +638,7 @@ class AbstractModule(object):
     return tuple(v for v in self.variables if not v.trainable)
 
   def get_variables(self,
-                    collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
+                    collection=tf.GraphKeys.TRAINABLE_VARIABLES):
     """Returns tuple of `tf.Variable`s declared inside this module.
 
     Note that this operates by searching this module's variable scope,
@@ -650,7 +650,7 @@ class AbstractModule(object):
 
     Args:
       collection: Collection to restrict query to. By default this is
-        `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+        `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
         include non-trainable variables such as moving averages.
 
     Returns:
@@ -676,7 +676,7 @@ class AbstractModule(object):
           self.variable_scope, collection=collection)
 
   def get_all_variables(self,
-                        collection=tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES):
+                        collection=tf.GraphKeys.TRAINABLE_VARIABLES):
     """Returns all `tf.Variable`s used when the module is connected.
 
     See the documentation for `AbstractModule._capture_variables()` for more
@@ -684,7 +684,7 @@ class AbstractModule(object):
 
     Args:
       collection: Collection to restrict query to. By default this is
-        `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+        `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
         include non-trainable variables such as moving averages.
 
     Returns:

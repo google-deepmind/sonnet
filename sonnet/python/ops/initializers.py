@@ -21,7 +21,7 @@ from __future__ import print_function
 
 # Dependency imports
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import io_ops

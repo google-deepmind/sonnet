@@ -90,7 +90,7 @@ import collections
 import math
 import weakref
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import tensorflow_probability as tfp
 
 _DEFAULT_SCALE_TRANSFORM = tf.nn.softplus

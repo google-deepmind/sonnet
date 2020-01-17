@@ -27,7 +27,7 @@ import mock
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import rnn as contrib_rnn
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
@@ -236,7 +236,7 @@ class VanillaRNNTest(tf.test.TestCase):
                                  regularizers=valid_regularizers)
     vanilla_rnn(inputs, prev_state)
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertEqual(len(regularizers), 2)
 
 

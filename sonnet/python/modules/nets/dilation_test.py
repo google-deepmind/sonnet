@@ -24,7 +24,7 @@ import numpy as np
 import sonnet as snt
 from sonnet.python.modules.nets import dilation
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 
@@ -213,7 +213,7 @@ class DilationTest(tf.test.TestCase, parameterized.TestCase):
     dilation_mod(tf.convert_to_tensor(self._images))
 
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
 
     # There are two regularizers per level
     layers_number = 8

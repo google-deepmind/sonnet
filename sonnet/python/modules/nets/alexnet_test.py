@@ -26,7 +26,7 @@ import numpy as np
 
 import sonnet as snt
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variables
@@ -159,7 +159,7 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
     net(inputs1, keep_prob1, is_training=True)
     net(inputs2, keep_prob2, is_training=True)
 
-    self.assertLen(tf.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES),
+    self.assertLen(tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES),
                    7 * 2)
 
     model_variables = net.get_variables()
@@ -200,7 +200,7 @@ class AlexNetTest(parameterized.TestCase, tf.test.TestCase):
     alex_net(inputs)
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
 
     alex_net_conv_layers = len(alex_net.conv_modules)
     self.assertEqual(len(graph_regularizers), 2 * alex_net_conv_layers)

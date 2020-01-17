@@ -28,7 +28,7 @@ from __future__ import print_function
 # Dependency imports
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def get_data(name, train_batch_size, test_batch_size):

@@ -25,7 +25,7 @@ import collections
 from sonnet.python.modules import base
 from sonnet.python.modules import base_info
 from sonnet.python.modules import basic
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import framework as contrib_framework
 
 nest = contrib_framework.nest

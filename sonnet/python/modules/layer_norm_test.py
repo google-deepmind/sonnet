@@ -26,7 +26,7 @@ import operator
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 
 from tensorflow.python.ops import variables
@@ -110,7 +110,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
     ln(inputs2)
 
     self.assertLen(tf.get_collection(
-        tf.compat.v1.GraphKeys.GLOBAL_VARIABLES), 2)
+        tf.GraphKeys.GLOBAL_VARIABLES), 2)
 
   def testInvalidInitializerParameters(self):
     with self.assertRaisesRegexp(KeyError, "Invalid initializer keys.*"):
@@ -170,7 +170,7 @@ class LayerNormTest(parameterized.TestCase, tf.test.TestCase):
     ln(inputs)
 
     graph_regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     self.assertRegexpMatches(graph_regularizers[0].name, ".*l1_regularizer.*")
     self.assertRegexpMatches(graph_regularizers[1].name, ".*l2_regularizer.*")
 

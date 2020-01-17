@@ -26,7 +26,7 @@ import functools
 from absl.testing import parameterized
 import numpy as np
 import sonnet as snt
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from tensorflow.python.platform import test
 

@@ -24,7 +24,7 @@ from __future__ import print_function
 
 # Dependency imports
 from sonnet.python.modules import base
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class Sequential(base.AbstractModule):

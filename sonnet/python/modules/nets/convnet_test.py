@@ -29,7 +29,7 @@ import numpy as np
 import sonnet as snt
 from sonnet.python.modules.conv import _fill_shape as fill_shape
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import layers as contrib_layers
 from tensorflow.contrib.eager.python import tfe as contrib_eager
 from tensorflow.python.ops import variables  # pylint: disable=g-direct-tensorflow-import
@@ -362,7 +362,7 @@ class SharedConvNets2DTest(parameterized.TestCase, tf.test.TestCase):
     model(input_to_net)
 
     regularizers = tf.get_collection(
-        tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES)
+        tf.GraphKeys.REGULARIZATION_LOSSES)
     expected_num_regularizers = 3 * (2 if use_bias else 1)
     self.assertLen(regularizers, expected_num_regularizers)
     if not tf.executing_eagerly():

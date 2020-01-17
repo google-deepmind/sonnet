@@ -22,7 +22,7 @@ from __future__ import print_function
 # Dependency imports
 
 import sonnet.examples.rnn_shakespeare as rnn_shakespeare
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class TinyShakespeareTest(tf.test.TestCase):

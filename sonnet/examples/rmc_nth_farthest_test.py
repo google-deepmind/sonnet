@@ -21,7 +21,7 @@ from __future__ import print_function
 import sonnet as snt
 from sonnet.examples import dataset_nth_farthest
 from sonnet.examples import rmc_nth_farthest
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class RMCNthFarthestTest(tf.test.TestCase):

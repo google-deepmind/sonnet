@@ -50,6 +50,20 @@ class FunctionTest(test_utils.TestCase, parameterized.TestCase):
 
   @test_utils.combined_named_parameters(BATCH_MODULES + RECURRENT_MODULES,
                                         test_utils.named_bools("autograph"))
+  def test_create_variables_eagerly(
+      self,
+      module_fn: ModuleFn,
+      input_shape: Tuple[int],
+      dtype: tf.DType,
+      autograph: bool,
+  ):
+    module = module_fn()
+    f = snt.distribute.create_variables_eagerly(module)
+    forward = tf.function(f, autograph=autograph)
+    forward(tf.ones(input_shape, dtype=dtype))
+
+  @test_utils.combined_named_parameters(BATCH_MODULES + RECURRENT_MODULES,
+                                        test_utils.named_bools("autograph"))
   def test_trace_batch_agnostic(
       self,
       module_fn: ModuleFn,

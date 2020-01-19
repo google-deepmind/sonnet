@@ -19,8 +19,13 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+from absl import logging
 import contextlib
+from sonnet.src import initializers
 import tensorflow as tf
+from typing import Callable, TypeVar
+
+T = TypeVar("T")
 
 
 def replica_local_creator(next_creator, **kwargs) -> tf.Variable:
@@ -133,3 +138,87 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
       stack.enter_context(super(TpuReplicator, self).scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
+
+
+def create_variables_eagerly(f: Callable[..., T]) -> Callable[..., T]:
+  """Wraps a function and attempts to create variables using eager mode.
+
+  Example usage:
+
+  >>> model = snt.Sequential([snt.Linear(1) for _ in range(100)])
+
+  >>> @tf.function
+  ... @snt.distribute.create_variables_eagerly
+  ... def f(x):
+  ...   return model(x)
+
+  >>> _ = f(tf.ones([1, 1]))
+
+  On a CPU only machine ``f`` will run ~4x faster (700ms vs. 3s), the benefits
+  are more pronounced in a distributed setup since eager variable creation can
+  skip a number of checks that are required in graph mode (e.g. checking whether
+  the variable has already been created) which end up ping-ponging RPCs.
+
+  Args:
+    f: Any function.
+
+  Returns:
+    A function running `f` in a context where variables are created eagerly.
+  """
+  def wrapper(*args, **kwargs):
+    with contextlib.ExitStack() as stack:
+      # The two hacks below enable a large speedup when initializing large
+      # models on TPU pods.
+      # TODO(b/141243467) Remove these workarounds.
+      stack.enter_context(_eager_initial_values())
+      stack.enter_context(tf.variable_creator_scope(_eager_variable_creator))
+      return f(*args, **kwargs)
+  return wrapper
+
+
+def _eager_variable_creator(getter, initial_value, **kwargs):
+  """Attempts to force variable creation to be eager."""
+  eager_initial_value = None
+
+  if isinstance(initial_value, tf.Tensor):
+    eager_initial_value = tf.get_static_value(initial_value)
+
+  if eager_initial_value is not None:
+    # If we have an eager initial value we can create variables in eager mode.
+    with tf.init_scope():
+      return getter(initial_value=eager_initial_value, **kwargs)
+
+  else:
+    # Fall back to creating in whatever context we're in with user input.
+    return getter(initial_value=initial_value, **kwargs)
+
+
+@contextlib.contextmanager
+def _eager_initial_values():
+  """Attempts to force all initializers to create eager tensors."""
+  all_initializers = {cls: cls.__call__
+                      for cls in initializers.Initializer.__subclasses__()}
+
+  def patched_call(self, shape, dtype):
+    """Monkey-patched verison of `Initializer.__call__`."""
+    cls = type(self)
+    orig_call = all_initializers[cls]
+    try:
+      with tf.init_scope():
+        return orig_call(self, shape, dtype)
+    except:  # pylint: disable=bare-except
+      if not tf.executing_eagerly():
+        logging.exception(
+            "Failed to create initial value eagerly for %s shape=%s dtype=%s",
+            type(self).__name__, shape, dtype)
+      return orig_call(self, shape, dtype)
+
+  try:
+    for cls in all_initializers:
+      cls.__call__ = patched_call
+    yield
+
+  finally:
+    # Restore
+    for cls, orig_call in all_initializers.items():
+      cls.__call__ = orig_call

@@ -19,10 +19,12 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet.src.distribute.batch_norm import CrossReplicaBatchNorm
+from sonnet.src.distribute.replicator import create_variables_eagerly
 from sonnet.src.distribute.replicator import Replicator
 from sonnet.src.distribute.replicator import TpuReplicator
 
 __all__ = (
+    "create_variables_eagerly",
     "Replicator",
     "TpuReplicator",
     "CrossReplicaBatchNorm",

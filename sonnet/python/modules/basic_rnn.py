@@ -31,7 +31,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import framework as contrib_framework
 
 nest = contrib_framework.nest

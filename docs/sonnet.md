@@ -123,7 +123,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -166,7 +166,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -468,7 +468,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -511,7 +511,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -802,7 +802,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -845,7 +845,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1097,7 +1097,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1140,7 +1140,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1505,7 +1505,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1548,7 +1548,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1772,7 +1772,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -1815,7 +1815,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2028,7 +2028,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2071,7 +2071,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2407,7 +2407,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2450,7 +2450,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2813,7 +2813,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -2879,7 +2879,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3311,7 +3311,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3354,7 +3354,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3607,7 +3607,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3650,7 +3650,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3879,7 +3879,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -3922,7 +3922,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -4293,7 +4293,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -4336,7 +4336,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -4653,7 +4653,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -4696,7 +4696,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5040,7 +5040,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5083,7 +5083,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5378,7 +5378,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5421,7 +5421,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5788,7 +5788,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -5831,7 +5831,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -6252,7 +6252,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -6295,7 +6295,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -6590,7 +6590,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -6633,7 +6633,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7001,7 +7001,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7044,7 +7044,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7462,7 +7462,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7505,7 +7505,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7903,7 +7903,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -7946,7 +7946,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -8304,7 +8304,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -8347,7 +8347,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -8759,7 +8759,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -8802,7 +8802,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9145,7 +9145,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9188,7 +9188,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9422,7 +9422,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9465,7 +9465,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9712,7 +9712,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -9763,7 +9763,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10054,7 +10054,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10097,7 +10097,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10351,7 +10351,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10404,7 +10404,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10802,7 +10802,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -10845,7 +10845,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11207,7 +11207,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11263,7 +11263,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11547,7 +11547,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11590,7 +11590,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11921,7 +11921,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -11964,7 +11964,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12265,7 +12265,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12308,7 +12308,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12588,7 +12588,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12631,7 +12631,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12837,7 +12837,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -12880,7 +12880,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13187,7 +13187,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13230,7 +13230,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13437,7 +13437,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13480,7 +13480,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13859,7 +13859,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -13902,7 +13902,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14212,7 +14212,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14255,7 +14255,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14549,7 +14549,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14592,7 +14592,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14872,7 +14872,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -14915,7 +14915,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15135,7 +15135,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15178,7 +15178,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15486,7 +15486,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15529,7 +15529,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15885,7 +15885,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -15928,7 +15928,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -16377,7 +16377,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -16420,7 +16420,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -16731,7 +16731,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -16955,7 +16955,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -16998,7 +16998,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17307,7 +17307,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17350,7 +17350,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17575,7 +17575,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17618,7 +17618,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17830,7 +17830,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -17873,7 +17873,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -18081,7 +18081,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -18124,7 +18124,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -18426,7 +18426,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -18469,7 +18469,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -18937,7 +18937,7 @@ The names of the variables are normalized to remove the scope prefix.
 
 * `scope_or_module`: Scope or module to build map from.
 * `collection`: Collection to restrict query to. By default this is
-      `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`, which includes
+      `tf.GraphKeys.GLOBAL_VARIABLES`, which includes
       non-trainable variables such as moving averages.
 * `context`: Scope or module, identical to or parent of `scope`. If given, this
       will be used as the stripped prefix. By default `None`, which means
@@ -18971,7 +18971,7 @@ module using a complementary `tf.train.Saver` object.
 * `scope`: Scope or module. Variables within will be saved or restored.
 * `collections`: Sequence of collections of variables to restrict
       `tf.train.Saver` to. By default this is
-      `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES` which includes moving
+      `tf.GraphKeys.GLOBAL_VARIABLES` which includes moving
       averages variables as well as trainable variables.
 * `context`: Scope or module, identical to or parent of `scope`. If given, this
       will be used as the stripped prefix.
@@ -18995,7 +18995,7 @@ used inside this module.
 
 * `module`: `snt.Module` instance to query the scope of.
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -19017,7 +19017,7 @@ Returns a tuple `tf.Variable`s in a scope for a given collection.
 
 * `scope`: `tf.VariableScope` or string to retrieve variables from.
 * `collection`: Collection to restrict query to. By default this is
-      `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+      `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
       include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -19611,7 +19611,7 @@ Custom getter to restore all variables with `snt.restore_initializer`.
     checkpoint.
 * `collection`: Only set the restore initializer for variables in this
     collection. If `None`, it will attempt to restore all variables. By
-    default `tf.compat.v1.GraphKeys.GLOBAL_VARIABLES`.
+    default `tf.GraphKeys.GLOBAL_VARIABLES`.
 
 ##### Returns:
 
@@ -20127,7 +20127,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -20170,7 +20170,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -20454,7 +20454,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -20497,7 +20497,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -20781,7 +20781,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -20824,7 +20824,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -21156,7 +21156,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -21199,7 +21199,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -21639,7 +21639,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -21682,7 +21682,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22063,7 +22063,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22106,7 +22106,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22361,7 +22361,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22404,7 +22404,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22694,7 +22694,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22742,7 +22742,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22948,7 +22948,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -22991,7 +22991,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -23311,7 +23311,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -23354,7 +23354,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -23620,7 +23620,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -23663,7 +23663,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -23970,7 +23970,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -24013,7 +24013,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -24237,7 +24237,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -24280,7 +24280,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -24749,7 +24749,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -24792,7 +24792,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25060,7 +25060,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25103,7 +25103,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25346,7 +25346,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25389,7 +25389,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25671,7 +25671,7 @@ information.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:
@@ -25714,7 +25714,7 @@ connected to.
 
 
 * `collection`: Collection to restrict query to. By default this is
-    `tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
+    `tf.GraphKeys.TRAINABLE_VARIABLES`, which doesn't
     include non-trainable variables such as moving averages.
 
 ##### Returns:

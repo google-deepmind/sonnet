@@ -38,6 +38,7 @@ snt_py_test(
     timeout = "long",
     srcs = ["checkpoint_test.py"],
     data = [":checkpoints"],
+    shard_count = 10,
     deps = [
         ":goldens",
         # pip: absl/logging
@@ -55,6 +56,7 @@ snt_py_test(
 snt_py_test(
     name = "distribute_test",
     srcs = ["distribute_test.py"],
+    shard_count = 10,
     deps = [
         ":descriptors",
         ":goldens",
@@ -104,6 +106,7 @@ snt_py_test(
     name = "function_test",
     timeout = "long",
     srcs = ["function_test.py"],
+    shard_count = 10,
     deps = [
         ":descriptors",
         # pip: absl/testing:parameterized
@@ -117,6 +120,7 @@ snt_py_test(
     name = "goldens_test",
     timeout = "long",
     srcs = ["goldens_test.py"],
+    shard_count = 10,
     deps = [
         ":goldens",
         "//sonnet",
@@ -129,6 +133,7 @@ snt_py_test(
     name = "pickle_test",
     timeout = "long",
     srcs = ["pickle_test.py"],
+    shard_count = 10,
     deps = [
         ":goldens",
         # pip: absl/testing:parameterized
@@ -142,6 +147,7 @@ snt_py_test(
     name = "saved_model_test",
     timeout = "long",
     srcs = ["saved_model_test.py"],
+    shard_count = 10,
     deps = [
         ":goldens",
         # pip: absl/testing:absltest
@@ -157,6 +163,7 @@ snt_py_test(
     name = "xla_test",
     timeout = "long",
     srcs = ["xla_test.py"],
+    shard_count = 10,
     deps = [
         ":goldens",
         # pip: absl/testing:absltest
@@ -173,6 +180,7 @@ snt_py_test(
     name = "keras_test",
     timeout = "long",
     srcs = ["keras_test.py"],
+    shard_count = 10,
     deps = [
         ":descriptors",
         # pip: absl/testing:parameterized
@@ -187,6 +195,7 @@ snt_py_test(
     name = "build_test",
     timeout = "long",
     srcs = ["build_test.py"],
+    shard_count = 10,
     deps = [
         ":descriptors",
         # pip: absl/testing:parameterized
@@ -200,6 +209,7 @@ snt_py_test(
     name = "copy_test",
     timeout = "long",
     srcs = ["copy_test.py"],
+    shard_count = 10,
     deps = [
         ":goldens",
         # pip: absl/testing:parameterized

@@ -61,7 +61,7 @@ class BatchApply(base.Module):
 
     num_dims = self.num_dims
     merge = lambda x: merge_leading_dims(x, num_dims=num_dims)
-    split = lambda x: split_leading_dim(x, num_dims=num_dims, inputs=example)
+    split = lambda x: split_leading_dim(x, num_dims=num_dims, example=example)
 
     # Merge leading dimensions of inputs.
     # Example: [T, B, N] -> [T*B, N]
@@ -89,19 +89,41 @@ def first_leaf(args, kwargs) -> Optional[Any]:
 
 def split_leading_dim(
     x: Optional[tf.Tensor],
-    inputs: tf.Tensor,
+    example: tf.Tensor,
     num_dims: int,
 ) -> Optional[tf.Tensor]:
-  """Split the first dimension of a tensor."""
+  """Split the first dimension of a tensor to match an example.
+
+  See :func:`merge_leading_dims`.
+
+  >>> x = tf.ones([6, 1])
+  >>> example = tf.ones([3, 2, 1])
+  >>> snt.split_leading_dim(x, example, 2)
+  <tf.Tensor: ...shape=(3, 2, 1), ...>
+
+  If ``x`` is not a :tf:`Tensor` or :tf:`Variable` then is is returned
+  unchanged:
+
+  >>> snt.split_leading_dim('not a tensor', example, 2)
+  'not a tensor'
+
+  Args:
+    x: A tensor with leading dim merged.
+    example: An Tensor with leading dim not merged.
+    num_dims: The number of leading dimensions of example to use.
+
+  Returns:
+    A tensor with leading dim split, or the input unchanged.
+  """
   if x is None or not isinstance(x, (tf.Tensor, tf.Variable)):
     return x
 
-  static_shape = inputs.shape[:num_dims] + x.shape[1:]
+  static_shape = example.shape[:num_dims] + x.shape[1:]
   if static_shape.is_fully_defined():  # pytype: disable=attribute-error
     return tf.reshape(x, static_shape)
 
   # Shape can't be inferred statically.
-  leading_dims = tf.shape(inputs)[:num_dims]
+  leading_dims = tf.shape(example)[:num_dims]
   other_dims = tf.shape(x)[1:]
   dynamic_shape = tf.concat([leading_dims, other_dims], axis=0)
   return tf.reshape(x, dynamic_shape)
@@ -119,7 +141,32 @@ def merge_leading_dims(
     x: Optional[tf.Tensor],
     num_dims: int,
 ) -> Optional[tf.Tensor]:
-  """Merges leading dimensions."""
+  """Merges leading dimensions of a tensor.
+
+  See :func:`split_leading_dim`.
+
+  >>> x = tf.ones([3, 2, 1])
+  >>> snt.merge_leading_dims(x, num_dims=2)
+  <tf.Tensor: ...shape=(6, 1), ...>
+
+  If the rank of ``x`` is less than ``num_dims`` it is returned unchanged:
+
+  >>> snt.merge_leading_dims(x, 4)
+  <tf.Tensor: ...shape=(3, 2, 1), ...>
+
+  If ``x`` is not a :tf:`Tensor` or :tf:`Variable` then is is returned
+  unchanged:
+
+  >>> snt.merge_leading_dims('not a tensor', 1)
+  'not a tensor'
+
+  Args:
+    x: A :tf:`Tensor` to merge.
+    num_dims: The number of leading dimensions to merge.
+
+  Returns:
+    A :tf:`Tensor` with merged leading dimensions or the input unchanged.
+  """
   if x is None or not isinstance(x, (tf.Tensor, tf.Variable)):
     return x
 

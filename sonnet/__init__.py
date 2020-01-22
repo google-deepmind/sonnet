@@ -32,6 +32,8 @@ from sonnet.src.base import Module
 from sonnet.src.base import no_name_scope
 from sonnet.src.base import Optimizer
 from sonnet.src.batch_apply import BatchApply
+from sonnet.src.batch_apply import merge_leading_dims
+from sonnet.src.batch_apply import split_leading_dim
 from sonnet.src.batch_norm import BaseBatchNorm
 from sonnet.src.batch_norm import BatchNorm
 from sonnet.src.bias import Bias
@@ -132,6 +134,7 @@ __all__ = (
     "initializers",
     "log_variables",
     "lstm_with_recurrent_dropout",
+    "merge_leading_dims",
     "no_name_scope",
     "nets",
     "once",
@@ -140,6 +143,7 @@ __all__ = (
     "pad",
     "regularizers",
     "scale_gradient",
+    "split_leading_dim",
     "static_unroll",
 )
 

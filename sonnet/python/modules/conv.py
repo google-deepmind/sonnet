@@ -33,7 +33,7 @@ import numpy as np
 import six
 from sonnet.python.modules import base
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 # Strings for TensorFlow convolution padding modes. See the following

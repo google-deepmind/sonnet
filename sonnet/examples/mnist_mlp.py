@@ -25,7 +25,7 @@ import os
 import numpy as np
 import sonnet as snt
 from sonnet.examples import dataset_mnist_cifar10 as dataset_mnist
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 FLAGS = tf.flags.FLAGS

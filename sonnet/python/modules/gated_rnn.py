@@ -49,7 +49,7 @@ from sonnet.python.modules import conv
 from sonnet.python.modules import layer_norm
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.contrib import framework as contrib_framework
 from tensorflow.contrib import rnn as contrib_rnn
 

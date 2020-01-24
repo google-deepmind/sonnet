@@ -25,7 +25,7 @@ from sonnet.python.modules import base
 from sonnet.python.modules import basic
 from sonnet.python.modules import util
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 # pylint: disable=g-direct-tensorflow-import
 from tensorflow.python.layers import utils

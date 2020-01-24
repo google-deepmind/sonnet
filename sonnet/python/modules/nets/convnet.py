@@ -29,7 +29,7 @@ from sonnet.python.modules import batch_norm_v2
 from sonnet.python.modules import conv
 from sonnet.python.modules import util
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 DATA_FORMAT_NCHW = "NCHW"
 DATA_FORMAT_NHWC = "NHWC"

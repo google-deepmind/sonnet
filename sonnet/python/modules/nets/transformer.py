@@ -44,7 +44,7 @@ from sonnet.python.modules import layer_norm as snt_ln
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
 from sonnet.python.modules.nets import mlp as snt_mlp
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 AttentionState = collections.namedtuple('AttentionState',
                                         ('queries', 'keys', 'values', 'logits',

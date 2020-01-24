@@ -26,7 +26,7 @@ from sonnet.python.modules import conv
 from sonnet.python.modules import sequential
 from sonnet.python.modules import util
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def _range_along_dimension(range_dim, shape):

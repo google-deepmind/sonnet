@@ -32,7 +32,7 @@ import six
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import wrapt
 from tensorflow.contrib import framework as contrib_framework
 

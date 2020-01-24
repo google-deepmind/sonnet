@@ -38,7 +38,7 @@ import numpy as np
 import sonnet as snt
 from sonnet.examples import ptb_reader
 import sonnet.python.custom_getters.bayes_by_backprop as bbb
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import tensorflow_probability as tfp
 
 nest = tf.nest
@@ -417,8 +417,8 @@ def train(logdir):
   global_step = tf.get_variable(
       "num_weight_updates",
       initializer=tf.constant(0, dtype=tf.int32, shape=()),
-      collections=[tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
-                   tf.compat.v1.GraphKeys.GLOBAL_STEP])
+      collections=[tf.GraphKeys.GLOBAL_VARIABLES,
+                   tf.GraphKeys.GLOBAL_STEP])
 
   learning_rate = tf.get_variable(
       "lr", initializer=tf.constant(FLAGS.lr_start, shape=(), dtype=tf.float32))
@@ -547,8 +547,8 @@ def test(logdir):
   global_step = tf.get_variable(
       "num_weight_updates",
       initializer=tf.constant(0, dtype=tf.int32, shape=()),
-      collections=[tf.compat.v1.GraphKeys.GLOBAL_VARIABLES,
-                   tf.compat.v1.GraphKeys.GLOBAL_STEP])
+      collections=[tf.GraphKeys.GLOBAL_VARIABLES,
+                   tf.GraphKeys.GLOBAL_STEP])
 
   ptb_test = PTB(
       name="ptb_test",

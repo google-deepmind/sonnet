@@ -39,7 +39,7 @@ from sonnet.python.modules import basic
 from sonnet.python.modules import batch_norm
 from sonnet.python.modules import conv
 from sonnet.python.modules import util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 class AlexNet(base.AbstractModule):

@@ -23,10 +23,10 @@ from sonnet.src.optimizers import momentum as momentum_lib
 from sonnet.src.optimizers import optimizer_tests
 import tensorflow as tf
 
-SEEDS = (("_seed={}".format(seed), seed) for seed in (28, 2, 90))
 CONFIGS = optimizer_tests.named_product(learning_rate=(0.1, 0.01, 0.001),
                                         momentum=(0.9, 0.5, 0.2),
-                                        use_nesterov=(True, False))
+                                        use_nesterov=(True, False),
+                                        seed=(28, 2, 90))
 
 
 class ComparisonTest(optimizer_tests.AbstractFuzzTest):
@@ -44,9 +44,10 @@ class ComparisonTest(optimizer_tests.AbstractFuzzTest):
                                       use_nesterov=use_nesterov)
     return optimizer.apply
 
-  @test_utils.combined_named_parameters(SEEDS, CONFIGS)
-  def testComparingSonnetAndTensorFlow(self, seed, config):
-    self.assertEqualParameters(seed, config)
+  @test_utils.combined_named_parameters(CONFIGS)
+  def testComparingSonnetAndTensorFlow(self, config):
+    seed = config.pop("seed")
+    self.assertParametersRemainClose(seed, config)
 
 
 class MomentumTest(optimizer_tests.OptimizerTestBase):

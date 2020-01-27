@@ -121,28 +121,28 @@ class OptimizerTestBase(test_utils.TestCase):
 class AbstractFuzzTest(test_utils.TestCase, parameterized.TestCase):
   """Tests TF and Sonnet run concurrently produce equivalent output."""
 
-  num_steps = 100
-
   def _make_tf(self, learning_rate, momentum, use_nesterov):
     raise NotImplementedError()
 
   def _make_snt(self, learning_rate, momentum, use_nesterov):
     raise NotImplementedError()
 
-  def assertEqualParameters(self, seed, config):
+  def assertParametersRemainClose(self, seed, config, num_steps=100, atol=1e-4):
     tf_opt = self._make_tf(**config)
     snt_opt = self._make_snt(**config)
 
     # TODO(tomhennigan) Add sparse data.
-    data = _generate_dense_data(seed, self.num_steps)
+    data = _generate_dense_data(seed, num_steps)
     tf_params = _apply_optimizer(data, tf_opt)
     snt_params = _apply_optimizer(data, snt_opt)
     assert tf_params and len(tf_params) == len(snt_params)
 
-    tol = 1e-4 if self.primary_device == "TPU" else 1e-5
     for step, (tf_param, snt_param) in enumerate(zip(tf_params, snt_params)):
       msg = "TF and Sonnet diverged at step {}".format(step)
-      self.assertAllClose(tf_param, snt_param, atol=tol, msg=msg)
+      for tf_p, snt_p in zip(tf_param, snt_param):
+        self.assertEqual(tf_p.shape, snt_p.shape)
+        self.assertEqual(tf_p.dtype, snt_p.dtype)
+        self.assertAllClose(tf_p, snt_p, atol=atol, msg=msg)
 
 
 def _generate_dense_data(seed, num_steps):

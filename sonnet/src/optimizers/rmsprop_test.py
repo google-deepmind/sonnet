@@ -18,9 +18,42 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet.src import test_utils
 from sonnet.src.optimizers import optimizer_tests
 from sonnet.src.optimizers import rmsprop
 import tensorflow as tf
+
+CONFIGS = optimizer_tests.named_product(learning_rate=(0.01, 0.001),
+                                        decay=(0.8, 0.9),
+                                        momentum=(0.0, 0.5),
+                                        epsilon=(1e-7, 1e-8),
+                                        centered=(False, True),
+                                        seed=(28, 2, 90))
+
+
+class ComparisonTest(optimizer_tests.AbstractFuzzTest):
+  """Ensures Sonnet optimizers have equivalent behavior to TensorFlow."""
+
+  def _make_tf(self, learning_rate, decay, momentum, epsilon, centered):
+    optimizer = tf.optimizers.RMSprop(learning_rate=learning_rate,
+                                      rho=decay,
+                                      momentum=momentum,
+                                      epsilon=epsilon,
+                                      centered=centered)
+    return lambda g, p: optimizer.apply_gradients(zip(g, p))
+
+  def _make_snt(self, learning_rate, decay, momentum, epsilon, centered):
+    optimizer = rmsprop.RMSProp(learning_rate=learning_rate,
+                                decay=decay,
+                                momentum=momentum,
+                                epsilon=epsilon,
+                                centered=centered)
+    return optimizer.apply
+
+  @test_utils.combined_named_parameters(CONFIGS)
+  def testComparingSonnetAndTensorFlow(self, config):
+    seed = config.pop("seed")
+    self.assertParametersRemainClose(seed, config, atol=1e-2)
 
 
 class RMSPropTest(optimizer_tests.OptimizerTestBase):
@@ -171,6 +204,7 @@ class ReferenceRMSPropTest(RMSPropTest):
   def make_optimizer(self, **kwargs):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
+    kwargs["rho"] = kwargs.pop("decay", 0.9)
     return optimizer_tests.WrappedTFOptimizer(tf.optimizers.RMSprop(**kwargs))
 
 

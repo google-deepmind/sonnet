@@ -18,9 +18,39 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from sonnet.src import test_utils
 from sonnet.src.optimizers import adam
 from sonnet.src.optimizers import optimizer_tests
 import tensorflow as tf
+
+CONFIGS = optimizer_tests.named_product(learning_rate=(0.1, 0.01, 0.001),
+                                        beta_1=(0.9, 0.99, 0.999),
+                                        beta_2=(0.9, 0.99, 0.999),
+                                        epsilon=(1e-8,),
+                                        seed=(28, 2, 90))
+
+
+class ComparisonTest(optimizer_tests.AbstractFuzzTest):
+  """Ensures Sonnet optimizers have equivalent behavior to TensorFlow."""
+
+  def _make_tf(self, learning_rate, beta_1, beta_2, epsilon):
+    optimizer = tf.optimizers.Adam(learning_rate=learning_rate,
+                                   beta_1=beta_1,
+                                   beta_2=beta_2,
+                                   epsilon=epsilon)
+    return lambda g, p: optimizer.apply_gradients(zip(g, p))
+
+  def _make_snt(self, learning_rate, beta_1, beta_2, epsilon):
+    optimizer = adam.Adam(learning_rate=learning_rate,
+                          beta1=beta_1,
+                          beta2=beta_2,
+                          epsilon=epsilon)
+    return optimizer.apply
+
+  @test_utils.combined_named_parameters(CONFIGS)
+  def testComparingSonnetAndTensorFlow(self, config):
+    seed = config.pop("seed")
+    self.assertParametersRemainClose(seed, config)
 
 
 class AdamTest(optimizer_tests.OptimizerTestBase):

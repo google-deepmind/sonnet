@@ -34,9 +34,11 @@ snt_py_library(
 snt_py_test(
     name = "adam_test",
     srcs = ["adam_test.py"],
+    shard_count = 10,
     deps = [
         ":adam",
         ":optimizer_tests",
+        "//sonnet/src:test_utils",
         # pip: tensorflow
     ],
 )
@@ -57,9 +59,11 @@ snt_py_library(
 snt_py_test(
     name = "momentum_test",
     srcs = ["momentum_test.py"],
+    shard_count = 10,
     deps = [
         ":momentum",
         ":optimizer_tests",
+        "//sonnet/src:test_utils",
         # pip: tensorflow
     ],
 )
@@ -81,6 +85,7 @@ snt_py_library(
 snt_py_test(
     name = "rmsprop_test",
     srcs = ["rmsprop_test.py"],
+    shard_count = 10,
     deps = [
         ":optimizer_tests",
         ":rmsprop",
@@ -103,6 +108,7 @@ snt_py_library(
 snt_py_test(
     name = "sgd_test",
     srcs = ["sgd_test.py"],
+    shard_count = 10,
     deps = [
         ":optimizer_tests",
         ":sgd",

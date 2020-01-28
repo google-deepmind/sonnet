@@ -2259,7 +2259,7 @@ batch statistics.
 
 You can either update the moving averages automatically by setting
 `update_ops_collection=None` or by running the ops in the given collection,
-by default tf.compat.v1.GraphKeys.UPDATE_OPS.
+by default tf.GraphKeys.UPDATE_OPS.
 
 For example, to run the updates automatically:
 
@@ -2278,7 +2278,7 @@ For example, to run the updates manually:
     ...
 
     update_ops = tf.group(*tf.get_collection(
-        tf.compat.v1.GraphKeys.UPDATE_OPS))
+        tf.GraphKeys.UPDATE_OPS))
     train_op = tf.group(train_op, update_ops)
 
 Then, whenever `train_op` is run so also are the moving average update ops.
@@ -2330,7 +2330,7 @@ indices to reduce over with `axis`.
     moving average update ops to. If `None`, we instead add the update ops
     as control dependencies of the output of the module. This may result in
     some slowdown, as the feed-forward of the network is now blocked. By
-    default, `tf.compat.v1.GraphKeys.UPDATE_OPS`.
+    default, `tf.GraphKeys.UPDATE_OPS`.
 * `fused`: Use nn.fused_batch_norm if True, nn.batch_normalization otherwise.
 * `name`: Name of the module.
 
@@ -3178,13 +3178,13 @@ penalty.
 
 For example, to run the updates manually:
 
-    bn = BatchNormV2(update_ops_collection=tf.compat.v1.GraphKeys.UPDATE_OPS)
+    bn = BatchNormV2(update_ops_collection=tf.GraphKeys.UPDATE_OPS)
     train_net = bn(train_inputs, is_training=True)
 
     ...
 
     update_ops = tf.group(*tf.get_collection(
-        tf.compat.v1.GraphKeys.UPDATE_OPS))
+        tf.GraphKeys.UPDATE_OPS))
     train_op = tf.group(train_op, update_ops)
 
 Then, whenever `train_op` is run so also are the moving average update ops.

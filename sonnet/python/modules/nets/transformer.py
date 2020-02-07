@@ -38,8 +38,10 @@ import collections
 
 # Dependency imports
 import numpy as np
+from sonnet.python import custom_getters
 from sonnet.python.modules import base
 from sonnet.python.modules import basic
+from sonnet.python.modules import conv as snt_conv
 from sonnet.python.modules import layer_norm as snt_ln
 from sonnet.python.modules import rnn_core
 from sonnet.python.modules import util
@@ -49,6 +51,9 @@ import tensorflow.compat.v1 as tf
 AttentionState = collections.namedtuple('AttentionState',
                                         ('queries', 'keys', 'values', 'logits',
                                          'weights', 'embeddings', 'read_words'))
+
+CompressedMemoryState = collections.namedtuple(
+    'CompressedMemoryState', ('episodic_memory', 'compressed_memory', 'index'))
 
 
 def rel_shift(position_logits):
@@ -106,6 +111,19 @@ def _layer_norm(inputs):
     return snt_ln.LayerNorm()(inputs)
 
 
+def _concat_and_slice(prev_memory, new_memory):
+  original_memory_size = prev_memory.get_shape().as_list()[1]
+  concat_memory = tf.concat([prev_memory, new_memory], 1)
+  memory = concat_memory[:, -original_memory_size:]
+  return memory, concat_memory
+
+
+def simple_attention(queries, keys, values):
+  logits = tf.matmul(queries, keys, transpose_b=True)
+  weights = tf.nn.softmax(logits)
+  return tf.matmul(weights, values)
+
+
 class ResidualDropoutWrapper(base.AbstractModule):
   """Wrapper class that applies residual connections, dropout and layer norm.
 
@@ -153,12 +171,21 @@ def future_mask(chunk_size, dtype):
   return mask
 
 
+def _memory_size(state):
+  if isinstance(state, CompressedMemoryState):
+    return (state.episodic_memory.get_shape().as_list()[1] +
+            state.compressed_memory.get_shape().as_list()[1])
+  else:
+    return state.get_shape().as_list()[1]
+
+
 def create_mask(inputs, state, equal_window):
   """Creates mask for future sequence positions.
 
   Args:
     inputs: inputs tensor of shape [B, N, D]
-    state: optional tensor of shape [B, M, D]
+    state: optional tensor of shape [B, M, D], CompressedMemoryState or a list
+      where the ith entry corresponds to the ith layer's state.
     equal_window: if True, then each activation has an equally-sized attention
       window of length 'M'. This only makes sense if a state is given.
 
@@ -167,16 +194,14 @@ def create_mask(inputs, state, equal_window):
   """
   chunk_size = inputs.get_shape().as_list()[1]
   dtype = inputs.dtype
-  if state is None:
-    mask = future_mask(chunk_size, dtype)
-  else:
+  mask = future_mask(chunk_size, dtype)
+  if state is not None:
     if isinstance(state, (tuple, list)):
-      state = state[0]
-    mem_size = state.get_shape().as_list()[1]
-    mask = tf.concat([
-        tf.zeros([1, 1, chunk_size, mem_size], dtype=dtype),
-        future_mask(chunk_size, dtype)
-    ], 3)
+      largest_memory_layer = np.argmax([_memory_size(s) for s in state])
+      state = state[largest_memory_layer]
+    mem_size = _memory_size(state)
+    mask = tf.concat(
+        [tf.zeros([1, 1, chunk_size, mem_size], dtype=dtype), mask], 3)
 
   if equal_window:
     attn_mask = tf.ones([chunk_size, chunk_size], dtype=dtype)
@@ -250,8 +275,11 @@ class MultiheadAttention(base.AbstractModule):
       mask: Optional mask to attention logits. This can prevent attending to
         future positions or unused memory slots.
       scaling: Whether to scale the attention logits.
-      positional_encodings: Either None (none given) or a tuple of
-        `(key_positional_encodings, query_positional_encodings)`.
+      positional_encodings: Either None (none given), or an iterable of
+        `(key_positional_encodings, query_positional_encodings)` tuples, where
+        the first encodings in the list indicate the oldest entries in memory
+        and the final encodings indicate the newest entries in memory and the
+        sequence.
       use_relative_positions: If True then relative positions are incorporated,
         vs absolute, into the attention logits. This is done exactly as
         described in the TransformerXL, Dai et al. 2019.
@@ -267,6 +295,7 @@ class MultiheadAttention(base.AbstractModule):
         'key': self._key_size,
         'query': self._key_size,
         'relative_keys': self._key_size,
+        'relative_keys_0': self._key_size,
     }
     self._num_heads = num_heads
     self._mask = mask
@@ -279,32 +308,45 @@ class MultiheadAttention(base.AbstractModule):
   def multihead_linear(self, inputs, name):
     with tf.variable_scope(name, reuse=tf.AUTO_REUSE):
       hidden_size = self._sizes[name]
-      total_size = hidden_size * self._num_heads
-      chunk_size = inputs.get_shape().as_list()[1]
-      linear = basic.Linear(total_size, use_bias=False, initializers=self._init)
-      out = basic.BatchApply(linear)(inputs)
-      out = basic.BatchReshape([chunk_size, self._num_heads, hidden_size])(out)
-      out = tf.transpose(out, [0, 2, 1, 3])
-    return out
+      input_size = inputs.shape[-1].value
+      w = tf.get_variable(
+          'linear/w',
+          shape=[input_size, self._num_heads * hidden_size],
+          initializer=self._init['w'])
+      w = tf.reshape(w, [input_size, self._num_heads, hidden_size])
+      out = tf.einsum('bij,jhk->bhik', inputs, w)
+      return out
 
   def _build(self,
              inputs,
-             is_training,
              query_inputs=None,
              state=None,
+             is_training=False,
              dropout_keep_prob=0.5):
     embedding_size = self._value_size * self._num_heads
-    batch_size = tf.shape(inputs)[0]
+
     q_inputs = inputs if query_inputs is None else query_inputs
     # Denoted by L. If query_inputs is None, L = N.
     _, query_size = q_inputs.get_shape().as_list()[:2]
 
     if state is not None:
-      k_inputs = tf.concat([state] + [inputs], 1)
+      if isinstance(state, CompressedMemoryState):
+        state_memory_list = [state.compressed_memory, state.episodic_memory]
+      else:
+        state_memory_list = [state]
+
+      k_inputs = tf.concat(state_memory_list + [inputs], 1)
       v_inputs = k_inputs
     else:
       k_inputs = inputs
       v_inputs = inputs
+
+    # Batch size denoted by B
+    batch_size = tf.shape(inputs)[0]
+    # Chunk_size denoted by N
+    chunk_size = inputs.get_shape().as_list()[1]
+    # Denoted by N + M
+    att_size = k_inputs.get_shape().as_list()[1]
 
     if self._positional_encodings and not self._use_relative_positions:
       key_positions, query_positions = self._positional_encodings
@@ -328,30 +370,48 @@ class MultiheadAttention(base.AbstractModule):
           'r_w_bias', [1, self._num_heads, 1, self._key_size],
           dtype=inputs.dtype)
       content_logits = tf.matmul(q + r_w_bias, k, transpose_b=True)
-      relative_keys = self.multihead_linear(
-          self._positional_encodings[0], name='relative_keys')
-      r_r_bias = tf.get_variable(
-          'r_r_bias', [1, self._num_heads, 1, self._key_size],
-          dtype=inputs.dtype)
-      relative_keys = tf.tile(relative_keys, [batch_size, 1, 1, 1])
-      relative_logits = tf.matmul(q + r_r_bias, relative_keys, transpose_b=True)
-      relative_logits = rel_shift(relative_logits)
-      logits = content_logits + relative_logits
+      all_relative_logits = []
+      # Loop over multiple positional encodings, for the case of multiple
+      # memory types.
+      for i, positional_encodings in enumerate(self._positional_encodings):
+        key_positions, query_positions = positional_encodings
+        if key_positions.get_shape().as_list()[-1] != att_size:
+          key_positions = key_positions[:, -att_size:]  # Crop to layer mem size
+        is_final = i == len(self._positional_encodings) - 1
+        suffix = '' if is_final else '_%d' % i
+        relative_keys = self.multihead_linear(
+            key_positions, name='relative_keys' + suffix)
+        # [B, H, N, D]
+        r_r_bias = tf.get_variable(
+            'r_r_bias' + suffix, [1, self._num_heads, 1, self._key_size],
+            dtype=inputs.dtype)
+        relative_keys = tf.tile(relative_keys, [batch_size, 1, 1, 1])
+        relative_logits = tf.matmul(
+            q + r_r_bias, relative_keys, transpose_b=True)
+        relative_logits = rel_shift(relative_logits)
+        if not is_final:  # Include relative positions for input sequence.
+          relative_logits = relative_logits[:, :, :, :-chunk_size]
+        all_relative_logits.append(relative_logits)
+      all_relative_logits = tf.concat(all_relative_logits, 3)
+      logits = content_logits + all_relative_logits
     else:
       # [B, H, N, N + M]
       logits = tf.matmul(q, k, transpose_b=True)
       content_logits = logits
 
     if self._mask is not None:
-      logits += self._mask
+      if self._mask.get_shape().as_list()[-1] != att_size:
+        mask = self._mask[:, :, :, -att_size:]
+      else:
+        mask = self._mask
+      logits += mask
 
     weights = tf.nn.softmax(logits)
     if is_training:
       weights = tf.nn.dropout(weights, dropout_keep_prob)
-    output = tf.matmul(weights, v)  # [B, H, L, V]
+    # [B, L, H, V], where V is value_size
+    output_transpose = tf.einsum('bhij,bhjk->bihk', weights, v)
 
-    # [B, H, L, V] -> [B, L, H, V], where V is value_size
-    output_transpose = tf.transpose(output, [0, 2, 1, 3])
     # [B, L, H, V] -> [B, L, HV]
     attended_inputs = basic.BatchReshape([query_size, embedding_size])(
         output_transpose)
@@ -485,24 +545,30 @@ class TransformerTower(base.AbstractModule):
       condition_tile = tf.tile(
           tf.expand_dims(condition, 1), [1, tf.shape(inputs)[1], 1])
       inputs = tf.concat([inputs, condition_tile], -1)
+
     if state is None:
-      memory_size = 0
+      memory_sizes = [0]
+    elif isinstance(state[0], CompressedMemoryState):
+      cm_mem_size = max(_memory_size(s.compressed_memory) for s in state)
+      em_mem_size = max(_memory_size(s.episodic_memory) for s in state)
+      memory_sizes = [cm_mem_size, em_mem_size]
     else:
-      memory_size = state[0].get_shape().as_list()[1]
+      memory_sizes = [max([_memory_size(s) for s in state])]
     chunk_size = inputs.get_shape().as_list()[1]
-    seq_len = chunk_size + memory_size
-    # Calculates positions in float32 to ensure the timescale computations
-    # are accurate, before casting to appropriate type.
-    key_positions = get_position_encodings(
-        sequence_length=seq_len,
-        hidden_size=inputs.get_shape().as_list()[2],
-        clamp_value=self._clamp_time_range,
-    )
-    key_positions = tf.cast(key_positions, dtype=inputs.dtype)
-    if is_training:
-      key_positions = tf.nn.dropout(key_positions, rate=self._dropout_rate)
-    query_positions = key_positions[:, -chunk_size:, :]
-    self._positional_encodings = (key_positions, query_positions)
+    self._positional_encodings = []
+    # Creates positional encodings for different memory types.
+    for i, memory_size in enumerate(memory_sizes):
+      seq_len = chunk_size + memory_size
+      key_positions = get_position_encodings(
+          sequence_length=seq_len,
+          hidden_size=inputs.get_shape().as_list()[2],
+          clamp_value=self._clamp_time_range,
+      )
+      if is_training:
+        key_positions = tf.nn.dropout(key_positions, rate=self._dropout_rate)
+      key_positions = tf.cast(key_positions, dtype=inputs.dtype)
+      query_positions = key_positions[:, -chunk_size:, :]
+      self._positional_encodings.append((key_positions, query_positions))
 
     if self._causal:
       self._mask = create_mask(inputs, state, self._same_attention_length)
@@ -534,9 +600,16 @@ class TransformerTower(base.AbstractModule):
 
     return output, attention_states
 
+  def attention_module(self, i):
+    """Returns the i-th layer attention module."""
+    return self._attention_modules[i]
+
 
 class TransformerXL(rnn_core.RNNCore):
-  """Transformer with memory of past activations (dai et al. 2019).
+  """Transformer with memory of past activations.
+
+  From Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context
+  dai et al. 2019, https://arxiv.org/abs/1901.02860.
 
   The TransformerXL can be used in two modes:
 
@@ -610,6 +683,455 @@ class TransformerXL(rnn_core.RNNCore):
   def state_size(self):
     memory_shape = tf.TensorShape([self._memory_size, self._embedding_size])
     return [memory_shape] * self._num_layers
+
+  @property
+  def output_size(self):
+    if self._chunk_size == 0:
+      return tf.TensorShape([self._embedding_size])
+    else:
+      return tf.TensorShape([self._chunk_size, self._embedding_size])
+
+
+class PoolCompressor(base.AbstractModule):
+  """Compress sequence using simple pooling."""
+
+  def __init__(self,
+               compression_rate=2,
+               kernel_size=0,
+               pooling='AVG',
+               compressed_memory_size=None,
+               episodic_memory_size=None,
+               name='pool_compressor'):
+    """Instantiates compression module.
+
+    Args:
+      compression_rate: integer >= 1. The memory will be compressed from T
+        time-steps to T / compression_rate. In implementation, this corresponds
+        to the stride size of the module.
+      kernel_size: The additional kernel size, if we wish for overlapping
+        compressed vectors. The total conv1d kernel size is 'compression_rate +
+        kernel_size', (as the stride is 'compression_rate').
+      pooling: AVG or MAX pooling.
+      compressed_memory_size: Size of compressed memory store.
+      episodic_memory_size: Size of episodic memory store.
+      name: module name, used for variable scoping.
+    """
+    super(PoolCompressor, self).__init__(name=name)
+    self._compression_rate = compression_rate
+    self._compressed_memory_size = compressed_memory_size
+    self._episodic_memory_size = episodic_memory_size
+    self._pooling = pooling
+    self._kernel_size = kernel_size
+
+  def _build(self, memory, **unused_kwargs):
+    pooled_memories = tf.nn.pool(
+        memory,
+        window_shape=(self._compression_rate + self._kernel_size,),
+        data_format='NWC',
+        strides=(self._compression_rate,),
+        padding='VALID',
+        pooling_type=self._pooling)
+    return pooled_memories, tf.zeros([], dtype=memory.dtype)
+
+
+class ConvCompressor(base.AbstractModule):
+  """Compress sequence using convolutions, with respect to a desired loss."""
+
+  def __init__(self,
+               compression_rate,
+               compressed_memory_size,
+               episodic_memory_size,
+               kernel_size=0,
+               dilation_rates=None,
+               loss='mha',
+               name='conv_compressor'):
+    """Instantiates convolutional compression module.
+
+    Args:
+      compression_rate: integer >= 1. The memory will be compressed from T
+        time-steps to T / compression_rate. In implementation, this corresponds
+        to the stride size of the module.
+      compressed_memory_size: Size of compressed memory store.
+      episodic_memory_size: Size of regular memory equiv. to TXL's memory.
+      kernel_size: The additional kernel size, if we wish for overlapping
+        compressed vectors. The total conv1d kernel size is 'compression_rate +
+        kernel_size', (as the stride is 'compression_rate').
+      dilation_rates: optional iterable of dilation rates for deep dilated
+        convnet, e.g. [1, 2, 4].
+      loss: Either 'ae' for an auto-encoder compression loss, or 'mha' for a
+        multi-head attention loss. The multi-head attention loss attempts to
+        reconstruct the attention outputs between the (sequence, memory) and
+        (sequence, compressed_memory).
+      name: module name, used for variable scoping.
+    """
+    super(ConvCompressor, self).__init__(name=name)
+    self._loss = loss
+    self._stride = compression_rate
+    self._kernel_size = kernel_size
+    self._dilation_rates = dilation_rates
+    self._compressed_memory_size = compressed_memory_size
+    self._episodic_memory_size = episodic_memory_size
+
+  def _build(self,
+             memory,
+             attention_state=None,
+             attention_module=None,
+             is_training=False,
+             dropout_keep_prob=0.5):
+    """Builds graph to compress memory and return auxiliary loss.
+
+    Args:
+      memory: [batch, chunk_size, hidden_size] tensor to be compressed.
+      attention_state: AttentionState named tuple containing the queries, keys,
+        and values that were computed at a given layer.
+      attention_module: the attention module (sonnet class). Useful for
+        accessing the multi-head attention sub-modules, used to transform hidden
+        states into queries, keys, and values.
+      is_training: if is training, useful for dropout gating.
+      dropout_keep_prob: the probability of dropout. Currently unused!
+
+    Returns:
+      (compressed_memory, loss) tuple. Compressed_memory is of size
+        [batch, time / compression_rate, hidden_size]. The loss is a scalar.
+    """
+    _, chunk_size, hidden_size = memory.get_shape().as_list()
+    # Start of queryable sequence, from sequence of hiddens. If the memory is
+    # larger than the chunk size, the whole sequence will be used for queries.
+    seq_s = max(chunk_size - self._episodic_memory_size, 0)
+
+    memory = tf.stop_gradient(memory)
+    compressed_memory = memory
+    if self._dilation_rates is not None:
+      for rate in self._dilation_rates:
+        conv = snt_conv.Conv1D(
+            hidden_size,
+            kernel_shape=2,
+            rate=rate,
+            use_bias=False,
+            padding=snt_conv.VALID,
+            name='conv_rate_%d' % rate,
+        )
+        compressed_memory = conv(compressed_memory)
+        compressed_memory = tf.nn.relu(compressed_memory)
+
+    conv = snt_conv.Conv1D(
+        hidden_size,
+        kernel_shape=self._stride + self._kernel_size,
+        stride=self._stride,
+        use_bias=False,
+        padding=snt_conv.VALID,
+    )
+    # We stop gradients for the compression inputs. This is to avoid the network
+    # shaping them to be compressible. We would like to compress them
+    # *conditioned* on the task-specific representations that are learned.
+
+    # Queries from current sequence.
+    queries = tf.stop_gradient(attention_state.queries[:, :, seq_s:])
+    # Memory of past hidden activations to be compressed.
+    compressed_memory = conv(compressed_memory)
+    if self._loss == 'ae':
+      transpose_conv = conv.transpose()
+      recovered_memory = transpose_conv(compressed_memory)
+      loss = tf.reduce_mean(tf.square(recovered_memory - memory))
+    elif self._loss == 'mha':
+      # We share the attention module's parameters, but we stop gradients from
+      # flowing to these parameters with respect to the auxiliary loss, as we
+      # don't want the attention module to shape queries, keys, and values to
+      # be compressible.
+      stop_gradient_getter = custom_getters.Context(
+          custom_getters.stop_gradient)
+      with stop_gradient_getter:
+        # Calculates attention from sequence over memory.
+        memory_keys = attention_module.multihead_linear(memory, name='key')
+        memory_values = attention_module.multihead_linear(memory, name='value')
+        read_words_with_memory = simple_attention(queries, memory_keys,
+                                                  memory_values)
+
+        # Calculates attention from sequence over compressed memory.
+        compressed_keys = attention_module.multihead_linear(
+            compressed_memory, name='key')
+        compressed_values = attention_module.multihead_linear(
+            compressed_memory, name='value')
+        read_words_with_compressed_memory = simple_attention(
+            queries, compressed_keys, compressed_values)
+
+      loss = tf.reduce_mean(
+          tf.square(read_words_with_memory - read_words_with_compressed_memory))
+    else:
+      raise NotImplementedError(
+          'Unrecognised loss: %r, expected `ae` or `mha`' % self._loss)
+    return compressed_memory, loss
+
+
+def _compute_avg_attention(attention_state,
+                           compressed_memory_size,
+                           episodic_memory_size,
+                           chunk_size,
+                           n_buckets=6):
+  """Computes average attention for Compressive Transformer.
+
+  Computes average attention for `n_buckets` over the sequence,
+  episodic memory, and compressed memory. In total there are 3 x n_buckets.
+
+  Args:
+    attention_state: An AttentionState object.
+    compressed_memory_size: scalar size of compressed memory.
+    episodic_memory_size: scalar size of episodic memory.
+    chunk_size: size of input sequence.
+    n_buckets: number of buckets to average attention per memory,
+      compressed memory, and sequence.
+
+  Returns:
+    Tuple of (names, avg_weights) where each is a list. The names are
+      <segment_type>_<bucket_id>, i.e. cm_0, cm_1, em_0, em_1, seq_0, seq_1.
+      The bucket index is ordered by time, higher values are for attention
+      over more recent buckets of [seq/cm/em]. The avg_weights are the list
+      of corresponding values.
+
+  """
+  cm_size = compressed_memory_size
+  em_size = episodic_memory_size
+  split_sizes = []
+  split_names = []
+  if cm_size > 0:
+    split_sizes += [int(cm_size / n_buckets)] * (n_buckets - 1)
+    split_sizes += [cm_size - int(cm_size / n_buckets) * (n_buckets - 1)]
+    split_names += ['cm_p%d' % i for i in range(n_buckets)]
+  if em_size > 0:
+    split_sizes += [int(em_size / n_buckets)] * (n_buckets - 1)
+    split_sizes += [em_size - int(em_size / n_buckets) * (n_buckets - 1)]
+    split_names += ['em_p%d' % i for i in range(n_buckets)]
+
+  split_sizes += [int(chunk_size / n_buckets)] * (n_buckets - 1)
+  split_sizes += [chunk_size - int(chunk_size / n_buckets) * (n_buckets - 1)]
+
+  split_names += ['seq_p%d' % i for i in range(n_buckets)]
+  avg_weights = tf.reduce_mean(attention_state.weights, axis=[0, 1, 2])
+  split_avg_weights = tf.split(avg_weights, split_sizes)
+  split_avg_weights = [tf.reduce_sum(x) for x in split_avg_weights]
+  return split_names, split_avg_weights
+
+
+class CompressiveTransformer(rnn_core.RNNCore):
+  """Transformer with compressive memory.
+
+  From "Compressive Transformers for Long-Range Sequence Modelling"
+  Rae et al. 2019, https://arxiv.org/abs/1911.05507
+
+  """
+
+  def __init__(self,
+               core_config,
+               chunk_size,
+               episodic_memory_size,
+               compressed_memory_size,
+               compression_rate=2,
+               compression_ctor=ConvCompressor,
+               compression_config=None,
+               export_stats=False,
+               name='compressive_transformer'):
+    """Constructs Compressive Transformer.
+
+    Wraps a TransformerTower and includes a slot-based memory (like the
+    TransformerXL) alongside a compressed memory which is populated from
+    the oldest slot-based memories, passed through a compression network.
+    To train the compression network, an auxiliary compression loss is
+    added to the collection 'auxiliary_losses'.
+
+    Args:
+      core_config: dictionary with TransformerTower config.
+      chunk_size: expected chunk size of inputs, if greater than zero inputs are
+        of size [batch_size, chunk_size, input_dim]. If equal to zero inputs are
+        of size [batch_size, input_dim].
+      episodic_memory_size: size of slot-based memory (i.e. TransformerXL mem).
+      compressed_memory_size: size of compressed memory. Total attention len is
+        episodic_memory_size + compressed_memory_size + chunk_size.
+      compression_rate: Factor of compression from episodic memories to
+        compressed memories, i.e. `2` means M memories are mapped to M/2
+        compressed memories.
+      compression_ctor: Constructor of compression network, e.g. ConvCompressor,
+        PoolCompressor, or any newly specified network.
+      compression_config: optional dictionary with keyword arguments for
+        compression network.
+      export_stats: exports compression loss and attention weight per layer to a
+        tf collection 'stats_export' if true. Can slow down training.
+      name: name of variable scope.
+    """
+
+    super(CompressiveTransformer, self).__init__(name=name)
+    self._core_config = core_config
+    self._episodic_memory_size = episodic_memory_size
+    self._compressed_memory_size = compressed_memory_size
+    self._chunk_size = chunk_size
+    self._compression_config = dict(compression_config or [])
+    self._compression_rate = compression_rate
+    self._compression_config.update({
+        'compression_rate': compression_rate,
+        'compressed_memory_size': self._compressed_memory_size,
+        'episodic_memory_size': self._episodic_memory_size,
+    })
+    self._compression_ctor = compression_ctor
+    self._export_stats = export_stats
+
+    # Extract some size information from the core config.
+    self._num_layers = self._core_config['num_layers']
+    self._value_size = self._core_config['value_size']
+    self._key_size = self._core_config.get('key_size') or self._value_size
+    self._num_heads = self._core_config['num_heads']
+    self._dropout_rate = self._core_config.get('dropout_rate', 0.)
+    self._embedding_size = self._num_heads * self._value_size
+
+  def _build(self, inputs, prev_state, is_training=True):
+    """Builds graph.
+
+    Args:
+      inputs: 3D tensor of shape [batch_size, chunk_size, input_dim] or
+        2D tensor of shape [batch_size, input_dim].
+      prev_state: list of length `num_layers` containing `CompressedMemoryState`
+        tuples.
+      is_training: applies dropout if true.
+
+    Returns:
+      output: tensor equal in rank to `inputs` with final dimension equal to
+        `embedding_size` = `key_size` * `num_heads`.
+      next_state: list of length `num_layers` containing `CompressedMemoryState`
+        tuples.
+    """
+    input_shape = inputs.get_shape().as_list()
+    if len(input_shape) == 2:
+      inputs = tf.expand_dims(inputs, 1)
+
+    _, chunk_size, _ = inputs.get_shape().as_list()
+    num_layers_t = tf.constant(self._num_layers, dtype=inputs.dtype)
+
+    inputs = default_mlp([self._embedding_size], activate_final=True)(
+        inputs,
+        is_training=is_training,
+        dropout_keep_prob=1 - self._dropout_rate)
+    transformer = TransformerTower(**self._core_config)
+    state_for_transformer = (None
+                             if self._episodic_memory_size == 0 else prev_state)
+    output, attention_state = transformer(
+        inputs, state=state_for_transformer, is_training=is_training)
+
+    min_num_to_compress = (
+        self._compression_rate + self._compression_config.get('kernel_size', 0))
+    num_to_compress = min(max(min_num_to_compress, chunk_size),
+                          chunk_size + self._episodic_memory_size - 1)
+
+    def apply_compression_generic(attn_state, attn_module, mem_to_compress,
+                                  prev_compressed_memory):
+      """Instantiates compression module and returns fn to build graph."""
+      compress_module = self._compression_ctor(**self._compression_config)
+
+      def _inner_fn():
+        """Returns (updated compressed memory, compression loss)."""
+        next_compressed_memory, compression_loss = compress_module(
+            mem_to_compress,
+            attention_state=attn_state,
+            attention_module=attn_module,
+            is_training=is_training,
+            dropout_keep_prob=1 - self._dropout_rate,
+        )
+        compressed_memory, _ = _concat_and_slice(prev_compressed_memory,
+                                                 next_compressed_memory)
+        return compressed_memory, compression_loss
+
+      return _inner_fn
+
+    def dont_apply_compression_generic(prev_compressed_memory):
+      """Instantiates fn to build dummy graph that skips any compression."""
+
+      def _inner_fn():
+        return (prev_compressed_memory,
+                tf.zeros([], dtype=prev_compressed_memory.dtype))
+
+      return _inner_fn
+
+    next_state = []
+    compression_loss = tf.zeros([], dtype=inputs.dtype)
+    global_attention_weights = []
+    stats_export_dict = {}
+    for i, state_i in enumerate(prev_state):
+      # Append new elements to memory.
+      attn_state_i = attention_state[i]
+      memory, concat_memory = _concat_and_slice(state_i.episodic_memory,
+                                                attn_state_i.embeddings)
+
+      sequence_index = state_i.index[0]
+      # We special-case chunk_size=1, which is useful for sampling. In the
+      # single time-step setting we only compress the memory every
+      # 'compression_rate' steps. Otherwise we assume chunk_size is a multiple
+      # of `compression_rate`, and thus multiple compressions can be performed
+      # in parallel.
+      to_compress = tf.logical_or(
+          chunk_size > 1,
+          tf.equal(sequence_index % self._compression_rate,
+                   self._compression_rate - 1))[0]
+
+      apply_compression_fn = apply_compression_generic(
+          attn_state=attn_state_i,
+          attn_module=transformer.attention_module(i),
+          mem_to_compress=concat_memory[:, :num_to_compress],
+          prev_compressed_memory=state_i.compressed_memory,
+      )
+      dont_apply_compression_fn = dont_apply_compression_generic(
+          prev_compressed_memory=state_i.compressed_memory)
+
+      compression_output = tf.cond(to_compress, apply_compression_fn,
+                                   dont_apply_compression_fn)
+      compressed_memory, compression_loss_i = compression_output
+      compression_loss += compression_loss_i
+
+      # Log useful stats, compression loss per layer.
+      stats_export_dict['compression_loss_l%02d' % i] = compression_loss_i
+      # Attention weights per layer.
+      attn_names, attn_weights = _compute_avg_attention(
+          attn_state_i, self._compressed_memory_size,
+          self._episodic_memory_size, chunk_size)
+      attn_names_i = [name + '_l%02d' % i for name in attn_names]
+      stats_export_dict.update(dict(zip(attn_names_i, attn_weights)))
+
+      # Avg global attention weights.
+      if i == 0:
+        global_attention_weights = [y / num_layers_t for y in attn_weights]
+      else:
+        global_attention_weights = [
+            (x + y / num_layers_t)
+            for x, y in zip(global_attention_weights, attn_weights)
+        ]
+
+      next_state.append(
+          CompressedMemoryState(
+              index=state_i.index + 1,
+              episodic_memory=memory,
+              compressed_memory=compressed_memory))
+
+    next_state = tuple(next_state)
+    compression_loss /= num_layers_t
+    stats_export_dict.update(dict(zip(attn_names, global_attention_weights)))
+    if is_training:
+      tf.add_to_collections('auxiliary_losses', compression_loss)
+    if self._export_stats:
+      tf.add_to_collections('stats_export', stats_export_dict)
+
+    if self._chunk_size == 0:  # For the use-case as a single-step RNN.
+      output = tf.squeeze(output, 1)
+
+    return output, next_state
+
+  @property
+  def state_size(self):
+    memory_shape = tf.TensorShape(
+        [self._episodic_memory_size, self._embedding_size])
+    cm_shape = tf.TensorShape(
+        [self._compressed_memory_size, self._embedding_size])
+    index_shape = tf.TensorShape([1])
+    shape_per_layer = CompressedMemoryState(
+        index=index_shape,
+        episodic_memory=memory_shape,
+        compressed_memory=cm_shape)
+    return tuple([shape_per_layer] * self._num_layers)
 
   @property
   def output_size(self):

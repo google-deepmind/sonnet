@@ -328,5 +328,69 @@ class TransformerXLTest(tf.test.TestCase):
       self.assertAllEqual(final_output_2.shape[0], batch_size_2)
 
 
+class CompressiveTransformerTest(tf.test.TestCase):
+
+  def test_forward(self):
+    batch_size = 8
+    window_size = 18
+    input_size = 16
+    output_size = 128
+    num_layers = 3
+    key_size = 4
+    value_size = 6
+    num_heads = 16
+    em_memory_size = 18
+    cm_memory_size = 7
+    inputs = tf.random_normal([batch_size, window_size, input_size])
+    core_config = {
+        'value_size': value_size,
+        'key_size': key_size,
+        'num_heads': num_heads,
+        'num_layers': num_layers,
+        'causal': True,
+        'shared_attention': False,
+        'output_size': output_size,
+        'mlp_hidden_sizes': tuple([64]),
+    }
+    compressive_transformer = snt.nets.CompressiveTransformer(
+        core_config=core_config,
+        episodic_memory_size=em_memory_size,
+        compressed_memory_size=cm_memory_size,
+        chunk_size=window_size,
+    )
+    initial_state = compressive_transformer.initial_state(batch_size)
+    output, next_state = compressive_transformer(inputs, initial_state)
+    output2, final_state = compressive_transformer(inputs, next_state)
+    compression_loss = tf.get_collection('auxiliary_losses')
+    self.assertAllEqual(output.get_shape().as_list(),
+                        [batch_size, window_size, output_size])
+    self.assertEqual(len(next_state), num_layers)
+    self.assertEqual(len(next_state[0]), 3)  # index, cm, em
+
+    def check_state_size(state_list):
+      for state in state_list:
+        self.assertAllEqual(
+            state.episodic_memory.get_shape().as_list(),
+            [batch_size, em_memory_size, value_size * num_heads])
+        self.assertAllEqual(
+            state.compressed_memory.get_shape().as_list(),
+            [batch_size, cm_memory_size, value_size * num_heads])
+
+    check_state_size(next_state)
+    check_state_size(final_state)
+
+    with self.test_session() as sess:
+      sess.run(tf.global_variables_initializer())
+      sess.run(output)
+      sess.run(next_state)
+      sess.run(output2)
+      sess.run(final_state)
+      compression_loss_np = sess.run(compression_loss)
+    # Compression loss is zero because em and cm are zero.
+    self.assertEqual(compression_loss_np[0], 0)
+    # Compression loss is > 0 because em is populated.
+    self.assertGreater(compression_loss_np[1], 0)
+
+
 if __name__ == '__main__':
   tf.test.main()

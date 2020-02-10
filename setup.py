@@ -29,12 +29,12 @@ _VERSION = '1.36'
 
 
 EXTRA_PACKAGES = {
-    'tensorflow': ['tensorflow>=1.15.0'],
-    'tensorflow with gpu': ['tensorflow-gpu>=1.15.0'],
+    'tensorflow': ['tensorflow>=1.15.0,<2.0.0'],
+    'tensorflow with gpu': ['tensorflow-gpu>=1.15.0,<2.0.0'],
 }
 
 REQUIRED_PACKAGES = [
-    'tensorflow-probability>=0.8.0',
+    'tensorflow-probability>=0.8.0,<0.9.0',  # Version 0.9 requires tensorflow 2
     'six',
     'absl-py',
     'semantic_version',

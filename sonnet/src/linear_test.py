@@ -96,6 +96,19 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     tf_output = l(tf.ones([batch_size, input_size]))
     self.assertAllEqual(tf_output, numpy_linear())
 
+  def testCallMultiBatch(self):
+    l = linear.Linear(5)
+    input_tensor = tf.random.uniform([1, 2, 3, 4])
+    tf_output = l(input_tensor)
+
+    w_np = l.w.numpy()
+    b_np = l.b.numpy()
+    input_tensor_np = input_tensor.numpy()
+    np_output = np.matmul(input_tensor_np, w_np) + b_np
+
+    # TPU uses bfloat16 internally, so larger deviations are expected.
+    self.assertAllClose(tf_output, np_output, atol=1e-2, rtol=5e-2)
+
   @parameterized.parameters(True, False)
   def testFunction(self, with_bias):
     linear_1 = linear.Linear(
@@ -139,10 +152,26 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
         ValueError, "Input size must be specified at module build time."):
       defun_linear.get_concrete_function(x)
 
-  @parameterized.named_parameters(("1D", [1]), ("3D", [1, 2, 3]))
+  def testMultiBatchOutputDimensions(self):
+    x = tf.TensorSpec([None, None, None, 2], dtype=tf.float32)
+
+    l = linear.Linear(7)
+    defun_linear = tf.function(l)
+
+    defun_linear.get_concrete_function(x)
+
+    out = defun_linear(tf.ones([1, 5, 3, 2]))
+    expected_out = l(tf.ones([1, 5, 3, 2]))
+    self.assertEqual(out.shape, [1, 5, 3, 7])
+    self.assertAllEqual(self.evaluate(expected_out), self.evaluate(out))
+
+    out = defun_linear(tf.ones([2, 4, 5, 2]))
+    self.assertEqual(out.shape, [2, 4, 5, 7])
+
+  @parameterized.named_parameters(("1D", [1]),)
   def testIncorrectDims(self, shape):
     l = linear.Linear(3)
-    with self.assertRaisesRegex(ValueError, "Shape .* must have rank 2"):
+    with self.assertRaisesRegex(ValueError, "Shape .* must have rank >= 2"):
       l(tf.ones(shape))
 
   def testInputSize(self):

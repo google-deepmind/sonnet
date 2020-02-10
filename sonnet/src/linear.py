@@ -64,9 +64,9 @@ class Linear(base.Module):
   @once.once
   def _initialize(self, inputs: tf.Tensor):
     """Constructs parameters used by this module."""
-    utils.assert_rank(inputs, 2)
+    utils.assert_minimum_rank(inputs, 2)
 
-    input_size = inputs.shape[1]
+    input_size = inputs.shape[-1]
     if input_size is None:  # Can happen inside an @tf.function.
       raise ValueError("Input size must be specified at module build time.")
 

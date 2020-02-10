@@ -1,6 +1,27 @@
 # Sonnet Changelog
 
 
+## Version 1.36 - Friday, 10 February 2020
+* Add the *Compressive Transformer*.
+* Add *Transformer* and *TransformerXL*.
+* Fix calls to `as_numpy_dtype`
+* Pass `rate` instead of `keep_prob` in snt.nets.MLP `_build` method
+* Remove unnecessary `global_variable_initializer`
+* Relax `SharedConvNets2DTest.testNormalizations`'s tolerance to make it pass.
+* Add support for reflective and symmetric padding in `_ConvND`
+* Update deprecated calls of `tfp.distributions.*` to `tfp.math`
+* Support non-float32 dtypes in spectral_norm by Deepmind · 4 months ago
+* Alias `Model.*_generator`(e.g. fit_generator) to the non `_from_generator` endpoints which support generators and do not run eagerly.
+* Improvements to wrap_with_spectral_norm's API
+* Allow batched (higher-dimensional) inputs to  `snt.Linear`
+* Fix cases where `tf.TensorShape` was constructed with float dimensions
+* Migrate off of deprecated `tf.contrib.distributions` to supported `tfp` methods
+* Fix cases where `tf.TensorShape` was constructed with float dimensions
+* Use `tf.custom_gradient` for scaling, clipping and densifying gradients
+* Address some TensorFlow deprecation warnings.
+* TF2 compatibility changes.
+
+
 ## Version 1.35 - Friday, 6 September 2019
 * Added Singular Value Normalization and SpectralNorm.
 * Added automatic mixed precision support in examples.

@@ -73,7 +73,7 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
       self.skipTest("No replicator supplied.")
     v = create_var(replicator)
     self.assertEqual(tf.VariableSynchronization.ON_READ,
-                     v.primary.synchronization)
+                     v.values[0].synchronization)
 
   @test_utils.combined_named_parameters(replicator_utils.named_replicators(),
                                         all_variable_creators())

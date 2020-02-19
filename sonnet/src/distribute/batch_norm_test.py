@@ -66,14 +66,18 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       return inputs, outputs
 
     inputs, outputs = strategy.experimental_run_v2(foo)
-    self.assertAllEqual(mean_metric.value.values[0].numpy(),
-                        mean_metric.value.values[1].numpy())
-    self.assertAllEqual(var_metric.value.values[0].numpy(),
-                        var_metric.value.values[1].numpy())
-    mean = mean_metric.value.values[0]
-    var = var_metric.value.values[0]
+    local_mean_metric = strategy.experimental_local_results(mean_metric.value)
+    local_var_metric = strategy.experimental_local_results(var_metric.value)
+    self.assertAllEqual(local_mean_metric[0].numpy(),
+                        local_mean_metric[1].numpy())
+    self.assertAllEqual(local_var_metric[0].numpy(),
+                        local_var_metric[1].numpy())
+    mean = local_mean_metric[0]
+    var = local_var_metric[0]
 
-    for inp, out in zip(inputs.values, outputs.values):
+    for inp, out in zip(
+        strategy.experimental_local_results(inputs),
+        strategy.experimental_local_results(outputs)):
       expected_out = (inp - mean) * tf.math.rsqrt(var + 1e-5) * scale + offset
       self.assertAllClose(out, expected_out)
 
@@ -100,15 +104,18 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       return strategy.experimental_run_v2(compute)
     inputs, outputs = run()
 
-    self.assertAllEqual(mean_metric.value.values[0].numpy(),
-                        mean_metric.value.values[1].numpy())
-    self.assertAllEqual(var_metric.value.values[0].numpy(),
-                        var_metric.value.values[1].numpy())
+    local_mean_metric = strategy.experimental_local_results(mean_metric.value)
+    local_var_metric = strategy.experimental_local_results(var_metric.value)
+    self.assertAllEqual(local_mean_metric[0].numpy(),
+                        local_mean_metric[1].numpy())
+    self.assertAllEqual(local_var_metric[0].numpy(),
+                        local_var_metric[1].numpy())
+    mean = local_mean_metric[0]
+    var = local_var_metric[0]
 
-    mean = mean_metric.value.values[0]
-    var = var_metric.value.values[0]
-
-    for inp, out in zip(inputs.values, outputs.values):
+    for inp, out in zip(
+        strategy.experimental_local_results(inputs),
+        strategy.experimental_local_results(outputs)):
       expected_out = (inp - mean) * tf.math.rsqrt(var + 1e-5) * scale + offset
       self.assertAllClose(out, expected_out)
 

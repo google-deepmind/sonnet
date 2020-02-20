@@ -269,12 +269,6 @@ Optimizers
 
 .. automodule:: sonnet.optimizers
 
-Optimizer
-~~~~~~~~~
-
-.. autoclass:: Optimizer
-   :members:
-
 Adam
 ~~~~
 

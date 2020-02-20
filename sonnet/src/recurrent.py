@@ -105,14 +105,17 @@ class UnrolledRNN(base.Module):
     """Apply this RNN to the input sequence.
 
     Args:
-      input_sequence: An arbitrarily nested structure of shape [T, B, ...] where
-        T is the number of time steps and B is the batch size.
+      input_sequence: An arbitrarily nested structure of shape ``[T, B, ...]``
+        where ``T`` is the number of time steps and B is the batch size.
       initial_state: Initial RNN state.
-    A tuple with two elements: * **output_sequence** - An arbitrarily nested
-      structure of tensors of shape [T, B, ...]. Dimensions following the batch
-      size could be different from that of the ``input_sequence``. *
-      **final_state** - Final RNN state, must be of the same shape as the
-      initial one.
+
+    Returns:
+      A tuple with two elements:
+        * **output_sequence** - An arbitrarily nested structure of tensors of
+          shape ``[T, B, ...]``. Dimensions following the batch size could be
+          different from that of the ``input_sequence``.
+        * **final_state** - Final RNN state, must be of the same shape as the
+          initial one.
     """
 
   @abc.abstractmethod
@@ -239,9 +242,9 @@ def static_unroll(
 
   Args:
     core: An :class:`RNNCore` to unroll.
-    input_sequence: An arbitrarily nested structure of tensors of shape ``[T, B,
-      ...]`` where ``T`` is the number of time steps, and ``B`` is the batch
-      size.
+    input_sequence: An arbitrarily nested structure of tensors of shape
+      ``[T, B, ...]`` where ``T`` is the number of time steps, and ``B`` is
+      the batch size.
     initial_state: An initial state of the given core.
     sequence_length: An optional tensor of shape ``[B]`` specifying the lengths
       of sequences within the (padded) batch.
@@ -330,9 +333,9 @@ def dynamic_unroll(
 
   Args:
     core: An :class:`RNNCore` to unroll.
-    input_sequence: An arbitrarily nested structure of tensors of shape ``[T, B,
-      ...]`` where ``T`` is the number of time steps, and ``B`` is the batch
-      size.
+    input_sequence: An arbitrarily nested structure of tensors of shape
+      ``[T, B, ...]`` where ``T`` is the number of time steps, and ``B`` is the
+      batch size.
     initial_state: initial state of the given core.
     sequence_length: An optional tensor of shape ``[B]`` specifying the lengths
       of sequences within the (padded) batch.
@@ -492,13 +495,13 @@ class VanillaRNN(RNNCore):
 
     Args:
       hidden_size: Hidden layer size.
-      activation: Activation function to use. Defaults to `tf.tanh`.
+      activation: Activation function to use. Defaults to ``tf.tanh``.
       w_i_init: Optional initializer for the input-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(input_size)``.
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(hidden_size)``.
+        deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the bias. Defaults to
         :class:`~initializers.Zeros`.
       dtype: Optional :tf:`DType` of the core's variables. Defaults to
@@ -804,13 +807,13 @@ class LSTM(RNNCore):
         to this size via a trainable projection matrix.
       projection_init: Optional initializer for the projection matrix.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(hidden_size)``.
+        deviation of ``1 / sqrt(hidden_size)``.
       w_i_init: Optional initializer for the input-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(input_size)``.
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(hidden_size)``.
+        deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -928,10 +931,10 @@ class UnrolledLSTM(UnrolledRNN):
       hidden_size: Hidden layer size.
       w_i_init: Optional initializer for the input-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(input_size)``.
+        deviation of ``1 / sqrt(input_size)``.
       w_h_init: Optional initializer for the hidden-to-hidden weights.
         Defaults to :class:`~initializers.TruncatedNormal` with a standard
-          deviation of ``1 / sqrt(hidden_size)``.
+        deviation of ``1 / sqrt(hidden_size)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -1181,8 +1184,11 @@ def lstm_with_recurrent_dropout(hidden_size, dropout=0.5, seed=None, **kwargs):
       constructor.
 
   Returns:
-    train_lstm: An :class:`LSTM` with recurrent dropout enabled for training.
-    test_lstm: The same as ``train_lstm`` but without recurrent dropout.
+    A tuple of two elements:
+      * **train_lstm** - An :class:`LSTM` with recurrent dropout enabled for
+        training.
+      * **test_lstm** - The same as ``train_lstm`` but without recurrent
+        dropout.
 
   Raises:
     ValueError: If ``dropout`` is not in ``[0, 1)``.
@@ -1264,12 +1270,12 @@ class _ConvNDLSTM(RNNCore):
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**num_spatial_dims *
-          input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**num_spatial_dims *
+        input_channels)``.
       w_h_init: Optional initializer for the hidden-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**num_spatial_dims *
-          input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**num_spatial_dims *
+        input_channels)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -1375,10 +1381,10 @@ class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape * input_channels)``.
       w_h_init: Optional initializer for the hidden-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape * input_channels)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -1426,10 +1432,10 @@ class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**2 * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**2 * input_channels)``.
       w_h_init: Optional initializer for the hidden-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**2 * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**2 * input_channels)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -1477,10 +1483,10 @@ class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
       data_format: The data format of the input.
       w_i_init: Optional initializer for the input-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**3 * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**3 * input_channels)``.
       w_h_init: Optional initializer for the hidden-to-hidden convolution
         weights. Defaults to :class:`~initializers.TruncatedNormal` with a
-          standard deviation of ``1 / sqrt(kernel_shape**3 * input_channels)``.
+        standard deviation of ``1 / sqrt(kernel_shape**3 * input_channels)``.
       b_init: Optional initializer for the biases. Defaults to
         :class:`~initializers.Zeros`.
       forget_bias: Optional float to add to the bias of the forget gate after
@@ -1522,11 +1528,11 @@ class GRU(RNNCore):
 
   Attributes:
     input_to_hidden: Input-to-hidden weights :math:`W_{iz}`, :math:`W_{ir}`
-      and :math:`W_{ia}` concatenated into a tensor of shape ``[input_size, 3 *
-        hidden_size]``.
+      and :math:`W_{ia}` concatenated into a tensor of shape
+      ``[input_size, 3 * hidden_size]``.
     hidden_to_hidden: Hidden-to-hidden weights :math:`W_{hz}`, :math:`W_{hr}`
-      and :math:`W_{ha}` concatenated into a tensor of shape ``[hidden_size, 3 *
-        hidden_size]``.
+      and :math:`W_{ha}` concatenated into a tensor of shape
+      ``[hidden_size, 3 * hidden_size]``.
     b: Biases :math:`b_z`, :math:`b_r` and :math:`b_a` concatenated into a
       tensor of shape ``[3 * hidden_size]``.
   """

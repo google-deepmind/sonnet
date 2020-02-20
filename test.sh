@@ -26,7 +26,12 @@ python3 --version
 # Run setup.py, this installs the python dependencies
 python3 setup.py install
 
-N_JOBS=$(grep -c ^processor /proc/cpuinfo)
+# CPU count on macos or linux
+if [ "$(uname)" == "Darwin" ]; then
+  N_JOBS=$(sysctl -n hw.logicalcpu)
+else
+  N_JOBS=$(grep -c ^processor /proc/cpuinfo)
+fi
 
 echo ""
 echo "Bazel will use ${N_JOBS} concurrent job(s)."

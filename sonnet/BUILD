@@ -28,6 +28,7 @@ snt_py_library(
         "//sonnet/src:conv_transpose",
         "//sonnet/src:custom_getter",
         "//sonnet/src:deferred",
+        "//sonnet/src:depthwise_conv",
         "//sonnet/src:dropout",
         "//sonnet/src:embed",
         "//sonnet/src:group_norm",

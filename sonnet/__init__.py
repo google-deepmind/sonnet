@@ -46,6 +46,7 @@ from sonnet.src.conv_transpose import Conv2DTranspose
 from sonnet.src.conv_transpose import Conv3DTranspose
 from sonnet.src.custom_getter import custom_variable_getter
 from sonnet.src.deferred import Deferred
+from sonnet.src.depthwise_conv import DepthwiseConv2D
 from sonnet.src.dropout import Dropout
 from sonnet.src.embed import Embed
 from sonnet.src.group_norm import GroupNorm
@@ -98,6 +99,7 @@ __all__ = (
     "Conv3DTranspose",
     "DeepRNN",
     "Deferred",
+    "DepthwiseConv2D",
     "Dropout",
     "Embed",
     "ExponentialMovingAverage",

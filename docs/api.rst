@@ -84,6 +84,12 @@ Conv3DTranspose
 .. autoclass:: Conv3DTranspose
    :members:
 
+DepthwiseConv2D
+~~~~~~~~~~~~~~~
+
+.. autoclass:: DepthwiseConv2D
+   :members:
+
 Normalization modules
 ---------------------
 

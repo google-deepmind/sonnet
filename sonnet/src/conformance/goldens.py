@@ -193,6 +193,13 @@ class Conv3DTranspose(AbstractGolden):
   num_variables = 2
 
 
+@_register_golden(snt.DepthwiseConv2D, "depthwise_conv2d_3x3_2x2")
+class DepthwiseConv2D(AbstractGolden):
+  create_module = lambda _: snt.DepthwiseConv2D(kernel_shape=3)
+  input_spec = tf.TensorSpec([1, 2, 2, 2])
+  num_variables = 2
+
+
 @_register_golden(snt.nets.MLP, "mlp_3x4x5_1x3")
 class MLP(AbstractGolden):
   create_module = (lambda _: snt.nets.MLP([3, 4, 5]))

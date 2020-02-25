@@ -83,9 +83,9 @@ class LayerNorm(base.Module):
     Args:
       axis: An ``int``, ``slice`` or sequence of ``int``\s representing the axes
         which should be normalized across. Typical usages are: ``1`` or ``-1``
-          for normalization over just the channels and ``slice(1, None)``,
-          ``slice(2, None)`` for normalization over the spatial and channel
-          dimensions whilst avoiding the batch and/or time dimensions.
+        for normalization over just the channels and ``slice(1, None)``,
+        ``slice(2, None)`` for normalization over the spatial and channel
+        dimensions whilst avoiding the batch and/or time dimensions.
       create_scale: ``bool`` representing whether to create a trainable scale
         per channel applied after the normalization.
       create_offset: ``bool`` representing whether to create a trainable offset

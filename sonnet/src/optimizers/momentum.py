@@ -87,7 +87,8 @@ class Momentum(base.Optimizer):
     And when using Nesterov momentum (`use_nesterov=True`) it applies:
 
         accum_t <- momentum * accum_{t-1} + update
-        parameter <- parameter - (learning_rate * update + learning_rate * momentum * accum_t)
+        parameter <- parameter - (learning_rate * update +
+        learning_rate * momentum * accum_t)
 
     Args:
       updates: A list of updates to apply to parameters. Updates are often

@@ -309,8 +309,10 @@ class BatchNorm(BaseBatchNorm):
       name: Name of the module.
     """
     with tf.name_scope(name or "batch_norm"):
-      moving_mean = moving_averages.ExponentialMovingAverage(decay_rate)
-      moving_variance = moving_averages.ExponentialMovingAverage(decay_rate)
+      moving_mean = moving_averages.ExponentialMovingAverage(
+          decay_rate, name="moving_mean")
+      moving_variance = moving_averages.ExponentialMovingAverage(
+          decay_rate, name="moving_variance")
 
     super(BatchNorm, self).__init__(
         create_scale=create_scale,

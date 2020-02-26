@@ -145,14 +145,14 @@ def scope(dtype: tf.DType):
 
   The global type is reset to its original value when the context is exited.::
 
-       snt.mixed_precision.enable(tf.float32)
-       snt.Linear.__call__ = snt.mixed_precision.modes([tf.float32, tf.float16])(snt.Linear.__call__)
-       mod = snt.Linear(10)
+      snt.mixed_precision.enable(tf.float32)
+      snt.Linear.__call__ = snt.mixed_precision.modes([tf.float32, tf.float16])(snt.Linear.__call__)
+      mod = snt.Linear(10)
 
-       with snt.mixed_precision.scope(tf.float16):
-           y = mod(tf.ones([1, 1]))  # First call will be done in F32.
-           y = mod(tf.ones([1, 1]))  # MatMul/Add will be done in F16.
-       y = mod(tf.ones([1, 1]))  # Outside the scope will be done in F32.
+      with snt.mixed_precision.scope(tf.float16):
+          y = mod(tf.ones([1, 1]))  # First call will be done in F32.
+          y = mod(tf.ones([1, 1]))  # MatMul/Add will be done in F16.
+      y = mod(tf.ones([1, 1]))  # Outside the scope will be done in F32.
 
   Args:
     dtype: type to set the mixed precision mode to.

@@ -97,7 +97,6 @@ class VectorQuantizer(base.Module):
         of the quantized space each input element was mapped to.
         encoding_indices: Tensor containing the discrete encoding indices, ie
         which element of the quantized space each input element was mapped to.
-
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 
@@ -242,7 +241,6 @@ class VectorQuantizerEMA(base.Module):
         of the quantized space each input element was mapped to.
         encoding_indices: Tensor containing the discrete encoding indices, ie
         which element of the quantized space each input element was mapped to.
-
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 

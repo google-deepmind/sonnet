@@ -91,7 +91,6 @@ def modes(valid_types):
     A decorator that will cast the inputs and outputs of the decorated function
     according to the global mixed precision policy and the functions eligibility
     for mixed precision.
-
   """
   mp_id = uuid.uuid4()
 

@@ -131,4 +131,4 @@ class Cifar10ConvNet(base.Module):
 
     logits = self._logits_module(flat_output)
 
-    return {'logits': logits, 'activations': activations}
+    return {'logits': logits, 'activations': activations}  # pytype: disable=bad-return-type

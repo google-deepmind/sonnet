@@ -26,7 +26,7 @@ from sonnet.src import linear
 from sonnet.src import types
 
 import tensorflow as tf
-from typing import Mapping, Optional, Sequence, Text
+from typing import Mapping, Optional, Sequence, Text, Union
 
 
 class Cifar10ConvNet(base.Module):
@@ -92,10 +92,12 @@ class Cifar10ConvNet(base.Module):
         b_init=self._b_init,
         name='logits')
 
-  def __call__(self,
-               inputs: tf.Tensor,
-               is_training: types.BoolLike,
-               test_local_stats: bool = True) -> Mapping[Text, tf.Tensor]:
+  def __call__(
+      self,
+      inputs: tf.Tensor,
+      is_training: types.BoolLike,
+      test_local_stats: bool = True
+  ) -> Mapping[Text, Union[tf.Tensor, Sequence[tf.Tensor]]]:
     """Connects the module to some inputs.
 
     Args:
@@ -131,4 +133,4 @@ class Cifar10ConvNet(base.Module):
 
     logits = self._logits_module(flat_output)
 
-    return {'logits': logits, 'activations': activations}  # pytype: disable=bad-return-type
+    return {'logits': logits, 'activations': activations}

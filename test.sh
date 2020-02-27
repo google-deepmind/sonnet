@@ -19,6 +19,11 @@
 set -e
 set -x
 
+if command -v use_bazel.sh > /dev/null ; then
+  # When running internally ensure the correct version of Bazel is used
+  use_bazel.sh 0.26.1
+fi
+
 virtualenv -p python3 .
 source bin/activate
 python3 --version

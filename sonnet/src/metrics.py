@@ -102,8 +102,7 @@ class Mean(Metric):
 
   @property
   def value(self) -> tf.Tensor:
-    """See base class."""
-    # TODO(cjfj): Assert summed type is floating-point?
+    assert type(self.sum) == tf.float32 or type(self.sum) == tf.float64
     return self.sum / tf.cast(self.count, dtype=self.sum.dtype)
 
   def reset(self):

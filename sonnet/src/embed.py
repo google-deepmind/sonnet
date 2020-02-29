@@ -101,10 +101,7 @@ class Embed(base.Module):
     self.embeddings = tf.Variable(vocab, trainable=trainable, name="embeddings")
 
   def __call__(self, inputs):
-    if self.densify_gradients:
-      embeddings = dense_gradient(self.embeddings)
-    else:
-      embeddings = self.embeddings
+    embeddings = dense_gradient(self.embeddings) if self.densify_gradients else self.embed_dim
     return tf.nn.embedding_lookup(embeddings, inputs)
 
 

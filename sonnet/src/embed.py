@@ -143,9 +143,6 @@ def dense_gradient(x: tf.Tensor):
     The input ``tf.Tensor`` and a dense identity gradient function.
   """
   def grad(dy):
-    if isinstance(dy, tf.IndexedSlices):
-      return tf.convert_to_tensor(dy)
-    else:
-      return dy
+    return tf.convert_to_tensor(dy) if isinstance(dy, tf.IndexedSlices) else dy
 
   return x, grad

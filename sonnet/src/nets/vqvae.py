@@ -94,9 +94,9 @@ class VectorQuantizer(base.Module):
         loss: Tensor containing the loss to optimize.
         perplexity: Tensor containing the perplexity of the encodings.
         encodings: Tensor containing the discrete encodings, ie which element
-          of the quantized space each input element was mapped to.
+        of the quantized space each input element was mapped to.
         encoding_indices: Tensor containing the discrete encoding indices, ie
-          which element of the quantized space each input element was mapped to.
+        which element of the quantized space each input element was mapped to.
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 
@@ -238,9 +238,9 @@ class VectorQuantizerEMA(base.Module):
         loss: Tensor containing the loss to optimize.
         perplexity: Tensor containing the perplexity of the encodings.
         encodings: Tensor containing the discrete encodings, ie which element
-          of the quantized space each input element was mapped to.
+        of the quantized space each input element was mapped to.
         encoding_indices: Tensor containing the discrete encoding indices, ie
-          which element of the quantized space each input element was mapped to.
+        which element of the quantized space each input element was mapped to.
     """
     flat_inputs = tf.reshape(inputs, [-1, self.embedding_dim])
 

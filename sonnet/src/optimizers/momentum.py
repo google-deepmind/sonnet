@@ -88,7 +88,7 @@ class Momentum(base.Optimizer):
 
         accum_t <- momentum * accum_{t-1} + update
         parameter <- parameter - (learning_rate * update +
-                                  learning_rate * momentum * accum_t)
+        learning_rate * momentum * accum_t)
 
     Args:
       updates: A list of updates to apply to parameters. Updates are often

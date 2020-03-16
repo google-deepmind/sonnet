@@ -255,8 +255,8 @@ class BaseBatchNorm(base.Module):
       mean = self.moving_mean.value
       variance = self.moving_variance.value
       if self._fused:
-        mean = tf.squeeze(mean)
-        variance = tf.squeeze(variance)
+        mean = tf.squeeze(mean, self._axis)
+        variance = tf.squeeze(variance, self._axis)
     return mean, variance
 
   def _update_statistics(self, mean, variance):

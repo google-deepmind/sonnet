@@ -104,6 +104,16 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     outputs = layer(inputs, True)
     self.assertAllEqual(outputs, tf.zeros_like(inputs))
 
+  def testSingleBatchInference(self):
+    layer = batch_norm.BaseBatchNorm(
+        moving_mean=TestMetric(),
+        moving_variance=TestMetric(),
+        create_scale=True,
+        create_offset=True)
+    inputs = tf.ones([1, 1, 1, 1])
+    outputs = layer(inputs, False)
+    self.assertAllEqual(outputs, tf.zeros_like(inputs))
+
   @parameterized.parameters(True, False)
   def testWithTfFunction(self, autograph):
     if "TPU" in self.device_types:

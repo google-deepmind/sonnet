@@ -76,7 +76,7 @@ class Replicator(tf.distribute.MirroredStrategy):
   Finally we use the run API to apply ``forward`` in parallel on all accelerator
   devices:
 
-      >>> per_replica_y = replicator.experimental_run_v2(forward)
+      >>> per_replica_y = replicator.run(forward)
   """
 
   @contextlib.contextmanager
@@ -128,7 +128,7 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
 
       >>> @tf.function(autograph=False)
       ... def all_forward():
-      ...   return replicator.experimental_run_v2(forward)
+      ...   return replicator.run(forward)
       >>> per_replica_y = all_forward()
   """
 
@@ -138,6 +138,11 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
       stack.enter_context(super(TpuReplicator, self).scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
+
+# TODO(tomhennigan) Remove this once TF 2.2 is released.
+for cls in (Replicator, TpuReplicator):
+  if not hasattr(cls, "run"):
+    cls.run = cls.experimental_run_v2
 
 
 def create_variables_eagerly(f: Callable[..., T]) -> Callable[..., T]:

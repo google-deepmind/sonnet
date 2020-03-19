@@ -114,7 +114,7 @@ class OptimizerTestBase(test_utils.TestCase):
     with self.assertRaisesRegexp(
         ValueError,
         "Sonnet optimizers are not compatible with `MirroredStrategy`"):
-      strategy.experimental_run_v2(lambda: optimizer.apply(updates, parameters))
+      strategy.run(lambda: optimizer.apply(updates, parameters))
 
 
 # NOTE: Avoiding ABCMeta because of metaclass conflict.

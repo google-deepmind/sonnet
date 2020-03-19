@@ -44,7 +44,7 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
     @tf.function
     def forward():
       step = lambda: golden.create_all_variables(mod)
-      return replicator.experimental_run_v2(step)
+      return replicator.run(step)
 
     # TODO(b/132329316) Remove when `xla.compile` allows tf.device(TPU).
     with tf.device(None):
@@ -83,7 +83,7 @@ class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):
         state = core.initial_state(input_shape[0])
         return unroll(core, sequence, state)
 
-      return replicator.experimental_run_v2(forward)
+      return replicator.run(forward)
 
     # TpuReplicator doesn't support pure eager mode.
     if isinstance(replicator, snt_replicator.TpuReplicator):

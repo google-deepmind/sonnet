@@ -195,7 +195,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       variables = golden.create_all_variables(module)
 
     def forward():
-      per_replica = replicator.experimental_run_v2(
+      per_replica = replicator.run(
           lambda: golden.forward(module))
       return tree.map_structure(
           lambda args: tf.stack(replicator.unwrap(args), axis=0), per_replica)
@@ -350,7 +350,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       module = golden.create_module()
 
     def forward():
-      return replicator.experimental_run_v2(lambda: golden.forward(module))
+      return replicator.run(lambda: golden.forward(module))
 
     if use_function:
       forward = tf.function(forward)

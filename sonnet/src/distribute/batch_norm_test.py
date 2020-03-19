@@ -65,7 +65,7 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       outputs = layer(inputs, True, False, scale, offset)
       return inputs, outputs
 
-    inputs, outputs = strategy.experimental_run_v2(foo)
+    inputs, outputs = strategy.run(foo)
     local_mean_metric = strategy.experimental_local_results(mean_metric.value)
     local_var_metric = strategy.experimental_local_results(var_metric.value)
     self.assertAllEqual(local_mean_metric[0].numpy(),
@@ -101,7 +101,7 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
         outputs = layer(inputs, True, False, scale, offset)
         return inputs, outputs
 
-      return strategy.experimental_run_v2(compute)
+      return strategy.run(compute)
     inputs, outputs = run()
 
     local_mean_metric = strategy.experimental_local_results(mean_metric.value)

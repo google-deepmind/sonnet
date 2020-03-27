@@ -52,7 +52,7 @@ To get started install TensorFlow 2.0 and Sonnet 2:
 
 ```shell
 $ pip install tensorflow-gpu tensorflow-probability
-$ pip install "dm-sonnet>=2.0.0b0" --pre
+$ pip install dm-sonnet
 ```
 
 You can run the following to verify things installed correctly:

@@ -165,9 +165,9 @@ class ConvNDTranspose(base.Module):
             "The output_shape must be of length {} but instead was {}.".format(
                 self._num_spatial_dims, len(self._output_shape)))
       if self._channel_index == 1:
-        self._output_shape = [self._output_channels] + self._output_shape
+        self._output_shape = [self._output_channels] + list(self._output_shape)
       else:
-        self._output_shape = self._output_shape + [self._output_channels]
+        self._output_shape = list(self._output_shape) + [self._output_channels]
 
     self.w = self._make_w()
     if self._with_bias:

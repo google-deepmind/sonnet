@@ -31,6 +31,20 @@ import tensorflow as tf
 from typing import Optional, Sequence, Text, Union
 
 
+def smart_concat(v1, v2):
+  if isinstance(v1, tf.Tensor) or isinstance(v2, tf.Tensor):
+    return tf.concat([v1, v2], 0)
+  else:
+    return v1 + v2
+
+
+def smart_lambda(func, v1, v2):
+  if isinstance(v1, tf.Tensor) or isinstance(v2, tf.Tensor):
+    return func(v1, v2)
+  else:
+    return [func(x, y) for (x, y) in zip(v1, v2)]
+
+
 class ConvNDTranspose(base.Module):
   """An N-dimensional transpose convolutional module.
 
@@ -63,7 +77,7 @@ class ConvNDTranspose(base.Module):
         integer representing kernel shape. `kernel_shape` will be expanded to
         define a kernel size in all dimensions.
       output_shape: Output shape of the spatial dimensions of a transpose
-        convolution. Can be either an integer or an iterable of integers or a
+        convolution. Can be either an iterable of integers or a
         `TensorShape` of length `num_spatial_dims`. If a `None` value is given,
         a default shape is automatically calculated.
       stride: Sequence of integers (of length num_spatial_dims), or an integer.
@@ -114,7 +128,15 @@ class ConvNDTranspose(base.Module):
   def __call__(self, inputs):
     self._initialize(inputs)
 
-    output_shape = tf.concat([[tf.shape(inputs)[0]], self._output_shape], 0)
+    if self._output_shape is None:
+      output_shape = self._get_output_shape(inputs)
+      if self._channel_index == 1:
+        output_shape = smart_concat([self._output_channels], output_shape)
+      else:
+        output_shape = smart_concat(output_shape, [self._output_channels])
+    else:
+      output_shape = self._output_shape
+    output_shape = smart_concat([tf.shape(inputs)[0]], output_shape)
 
     outputs = tf.nn.conv_transpose(
         input=inputs,
@@ -137,17 +159,15 @@ class ConvNDTranspose(base.Module):
       raise ValueError("The number of input channels must be known")
     self._dtype = inputs.dtype
 
-    if self._output_shape is None:
-      self._output_shape = self._get_output_shape(inputs.shape)
-    elif len(self._output_shape) != self._num_spatial_dims:
-      raise ValueError(
-          "The output_shape must be of length {} but instead was {}".format(
-              self._n, len(self._output_shape)))
-
-    if self._channel_index == 1:
-      self._output_shape = (self._output_channels,) + self._output_shape
-    else:
-      self._output_shape = self._output_shape + (self._output_channels,)
+    if self._output_shape is not None:
+      if len(self._output_shape) != self._num_spatial_dims:
+        raise ValueError(
+            "The output_shape must be of length {} but instead was {}.".format(
+                self._num_spatial_dims, len(self._output_shape)))
+      if self._channel_index == 1:
+        self._output_shape = [self._output_channels] + self._output_shape
+      else:
+        self._output_shape = self._output_shape + [self._output_channels]
 
     self.w = self._make_w()
     if self._with_bias:
@@ -168,14 +188,17 @@ class ConvNDTranspose(base.Module):
 
     return tf.Variable(self._w_init(weight_shape, self._dtype), name="w")
 
-  def _get_output_shape(self, input_shape):
+  def _get_output_shape(self, inputs):
+    input_shape = inputs.shape if inputs.shape.is_fully_defined() else tf.shape(
+        inputs)
+
     if self._channel_index == 1:
       input_size = input_shape[2:]
     else:
       input_size = input_shape[1:-1]
     stride = utils.replicate(self._stride, self._num_spatial_dims, "stride")
 
-    output_shape = [x * y for (x, y) in zip(input_size, stride)]
+    output_shape = smart_lambda(lambda x, y: x * y, input_size, stride)
 
     if self._padding == "VALID":
       kernel_shape = utils.replicate(self._kernel_shape, self._num_spatial_dims,
@@ -184,11 +207,10 @@ class ConvNDTranspose(base.Module):
       effective_kernel_shape = [
           (shape - 1) * rate + 1 for (shape, rate) in zip(kernel_shape, rate)
       ]
-      output_shape = [
-          x + y - 1 for (x, y) in zip(output_shape, effective_kernel_shape)
-      ]
+      output_shape = smart_lambda(lambda x, y: x + y - 1, output_shape,
+                                  effective_kernel_shape)
 
-    return tuple(output_shape)
+    return output_shape
 
 
 class Conv1DTranspose(ConvNDTranspose):

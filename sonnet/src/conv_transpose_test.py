@@ -57,7 +57,27 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
         TypeError,
         "ConvNDTranspose only takes string padding, please provide either"):
       conv_transpose.ConvNDTranspose(
-          2, output_channels=1, output_shape=None, kernel_shape=3, padding=None)
+          2, output_channels=1, kernel_shape=3, padding=None)
+
+  def testBiasInitNoBias(self):
+    with self.assertRaisesRegexp(
+        ValueError,
+        "When not using a bias the b_init must be None."):
+      conv_transpose.ConvNDTranspose(
+          2, output_channels=1, kernel_shape=3, with_bias=False,
+          b_init=lib_initializers.Ones(), data_format="NHWC")
+
+  def testIncorrectOutputShape(self):
+    c = conv_transpose.ConvNDTranspose(
+        num_spatial_dims=2,
+        output_channels=3,
+        kernel_shape=2,
+        output_shape=[1],
+        data_format="NHWC")
+    with self.assertRaisesRegexp(
+        ValueError,
+        "The output_shape must be of length 2 but instead was 1."):
+      c(tf.ones([3, 5, 5, 3]))
 
   @parameterized.parameters(*itertools.product(
       [True, False],  # with_bias
@@ -128,6 +148,33 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
     out2 = defun_conv(tf.ones([5, 3, 5, 5]))
     self.assertEqual(out2.shape, [5, 2, 5, 5])
+
+  def testUnknownShapeDims(self):
+    x = tf.TensorSpec([3, None, None, 3], dtype=tf.float32)
+
+    c = conv_transpose.ConvNDTranspose(
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        data_format="NHWC")
+    defun_conv = tf.function(c).get_concrete_function(x)
+
+    out1 = defun_conv(tf.ones([3, 5, 5, 3]))
+    self.assertEqual(out1.shape, [3, 5, 5, 2])
+
+    out1 = defun_conv(tf.ones([3, 3, 3, 3]))
+    self.assertEqual(out1.shape, [3, 3, 3, 2])
+
+  def testGivenOutputShape(self):
+    c = conv_transpose.ConvNDTranspose(
+        num_spatial_dims=2,
+        output_channels=2,
+        kernel_shape=3,
+        output_shape=[5, 5],
+        data_format="NHWC")
+
+    out1 = c(tf.ones([3, 5, 5, 3]))
+    self.assertEqual(out1.shape, [3, 5, 5, 2])
 
   @parameterized.parameters(True, False)
   def testUnknownChannels(self, autograph):

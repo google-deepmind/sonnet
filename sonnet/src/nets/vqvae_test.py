@@ -109,15 +109,20 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
     inputs = tf.zeros([0, 5, 5, kwargs['embedding_dim']])
     vqvae_module(inputs, is_training=False)
 
-  @parameterized.parameters({'use_tf_function': True},
-                            {'use_tf_function': False})
-  def testEmaUpdating(self, use_tf_function):
+  @parameterized.parameters({'use_tf_function': True, 'dtype': tf.float32},
+                            {'use_tf_function': True, 'dtype': tf.float64},
+                            {'use_tf_function': False, 'dtype': tf.float32},
+                            {'use_tf_function': False, 'dtype': tf.float64})
+  def testEmaUpdating(self, use_tf_function, dtype):
     embedding_dim = 6
+    np_dtype = np.float64 if dtype is tf.float64 else np.float32
+    decay = np.array(0.1, dtype=np_dtype)
     vqvae_module = vqvae.VectorQuantizerEMA(
         embedding_dim=embedding_dim,
         num_embeddings=7,
         commitment_cost=0.5,
-        decay=0.1)
+        decay=decay,
+        dtype=dtype)
     if use_tf_function:
       vqvae_module = tf.function(vqvae_module)
 
@@ -127,7 +132,7 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
 
     # Embeddings should change with every forwards pass if is_training == True.
     for _ in range(10):
-      inputs = tf.random.normal([batch_size, embedding_dim])
+      inputs = tf.random.normal([batch_size, embedding_dim], dtype=dtype)
       vqvae_module(inputs, is_training=True)
       current_embeddings = vqvae_module.embeddings.numpy()
       self.assertFalse((prev_embeddings == current_embeddings).all())
@@ -135,7 +140,7 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
 
     # Forward passes with is_training == False don't change anything
     for _ in range(10):
-      inputs = tf.random.normal([batch_size, embedding_dim])
+      inputs = tf.random.normal([batch_size, embedding_dim], dtype=dtype)
       vqvae_module(inputs, is_training=False)
       current_embeddings = vqvae_module.embeddings.numpy()
       self.assertTrue((current_embeddings == prev_embeddings).all())

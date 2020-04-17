@@ -106,7 +106,9 @@ class VectorQuantizer(base.Module):
         tf.reduce_sum(self.embeddings**2, 0, keepdims=True))
 
     encoding_indices = tf.argmax(-distances, 1)
-    encodings = tf.one_hot(encoding_indices, self.num_embeddings)
+    encodings = tf.one_hot(encoding_indices,
+                           self.num_embeddings,
+                           dtype=distances.dtype)
 
     # NB: if your code crashes with a reshape error on the line below about a
     # Tensor containing the wrong number of values, then the most likely cause
@@ -250,7 +252,9 @@ class VectorQuantizerEMA(base.Module):
         tf.reduce_sum(self.embeddings**2, 0, keepdims=True))
 
     encoding_indices = tf.argmax(-distances, 1)
-    encodings = tf.one_hot(encoding_indices, self.num_embeddings)
+    encodings = tf.one_hot(encoding_indices,
+                           self.num_embeddings,
+                           dtype=distances.dtype)
 
     # NB: if your code crashes with a reshape error on the line below about a
     # Tensor containing the wrong number of values, then the most likely cause

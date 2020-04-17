@@ -285,16 +285,20 @@ that has the specific methods (e.g. `inference`) and properties (e.g.
 
 ## Distributed training
 
-**Reference:** https://www.tensorflow.org/alpha/guide/distribute_strategy
+**Example:** https://github.com/deepmind/sonnet/blob/v2/examples/distributed_cifar10.ipynb
 
-We are still working on making Sonnet compatible with distribution strategy.
-Currently modules that compute forward functions but don't update internal
-state (e.g. `Conv2D`) work well with `tf.distribute.MirroredStrategy` and
-`tf.distribute.experimental.TPUStrategy`.
+Sonnet has support for distributed training using
+[custom TensorFlow distribution strategies](https://sonnet.readthedocs.io/en/latest/api.html#module-sonnet.distribute).
 
-In general our philosophy with Sonnet is not to add special casing inside
-modules to support libraries. In some cases this is unavoidable since components
-that update state must do so in a "distribution aware" manner (for example
-optimizers, metrics or batch normalization). For these modules we plan on
-creating new versions in the `snt.distribute` namespace to indicate that these
-modules are distribution aware.
+A key difference between Sonnet and distributed training using `tf.keras` is
+that Sonnet modules and optimizers do not behave differently when run under
+distribution strategies (e.g. we do not average your gradients or sync your
+batch norm stats). We believe that users should be in full control of these
+aspects of their training and they should not be baked into the library. The
+trade off here is that you need to implement these features in your training
+script (typically this is just 2 lines of code to all reduce your gradients
+before applying your optimizer) or swap in modules that are explicitly
+distribution aware (e.g. `snt.distribute.CrossReplicaBatchNorm`).
+
+Our [distributed Cifar-10](https://github.com/deepmind/sonnet/blob/v2/examples/distributed_cifar10.ipynb)
+example walks through doing multi-GPU training with Sonnet.

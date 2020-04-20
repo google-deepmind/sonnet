@@ -64,5 +64,4 @@ class OptimizerConformanceTest(test_utils.TestCase, parameterized.TestCase):
       self.assertCountEqual(logged_variables[0], logged_variables[1])
 
 if __name__ == "__main__":
-  # tf.enable_v2_behavior()
   tf.test.main()

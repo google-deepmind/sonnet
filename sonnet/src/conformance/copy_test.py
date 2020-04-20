@@ -52,5 +52,4 @@ class CopyTest(test_utils.TestCase, parameterized.TestCase):
       tree.map_structure(self.assertAllEqual, y1, y2)
 
 if __name__ == "__main__":
-  # tf.enable_v2_behavior()
   tf.test.main()

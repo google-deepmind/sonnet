@@ -57,8 +57,6 @@ You can run the following to verify things installed correctly:
 import tensorflow as tf
 import sonnet as snt
 
-# tf.enable_v2_behavior()
-
 print("TensorFlow version {}".format(tf.__version__))
 print("Sonnet version {}".format(snt.__version__))
 ```

@@ -320,5 +320,4 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
 
 if __name__ == "__main__":
-  # tf.enable_v2_behavior()
   tf.test.main()

@@ -69,5 +69,4 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
                     channels_per_group_list=channel_list)
 
 if __name__ == "__main__":
-  # tf.enable_v2_behavior()
   tf.test.main()

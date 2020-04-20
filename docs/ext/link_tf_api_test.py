@@ -20,7 +20,6 @@ from __future__ import print_function
 
 from absl.testing import absltest
 from docs.ext import link_tf_api
-import tensorflow as tf
 
 DOC_BASE_URL = "https://www.tensorflow.org/versions/r2.0/api_docs/python/tf"
 
@@ -51,5 +50,4 @@ class LinkTfApiTest(absltest.TestCase):
 
 
 if __name__ == "__main__":
-  # tf.enable_v2_behavior()
   absltest.main()

@@ -41,5 +41,4 @@ class DescriptorsTest(test_utils.TestCase):
 
 
 if __name__ == '__main__':
-  # tf.enable_v2_behavior()
   tf.test.main()

@@ -23,7 +23,7 @@ import numpy as np
 from sonnet.src import base
 import tensorflow as tf
 import tree
-from typing import Any, Optional, Sequence, Text, Union
+from typing import Any, Callable, Optional, Sequence, Text, Union
 
 
 class BatchApply(base.Module):
@@ -47,7 +47,7 @@ class BatchApply(base.Module):
   """
 
   def __init__(self,
-               module: base.Module,
+               module: Callable[..., tf.Tensor],
                num_dims: int = 2,
                name: Optional[Text] = None):
     super(BatchApply, self).__init__(name=name)

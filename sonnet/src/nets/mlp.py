@@ -125,7 +125,7 @@ class MLP(base.Module):
     >>> y = mlp(tf.ones([1, 2]))
     >>> rev = mlp.reverse()
     >>> rev(y)
-    <tf.Tensor: ... shape=(1, 2), ...>
+    <tf.Tensor: shape=(1, 2), ...>
 
     Args:
       activate_final: Whether the final layer of the MLP should be activated.

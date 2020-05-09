@@ -57,12 +57,12 @@ def range_like(t, start=0):
   """Returns a tensor with sequential values of the same dtype/shape as `t`.
 
   >>> range_like(tf.ones([2, 2]))
-  <tf.Tensor: ... shape=(2, 2), dtype=float32, numpy=
+  <tf.Tensor: shape=(2, 2), dtype=float32, numpy=
   array([[ 0.,  1.],
          [ 2.,  3.]], dtype=float32)>
 
   >>> range_like(tf.ones([2, 2]), start=5)
-  <tf.Tensor: ... shape=(2, 2), dtype=float32, numpy=
+  <tf.Tensor: shape=(2, 2), dtype=float32, numpy=
   array([[ 5.,  6.],
          [ 7.,  8.]], dtype=float32)>
 

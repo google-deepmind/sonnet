@@ -139,11 +139,6 @@ class TpuReplicator(tf.distribute.experimental.TPUStrategy):
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
 
-# TODO(tomhennigan) Remove this once TF 2.2 is released.
-for cls in (Replicator, TpuReplicator):
-  if not hasattr(cls, "run"):
-    cls.run = cls.experimental_run_v2
-
 
 def create_variables_eagerly(f: Callable[..., T]) -> Callable[..., T]:
   """Wraps a function and attempts to create variables using eager mode.

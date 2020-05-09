@@ -40,9 +40,7 @@ class CopyTest(test_utils.TestCase, parameterized.TestCase):
     # Check that module variables are recreated with equivalent properties.
     for v1, v2 in zip(m1.variables, m2.variables):
       self.assertIsNot(v1, v2)
-      if tf.version.GIT_VERSION == "unknown":
-        # TODO(tomhennigan) Remove version check when TF 2.1 is released.
-        self.assertEqual(v1.name, v2.name)
+      self.assertEqual(v1.name, v2.name)
       self.assertEqual(v1.device, v2.device)
       self.assertAllEqual(v1.read_value(), v2.read_value())
 

@@ -105,9 +105,6 @@ class OptimizerTestBase(test_utils.TestCase):
 
   def testUnsuppportedStrategyError(self):
     strategy = tf.distribute.MirroredStrategy()
-    if not hasattr(strategy, "run"):
-      # TODO(tomhennigan) Remove this once we test with TF 2.2.
-      strategy.run = strategy.experimental_run_v2
     with strategy.scope():
       parameters = [tf.Variable(1.0)]
       updates = [tf.constant(0.1)]

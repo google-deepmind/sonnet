@@ -23,7 +23,7 @@ Using :doc:`built in modules <api>` is as easy as using any other Python object:
 
 >>> linear = snt.Linear(output_size=10)
 >>> linear(tf.ones([8, 28 * 28]))
-<tf.Tensor: ... shape=(8, 10), dtype=float32, ... dtype=float32)>
+<tf.Tensor: shape=(8, 10), dtype=float32, ... dtype=float32)>
 
 You can get access to the modules parameters using the ``trainable_variables``
 property, note that most modules only create parameters the first time they
@@ -66,7 +66,7 @@ You can use your module like you would any other Python object:
 
 >>> mlp = MyMLP()
 >>> mlp(tf.random.normal([8, 28 * 28]))
-<tf.Tensor: ... shape=(8, 10), ...>
+<tf.Tensor: shape=(8, 10), ...>
 
 Additionally, the variable and submodule tracking features of :class:`Module`
 will work without any additional code:

@@ -31,7 +31,7 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype, _safe_where, _unstack_input_sequence, _specialize_per_device
+from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step
 
 import tensorflow as tf
 import tree
@@ -385,26 +385,6 @@ def dynamic_unroll(
 
   output_sequence = tree.map_structure(tf.TensorArray.stack, output_tas)
   return output_sequence, state
-
-
-def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
-  """Performs a single RNN step optionally accounting for variable length."""
-  outputs, state = core(
-      tree.map_structure(lambda i: i.read(t), input_tas), prev_state)
-
-  if prev_outputs is None:
-    assert t == 0
-    prev_outputs = tree.map_structure(tf.zeros_like, outputs)
-
-  # TODO(slebedev): do not go into this block if t < min_len.
-  if sequence_length is not None:
-    # Selectively propagate outputs/state to the not-yet-finished
-    # sequences.
-    maybe_propagate = functools.partial(_safe_where, t >= sequence_length)
-    outputs = tree.map_structure(maybe_propagate, prev_outputs, outputs)
-    state = tree.map_structure(maybe_propagate, prev_state, state)
-
-  return outputs, state
 
 
 class VanillaRNN(RNNCore):

@@ -14,6 +14,7 @@
 # ============================================================================
 """Utils for Recurrent Neural Network cores."""
 
+import functools
 import uuid
 
 import tensorflow.compat.v1 as tf1
@@ -26,11 +27,25 @@ from tensorflow.python import context as context_lib
 from tensorflow.python.eager import function as function_lib
 # pylint: enable=g-direct-tensorflow-import
 
-def _check_inputs_dtype(inputs, expected_dtype):
-  if inputs.dtype is not expected_dtype:
-    raise TypeError("inputs must have dtype {!r}, got {!r}".format(
-        expected_dtype, inputs.dtype))
-  return expected_dtype
+
+def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
+  """Performs a single RNN step optionally accounting for variable length."""
+  outputs, state = core(
+      tree.map_structure(lambda i: i.read(t), input_tas), prev_state)
+
+  if prev_outputs is None:
+    assert t == 0
+    prev_outputs = tree.map_structure(tf.zeros_like, outputs)
+
+  # TODO(slebedev): do not go into this block if t < min_len.
+  if sequence_length is not None:
+    # Selectively propagate outputs/state to the not-yet-finished
+    # sequences.
+    maybe_propagate = functools.partial(_safe_where, t >= sequence_length)
+    outputs = tree.map_structure(maybe_propagate, prev_outputs, outputs)
+    state = tree.map_structure(maybe_propagate, prev_state, state)
+
+  return outputs, state
 
 
 def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
@@ -42,6 +57,12 @@ def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
   # TODO(tomhennigan) Broadcasting with SelectV2 is currently broken.
   return tf1.where(condition, x, y)
 
+
+def _check_inputs_dtype(inputs, expected_dtype):
+  if inputs.dtype is not expected_dtype:
+    raise TypeError("inputs must have dtype {!r}, got {!r}".format(
+        expected_dtype, inputs.dtype))
+  return expected_dtype
 
 
 def _unstack_input_sequence(input_sequence):

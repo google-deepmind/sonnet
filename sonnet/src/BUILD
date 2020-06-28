@@ -369,7 +369,9 @@ snt_py_test(
 snt_py_library(
     name = "recurrent_internals",
     srcs = ["recurrent_internals.py"],
-    deps = [],
+    deps = [
+        # pip: tensorflow
+    ],
 )
 
 snt_py_library(

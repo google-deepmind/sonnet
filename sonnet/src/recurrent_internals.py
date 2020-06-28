@@ -14,9 +14,21 @@
 # ============================================================================
 """Utils for Recurrent Neural Network cores."""
 
+import tensorflow.compat.v1 as tf1
+
 
 def _check_inputs_dtype(inputs, expected_dtype):
   if inputs.dtype is not expected_dtype:
     raise TypeError("inputs must have dtype {!r}, got {!r}".format(
         expected_dtype, inputs.dtype))
   return expected_dtype
+
+
+def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
+  """`tf.where` which allows scalar inputs."""
+  if x.shape.rank == 0:
+    # This is to match the `tf.nn.*_rnn` behavior. In general, we might
+    # want to branch on `tf.reduce_all(condition)`.
+    return y
+  # TODO(tomhennigan) Broadcasting with SelectV2 is currently broken.
+  return tf1.where(condition, x, y)

@@ -32,9 +32,8 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype
+from sonnet.src.recurrent_internals import _check_inputs_dtype, _safe_where
 
-import tensorflow.compat.v1 as tf1
 import tensorflow as tf
 import tree
 
@@ -434,17 +433,6 @@ def _unstack_input_sequence(input_sequence):
   input_tas = tree.map_structure(
       lambda i: tf.TensorArray(i.dtype, num_steps).unstack(i), input_sequence)
   return num_steps, input_tas
-
-
-def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
-  """`tf.where` which allows scalar inputs."""
-  if x.shape.rank == 0:
-    # This is to match the `tf.nn.*_rnn` behavior. In general, we might
-    # want to branch on `tf.reduce_all(condition)`.
-    return y
-  # TODO(tomhennigan) Broadcasting with SelectV2 is currently broken.
-  return tf1.where(condition, x, y)
-
 
 def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
   """Performs a single RNN step optionally accounting for variable length."""
@@ -1719,10 +1707,3 @@ class CuDNNGRU(RNNCore):
         self._w_h_init([self._hidden_size, 3 * self._hidden_size], dtype),
         name="w_h")
     self.b = tf.Variable(self._b_init([3 * self._hidden_size], dtype), name="b")
-
-#
-# def _check_inputs_dtype(inputs, expected_dtype):
-#   if inputs.dtype is not expected_dtype:
-#     raise TypeError("inputs must have dtype {!r}, got {!r}".format(
-#         expected_dtype, inputs.dtype))
-#   return expected_dtype

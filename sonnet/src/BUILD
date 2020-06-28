@@ -367,6 +367,12 @@ snt_py_test(
 )
 
 snt_py_library(
+    name = "recurrent_internals",
+    srcs = ["recurrent_internals.py"],
+    deps = [],
+)
+
+snt_py_library(
     name = "recurrent",
     srcs = ["recurrent.py"],
     deps = [
@@ -377,6 +383,7 @@ snt_py_library(
         ":once",
         ":types",
         ":utils",
+        ":recurrent_internals"
         # pip: six
         # pip: tensorflow
         # pip: tree

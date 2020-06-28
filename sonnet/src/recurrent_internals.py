@@ -14,10 +14,17 @@
 # ============================================================================
 """Utils for Recurrent Neural Network cores."""
 
+import uuid
+
 import tensorflow.compat.v1 as tf1
 import tensorflow as tf
 import tree
 
+# pylint: disable=g-direct-tensorflow-import
+# Required for specializing `UnrolledLSTM` per device.
+from tensorflow.python import context as context_lib
+from tensorflow.python.eager import function as function_lib
+# pylint: enable=g-direct-tensorflow-import
 
 def _check_inputs_dtype(inputs, expected_dtype):
   if inputs.dtype is not expected_dtype:
@@ -76,3 +83,62 @@ def _unstack_input_sequence(input_sequence):
   input_tas = tree.map_structure(
       lambda i: tf.TensorArray(i.dtype, num_steps).unstack(i), input_sequence)
   return num_steps, input_tas
+
+
+# TODO(b/133740216): consider upstreaming into TensorFlow.
+def _specialize_per_device(api_name, specializations, default):
+  """Create a :tf:`function` specialized per-device.
+
+  Args:
+    api_name: Name of the function, e.g. ``"lstm"``.
+    specializations: A mapping from device type (e.g. ``"CPU"`` or ``"TPU``) to
+      a Python function with a specialized implementation for that device.
+    default: Default device type to use (typically, ``"CPU"``).
+
+  Returns:
+    A :tf:`function` which when called dispatches to the specialization
+    for the current device.
+  """
+  # Cached to avoid redundant ``ModuleWrapper.__getattribute__`` calls.
+  list_logical_devices = tf.config.experimental.list_logical_devices
+
+  def wrapper(*args, **kwargs):
+    """Specialized {}.
+
+    In eager mode the specialization is chosen based on the current
+    device context or, if no device context is active, on availability
+    of a GPU.
+
+    In graph mode (inside tf.function) the choice is delegated to the
+    implementation selector pass in Grappler.
+
+    Args:
+      *args: Positional arguments to pass to the chosen specialization.
+      **kwargs: Keyword arguments to pass to the chosen specialization.
+    """.format(api_name)
+    ctx = context_lib.context()
+    if ctx.executing_eagerly():
+      device = ctx.device_spec.device_type
+      if device is None:
+        # Soft-placement will never implicitly place an op an a TPU, so
+        # we only need to consider CPU/GPU.
+        device = "GPU" if list_logical_devices("GPU") else "CPU"
+
+      specialization = specializations.get(device) or specializations[default]
+      return specialization(*args, **kwargs)
+
+    # Implementation selector requires a globally unique name for each
+    # .register() call.
+    unique_api_name = "{}_{}".format(api_name, uuid.uuid4())
+    functions = {}
+    for device, specialization in specializations.items():
+      functions[device] = function_lib.defun_with_attributes(
+          specialization,
+          attributes={
+              "api_implements": unique_api_name,
+              "api_preferred_device": device
+          })
+      function_lib.register(functions[device], *args, **kwargs)
+    return functions[default](*args, **kwargs)
+
+  return wrapper

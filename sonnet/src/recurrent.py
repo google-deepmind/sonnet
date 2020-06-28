@@ -22,7 +22,6 @@ from __future__ import print_function
 import abc
 import collections
 import functools
-import uuid
 
 import six
 from sonnet.src import base
@@ -32,18 +31,12 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype, _safe_where, _unstack_input_sequence
+from sonnet.src.recurrent_internals import _check_inputs_dtype, _safe_where, _unstack_input_sequence, _specialize_per_device
 
 import tensorflow as tf
 import tree
 
 from typing import Optional, Sequence, Text, Tuple, Union
-
-# pylint: disable=g-direct-tensorflow-import
-# Required for specializing `UnrolledLSTM` per device.
-from tensorflow.python import context as context_lib
-from tensorflow.python.eager import function as function_lib
-# pylint: enable=g-direct-tensorflow-import
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -939,65 +932,6 @@ class UnrolledLSTM(UnrolledRNN):
         self._b_init([4 * self._hidden_size], dtype), num_or_size_splits=4)
     b_f += self._forget_bias
     self.b = tf.Variable(tf.concat([b_i, b_f, b_g, b_o], axis=0), name="b")
-
-
-# TODO(b/133740216): consider upstreaming into TensorFlow.
-def _specialize_per_device(api_name, specializations, default):
-  """Create a :tf:`function` specialized per-device.
-
-  Args:
-    api_name: Name of the function, e.g. ``"lstm"``.
-    specializations: A mapping from device type (e.g. ``"CPU"`` or ``"TPU``) to
-      a Python function with a specialized implementation for that device.
-    default: Default device type to use (typically, ``"CPU"``).
-
-  Returns:
-    A :tf:`function` which when called dispatches to the specialization
-    for the current device.
-  """
-  # Cached to avoid redundant ``ModuleWrapper.__getattribute__`` calls.
-  list_logical_devices = tf.config.experimental.list_logical_devices
-
-  def wrapper(*args, **kwargs):
-    """Specialized {}.
-
-    In eager mode the specialization is chosen based on the current
-    device context or, if no device context is active, on availability
-    of a GPU.
-
-    In graph mode (inside tf.function) the choice is delegated to the
-    implementation selector pass in Grappler.
-
-    Args:
-      *args: Positional arguments to pass to the chosen specialization.
-      **kwargs: Keyword arguments to pass to the chosen specialization.
-    """.format(api_name)
-    ctx = context_lib.context()
-    if ctx.executing_eagerly():
-      device = ctx.device_spec.device_type
-      if device is None:
-        # Soft-placement will never implicitly place an op an a TPU, so
-        # we only need to consider CPU/GPU.
-        device = "GPU" if list_logical_devices("GPU") else "CPU"
-
-      specialization = specializations.get(device) or specializations[default]
-      return specialization(*args, **kwargs)
-
-    # Implementation selector requires a globally unique name for each
-    # .register() call.
-    unique_api_name = "{}_{}".format(api_name, uuid.uuid4())
-    functions = {}
-    for device, specialization in specializations.items():
-      functions[device] = function_lib.defun_with_attributes(
-          specialization,
-          attributes={
-              "api_implements": unique_api_name,
-              "api_preferred_device": device
-          })
-      function_lib.register(functions[device], *args, **kwargs)
-    return functions[default](*args, **kwargs)
-
-  return wrapper
 
 
 def _fallback_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):

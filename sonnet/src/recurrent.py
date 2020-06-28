@@ -20,7 +20,6 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
-import collections
 import functools
 
 import six
@@ -31,7 +30,7 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step
+from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step, LSTMState
 
 import tensorflow as tf
 import tree
@@ -663,9 +662,6 @@ def deep_rnn_with_residual_connections(
   return _LegacyDeepRNN([_ResidualWrapper(l) for l in layers],
                         skip_connections=False,
                         name=name)
-
-
-LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 
 
 class LSTM(RNNCore):

@@ -14,6 +14,7 @@
 # ============================================================================
 """Utils for Recurrent Neural Network cores."""
 
+import collections
 import functools
 import uuid
 
@@ -26,6 +27,9 @@ import tree
 from tensorflow.python import context as context_lib
 from tensorflow.python.eager import function as function_lib
 # pylint: enable=g-direct-tensorflow-import
+
+
+LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 
 
 def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):

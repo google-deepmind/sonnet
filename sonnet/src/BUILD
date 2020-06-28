@@ -371,6 +371,7 @@ snt_py_library(
     srcs = ["recurrent_internals.py"],
     deps = [
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

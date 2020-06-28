@@ -36,7 +36,7 @@ from tensorflow.python.eager import function as function_lib
 LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 
 
-def _lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
+def lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
   """Compute one step of an LSTM."""
   gates_x = tf.matmul(inputs, w_i)
   gates_h = tf.matmul(prev_state.hidden, w_h)
@@ -55,7 +55,7 @@ def _lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
   return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
 
 
-def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
+def rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
   """Performs a single RNN step optionally accounting for variable length."""
   outputs, state = core(
       tree.map_structure(lambda i: i.read(t), input_tas), prev_state)
@@ -85,14 +85,14 @@ def _safe_where(condition, x, y):  # pylint: disable=g-doc-args
   return tf1.where(condition, x, y)
 
 
-def _check_inputs_dtype(inputs, expected_dtype):
+def check_inputs_dtype(inputs, expected_dtype):
   if inputs.dtype is not expected_dtype:
     raise TypeError("inputs must have dtype {!r}, got {!r}".format(
         expected_dtype, inputs.dtype))
   return expected_dtype
 
 
-def _unstack_input_sequence(input_sequence):
+def unstack_input_sequence(input_sequence):
   r"""Unstacks the input sequence into a nest of :tf:`TensorArray`\ s.
 
   This allows to traverse the input sequence using :tf:`TensorArray.read`
@@ -134,7 +134,7 @@ def _unstack_input_sequence(input_sequence):
 
 
 # TODO(b/133740216): consider upstreaming into TensorFlow.
-def _specialize_per_device(api_name, specializations, default):
+def specialize_per_device(api_name, specializations, default):
   """Create a :tf:`function` specialized per-device.
 
   Args:

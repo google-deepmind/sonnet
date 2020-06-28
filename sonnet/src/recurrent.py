@@ -32,6 +32,7 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
+from sonnet.src.recurrent_internals import _check_inputs_dtype
 
 import tensorflow.compat.v1 as tf1
 import tensorflow as tf
@@ -1719,9 +1720,9 @@ class CuDNNGRU(RNNCore):
         name="w_h")
     self.b = tf.Variable(self._b_init([3 * self._hidden_size], dtype), name="b")
 
-
-def _check_inputs_dtype(inputs, expected_dtype):
-  if inputs.dtype is not expected_dtype:
-    raise TypeError("inputs must have dtype {!r}, got {!r}".format(
-        expected_dtype, inputs.dtype))
-  return expected_dtype
+#
+# def _check_inputs_dtype(inputs, expected_dtype):
+#   if inputs.dtype is not expected_dtype:
+#     raise TypeError("inputs must have dtype {!r}, got {!r}".format(
+#         expected_dtype, inputs.dtype))
+#   return expected_dtype

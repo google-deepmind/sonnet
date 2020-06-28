@@ -30,8 +30,7 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step, _lstm_fn
-from sonnet.src.recurrent_internals import LSTMState as LSTMState_definition
+from sonnet.src import recurrent_internals
 
 import tensorflow as tf
 import tree
@@ -253,7 +252,7 @@ def static_unroll(
     ValueError: If ``input_sequence`` is empty or its leading dimension is
       not known statically.
   """
-  num_steps, input_tas = _unstack_input_sequence(input_sequence)
+  num_steps, input_tas = recurrent_internals.unstack_input_sequence(input_sequence)
   if not isinstance(num_steps, six.integer_types):
     raise ValueError(
         "input_sequence must have a statically known number of time steps")
@@ -262,7 +261,7 @@ def static_unroll(
   state = initial_state
   output_accs = None
   for t in six.moves.range(num_steps):
-    outputs, state = _rnn_step(
+    outputs, state = recurrent_internals.rnn_step(
         core,
         input_tas,
         sequence_length,
@@ -353,10 +352,10 @@ def dynamic_unroll(
   Raises:
     ValueError: If ``input_sequence`` is empty.
   """
-  num_steps, input_tas = _unstack_input_sequence(input_sequence)
+  num_steps, input_tas = recurrent_internals.unstack_input_sequence(input_sequence)
 
   # Unroll the first time step separately to infer outputs structure.
-  outputs, state = _rnn_step(
+  outputs, state = recurrent_internals.rnn_step(
       core,
       input_tas,
       sequence_length,
@@ -373,7 +372,7 @@ def dynamic_unroll(
         parallel_iterations=parallel_iterations,
         swap_memory=swap_memory,
         maximum_iterations=num_steps - 1)
-    outputs, state = _rnn_step(
+    outputs, state = recurrent_internals.rnn_step(
         core,
         input_tas,
         sequence_length,
@@ -467,7 +466,7 @@ class VanillaRNN(RNNCore):
 
   @once.once
   def _initialize(self, inputs: tf.Tensor):
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(inputs, self._dtype)
     self._b = tf.Variable(self._b_init([self._hidden_size], dtype), name="b")
 
 
@@ -665,7 +664,7 @@ def deep_rnn_with_residual_connections(
                         name=name)
 
 
-LSTMState = LSTMState_definition
+LSTMState = recurrent_internals.LSTMState
 
 
 class LSTM(RNNCore):
@@ -762,7 +761,7 @@ class LSTM(RNNCore):
   def __call__(self, inputs, prev_state):
     """See base class."""
     self._initialize(inputs)
-    return _lstm_fn(inputs, prev_state, self._w_i, self._w_h, self.b,
+    return recurrent_internals.lstm_fn(inputs, prev_state, self._w_i, self._w_h, self.b,
                     self.projection)
 
   def initial_state(self, batch_size: int) -> LSTMState:
@@ -783,7 +782,7 @@ class LSTM(RNNCore):
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
     input_size = inputs.shape[1]
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(inputs, self._dtype)
 
     w_i_init = self._w_i_init or initializers.TruncatedNormal(
         stddev=1.0 / tf.sqrt(tf.cast(input_size, dtype)))
@@ -878,7 +877,7 @@ class UnrolledLSTM(UnrolledRNN):
   def _initialize(self, input_sequence):
     utils.assert_rank(input_sequence, 3)  # [num_steps, batch_size, input_size].
     input_size = input_sequence.shape[2]
-    dtype = _check_inputs_dtype(input_sequence, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(input_sequence, self._dtype)
 
     w_i_init = self._w_i_init or initializers.TruncatedNormal(
         stddev=1.0 / tf.sqrt(tf.cast(input_size, dtype)))
@@ -898,7 +897,7 @@ class UnrolledLSTM(UnrolledRNN):
 def _fallback_unrolled_lstm(input_sequence, initial_state, w_i, w_h, b):
   """Fallback version of :class:`UnrolledLSTM` which works on any device."""
   return dynamic_unroll(
-      functools.partial(_lstm_fn, w_i=w_i, w_h=w_h, b=b), input_sequence,
+      functools.partial(recurrent_internals.lstm_fn, w_i=w_i, w_h=w_h, b=b), input_sequence,
       initial_state)
 
 
@@ -949,7 +948,7 @@ _unrolled_lstm_impls = {
 if hasattr(tf.raw_ops, "BlockLSTMV2"):
   _unrolled_lstm_impls["CPU"] = _block_unrolled_lstm
 
-_specialized_unrolled_lstm = _specialize_per_device(
+_specialized_unrolled_lstm = recurrent_internals.specialize_per_device(
     "snt_unrolled_lstm", specializations=_unrolled_lstm_impls, default="TPU")
 
 
@@ -1193,7 +1192,7 @@ class _ConvNDLSTM(RNNCore):
 
   @once.once
   def _initialize(self, inputs):
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(inputs, self._dtype)
     b_i, b_f, b_g, b_o = tf.split(
         self._b_init([4 * self._output_channels], dtype), num_or_size_splits=4)
     b_f += self._forget_bias
@@ -1446,7 +1445,7 @@ class GRU(RNNCore):
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 2)
     input_size = inputs.shape[1]
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(inputs, self._dtype)
     self._w_i = tf.Variable(
         self._w_i_init([input_size, 3 * self._hidden_size], dtype), name="w_i")
     self._w_h = tf.Variable(
@@ -1555,7 +1554,7 @@ class CuDNNGRU(RNNCore):
   def _initialize(self, inputs):
     utils.assert_rank(inputs, 3)  # [num_steps, batch_size, input_size].
     input_size = inputs.shape[2]
-    dtype = _check_inputs_dtype(inputs, self._dtype)
+    dtype = recurrent_internals.check_inputs_dtype(inputs, self._dtype)
     self._w_i = tf.Variable(
         self._w_i_init([input_size, 3 * self._hidden_size], dtype), name="w_i")
     self._w_h = tf.Variable(

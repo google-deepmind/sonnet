@@ -32,6 +32,25 @@ from tensorflow.python.eager import function as function_lib
 LSTMState = collections.namedtuple("LSTMState", ["hidden", "cell"])
 
 
+def _lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
+  """Compute one step of an LSTM."""
+  gates_x = tf.matmul(inputs, w_i)
+  gates_h = tf.matmul(prev_state.hidden, w_h)
+  gates = gates_x + gates_h + b
+
+  # i = input, f = forget, g = cell updates, o = output.
+  i, f, g, o = tf.split(gates, num_or_size_splits=4, axis=1)
+
+  next_cell = tf.sigmoid(f) * prev_state.cell
+  next_cell += tf.sigmoid(i) * tf.tanh(g)
+  next_hidden = tf.sigmoid(o) * tf.tanh(next_cell)
+
+  if projection is not None:
+    next_hidden = tf.matmul(next_hidden, projection)
+
+  return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
+
+
 def _rnn_step(core, input_tas, sequence_length, t, prev_outputs, prev_state):
   """Performs a single RNN step optionally accounting for variable length."""
   outputs, state = core(

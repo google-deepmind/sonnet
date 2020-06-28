@@ -30,7 +30,8 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step, LSTMState
+from sonnet.src.recurrent_internals import _check_inputs_dtype, _unstack_input_sequence, _specialize_per_device, _rnn_step, _lstm_fn
+from sonnet.src.recurrent_internals import LSTMState as LSTMState_definition
 
 import tensorflow as tf
 import tree
@@ -664,6 +665,9 @@ def deep_rnn_with_residual_connections(
                         name=name)
 
 
+LSTMState = LSTMState_definition
+
+
 class LSTM(RNNCore):
   r"""Long short-term memory (LSTM) RNN core.
 
@@ -806,25 +810,6 @@ class LSTM(RNNCore):
       self.projection = tf.Variable(
           projection_init([self._hidden_size, self._projection_size], dtype),
           name="projection")
-
-
-def _lstm_fn(inputs, prev_state, w_i, w_h, b, projection=None):
-  """Compute one step of an LSTM."""
-  gates_x = tf.matmul(inputs, w_i)
-  gates_h = tf.matmul(prev_state.hidden, w_h)
-  gates = gates_x + gates_h + b
-
-  # i = input, f = forget, g = cell updates, o = output.
-  i, f, g, o = tf.split(gates, num_or_size_splits=4, axis=1)
-
-  next_cell = tf.sigmoid(f) * prev_state.cell
-  next_cell += tf.sigmoid(i) * tf.tanh(g)
-  next_hidden = tf.sigmoid(o) * tf.tanh(next_cell)
-
-  if projection is not None:
-    next_hidden = tf.matmul(next_hidden, projection)
-
-  return next_hidden, LSTMState(hidden=next_hidden, cell=next_cell)
 
 
 class UnrolledLSTM(UnrolledRNN):

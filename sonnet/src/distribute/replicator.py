@@ -19,11 +19,12 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+from typing import Callable, TypeVar
+
 from absl import logging
 import contextlib
 from sonnet.src import initializers
 import tensorflow as tf
-from typing import Callable, TypeVar
 
 T = TypeVar("T")
 
@@ -86,8 +87,14 @@ class Replicator(tf.distribute.MirroredStrategy):
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
 
+# TODO(tomhennigan) Remove this once TF 2.3 is released.
+try:
+  TPUStrategy = tf.distribute.TPUStrategy
+except AttributeError:
+  TPUStrategy = tf.distribute.experimental.TPUStrategy
 
-class TpuReplicator(tf.distribute.experimental.TPUStrategy):
+
+class TpuReplicator(TPUStrategy):
   r"""Replicates input, parameters and compute over multiple TPUs.
 
   ``TpuReplicator`` is a TensorFlow "Distribution Strategy" implementing the

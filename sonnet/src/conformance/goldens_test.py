@@ -29,7 +29,7 @@ import tensorflow as tf
 class CoverageTest(test_utils.TestCase):
 
   def test_all_modules_covered(self):
-    no_checkpoint_whitelist = set([
+    allow_no_checkpoint = set([
         # TODO(petebu): Remove this once optimizer goldens check works.
         snt.optimizers.Adam,
         snt.optimizers.Momentum,
@@ -66,12 +66,12 @@ class CoverageTest(test_utils.TestCase):
     # Find all the modules that have checkpoint tests.
     tested_modules = {module_cls for module_cls, _, _ in goldens.list_goldens()}
 
-    # Make sure we don't leave entries in no_checkpoint_whitelist if they are
+    # Make sure we don't leave entries in allow_no_checkpoint if they are
     # actually tested.
-    self.assertEmpty(tested_modules & no_checkpoint_whitelist)
+    self.assertEmpty(tested_modules & allow_no_checkpoint)
 
     # Make sure everything is covered.
-    self.assertEqual(tested_modules | no_checkpoint_whitelist, all_sonnet_types)
+    self.assertEqual(tested_modules | allow_no_checkpoint, all_sonnet_types)
 
 
 if __name__ == "__main__":

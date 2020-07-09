@@ -19,7 +19,7 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import collections
+import collections.abc
 import functools
 import inspect
 import re
@@ -40,7 +40,7 @@ def replicate(
     name: Text,
 ) -> Tuple[T]:
   """Replicates entry in `element` `num_times` if needed."""
-  if not isinstance(element, collections.Sequence):
+  if not isinstance(element, collections.abc.Sequence):
     return (element,) * num_times
   elif len(element) == 1:
     return tuple(element * num_times)

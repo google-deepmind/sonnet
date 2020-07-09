@@ -19,7 +19,7 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import collections
+import collections.abc
 import six
 
 from sonnet.src import base
@@ -111,7 +111,7 @@ class GroupNorm(base.Module):
       self._axis = axis
     elif isinstance(axis, six.integer_types):
       self._axis = [axis]
-    elif (isinstance(axis, collections.Iterable) and
+    elif (isinstance(axis, collections.abc.Iterable) and
           all(isinstance(ax, six.integer_types) for ax in axis)):
       self._axis = axis
     else:

@@ -42,10 +42,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
 
     @tf.function(input_signature=[golden.input_spec])
     def inference(x):
-      # We'll let `golden.forward` run the model with a fixed input. This allows
-      # for additional positional arguments like is_training.
-      del x
-      return golden.forward(module)
+      return golden.forward(module, x)
 
     # Create a saved model, add a method for inference and a dependency on our
     # module such that it can find dependencies.
@@ -54,8 +51,7 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     saved_model.inference = inference
     saved_model.all_variables = list(module.variables)
 
-    # Sample input, the value is not important (it is not used in the inference
-    # function).
+    # Sample input.
     x = goldens.range_like(golden.input_spec)
 
     # Run the saved model and pull variable values.

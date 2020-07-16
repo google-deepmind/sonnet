@@ -20,13 +20,13 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+from typing import Text, Tuple, Sequence
 
 from absl.testing import parameterized
 import numpy as np
 import six
 import sonnet as snt
 import tensorflow as tf
-from typing import Text, Tuple, Sequence
 
 _all_goldens = []
 
@@ -95,7 +95,7 @@ class Golden(object):
     pass
 
   @abc.abstractmethod
-  def forward(self, module):
+  def forward(self, module, x=None):
     """Return the output from calling the module with a fixed input."""
     pass
 
@@ -120,8 +120,9 @@ class AbstractGolden(Golden):
   def num_variables(self):
     pass
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x)
 
   def create_all_variables(self, module):
@@ -221,8 +222,9 @@ class Cifar10ConvNet(AbstractGolden):
   input_spec = tf.TensorSpec([1, 3, 3, 2])
   num_variables = 22
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)["logits"]
 
 
@@ -257,8 +259,9 @@ class BaseBatchNorm(AbstractGolden):
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
 
 
@@ -269,8 +272,9 @@ class BaseBatchNormScaleOffset(AbstractGolden):
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
 
 
@@ -280,8 +284,9 @@ class BatchNorm(AbstractGolden):
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 8
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
 
 
@@ -291,8 +296,9 @@ class BatchNormScaleOffset(AbstractGolden):
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 8
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
 
 
@@ -303,8 +309,9 @@ class ExponentialMovingAverage(AbstractGolden):
   num_variables = 3
   has_side_effects = True
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x)
 
 
@@ -315,8 +322,9 @@ class BatchNormTraining(AbstractGolden):
   num_variables = 8
   has_side_effects = True
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=True)
 
 
@@ -328,8 +336,9 @@ class CrossReplicaBatchNorm(AbstractGolden):
   input_spec = tf.TensorSpec([1, 2, 2, 3])
   num_variables = 2
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=False, test_local_stats=True)
 
 
@@ -340,17 +349,19 @@ class DropoutVariableRate(AbstractGolden):
   num_variables = 1
   deterministic = False
 
-  def forward(self, module):
+  def forward(self, module, x=None):
     tf.random.set_seed(3)
-    x = range_like(self.input_spec, start=1)
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=True)
 
 
 class AbstractRNNGolden(AbstractGolden):
 
-  def forward(self, module):
-    # Small inputs to ensure that tf.tanh and tf.sigmoid don't saturate.
-    x = 1.0 / range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      # Small inputs to ensure that tf.tanh and tf.sigmoid don't saturate.
+      x = 1.0 / range_like(self.input_spec, start=1)
     batch_size = self.input_spec.shape[0]
     prev_state = module.initial_state(batch_size)
     y, next_state = module(x, prev_state)
@@ -473,8 +484,9 @@ class ResNet(AbstractGolden):
   num_variables = 155
   has_side_effects = True
 
-  def forward(self, module):
-    x = range_like(self.input_spec, start=1)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec, start=1)
     return module(x, is_training=True)
 
 
@@ -488,8 +500,9 @@ class VectorQuantizerTest(AbstractGolden):
   # Input can be any shape as long as final dimension is equal to embedding_dim.
   input_spec = tf.TensorSpec([2, 3, 4])
 
-  def forward(self, module):
-    x = range_like(self.input_spec)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec)
     return module(x, is_training=True)
 
   # Numerical results can be quite different on TPU, be a bit more loose here.
@@ -508,8 +521,9 @@ class VectorQuantizerEMATrainTest(AbstractGolden):
   # Input can be any shape as long as final dimension is equal to embedding_dim.
   input_spec = tf.TensorSpec([2, 5])
 
-  def forward(self, module):
-    x = range_like(self.input_spec)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec)
     return module(x, is_training=True)
 
   # Numerical results can be quite different on TPU, be a bit more loose here.
@@ -529,8 +543,9 @@ class VectorQuantizerEMAEvalTest(AbstractGolden):
   # Input can be any shape as long as final dimension is equal to embedding_dim.
   input_spec = tf.TensorSpec([2, 3])
 
-  def forward(self, module):
-    x = range_like(self.input_spec)
+  def forward(self, module, x=None):
+    if x is None:
+      x = range_like(self.input_spec)
     return module(x, is_training=False)
 
   # Numerical results can be quite different on TPU, be a bit more loose here.

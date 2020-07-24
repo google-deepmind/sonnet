@@ -70,7 +70,11 @@ class SavedModelTest(test_utils.TestCase, parameterized.TestCase):
     if golden.deterministic:
       # The output from both the saved and restored model should be close.
       y1 = saved_model.inference(x)
-      tree.map_structure(self.assertAllEqual, y1, y2)
+      # TODO(b/161972382): The restored model doesn't seem to specialize the
+      # graph with implementation selector, so the original model uses CuDNN
+      # calls, whereas the restored model uses the non-specialized graph which
+      # still contains a regular Tanh op.
+      tree.map_structure(self.assertAllClose, y1, y2)
 
     for a, b in zip(v1, v2):
       self.assertEqual(a.name, b.name)

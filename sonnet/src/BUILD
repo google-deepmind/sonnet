@@ -691,7 +691,7 @@ snt_py_test(
 snt_py_library(
     name = "types",
     srcs = ["types.py"],
-    srcs_version = "PY3",
+    srcs_version = "PY2AND3",
     deps = [
         # pip: numpy
         # pip: tensorflow

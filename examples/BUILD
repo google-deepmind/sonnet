@@ -10,6 +10,7 @@ py_binary(
     name = "simple_mnist",
     srcs = ["simple_mnist.py"],
     python_version = "PY3",
+    srcs_version = "PY2AND3",
     deps = [
         # pip: absl:app
         "//sonnet",

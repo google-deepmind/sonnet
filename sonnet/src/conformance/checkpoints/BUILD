@@ -11,7 +11,7 @@ py_binary(
     name = "generate",
     srcs = ["generate.py"],
     python_version = "PY3",
-    srcs_version = "PY2AND3",
+    srcs_version = "PY3",
     deps = [
         # pip: absl:app
         # pip: absl/flags

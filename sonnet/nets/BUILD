@@ -4,8 +4,6 @@ package(default_visibility = ["//sonnet:__pkg__"])
 
 licenses(["notice"])  # Apache 2.0 License
 
-exports_files(["LICENSE"])
-
 snt_py_library(
     name = "nets",
     srcs = [

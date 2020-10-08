@@ -21,11 +21,11 @@ from __future__ import print_function
 
 import abc
 import collections
+from typing import Iterable, Mapping, Optional, Text, Union
 import numpy as np
 import six
 from sonnet.src import types
 import tensorflow as tf
-from typing import Iterable, Mapping, Optional, Text, Union
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -355,7 +355,7 @@ def check_initializers(initializers: Mapping[Text, Initializer],
   if initializers is None:
     return {}
 
-  if not isinstance(initializers, collections.Mapping):
+  if not isinstance(initializers, collections.abc.Mapping):
     raise TypeError("Initializers must be a dict-like object.")
 
   extra_keys = frozenset(initializers) - frozenset(expected_keys)

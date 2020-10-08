@@ -19,17 +19,16 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import collections
-import six
+import collections.abc
+from typing import Optional, Text
 
+import six
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-
 import tensorflow as tf
-from typing import Optional, Text
 
 
 class LayerNorm(base.Module):
@@ -107,7 +106,7 @@ class LayerNorm(base.Module):
       self._axis = axis
     elif isinstance(axis, six.integer_types):
       self._axis = (axis,)
-    elif (isinstance(axis, collections.Iterable) and
+    elif (isinstance(axis, collections.abc.Iterable) and
           all(isinstance(ax, six.integer_types) for ax in axis)):
       self._axis = axis
     else:

@@ -19,17 +19,17 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
-import collections
+import collections.abc
 import functools
 import inspect
 import re
+from typing import Any, Callable, Dict, Generic, Optional, Sequence, Text, Tuple, TypeVar, Union
 
 from absl import logging
 import six
 from sonnet.src import initializers
 import tabulate
 import tensorflow as tf
-from typing import Any, Callable, Dict, Generic, Optional, Sequence, Text, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -40,7 +40,7 @@ def replicate(
     name: Text,
 ) -> Tuple[T]:
   """Replicates entry in `element` `num_times` if needed."""
-  if not isinstance(element, collections.Sequence):
+  if not isinstance(element, collections.abc.Sequence):
     return (element,) * num_times
   elif len(element) == 1:
     return tuple(element * num_times)
@@ -194,7 +194,7 @@ def getfullargspec(func):
   if six.PY2:
     # Assume that we are running with PyType patched Python 2.7 and getargspec
     # will not barf if `func` has type annotations.
-    return inspect.getargspec(func)
+    return inspect.getargspec(func)  # pylint: disable=deprecated-method
   else:
     return inspect.getfullargspec(func)
 

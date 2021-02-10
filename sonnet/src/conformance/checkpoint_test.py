@@ -367,7 +367,7 @@ class ReplicatorCheckpointTest(test_utils.TestCase, parameterized.TestCase):
       result_iter = iter(replicator.experimental_local_results(result))
       first_replica = next(result_iter)
       for next_replica in result_iter:
-        self.assertAllEqual(first_replica, next_replica)
+        tree.map_structure(self.assertAllEqual, first_replica, next_replica)
 
     if not golden.has_side_effects:
       replicator_variables = module.variables

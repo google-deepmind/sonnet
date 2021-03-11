@@ -47,7 +47,7 @@ notebook attached to a GPU or TPU.
 To get started install TensorFlow 2.0 and Sonnet 2:
 
 ```shell
-$ pip install tensorflow-gpu tensorflow-probability
+$ pip install tensorflow tensorflow-probability
 $ pip install dm-sonnet
 ```
 

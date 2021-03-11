@@ -28,7 +28,8 @@ virtualenv -p python3 .
 source bin/activate
 python3 --version
 
-# Run setup.py, this installs the python dependencies
+# Run setup.py, install dependencies first to use pip install
+python3 -m pip install -r requirements.txt
 python3 setup.py install
 
 # CPU count on macos or linux

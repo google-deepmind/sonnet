@@ -19,7 +19,7 @@ Installation
 
 Install Sonnet by running::
 
-    $ pip install tensorflow-gpu
+    $ pip install tensorflow
     $ pip install dm-sonnet
 
 .. toctree::

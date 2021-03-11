@@ -81,10 +81,10 @@ def create(
   """
   # The effective kernel size includes any holes/gaps introduced by the
   # dilation rate. It's equal to kernel_size when rate == 1.
-  effective_kernel_size = map(  # pylint: disable=deprecated-lambda
+  effective_kernel_size = map(
       lambda kernel, rate: (kernel - 1) * rate + 1,
       utils.replicate(kernel, n, "kernel"), utils.replicate(rate, n, "rate"))
-  paddings = map(  # pylint: disable=deprecated-lambda
+  paddings = map(
       lambda x, y: x(y), utils.replicate(padding, n, "padding"),
       effective_kernel_size)
   if channel_index == 1:  # N, C, ...

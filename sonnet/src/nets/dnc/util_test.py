@@ -154,8 +154,8 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     lin_b = linear.Linear(output_size_b, name='lin_b')
     input_a = tf.random.uniform([batch_size, input_size])
     input_b = tf.random.uniform([batch_size, input_size])
-    with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
-                                 'Incompatible shapes'):
+    with self.assertRaisesIncompatibleShapesError(
+        tf.errors.InvalidArgumentError):
       util.apply_linear((input_a, input_b), (lin_a, lin_b))
 
   @parameterized.parameters(

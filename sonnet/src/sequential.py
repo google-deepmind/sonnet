@@ -59,7 +59,7 @@ class Sequential(base.Module):
   """
 
   def __init__(self,
-               layers: Iterable[Callable[..., Any]] = None,
+               layers: Optional[Iterable[Callable[..., Any]]] = None,
                name: Optional[Text] = None):
     super(Sequential, self).__init__(name=name)
     self._layers = list(layers) if layers is not None else []

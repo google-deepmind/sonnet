@@ -167,7 +167,7 @@ class TrainableState(base.Module):
 
   def __init__(self,
                initial_values: types.TensorNest,
-               mask: types.TensorNest = None,
+               mask: Optional[types.TensorNest] = None,
                name: Optional[Text] = None):
     """Constructs a trainable state from initial values.
 
@@ -1121,7 +1121,7 @@ class _RecurrentDropoutWrapper(RNNCore):
   ``lstm_with_recurrent_dropout``.
   """
 
-  def __init__(self, base_core: RNNCore, rates, seed: int = None):
+  def __init__(self, base_core: RNNCore, rates, seed: Optional[int] = None):
     """Wraps a given base RNN core.
 
     Args:

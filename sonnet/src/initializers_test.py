@@ -87,7 +87,7 @@ class ConstantInitializersTest(InitializersTest):
       ("Variable", lambda: tf.Variable([3.0, 2.0, 1.0]), "Variable"),
       ("List", lambda: [], "list"), ("Tuple", lambda: (), "tuple"))
   def testConstantInvalidValue(self, value, value_type):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         TypeError, r"Invalid type for value: .*{}.*".format(value_type)):
       initializers.Constant(value())
 
@@ -104,13 +104,13 @@ class ConstantInitializersTest(InitializersTest):
   @parameterized.parameters(initializers.Zeros, initializers.Ones)
   def testInvalidDataType(self, initializer):
     init = initializer()
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, r"Expected integer or floating point type, got "):
       init([1], dtype=tf.string)
 
   def testInvalidDataTypeConstant(self):
     init = initializers.Constant(0)
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, r"Expected integer or floating point type, got "):
       init([1], dtype=tf.string)
 
@@ -151,7 +151,7 @@ class RandomUniformInitializerTest(InitializersTest):
 
   def testInvalidDataType(self):
     init = initializers.RandomUniform()
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, r"Expected integer or floating point type, got "):
       init([1], dtype=tf.string)
 
@@ -194,8 +194,8 @@ class RandomNormalInitializerTest(InitializersTest):
   @parameterized.parameters(tf.int32, tf.string)
   def testInvalidDataType(self, dtype):
     init = initializers.RandomNormal(0.0, 1.0)
-    with self.assertRaisesRegexp(ValueError,
-                                 r"Expected floating point type, got "):
+    with self.assertRaisesRegex(ValueError,
+                                r"Expected floating point type, got "):
       init([1], dtype=dtype)
 
   def testTFFunction(self):
@@ -238,8 +238,8 @@ class TruncatedNormalInitializerTest(InitializersTest):
   @parameterized.parameters(tf.int32, tf.string)
   def testInvalidDataType(self, dtype):
     init = initializers.TruncatedNormal(0.0, 1.0)
-    with self.assertRaisesRegexp(ValueError,
-                                 r"Expected floating point type, got "):
+    with self.assertRaisesRegex(ValueError,
+                                r"Expected floating point type, got "):
       init([1], dtype=dtype)
 
   def testTFFunction(self):
@@ -283,14 +283,14 @@ class IdentityInitializerTest(InitializersTest):
 
   def testInvalidDataType(self):
     init = initializers.Identity()
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, r"Expected integer or floating point type, got "):
       init([1, 2], dtype=tf.string)
 
   @parameterized.parameters(tf.float32, tf.int32)
   def testInvalidShape(self, dtype):
     init = initializers.Identity()
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "The tensor to initialize must be at least two-dimensional"):
       init([1], dtype=dtype)
@@ -335,13 +335,13 @@ class OrthogonalInitializerTest(InitializersTest):
   @parameterized.parameters(tf.int32, tf.string)
   def testInvalidDataType(self, dtype):
     init = initializers.Orthogonal()
-    with self.assertRaisesRegexp(ValueError,
-                                 r"Expected floating point type, got "):
+    with self.assertRaisesRegex(ValueError,
+                                r"Expected floating point type, got "):
       init([1, 2], dtype=dtype)
 
   def testInvalidShape(self):
     init = initializers.Orthogonal()
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "The tensor to initialize must be at least two-dimensional"):
       init([1], tf.float32)
@@ -515,7 +515,7 @@ class VarianceScalingInitializerTest(InitializersTest):
     expected = init([4, 2], tf.float32)
     self.assertEqual(x.shape, [4, 2])
     if self.primary_device != "TPU":  # Seeds don't work as expected on TPU
-      self.assertAllEqual(expected, x)
+      self.assertAllClose(expected, x)
 
   @parameterized.parameters(
       itertools.product(["fan_in", "fan_out", "fan_avg"],
@@ -536,13 +536,13 @@ class VarianceScalingInitializerTest(InitializersTest):
   @parameterized.parameters(tf.int32, tf.string)
   def testInvalidDataType(self, dtype):
     init = initializers.VarianceScaling()
-    with self.assertRaisesRegexp(ValueError,
-                                 r"Expected floating point type, got "):
+    with self.assertRaisesRegex(ValueError,
+                                r"Expected floating point type, got "):
       init([1, 2], dtype=dtype)
 
   def testCheckInitializersInvalidType(self):
-    with self.assertRaisesRegexp(TypeError,
-                                 "Initializers must be a dict-like object."):
+    with self.assertRaisesRegex(TypeError,
+                                "Initializers must be a dict-like object."):
       initializers.check_initializers([1, 2, 3], ("a"))
 
   def testCheckInitalizersEmpty(self):
@@ -558,7 +558,7 @@ class VarianceScalingInitializerTest(InitializersTest):
     }, keys)
 
   def testCheckInitalizersInvalid(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         KeyError,
         r"Invalid initializer keys 'a', initializers can only be provided for"):
       initializers.check_initializers({

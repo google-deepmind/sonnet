@@ -19,6 +19,8 @@ from __future__ import division
 # from __future__ import google_type_annotations
 from __future__ import print_function
 
+from typing import Optional, Text, Tuple
+
 from sonnet.src import batch_norm
 from sonnet.src import initializers
 from sonnet.src import metrics
@@ -26,7 +28,6 @@ from sonnet.src import once
 from sonnet.src import types
 
 import tensorflow as tf
-from typing import Optional, Text, Tuple
 
 
 class CrossReplicaBatchNorm(batch_norm.BaseBatchNorm):

@@ -5,8 +5,8 @@ package(default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpacka
 licenses(["notice"])  # Apache 2.0 License
 
 snt_py_library(
-    name = "batch_norm",
-    srcs = ["batch_norm.py"],
+    name = "distributed_batch_norm",
+    srcs = ["distributed_batch_norm.py"],
     deps = [
         "//sonnet/src:base",
         "//sonnet/src:batch_norm",
@@ -21,10 +21,10 @@ snt_py_library(
 )
 
 snt_py_test(
-    name = "batch_norm_test",
-    srcs = ["batch_norm_test.py"],
+    name = "distributed_batch_norm_test",
+    srcs = ["distributed_batch_norm_test.py"],
     deps = [
-        ":batch_norm",
+        ":distributed_batch_norm",
         ":replicator",
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",

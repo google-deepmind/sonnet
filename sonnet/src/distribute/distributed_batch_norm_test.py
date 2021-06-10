@@ -22,7 +22,7 @@ from absl import logging
 
 from absl.testing import parameterized
 from sonnet.src import test_utils
-from sonnet.src.distribute import batch_norm
+from sonnet.src.distribute import distributed_batch_norm as batch_norm
 from sonnet.src.distribute import replicator
 import tensorflow as tf
 

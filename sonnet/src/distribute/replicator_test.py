@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 from absl import logging
 from absl.testing import parameterized
 from sonnet.src import initializers
@@ -152,6 +154,9 @@ class ReplicatorTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(True, False)
   def test_falls_back_to_graph(self, autograph):
+    if os.environ.get("GITHUB_ACTIONS", "") == "true" and autograph:
+      self.skipTest("Autograph generated code has syntax error.")
+
     init = FailsInEagerMode()
     value = tf.function(
         snt_replicator.create_variables_eagerly(

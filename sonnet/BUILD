@@ -49,7 +49,7 @@ snt_py_library(
     name = "distribute",
     srcs = ["distribute.py"],
     deps = [
-        "//sonnet/src/distribute:batch_norm",
+        "//sonnet/src/distribute:distributed_batch_norm",
         "//sonnet/src/distribute:replicator",
     ],
 )

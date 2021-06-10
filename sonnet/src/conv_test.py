@@ -43,7 +43,7 @@ def foo(i):
 
 class ConvTest(test_utils.TestCase, parameterized.TestCase):
 
-  @mock.patch("__main__.foo", mock.MagicMock(return_value=[0, 0]))
+  @mock.patch(__name__ + ".foo", mock.MagicMock(return_value=[0, 0]))
   def testPaddingFunctionReached(self):
     self.reached = False
 
@@ -64,7 +64,7 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(0, 4)
   def testIncorrectN(self, n):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "We only support convoltion operations for num_spatial_dims=1, 2 or 3"):
       conv.ConvND(
@@ -74,7 +74,7 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
           data_format="NHWC")
 
   def testInitializerKeysInvalidWithoutBias(self):
-    with self.assertRaisesRegexp(ValueError, "b_init must be None"):
+    with self.assertRaisesRegex(ValueError, "b_init must be None"):
       conv.ConvND(
           num_spatial_dims=2,
           output_channels=1,

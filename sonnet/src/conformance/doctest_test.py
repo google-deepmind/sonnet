@@ -25,6 +25,7 @@ from absl.testing import parameterized
 import sonnet as snt
 from sonnet.src import test_utils
 import tensorflow as tf
+import tree
 
 
 class DoctestTest(test_utils.TestCase, parameterized.TestCase):
@@ -62,7 +63,8 @@ class DoctestTest(test_utils.TestCase, parameterized.TestCase):
         optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE,
         extraglobs={
             "snt": snt,
-            "tf": tf
+            "tf": tf,
+            "tree": tree,
         })
     if num_attempted == 0:
       self.skipTest("No doctests in %s" % module.__name__)

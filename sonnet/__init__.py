@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from sonnet import distribute
+from sonnet import functional
 from sonnet import initializers
 from sonnet import mixed_precision
 from sonnet import nets
@@ -133,6 +134,7 @@ __all__ = (
     "distribute",
     "dynamic_unroll",
     "format_variables",
+    "functional",
     "initializers",
     "log_variables",
     "lstm_with_recurrent_dropout",

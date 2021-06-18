@@ -39,3 +39,17 @@ snt_py_test(
         # pip: tensorflow
     ],
 )
+
+py_binary(
+    name = "functional_mlp_mnist",
+    srcs = ["functional_mlp_mnist.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        # pip: absl:app
+        # pip: absl/logging
+        "//sonnet",
+        # pip: tensorflow
+        # pip: tensorflow_datasets
+    ],
+)

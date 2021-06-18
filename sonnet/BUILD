@@ -12,6 +12,7 @@ snt_py_library(
     visibility = ["//visibility:public"],
     deps = [
         ":distribute",
+        ":functional",
         ":initializers",
         ":mixed_precision",
         ":optimizers",
@@ -51,6 +52,17 @@ snt_py_library(
     deps = [
         "//sonnet/src/distribute:distributed_batch_norm",
         "//sonnet/src/distribute:replicator",
+    ],
+)
+
+snt_py_library(
+    name = "functional",
+    srcs = ["functional.py"],
+    deps = [
+        ":optimizers",
+        "//sonnet/src/functional:haiku",
+        "//sonnet/src/functional:jax",
+        "//sonnet/src/functional:optimizers",
     ],
 )
 

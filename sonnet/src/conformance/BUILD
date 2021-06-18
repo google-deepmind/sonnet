@@ -76,6 +76,7 @@ snt_py_test(
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 

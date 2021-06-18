@@ -14,18 +14,12 @@
 # ============================================================================
 """Sonnet implementation of VQ-VAE https://arxiv.org/abs/1711.00937."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import moving_averages
 from sonnet.src import types
 
 import tensorflow as tf
-from typing import Text
 
 
 class VectorQuantizer(base.Module):
@@ -58,7 +52,7 @@ class VectorQuantizer(base.Module):
                num_embeddings: int,
                commitment_cost: types.FloatLike,
                dtype: tf.DType = tf.float32,
-               name: Text = 'vector_quantizer'):
+               name: str = 'vector_quantizer'):
     """Initializes a VQ-VAE module.
 
     Args:
@@ -70,7 +64,7 @@ class VectorQuantizer(base.Module):
       dtype: dtype for the embeddings variable, defaults to tf.float32.
       name: name of the module.
     """
-    super(VectorQuantizer, self).__init__(name=name)
+    super().__init__(name=name)
     self.embedding_dim = embedding_dim
     self.num_embeddings = num_embeddings
     self.commitment_cost = commitment_cost
@@ -202,7 +196,7 @@ class VectorQuantizerEMA(base.Module):
       dtype: dtype for the embeddings variable, defaults to tf.float32.
       name: name of the module.
     """
-    super(VectorQuantizerEMA, self).__init__(name=name)
+    super().__init__(name=name)
     self.embedding_dim = embedding_dim
     self.num_embeddings = num_embeddings
     if not 0 <= decay <= 1:

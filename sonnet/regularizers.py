@@ -14,10 +14,6 @@
 # ============================================================================
 """Regularizers."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src.regularizers import L1
 from sonnet.src.regularizers import L2
 from sonnet.src.regularizers import OffDiagonalOrthogonal

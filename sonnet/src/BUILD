@@ -13,7 +13,6 @@ snt_py_library(
         ":utils",
         # pip: six
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -23,7 +22,9 @@ snt_py_test(
     deps = [
         ":base",
         ":test_utils",
+        # pip: absl/testing:parameterized
         # pip: numpy
+        # pip: six
         # pip: tensorflow
         # pip: wrapt
     ],
@@ -35,7 +36,6 @@ snt_py_library(
     deps = [
         # pip: tensorflow
         # pip: tree
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -45,9 +45,7 @@ snt_py_test(
     deps = [
         ":build",
         ":test_utils",
-        # pip: absl/testing:parameterized
         # pip: tensorflow
-        # pip: tree
     ],
 )
 
@@ -124,7 +122,6 @@ snt_py_library(
         ":pad",
         ":utils",
         # pip: numpy
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -134,8 +131,10 @@ snt_py_test(
     srcs = ["conv_test.py"],
     deps = [
         ":conv",
+        ":initializers",
         ":test_utils",
         # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
     ],
 )
@@ -158,8 +157,10 @@ snt_py_test(
     srcs = ["depthwise_conv_test.py"],
     deps = [
         ":depthwise_conv",
+        ":initializers",
         ":test_utils",
         # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
     ],
 )
@@ -183,8 +184,10 @@ snt_py_test(
     srcs = ["conv_transpose_test.py"],
     deps = [
         ":conv_transpose",
+        ":initializers",
         ":test_utils",
         # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
     ],
 )
@@ -197,7 +200,6 @@ snt_py_library(
         # pip: contextlib2
         # pip: tensorflow
         # pip: tree
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -263,7 +265,6 @@ snt_py_library(
         ":once",
         ":utils",
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -302,6 +303,7 @@ snt_py_test(
         ":initializers",
         ":test_utils",
         # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
     ],
 )
@@ -387,6 +389,7 @@ snt_py_test(
         ":recurrent",
         ":test_utils",
         # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
         # pip: tree
     ],
@@ -439,7 +442,6 @@ snt_py_library(
         ":once",
         ":types",
         ":utils",
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -466,7 +468,6 @@ snt_py_library(
         ":once",
         ":types",
         ":utils",
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -515,7 +516,6 @@ snt_py_library(
         # pip: six
         # pip: tabulate
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -539,7 +539,6 @@ snt_py_library(
     deps = [
         # pip: absl/testing:parameterized
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -607,6 +606,7 @@ snt_py_test(
         ":embed",
         ":initializers",
         ":test_utils",
+        # pip: absl/testing:parameterized
         # pip: tensorflow
     ],
 )
@@ -619,7 +619,6 @@ snt_py_library(
         # pip: numpy
         # pip: tensorflow
         # pip: tree
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -630,8 +629,9 @@ snt_py_test(
         ":base",
         ":batch_apply",
         ":test_utils",
+        # pip: absl/testing:parameterized
+        # pip: numpy
         # pip: tensorflow
-        # pip: wrapt
     ],
 )
 
@@ -676,7 +676,6 @@ snt_py_test(
     name = "parallel_linear_test",
     srcs = ["parallel_linear_test.py"],
     deps = [
-        ":base",
         ":linear",
         ":parallel_linear",
         ":test_utils",

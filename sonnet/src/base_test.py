@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.base."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import abc
 
 from absl.testing import parameterized
@@ -125,12 +121,12 @@ class TestModuleNaming(tf.test.TestCase):
   def test_ctor_no_name_scope_no_super(self):
     msg = ("Constructing a snt.Module without calling the super constructor is "
            "not supported")
-    with self.assertRaisesRegexp(ValueError, msg):
+    with self.assertRaisesRegex(ValueError, msg):
       CtorNoNameScopeNoSuper()
 
   def test_invalid_name(self):
     msg = ".* is not a valid module name"
-    with self.assertRaisesRegexp(ValueError, msg):
+    with self.assertRaisesRegex(ValueError, msg):
       base.Module(name="$Foo")
 
   def test_modules_not_numbered_in_eager(self):
@@ -184,7 +180,7 @@ class TestModuleNaming(tf.test.TestCase):
 
       def __getattr__(self, name):
         scope_names.append((name, get_name_scope()))
-        return super(GetAttrModule, self).__getattr__(name)
+        return super().__getattr__(name)
 
     mod = GetAttrModule()
     with self.assertRaises(AttributeError):
@@ -198,7 +194,7 @@ class TestModuleNaming(tf.test.TestCase):
 
       def __getattribute__(self, name):
         scope_names.append((name, get_name_scope()))
-        return super(GetAttributeModule, self).__getattribute__(name)
+        return super().__getattribute__(name)
 
     mod = GetAttributeModule()
     with self.assertRaises(AttributeError):
@@ -265,7 +261,7 @@ class AutoReprTest(tf.test.TestCase):
     class FooModule(base.Module):
 
       def __init__(self, a=((-1., -1.))):
-        super(FooModule, self).__init__()
+        super().__init__()
 
     # auto_repr tests default values for equality. In numpy (and TF2) equality
     # is tested elementwise so the return value of `==` is an ndarray which we
@@ -304,7 +300,7 @@ class AbcTest(tf.test.TestCase):
 
   def testAbstract(self):
     msg = "Can't instantiate .* abstract methods"
-    with self.assertRaisesRegexp(TypeError, msg):
+    with self.assertRaisesRegex(TypeError, msg):
       AbstractModule()  # pylint: disable=abstract-class-instantiated
 
   def testConcrete(self):
@@ -395,7 +391,7 @@ class ErrorModule(base.Module):
 
   def __init__(self, call_super, raise_in_constructor=True):
     if call_super:
-      super(ErrorModule, self).__init__()
+      super().__init__()
     if raise_in_constructor:
       raise ErrorModuleError("Deliberate error!")
 
@@ -406,7 +402,7 @@ class ErrorModule(base.Module):
 class RecursiveModule(base.Module):
 
   def __init__(self, depth, trainable=True):
-    super(RecursiveModule, self).__init__(name="badger")
+    super().__init__(name="badger")
     self.child = None
     if depth > 1:
       self.child = RecursiveModule(depth - 1, trainable=trainable)
@@ -433,7 +429,7 @@ class ConcreteModule(AbstractModule):
 class TreeModule(base.Module):
 
   def __init__(self, name=None):
-    super(TreeModule, self).__init__(name=name)
+    super().__init__(name=name)
     self._leaves = []
 
   def new_leaf(self, name=None):
@@ -476,12 +472,12 @@ class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
   def test_not_calling_super_constructor(self):
     msg = ("Constructing a snt.Module without calling the super constructor is "
            "not supported")
-    with self.assertRaisesRegexp(ValueError, msg):
+    with self.assertRaisesRegex(ValueError, msg):
       DoesNotCallSuperConstructorModule()
 
   def test_calls_method_before_super(self):
     msg = "super constructor must be called before any other methods"
-    with self.assertRaisesRegexp(AttributeError, msg):
+    with self.assertRaisesRegex(AttributeError, msg):
       CallsMethodBeforeSuperConstructorModule(allowed_method=False)
 
   def test_annotated_method_is_allowed(self):
@@ -495,7 +491,7 @@ class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
 
     mod = MyModule()
     err = "MyModule.* does not currently contain any {}".format(property_name)
-    with self.assertRaisesRegexp(ValueError, err):
+    with self.assertRaisesRegex(ValueError, err):
       getattr(mod, property_name)
 
   @parameterized.parameters("trainable_variables", "variables")
@@ -513,11 +509,11 @@ class CommonErrorsTest(test_utils.TestCase, parameterized.TestCase):
 class NoopModule(base.Module):
 
   def __init__(self, a=None):
-    super(NoopModule, self).__init__()
+    super().__init__()
     self.a = a
 
 
-class RaisesOnEquality(object):
+class RaisesOnEquality:
 
   equality_checked = False
 
@@ -553,7 +549,7 @@ class CtorNoNameScope(base.Module):
 
   @base.no_name_scope
   def __init__(self):
-    super(CtorNoNameScope, self).__init__()
+    super().__init__()
     self.ctor_name_scope = get_name_scope()
     self.w = tf.Variable(1., name="w")
 
@@ -568,7 +564,7 @@ class CtorNoNameScopeNoSuper(base.Module):
 class PropertyModule(base.Module):
 
   def __init__(self):
-    super(PropertyModule, self).__init__()
+    super().__init__()
     self._setter_scope_name = None
 
   @property
@@ -606,7 +602,7 @@ class CallsMethodBeforeSuperConstructorModule(base.Module):
       self.no_name_scope()
     else:
       self.with_name_scope()
-    super(CallsMethodBeforeSuperConstructorModule, self).__init__()
+    super().__init__()
 
   @base.no_name_scope
   def no_name_scope(self):
@@ -620,8 +616,8 @@ class CustomMetaclass(type):
 
   TAG = "__custom_metaclass__"
 
-  def __new__(mcs, name, bases, clsdict):
-    new_type = super(CustomMetaclass, mcs).__new__(mcs, name, bases, clsdict)
+  def __new__(cls, name, bases, clsdict):
+    new_type = super(CustomMetaclass, cls).__new__(cls, name, bases, clsdict)
     setattr(new_type, CustomMetaclass.TAG, True)
     return new_type
 
@@ -630,8 +626,8 @@ class CombiningMetaclass(base.ModuleMetaclass, CustomMetaclass):
 
   TAG = "__combining_metaclass__"
 
-  def __new__(mcs, name, bases, clsdict):
-    new_type = super(CombiningMetaclass, mcs).__new__(mcs, name, bases, clsdict)
+  def __new__(cls, name, bases, clsdict):
+    new_type = super(CombiningMetaclass, cls).__new__(cls, name, bases, clsdict)  # pylint: disable=too-many-function-args
     setattr(new_type, CombiningMetaclass.TAG, True)
     return new_type
 
@@ -656,13 +652,13 @@ class CustomMetaclassTest(tf.test.TestCase):
 class TakesSubmodules(base.Module):
 
   def __init__(self, submodules, name=None):
-    super(TakesSubmodules, self).__init__(name=name)
+    super().__init__(name=name)
 
 
 class WildcardInit(base.Module):
 
   def __init__(self, a, b, *args, **kwargs):
-    super(WildcardInit, self).__init__()
+    super().__init__()
     del args, kwargs
 
 

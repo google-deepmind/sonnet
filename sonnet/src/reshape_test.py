@@ -13,9 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Tests for sonnet.v2.src.reshape."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from absl.testing import parameterized
 import numpy as np
@@ -46,8 +43,8 @@ class ReshapeTest(test_utils.TestCase, parameterized.TestCase):
 
   def testInvalid_negativeSize(self):
     mod = reshape.Reshape(output_shape=[1, -2])
-    with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
-                                 "[Ss]ize 2 must be non-negative, not -2"):
+    with self.assertRaisesRegex(tf.errors.InvalidArgumentError,
+                                "[Ss]ize 2 must be non-negative, not -2"):
       mod(tf.ones([1, 2, 3]))
 
   def testInvalid_type(self):
@@ -62,7 +59,7 @@ class ReshapeTest(test_utils.TestCase, parameterized.TestCase):
     output_size = 8 * 2 * 3 * 4
     msg = ("Input to reshape is a tensor with %d values, "
            "but the requested shape has %d" % (input_size, output_size))
-    with self.assertRaisesRegexp(tf.errors.InvalidArgumentError, msg):
+    with self.assertRaisesRegex(tf.errors.InvalidArgumentError, msg):
       mod(tf.ones([8, 2, 2, 4]))
 
   def testInferShape(self):
@@ -127,13 +124,13 @@ class ReshapeTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(mod_r.name, "%s_reversed" % mod.name)
 
   def testInvalidPreserveDimsError(self):
-    with self.assertRaisesRegexp(ValueError, "preserve_dims"):
+    with self.assertRaisesRegex(ValueError, "preserve_dims"):
       reshape.Reshape((-1,), preserve_dims=0)
 
   def testBuildDimError(self):
     mod = reshape.Reshape((-1,), preserve_dims=2)
     input_tensor = tf.ones([50])
-    with self.assertRaisesRegexp(ValueError, "preserve_dims"):
+    with self.assertRaisesRegex(ValueError, "preserve_dims"):
       mod(input_tensor)
 
   @parameterized.named_parameters(
@@ -230,7 +227,7 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     in_shape = [10, 2, 3, 4]
     inputs = tf.ones(in_shape)
     mod = reshape.Flatten(preserve_dims=preserve_dims)
-    with self.assertRaisesRegexp(ValueError, "Input tensor has 4 dimensions"):
+    with self.assertRaisesRegex(ValueError, "Input tensor has 4 dimensions"):
       _ = mod(inputs)
 
   def testFlattenWithZeroDim(self):
@@ -239,13 +236,13 @@ class FlattenTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(output.shape, [1, 0])
 
   def testInvalidFlattenFromError(self):
-    with self.assertRaisesRegexp(ValueError, "preserve_dims"):
+    with self.assertRaisesRegex(ValueError, "preserve_dims"):
       reshape.Flatten(preserve_dims=0)
 
   def testBuildDimError(self):
     mod = reshape.Flatten(preserve_dims=2)
     input_tensor = tf.ones([50])
-    with self.assertRaisesRegexp(ValueError, "should have at least as many as"):
+    with self.assertRaisesRegex(ValueError, "should have at least as many as"):
       mod(input_tensor)
 
   @parameterized.parameters([1, 8])

@@ -8,12 +8,12 @@ py_binary(
     name = "simple_mnist",
     srcs = ["simple_mnist.py"],
     python_version = "PY3",
+    srcs_version = "PY3",
     deps = [
         # pip: absl:app
         "//sonnet",
         # pip: tensorflow
         # pip: tensorflow_datasets
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -25,7 +25,6 @@ snt_py_library(
         "//sonnet",
         # pip: tensorflow
         # pip: tensorflow_datasets
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 

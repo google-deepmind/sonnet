@@ -14,11 +14,6 @@
 # ============================================================================
 """Test utilities for Sonnet 2."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import functools
 import inspect
 import itertools
@@ -26,10 +21,10 @@ import os
 import sys
 import threading
 import types
+from typing import Sequence, Tuple, Type, TypeVar
 
 from absl.testing import parameterized
 import tensorflow as tf
-from typing import Sequence, Text, Tuple, Type, TypeVar
 
 Module = TypeVar("Module")
 
@@ -43,7 +38,7 @@ class TestCase(tf.test.TestCase):
   ENTER_PRIMARY_DEVICE = True
 
   def setUp(self):
-    super(TestCase, self).setUp()
+    super().setUp()
 
     # Enable autograph strict mode - any autograph errors will trigger an error
     # rather than falling back to no conversion.
@@ -66,7 +61,7 @@ class TestCase(tf.test.TestCase):
       self._device.__enter__()
 
   def tearDown(self):
-    super(TestCase, self).tearDown()
+    super().tearDown()
     if self.ENTER_PRIMARY_DEVICE:
       self._device.__exit__(*sys.exc_info())
       del self._device
@@ -117,7 +112,7 @@ def find_all_sonnet_modules(
 
 
 def find_sonnet_python_modules(
-    root_module: types.ModuleType,) -> Sequence[Tuple[Text, types.ModuleType]]:
+    root_module: types.ModuleType,) -> Sequence[Tuple[str, types.ModuleType]]:
   """Returns `(name, module)` for all Sonnet submodules under `root_module`."""
   modules = set([(root_module.__name__, root_module)])
   visited = set()
@@ -164,6 +159,6 @@ def combined_named_parameters(*parameters):
       functools.reduce(combine, r) for r in itertools.product(*parameters))
 
 
-def named_bools(name) -> Sequence[Tuple[Text, bool]]:
+def named_bools(name) -> Sequence[Tuple[str, bool]]:
   """Returns a pair of booleans suitable for use with ``named_parameters``."""
   return (name, True), ("not_{}".format(name), False)

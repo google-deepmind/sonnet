@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.utils."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import initializers
@@ -68,7 +64,7 @@ class ReplicateTest(test_utils.TestCase, parameterized.TestCase):
 
   def testIncorrectLength(self):
     v = [2, 2]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         TypeError,
         r"must be a scalar or sequence of length 1 or sequence of length 3"):
       utils.replicate(v, 3, "value")
@@ -78,7 +74,7 @@ class DecoratorTest(test_utils.TestCase):
 
   def test_callable_object(self):
 
-    class MyObject(object):
+    class MyObject:
 
       def __call__(self, x, y):
         return x**y
@@ -109,7 +105,7 @@ class DecoratorTest(test_utils.TestCase):
       self.assertIs(instance, o)
       return 2 * wrapped(*args, **kwargs)
 
-    class MyObject(object):
+    class MyObject:
 
       @double
       def f(self, x, y):
@@ -125,7 +121,7 @@ class DecoratorTest(test_utils.TestCase):
       self.assertIs(instance, o)
       return 2 * wrapped(*args, **kwargs)
 
-    class MyObject(object):
+    class MyObject:
 
       def f(self, x, y):
         return x**y
@@ -146,7 +142,7 @@ class ChannelIndexTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters("foo", "NCHC", "BTDTD", "chanels_first", "NHW")
   def test_invalid_strings(self, data_format):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "Unable to extract channel information from '{}'.".format(data_format)):
       utils.get_channel_index(data_format)
@@ -169,14 +165,14 @@ class AssertRankTest(test_utils.TestCase, parameterized.TestCase):
   def test_invalid_rank(self, rank):
     x = tf.ones([1] * rank)
     # pylint: disable=g-error-prone-assert-raises
-    with self.assertRaisesRegexp(ValueError, "must have rank %d" % (rank + 1)):
+    with self.assertRaisesRegex(ValueError, "must have rank %d" % (rank + 1)):
       utils.assert_rank(x, rank + 1)
 
-    with self.assertRaisesRegexp(ValueError, "must have rank %d" % (rank - 1)):
+    with self.assertRaisesRegex(ValueError, "must have rank %d" % (rank - 1)):
       utils.assert_rank(x, rank - 1)
 
-    with self.assertRaisesRegexp(ValueError,
-                                 "must have rank >= %d" % (rank + 1)):
+    with self.assertRaisesRegex(ValueError,
+                                "must have rank >= %d" % (rank + 1)):
       utils.assert_minimum_rank(x, rank + 1)
     # pylint: enable=g-error-prone-assert-raises
 
@@ -296,7 +292,7 @@ class FormatVariablesTest(test_utils.TestCase):
       utils.log_variables([v2, v1])
 
 
-class NotHashable(object):
+class NotHashable:
 
   def __hash__(self):
     raise ValueError("Not hashable")

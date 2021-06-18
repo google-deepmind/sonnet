@@ -9,6 +9,7 @@ snt_py_library(
     srcs = ["haiku.py"],
     deps = [
         ":utils",
+        # pip: contextlib2
         # pip: tensorflow
     ],
 )
@@ -72,6 +73,7 @@ snt_py_test(
     name = "optimizers_test",
     srcs = ["optimizers_test.py"],
     deps = [
+        ":haiku",
         ":optimizers",
         # pip: absl/testing:parameterized
         "//sonnet",

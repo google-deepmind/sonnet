@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.embed."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 from sonnet.src import embed
 from sonnet.src import initializers

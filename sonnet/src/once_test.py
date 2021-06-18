@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.once."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import pickle
 
 from absl.testing import absltest
@@ -41,7 +37,7 @@ class OnceTest(parameterized.TestCase):
 
   def test_always_returns_none(self):
     f = once.once(lambda: "Hello, world!")
-    with self.assertRaisesRegexp(ValueError, "snt.once .* cannot return"):
+    with self.assertRaisesRegex(ValueError, "snt.once .* cannot return"):
       f()
 
   def test_does_not_cache_on_error(self):
@@ -67,7 +63,7 @@ class OnceTest(parameterized.TestCase):
 
   def test_method_does_not_cache_on_error(self):
 
-    class Dummy(object):
+    class Dummy:
 
       @once.once
       def f(self):
@@ -119,7 +115,7 @@ def nop():
   pass
 
 
-class NoOpCallable(object):
+class NoOpCallable:
 
   def nop(self):
     pass
@@ -128,7 +124,7 @@ class NoOpCallable(object):
     pass
 
 
-class Counter(object):
+class Counter:
   call_count = 0
 
   @once.once

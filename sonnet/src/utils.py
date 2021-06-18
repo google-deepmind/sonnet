@@ -14,16 +14,11 @@
 # ============================================================================
 """Utils for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import collections.abc
 import functools
 import inspect
 import re
-from typing import Any, Callable, Dict, Generic, Optional, Sequence, Text, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Optional, Sequence, Tuple, TypeVar, Union
 
 from absl import logging
 import six
@@ -37,7 +32,7 @@ T = TypeVar("T")
 def replicate(
     element: Union[T, Sequence[T]],
     num_times: int,
-    name: Text,
+    name: str,
 ) -> Tuple[T]:
   """Replicates entry in `element` `num_times` if needed."""
   if not isinstance(element, collections.abc.Sequence):
@@ -57,8 +52,7 @@ def _is_object(f: Any) -> bool:
 
 # TODO(b/123870292) Remove this and use wrapt.decorator when supported by TF.
 def decorator(
-    decorator_fn: Callable[[T, Any, Sequence[Any], Dict[Text, Any]],
-                           Any],) -> T:
+    decorator_fn: Callable[[T, Any, Sequence[Any], Dict[str, Any]], Any],) -> T:
   """Returns a wrapt style decorator."""
 
   @functools.wraps(decorator_fn)
@@ -104,7 +98,7 @@ _SPATIAL_CHANNELS_LAST = re.compile("^N[^C]*C$")
 _SEQUENTIAL = re.compile("^((BT)|(TB))[^D]*D$")
 
 
-def get_channel_index(data_format: Text) -> int:
+def get_channel_index(data_format: str) -> int:
   """Returns the channel index when given a valid data format.
 
   Args:
@@ -202,7 +196,7 @@ def getfullargspec(func):
 def variable_like(inputs: Union[tf.Tensor, tf.Variable],
                   initializer: initializers.Initializer = initializers.Zeros(),
                   trainable: Optional[bool] = None,
-                  name: Optional[Text] = None) -> tf.Variable:
+                  name: Optional[str] = None) -> tf.Variable:
   """Creates a new variable with the same shape/dtype/device as the input."""
   if trainable is None:
     trainable = getattr(inputs, "trainable", None)
@@ -213,7 +207,7 @@ def variable_like(inputs: Union[tf.Tensor, tf.Variable],
     return tf.Variable(initial_value, trainable=trainable, name=name)
 
 
-def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
+def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> str:
   """Renders the given shape/dtype as a short specification."""
 
   format_map = {
@@ -243,7 +237,7 @@ def _render_spec(shape: tf.TensorShape, dtype: tf.DType) -> Text:
       shape=",".join(str(d) for d in shape))
 
 
-def _simple_device(var: tf.Variable) -> Text:
+def _simple_device(var: tf.Variable) -> str:
   device = tf.DeviceSpec.from_string(var.device)
   if device.job == "localhost" and device.replica == 0 and device.task == 0:
     if device.device_index == 0:
@@ -260,7 +254,7 @@ def _name_scope_then_rank(var: tf.Variable):
 
 
 def format_variables(variables: Sequence[tf.Variable],
-                     tablefmt: Text = "orgtbl") -> Text:
+                     tablefmt: str = "orgtbl") -> str:
   """Takes a collection of variables and formats it as a table."""
   rows = []
   for var in sorted(variables, key=_name_scope_then_rank):

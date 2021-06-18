@@ -14,10 +14,6 @@
 # ============================================================================
 """Initializers."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src.initializers import Constant
 from sonnet.src.initializers import Identity
 from sonnet.src.initializers import Initializer

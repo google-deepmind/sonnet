@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.recurrent."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import itertools
 import unittest
 
@@ -33,7 +29,7 @@ import tree
 class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(VanillaRNNTest, self).setUp()
+    super().setUp()
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -84,7 +80,7 @@ class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
 class DeepRNNTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(DeepRNNTest, self).setUp()
+    super().setUp()
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -150,16 +146,16 @@ class DeepRNNTest(test_utils.TestCase, parameterized.TestCase):
                      tf.TensorShape([self.batch_size, 2 * self.hidden_size]))
 
   def testWithConnectionsValidation(self):
-    with self.assertRaisesRegexp(ValueError, "to be instances of RNNCore"):
+    with self.assertRaisesRegex(ValueError, "to be instances of RNNCore"):
       recurrent.deep_rnn_with_skip_connections([tf.tanh])
-    with self.assertRaisesRegexp(ValueError, "to be instances of RNNCore"):
+    with self.assertRaisesRegex(ValueError, "to be instances of RNNCore"):
       recurrent.deep_rnn_with_residual_connections([tf.tanh])
 
 
 class LSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(LSTMTest, self).setUp()
+    super().setUp()
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -258,7 +254,7 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
 class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(UnrolledLSTMTest, self).setUp()
+    super().setUp()
 
     self.batch_size = 3
     self.input_size = 2
@@ -352,7 +348,7 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(ConvNDLSTMTest, self).setUp()
+    super().setUp()
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -446,7 +442,7 @@ class ConvNDLSTMTest(test_utils.TestCase, parameterized.TestCase):
 class GRUTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(GRUTest, self).setUp()
+    super().setUp()
     self.batch_size = 3
     self.input_size = 2
     self.hidden_size = 16
@@ -504,7 +500,7 @@ def expit(x):
 class CuDNNGRUTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(CuDNNGRUTest, self).setUp()
+    super().setUp()
 
     if self.primary_device != "GPU":
       self.skipTest("Only available on GPU")
@@ -585,7 +581,7 @@ class Counter(recurrent.RNNCore):
   """
 
   def __init__(self, hidden_size, name=None):
-    super(Counter, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     self._built = False
 
@@ -607,7 +603,7 @@ class Replicate(recurrent.RNNCore):
   """Replicate the output of the base RNN core."""
 
   def __init__(self, base_core, n, name=None):
-    super(Replicate, self).__init__(name)
+    super().__init__(name)
     self._base_core = base_core
     self._n = n
 
@@ -688,7 +684,7 @@ class TrainableStateTest(test_utils.TestCase, parameterized.TestCase):
 class UnrollTest(test_utils.TestCase, parameterized.TestCase):
 
   def setUp(self):
-    super(UnrollTest, self).setUp()
+    super().setUp()
 
     self.num_steps = 5
     self.batch_size = 3
@@ -856,7 +852,7 @@ class UnrollTest(test_utils.TestCase, parameterized.TestCase):
 class UnknownStepsUnrollTest(test_utils.TestCase):
 
   def setUp(self):
-    super(UnknownStepsUnrollTest, self).setUp()
+    super().setUp()
 
     self.num_steps = 5
     self.batch_size = 3

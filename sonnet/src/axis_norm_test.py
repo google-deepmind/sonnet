@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.axis_norm."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import axis_norm
@@ -130,7 +126,7 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters("NHW", "HWC", "channel_last")
   def testInvalidDataFormat(self, data_format):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "Unable to extract channel information from '{}'.".format(data_format)):
       axis_norm.LayerNorm(
@@ -152,12 +148,12 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.named_parameters(("String", "foo"), ("ListString", ["foo"]))
   def testInvalidAxis(self, axis):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "`axis` should be an int, slice or iterable of ints."):
       axis_norm.LayerNorm(axis, create_scale=False, create_offset=False)
 
   def testNoScaleAndInitProvided(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "Cannot set `scale_init` if `create_scale=False`."):
       axis_norm.LayerNorm(
           3,
@@ -166,7 +162,7 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
           scale_init=initializers.Ones())
 
   def testNoOffsetBetaInitProvided(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "Cannot set `offset_init` if `create_offset=False`."):
       axis_norm.LayerNorm(
           3,
@@ -177,14 +173,14 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
   def testCreateScaleAndScaleProvided(self):
     layer = axis_norm.LayerNorm([2], create_scale=True, create_offset=False)
 
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "Cannot pass `scale` at call time if `create_scale=True`."):
       layer(tf.ones([2, 3, 4]), scale=tf.ones([4]))
 
   def testCreateOffsetAndOffsetProvided(self):
     layer = axis_norm.LayerNorm([2], create_offset=True, create_scale=False)
 
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "Cannot pass `offset` at call time if `create_offset=True`."):
       layer(tf.ones([2, 3, 4]), offset=tf.ones([4]))
@@ -214,7 +210,7 @@ class LayerNormTest(test_utils.TestCase, parameterized.TestCase):
 
     layer(inputs, scale, offset)
 
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "The rank of the inputs cannot change between calls, the original"):
       layer(tf.ones([2, 3, 3, 4, 5]), scale, offset)

@@ -14,24 +14,19 @@
 # ============================================================================
 """Base Sonnet module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
 import functools
 import inspect
 import os
 import pprint
 import sys
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, TypeVar
 
 import six
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
 import tensorflow as tf
-from typing import Any, Callable, Dict, Optional, Sequence, Text, Tuple, Type, TypeVar
 
 T = TypeVar("T")
 TFFunctionType = type(tf.function(lambda: None, autograph=False))  # pylint: disable=invalid-name
@@ -65,10 +60,10 @@ class ModuleMetaclass(abc.ABCMeta):
   """Metaclass for `Module`."""
 
   def __new__(
-      mcs: Type[Type[T]],
-      name: Text,
+      cls: Type[Type[T]],
+      name: str,
       bases: Tuple[Type[Any], ...],
-      clsdict: Dict[Text, Any],
+      clsdict: Dict[str, Any],
   ) -> Type[T]:
     methods = []
 
@@ -95,7 +90,7 @@ class ModuleMetaclass(abc.ABCMeta):
 
     clsdict.setdefault("__repr__", lambda module: module._auto_repr)  # pylint: disable=protected-access
 
-    cls = super(ModuleMetaclass, mcs).__new__(mcs, name, bases, clsdict)
+    new_cls = super(ModuleMetaclass, cls).__new__(cls, name, bases, clsdict)  # pylint: disable=too-many-function-args
 
     for method_name in methods:
       # Note: the below is quite subtle, we need to ensure that we're wrapping
@@ -105,11 +100,11 @@ class ModuleMetaclass(abc.ABCMeta):
       # `BoundFunctionWrapper` which in turn populates the `instance` argument
       # to decorator functions using args[0]).
       # Equivalent to: `cls.__dict__[method_name].__get__(None, cls)`
-      method = getattr(cls, method_name)
+      method = getattr(new_cls, method_name)
       method = with_name_scope(method)
-      setattr(cls, method_name, method)
+      setattr(new_cls, method_name, method)
 
-    return cls
+    return new_cls
 
   def __call__(cls: Type[T], *args, **kwargs) -> T:
     # Call new such that we have an un-initialized module instance that we can
@@ -124,12 +119,6 @@ class ModuleMetaclass(abc.ABCMeta):
     # Now attempt to initialize the object.
     try:
       module.__init__(*args, **kwargs)
-    except:
-      # We must explicitly catch so that in Python 2 sys.exc_info() is populated
-      # before entering the finally block.
-      raise
-    else:
-      module._auto_repr = auto_repr(cls, *args, **kwargs)  # pylint: disable=protected-access
     finally:
       exc_info = sys.exc_info()
 
@@ -151,6 +140,8 @@ class ModuleMetaclass(abc.ABCMeta):
             "is not supported. Add the following as the first line in your "
             "__init__ method:\n\nsuper(%s, self).__init__()" % cls.__name__)
 
+    module._auto_repr = auto_repr(cls, *args, **kwargs)  # pylint: disable=protected-access
+
     return module
 
 
@@ -165,10 +156,10 @@ def safe_compare(a, b) -> bool:
     return False
 
 
-def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
+def auto_repr(cls: Type[Any], *args, **kwargs) -> str:
   """Derives a `__repr__` from constructor arguments of a given class.
 
-      >>> class Foo(object):
+      >>> class Foo:
       ...   def __init__(self, x=None, y=42):
       ...      pass
       ...
@@ -196,7 +187,7 @@ def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
   arg_names = arg_names[1:(len(args) + 1)]
   # Keep used kwargs in the order they appear in argspec.
   arg_names.extend(n for n in argspec.args if n in kwargs)
-  arg_values = inspect.getcallargs(cls.__init__, None, *args, **kwargs)
+  arg_values = inspect.getcallargs(cls.__init__, None, *args, **kwargs)  # pylint: disable=deprecated-method
 
   # Extract default parameter values.
   defaults = argspec.defaults or ()
@@ -221,14 +212,14 @@ def auto_repr(cls: Type[Any], *args, **kwargs) -> Text:
         indent(4, ",\n".join(fancy_repr(n, v) for n, v in names_and_values)))
 
 
-def fancy_repr(name: Text, value: Any) -> Text:
+def fancy_repr(name: str, value: Any) -> str:
   repr_value = pprint.pformat(value)
   if name:
     repr_value = indent(len(name), repr_value).strip()
   return name + repr_value
 
 
-def indent(amount: int, s: Text) -> Text:
+def indent(amount: int, s: str) -> str:
   """Indents `s` with `amount` spaces."""
   prefix = amount * " "
   return "\n".join(prefix + line for line in s.splitlines())
@@ -239,7 +230,7 @@ def wrap_with_name_scope(
     method: Callable[..., T],
     instance: Any,
     args: Sequence[Any],
-    kwargs: Dict[Text, Any],
+    kwargs: Dict[str, Any],
 ) -> T:
   """Decorator that calls the given function in the module name scope.
 
@@ -277,7 +268,7 @@ def wrap_with_name_scope_no_exception(
     method: Callable[..., T],
     instance: Any,
     args: Sequence[Any],
-    kwargs: Dict[Text, Any],
+    kwargs: Dict[str, Any],
 ) -> T:
   """Patches the given method so it enters the modules name scope."""
   if instance is None:
@@ -397,7 +388,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
   scoping as described in the original RFC :cite:`agarwal2019stateful`.
   """
 
-  def __init__(self, name: Optional[Text] = None):
+  def __init__(self, name: Optional[str] = None):
     """Initializes the current module with the given name.
 
     Subclasses should call this constructor before creating other modules or
@@ -410,7 +401,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
     """
     assert_tf2()
 
-    super(Module, self).__init__(name=name)
+    super().__init__(name=name)
 
     if getattr(self.__init__, APPLY_NAME_SCOPE, True):
       # Enter the name scope so subsequent code in the contructor (e.g. creating
@@ -437,7 +428,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       name) followed by variables from all submodules recursively (breadth
       first).
     """
-    variables = super(Module, self).variables
+    variables = super().variables
     if not variables and not getattr(self, ALLOW_EMPTY_RESULT, False):
       # Raise a useful error if the collection is empty. Typically this
       # indicates that the user has requested the property before the module has
@@ -467,7 +458,7 @@ class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
       name) followed by variables from all submodules recursively (breadth
       first).
     """
-    trainable_variables = super(Module, self).trainable_variables
+    trainable_variables = super().trainable_variables
     if not trainable_variables and not getattr(self, ALLOW_EMPTY_RESULT, False):
       # Raise a useful error if the collection is empty. Typically this
       # indicates that the user has requested the property before the module has

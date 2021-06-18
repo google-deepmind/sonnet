@@ -14,21 +14,15 @@
 # ============================================================================
 """RMSProp module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 import six
-
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
 from sonnet.src.optimizers import optimizer_utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 def rmsprop_update(update, decay, learning_rate, epsilon, mu, mom, ms, mg):
@@ -82,7 +76,7 @@ class RMSProp(base.Optimizer):
                momentum: Union[types.FloatLike, tf.Variable] = 0.0,
                epsilon: Union[types.FloatLike, tf.Variable] = 1e-10,
                centered: bool = False,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs an `RMSProp` module.
 
     Args:
@@ -96,7 +90,7 @@ class RMSProp(base.Optimizer):
         computation and memory. Defaults to False.
       name: Name for this module.
     """
-    super(RMSProp, self).__init__(name)
+    super().__init__(name)
     self.learning_rate = learning_rate
     self.decay = decay
     self.momentum = momentum

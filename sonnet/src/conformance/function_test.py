@@ -14,17 +14,13 @@
 # ============================================================================
 """Ensures that all Sonnet modules support ``tf.function``."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Callable, Tuple
 
 from absl.testing import parameterized
 import sonnet as snt
 from sonnet.src import test_utils
 from sonnet.src.conformance import descriptors
 import tensorflow as tf
-from typing import Callable, Tuple
 
 ModuleFn = Callable[[], snt.Module]
 BATCH_MODULES = descriptors.BATCH_MODULES

@@ -14,14 +14,10 @@
 # ============================================================================
 """Recurrent Neural Network cores."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
 import collections
 import functools
+from typing import Optional, Sequence, Tuple, Union
 import uuid
 
 import six
@@ -32,12 +28,9 @@ from sonnet.src import linear
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-
 import tensorflow.compat.v1 as tf1
 import tensorflow as tf
 import tree
-
-from typing import Optional, Sequence, Text, Tuple, Union
 
 # pylint: disable=g-direct-tensorflow-import
 # Required for specializing `UnrolledLSTM` per device.
@@ -148,7 +141,7 @@ class TrainableState(base.Module):
   def for_core(cls,
                core: RNNCore,
                mask: Optional[types.TensorNest] = None,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a trainable state for a given :class:`RNNCore`.
 
     Args:
@@ -168,7 +161,7 @@ class TrainableState(base.Module):
   def __init__(self,
                initial_values: types.TensorNest,
                mask: Optional[types.TensorNest] = None,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a trainable state from initial values.
 
     Args:
@@ -178,7 +171,7 @@ class TrainableState(base.Module):
         state is considered trainable.
       name: Name of the module.
     """
-    super(TrainableState, self).__init__(name)
+    super().__init__(name)
 
     flat_initial_values = tree.flatten_with_path(initial_values)
     if mask is None:
@@ -261,7 +254,7 @@ def static_unroll(
       not known statically.
   """
   num_steps, input_tas = _unstack_input_sequence(input_sequence)
-  if not isinstance(num_steps, six.integer_types):
+  if not isinstance(num_steps, int):
     raise ValueError(
         "input_sequence must have a statically known number of time steps")
 
@@ -287,7 +280,7 @@ def static_unroll(
   return output_sequence, state
 
 
-class _ListWrapper(object):
+class _ListWrapper:
   """A wrapper hiding a list from `nest`.
 
   This allows to use `tree.map_structure` without recursing into the
@@ -490,7 +483,7 @@ class VanillaRNN(RNNCore):
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a vanilla RNN core.
 
     Args:
@@ -508,7 +501,7 @@ class VanillaRNN(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(VanillaRNN, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     self._activation = activation
     self._b_init = b_init or initializers.Zeros()
@@ -560,7 +553,7 @@ class _LegacyDeepRNN(RNNCore):
                layers,
                skip_connections,
                concat_final_output_if_skip=True,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     r"""Constructs a ``DeepRNN``.
 
     Args:
@@ -569,7 +562,7 @@ class _LegacyDeepRNN(RNNCore):
       concat_final_output_if_skip: See :func:`deep_rnn_with_skip_connections`.
       name: Name of the module.
     """
-    super(_LegacyDeepRNN, self).__init__(name)
+    super().__init__(name)
     self._layers = layers if layers is not None else []
     self._skip_connections = skip_connections
     self._concat_final_output_if_skip = concat_final_output_if_skip
@@ -634,14 +627,14 @@ class DeepRNN(_LegacyDeepRNN):
   """
 
   # TODO(slebedev): currently called `layers` to be in-sync with `Sequential`.
-  def __init__(self, layers, name: Optional[Text] = None):
-    super(DeepRNN, self).__init__(layers, skip_connections=False, name=name)
+  def __init__(self, layers, name: Optional[str] = None):
+    super().__init__(layers, skip_connections=False, name=name)
 
 
 def deep_rnn_with_skip_connections(
     layers: Sequence[RNNCore],
     concat_final_output: bool = True,
-    name: Text = "deep_rnn_with_skip_connections") -> RNNCore:
+    name: str = "deep_rnn_with_skip_connections") -> RNNCore:
   r"""Constructs a :class:`DeepRNN` with skip connections.
 
   Skip connections alter the dependency structure within a :class:`DeepRNN`.
@@ -688,7 +681,7 @@ class _ResidualWrapper(RNNCore):
   """
 
   def __init__(self, base_core: RNNCore):
-    super(_ResidualWrapper, self).__init__(name=base_core.name + "_residual")
+    super().__init__(name=base_core.name + "_residual")
     self._base_core = base_core
 
   def __call__(self, inputs: types.TensorNest, prev_state: types.TensorNest):
@@ -703,7 +696,7 @@ class _ResidualWrapper(RNNCore):
 
 def deep_rnn_with_residual_connections(
     layers: Sequence[RNNCore],
-    name: Text = "deep_rnn_with_residual_connections") -> RNNCore:
+    name: str = "deep_rnn_with_residual_connections") -> RNNCore:
   r"""Constructs a :class:`DeepRNN` with residual connections.
 
   Residual connections alter the dependency structure in a :class:`DeepRNN`.
@@ -798,7 +791,7 @@ class LSTM(RNNCore):
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs an LSTM.
 
     Args:
@@ -822,7 +815,7 @@ class LSTM(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(LSTM, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     self._projection_size = projection_size
     self._eff_hidden_size = self._projection_size or self._hidden_size
@@ -924,7 +917,7 @@ class UnrolledLSTM(UnrolledRNN):
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Construct an unrolled LSTM.
 
     Args:
@@ -943,7 +936,7 @@ class UnrolledLSTM(UnrolledRNN):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(UnrolledLSTM, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     self._w_i_init = w_i_init
     self._w_h_init = w_h_init
@@ -1130,8 +1123,7 @@ class _RecurrentDropoutWrapper(RNNCore):
         ``base_core.initial_state``.
       seed: Optional int; seed passed to :tf:`nn.dropout`.
     """
-    super(_RecurrentDropoutWrapper,
-          self).__init__(name=base_core.name + "_recurrent_dropout")
+    super().__init__(name=base_core.name + "_recurrent_dropout")
     self._base_core = base_core
     self._rates = rates
     self._seed = seed
@@ -1251,13 +1243,13 @@ class _ConvNDLSTM(RNNCore):
                input_shape: types.ShapeLike,
                output_channels: int,
                kernel_shape: Union[int, Sequence[int]],
-               data_format: Optional[Text] = None,
+               data_format: Optional[str] = None,
                w_i_init: Optional[initializers.Initializer] = None,
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a convolutional LSTM.
 
     Args:
@@ -1284,7 +1276,7 @@ class _ConvNDLSTM(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(_ConvNDLSTM, self).__init__(name)
+    super().__init__(name)
     self._num_spatial_dims = num_spatial_dims
     self._input_shape = list(input_shape)
     self._channel_index = 1 if (data_format is not None and
@@ -1356,7 +1348,7 @@ class _ConvNDLSTM(RNNCore):
     self.b = tf.Variable(tf.concat([b_i, b_f, b_g, b_o], axis=0), name="b")
 
 
-class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
   __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "1")
 
   def __init__(self,
@@ -1369,7 +1361,7 @@ class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a 1-D convolutional LSTM.
 
     Args:
@@ -1393,7 +1385,7 @@ class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
         ``tf.float32``.
       name: Name of the module.
     """
-    super(Conv1DLSTM, self).__init__(
+    super().__init__(
         num_spatial_dims=1,
         input_shape=input_shape,
         output_channels=output_channels,
@@ -1407,20 +1399,20 @@ class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
         name=name)
 
 
-class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
   __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "2")
 
   def __init__(self,
                input_shape: types.ShapeLike,
                output_channels: int,
                kernel_shape: Union[int, Sequence[int]],
-               data_format: Text = "NHWC",
+               data_format: str = "NHWC",
                w_i_init: Optional[initializers.Initializer] = None,
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a 2-D convolutional LSTM.
 
     Args:
@@ -1444,7 +1436,7 @@ class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
         ``tf.float32``.
       name: Name of the module.
     """
-    super(Conv2DLSTM, self).__init__(
+    super().__init__(
         num_spatial_dims=2,
         input_shape=input_shape,
         output_channels=output_channels,
@@ -1458,20 +1450,20 @@ class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
         name=name)
 
 
-class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
+class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
   __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "3")
 
   def __init__(self,
                input_shape: types.ShapeLike,
                output_channels: int,
                kernel_shape: Union[int, Sequence[int]],
-               data_format: Text = "NDHWC",
+               data_format: str = "NDHWC",
                w_i_init: Optional[initializers.Initializer] = None,
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                forget_bias: types.FloatLike = 1.0,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a 3-D convolutional LSTM.
 
     Args:
@@ -1495,7 +1487,7 @@ class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring
         ``tf.float32``.
       name: Name of the module.
     """
-    super(Conv3DLSTM, self).__init__(
+    super().__init__(
         num_spatial_dims=3,
         input_shape=input_shape,
         output_channels=output_channels,
@@ -1543,7 +1535,7 @@ class GRU(RNNCore):
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a GRU.
 
     Args:
@@ -1558,7 +1550,7 @@ class GRU(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(GRU, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     glorot_uniform = initializers.VarianceScaling(
         mode="fan_avg", distribution="uniform")
@@ -1632,7 +1624,7 @@ class CuDNNGRU(RNNCore):
                w_h_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a `GRU`.
 
     Args:
@@ -1647,7 +1639,7 @@ class CuDNNGRU(RNNCore):
         ``tf.float32``.
       name: Name of the module.
     """
-    super(CuDNNGRU, self).__init__(name)
+    super().__init__(name)
     self._hidden_size = hidden_size
     glorot_uniform = initializers.VarianceScaling(
         mode="fan_avg", distribution="uniform")

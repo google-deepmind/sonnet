@@ -18,9 +18,6 @@ These modules receive input and output parameters for the memory access module.
 We also alias external controllers in this module that are relevant, so they can
 be specified by string name in the core config.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import sys
 
@@ -64,7 +61,7 @@ class FeedForward(recurrent.RNNCore):
       dtype: datatype of inputs to accept, defaults to tf.float32.
       name: module name (default 'feed_forward').
     """
-    super(FeedForward, self).__init__(name=name)
+    super().__init__(name=name)
     self.linear = linear.Linear(hidden_size)
     self.dtype = dtype
     self._activation = activation

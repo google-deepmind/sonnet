@@ -15,19 +15,14 @@
 
 """Depth-wise convolutional module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 import numpy as np
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 class DepthwiseConv2D(base.Module):
@@ -42,12 +37,12 @@ class DepthwiseConv2D(base.Module):
                channel_multiplier: int = 1,
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Text = "SAME",
+               padding: str = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NHWC",
-               name: Optional[Text] = None):
+               data_format: str = "NHWC",
+               name: Optional[str] = None):
     """Constructs a `DepthwiseConv2D` module.
 
     Args:
@@ -78,7 +73,7 @@ class DepthwiseConv2D(base.Module):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(DepthwiseConv2D, self).__init__(name=name)
+    super().__init__(name=name)
 
     self.channel_multiplier = channel_multiplier
     self.kernel_shape = kernel_shape

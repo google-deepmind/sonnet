@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.adam."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src import test_utils
 from sonnet.src.optimizers import adam
 from sonnet.src.optimizers import optimizer_tests

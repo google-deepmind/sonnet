@@ -14,10 +14,6 @@
 # ============================================================================
 """Common network architectures implemented as Sonnet modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.nets import resnet
 from sonnet.src.nets.cifar10_convnet import Cifar10ConvNet
 from sonnet.src.nets.mlp import MLP

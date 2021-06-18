@@ -13,9 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Tests for sonnet.v2.src.leaky_clip_by_value."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from absl.testing import parameterized
 from sonnet.src import leaky_clip_by_value

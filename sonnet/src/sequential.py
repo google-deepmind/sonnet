@@ -14,13 +14,9 @@
 # ============================================================================
 """Sequential applies a linear sequence of layers."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Any, Callable, Iterable, Optional
 
 from sonnet.src import base
-from typing import Any, Callable, Iterable, Optional, Text
 
 
 class Sequential(base.Module):
@@ -60,8 +56,8 @@ class Sequential(base.Module):
 
   def __init__(self,
                layers: Optional[Iterable[Callable[..., Any]]] = None,
-               name: Optional[Text] = None):
-    super(Sequential, self).__init__(name=name)
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self._layers = list(layers) if layers is not None else []
 
   def __call__(self, inputs, *args, **kwargs):

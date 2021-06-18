@@ -13,16 +13,13 @@
 # limitations under the License.
 # ============================================================================
 """Custom getter for module members."""
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+
+from typing import Any, Callable, ContextManager, Iterable, Optional, Type
 
 import contextlib
 from sonnet.src import base
 import tensorflow as tf
 import tree
-from typing import Any, Callable, ContextManager, Iterable, Optional, Type
 
 _DEFAULT_CLASSES = [base.Module]
 
@@ -44,7 +41,7 @@ def _custom_getter(
   """Applies the given `getter` when getting members of given `classes`.
 
   For example:
-  >>> class X(object):
+  >>> class X:
   ...   values = [1, 2]
 
   >>> x = X()

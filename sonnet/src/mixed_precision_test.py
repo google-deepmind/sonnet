@@ -13,9 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Tests for Mixed Precision."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from absl.testing import parameterized
 from sonnet.src import base
@@ -28,7 +25,7 @@ import tree
 class DummyVar(base.Module, test_utils.TestCase):
 
   def __init__(self, x):
-    super(DummyVar, self).__init__()
+    super().__init__()
     test_utils.TestCase.__init__(self)
     self.x = x
 
@@ -50,7 +47,7 @@ class DummyVar(base.Module, test_utils.TestCase):
 class DummyInput(test_utils.TestCase):
 
   def __init__(self, _):
-    super(DummyInput, self).__init__()
+    super().__init__()
     test_utils.TestCase.__init__(self)
 
   def check_type(self, x, dtype):
@@ -365,7 +362,7 @@ class MixedPrecisionTest(test_utils.TestCase):
     class DummyCall(base.Module, test_utils.TestCase):
 
       def __init__(self):
-        super(DummyCall, self).__init__()
+        super().__init__()
         test_utils.TestCase.__init__(self)
         self.y = tf.Variable([[1., 3], [5., 7.]])
 

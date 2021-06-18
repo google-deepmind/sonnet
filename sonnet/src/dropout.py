@@ -15,17 +15,12 @@
 
 """Sonnet dropout modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional
 
 from sonnet.src import base
 from sonnet.src import types
 from sonnet.src import utils
-
 import tensorflow as tf
-from typing import Optional, Text
 
 
 class Dropout(base.Module):
@@ -41,7 +36,7 @@ class Dropout(base.Module):
                rate: types.FloatLike,
                noise_shape: Optional[types.ShapeLike] = None,
                seed: Optional[int] = None,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a Dropout module.
 
     Args:
@@ -54,7 +49,7 @@ class Dropout(base.Module):
         generating dropout tensor.
       name: (Optional) Name for this module.
     """
-    super(Dropout, self).__init__(name=name)
+    super().__init__(name=name)
     self._rate = rate
     self._noise_shape = noise_shape
     self._seed = seed

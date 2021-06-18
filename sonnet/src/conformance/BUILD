@@ -16,7 +16,6 @@ snt_py_library(
         # pip: six
         "//sonnet",
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -42,7 +41,6 @@ snt_py_test(
         # pip: absl/logging
         # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
-        "//sonnet",
         "//sonnet/src:test_utils",
         "//sonnet/src/distribute:replicator",
         "//sonnet/src/distribute:replicator_test_utils",
@@ -58,13 +56,12 @@ snt_py_test(
     deps = [
         ":descriptors",
         ":goldens",
-        # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:test_utils",
+        "//sonnet/src/distribute:replicator",
         "//sonnet/src/distribute:replicator_test_utils",
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -86,7 +83,6 @@ snt_py_library(
     deps = [
         "//sonnet",
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -165,7 +161,6 @@ snt_py_test(
     shard_count = 10,
     deps = [
         ":goldens",
-        # pip: absl/testing:absltest
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
         # pip: tensorflow
@@ -201,6 +196,7 @@ snt_py_test(
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
+        # pip: tree
     ],
 )
 
@@ -223,7 +219,6 @@ snt_py_test(
     timeout = "long",
     srcs = ["tensorflow1_test.py"],
     deps = [
-        # pip: absl/testing:parameterized
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
@@ -237,7 +232,6 @@ snt_py_test(
     deps = [
         ":descriptors",
         # pip: absl/testing:parameterized
-        "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],

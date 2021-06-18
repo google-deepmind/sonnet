@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.examples.simple_mnist."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import sonnet as snt
 from examples import simple_mnist
 from sonnet.src import test_utils
@@ -28,7 +24,7 @@ class SimpleMnistTest(test_utils.TestCase):
 
   def setUp(self):
     self.ENTER_PRIMARY_DEVICE = False  # pylint: disable=invalid-name
-    super(SimpleMnistTest, self).setUp()
+    super().setUp()
 
   def test_train_epoch(self):
     model = snt.Sequential([

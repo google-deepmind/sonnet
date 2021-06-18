@@ -14,16 +14,12 @@
 # ============================================================================
 """Merges a number of leading dimensions of an input tensor to manipulate it."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Any, Callable, Optional, Sequence, Union
 
 import numpy as np
 from sonnet.src import base
 import tensorflow as tf
 import tree
-from typing import Any, Callable, Optional, Sequence, Text, Union
 
 
 class BatchApply(base.Module):
@@ -49,8 +45,8 @@ class BatchApply(base.Module):
   def __init__(self,
                module: Callable[..., tf.Tensor],
                num_dims: int = 2,
-               name: Optional[Text] = None):
-    super(BatchApply, self).__init__(name=name)
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self.module = module
     self.num_dims = num_dims
 

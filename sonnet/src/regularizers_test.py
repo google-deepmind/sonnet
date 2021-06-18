@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.regularizers."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 from sonnet.src import regularizers
 from sonnet.src import test_utils

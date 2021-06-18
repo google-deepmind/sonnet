@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.replicator."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 
 from absl import logging
@@ -35,7 +31,7 @@ def _create_variable_in_cross_replica_context(replicator):
   return v
 
 
-class TrainableVariable(object):
+class TrainableVariable:
 
   def __call__(self):
     if not hasattr(self, "v"):

@@ -14,19 +14,14 @@
 # ============================================================================
 """Adaptive Moment Estimation (Adam) module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
 from sonnet.src.optimizers import optimizer_utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 def adam_update(g, alpha, beta_1, beta_2, epsilon, t, m, v):
@@ -58,13 +53,12 @@ class Adam(base.Optimizer):
     v: Biased second raw moment estimate (a list with one value per parameter).
   """
 
-  def __init__(
-      self,
-      learning_rate: Union[types.FloatLike, tf.Variable] = 0.001,
-      beta1: Union[types.FloatLike, tf.Variable] = 0.9,
-      beta2: Union[types.FloatLike, tf.Variable] = 0.999,
-      epsilon: Union[types.FloatLike, tf.Variable] = 1e-8,
-      name: Optional[Text] = None):
+  def __init__(self,
+               learning_rate: Union[types.FloatLike, tf.Variable] = 0.001,
+               beta1: Union[types.FloatLike, tf.Variable] = 0.9,
+               beta2: Union[types.FloatLike, tf.Variable] = 0.999,
+               epsilon: Union[types.FloatLike, tf.Variable] = 1e-8,
+               name: Optional[str] = None):
     """Constructs an `Adam` module.
 
     Args:
@@ -74,7 +68,7 @@ class Adam(base.Optimizer):
       epsilon: Small value to avoid zero denominator.
       name: Name of the module.
     """
-    super(Adam, self).__init__(name=name)
+    super().__init__(name=name)
     self.learning_rate = learning_rate
     self.beta1 = beta1
     self.beta2 = beta2

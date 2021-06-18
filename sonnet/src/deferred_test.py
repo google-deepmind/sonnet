@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.deferred."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src import base
 from sonnet.src import deferred
 from sonnet.src import test_utils
@@ -82,7 +78,7 @@ class DeferredTest(test_utils.TestCase):
   def test_alternative_forward_call_type_error(self):
     mod = deferred.Deferred(AlternativeForwardModule, call_methods=("forward",))
     msg = "'AlternativeForwardModule' object is not callable"
-    with self.assertRaisesRegexp(TypeError, msg):
+    with self.assertRaisesRegex(TypeError, msg):
       mod()
 
   def test_name_scope(self):
@@ -105,7 +101,7 @@ class DeferredTest(test_utils.TestCase):
 class ExampleModule(base.Module):
 
   def __init__(self):
-    super(ExampleModule, self).__init__()
+    super().__init__()
     self.w = tf.Variable(1.)
 
   def __str__(self):

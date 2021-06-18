@@ -14,13 +14,8 @@
 # ============================================================================
 """Golden test cases."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
-from typing import Text, Tuple, Sequence
+from typing import Sequence, Tuple
 
 from absl.testing import parameterized
 import numpy as np
@@ -31,7 +26,7 @@ import tensorflow as tf
 _all_goldens = []
 
 
-def named_goldens() -> Sequence[Tuple[Text, "Golden"]]:
+def named_goldens() -> Sequence[Tuple[str, "Golden"]]:
   return ((name, cls()) for _, name, cls in list_goldens())
 
 
@@ -81,7 +76,7 @@ def range_like(t, start=0):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Golden(object):
+class Golden:
   """Represents a golden checkpoint file."""
 
   @abc.abstractmethod

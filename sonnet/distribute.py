@@ -14,10 +14,6 @@
 # ============================================================================
 """Utilities for using Sonnet with TensorFlow Distribution Strategy."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src.distribute.distributed_batch_norm import CrossReplicaBatchNorm
 from sonnet.src.distribute.replicator import create_variables_eagerly
 from sonnet.src.distribute.replicator import Replicator

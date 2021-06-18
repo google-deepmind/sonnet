@@ -13,9 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Tests for sonnet.v2.src.nets.sdnc.util."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from absl.testing import parameterized
 import numpy as np
@@ -80,7 +77,7 @@ class SegmentDimTest(test_utils.TestCase, parameterized.TestCase):
   def testInvalidDims(self):
     segment_shapes = [tf.TensorShape([3]), tf.TensorShape([2])]
     inputs = tf.random.uniform([5, 5])
-    with self.assertRaisesRegexp(ValueError, 'Invalid dims'):
+    with self.assertRaisesRegex(ValueError, 'Invalid dims'):
       util.segment_dim(inputs, 3, segment_shapes)
 
 
@@ -174,8 +171,8 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
         lambda size: tf.random.uniform([batch_size, size]), input_sizes)
     modules = tree.map_structure(linear.Linear, module_hidden_sizes)
 
-    with self.assertRaisesRegexp(ValueError,
-                                 'don\'t have the same nested structure'):
+    with self.assertRaisesRegex(ValueError,
+                                'don\'t have the same nested structure'):
       util.apply_linear(inputs, modules)
 
   @parameterized.parameters(
@@ -194,7 +191,7 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
         lambda size: tf.random.uniform([batch_size, size]), input_sizes)
     modules = tree.map_structure(linear.Linear, module_hidden_sizes)
 
-    with self.assertRaisesRegexp(AssertionError, 'must be length 2'):
+    with self.assertRaisesRegex(AssertionError, 'must be length 2'):
       util.apply_linear(inputs, modules)
 
 

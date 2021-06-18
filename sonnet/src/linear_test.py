@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.linear."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import linear
@@ -38,7 +34,7 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     self.assertIs(mod.b_init, my_initializer)
 
   def testInitializerKeysInvalidWithoutBias(self):
-    with self.assertRaisesRegexp(ValueError, "b_init must be None"):
+    with self.assertRaisesRegex(ValueError, "b_init must be None"):
       linear.Linear(1, with_bias=False, b_init=tf.zeros_initializer())
 
   def testParametersCreatedOnce(self):

@@ -14,11 +14,6 @@
 # ============================================================================
 """Simple functional APIs for TF2."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 from sonnet import optimizers as oo_optimizers
 from sonnet.src.functional import haiku
 from sonnet.src.functional import jax

@@ -14,17 +14,12 @@
 # ============================================================================
 """Utilities for tests working with replicator."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
+from typing import Callable, Sequence, Tuple
 import unittest
 
 from absl import logging
 from sonnet.src.distribute import replicator as snt_replicator
 import tensorflow as tf
-from typing import Callable, Sequence, Text, Tuple
 
 
 def _replicator_primary_device() -> snt_replicator.Replicator:
@@ -54,6 +49,6 @@ def _tpu_replicator_or_skip_test() -> snt_replicator.TpuReplicator:
 Strategy = tf.distribute.Strategy
 
 
-def named_replicators() -> Sequence[Tuple[Text, Callable[[], Strategy]]]:
+def named_replicators() -> Sequence[Tuple[str, Callable[[], Strategy]]]:
   return (("TpuReplicator", _tpu_replicator_or_skip_test),
           ("Replicator", _replicator_primary_device))

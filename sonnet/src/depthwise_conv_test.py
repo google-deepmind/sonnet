@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.depthwise_conv."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 
 import numpy as np
@@ -40,7 +36,7 @@ def create_constant_initializers(w, b, with_bias):
 class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
 
   def testInitializerKeysInvalidWithoutBias(self):
-    with self.assertRaisesRegexp(ValueError, "b_init must be None"):
+    with self.assertRaisesRegex(ValueError, "b_init must be None"):
       depthwise_conv.DepthwiseConv2D(
           channel_multiplier=1,
           kernel_shape=3,

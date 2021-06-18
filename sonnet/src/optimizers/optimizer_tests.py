@@ -14,11 +14,6 @@
 # ============================================================================
 """Common tests for Sonnet optimizers."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import itertools
 
 from absl.testing import parameterized
@@ -35,7 +30,7 @@ class WrappedTFOptimizer(base.Optimizer):
   wrapped = None
 
   def __init__(self, optimizer: tf.optimizers.Optimizer):
-    super(WrappedTFOptimizer, self).__init__()
+    super().__init__()
     self.wrapped = optimizer
 
   def __getattr__(self, name):
@@ -69,7 +64,7 @@ class OptimizerTestBase(test_utils.TestCase):
 
     parameters = [tf.Variable([1., 2.]), tf.Variable([3., 4.])]
     updates = [tf.constant([5., 5.])]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "`updates` and `parameters` must be the same length."):
       optimizer.apply(updates, parameters)
 
@@ -78,7 +73,7 @@ class OptimizerTestBase(test_utils.TestCase):
     if is_tf_optimizer(optimizer):
       self.skipTest("TF optimizers don't error on empty params.")
 
-    with self.assertRaisesRegexp(ValueError, "`parameters` cannot be empty."):
+    with self.assertRaisesRegex(ValueError, "`parameters` cannot be empty."):
       optimizer.apply([], [])
 
   def testAllUpdatesNone(self):
@@ -89,7 +84,7 @@ class OptimizerTestBase(test_utils.TestCase):
       msg = "No gradients provided for any variable"
     else:
       msg = "No updates provided for any parameter"
-    with self.assertRaisesRegexp(ValueError, msg):
+    with self.assertRaisesRegex(ValueError, msg):
       optimizer.apply(updates, parameters)
 
   def testInconsistentDTypes(self):
@@ -99,7 +94,7 @@ class OptimizerTestBase(test_utils.TestCase):
 
     parameters = [tf.Variable([1., 2.], name="param0")]
     updates = [tf.constant([5, 5])]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "DType of .* is not equal to that of parameter .*param0.*"):
       optimizer.apply(updates, parameters)
 
@@ -111,7 +106,7 @@ class OptimizerTestBase(test_utils.TestCase):
       optimizer = self.make_optimizer()
       if is_tf_optimizer(optimizer):
         self.skipTest("TF optimizers aren't restricted to Sonnet strategies.")
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "Sonnet optimizers are not compatible with `MirroredStrategy`"):
       strategy.run(lambda: optimizer.apply(updates, parameters))

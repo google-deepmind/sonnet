@@ -13,10 +13,8 @@
 # limitations under the License.
 # ============================================================================
 """Convnet module for Cifar10 classification."""
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+
+from typing import Mapping, Optional, Sequence, Union
 
 from sonnet.src import base
 from sonnet.src import batch_norm
@@ -24,9 +22,7 @@ from sonnet.src import conv
 from sonnet.src import initializers
 from sonnet.src import linear
 from sonnet.src import types
-
 import tensorflow as tf
-from typing import Mapping, Optional, Sequence, Text, Union
 
 
 class Cifar10ConvNet(base.Module):
@@ -41,7 +37,7 @@ class Cifar10ConvNet(base.Module):
                num_classes: int = 10,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = 'NHWC',
+               data_format: str = 'NHWC',
                output_channels: Sequence[int] = (
                    64,
                    64,
@@ -56,8 +52,8 @@ class Cifar10ConvNet(base.Module):
                    512,
                ),
                strides: Sequence[int] = (1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1),
-               name: Optional[Text] = None):
-    super(Cifar10ConvNet, self).__init__(name=name)
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self._num_classes = num_classes
     self._data_format = data_format
     if len(strides) != len(output_channels):
@@ -97,7 +93,7 @@ class Cifar10ConvNet(base.Module):
       inputs: tf.Tensor,
       is_training: types.BoolLike,
       test_local_stats: bool = True
-  ) -> Mapping[Text, Union[tf.Tensor, Sequence[tf.Tensor]]]:
+  ) -> Mapping[str, Union[tf.Tensor, Sequence[tf.Tensor]]]:
     """Connects the module to some inputs.
 
     Args:

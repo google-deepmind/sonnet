@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.conv_transpose."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import itertools
 
 from absl.testing import parameterized
@@ -42,7 +38,7 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(0, 4)
   def testIncorrectN(self, n):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "only support transpose convolution operations for num_spatial_dims"):
       conv_transpose.ConvNDTranspose(
@@ -53,16 +49,15 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
           data_format="NHWC")
 
   def testIncorrectPadding(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         TypeError,
         "ConvNDTranspose only takes string padding, please provide either"):
       conv_transpose.ConvNDTranspose(
           2, output_channels=1, kernel_shape=3, padding=None)
 
   def testBiasInitNoBias(self):
-    with self.assertRaisesRegexp(
-        ValueError,
-        "When not using a bias the b_init must be None."):
+    with self.assertRaisesRegex(
+        ValueError, "When not using a bias the b_init must be None."):
       conv_transpose.ConvNDTranspose(
           2, output_channels=1, kernel_shape=3, with_bias=False,
           b_init=lib_initializers.Ones(), data_format="NHWC")
@@ -74,9 +69,8 @@ class ConvTransposeTest(test_utils.TestCase, parameterized.TestCase):
         kernel_shape=2,
         output_shape=[1],
         data_format="NHWC")
-    with self.assertRaisesRegexp(
-        ValueError,
-        "The output_shape must be of length 2 but instead was 1."):
+    with self.assertRaisesRegex(
+        ValueError, "The output_shape must be of length 2 but instead was 1."):
       c(tf.ones([3, 5, 5, 3]))
 
   @parameterized.parameters(*itertools.product(

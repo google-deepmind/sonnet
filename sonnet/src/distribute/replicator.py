@@ -14,11 +14,6 @@
 # ============================================================================
 """Replicator Distribution Strategy."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 from typing import Callable, TypeVar
 
 from absl import logging
@@ -83,7 +78,7 @@ class Replicator(tf.distribute.MirroredStrategy):
   @contextlib.contextmanager
   def scope(self):
     with contextlib.ExitStack() as stack:
-      stack.enter_context(super(Replicator, self).scope())
+      stack.enter_context(super().scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
 
@@ -142,7 +137,7 @@ class TpuReplicator(TPUStrategy):
   @contextlib.contextmanager
   def scope(self):
     with contextlib.ExitStack() as stack:
-      stack.enter_context(super(TpuReplicator, self).scope())
+      stack.enter_context(super().scope())
       stack.enter_context(tf.variable_creator_scope(replica_local_creator))
       yield
 

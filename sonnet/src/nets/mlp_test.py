@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.nets.mlp."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import itertools
 from absl.testing import parameterized
 from sonnet.src import test_utils
@@ -28,7 +24,7 @@ import tensorflow as tf
 class MLPTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_b_init_when_with_bias_false(self):
-    with self.assertRaisesRegexp(ValueError, "b_init must not be set"):
+    with self.assertRaisesRegex(ValueError, "b_init must not be set"):
       mlp.MLP([1], with_bias=False, b_init=object())
 
   @parameterized.parameters(itertools.product((1, 2, 3), (0.1, 0.0, None)))
@@ -123,13 +119,13 @@ class MLPTest(test_utils.TestCase, parameterized.TestCase):
 
   def test_dropout_requires_is_training(self):
     mod = mlp.MLP([1, 1], dropout_rate=0.5)
-    with self.assertRaisesRegexp(ValueError, "is_training.* is required"):
+    with self.assertRaisesRegex(ValueError, "is_training.* is required"):
       mod(tf.ones([1, 1]))
 
   @parameterized.parameters(False, True)
   def test_no_dropout_rejects_is_training(self, is_training):
     mod = mlp.MLP([1, 1])
-    with self.assertRaisesRegexp(ValueError, "is_training.*only.*with dropout"):
+    with self.assertRaisesRegex(ValueError, "is_training.*only.*with dropout"):
       mod(tf.ones([1, 1]), is_training=is_training)
 
   @parameterized.parameters(False, True)
@@ -163,7 +159,7 @@ def reversed_mlp(**kwargs):
   return mod.reverse()
 
 
-class CountingActivation(object):
+class CountingActivation:
 
   def __init__(self):
     self.count = 0
@@ -173,7 +169,7 @@ class CountingActivation(object):
     return x
 
 
-class CountingInitializer(object):
+class CountingInitializer:
 
   def __init__(self):
     self.count = 0

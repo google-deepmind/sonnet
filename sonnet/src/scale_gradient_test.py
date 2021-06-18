@@ -13,9 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Tests for sonnet.v2.src.scale_gradient."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import itertools
 

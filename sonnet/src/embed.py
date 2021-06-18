@@ -15,19 +15,13 @@
 
 """Embedding module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import math
+from typing import Optional
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import types
-
 import tensorflow as tf
-from typing import Optional, Text
 
 
 class Embed(base.Module):
@@ -41,7 +35,7 @@ class Embed(base.Module):
                initializer: Optional[initializers.Initializer] = None,
                trainable: bool = True,
                dtype: tf.DType = tf.float32,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs an Embed module.
 
     Args:
@@ -75,7 +69,7 @@ class Embed(base.Module):
         ``vocab_size``, ``embedding_dim``, ``initializer`` (as these should be
         inferred).
     """
-    super(Embed, self).__init__(name=name)
+    super().__init__(name=name)
 
     if vocab_size is None and existing_vocab is None:
       raise ValueError("Must provide one of vocab_size or existing_vocab.")

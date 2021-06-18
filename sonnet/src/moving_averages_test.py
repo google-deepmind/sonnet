@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.moving_averages."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 from sonnet.src import moving_averages
 from sonnet.src import test_utils

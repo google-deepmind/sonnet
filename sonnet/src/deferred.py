@@ -14,10 +14,6 @@
 # ============================================================================
 """Enables module construction to be deferred."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src import base
 
 
@@ -63,7 +59,7 @@ class Deferred(base.Module):
         `call_methods=("__call__", "encode", "decode")`.
       name: Name for the deferred module.
     """
-    super(Deferred, self).__init__(name=name)
+    super().__init__(name=name)
     self._constructor = constructor
     self._target = None
 
@@ -116,14 +112,14 @@ class Deferred(base.Module):
         setattr(self._target, name, value)
         return
 
-    super(Deferred, self).__setattr__(name, value)
+    super().__setattr__(name, value)
 
   def __delattr__(self, name):
     if name != "_target" and hasattr(self, "_target"):
       if self._target is not None:
         return delattr(self._target, name)
 
-    super(Deferred, self).__delattr__(name)
+    super().__delattr__(name)
 
 
 def _materialize_then_call(module, method_name):

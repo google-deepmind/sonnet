@@ -14,10 +14,6 @@
 # ============================================================================
 """Utility to run functions and methods once."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import uuid
 
 from sonnet.src import utils
@@ -43,7 +39,7 @@ def once(f):
 
   If `f` is a method then it will be evaluated once per instance:
 
-      >>> class MyObject(object):
+      >>> class MyObject:
       ...   @snt.once
       ...   def f(self):
       ...     print('Hello, world!')

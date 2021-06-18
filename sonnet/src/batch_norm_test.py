@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.batch_norm."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import itertools
 
 from absl.testing import parameterized
@@ -196,7 +192,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters("NHW", "HWC", "channel_last")
   def testInvalidDataFormat(self, data_format):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "Unable to extract channel information from '{}'".format(data_format)):
       batch_norm.BaseBatchNorm(
@@ -229,7 +225,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertEqual(test._channel_index, -1)
 
   def testNoScaleAndInitProvided(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "Cannot set `scale_init` if `create_scale=False`"):
       batch_norm.BaseBatchNorm(
           moving_mean=TestMetric(),
@@ -239,7 +235,7 @@ class BaseBatchNormTest(test_utils.TestCase, parameterized.TestCase):
           scale_init=initializers.Ones())
 
   def testNoOffsetBetaInitProvided(self):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "Cannot set `offset_init` if `create_offset=False`"):
       batch_norm.BaseBatchNorm(
           moving_mean=TestMetric(),
@@ -262,7 +258,7 @@ class BatchNormTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllEqual(outputs, tf.fill(inputs.shape, 2.0))
 
 
-class TestMetric(object):
+class TestMetric:
 
   def __init__(self):
     self._foo = None

@@ -13,10 +13,6 @@
 # limitations under the License.
 # ============================================================================
 """Mixed Precision Decorator for Sonnet 2."""
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
 
 import uuid
 import contextlib

@@ -22,21 +22,16 @@ This extension allows to reference TensorFlow API symbols using the
 generates a link to ``tf.Module``.
 """
 
-# from __future__ import google_type_annotations
-
 import functools
+from typing import Any, List, Tuple
+from urllib import parse as urlparse
 
 from docutils import nodes
 from docutils.parsers.rst import states
-from six.moves.urllib import parse as urlparse
 import tensorflow as tf
-from typing import Any
-from typing import List
-from typing import Text
-from typing import Tuple
 
-# pylint: disable=g-direct-tensorflow-import
-from tensorflow.python.util import tf_export
+from tensorflow.python.util import tf_export  # pylint: disable=g-direct-tensorflow-import
+
 
 __version__ = "0.1"
 
@@ -47,9 +42,9 @@ TF_API_BASE_URL = (
 
 
 def tf_role_fn(
-    typ: Text,
-    rawtext: Text,
-    text: Text,
+    typ: str,
+    rawtext: str,
+    text: str,
     lineno: int,
     inliner: states.Inliner,
     options: Any = None,

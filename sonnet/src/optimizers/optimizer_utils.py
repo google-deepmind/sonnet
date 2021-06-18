@@ -14,15 +14,11 @@
 # ============================================================================
 """Utils for Sonnet optimizers."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Sequence
 
 from sonnet.src import types
 from sonnet.src.distribute import replicator
 import tensorflow as tf
-from typing import Sequence
 
 # Sonnet only supports a subset of distribution strategies since it makes use of
 # a simplified update model and replica local variables.

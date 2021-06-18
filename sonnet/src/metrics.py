@@ -14,18 +14,13 @@
 # ============================================================================
 """Base class for general metrics within Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
-import six
+from typing import Optional
 
+import six
 from sonnet.src import base
 from sonnet.src import once
 import tensorflow as tf
-from typing import Optional, Text
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -57,8 +52,8 @@ class Metric(base.Module):
 class Sum(Metric):
   """Calculates the element-wise sum of the given values."""
 
-  def __init__(self, name: Optional[Text] = None):
-    super(Sum, self).__init__(name=name)
+  def __init__(self, name: Optional[str] = None):
+    super().__init__(name=name)
     self.sum = None
 
   @once.once
@@ -84,8 +79,8 @@ class Sum(Metric):
 class Mean(Metric):
   """Calculates the element-wise mean of the given values."""
 
-  def __init__(self, name: Optional[Text] = None):
-    super(Mean, self).__init__(name=name)
+  def __init__(self, name: Optional[str] = None):
+    super().__init__(name=name)
     self.sum = None
     self.count = tf.Variable(0, dtype=tf.int64, trainable=False, name="count")
 

@@ -8,14 +8,11 @@ snt_py_library(
     name = "distributed_batch_norm",
     srcs = ["distributed_batch_norm.py"],
     deps = [
-        "//sonnet/src:base",
         "//sonnet/src:batch_norm",
         "//sonnet/src:initializers",
         "//sonnet/src:metrics",
-        "//sonnet/src:moving_averages",
         "//sonnet/src:once",
         "//sonnet/src:types",
-        "//sonnet/src:utils",
         # pip: tensorflow
     ],
 )
@@ -26,6 +23,7 @@ snt_py_test(
     deps = [
         ":distributed_batch_norm",
         ":replicator",
+        # pip: absl/logging
         # pip: absl/testing:parameterized
         "//sonnet/src:test_utils",
         # pip: tensorflow
@@ -49,6 +47,8 @@ snt_py_test(
     deps = [
         ":replicator",
         ":replicator_test_utils",
+        # pip: absl/logging
+        # pip: absl/testing:parameterized
         "//sonnet/src:initializers",
         "//sonnet/src:test_utils",
         # pip: tensorflow
@@ -63,6 +63,5 @@ snt_py_library(
         ":replicator",
         # pip: absl/logging
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )

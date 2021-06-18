@@ -12,7 +12,6 @@ snt_py_library(
         "//sonnet/src:initializers",
         "//sonnet/src:linear",
         # pip: tensorflow
-        # https://github.com/google/pytype/blob/master/2.7_patches/
     ],
 )
 
@@ -48,6 +47,7 @@ snt_py_test(
     deps = [
         ":cifar10_convnet",
         # pip: absl/testing:parameterized
+        # pip: numpy
         "//sonnet/src:test_utils",
         # pip: tensorflow
     ],
@@ -70,6 +70,8 @@ snt_py_test(
     srcs = ["vqvae_test.py"],
     deps = [
         ":vqvae",
+        # pip: absl/testing:parameterized
+        # pip: numpy
         "//sonnet/src:test_utils",
         # pip: tensorflow
         # pip: tree

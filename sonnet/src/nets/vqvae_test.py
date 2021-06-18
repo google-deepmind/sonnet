@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.nets.vqvae."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 
 import numpy as np
@@ -88,8 +84,8 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
   def testShapeChecking(self, constructor, kwargs):
     vqvae_module = constructor(**kwargs)
     wrong_shape_input = np.random.randn(100, kwargs['embedding_dim'] * 2)
-    with self.assertRaisesRegexp(tf.errors.InvalidArgumentError,
-                                 'but the requested shape has'):
+    with self.assertRaisesRegex(tf.errors.InvalidArgumentError,
+                                'but the requested shape has'):
       vqvae_module(
           tf.constant(wrong_shape_input.astype(np.float32)), is_training=False)
 

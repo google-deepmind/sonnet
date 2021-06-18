@@ -14,17 +14,12 @@
 # ============================================================================
 """Exponential moving average for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional
 
 from sonnet.src import metrics
 from sonnet.src import once
 from sonnet.src import types
-
 import tensorflow as tf
-from typing import Optional, Text
 
 
 class ExponentialMovingAverage(metrics.Metric):
@@ -52,7 +47,7 @@ class ExponentialMovingAverage(metrics.Metric):
       value is passed.
   """
 
-  def __init__(self, decay: types.FloatLike, name: Optional[Text] = None):
+  def __init__(self, decay: types.FloatLike, name: Optional[str] = None):
     """Creates a debiased moving average module.
 
     Args:
@@ -61,7 +56,7 @@ class ExponentialMovingAverage(metrics.Metric):
         values more closely.
       name: Name of the module.
     """
-    super(ExponentialMovingAverage, self).__init__(name=name)
+    super().__init__(name=name)
     self._decay = decay
     self._counter = tf.Variable(
         0, trainable=False, dtype=tf.int64, name="counter")

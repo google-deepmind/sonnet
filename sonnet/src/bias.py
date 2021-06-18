@@ -14,19 +14,14 @@
 # ============================================================================
 """Bias module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text
 
 
 class Bias(base.Module):
@@ -73,7 +68,7 @@ class Bias(base.Module):
                output_size: Optional[int] = None,
                bias_dims: Optional[Sequence[int]] = None,
                b_init: Optional[initializers.Initializer] = None,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a `Bias` module that supports broadcasting.
 
     Args:
@@ -87,7 +82,7 @@ class Bias(base.Module):
       b_init: Optional initializer for the bias. Default to zeros.
       name: Name of the module.
     """
-    super(Bias, self).__init__(name=name)
+    super().__init__(name=name)
     self.output_size = output_size
     self.bias_dims = bias_dims
     self.b_init = initializers.Zeros() if b_init is None else b_init

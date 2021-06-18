@@ -14,19 +14,15 @@
 # ============================================================================
 """Trivial convnet learning MNIST."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Dict
 
 from absl import app
 import sonnet as snt
 import tensorflow as tf
 import tensorflow_datasets as tfds
-from typing import Dict, Text
 
 
-def mnist(split: Text, batch_size: int) -> tf.data.Dataset:
+def mnist(split: str, batch_size: int) -> tf.data.Dataset:
   """Returns a tf.data.Dataset with MNIST image/label pairs."""
 
   def preprocess_dataset(images, labels):
@@ -87,7 +83,7 @@ def train_epoch(
 def test_accuracy(
     model: snt.Module,
     dataset: tf.data.Dataset,
-) -> Dict[Text, tf.Tensor]:
+) -> Dict[str, tf.Tensor]:
   """Computes accuracy on the test set."""
   correct, total = 0, 0
   for images, labels in dataset:

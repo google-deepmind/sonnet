@@ -14,17 +14,12 @@
 # ============================================================================
 """A minimal interface mlp module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Callable, Iterable, Optional
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import linear
-
 import tensorflow as tf
-from typing import Callable, Iterable, Optional, Text
 
 
 class MLP(base.Module):
@@ -38,7 +33,7 @@ class MLP(base.Module):
                activation: Callable[[tf.Tensor], tf.Tensor] = tf.nn.relu,
                dropout_rate=None,
                activate_final: bool = False,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs an MLP.
 
     Args:
@@ -60,7 +55,7 @@ class MLP(base.Module):
     if not with_bias and b_init is not None:
       raise ValueError("When with_bias=False b_init must not be set.")
 
-    super(MLP, self).__init__(name=name)
+    super().__init__(name=name)
     self._with_bias = with_bias
     self._w_init = w_init
     self._b_init = b_init
@@ -110,7 +105,7 @@ class MLP(base.Module):
 
   def reverse(self,
               activate_final: Optional[bool] = None,
-              name: Optional[Text] = None) -> "MLP":
+              name: Optional[str] = None) -> "MLP":
     """Returns a new MLP which is the layer-wise reverse of this MLP.
 
     NOTE: Since computing the reverse of an MLP requires knowing the input size

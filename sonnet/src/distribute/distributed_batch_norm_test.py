@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.distribute.batch_norm."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl import logging
 
 from absl.testing import parameterized
@@ -120,7 +116,7 @@ class CrossReplicaBatchNormTest(test_utils.TestCase, parameterized.TestCase):
       self.assertAllClose(out, expected_out)
 
 
-class TestMetric(object):
+class TestMetric:
 
   def __init__(self):
     self._foo = None

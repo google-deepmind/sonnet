@@ -14,10 +14,7 @@
 # ============================================================================
 """ResNet model for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Mapping, Optional, Sequence, Union
 
 from sonnet.src import base
 from sonnet.src import batch_norm
@@ -25,9 +22,7 @@ from sonnet.src import conv
 from sonnet.src import initializers
 from sonnet.src import linear
 from sonnet.src import pad
-
 import tensorflow as tf
-from typing import Mapping, Optional, Sequence, Text, Union
 
 
 class BottleNeckBlockV1(base.Module):
@@ -37,9 +32,9 @@ class BottleNeckBlockV1(base.Module):
                channels: int,
                stride: Union[int, Sequence[int]],
                use_projection: bool,
-               bn_config: Mapping[Text, float],
-               name: Optional[Text] = None):
-    super(BottleNeckBlockV1, self).__init__(name=name)
+               bn_config: Mapping[str, float],
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self._channels = channels
     self._stride = stride
     self._use_projection = use_projection
@@ -116,9 +111,9 @@ class BottleNeckBlockV2(base.Module):
                channels: int,
                stride: Union[int, Sequence[int]],
                use_projection: bool,
-               bn_config: Mapping[Text, float],
-               name: Optional[Text] = None):
-    super(BottleNeckBlockV2, self).__init__(name=name)
+               bn_config: Mapping[str, float],
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self._channels = channels
     self._stride = stride
     self._use_projection = use_projection
@@ -191,10 +186,10 @@ class BlockGroup(base.Module):
                channels: int,
                num_blocks: int,
                stride: Union[int, Sequence[int]],
-               bn_config: Mapping[Text, float],
+               bn_config: Mapping[str, float],
                resnet_v2: bool = False,
-               name: Optional[Text] = None):
-    super(BlockGroup, self).__init__(name=name)
+               name: Optional[str] = None):
+    super().__init__(name=name)
     self._channels = channels
     self._num_blocks = num_blocks
     self._stride = stride
@@ -228,10 +223,10 @@ class ResNet(base.Module):
   def __init__(self,
                blocks_per_group_list: Sequence[int],
                num_classes: int,
-               bn_config: Optional[Mapping[Text, float]] = None,
+               bn_config: Optional[Mapping[str, float]] = None,
                resnet_v2: bool = False,
                channels_per_group_list: Sequence[int] = (256, 512, 1024, 2048),
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a ResNet model.
 
     Args:
@@ -247,7 +242,7 @@ class ResNet(base.Module):
         of channels used for each block in each group.
       name: Name of the module.
     """
-    super(ResNet, self).__init__(name=name)
+    super().__init__(name=name)
     if bn_config is None:
       bn_config = {"decay_rate": 0.9, "eps": 1e-5}
     self._bn_config = bn_config
@@ -328,9 +323,9 @@ class ResNet50(ResNet):
 
   def __init__(self,
                num_classes: int,
-               bn_config: Optional[Mapping[Text, float]] = None,
+               bn_config: Optional[Mapping[str, float]] = None,
                resnet_v2: bool = False,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a ResNet model.
 
     Args:
@@ -341,8 +336,8 @@ class ResNet50(ResNet):
         False.
       name: Name of the module.
     """
-    super(ResNet50, self).__init__([3, 4, 6, 3],
-                                   num_classes=num_classes,
-                                   bn_config=bn_config,
-                                   resnet_v2=resnet_v2,
-                                   name=name)
+    super().__init__([3, 4, 6, 3],
+                     num_classes=num_classes,
+                     bn_config=bn_config,
+                     resnet_v2=resnet_v2,
+                     name=name)

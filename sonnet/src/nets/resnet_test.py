@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.nets.resnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 from sonnet.src import test_utils
 from sonnet.src.nets import resnet
@@ -53,7 +49,7 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters(3, 5)
   def test_error_incorrect_args_block_list(self, list_length):
     block_list = [i for i in range(list_length)]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, "blocks_per_group_list` must be of length 4 not {}".format(
             list_length)):
       resnet.ResNet(block_list, 10, {"decay_rate": 0.9, "eps": 1e-5})
@@ -61,7 +57,7 @@ class ResnetTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters(3, 5)
   def test_error_incorrect_args_channel_list(self, list_length):
     channel_list = [i for i in range(list_length)]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         "channels_per_group_list` must be of length 4 not {}".format(
             list_length)):

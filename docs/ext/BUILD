@@ -9,7 +9,6 @@ snt_py_library(
     srcs = ["link_tf_api.py"],
     deps = [
         # pip: docutils
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -22,6 +21,5 @@ snt_py_test(
     deps = [
         ":link_tf_api",
         # pip: absl/testing:absltest
-        # pip: tensorflow
     ],
 )

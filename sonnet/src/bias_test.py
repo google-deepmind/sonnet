@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.bias."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src import bias
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -27,7 +23,7 @@ class BiasTest(test_utils.TestCase):
 
   def test_output_shape(self):
     mod = bias.Bias(output_size=(2 * 2,))
-    with self.assertRaisesRegexp(ValueError, "Input shape must be [(]-1, 4[)]"):
+    with self.assertRaisesRegex(ValueError, "Input shape must be [(]-1, 4[)]"):
       mod(tf.ones([2, 2, 2]))
 
   def test_output_size_valid(self):
@@ -53,8 +49,8 @@ class BiasTest(test_utils.TestCase):
 
   def test_bias_dims_invalid(self):
     mod = bias.Bias(bias_dims=[1, 5])
-    with self.assertRaisesRegexp(ValueError,
-                                 "5 .* out of range for input of rank 3"):
+    with self.assertRaisesRegex(ValueError,
+                                "5 .* out of range for input of rank 3"):
       mod(tf.ones([1, 2, 3]))
 
   def test_b_init_defaults_to_zeros(self):

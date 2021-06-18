@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests checkpointing with Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 
 from absl import logging
@@ -31,7 +27,7 @@ import tensorflow as tf
 import tree
 
 
-class TestCheckpoint(object):
+class TestCheckpoint:
   """Wraps a tf.train.Checkpoint to make it more convenient for testing."""
 
   def __init__(self, golden=None, **kwargs):

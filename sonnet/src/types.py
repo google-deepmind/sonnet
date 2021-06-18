@@ -14,15 +14,10 @@
 # ============================================================================
 """Type aliases for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Callable, Iterable, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import tensorflow as tf
-
-from typing import Callable, Iterable, Mapping, Optional, Sequence, Text, Tuple, Union
 
 # Parameter update type, used by optimizers.
 ParameterUpdate = Optional[Union[tf.Tensor, tf.IndexedSlices]]
@@ -39,7 +34,7 @@ ShapeLike = Union[int, Sequence[int], tf.TensorShape]
 
 # Note that this is effectively treated as `Any`; see b/109648354.
 TensorNest = Union[TensorLike, Iterable['TensorNest'],
-                   Mapping[Text, 'TensorNest'],]  # pytype: disable=not-supported-yet
+                   Mapping[str, 'TensorNest'],]  # pytype: disable=not-supported-yet
 
 ActivationFn = Callable[[TensorLike], TensorLike]
 Axis = Union[int, slice, Sequence[int]]

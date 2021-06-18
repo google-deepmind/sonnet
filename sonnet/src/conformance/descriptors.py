@@ -14,23 +14,18 @@
 # ============================================================================
 """Module descriptors programatically describe how to use modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import collections
+from typing import Callable, Union
 
 import sonnet as snt
 import tensorflow as tf
-from typing import Callable, Union
 
 
 class Wrapped(snt.Module):
 
   @snt.no_name_scope
   def __init__(self, wrapped: snt.Module):
-    super(Wrapped, self).__init__()
+    super().__init__()
     self.wrapped = wrapped
 
 
@@ -47,7 +42,7 @@ class Recurrent(Wrapped):
   def __init__(self,
                module: Union[snt.RNNCore, snt.UnrolledRNN],
                unroller=None):
-    super(Recurrent, self).__init__(module)
+    super().__init__(module)
     self.unroller = unroller
 
   @snt.no_name_scope

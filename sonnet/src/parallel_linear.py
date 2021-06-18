@@ -14,19 +14,14 @@
 # ============================================================================
 """Parallel linear module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import math
+from typing import Optional
 
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import utils
 import tensorflow as tf
-from typing import Optional, Text
 
 
 class ParallelLinears(base.Module):
@@ -46,7 +41,7 @@ class ParallelLinears(base.Module):
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a `ParallelLinear` module.
 
     Args:
@@ -60,7 +55,7 @@ class ParallelLinears(base.Module):
         initialized to zero.
       name: Name of the module.
     """
-    super(ParallelLinears, self).__init__(name=name)
+    super().__init__(name=name)
     self.output_size = output_size
     self.with_bias = with_bias
     self.w_init = w_init

@@ -14,21 +14,16 @@
 # ============================================================================
 """Regularizers for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
+from typing import Sequence
 
 import six
 from sonnet.src import types
 import tensorflow as tf
-from typing import Sequence
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Regularizer(object):
+class Regularizer:
   """Base regularizer class."""
 
   @abc.abstractmethod

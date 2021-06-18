@@ -14,21 +14,15 @@
 # ============================================================================
 """Transpose convolutional module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 import numpy as np
-
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 def smart_concat(v1, v2):
@@ -62,12 +56,12 @@ class ConvNDTranspose(base.Module):
                output_shape: Optional[types.ShapeLike] = None,
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Text = "SAME",
+               padding: str = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Optional[Text] = None,
-               name: Optional[Text] = None):
+               data_format: Optional[str] = None,
+               name: Optional[str] = None):
     """Constructs a `ConvNDTranspose` module.
 
     Args:
@@ -96,7 +90,7 @@ class ConvNDTranspose(base.Module):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(ConvNDTranspose, self).__init__(name=name)
+    super().__init__(name=name)
 
     if not 1 <= num_spatial_dims <= 3:
       raise ValueError(
@@ -222,12 +216,12 @@ class Conv1DTranspose(ConvNDTranspose):
                output_shape: Optional[types.ShapeLike] = None,
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Text = "SAME",
+               padding: str = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NWC",
-               name: Optional[Text] = None):
+               data_format: str = "NWC",
+               name: Optional[str] = None):
     """Constructs a `Conv1DTranspose` module.
 
     Args:
@@ -255,7 +249,7 @@ class Conv1DTranspose(ConvNDTranspose):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv1DTranspose, self).__init__(
+    super().__init__(
         num_spatial_dims=1,
         output_channels=output_channels,
         kernel_shape=kernel_shape,
@@ -279,12 +273,12 @@ class Conv2DTranspose(ConvNDTranspose):
                output_shape: Optional[types.ShapeLike] = None,
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Text = "SAME",
+               padding: str = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NHWC",
-               name: Optional[Text] = None):
+               data_format: str = "NHWC",
+               name: Optional[str] = None):
     """Constructs a `Conv2DTranspose` module.
 
     Args:
@@ -312,7 +306,7 @@ class Conv2DTranspose(ConvNDTranspose):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv2DTranspose, self).__init__(
+    super().__init__(
         num_spatial_dims=2,
         output_channels=output_channels,
         kernel_shape=kernel_shape,
@@ -336,12 +330,12 @@ class Conv3DTranspose(ConvNDTranspose):
                output_shape: Optional[types.ShapeLike] = None,
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Text = "SAME",
+               padding: str = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NDHWC",
-               name: Optional[Text] = None):
+               data_format: str = "NDHWC",
+               name: Optional[str] = None):
     """Constructs a `Conv3DTranspose` module.
 
     Args:
@@ -369,7 +363,7 @@ class Conv3DTranspose(ConvNDTranspose):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv3DTranspose, self).__init__(
+    super().__init__(
         num_spatial_dims=3,
         output_channels=output_channels,
         kernel_shape=kernel_shape,

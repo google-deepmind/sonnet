@@ -14,15 +14,8 @@
 # ============================================================================
 """Group normalization implementation for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import collections.abc
-from typing import Optional, Text
-
-import six
+from typing import Optional
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
@@ -78,8 +71,8 @@ class GroupNorm(base.Module):
                eps: types.FloatLike = 1e-5,
                scale_init: Optional[initializers.Initializer] = None,
                offset_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "channels_last",
-               name: Optional[Text] = None):
+               data_format: str = "channels_last",
+               name: Optional[str] = None):
     """Constructs a ``GroupNorm`` module.
 
     Args:
@@ -104,14 +97,14 @@ class GroupNorm(base.Module):
         default it is ``channels_last``.
       name: Name of the module.
     """
-    super(GroupNorm, self).__init__(name=name)
+    super().__init__(name=name)
 
     if isinstance(axis, slice):
       self._axis = axis
-    elif isinstance(axis, six.integer_types):
+    elif isinstance(axis, int):
       self._axis = [axis]
     elif (isinstance(axis, collections.abc.Iterable) and
-          all(isinstance(ax, six.integer_types) for ax in axis)):
+          all(isinstance(ax, int) for ax in axis)):
       self._axis = axis
     else:
       raise ValueError("`axis` should be an int, slice or iterable of ints.")

@@ -14,14 +14,9 @@
 # ============================================================================
 """Initializers for Sonnet."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import abc
 import collections
-from typing import Iterable, Mapping, Optional, Text, Union
+from typing import Iterable, Mapping, Optional, Union
 import numpy as np
 import six
 from sonnet.src import types
@@ -29,7 +24,7 @@ import tensorflow as tf
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Initializer(object):
+class Initializer:
   """Initializer base class, all initializers must implement a call method."""
 
   @abc.abstractmethod
@@ -293,8 +288,8 @@ class VarianceScaling(Initializer):
 
   def __init__(self,
                scale: float = 1.0,
-               mode: Text = "fan_in",
-               distribution: Text = "truncated_normal",
+               mode: str = "fan_in",
+               distribution: str = "truncated_normal",
                seed: Optional[int] = None):
     """Constructs a variance scaling initalizer.
 
@@ -349,8 +344,8 @@ class VarianceScaling(Initializer):
           shape=shape, minval=-limit, maxval=limit, dtype=dtype, seed=self.seed)
 
 
-def check_initializers(initializers: Mapping[Text, Initializer],
-                       expected_keys: Iterable[Text]):
+def check_initializers(initializers: Mapping[str, Initializer],
+                       expected_keys: Iterable[str]):
   """Checks a dictionary of initializers only contains the given keys."""
   if initializers is None:
     return {}

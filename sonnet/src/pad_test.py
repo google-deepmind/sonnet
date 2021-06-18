@@ -14,10 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.pad."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from absl.testing import parameterized
 from sonnet.src import pad
 from sonnet.src import test_utils
@@ -41,7 +37,7 @@ class PadTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters((2, [2, 2]), (3, [4, 4, 4, 4]), ([2, 2], 3),
                             ([4, 4, 4, 4], 3))
   def test_padding_incorrect_input(self, kernel_size, rate):
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         TypeError,
         r"must be a scalar or sequence of length 1 or sequence of length 3."):
       pad.create(pad.full, kernel_size, rate, 3, -1)

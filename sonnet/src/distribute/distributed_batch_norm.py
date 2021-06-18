@@ -14,12 +14,7 @@
 # ============================================================================
 """Distributed batch normalization module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
-from typing import Optional, Text, Tuple
+from typing import Optional, Tuple
 
 from sonnet.src import batch_norm
 from sonnet.src import initializers
@@ -53,8 +48,8 @@ class CrossReplicaBatchNorm(batch_norm.BaseBatchNorm):
                eps: types.FloatLike = 1e-5,
                scale_init: Optional[initializers.Initializer] = None,
                offset_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "channels_last",
-               name: Optional[Text] = None):
+               data_format: str = "channels_last",
+               name: Optional[str] = None):
     """Constructs a ``CrossReplicaBatchNorm`` module.
 
     Args:
@@ -81,7 +76,7 @@ class CrossReplicaBatchNorm(batch_norm.BaseBatchNorm):
         default it is ``channels_last``.
       name: Name of the module.
     """
-    super(CrossReplicaBatchNorm, self).__init__(
+    super().__init__(
         create_scale=create_scale,
         create_offset=create_offset,
         moving_mean=moving_mean,
@@ -94,7 +89,7 @@ class CrossReplicaBatchNorm(batch_norm.BaseBatchNorm):
 
   @once.once
   def _initialize(self, inputs: tf.Tensor):
-    super(CrossReplicaBatchNorm, self)._initialize(inputs)
+    super()._initialize(inputs)
 
     # Always use the unfused op here as mean/var are calculated before the op is
     # called so no speed-up is gained from the fused op

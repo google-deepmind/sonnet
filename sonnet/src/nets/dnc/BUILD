@@ -25,7 +25,7 @@ snt_py_test(
         ":control",
         # pip: absl/testing:parameterized
         # pip: numpy
-        # pip: six
+        "//sonnet/src:recurrent",
         "//sonnet/src:test_utils",
         # pip: tensorflow
         # pip: tree

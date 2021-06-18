@@ -17,10 +17,6 @@
 All optimizers implement the `snt.Optimizer` interface.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src.optimizers.adam import Adam
 from sonnet.src.optimizers.momentum import Momentum
 from sonnet.src.optimizers.rmsprop import RMSProp

@@ -14,10 +14,7 @@
 # ============================================================================
 """Tests Sonnet and TF Distribution Strategy."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Callable, Tuple
 
 from absl.testing import parameterized
 import sonnet as snt
@@ -27,7 +24,6 @@ from sonnet.src.conformance import goldens
 from sonnet.src.distribute import replicator as snt_replicator
 from sonnet.src.distribute import replicator_test_utils as replicator_utils
 import tensorflow as tf
-from typing import Callable, Tuple
 
 
 class TpuReplicatorTest(test_utils.TestCase, parameterized.TestCase):

@@ -14,10 +14,6 @@
 # ============================================================================
 """Ensures that code samples in Sonnet are accurate."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import doctest
 import inspect
 
@@ -34,7 +30,7 @@ class DoctestTest(test_utils.TestCase, parameterized.TestCase):
   ENTER_PRIMARY_DEVICE = False
 
   def setUp(self):
-    super(DoctestTest, self).setUp()
+    super().setUp()
     if self.primary_device != "TPU":
       # `TpuReplicator` cannot be constructed without a TPU, however it has
       # exactly the same API as `Replicator` so we can run doctests using that

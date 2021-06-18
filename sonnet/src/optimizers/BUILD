@@ -9,6 +9,8 @@ snt_py_library(
     testonly = 1,
     srcs = ["optimizer_tests.py"],
     deps = [
+        # pip: absl/testing:parameterized
+        # pip: numpy
         "//sonnet/src:base",
         "//sonnet/src:test_utils",
         # pip: tensorflow

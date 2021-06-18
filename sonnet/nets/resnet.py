@@ -14,10 +14,6 @@
 # ============================================================================
 """ResNet components."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from sonnet.src.nets.resnet import BlockGroup
 from sonnet.src.nets.resnet import BottleNeckBlockV1
 from sonnet.src.nets.resnet import BottleNeckBlockV2

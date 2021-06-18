@@ -14,11 +14,6 @@
 # ============================================================================
 """Tests Sonnet and Keras compatibility."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 from absl.testing import parameterized
 import sonnet as snt
 from sonnet.src import test_utils
@@ -180,7 +175,7 @@ class LayerAdapter(tf.keras.layers.Layer):
   """
 
   def __init__(self, module, method="__call__", dtype=tf.float32):
-    super(LayerAdapter, self).__init__(dtype=dtype)
+    super().__init__(dtype=dtype)
     self.module = module
     self._module_call_method = getattr(module, method)
     self._output_shapes = None
@@ -205,7 +200,7 @@ class LayerAdapter(tf.keras.layers.Layer):
     return output_shapes
 
   def build(self, input_shape):
-    super(LayerAdapter, self).build(input_shape)
+    super().build(input_shape)
 
     # Trigger variable initialization by tracing the module.
     self._trace_and_initialize(input_shape)
@@ -225,7 +220,7 @@ class LayerAdapter(tf.keras.layers.Layer):
 class ModuleWithLayer(snt.Module):
 
   def __init__(self):
-    super(ModuleWithLayer, self).__init__()
+    super().__init__()
     self.dense = tf.keras.layers.Dense(10)
 
   def __call__(self, x):

@@ -14,11 +14,6 @@
 # ============================================================================
 """Implements part of the Haiku ("Sonnet for JAX") API in TensorFlow 2."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
-
 import collections
 import functools
 import itertools
@@ -41,7 +36,7 @@ class TensorVariableCallbacks(threading.local):
   instance = None  # Thread local singleton instance.
 
   def __init__(self):
-    super(TensorVariableCallbacks, self).__init__()
+    super().__init__()
     self._recording = False
     self._callbacks = []
 

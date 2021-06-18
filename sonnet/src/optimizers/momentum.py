@@ -14,19 +14,14 @@
 # ============================================================================
 """SGD with Momentum module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
 from sonnet.src.optimizers import optimizer_utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 def momentum_update(update, learning_rate, mu, momentum, use_nesterov):
@@ -53,7 +48,7 @@ class Momentum(base.Optimizer):
                learning_rate: Union[types.FloatLike, tf.Variable],
                momentum: Union[types.FloatLike, tf.Variable],
                use_nesterov: bool = False,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a `Momentum` module.
 
     Args:
@@ -62,7 +57,7 @@ class Momentum(base.Optimizer):
       use_nesterov: Whether to use Nesterov momentum.
       name: Name of the module.
     """
-    super(Momentum, self).__init__(name)
+    super().__init__(name)
     self.learning_rate = learning_rate
     self.momentum = momentum  # TODO(petebu) Reconsider name.
     self.use_nesterov = use_nesterov

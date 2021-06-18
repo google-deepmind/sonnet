@@ -14,17 +14,12 @@
 # ============================================================================
 """Stochastic Gradient Descent module."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 from sonnet.src import base
 from sonnet.src import types
 from sonnet.src.optimizers import optimizer_utils
-
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 class SGD(base.Optimizer):
@@ -36,14 +31,14 @@ class SGD(base.Optimizer):
 
   def __init__(self,
                learning_rate: Union[types.FloatLike, tf.Variable],
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs an `SGD` module.
 
     Args:
       learning_rate: Learning rate.
       name: Name of the module.
     """
-    super(SGD, self).__init__(name)
+    super().__init__(name)
     self.learning_rate = learning_rate
 
   def apply(self, updates: Sequence[types.ParameterUpdate],

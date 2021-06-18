@@ -14,28 +14,24 @@
 # ============================================================================
 """Reshaping Sonnet modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence
 
 import numpy as np
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import types
 import tensorflow as tf
-from typing import Optional, Sequence, Text
 
 
 def reshape(inputs: tf.Tensor,
             output_shape: types.ShapeLike,
             preserve_dims: int = 1,
-            name: Optional[Text] = None) -> tf.Tensor:
+            name: Optional[str] = None) -> tf.Tensor:
   """A shortcut for applying :class:`Reshape` to the ``inputs``."""
   return Reshape(output_shape, preserve_dims, name=name)(inputs)
 
 
-def flatten(inputs: tf.Tensor, name: Text = "flatten") -> tf.Tensor:
+def flatten(inputs: tf.Tensor, name: str = "flatten") -> tf.Tensor:
   """A shortcut for applying :class:`Flatten` to the ``inputs``."""
   return Flatten(name=name)(inputs)
 
@@ -92,7 +88,7 @@ class Reshape(base.Module):
   def __init__(self,
                output_shape: types.ShapeLike,
                preserve_dims: int = 1,
-               name: Optional[Text] = None):
+               name: Optional[str] = None):
     """Constructs a ``Reshape`` module.
 
     Args:
@@ -107,7 +103,7 @@ class Reshape(base.Module):
     Raises:
       ValueError: If ``preserve_dims`` is not positive.
     """
-    super(Reshape, self).__init__(name=name)
+    super().__init__(name=name)
 
     if preserve_dims <= 0:
       raise ValueError("Argument preserve_dims should be >= 1.")
@@ -163,7 +159,7 @@ class Reshape(base.Module):
     return output
 
   @base.no_name_scope
-  def reversed(self, name: Optional[Text] = None) -> "Reshape":
+  def reversed(self, name: Optional[str] = None) -> "Reshape":
     """Returns inverse batch reshape."""
     if name is None:
       name = self.name + "_reversed"
@@ -184,12 +180,11 @@ class Flatten(Reshape):
   See :class:`Reshape` for more details.
   """
 
-  def __init__(self, preserve_dims: int = 1, name: Optional[Text] = None):
+  def __init__(self, preserve_dims: int = 1, name: Optional[str] = None):
     """Constructs a ``Flatten`` module.
 
     Args:
       preserve_dims: Number of leading dimensions that will not be reshaped.
       name: Name of the module.
     """
-    super(Flatten, self).__init__(
-        output_shape=(-1,), preserve_dims=preserve_dims, name=name)
+    super().__init__(output_shape=(-1,), preserve_dims=preserve_dims, name=name)

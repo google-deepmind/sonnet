@@ -14,14 +14,10 @@
 # ============================================================================
 """Utility function to build Sonnet modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Any, Callable
 
 import tensorflow as tf
 import tree
-from typing import Any, Callable
 
 
 def _int_or_none(o):

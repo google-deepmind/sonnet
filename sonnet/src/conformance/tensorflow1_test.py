@@ -15,10 +15,6 @@
 
 """Tests Sonnet 2 with TF1."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import sonnet as snt
 from sonnet.src import test_utils
 import tensorflow.compat.v1 as tf
@@ -30,7 +26,7 @@ class TensorFlow1Test(test_utils.TestCase):
     if tf.version.GIT_VERSION != "unknown":
       self.skipTest("This test only runs if testing against TF at head.")
 
-    with self.assertRaisesRegexp(AssertionError, "requires TensorFlow 2"):
+    with self.assertRaisesRegex(AssertionError, "requires TensorFlow 2"):
       snt.Module()
 
 if __name__ == "__main__":

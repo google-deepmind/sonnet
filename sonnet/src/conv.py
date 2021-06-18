@@ -14,21 +14,15 @@
 # ============================================================================
 """Convolutional modules."""
 
-from __future__ import absolute_import
-from __future__ import division
-# from __future__ import google_type_annotations
-from __future__ import print_function
+from typing import Optional, Sequence, Union
 
 import numpy as np
-import six
-
 from sonnet.src import base
 from sonnet.src import initializers
 from sonnet.src import once
 from sonnet.src import pad
 from sonnet.src import utils
 import tensorflow as tf
-from typing import Optional, Sequence, Text, Union
 
 
 class ConvND(base.Module):
@@ -40,12 +34,12 @@ class ConvND(base.Module):
                kernel_shape: Union[int, Sequence[int]],
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Union[Text, pad.Paddings] = "SAME",
+               padding: Union[str, pad.Paddings] = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Optional[Text] = None,
-               name: Optional[Text] = None):
+               data_format: Optional[str] = None,
+               name: Optional[str] = None):
     """Constructs a `ConvND` module.
 
     Args:
@@ -74,7 +68,7 @@ class ConvND(base.Module):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(ConvND, self).__init__(name=name)
+    super().__init__(name=name)
 
     if not 1 <= num_spatial_dims <= 3:
       raise ValueError(
@@ -86,7 +80,7 @@ class ConvND(base.Module):
     self.stride = stride
     self.rate = rate
 
-    if isinstance(padding, six.string_types):
+    if isinstance(padding, str):
       self.conv_padding = padding.upper()
       self.padding_func = None
     else:
@@ -175,12 +169,12 @@ class Conv1D(ConvND):
                kernel_shape: Union[int, Sequence[int]],
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Union[Text, pad.Paddings] = "SAME",
+               padding: Union[str, pad.Paddings] = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NWC",
-               name: Optional[Text] = None):
+               data_format: str = "NWC",
+               name: Optional[str] = None):
     """Constructs a ``Conv1D`` module.
 
     Args:
@@ -207,7 +201,7 @@ class Conv1D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv1D, self).__init__(
+    super().__init__(
         num_spatial_dims=1,
         output_channels=output_channels,
         kernel_shape=kernel_shape,
@@ -229,12 +223,12 @@ class Conv2D(ConvND):
                kernel_shape: Union[int, Sequence[int]],
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Union[Text, pad.Paddings] = "SAME",
+               padding: Union[str, pad.Paddings] = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NHWC",
-               name: Optional[Text] = None):
+               data_format: str = "NHWC",
+               name: Optional[str] = None):
     """Constructs a ``Conv2D`` module.
 
     Args:
@@ -262,7 +256,7 @@ class Conv2D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv2D, self).__init__(
+    super().__init__(
         num_spatial_dims=2,
         output_channels=output_channels,
         kernel_shape=kernel_shape,
@@ -284,12 +278,12 @@ class Conv3D(ConvND):
                kernel_shape: Union[int, Sequence[int]],
                stride: Union[int, Sequence[int]] = 1,
                rate: Union[int, Sequence[int]] = 1,
-               padding: Union[Text, pad.Paddings] = "SAME",
+               padding: Union[str, pad.Paddings] = "SAME",
                with_bias: bool = True,
                w_init: Optional[initializers.Initializer] = None,
                b_init: Optional[initializers.Initializer] = None,
-               data_format: Text = "NDHWC",
-               name: Optional[Text] = None):
+               data_format: str = "NDHWC",
+               name: Optional[str] = None):
     """Constructs a ``Conv3D`` module.
 
     Args:
@@ -317,7 +311,7 @@ class Conv3D(ConvND):
       data_format: The data format of the input.
       name: Name of the module.
     """
-    super(Conv3D, self).__init__(
+    super().__init__(
         num_spatial_dims=3,
         output_channels=output_channels,
         kernel_shape=kernel_shape,

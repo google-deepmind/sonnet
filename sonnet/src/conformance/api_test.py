@@ -14,7 +14,8 @@
 # ============================================================================
 """Tests for Sonnet's public API."""
 
-from six.moves import reload_module as reload
+import importlib
+
 import sonnet as snt
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -28,7 +29,7 @@ class PublicSymbolsTest(test_utils.TestCase):
   def test_supports_reload(self):
     mysnt = snt
     for _ in range(2):
-      mysnt = reload(mysnt)
+      mysnt = importlib.reload(mysnt)
       self.assertFalse(hasattr(mysnt, "src"))
 
 

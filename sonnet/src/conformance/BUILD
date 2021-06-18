@@ -13,7 +13,6 @@ snt_py_library(
     deps = [
         # pip: absl/testing:parameterized
         # pip: numpy
-        # pip: six
         "//sonnet",
         # pip: tensorflow
     ],
@@ -23,7 +22,6 @@ snt_py_test(
     name = "api_test",
     srcs = ["api_test.py"],
     deps = [
-        # pip: six
         "//sonnet",
         "//sonnet/src:test_utils",
         # pip: tensorflow

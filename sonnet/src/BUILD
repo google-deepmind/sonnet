@@ -11,7 +11,6 @@ snt_py_library(
         ":once",
         ":types",
         ":utils",
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -24,7 +23,6 @@ snt_py_test(
         ":test_utils",
         # pip: absl/testing:parameterized
         # pip: numpy
-        # pip: six
         # pip: tensorflow
         # pip: wrapt
     ],
@@ -239,7 +237,6 @@ snt_py_library(
     deps = [
         ":types",
         # pip: numpy
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -333,7 +330,6 @@ snt_py_library(
     deps = [
         ":base",
         ":once",
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -375,7 +371,6 @@ snt_py_library(
         ":once",
         ":types",
         ":utils",
-        # pip: six
         # pip: tensorflow
         # pip: tree
     ],
@@ -400,7 +395,6 @@ snt_py_library(
     srcs = ["regularizers.py"],
     deps = [
         ":types",
-        # pip: six
         # pip: tensorflow
     ],
 )
@@ -513,7 +507,6 @@ snt_py_library(
     deps = [
         ":initializers",
         # pip: absl/logging
-        # pip: six
         # pip: tabulate
         # pip: tensorflow
     ],

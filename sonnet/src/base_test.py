@@ -18,7 +18,6 @@ import abc
 
 from absl.testing import parameterized
 import numpy as np
-import six
 from sonnet.src import base
 from sonnet.src import test_utils
 import tensorflow as tf
@@ -409,8 +408,7 @@ class RecursiveModule(base.Module):
     self.w = tf.Variable(1.0, trainable=trainable, name="mushroom")
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AbstractModule(base.Module):
+class AbstractModule(base.Module, metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
   def __call__(self, x):
@@ -632,8 +630,7 @@ class CombiningMetaclass(base.ModuleMetaclass, CustomMetaclass):
     return new_type
 
 
-@six.add_metaclass(CombiningMetaclass)
-class ModuleWithCustomMetaclass(base.Module):
+class ModuleWithCustomMetaclass(base.Module, metaclass=CombiningMetaclass):
 
   def __init__(self):
     super(ModuleWithCustomMetaclass, self).__init__()

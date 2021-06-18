@@ -73,7 +73,6 @@ snt_py_library(
     srcs = ["rmsprop.py"],
     deps = [
         ":optimizer_utils",
-        # pip: six
         "//sonnet/src:base",
         "//sonnet/src:once",
         "//sonnet/src:types",

@@ -20,7 +20,6 @@ import functools
 from typing import Optional, Sequence, Tuple, Union
 import uuid
 
-import six
 from sonnet.src import base
 from sonnet.src import conv
 from sonnet.src import initializers
@@ -39,8 +38,7 @@ from tensorflow.python.eager import function as function_lib
 # pylint: enable=g-direct-tensorflow-import
 
 
-@six.add_metaclass(abc.ABCMeta)
-class RNNCore(base.Module):
+class RNNCore(base.Module, metaclass=abc.ABCMeta):
   """Base class for Recurrent Neural Network cores.
 
   This class defines the basic functionality that every core should
@@ -84,8 +82,7 @@ class RNNCore(base.Module):
     """
 
 
-@six.add_metaclass(abc.ABCMeta)
-class UnrolledRNN(base.Module):
+class UnrolledRNN(base.Module, metaclass=abc.ABCMeta):
   """Base class for unrolled Recurrent Neural Networks.
 
   This class is a generalization of :class:`RNNCore` which operates on
@@ -261,7 +258,7 @@ def static_unroll(
   outputs = None
   state = initial_state
   output_accs = None
-  for t in six.moves.range(num_steps):
+  for t in range(num_steps):
     outputs, state = _rnn_step(
         core,
         input_tas,

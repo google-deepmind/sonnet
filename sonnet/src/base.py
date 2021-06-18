@@ -22,7 +22,6 @@ import pprint
 import sys
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, TypeVar
 
-import six
 from sonnet.src import once
 from sonnet.src import types
 from sonnet.src import utils
@@ -181,7 +180,7 @@ def auto_repr(cls: Type[Any], *args, **kwargs) -> str:
   Returns:
     A string representing a call equivalent to `cls(*args, **kwargs)`.
   """
-  argspec = utils.getfullargspec(cls.__init__)
+  argspec = inspect.getfullargspec(cls.__init__)
   arg_names = argspec.args
   # Keep used positionals minus self.
   arg_names = arg_names[1:(len(args) + 1)]
@@ -255,7 +254,7 @@ def wrap_with_name_scope(
         "The super constructor must be called before any other methods in "
         "your constructor. If this is not possible then annotate all the "
         "methods called with `@snt.no_name_scope`.")
-    six.raise_from(exc_value, exc_value_from)
+    raise exc_value from exc_value_from
 
   with module_name_scope:
     # snt.Module enters the module name scope for all methods. To disable this
@@ -366,7 +365,7 @@ def assert_tf2():
 assert_tf2.checked = False
 
 
-class Module(six.with_metaclass(ModuleMetaclass, tf.Module)):
+class Module(tf.Module, metaclass=ModuleMetaclass):
   """Base class for Sonnet modules.
 
   A Sonnet module is a lightweight container for variables and other modules.

@@ -21,7 +21,6 @@ import re
 from typing import Any, Callable, Dict, Generic, Optional, Sequence, Tuple, TypeVar, Union
 
 from absl import logging
-import six
 from sonnet.src import initializers
 import tabulate
 import tensorflow as tf
@@ -74,7 +73,7 @@ def decorator(
 
       return _decorate_bound_method
 
-    argspec = getfullargspec(f)
+    argspec = inspect.getfullargspec(f)
     if argspec.args and argspec.args[0] == "self":
 
       @functools.wraps(f)
@@ -181,16 +180,6 @@ def smart_autograph(f: T) -> T:
       return f_autograph(*args, **kwargs)
 
   return smart_autograph_wrapper
-
-
-def getfullargspec(func):
-  """Gets the names and default values of a function's parameters."""
-  if six.PY2:
-    # Assume that we are running with PyType patched Python 2.7 and getargspec
-    # will not barf if `func` has type annotations.
-    return inspect.getargspec(func)  # pylint: disable=deprecated-method
-  else:
-    return inspect.getfullargspec(func)
 
 
 def variable_like(inputs: Union[tf.Tensor, tf.Variable],

@@ -19,7 +19,6 @@ from typing import Sequence, Tuple
 
 from absl.testing import parameterized
 import numpy as np
-import six
 import sonnet as snt
 import tensorflow as tf
 
@@ -75,8 +74,7 @@ def range_like(t, start=0):
       t.shape)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Golden:
+class Golden(abc.ABC):
   """Represents a golden checkpoint file."""
 
   @abc.abstractmethod
@@ -95,7 +93,6 @@ class Golden:
     pass
 
 
-@six.add_metaclass(abc.ABCMeta)
 class AbstractGolden(Golden):
   """Abstract base class for golden tests of single input modules."""
 

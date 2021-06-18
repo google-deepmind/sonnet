@@ -18,13 +18,11 @@ import abc
 import collections
 from typing import Iterable, Mapping, Optional, Union
 import numpy as np
-import six
 from sonnet.src import types
 import tensorflow as tf
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Initializer:
+class Initializer(abc.ABC):
   """Initializer base class, all initializers must implement a call method."""
 
   @abc.abstractmethod

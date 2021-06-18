@@ -17,13 +17,11 @@
 import abc
 from typing import Sequence
 
-import six
 from sonnet.src import types
 import tensorflow as tf
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Regularizer:
+class Regularizer(abc.ABC):
   """Base regularizer class."""
 
   @abc.abstractmethod

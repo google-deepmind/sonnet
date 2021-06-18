@@ -17,14 +17,12 @@
 import abc
 from typing import Optional
 
-import six
 from sonnet.src import base
 from sonnet.src import once
 import tensorflow as tf
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Metric(base.Module):
+class Metric(base.Module, metaclass=abc.ABCMeta):
   """Metric base class."""
 
   @abc.abstractmethod

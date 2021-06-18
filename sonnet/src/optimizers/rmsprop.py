@@ -14,9 +14,9 @@
 # ============================================================================
 """RMSProp module."""
 
+import itertools
 from typing import Optional, Sequence, Union
 
-import six
 from sonnet.src import base
 from sonnet.src import once
 from sonnet.src import types
@@ -127,7 +127,7 @@ class RMSProp(base.Optimizer):
     optimizer_utils.check_distribution_strategy()
     optimizer_utils.check_updates_parameters(updates, parameters)
     self._initialize(parameters)
-    for update, parameter, mom_var, ms_var, mg_var in six.moves.zip_longest(
+    for update, parameter, mom_var, ms_var, mg_var in itertools.zip_longest(
         updates, parameters, self.mom, self.ms, self.mg):
       if update is None:
         continue

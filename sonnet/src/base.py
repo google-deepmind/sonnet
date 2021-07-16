@@ -131,7 +131,7 @@ class ModuleMetaclass(abc.ABCMeta):
 
       # TODO(tomhennigan) Remove `_scope_name` after next TF release.
       ran_super_ctor = (
-          hasattr(module, "_name_scope") or hasattr(module, "_scope_name"))
+          hasattr(module, "_name_scope_v2") or hasattr(module, "_scope_name"))
 
       if exc_info[0] is None and not ran_super_ctor:
         raise ValueError(

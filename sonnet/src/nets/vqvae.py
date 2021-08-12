@@ -208,7 +208,7 @@ class VectorQuantizerEMA(base.Module):
     embedding_shape = [embedding_dim, num_embeddings]
     initializer = initializers.VarianceScaling(distribution='uniform')
     self.embeddings = tf.Variable(
-        initializer(embedding_shape, dtype), name='embeddings')
+        initializer(embedding_shape, dtype), trainable=False, name='embeddings')
 
     self.ema_cluster_size = moving_averages.ExponentialMovingAverage(
         decay=self.decay, name='ema_cluster_size')

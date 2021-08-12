@@ -144,6 +144,13 @@ class VqvaeTest(parameterized.TestCase, test_utils.TestCase):
       current_embeddings = vqvae_module.embeddings.numpy()
       self.assertTrue((current_embeddings == prev_embeddings).all())
 
+  def testEmbeddingsNotTrainable(self):
+    # NOTE: EMA embeddings are updated during the forward pass and not as part
+    # of the optimizer step.
+    model = vqvae.VectorQuantizerEMA(
+        embedding_dim=6, num_embeddings=13, commitment_cost=0.5, decay=0.1)
+    self.assertFalse(model.embeddings.trainable)
+
 
 if __name__ == '__main__':
   tf.test.main()

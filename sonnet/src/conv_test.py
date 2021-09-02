@@ -14,8 +14,6 @@
 # ============================================================================
 """Tests for sonnet.v2.src.conv."""
 
-from unittest import mock
-
 from absl.testing import parameterized
 import numpy as np
 from sonnet.src import conv
@@ -34,30 +32,29 @@ def create_constant_initializers(w, b, with_bias):
     return {"w_init": initializers.Constant(w)}
 
 
-def foo(i):
-  return [i, i]
-
-
 class ConvTest(test_utils.TestCase, parameterized.TestCase):
 
-  @mock.patch(__name__ + ".foo", mock.MagicMock(return_value=[0, 0]))
   def testPaddingFunctionReached(self):
     self.reached = False
+
+    def padding_func(*unused_args):
+      padding_func.called = True
+      return [0, 0]
 
     conv1 = conv.ConvND(
         num_spatial_dims=2,
         output_channels=1,
         kernel_shape=3,
         stride=1,
-        padding=foo,
+        padding=padding_func,
         data_format="NHWC",
         **create_constant_initializers(1.0, 1.0, True))
 
     conv1(tf.ones([1, 5, 5, 1], dtype=tf.float32))
 
     self.assertEqual(conv1.conv_padding, "VALID")
-    self.assertEqual(conv1.padding_func, foo)
-    self.assertTrue(foo.called)
+    self.assertEqual(conv1.padding_func, padding_func)
+    self.assertTrue(getattr(padding_func, "called", False))
 
   @parameterized.parameters(0, 4)
   def testIncorrectN(self, n):

@@ -27,7 +27,7 @@ import tensorflow as tf
 
 
 def get_controller_ctor(controller_name):
-  """Returns the constructor for a givn controller name."""
+  """Returns the constructor for a given controller name."""
   if controller_name == 'LSTM':
     return recurrent.LSTM
   elif controller_name == 'GRU':
@@ -100,7 +100,7 @@ def deep_core(control_name,
     num_layers: Number of layers.
     skip_connections: Boolean that indicates whether to use skip connections.
       See documenation for sonnet.DeepRnn in
-      //learning/deepmind/tensorflow/sonnet/python/modules/basic_rnn.py for more
+      https://github.com/deepmind/sonnet/blob/master/sonnet/python/modules/basic_rnn.py for more
       information.
     name: module name.
 

@@ -34,6 +34,9 @@ snt_py_test(
     srcs = ["checkpoint_test.py"],
     data = [":checkpoints"],
     shard_count = 10,
+    tags = [
+        "notap",  # TODO(b/203294224): investigate flake on GPU.
+    ],
     deps = [
         ":goldens",
         # pip: absl/logging

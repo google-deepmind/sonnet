@@ -456,6 +456,9 @@ snt_py_test(
 snt_py_library(
     name = "group_norm",
     srcs = ["group_norm.py"],
+    tags = [
+        "notap",  # TODO(b/208346960): investigate flake on tpu.
+    ],
     deps = [
         ":base",
         ":initializers",

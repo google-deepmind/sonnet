@@ -26,7 +26,7 @@ ParameterUpdate = Optional[Union[tf.Tensor, tf.IndexedSlices]]
 TensorLike = Union[np.ndarray, tf.Tensor, tf.Variable]
 
 # Note that we have no way of statically verifying the tensor's shape.
-BoolLike = Union[bool, np.bool, TensorLike]
+BoolLike = Union[bool, np.bool_, TensorLike]
 IntegerLike = Union[int, np.integer, TensorLike]
 FloatLike = Union[float, np.floating, TensorLike]
 

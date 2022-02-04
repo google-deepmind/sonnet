@@ -125,7 +125,7 @@ class OffDiagonalOrthogonal(Regularizer):
       >>> reg([t])
       <tf.Tensor: ...>
 
-  corresponds to copmuting
+  corresponds to computing
 
       >>> w = tf.reshape(t, [-1, 2])
       >>> w_gram_sq = tf.square(tf.matmul(tf.transpose(w), w))

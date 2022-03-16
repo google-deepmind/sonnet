@@ -226,8 +226,8 @@ def unroll_descriptors(descriptors, unroller=None):
 
 
 RECURRENT_MODULES = (
-    unroll_descriptors(RNN_CORES, snt.dynamic_unroll) +
-    unroll_descriptors(RNN_CORES, snt.static_unroll) +
+    # unroll_descriptors(RNN_CORES, snt.dynamic_unroll) +
+    # unroll_descriptors(RNN_CORES, snt.static_unroll) +
     unroll_descriptors(UNROLLED_RNN_CORES))
 
 

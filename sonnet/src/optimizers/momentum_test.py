@@ -201,7 +201,10 @@ class ReferenceMomentumTest(MomentumTest):
     if "use_nesterov" in kwargs:
       kwargs["nesterov"] = kwargs["use_nesterov"]
       del kwargs["use_nesterov"]
-    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.SGD(**kwargs))
+    if hasattr(tf.keras.optimizers, "legacy"):
+      return optimizer_tests.WrappedTFOptimizer(
+          tf.keras.optimizers.legacy.SGD(**kwargs))
+    return optimizer_tests.WrappedTFOptimizer(tf.keras.optimizers.SGD(**kwargs))
 
 
 if __name__ == "__main__":

@@ -201,7 +201,11 @@ class ReferenceRMSPropTest(RMSPropTest):
     if "learning_rate" not in kwargs:
       kwargs["learning_rate"] = 0.1
     kwargs["rho"] = kwargs.pop("decay", 0.9)
-    return optimizer_tests.WrappedTFOptimizer(tf.optimizers.RMSprop(**kwargs))
+    if hasattr(tf.keras.optimizers, "legacy"):
+      return optimizer_tests.WrappedTFOptimizer(
+          tf.keras.optimizers.legacy.RMSprop(**kwargs))
+    return optimizer_tests.WrappedTFOptimizer(
+        tf.keras.optimizers.RMSprop(**kwargs))
 
 
 if __name__ == "__main__":

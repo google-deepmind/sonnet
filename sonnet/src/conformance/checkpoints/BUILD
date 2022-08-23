@@ -3,7 +3,7 @@ package(
     default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"],
 )
 
-licenses(["notice"])  # Apache 2.0 License
+licenses(["notice"])
 
 py_binary(
     name = "generate",

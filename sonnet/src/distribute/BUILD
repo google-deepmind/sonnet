@@ -2,7 +2,7 @@ load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
 package(default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"])
 
-licenses(["notice"])  # Apache 2.0 License
+licenses(["notice"])
 
 snt_py_library(
     name = "distributed_batch_norm",

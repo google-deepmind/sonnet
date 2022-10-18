@@ -1035,7 +1035,9 @@ def _specialize_per_device(api_name, specializations, default):
               "api_implements": unique_api_name,
               "api_preferred_device": device
           })
-      function_lib.register(functions[device], *args, **kwargs)
+      concrete_func = functions[device].get_concrete_function(*args, **kwargs)
+      concrete_func.add_to_graph()
+      concrete_func.add_gradient_functions_to_graph()
     return functions[default](*args, **kwargs)
 
   return wrapper

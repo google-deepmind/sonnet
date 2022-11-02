@@ -77,7 +77,9 @@ def decorator(
     argspec = inspect.getfullargspec(f)
     if argspec.args and argspec.args[0] == "self":
 
-      @functools.wraps(f)
+      # TODO(b/123870292): Bound methods with multiple decorators can be
+      # detected as unbound too, which breaks tf.function usage.
+      # Attempt migrating to wrapt instead of using this custom approach.
       def _decorate_unbound_method(self, *args, **kwargs):
         bound_method = f.__get__(self, self.__class__)  # pytype: disable=attribute-error
         return decorator_fn(bound_method, self, args, kwargs)

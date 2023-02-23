@@ -1,2 +1,2 @@
-tensorflow==2.5.1
+tensorflow==2.11.0
 tensorflow-probability==0.12.2

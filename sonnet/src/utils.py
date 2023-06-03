@@ -18,6 +18,7 @@ import collections.abc
 import functools
 import inspect
 import re
+import threading
 from typing import Any, Callable, Dict, Generic, Optional, Sequence, Tuple, TypeVar, Union
 
 from absl import logging
@@ -76,7 +77,9 @@ def decorator(
     argspec = inspect.getfullargspec(f)
     if argspec.args and argspec.args[0] == "self":
 
-      @functools.wraps(f)
+      # TODO(b/123870292): Bound methods with multiple decorators can be
+      # detected as unbound too, which breaks tf.function usage.
+      # Attempt migrating to wrapt instead of using this custom approach.
       def _decorate_unbound_method(self, *args, **kwargs):
         bound_method = f.__get__(self, self.__class__)  # pytype: disable=attribute-error
         return decorator_fn(bound_method, self, args, kwargs)
@@ -143,7 +146,17 @@ def assert_minimum_rank(inputs, rank: int):
     raise ValueError("Shape %r must have rank >= %d" % (shape, rank))
 
 
-def smart_autograph(f: T) -> T:
+def _synchronized(f: Callable[..., T]) -> Callable[..., T]:
+  """Returns a version of f that can only be called by one thread at a once."""
+  lock = threading.RLock()
+  @functools.wraps(f)
+  def wrapper(*a, **k):
+    with lock:
+      return f(*a, **k)
+  return wrapper
+
+
+def smart_autograph(f: Callable[..., T]) -> Callable[..., T]:
   """Wraps `f` such that in graph mode it uses autograph but not in eager.
 
   Whilst wrapping `f` in autograph is (intended to be) semantics preserving,
@@ -170,14 +183,20 @@ def smart_autograph(f: T) -> T:
   Returns:
     A wrapper for `f` that dispatches to the original or autograph version of f.
   """
-  f_autograph = tf.autograph.to_graph(f)
+  cache = []
+
+  @_synchronized
+  def f_autograph():
+    if not cache:
+      cache.append(tf.autograph.to_graph(f))
+    return cache[0]
 
   @functools.wraps(f)
   def smart_autograph_wrapper(*args, **kwargs):
     if tf.executing_eagerly():
       return f(*args, **kwargs)
     else:
-      return f_autograph(*args, **kwargs)
+      return f_autograph()(*args, **kwargs)
 
   return smart_autograph_wrapper
 

@@ -5,7 +5,7 @@ package(
     default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"],
 )
 
-licenses(["notice"])  # Apache 2.0 License
+licenses(["notice"])
 
 snt_py_library(
     name = "goldens",
@@ -34,6 +34,9 @@ snt_py_test(
     srcs = ["checkpoint_test.py"],
     data = [":checkpoints"],
     shard_count = 10,
+    tags = [
+        "notap",  # TODO(b/203294224): investigate flake on GPU.
+    ],
     deps = [
         ":goldens",
         # pip: absl/logging

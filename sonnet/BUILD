@@ -2,7 +2,7 @@ load("//sonnet/src:build_defs.bzl", "snt_py_library")
 
 package(default_visibility = ["//visibility:private"])
 
-licenses(["notice"])  # Apache 2.0 License
+licenses(["notice"])
 
 snt_py_library(
     name = "sonnet",

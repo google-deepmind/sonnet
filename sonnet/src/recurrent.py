@@ -34,7 +34,6 @@ import tree
 # pylint: disable=g-direct-tensorflow-import
 # Required for specializing `UnrolledLSTM` per device.
 from tensorflow.python import context as context_lib
-from tensorflow.python.eager import function as function_lib
 # pylint: enable=g-direct-tensorflow-import
 
 
@@ -1029,13 +1028,15 @@ def _specialize_per_device(api_name, specializations, default):
     unique_api_name = "{}_{}".format(api_name, uuid.uuid4())
     functions = {}
     for device, specialization in specializations.items():
-      functions[device] = function_lib.defun_with_attributes(
+      functions[device] = tf.function(
           specialization,
-          attributes={
+          experimental_attributes={
               "api_implements": unique_api_name,
               "api_preferred_device": device
           })
-      function_lib.register(functions[device], *args, **kwargs)
+      concrete_func = functions[device].get_concrete_function(*args, **kwargs)
+      concrete_func.add_to_graph()
+      concrete_func.add_gradient_functions_to_graph()
     return functions[default](*args, **kwargs)
 
   return wrapper

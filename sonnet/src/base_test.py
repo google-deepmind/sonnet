@@ -298,7 +298,7 @@ class ForwardMethodsTest(tf.test.TestCase):
 class AbcTest(tf.test.TestCase):
 
   def testAbstract(self):
-    msg = "Can't instantiate .* abstract methods"
+    msg = "Can't instantiate .* abstract method"
     with self.assertRaisesRegex(TypeError, msg):
       AbstractModule()  # pylint: disable=abstract-class-instantiated
 

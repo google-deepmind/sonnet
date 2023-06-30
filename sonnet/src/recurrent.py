@@ -33,7 +33,7 @@ import tree
 
 # pylint: disable=g-direct-tensorflow-import
 # Required for specializing `UnrolledLSTM` per device.
-from tensorflow.python import context as context_lib
+from tensorflow.python.eager import context as context_lib
 # pylint: enable=g-direct-tensorflow-import
 
 

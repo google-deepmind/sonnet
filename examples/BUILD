@@ -1,3 +1,4 @@
+load("//third_party/bazel_rules/rules_python/python:py_binary.bzl", "py_binary")
 load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
 package(default_visibility = ["//visibility:private"])

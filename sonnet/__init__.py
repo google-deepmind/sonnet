@@ -71,10 +71,10 @@ from sonnet.src.recurrent import TrainableState
 from sonnet.src.recurrent import UnrolledLSTM
 from sonnet.src.recurrent import UnrolledRNN
 from sonnet.src.recurrent import VanillaRNN
-from sonnet.src.reshape import flatten
 from sonnet.src.reshape import Flatten
-from sonnet.src.reshape import reshape
+from sonnet.src.reshape import flatten
 from sonnet.src.reshape import Reshape
+from sonnet.src.reshape import reshape
 from sonnet.src.scale_gradient import scale_gradient
 from sonnet.src.sequential import Sequential
 from sonnet.src.utils import format_variables

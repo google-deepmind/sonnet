@@ -9,8 +9,6 @@ licenses(["notice"])
 py_binary(
     name = "simple_mnist",
     srcs = ["simple_mnist.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         # pip: absl:app
         "//sonnet",
@@ -44,8 +42,6 @@ snt_py_test(
 py_binary(
     name = "functional_mlp_mnist",
     srcs = ["functional_mlp_mnist.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         # pip: absl:app
         # pip: absl/logging

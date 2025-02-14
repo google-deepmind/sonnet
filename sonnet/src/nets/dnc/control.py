@@ -99,9 +99,6 @@ def deep_core(control_name,
     control_config: Dictionary containing the configuration for the modules.
     num_layers: Number of layers.
     skip_connections: Boolean that indicates whether to use skip connections.
-      See documenation for sonnet.DeepRnn in
-      //learning/deepmind/tensorflow/sonnet/python/modules/basic_rnn.py for more
-      information.
     name: module name.
 
   Returns:

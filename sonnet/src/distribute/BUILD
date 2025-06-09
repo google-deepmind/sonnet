@@ -35,7 +35,6 @@ snt_py_library(
     srcs = ["replicator.py"],
     deps = [
         # pip: absl/logging
-        # pip: contextlib2
         "//sonnet/src:initializers",
         # pip: tensorflow
     ],

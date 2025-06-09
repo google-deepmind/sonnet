@@ -14,10 +14,10 @@
 # ============================================================================
 """Replicator Distribution Strategy."""
 
+import contextlib
 from typing import Callable, TypeVar
 
 from absl import logging
-import contextlib
 from sonnet.src import initializers
 import tensorflow as tf
 

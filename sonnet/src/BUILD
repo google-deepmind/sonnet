@@ -195,7 +195,6 @@ snt_py_library(
     srcs = ["custom_getter.py"],
     deps = [
         ":base",
-        # pip: contextlib2
         # pip: tensorflow
         # pip: tree
     ],
@@ -637,7 +636,6 @@ snt_py_library(
     deps = [
         ":custom_getter",
         ":utils",
-        # pip: contextlib2
         # pip: tensorflow
         # pip: tree
     ],

@@ -14,8 +14,8 @@
 # ============================================================================
 """Mixed Precision Decorator for Sonnet 2."""
 
-import uuid
 import contextlib
+import uuid
 
 from sonnet.src import custom_getter
 from sonnet.src import utils

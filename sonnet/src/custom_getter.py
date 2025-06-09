@@ -14,9 +14,9 @@
 # ============================================================================
 """Custom getter for module members."""
 
+import contextlib
 from typing import Any, Callable, ContextManager, Iterable, Optional, Type
 
-import contextlib
 from sonnet.src import base
 import tensorflow as tf
 import tree

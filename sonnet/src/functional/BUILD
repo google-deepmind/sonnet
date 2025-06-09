@@ -9,7 +9,6 @@ snt_py_library(
     srcs = ["haiku.py"],
     deps = [
         ":utils",
-        # pip: contextlib2
         # pip: tensorflow
     ],
 )

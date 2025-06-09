@@ -15,11 +15,11 @@
 """Implements part of the Haiku ("Sonnet for JAX") API in TensorFlow 2."""
 
 import collections
+import contextlib
 import functools
 import itertools
 import threading
 
-import contextlib
 from sonnet.src.functional import utils
 import tensorflow as tf
 

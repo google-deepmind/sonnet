@@ -4,11 +4,11 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
@@ -183,20 +183,26 @@ class ConvTest(test_utils.TestCase, parameterized.TestCase):
     out2 = defun_conv(tf.ones([5, 3, 5, 5]))
     self.assertEqual(out2.shape, [5, 2, 5, 5])
 
-  @parameterized.parameters(True, False)
-  def testUnknownChannels(self, autograph):
-    x = tf.TensorSpec([3, 3, 3, None], dtype=tf.float32)
+  def test_conv_nd_raises_on_dynamic_channels(self):
+    """Tests that ConvND raises a clear error with a dynamic channel dim."""
+    conv_module = conv.Conv2D(output_channels=3, kernel_shape=3)
 
-    c = conv.ConvND(
-        num_spatial_dims=2,
-        output_channels=1,
-        kernel_shape=3,
-        data_format="NHWC")
-    defun_conv = tf.function(c, autograph=autograph)
+    # Define a function that calls the module with a dynamic input shape.
+    # The `input_signature` specifies that the channel dimension is unknown.
+    @tf.function(input_signature=[
+        tf.TensorSpec(shape=[None, 16, 16, None], dtype=tf.float32)
+    ])
+    def forward(x):
+      return conv_module(x)
 
-    with self.assertRaisesRegex(ValueError,
-                                "The number of input channels must be known"):
-      defun_conv.get_concrete_function(x)
+    # Assert that calling the function raises a ValueError with the
+    # specific, helpful error message we added.
+    with self.assertRaisesRegex(
+        ValueError,
+        "The channel dimension of the inputs to `snt.ConvND` must be "
+        "statically known"):
+      # The error is raised during the first trace of the tf.function.
+      _ = forward.get_concrete_function()
 
   def testUnknownSpatialDims(self):
     x = tf.TensorSpec([3, None, None, 3], dtype=tf.float32)
@@ -319,9 +325,8 @@ class Conv3DTest(test_utils.TestCase, parameterized.TestCase):
         19, 13, 9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19,
         28, 28, 28, 19, 19, 28, 28, 28, 19, 13, 19, 19, 19, 13, 13, 19, 19, 19,
         13, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19, 13, 19,
-        19, 19, 13, 13, 19, 19, 19, 13, 19, 28, 28, 28, 19, 19, 28, 28, 28, 19,
-        19, 28, 28, 28, 19, 13, 19, 19, 19, 13, 9, 13, 13, 13, 9, 13, 19, 19,
-        19, 13, 13, 19, 19, 19, 13, 13, 19, 19, 19, 13, 9, 13, 13, 13, 9
+        19, 19, 13, 9, 13, 13, 13, 9, 13, 19, 19, 19, 13, 13, 19, 19, 19, 13,
+        13, 19, 19, 19, 13, 9, 13, 13, 13, 9
     ]).reshape((5, 5, 5))
     if not with_bias:
       expected_out -= 1

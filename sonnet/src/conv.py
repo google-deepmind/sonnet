@@ -4,11 +4,11 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
@@ -40,13 +40,40 @@ class ConvND(base.Module):
                b_init: Optional[initializers.Initializer] = None,
                data_format: Optional[str] = None,
                name: Optional[str] = None):
-    """Constructs a `ConvND` module."""
+    """Constructs a `ConvND` module.
+
+    Args:
+      num_spatial_dims: The number of spatial dimensions of the input.
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length num_spatial_dims), or an
+        integer. `kernel_shape` will be expanded to define a kernel size in all
+        dimensions.
+      stride: Sequence of strides (of length num_spatial_dims), or an integer.
+        `stride` will be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates (of length num_spatial_dims), or integer
+        that is used to define dilation rate in all dimensions. 1 corresponds to
+        standard ND convolution, `rate > 1` corresponds to dilated convolution.
+      padding: Padding to apply to the input. This can either "SAME", "VALID" or
+        a callable or sequence of callables up to size N. Any callables must
+        take a single integer argument equal to the effective kernel size and
+        return a list of two integers representing the padding before and after.
+        See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default `True`.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        `1 / sqrt(input_feature_size)`, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super().__init__(name=name)
 
     if not 1 <= num_spatial_dims <= 3:
       raise ValueError(
           "We only support convoltion operations for num_spatial_dims=1, 2 or "
-          "3, received num_spatial_dims={}.".format(num_spatial_dims))
+          f"3, received num_spatial_dims={num_spatial_dims}.")
     self._num_spatial_dims = num_spatial_dims
     self.output_channels = output_channels
     self.kernel_shape = kernel_shape
@@ -71,7 +98,16 @@ class ConvND(base.Module):
       raise ValueError("When not using a bias the b_init must be None.")
 
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
-    """Applies the defined convolution to the inputs."""
+    """Applies the defined convolution to the inputs.
+
+    Args:
+      inputs: An ``N + 2`` rank :tf:`Tensor` of dtype :tf:`float16`,
+        :tf:`bfloat16` or `tf.float32` to which the convolution is applied.
+
+    Returns:
+      An ``N + 2`` dimensional :tf:`Tensor` of shape
+        ``[batch_size, output_dim_1, output_dim_2, ..., output_channels]``.
+    """
     self._initialize(inputs)
 
     if self.padding_func:
@@ -94,12 +130,12 @@ class ConvND(base.Module):
     """Constructs parameters used by this module."""
     utils.assert_rank(inputs, self._num_spatial_dims + 2)
 
-    # This is the fix for issue #239.
-    # The original code `inputs.shape[self._channel_index]` fails inside a
-    # `tf.function` if the channel dimension is symbolic (`None`).
-    # `tf.compat.v1.dimension_value` safely extracts the dimension value,
-    # returning `None` if it's not statically known. This allows our check
-    # to work correctly without throwing an error during graph construction.
+    # To build the weight matrix, we need the static value of the input
+    # channel dimension. Directly accessing `inputs.shape` can fail inside a
+    # `tf.function` if the dimension is symbolic (e.g., `None`).
+    # `tf.compat.v1.dimension_value` provides a safe way to get the static
+    # value, returning `None` if it's not available, which allows us to
+    # provide a clear error message.
     self.input_channels = tf.compat.v1.dimension_value(
         inputs.shape[self._channel_index])
 
@@ -140,7 +176,7 @@ class ConvND(base.Module):
 
 
 class Conv1D(ConvND):
-  """`Conv1D` module."""
+  """``Conv1D`` module."""
 
   def __init__(self,
                output_channels: int,
@@ -153,7 +189,32 @@ class Conv1D(ConvND):
                b_init: Optional[initializers.Initializer] = None,
                data_format: str = "NWC",
                name: Optional[str] = None):
-    """Constructs a `Conv1D` module."""
+    """Constructs a ``Conv1D`` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of length 1, or an integer. ``kernel_shape`` will
+        be expanded to define a kernel size in all dimensions.
+      stride: Sequence of strides of length 1, or an integer. ``stride`` will be
+        expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates of length 1, or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
+      padding: Padding to apply to the input. This can be either ``SAME``,
+        ``VALID`` or a callable or sequence of callables of size 1. Any
+        callables must take a single integer argument equal to the effective
+        kernel size and return a list of two integers representing the padding
+        before and after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default ``True``.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        ``1``/``sqrt(input_feature_size)``, which is commonly used when the
+        inputs are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super().__init__(
         num_spatial_dims=1,
         output_channels=output_channels,
@@ -182,7 +243,33 @@ class Conv2D(ConvND):
                b_init: Optional[initializers.Initializer] = None,
                data_format: str = "NHWC",
                name: Optional[str] = None):
-    """Constructs a `Conv2D` module."""
+    """Constructs a ``Conv2D`` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length 2), or an integer.
+        ``kernel_shape`` will be expanded to define a kernel size in all
+        dimensions.
+      stride: Sequence of strides (of length 2), or an integer. ``stride`` will
+        be expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates of length 2, or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
+      padding: Padding to apply to the input. This can either ``SAME``,
+        ``VALID`` or a callable or sequence of callables of size 2. Any
+        callables must take a single integer argument equal to the effective
+        kernel size and return a list of two integers representing the padding
+        before and after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default ``True``.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        ``1 / sqrt(input_feature_size)``, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super().__init__(
         num_spatial_dims=2,
         output_channels=output_channels,
@@ -211,7 +298,33 @@ class Conv3D(ConvND):
                b_init: Optional[initializers.Initializer] = None,
                data_format: str = "NDHWC",
                name: Optional[str] = None):
-    """Constructs a `Conv3D` module."""
+    """Constructs a ``Conv3D`` module.
+
+    Args:
+      output_channels: The number of output channels.
+      kernel_shape: Sequence of kernel sizes (of length 3), or an integer.
+        ``kernel_shape`` will be expanded to define a kernel size in all
+        dimensions.
+      stride: Sequence of strides (of length 3), or an integer. `stride` will be
+        expanded to define stride in all dimensions.
+      rate: Sequence of dilation rates of length 3), or integer that is used to
+        define dilation rate in all dimensions. 1 corresponds to standard
+        convolution, ``rate > 1`` corresponds to dilated convolution.
+      padding: Padding to apply to the input. This can either ``SAME``,
+        ``VALID`` or a callable or sequence of callables up to size N. Any
+        callables must take a single integer argument equal to the effective
+        kernel size and return a list of two integers representing the padding
+        before and after. See snt.pad.* for more details and example functions.
+      with_bias: Whether to include bias parameters. Default ``True``.
+      w_init: Optional initializer for the weights. By default the weights are
+        initialized truncated random normal values with a standard deviation of
+        ``1 / sqrt(input_feature_size)``, which is commonly used when the inputs
+        are zero centered (see https://arxiv.org/abs/1502.03167v3).
+      b_init: Optional initializer for the bias. By default the bias is
+        initialized to zero.
+      data_format: The data format of the input.
+      name: Name of the module.
+    """
     super().__init__(
         num_spatial_dims=3,
         output_channels=output_channels,

@@ -7,6 +7,7 @@ licenses(["notice"])
 py_binary(
     name = "generate",
     srcs = ["generate.py"],
+    strict_deps = False,
     deps = [
         # pip: absl:app
         # pip: absl/flags

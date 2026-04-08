@@ -15,6 +15,7 @@
 """Mixed Precision Decorator for Sonnet 2."""
 
 import contextlib
+import threading
 import uuid
 
 from sonnet.src import custom_getter
@@ -22,8 +23,11 @@ from sonnet.src import utils
 import tensorflow as tf
 import tree
 
-# TODO(loreno): Make this a thread local variable
-_mixed_precision_mode = None
+# Resolved TODO: Replaced global state with thread-local storage
+_local = threading.local()
+# Resolved TODO: Added lock for thread-safe initialization of seen_none
+_seen_none_lock = threading.Lock()
+
 _MP_SEEN_PROPERTY = '_mp_seen'
 
 
@@ -33,8 +37,7 @@ def enable(dtype):
   Args:
     dtype: type to cast to.
   """
-  global _mixed_precision_mode
-  _mixed_precision_mode = dtype
+  _local.mode = dtype
 
 
 def disable():
@@ -43,7 +46,7 @@ def disable():
 
 
 def _get_mixed_precision_mode():
-  return _mixed_precision_mode
+  return getattr(_local, 'mode', None)
 
 
 # TODO(loreno): Consider casting non-tensor/variable inputs
@@ -115,10 +118,12 @@ def modes(valid_types):
 
     if instance is None:
       if not _wrapper.seen_none:
-        # TODO(loreno): Make this thread safe
-        res = f(*args, **kwargs)
-        _wrapper.seen_none = True
-        return res
+        # Resolved TODO: Thread-safe double-checked locking for seen_none
+        with _seen_none_lock:
+          if not _wrapper.seen_none:
+            res = f(*args, **kwargs)
+            _wrapper.seen_none = True
+            return res
       return _cast_call(f, new_dtype, args, kwargs)
 
     else:

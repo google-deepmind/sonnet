@@ -1,6 +1,7 @@
 load("//sonnet/src:build_defs.bzl", "snt_py_library", "snt_py_test")
 
 package(
+    default_applicable_licenses = ["//sonnet:license"],  # copybara:strip
     default_testonly = True,
     default_visibility = ["//sonnet:__subpackages__", "//docs/ext:__subpackages__", "//examples:__subpackages__"],
 )

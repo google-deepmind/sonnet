@@ -1,6 +1,9 @@
 load("//sonnet/src:build_defs.bzl", "snt_py_library")
 
-package(default_visibility = ["//sonnet:__pkg__"])
+package(
+    default_applicable_licenses = ["//sonnet:license"],  # copybara:strip
+    default_visibility = ["//sonnet:__pkg__"],
+)
 
 licenses(["notice"])
 

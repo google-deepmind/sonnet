@@ -1,6 +1,9 @@
 load("//third_party/bazel_rules/rules_python/python:py_binary.bzl", "py_binary")
 
-package(default_testonly = True)
+package(
+    default_applicable_licenses = ["//sonnet:license"],  # copybara:strip
+    default_testonly = True,
+)
 
 licenses(["notice"])
 

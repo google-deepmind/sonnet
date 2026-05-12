@@ -36,7 +36,7 @@ def read(memory,
   """
   with tf.name_scope("read_memory"):
     if squash_before_access:
-      squash_op(weights)
+      memory = squash_op(memory)
     read_word = tf.matmul(weights, memory)
     if squash_after_access:
       read_word = squash_op(read_word)

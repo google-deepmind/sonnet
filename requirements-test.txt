@@ -1,3 +1,2 @@
-mock>=3.0.5
 tensorflow-datasets>1,<4
 docutils

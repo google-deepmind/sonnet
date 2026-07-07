@@ -92,13 +92,13 @@ class Bias(base.Module):
     utils.assert_minimum_rank(inputs, 2)
 
     input_shape = inputs.shape
-    bias_shape = calculate_bias_shape(input_shape, self.bias_dims)
+    bias_shape = calculate_bias_shape(input_shape, self.bias_dims)  # pyrefly: ignore[bad-argument-type]
 
     input_size = input_shape[1:]
     if self.output_size is not None:
       if self.output_size != input_size:
         raise ValueError("Input shape must be {} not {}".format(
-            (-1,) + self.output_size, input_shape))
+            (-1,) + self.output_size, input_shape))  # pyrefly: ignore[unsupported-operation]
 
     self.input_size = input_size
     self.b = tf.Variable(self.b_init(bias_shape, inputs.dtype), name="b")
@@ -141,10 +141,10 @@ def calculate_bias_shape(input_shape: types.ShapeLike,
     ValueError: If the user attempts to add bias over the mini-batch dimension,
         e.g. `bias_dims=[0]`.
   """
-  input_rank = len(input_shape)
+  input_rank = len(input_shape)  # pyrefly: ignore[bad-argument-type]
   if bias_dims is None:
     # If None, default is to use all dimensions.
-    return input_shape[1:]
+    return input_shape[1:]  # pyrefly: ignore[bad-index]
 
   elif not bias_dims:
     # If empty list, use a scalar bias.
@@ -165,7 +165,7 @@ def calculate_bias_shape(input_shape: types.ShapeLike,
             "Dimension %d (bias_dims=%r) out of range for input of rank %r." %
             (dim, tuple(bias_dims), input_rank))
 
-      bias_shape[dim] = input_shape[dim]
+      bias_shape[dim] = input_shape[dim]  # pyrefly: ignore[bad-index]
     # Strip leading unit dimensions.
     start = input_rank
     for dim in range(1, input_rank):

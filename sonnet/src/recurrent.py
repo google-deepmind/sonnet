@@ -37,7 +37,7 @@ from tensorflow.python.eager import context as context_lib
 # pylint: enable=g-direct-tensorflow-import
 
 
-class RNNCore(base.Module, metaclass=abc.ABCMeta):
+class RNNCore(base.Module, metaclass=abc.ABCMeta):  # pyrefly: ignore[invalid-inheritance]
   """Base class for Recurrent Neural Network cores.
 
   This class defines the basic functionality that every core should
@@ -81,7 +81,7 @@ class RNNCore(base.Module, metaclass=abc.ABCMeta):
     """
 
 
-class UnrolledRNN(base.Module, metaclass=abc.ABCMeta):
+class UnrolledRNN(base.Module, metaclass=abc.ABCMeta):  # pyrefly: ignore[invalid-inheritance]
   """Base class for unrolled Recurrent Neural Networks.
 
   This class is a generalization of :class:`RNNCore` which operates on
@@ -528,7 +528,7 @@ class VanillaRNN(RNNCore):
     # For VanillaRNN, the next state of the RNN is the same as the outputs.
     return outputs, outputs
 
-  def initial_state(self, batch_size: int) -> tf.Tensor:
+  def initial_state(self, batch_size: int) -> tf.Tensor:  # pyrefly: ignore[bad-override]
     """See base class."""
     return tf.zeros(shape=[batch_size, self._hidden_size], dtype=self._dtype)
 
@@ -832,7 +832,7 @@ class LSTM(RNNCore):
     return _lstm_fn(inputs, prev_state, self._w_i, self._w_h, self.b,
                     self.projection)
 
-  def initial_state(self, batch_size: int) -> LSTMState:
+  def initial_state(self, batch_size: int) -> LSTMState:  # pyrefly: ignore[bad-override]
     """See base class."""
     return LSTMState(
         hidden=tf.zeros([batch_size, self._eff_hidden_size], dtype=self._dtype),
@@ -946,7 +946,7 @@ class UnrolledLSTM(UnrolledRNN):
     return _specialized_unrolled_lstm(input_sequence, initial_state, self._w_i,
                                       self._w_h, self.b)
 
-  def initial_state(self, batch_size):
+  def initial_state(self, batch_size):  # pyrefly: ignore[bad-override]
     """See base class."""
     return LSTMState(
         hidden=tf.zeros([batch_size, self._hidden_size], dtype=self._dtype),
@@ -1284,7 +1284,7 @@ class _ConvNDLSTM(RNNCore):
     """
     super().__init__(name)
     self._num_spatial_dims = num_spatial_dims
-    self._input_shape = list(input_shape)
+    self._input_shape = list(input_shape)  # pyrefly: ignore[bad-argument-type]
     self._channel_index = 1 if (data_format is not None and
                                 data_format.startswith("NC")) else -1
     self._output_channels = output_channels
@@ -1336,7 +1336,7 @@ class _ConvNDLSTM(RNNCore):
   def hidden_to_hidden(self):
     return self._hidden_to_hidden.w
 
-  def initial_state(self, batch_size):
+  def initial_state(self, batch_size):  # pyrefly: ignore[bad-override]
     """See base class."""
     shape = list(self._input_shape)
     shape[self._channel_index] = self._output_channels
@@ -1355,7 +1355,7 @@ class _ConvNDLSTM(RNNCore):
 
 
 class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
-  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "1")
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "1")  # pyrefly: ignore[missing-attribute]
 
   def __init__(self,
                input_shape: types.ShapeLike,
@@ -1406,7 +1406,7 @@ class Conv1DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstr
 
 
 class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
-  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "2")
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "2")  # pyrefly: ignore[missing-attribute]
 
   def __init__(self,
                input_shape: types.ShapeLike,
@@ -1457,7 +1457,7 @@ class Conv2DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstr
 
 
 class Conv3DLSTM(_ConvNDLSTM):  # pylint: disable=missing-docstring,empty-docstring
-  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "3")
+  __doc__ = _ConvNDLSTM.__doc__.replace("``num_spatial_dims``", "3")  # pyrefly: ignore[missing-attribute]
 
   def __init__(self,
                input_shape: types.ShapeLike,
@@ -1584,7 +1584,7 @@ class GRU(RNNCore):
     next_state = (1 - z) * prev_state + z * a
     return next_state, next_state
 
-  def initial_state(self, batch_size):
+  def initial_state(self, batch_size):  # pyrefly: ignore[bad-override]
     """See base class."""
     return tf.zeros([batch_size, self._hidden_size], dtype=self._dtype)
 
@@ -1710,7 +1710,7 @@ class CuDNNGRU(RNNCore):
   def hidden_to_hidden(self):
     return self._w_h
 
-  def initial_state(self, batch_size):
+  def initial_state(self, batch_size):  # pyrefly: ignore[bad-override]
     """See base class."""
     return tf.zeros([batch_size, self._hidden_size], dtype=self._dtype)
 

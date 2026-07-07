@@ -127,7 +127,7 @@ def split_leading_dim(
 
 def maybe_prod(s: Sequence[Union[int, None]]) -> Optional[int]:
   try:
-    return np.prod(s)
+    return np.prod(s)  # pyrefly: ignore[no-matching-overload]
   except TypeError:
     # Can happen if the input contains `None`.
     return None

@@ -55,7 +55,7 @@ class Recurrent(Wrapped):
       return self.wrapped(x, initial_state)
     else:
       x = tf.expand_dims(x, axis=0)
-      return self.unroller(self.wrapped, x, initial_state)
+      return self.unroller(self.wrapped, x, initial_state)  # pyrefly: ignore[not-callable]
 
 
 def unwrap(module: snt.Module) -> snt.Module:

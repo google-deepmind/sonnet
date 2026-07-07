@@ -83,7 +83,7 @@ class FeedForward(recurrent.RNNCore):
       output = self._activation(output)
     return output, prev_state
 
-  def initial_state(self, batch_size):
+  def initial_state(self, batch_size):  # pyrefly: ignore[bad-override]
     return tf.zeros([batch_size, 1], dtype=self.dtype)
 
 
@@ -110,6 +110,6 @@ def deep_core(control_name,
       for i in range(num_layers)
   ]
   if skip_connections:
-    return recurrent.deep_rnn_with_skip_connections(cores, name=name)
+    return recurrent.deep_rnn_with_skip_connections(cores, name=name)  # pyrefly: ignore[bad-argument-type]
   else:
     return recurrent.DeepRNN(cores, name=name)

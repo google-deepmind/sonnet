@@ -36,11 +36,11 @@ def replicate(
 ) -> Tuple[T]:
   """Replicates entry in `element` `num_times` if needed."""
   if not isinstance(element, collections.abc.Sequence):
-    return (element,) * num_times
+    return (element,) * num_times  # pyrefly: ignore[bad-return]
   elif len(element) == 1:
-    return tuple(element * num_times)
+    return tuple(element * num_times)  # pyrefly: ignore[bad-argument-type, unsupported-operation]
   elif len(element) == num_times:
-    return tuple(element)
+    return tuple(element)  # pyrefly: ignore[bad-return]
   raise TypeError(
       "{} must be a scalar or sequence of length 1 or sequence of length {}."
       .format(name, num_times))
@@ -70,7 +70,7 @@ def decorator(
 
       @functools.wraps(f)
       def _decorate_bound_method(*args, **kwargs):
-        return decorator_fn(f, f.__self__, args, kwargs)
+        return decorator_fn(f, f.__self__, args, kwargs)  # pyrefly: ignore[bad-argument-type]
 
       return _decorate_bound_method
 
@@ -92,7 +92,7 @@ def decorator(
 
     return _decorate_fn
 
-  return _decorator
+  return _decorator  # pyrefly: ignore[bad-return]
 
 
 _SPATIAL_CHANNELS_FIRST = re.compile("^NC[^C]*$")

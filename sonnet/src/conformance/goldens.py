@@ -26,7 +26,7 @@ _all_goldens = []
 
 
 def named_goldens() -> Sequence[Tuple[str, "Golden"]]:
-  return ((name, cls()) for _, name, cls in list_goldens())
+  return ((name, cls()) for _, name, cls in list_goldens())  # pyrefly: ignore[bad-return]
 
 
 def all_goldens(test_method):

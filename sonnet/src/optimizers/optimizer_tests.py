@@ -37,7 +37,7 @@ class WrappedTFOptimizer(base.Optimizer):
     return getattr(self.wrapped, name)
 
   def apply(self, updates, params):
-    self.wrapped.apply_gradients(zip(updates, params))
+    self.wrapped.apply_gradients(zip(updates, params))  # pyrefly: ignore[missing-attribute]
 
 
 def is_tf_optimizer(optimizer):

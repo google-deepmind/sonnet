@@ -64,7 +64,7 @@ def value_and_grad(f, argnums=0, has_aux=False):
       out, aux = out
     grads = tape.gradient(out, params)
     if has_aux:
-      return (out, aux), grads
+      return (out, aux), grads  # pyrefly: ignore[unbound-name]
     else:
       return out, grads
   return wrapper

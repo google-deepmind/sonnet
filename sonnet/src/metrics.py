@@ -22,7 +22,7 @@ from sonnet.src import once
 import tensorflow as tf
 
 
-class Metric(base.Module, metaclass=abc.ABCMeta):
+class Metric(base.Module, metaclass=abc.ABCMeta):  # pyrefly: ignore[invalid-inheritance]
   """Metric base class."""
 
   @abc.abstractmethod

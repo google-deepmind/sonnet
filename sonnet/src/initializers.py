@@ -182,12 +182,12 @@ class Identity(Initializer):
       raise ValueError("The tensor to initialize must be "
                        "at least two-dimensional")
     elif rank == 2:
-      initializer = tf.eye(num_rows=shape[0], num_columns=shape[1], dtype=dtype)
+      initializer = tf.eye(num_rows=shape[0], num_columns=shape[1], dtype=dtype)  # pyrefly: ignore[bad-index]
     else:  # rank > 2
       initializer = tf.eye(
-          num_rows=shape[-2],
-          num_columns=shape[-1],
-          batch_shape=shape[:-2],
+          num_rows=shape[-2],  # pyrefly: ignore[bad-index]
+          num_columns=shape[-1],  # pyrefly: ignore[bad-index]
+          batch_shape=shape[:-2],  # pyrefly: ignore[bad-index]
           dtype=dtype)
     return self.gain * initializer
 
@@ -223,15 +223,15 @@ class Orthogonal(Initializer):
 
   def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_floating_dtype(dtype)
-    if len(shape) < 2:
+    if len(shape) < 2:  # pyrefly: ignore[bad-argument-type]
       raise ValueError("The tensor to initialize must be "
                        "at least two-dimensional")
     # Flatten the input shape with the last dimension remaining
     # its original shape so it works for conv2d
     num_rows = 1
-    for dim in shape[:-1]:
+    for dim in shape[:-1]:  # pyrefly: ignore[bad-index]
       num_rows *= dim
-    num_cols = shape[-1]
+    num_cols = shape[-1]  # pyrefly: ignore[bad-index]
     flat_shape = [
         tf.maximum(num_cols, num_rows),
         tf.minimum(num_cols, num_rows)
@@ -370,21 +370,21 @@ def _compute_fans(shape: types.ShapeLike):
   Returns:
     A tuple of scalars `(fan_in, fan_out)`.
   """
-  if len(shape) < 1:  # Just to avoid errors for constants.
+  if len(shape) < 1:  # Just to avoid errors for constants.  # pyrefly: ignore[bad-argument-type]
     fan_in = fan_out = 1
-  elif len(shape) == 1:
-    fan_in = fan_out = shape[0]
-  elif len(shape) == 2:
-    fan_in = shape[0]
-    fan_out = shape[1]
+  elif len(shape) == 1:  # pyrefly: ignore[bad-argument-type]
+    fan_in = fan_out = shape[0]  # pyrefly: ignore[bad-index]
+  elif len(shape) == 2:  # pyrefly: ignore[bad-argument-type]
+    fan_in = shape[0]  # pyrefly: ignore[bad-index]
+    fan_out = shape[1]  # pyrefly: ignore[bad-index]
   else:
     # Assuming convolution kernels (2D, 3D, or more).
     # kernel shape: (..., input_depth, depth)
     receptive_field_size = 1.
-    for dim in shape[:-2]:
+    for dim in shape[:-2]:  # pyrefly: ignore[bad-index]
       receptive_field_size *= dim
-    fan_in = shape[-2] * receptive_field_size
-    fan_out = shape[-1] * receptive_field_size
+    fan_in = shape[-2] * receptive_field_size  # pyrefly: ignore[bad-index]
+    fan_out = shape[-1] * receptive_field_size  # pyrefly: ignore[bad-index]
   return fan_in, fan_out
 
 

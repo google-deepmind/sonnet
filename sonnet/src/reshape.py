@@ -143,7 +143,7 @@ class Reshape(base.Module):
     self._initialize(inputs)
 
     # Resolve the wildcard if any.
-    output_shape = tuple(self._output_shape)
+    output_shape = tuple(self._output_shape)  # pyrefly: ignore[bad-argument-type]
     if -1 in output_shape:
       reshaped_shape = inputs.shape[self._preserve_dims:]
       if reshaped_shape.is_fully_defined():

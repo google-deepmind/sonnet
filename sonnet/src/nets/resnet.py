@@ -41,7 +41,7 @@ class BottleNeckBlockV1(base.Module):
     self._bn_config = bn_config
 
     batchnorm_args = {"create_scale": True, "create_offset": True}
-    batchnorm_args.update(bn_config)
+    batchnorm_args.update(bn_config)  # pyrefly: ignore[no-matching-overload]
 
     if self._use_projection:
       self._proj_conv = conv.Conv2D(
@@ -120,7 +120,7 @@ class BottleNeckBlockV2(base.Module):
     self._bn_config = bn_config
 
     batchnorm_args = {"create_scale": True, "create_offset": True}
-    batchnorm_args.update(bn_config)
+    batchnorm_args.update(bn_config)  # pyrefly: ignore[no-matching-overload]
 
     if self._use_projection:
       self._proj_conv = conv.Conv2D(
@@ -274,7 +274,7 @@ class ResNet(base.Module):
           create_scale=True,
           create_offset=True,
           name="initial_batchnorm",
-          **bn_config)
+          **bn_config)  # pyrefly: ignore[bad-argument-type]
 
     self._block_groups = []
     strides = [1, 2, 2, 2]
@@ -293,7 +293,7 @@ class ResNet(base.Module):
           create_scale=True,
           create_offset=True,
           name="final_batchnorm",
-          **bn_config)
+          **bn_config)  # pyrefly: ignore[bad-argument-type]
 
     self._logits = linear.Linear(
         output_size=num_classes, w_init=initializers.Zeros(), name="logits")

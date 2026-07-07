@@ -110,7 +110,7 @@ class ConvNDTranspose(base.Module):
       raise TypeError("ConvNDTranspose only takes string padding, please "
                       "provide either `SAME` or `VALID`.")
     self._data_format = data_format
-    self._channel_index = utils.get_channel_index(data_format)
+    self._channel_index = utils.get_channel_index(data_format)  # pyrefly: ignore[bad-argument-type]
     self._with_bias = with_bias
 
     self._w_init = w_init
@@ -154,14 +154,14 @@ class ConvNDTranspose(base.Module):
     self._dtype = inputs.dtype
 
     if self._output_shape is not None:
-      if len(self._output_shape) != self._num_spatial_dims:
+      if len(self._output_shape) != self._num_spatial_dims:  # pyrefly: ignore[bad-argument-type]
         raise ValueError(
             "The output_shape must be of length {} but instead was {}.".format(
-                self._num_spatial_dims, len(self._output_shape)))
+                self._num_spatial_dims, len(self._output_shape)))  # pyrefly: ignore[bad-argument-type]
       if self._channel_index == 1:
-        self._output_shape = [self._output_channels] + list(self._output_shape)
+        self._output_shape = [self._output_channels] + list(self._output_shape)  # pyrefly: ignore[bad-argument-type]
       else:
-        self._output_shape = list(self._output_shape) + [self._output_channels]
+        self._output_shape = list(self._output_shape) + [self._output_channels]  # pyrefly: ignore[bad-argument-type]
 
     self.w = self._make_w()
     if self._with_bias:

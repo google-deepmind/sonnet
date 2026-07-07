@@ -160,6 +160,6 @@ __version__ = "2.0.3.dev"
 #                 ||     ||
 #
 try:
-  del src  # pylint: disable=undefined-variable
+  del src  # pylint: disable=undefined-variable  # pyrefly: ignore[unbound-name]
 except NameError:
   pass

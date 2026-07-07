@@ -52,7 +52,7 @@ def check_updates_parameters(updates: Sequence[types.ParameterUpdate],
 
 
 def check_same_dtype(update: types.ParameterUpdate, parameter: tf.Variable):
-  if update.dtype != parameter.dtype:
+  if update.dtype != parameter.dtype:  # pyrefly: ignore[missing-attribute]
     raise ValueError(
         "DType of update {!r} is not equal to that of parameter {!r}".format(
             update, parameter))

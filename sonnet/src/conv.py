@@ -88,7 +88,7 @@ class ConvND(base.Module):
       self.padding_func = padding
 
     self.data_format = data_format
-    self._channel_index = utils.get_channel_index(data_format)
+    self._channel_index = utils.get_channel_index(data_format)  # pyrefly: ignore[bad-argument-type]
     self.with_bias = with_bias
 
     self.w_init = w_init

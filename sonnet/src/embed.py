@@ -80,7 +80,7 @@ class Embed(base.Module):
 
     if existing_vocab is None:
       if embed_dim is None:
-        embed_dim = embedding_dim(vocab_size)
+        embed_dim = embedding_dim(vocab_size)  # pyrefly: ignore[bad-argument-type]
       if initializer is None:
         initializer = initializers.TruncatedNormal()
       vocab = initializer([vocab_size, embed_dim], dtype)

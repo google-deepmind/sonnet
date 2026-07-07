@@ -87,7 +87,7 @@ def _custom_getter(
     orig_getattribute = cls.__getattribute__  # pytype: disable=attribute-error
 
     def new_getattribute(obj, name, orig_getattribute=orig_getattribute):
-      attr = orig_getattribute(obj, name)
+      attr = orig_getattribute(obj, name)  # pyrefly: ignore[bad-argument-count]
 
       if (instances is None) or (obj in instances):
         return getter(attr)

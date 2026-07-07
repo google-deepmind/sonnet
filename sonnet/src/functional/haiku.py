@@ -64,7 +64,7 @@ def notify(f):
   """Wraps `f` such that callbacks are notified about it being called."""
   @functools.wraps(f)
   def wrapper(self, *args, **kwargs):
-    TensorVariableCallbacks.instance.notify(self)
+    TensorVariableCallbacks.instance.notify(self)  # pyrefly: ignore[missing-attribute]
     return f(self, *args, **kwargs)  # pytype: disable=wrong-arg-count
   return wrapper
 
@@ -252,7 +252,7 @@ variables = create_tensor_variables
 @contextlib.contextmanager
 def track_tensor_variables():
   tensor_variables = []
-  with TensorVariableCallbacks.instance(tensor_variables.append):  # pylint: disable=not-callable
+  with TensorVariableCallbacks.instance(tensor_variables.append):  # pylint: disable=not-callable  # pyrefly: ignore[not-callable]
     yield tensor_variables
 
 
@@ -276,7 +276,7 @@ def track_initial_state():
     if r not in var_state:
       var_state[r] = (v.initial_tensor_value, v.tensor_value)
 
-  with TensorVariableCallbacks.instance(callback):  # pylint: disable=not-callable
+  with TensorVariableCallbacks.instance(callback):  # pylint: disable=not-callable  # pyrefly: ignore[not-callable]
     yield var_state
 
 

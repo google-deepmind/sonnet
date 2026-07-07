@@ -58,7 +58,7 @@ def no_name_scope(method: T) -> T:
 class ModuleMetaclass(abc.ABCMeta):
   """Metaclass for `Module`."""
 
-  def __new__(
+  def __new__(  # pyrefly: ignore[invalid-annotation]
       cls: Type[Type[T]],
       name: str,
       bases: Tuple[Type[Any], ...],
@@ -89,7 +89,7 @@ class ModuleMetaclass(abc.ABCMeta):
 
     clsdict.setdefault("__repr__", lambda module: module._auto_repr)  # pylint: disable=protected-access
 
-    new_cls = super(ModuleMetaclass, cls).__new__(cls, name, bases, clsdict)  # pylint: disable=too-many-function-args
+    new_cls = super(ModuleMetaclass, cls).__new__(cls, name, bases, clsdict)  # pylint: disable=too-many-function-args  # pyrefly: ignore[invalid-argument]
 
     for method_name in methods:
       # Note: the below is quite subtle, we need to ensure that we're wrapping
@@ -127,7 +127,7 @@ class ModuleMetaclass(abc.ABCMeta):
       ctor_name_scope = getattr(module, "_ctor_name_scope", None)
       if ctor_name_scope is not None:
         ctor_name_scope.__exit__(*exc_info)
-        del module._ctor_name_scope
+        del module._ctor_name_scope  # pyrefly: ignore[missing-attribute]
 
       # TODO(tomhennigan) Remove `_scope_name` after next TF release.
       ran_super_ctor = (
@@ -139,7 +139,7 @@ class ModuleMetaclass(abc.ABCMeta):
             "is not supported. Add the following as the first line in your "
             "__init__ method:\n\nsuper(%s, self).__init__()" % cls.__name__)
 
-    module._auto_repr = auto_repr(cls, *args, **kwargs)  # pylint: disable=protected-access
+    module._auto_repr = auto_repr(cls, *args, **kwargs)  # pylint: disable=protected-access  # pyrefly: ignore[missing-attribute]
 
     return module
 
@@ -357,12 +357,12 @@ def allow_empty_variables(module_or_cls: T) -> T:
 
 
 def assert_tf2():
-  if not assert_tf2.checked:
+  if not assert_tf2.checked:  # pyrefly: ignore[missing-attribute]
     with tf.init_scope():
       assert tf.executing_eagerly(), "Sonnet v2 requires TensorFlow 2"
-    assert_tf2.checked = True
+    assert_tf2.checked = True  # pyrefly: ignore[missing-attribute]
 
-assert_tf2.checked = False
+assert_tf2.checked = False  # pyrefly: ignore[missing-attribute]
 
 
 class Module(tf.Module, metaclass=ModuleMetaclass):

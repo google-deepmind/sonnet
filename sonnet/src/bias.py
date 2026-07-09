@@ -120,8 +120,7 @@ class Bias(base.Module):
     self._initialize(inputs)
     if multiplier is not None:
       return inputs + (self.b * multiplier)
-    else:
-      return inputs + self.b
+    return inputs + self.b
 
 
 def calculate_bias_shape(input_shape: types.ShapeLike,

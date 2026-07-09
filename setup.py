@@ -38,7 +38,7 @@ setup(
     long_description_content_type='text/markdown',
     author_email='sonnet-dev-os@google.com',
     # Contained modules and scripts.
-    packages=find_namespace_packages(exclude=['*_test.py']),
+    packages=find_namespace_packages(exclude=['*_test.py', 'examples*', 'docs*']),
     install_requires=_parse_requirements('requirements.txt'),
     extras_require=EXTRA_PACKAGES,
     tests_require=_parse_requirements('requirements-test.txt'),

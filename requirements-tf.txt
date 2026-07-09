@@ -1,2 +1,2 @@
-tensorflow==2.12.0rc0
+tensorflow==2.12.1
 tensorflow-probability==0.12.2

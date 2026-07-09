@@ -2,15 +2,17 @@
 
 from setuptools import find_namespace_packages
 from setuptools import setup
+import re
 
 
 def _get_sonnet_version():
   with open('sonnet/__init__.py') as fp:
     for line in fp:
       if line.startswith('__version__'):
-        g = {}
-        exec(line, g)  # pylint: disable=exec-used
-        return g['__version__']
+        match = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", line)
+        if match:
+            return match.group(1)
+        raise ValueError('Could not parse __version__ from line')
     raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
 
 

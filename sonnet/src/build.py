@@ -66,6 +66,6 @@ def build(
   args = map(_promote_shapes, args)
   # NOTE: We use a concrete function to ensure that weights are created and
   # initialized, but other stateful ops (e.g. updating weights) are not.
-  cf = f.get_concrete_function(*args, **kwargs)
+  cf = f.get_concrete_function(*args, **kwargs)  # pyrefly: ignore[missing-attribute]
   return tree.map_structure(_maybe_tensor_spec, cf.output_shapes,
                             cf.output_dtypes)

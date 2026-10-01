@@ -250,6 +250,40 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
                                 r"dropout must be in the range \[0, 1\).+"):
       recurrent.lstm_with_recurrent_dropout(self.hidden_size, -1)
 
+  def testRecurrentDropoutWithTfFunction(self):
+    num_steps = 2
+    inputs = tf.random.uniform([num_steps, self.batch_size, self.input_size])
+
+    train_core, test_core = recurrent.lstm_with_recurrent_dropout(
+        self.hidden_size, dropout=0.5)
+
+    # `dynamic_unroll` carries the state through a `tf.while_loop`, which
+    # cannot handle `None` values, so all state leaves must be tensors.
+    initial_state = train_core.initial_state(self.batch_size)
+    self.assertTrue(all(t is not None for t in tree.flatten(initial_state)))
+
+    # The cell is not dropped, so its mask is only there to keep the loop state
+    # free of `None`. It should stay a scalar instead of a full-size tensor.
+    _, dropout_masks = initial_state
+    self.assertIn((), [tuple(m.shape) for m in tree.flatten(dropout_masks)])
+
+    @tf.function
+    def unroll_train():
+      return recurrent.dynamic_unroll(train_core, inputs, initial_state)
+
+    @tf.function
+    def unroll_test():
+      return recurrent.dynamic_unroll(test_core, inputs,
+                                      test_core.initial_state(self.batch_size))
+
+    [_, train_output], _ = unroll_train()
+    [_, test_output], _ = unroll_test()
+
+    self.assertEqual(train_output.shape, test_output.shape)
+    self.assertGreater(
+        self.evaluate(tf.reduce_max(tf.abs(train_output - test_output))),
+        0.001)
+
 
 class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 

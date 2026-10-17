@@ -4,6 +4,8 @@
 
 [**Documentation**](https://sonnet.readthedocs.io/) | [**Examples**](#examples)
 
+**Language**: **English** · [简体中文](https://github.com/google-deepmind/sonnet/blob/v2/README.zh.md)
+
 Sonnet is a library built on top of [TensorFlow 2](https://www.tensorflow.org/)
 designed to provide simple, composable abstractions for machine learning
 research.

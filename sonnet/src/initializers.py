@@ -177,7 +177,7 @@ class Identity(Initializer):
 
   def __call__(self, shape: types.ShapeLike, dtype: tf.DType) -> tf.Tensor:
     dtype = _as_numerical_dtype(dtype)
-    rank = shape.shape[0] if isinstance(shape, tf.Tensor) else len(shape)
+    rank = shape.shape[0] if isinstance(shape, tf.Tensor) else len(shape)  # pyrefly: ignore[bad-argument-type]
     if rank < 2:
       raise ValueError("The tensor to initialize must be "
                        "at least two-dimensional")

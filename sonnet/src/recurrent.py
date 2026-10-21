@@ -1149,7 +1149,11 @@ class _RecurrentDropoutWrapper(RNNCore):
 
     def maybe_dropout(s, rate):
       if rate is None:
-        return None
+        # Elements which are not dropped still need a mask, otherwise the
+        # state has `None` leaves and `dynamic_unroll` cannot carry it through
+        # a `tf.while_loop`. A scalar one is enough since it broadcasts, and
+        # it keeps the loop state small.
+        return tf.ones([], dtype=s.dtype)
       else:
         return tf.nn.dropout(tf.ones_like(s), rate=rate, seed=self._seed)
 

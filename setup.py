@@ -1,17 +1,18 @@
 """Setup for pip package."""
 
+import re
+
 from setuptools import find_namespace_packages
 from setuptools import setup
 
 
 def _get_sonnet_version():
   with open('sonnet/__init__.py') as fp:
-    for line in fp:
-      if line.startswith('__version__'):
-        g = {}
-        exec(line, g)  # pylint: disable=exec-used
-        return g['__version__']
-    raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
+    content = fp.read()
+  match = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", content)
+  if match:
+    return match.group(1)
+  raise ValueError('`__version__` not defined in `sonnet/__init__.py`')
 
 
 def _parse_requirements(requirements_txt_path):

@@ -114,6 +114,10 @@ class BatchGatherTest(test_utils.TestCase):
 class LinearTest(test_utils.TestCase, parameterized.TestCase):
 
   def testLinearOutputOneModule(self):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     batch_size = 4
     input_size = 5
     output_size = 3
@@ -126,6 +130,10 @@ class LinearTest(test_utils.TestCase, parameterized.TestCase):
     self.assertAllClose(expected_output, output.numpy(), atol=self.get_atol())
 
   def testLinearOutputTwoModules(self):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     batch_size = 4
     input_size_a = 5
     input_size_b = 6

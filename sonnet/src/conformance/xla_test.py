@@ -27,6 +27,10 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
   @goldens.all_goldens
   def test_compile(self, golden):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     mod = golden.create_module()
     golden.create_all_variables(mod)
 
@@ -55,6 +59,10 @@ class XLATest(test_utils.TestCase, parameterized.TestCase):
 
   @goldens.all_goldens
   def test_jit_scope(self, golden):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     mod = golden.create_module()
     golden.create_all_variables(mod)
 

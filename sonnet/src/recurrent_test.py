@@ -36,6 +36,10 @@ class VanillaRNNTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters([False, True])
   def testComputationAgainstNumPy(self, use_tf_function):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     inputs = self.evaluate(
         tf.random.uniform([self.batch_size, self.input_size]))
     core = recurrent.VanillaRNN(
@@ -164,6 +168,10 @@ class LSTMTest(test_utils.TestCase, parameterized.TestCase):
       itertools.product([False, True], [None, 4], [0.0, 1.0]))
   def testComputationAgainstNumPy(self, use_tf_function, projection_size,
                                   forget_bias):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     inputs = self.evaluate(
         tf.random.uniform([self.batch_size, self.input_size]))
     core = recurrent.LSTM(
@@ -262,6 +270,10 @@ class UnrolledLSTMTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(itertools.product([1, 4], [True, False]))
   def testComputationAgainstLSTM(self, num_steps, use_tf_function):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     unrolled_lstm = recurrent.UnrolledLSTM(self.hidden_size)
     initial_state = unrolled_lstm.initial_state(self.batch_size)
 
@@ -449,6 +461,10 @@ class GRUTest(test_utils.TestCase, parameterized.TestCase):
 
   @parameterized.parameters([False, True])
   def testComputationAgainstNumPy(self, use_tf_function):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     inputs = self.evaluate(
         tf.random.uniform([self.batch_size, self.input_size]))
     core = recurrent.GRU(self.hidden_size)

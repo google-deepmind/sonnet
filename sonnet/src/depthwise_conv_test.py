@@ -67,6 +67,11 @@ class DepthwiseConvTest(test_utils.TestCase, parameterized.TestCase):
                                   ("ValidPaddingNoBias", False, "VALID"),
                                   ("ValidPaddingUseBias", True, "VALID"))
   def testFunction(self, with_bias, padding):
+    if self.primary_device == "GPU":
+      # Fails on GPUs where TF32 is enabled by default.
+      tf.config.experimental.enable_tensor_float_32_execution(False)
+      self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                      True)
     conv1 = depthwise_conv.DepthwiseConv2D(
         channel_multiplier=1,
         kernel_shape=3,

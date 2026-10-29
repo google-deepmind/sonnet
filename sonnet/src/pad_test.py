@@ -65,6 +65,10 @@ class PadTest(test_utils.TestCase, parameterized.TestCase):
   @parameterized.parameters((1, 1, 1), (3, 1, 1), (1, 3, 1), (1, 1, 3),
                             (3, 3, 1), (3, 1, 3), (1, 3, 3), (3, 3, 3))
   def test_same_padding(self, kernel_size, stride, rate):
+    # Fails on GPUs where TF32 is enabled by default.
+    tf.config.experimental.enable_tensor_float_32_execution(False)
+    self.addCleanup(tf.config.experimental.enable_tensor_float_32_execution,
+                    True)
     a = tf.random.normal([2, 4, 3])
     k = tf.random.normal([kernel_size, 3, 4])
     padding = pad.create(pad.same, kernel_size, rate, 1, -1)
